@@ -70,7 +70,56 @@ Con el propósito de obtener hallazgos comparables y estructurados, se desarroll
 
 
 ### 2.2.2. *Registro de entrevistas*
+En esta sección presentamos los registros de las entrevistas que hicimos para cada segmento objetivo de nuestra aplicación.
+**Segmento 1:**
 
+**Segmento 2:**
+
+<table>
+<colgroup>
+</colgroup>
+<thead>
+  <tr>
+    <th colspan="2">Entrevista #1<br></th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>Nombre</td>
+    <td>César Nikolay</td>
+  </tr>
+  <tr>
+    <td>Apellidos</td>
+    <td>Montero Vega</td>
+  </tr>
+  <tr>
+    <td>Edad</td>
+    <td>23 años</td>
+  </tr>
+  <tr>
+    <td>Distrito</td>
+    <td>Surquillo</td>
+  </tr>
+  <tr>
+    <td>Evidencia</td>
+    <td><div align="center"><img src="../../assets/Interview-Evidence/Interview-of-Cesar-Nikolay.jpeg" alt="Entrevista Cesar Nikolay"></td>
+  </tr>
+  <tr>
+    <td>Link</td>
+    <td><p><a target="_blank"  href="https://upcedupe-my.sharepoint.com/:v:/g/personal/u202411243_upc_edu_pe/IQDDZApqCDKDTrWGYH8oHZyrARNQnI4CuM2GNhY4k2TQz9s?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=yP3vPg" title="Title">Microsoft Stream</p></td>
+  </tr>
+  <tr>
+    <td>Duracion<br></td>
+    <td>0:00 min - 9:57 min</td>
+  </tr>
+  <tr>
+    <td>Resumen</td>
+    <td>
+		La entrevista se realizó a Nicolay, un técnico egresado en mecánica automotriz de 23 años, soltero y residente en Surquillo. En el taller desempeña el cargo de Técnico Especialista en Diagnóstico y Mantenimiento, con experiencia destacada en sistemas de inyección electrónica y manejo de escáneres multimarca para lectura de datos OBD2; ante la presión laboral busca mantener la serenidad y priorizar el trato al cliente. Su flujo de trabajo inicia con la recepción de una orden de trabajo física, inspección visual, escaneo del vehículo, solicitud de repuestos, ejecución de la reparación, pruebas de control de calidad y firma del documento de entrega. Su principal frustración operativa son los "tiempos muertos" por demoras en la aprobación de presupuestos o entrega de repuestos, los cuales afectan sus indicadores de rendimiento diario, sumado a la desorganización logística e ineficiencia en la comunicación del equipo. En el ámbito profesional, aspira a obtener certificaciones internacionales en mecatrónica automotriz y, a futuro, dirigir un centro de servicio estandarizado. En cuanto a hábitos tecnológicos, utiliza un smartphone Android (Xiaomi), empleando WhatsApp para coordinar y navegadores web para consultas técnicas y precios; reconoce a marcas japonesas como Honda y Subaru por su alta fiabilidad. Finalmente, en la validación de procesos, señala que el registro de tiempos actual es manual e impreciso, experimenta pérdida de señal móvil en fosos de inspección y bahías con estructuras gruesas, y valida su volumen de trabajo diario entregando las órdenes físicas firmadas junto con evidencias fotográficas registradas desde su celular personal para respaldar su labor. 
+</td>
+  </tr>
+</tbody>
+</table>
 
 
 ### 2.2.3. *Análisis de entrevistas*
