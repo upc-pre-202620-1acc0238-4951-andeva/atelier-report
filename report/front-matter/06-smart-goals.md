@@ -14,9 +14,9 @@
 
 **Rocha Cotrina, Alvaro**
 
-- 
+- Obtener al menos dos certificaciones internacionales de nivel profesional en Arquitectura de Software e Internet de las Cosas (IoT) en un plazo de 2 años tras culminar la carrera, para consolidar mi especialización en el diseño de sistemas predictivos, integración telemétrica y procesamiento de datos en tiempo real.
 
-- 
+- Liderar el desarrollo y lanzamiento comercial de una plataforma tecnológica B2B/B2C enfocada en la modernización del sector automotriz o gestión de proyectos, logrando su validación operativa con al menos 5 empresas o 500 usuarios recurrentes en un periodo de 3 años tras mi graduación, desempeñándome como Líder Técnico o Arquitecto de Software.
 
 **Sanchez Santin, Adiel Abdiaz**
 
