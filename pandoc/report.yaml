@@ -74,6 +74,13 @@ variables:
       \usepackage{tabularx}
       \usepackage{multirow}
       \usepackage{array}
+      
+      % Macros globales para encabezados de tablas complejas
+      \newcommand{\thfirst}[1]{\multicolumn{1}{|c|}{\textbf{#1}}}
+      \newcommand{\thcell}[1]{\multicolumn{1}{c|}{\textbf{#1}}}
+      \newcommand{\thc}[1]{\multicolumn{1}{c}{\textbf{#1}}}
+      \newcommand{\thspan}[2]{\multicolumn{#1}{c|}{\textbf{#2}}}
+      \newcommand{\thspanfirst}[2]{\multicolumn{#1}{|c|}{\textbf{#2}}}
     - |
       % Configuración de APA 7 para Tablas y Figuras
       \usepackage{caption}
