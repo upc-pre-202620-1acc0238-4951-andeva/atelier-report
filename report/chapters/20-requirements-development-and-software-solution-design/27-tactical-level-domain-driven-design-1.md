@@ -8155,187 +8155,3475 @@ A partir de la estructura formalizada en la @fig:database-diagram-iam y la @tbl:
 
 ### 2.6.3. *Bounded Context: Customer and Fleet Management (CRM)*
 
-El Bounded Context de Customer and Fleet Management (CRM) gestiona la dimensión comercial y relacional del ecosistema Atelier. Su alcance de dominio abarca el ciclo de vida de los clientes del taller, el empadronamiento y seguimiento técnico de sus vehículos, y la programación anticipada de citas para intervenciones automotrices.
+El Bounded Context de Customer and Fleet Management (CRM) gestiona la dimensión comercial, relacional y operativa previa del ecosistema Atelier. Su alcance de dominio abarca el ciclo de vida de los clientes del taller, el empadronamiento del parque automotor universal, la trazabilidad temporal de la cadena de custodia vehicular y la programación anticipada de citas para intervenciones automotrices.
 
-Dentro del sector automotriz, los talleres atienden a dos perfiles de clientes con dinámicas comerciales y requerimientos de soporte diferenciados:
-1. **Clientes Particulares:** Propietarios individuales de vehículos de uso personal que buscan atención ágil, presupuestos transparentes y comunicación directa sobre el avance de sus reparaciones.
-2. **Flotas Corporativas (B2B):** Empresas de transporte, distribución, logística o servicios que poseen decenas o cientos de vehículos utilitarios. Para estos clientes corporativos, el sistema requiere registrar la razón social, número de RUC de la empresa y gestionar de forma centralizada una flota vehicular heterogénea asignada a conductores designados, habilitando tarifas preferenciales y facturación agrupada.
+Dentro del sector automotriz, los talleres mecánicos atienden a dos perfiles de clientes con dinámicas comerciales diferenciadas:
 
-El contexto resuelve este requerimiento mediante la raíz de agregado `Customer`, la cual soporta ambos tipos de clientes y encapsula la colección de entidades dependientes `Vehicle`. Cada vehículo mantiene su Número de Identificación Vehicular (`VinNumber`), placa de rodaje (`PlateNumber`), características electromecánicas y odómetro actual (`Mileage`). El sistema impone como regla de negocio inviolable la monotonicidad creciente del odómetro: ninguna actualización manual o telemétrica puede reportar un kilometraje inferior al último valor certificado por el taller, evitando fraudes comerciales en la reventa vehicular.
+- **Clientes particulares (B2C):** Propietarios individuales de vehículos de uso personal que demandan atención ágil, presupuestos transparentes y comunicación directa sobre el avance de sus reparaciones.
 
-Adicionalmente, el contexto modela la raíz de agregado `Appointment` para coordinar el ingreso ordenado de vehículos a las sedes físicas del taller. La gestión de citas actúa como la antesala al proceso operativo de MRO, asegurando que la demanda de servicios no exceda la capacidad física instalada de bahías ni la disponibilidad del personal técnico en cada sucursal.
+- **Flotas corporativas (B2B):** Empresas de transporte, distribución, logística o servicios que gestionan decenas o cientos de vehículos comerciales. Para estos clientes corporativos, el sistema requiere registrar la razón social y el número de RUC ante la autoridad tributaria, permitiendo administrar una flota heterogénea con condiciones comerciales preferenciales.
+
+El diseño táctico resuelve estos requerimientos mediante la raíz de agregado **Customer**, la cual modela de forma polimórfica a ambos perfiles bajo un estricto aislamiento por taller (**TenantId**). A su vez, el automóvil físico se representa mediante la raíz de agregado global **Vehicle**, cuya existencia es independiente de cualquier taller particular para consolidar una historia clínica automotriz universal. La titularidad sobre las unidades se gobierna a través de la entidad dependiente **VehicleOwnership**, registrando el inicio y cese de custodia sin duplicar registros de chasis ni desvincular diagnósticos históricos.
+
+Adicionalmente, el contexto modela la raíz de agregado **Appointment** para coordinar el ingreso ordenado de vehículos a las sedes físicas del taller (**BranchId**). La gestión de citas actúa como la antesala al proceso operativo de MRO, garantizando que la demanda de servicios no sobrepase la capacidad física instalada de bahías ni la disponibilidad de personal técnico en cada sucursal.
 
 #### 2.6.3.1. Domain Layer
 
-La capa de dominio de Customer and Fleet Management encapsula las reglas de consistencia de clientes, automóviles y reservas previas. En la @tbl:crm-domain-types se presenta el catálogo de los componentes que conforman esta capa.
+La capa de dominio de Customer and Fleet Management encapsula los modelos conceptuales, las invariantes transaccionales de la cartera comercial y las reglas de custodia automotriz sin establecer dependencia con librerías tecnológicas ni motores de persistencia. Residiendo bajo el paquete canónico **com.andeva.atelier.platform.crm.domain**, su diseño táctico se estructura sobre cuatro pilares fundamentales:
 
-| Clase o Tipo | Categoría Táctica | Responsabilidad Principal en el Dominio |
-| :--- | :--- | :--- |
-| `Customer` | Raíz de Agregado | Gestiona el perfil del cliente (particular o corporativo), documentos de identidad y flota vehicular asociada. |
-| `Vehicle` | Entidad Dependiente | Ficha técnica vehicular asociada a un cliente; valida VIN, placa y garantiza la monotonicidad del odómetro. |
-| `Appointment` | Raíz de Agregado | Reserva de atención previa en una sucursal física; gestiona fechas, horarios, estado de confirmación y cancelación. |
-| `CustomerId` | Objeto de Valor | Identificador único universal (`UUID`) fuertemente tipado para clientes. |
-| `VehicleId` | Objeto de Valor | Identificador único universal (`UUID`) fuertemente tipado para vehículos. |
-| `AppointmentId` | Objeto de Valor | Identificador único universal (`UUID`) fuertemente tipado para citas programadas. |
-| `CustomerType` | Enumeración de Dominio | Clasificación comercial del cliente (`INDIVIDUAL` o `FLEET`). |
-| `DocumentNumber` | Objeto de Valor | Documento oficial de identidad peruano; valida 8 dígitos para DNI, 11 para RUC o alfanumérico para Carné de Extranjería. |
-| `CustomerName` | Objeto de Valor | Nombre completo de persona natural o denominación social corporativa de la empresa de flota. |
-| `ContactInfo` | Objeto de Valor | Información de contacto canónica agrupando correo electrónico y teléfono internacional validado. |
-| `VehicleBrand` | Objeto de Valor | Marca automotriz validada contra catálogo oficial (ej. Toyota, Nissan, Hyundai). |
-| `VehicleModel` | Objeto de Valor | Modelo vehicular comercial (ej. Hilux, Sentra, Tucson). |
-| `VehicleYear` | Objeto de Valor | Año de fabricación del modelo dentro de un intervalo histórico admisible ($1950 \le \text{año} \le \text{añoActual} + 1$). |
-| `AppointmentDateTime` | Objeto de Valor | Marca temporal de inicio y fin de la cita, garantizando una duración mínima de 30 minutos. |
-| `AppointmentStatus` | Enumeración de Dominio | Estados del ciclo de vida de la cita (`SCHEDULED`, `CONFIRMED`, `IN_PROGRESS`, `COMPLETED`, `CANCELLED`). |
-| `CancellationReason` | Objeto de Valor | Justificación textual obligatoria al anular una cita previamente agendada. |
-| `AppointmentSchedulingValidator`| Servicio de Dominio | Servicio puro que verifica que la cita respete el horario del taller, anticipación mínima y capacidad de bahías. |
-| `MileageMonotonicityValidator` | Servicio de Dominio | Regla algorítmica que comprueba que un nuevo kilometraje reportado no sea inferior al histórico certificado. |
-| `CustomerRepository` | Puerto de Salida | Contrato de persistencia de dominio para la Raíz de Agregado `Customer`. |
-| `VehicleRepository` | Puerto de Salida | Contrato de persistencia de dominio para la entidad `Vehicle`. |
-| `AppointmentRepository` | Puerto de Salida | Contrato de persistencia de dominio para la Raíz de Agregado `Appointment`. |
-| `CustomerRegisteredEvent` | Evento de Dominio | Notifica el alta de un nuevo cliente particular o corporativo en el taller. |
-| `VehicleRegisteredEvent` | Evento de Dominio | Notifica la incorporación de un nuevo vehículo al padrón del taller. |
-| `MileageUpdatedEvent` | Evento de Dominio | Notifica la actualización certificada del odómetro vehicular. |
-| `AppointmentScheduledEvent` | Evento de Dominio | Notifica la reserva de una nueva cita de servicio en el taller. |
-| `AppointmentConfirmedEvent` | Evento de Dominio | Notifica la confirmación de la cita tras la revisión de disponibilidad técnica. |
-| `AppointmentCancelledEvent` | Evento de Dominio | Notifica la anulación de la cita liberando el cupo en la sucursal. |
-: Catálogo de Tipos de Dominio del Bounded Context CRM {#tbl:crm-domain-types}
+- **Aislamiento multi-inquilino de la cartera comercial:** Las fichas comerciales de clientes particulares y corporativos pertenecen a un taller determinado mediante **TenantId**, garantizando la confidencialidad de la base de clientes y la autonomía operativa de cada negocio mecánico adscrito a la plataforma.
 
-*Nota.* Componentes tácticos de dominio para el Bounded Context de Customer and Fleet Management implementados en Java 24 bajo el paquete canónico com.andeva.atelier.platform.crm.domain.
+- **Parque automotor universal e independiente del taller:** Las unidades vehiculares se modelan como raíces de agregado globales que carecen de **TenantId**. Un automóvil existe en el mundo físico y puede recibir atención en múltiples talleres a lo largo de su ciclo de vida, lo que permite consolidar una hoja clínica técnica y un historial de telemetría continuos e integrados en la nube.
+
+- **Cadena de custodia y trazabilidad temporal:** La relación entre clientes y automóviles se gobierna mediante la entidad dependiente **VehicleOwnership**, registrando fechas formales de inicio y cese de custodia. Este desacoplamiento permite efectuar transferencias de titularidad vehicular sin alterar ni duplicar los historiales mecánicos ni diagnósticos previos.
+
+- **Orquestación del agendamiento y transición operativa hacia MRO:** La raíz de agregado **Appointment** administra la reserva de capacidad en sedes físicas (**BranchId**). Al alcanzar el estado de arribo físico a patio, la cita dispara eventos de dominio que despiertan la generación automática de la orden de trabajo en el contexto operativo.
+
+En la @tbl:crm-domain-types se presenta el catálogo consolidado de componentes que conforman la capa de dominio de Customer and Fleet Management.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Catálogo de la Capa de Dominio del Bounded Context CRM} \label{tbl:crm-domain-types} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\
+\hline
+\endhead
+Customer & Raíz de consistencia comercial. Administra clientes particulares y flotas corporativas, validación fiscal y contacto. \\*
+\hline
+\textbf{Categoría} & Raíz de Agregado \\*
+\hline
+\textbf{Relaciones} & Generalización de AbstractDomainAggregateRoot<Customer>. Referencia a TenantId, TaxId y PersonName. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak model.\allowbreak aggregates} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Vehicle & Unidad automotriz física universal. Mantiene placa de rodaje única, número VIN ISO 3779, especificaciones y custodia histórica. \\*
+\hline
+\textbf{Categoría} & Raíz de Agregado \\*
+\hline
+\textbf{Relaciones} & Generalización de AbstractDomainAggregateRoot<Vehicle>. Composición 1 a 1..* con VehicleOwnership. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak model.\allowbreak aggregates} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+VehicleOwnership & Vínculo temporal de titularidad y custodia vehicular entre un cliente y un vehículo físico. \\*
+\hline
+\textbf{Categoría} & Entidad Dependiente \\*
+\hline
+\textbf{Relaciones} & Dependiente subordinada a Vehicle. Referencia a VehicleId, CustomerId y fechas de vigencia. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak model.\allowbreak entities} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Appointment & Reserva y agendamiento previo de servicio técnico en una sucursal física del taller mecánico. \\*
+\hline
+\textbf{Categoría} & Raíz de Agregado \\*
+\hline
+\textbf{Relaciones} & Generalización de AbstractDomainAggregateRoot<Appointment>. Referencia a TenantId, BranchId, CustomerId y VehicleId. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak model.\allowbreak aggregates} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+CustomerId & Identificador único universal fuertemente tipado para clientes del taller. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor (ID) \\*
+\hline
+\textbf{Relaciones} & Registro inmutable de identidad basado en UUID. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+VehicleId & Identificador único universal fuertemente tipado para unidades del parque automotor. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor (ID) \\*
+\hline
+\textbf{Relaciones} & Registro inmutable de identidad basado en UUID. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+VehicleOwnershipId & Identificador único universal fuertemente tipado para el registro de titularidad vehicular. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor (ID) \\*
+\hline
+\textbf{Relaciones} & Registro inmutable de identidad basado en UUID. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+AppointmentId & Identificador único universal fuertemente tipado para citas programadas en taller. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor (ID) \\*
+\hline
+\textbf{Relaciones} & Registro inmutable de identidad basado en UUID. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+LicensePlate & Matrícula de rodaje normalizada en mayúsculas sin separadores, con validación de sintaxis oficial MTC. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor \\*
+\hline
+\textbf{Relaciones} & Utilizado por la raíz de agregado Vehicle. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Vin & Número de Identificación Vehicular estandarizado de 17 caracteres alfanuméricos según ISO 3779. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor \\*
+\hline
+\textbf{Relaciones} & Utilizado por la raíz de agregado Vehicle. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+CustomerType & Modalidad jurídica y comercial del cliente (INDIVIDUAL, COMPANY). \\*
+\hline
+\textbf{Categoría} & Enumeración de Dominio \\*
+\hline
+\textbf{Relaciones} & Utilizada por la raíz de agregado Customer. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+CustomerStatus & Estados operativos de la ficha del cliente en el taller (ACTIVE, INACTIVE). \\*
+\hline
+\textbf{Categoría} & Enumeración de Dominio \\*
+\hline
+\textbf{Relaciones} & Utilizada por la raíz de agregado Customer. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+EngineType & Tipología de motorización electromecánica del vehículo (GASOLINE, DIESEL, ELECTRIC, HYBRID). \\*
+\hline
+\textbf{Categoría} & Enumeración de Dominio \\*
+\hline
+\textbf{Relaciones} & Utilizada por la raíz de agregado Vehicle. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+AppointmentStatus & Estados del ciclo de vida de la cita técnica (PENDING, CONFIRMED, ARRIVED, CANCELED). \\*
+\hline
+\textbf{Categoría} & Enumeración de Dominio \\*
+\hline
+\textbf{Relaciones} & Utilizada por la raíz de agregado Appointment. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Appointment\allowbreak Scheduling\allowbreak Service & Valida viabilidad operativa, antelación horaria y aforo de recepción de citas en sucursal física. \\*
+\hline
+\textbf{Categoría} & Servicio de Dominio \\*
+\hline
+\textbf{Relaciones} & Coordina TenantId, BranchId, AppointmentRepository y reglas temporales. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Vehicle\allowbreak Transfer\allowbreak Domain\allowbreak Service & Orquesta el traspaso de propiedad vehicular comprobando la ausencia de órdenes activas en MRO. \\*
+\hline
+\textbf{Categoría} & Servicio de Dominio \\*
+\hline
+\textbf{Relaciones} & Coordina Vehicle, Customer y VehicleOwnership. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+CustomerRepository & Contrato de persistencia agnóstico para la raíz de agregado Customer. \\*
+\hline
+\textbf{Categoría} & Puerto de Salida \\*
+\hline
+\textbf{Relaciones} & Implementado en la capa de infraestructura. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+VehicleRepository & Contrato de persistencia agnóstico para la raíz de agregado Vehicle. \\*
+\hline
+\textbf{Categoría} & Puerto de Salida \\*
+\hline
+\textbf{Relaciones} & Implementado en la capa de infraestructura. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Vehicle\allowbreak Ownership\allowbreak Repository & Contrato de persistencia y consulta de la cadena de custodia vehicular. \\*
+\hline
+\textbf{Categoría} & Puerto de Salida \\*
+\hline
+\textbf{Relaciones} & Implementado en la capa de infraestructura. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+AppointmentRepository & Contrato de persistencia agnóstico para la raíz de agregado Appointment. \\*
+\hline
+\textbf{Categoría} & Puerto de Salida \\*
+\hline
+\textbf{Relaciones} & Implementado en la capa de infraestructura. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+CustomerRegisteredEvent & Notifica el alta de un nuevo cliente particular o corporativo en el taller. \\*
+\hline
+\textbf{Categoría} & Evento de Dominio \\*
+\hline
+\textbf{Relaciones} & Implementa DomainEvent para el Transactional Outbox. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Customer\allowbreak Contact\allowbreak Updated\allowbreak Event & Notifica la actualización de los canales de contacto de un cliente. \\*
+\hline
+\textbf{Categoría} & Evento de Dominio \\*
+\hline
+\textbf{Relaciones} & Implementa DomainEvent para el Transactional Outbox. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+VehicleRegisteredEvent & Notifica la matriculación y vinculación inicial de un vehículo en el catálogo global. \\*
+\hline
+\textbf{Categoría} & Evento de Dominio \\*
+\hline
+\textbf{Relaciones} & Implementa DomainEvent para el Transactional Outbox. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Vehicle\allowbreak Ownership\allowbreak Transferred\allowbreak Event & Notifica el traspaso de custodia y titularidad vehicular hacia un nuevo cliente. \\*
+\hline
+\textbf{Categoría} & Evento de Dominio \\*
+\hline
+\textbf{Relaciones} & Implementa DomainEvent para el Transactional Outbox. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Appointment\allowbreak Scheduled\allowbreak Event & Notifica la solicitud inicial de una cita técnica en una sucursal determinada. \\*
+\hline
+\textbf{Categoría} & Evento de Dominio \\*
+\hline
+\textbf{Relaciones} & Implementa DomainEvent para el Transactional Outbox. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Appointment\allowbreak Confirmed\allowbreak Event & Notifica la confirmación de la cita por parte del equipo de recepción del taller. \\*
+\hline
+\textbf{Categoría} & Evento de Dominio \\*
+\hline
+\textbf{Relaciones} & Implementa DomainEvent para el Transactional Outbox. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+AppointmentArrivedEvent & Notifica la recepción física del automóvil en patio, despertando la apertura de la orden de trabajo. \\*
+\hline
+\textbf{Categoría} & Evento de Dominio \\*
+\hline
+\textbf{Relaciones} & Implementa DomainEvent para el Transactional Outbox. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Appointment\allowbreak Canceled\allowbreak Event & Notifica la anulación de la cita técnica liberando el aforo de recepción de la sede. \\*
+\hline
+\textbf{Categoría} & Evento de Dominio \\*
+\hline
+\textbf{Relaciones} & Implementa DomainEvent para el Transactional Outbox. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Appointment\allowbreak Rescheduled\allowbreak Event & Notifica la reprogramación de la fecha u hora acordada para la cita automotriz. \\*
+\hline
+\textbf{Categoría} & Evento de Dominio \\*
+\hline
+\textbf{Relaciones} & Implementa DomainEvent para el Transactional Outbox. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak events} \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes tácticos de la Capa de Dominio de Customer and Fleet Management implementados bajo el paquete canónico com.andeva.atelier.platform.crm.domain.
 
 **Raíces de Agregado y Entidades Dependientes de CRM**
 
-1. `Customer`: Modela el cliente del taller automotriz bajo un esquema polimórfico flexible. Impone que todo cliente particular cuente con un `DocumentNumber` de tipo DNI o Carné de Extranjería, mientras que los clientes corporativos exigen obligatoriamente un RUC de 11 dígitos. El agregado encapsula la lista de vehículos vinculados, garantizando que un cliente no registre vehículos con placas de rodaje idénticas y proveyendo métodos para actualizar datos de contacto y auditar el historial de atención.
+El núcleo operativo de CRM se articula alrededor de tres raíces de agregado principales (**Customer**, **Vehicle** y **Appointment**) y una entidad dependiente (**VehicleOwnership**) encargada de preservar la integridad histórica de la posesión automotriz.
 
-| Elemento | Tipo o Firma | Ámbito | Descripción y Reglas de Negocio |
-| :--- | :--- | :---: | :--- |
-| `id` | `CustomerId` | Privado | Identificador único universal del cliente. |
-| `tenantId` | `TenantId` | Privado | Identificador del taller al que pertenece el cliente. |
-| `type` | `CustomerType` | Privado | Clasificación del cliente (`INDIVIDUAL`, `FLEET`). |
-| `documentNumber` | `DocumentNumber` | Privado | Documento oficial de identidad validado. |
-| `name` | `CustomerName` | Privado | Nombre completo de persona o razón social empresarial. |
-| `contact` | `ContactInfo` | Privado | Correo electrónico y teléfono de contacto principal. |
-| `vehicles` | `List<Vehicle>` | Privado | Colección de vehículos asociados al cliente. |
-| `registerIndividual` | `static Customer registerIndividual(...)` | Público | Factoría para personas naturales que emite `CustomerRegisteredEvent`. |
-| `registerFleet` | `static Customer registerFleet(...)` | Público | Factoría para empresas de flota corporativa con RUC validado. |
-| `addVehicle` | `Vehicle addVehicle(...)` | Público | Incorpora un nuevo vehículo a la flota del cliente y emite `VehicleRegisteredEvent`. |
-| `findVehicleByPlate` | `Optional<Vehicle> findVehicleByPlate(PlateNumber plate)` | Público | Localiza un vehículo dentro de la flota del cliente por su matrícula. |
-| `updateContactInfo` | `void updateContactInfo(ContactInfo newContact)` | Público | Modifica los datos de contacto corporativos o personales. |
-: Miembros de la Raíz de Agregado Customer {#tbl:crm-customer-members}
+- **Customer**: Modela la ficha comercial del cliente adscrito a un taller específico. El agregado implementa un esquema polimórfico que distingue entre personas naturales particulares de tipo **INDIVIDUAL** y empresas administradoras de flotas vehiculares de tipo **COMPANY**. Esta diferenciación impone invariantes de consistencia estrictas sobre la documentación tributaria y las razones comerciales: los particulares exigen nombres estructurados mediante el objeto de valor **PersonName** y un documento nacional de identidad de ocho dígitos o carné de extranjería validado a través de **TaxId**, mientras que las entidades corporativas demandan una razón social obligatoria y un registro único de contribuyentes de once dígitos avalado formalmente.
 
-*Nota.* Especificación de miembros del agregado Customer del paquete com.andeva.atelier.platform.crm.domain.model.aggregates.
+Asimismo, la entidad exige contar con al menos una vía de contacto válida (**EmailAddress** o **PhoneNumber**) para habilitar el despacho de recordatorios y avisos transaccionales. El agregado provee métodos para la actualización controlada de datos de contacto y la inhabilitación comercial, impidiendo que una ficha inactiva tramite nuevas atenciones en el taller.
 
-En cuanto a sus relaciones, `Customer` hereda de `AbstractDomainAggregateRoot<Customer>` y mantiene una relación de composición 1 a N con la entidad dependiente `Vehicle`.
+En la @tbl:crm-customer-members se detallan los miembros, firmas y reglas operativas de la raíz de agregado **Customer**.
 
-2. `Vehicle`: Entidad dependiente que modela la ficha técnica del automóvil o unidad de transporte. Cada vehículo posee un identificador de chasis estandarizado `VinNumber` y una matrícula vehicular `PlateNumber`. El atributo `mileage` encapsula el odómetro actual, el cual solo puede incrementarse mediante el método de negocio `updateMileage`, disparando una verificación de monotonicidad que rechaza valores inferiores al odómetro histórico certificado.
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Miembros de la Raíz de Agregado Customer} \label{tbl:crm-customer-members} \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Raíz de Agregado:} Customer (Núcleo Comercial y Cartera de Clientes)} \\*
+\hline
+id & Identificador universal único del cliente en la plataforma. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{CustomerId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+tenantId & Identificador del taller mecánico titular de la ficha comercial. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{TenantId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+type & Naturaleza jurídica del cliente (INDIVIDUAL o COMPANY). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{CustomerType} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+name & Nombres y apellidos estructurados (obligatorio en INDIVIDUAL; nulo en COMPANY). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{PersonName} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+companyName & Razón social o denominación comercial (obligatorio en COMPANY; nulo en INDIVIDUAL). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+taxId & Documento oficial de identidad tributaria (DNI de 8 dígitos o RUC de 11 dígitos). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{TaxId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+email & Dirección canónica de correo electrónico para notificaciones comerciales y avisos. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{EmailAddress} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+phone & Teléfono o línea móvil de contacto validado bajo estándar internacional UIT-T E.164. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{PhoneNumber} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+status & Estado operativo de la ficha del cliente en el taller (ACTIVE o INACTIVE). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{CustomerStatus} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+registerIndividual & Factoría para personas naturales; valida invariantes y emite CustomerRegisteredEvent. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{static Customer registerIndividual(TenantId t,\allowbreak  PersonName n,\allowbreak  TaxId x,\allowbreak  EmailAddress e,\allowbreak  PhoneNumber p)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+registerCompany & Factoría para flotas corporativas con RUC validado; emite CustomerRegisteredEvent. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{static Customer registerCompany(TenantId t,\allowbreak  String comp,\allowbreak  TaxId x,\allowbreak  EmailAddress e,\allowbreak  PhoneNumber p)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+updateContact & Actualiza los canales de contacto exigiendo al menos un medio de notificación no nulo. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void updateContact(EmailAddress newEmail,\allowbreak  PhoneNumber newPhone)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+updateProfile & Actualiza nombres y apellidos; admisible exclusivamente en clientes de tipo INDIVIDUAL. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void updateProfile(PersonName newName)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+updateCompanyDetails & Actualiza la denominación comercial; admisible exclusivamente en clientes de tipo COMPANY. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void updateCompanyDetails(String newCompanyName)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+activate & Transiciona el estado de la ficha a ACTIVE habilitando la apertura de servicios. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void activate()} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+deactivate & Inhabilita la ficha comercial del cliente impidiendo el registro de nuevas atenciones. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void deactivate()} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+getDisplayName & Retorna la razón social corporativa o la concatenación de nombres y apellidos. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String getDisplayName()} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Especificación de miembros y métodos del agregado Customer del paquete com.andeva.atelier.platform.crm.domain.model.aggregates.
 
-| Elemento | Tipo o Firma | Ámbito | Descripción y Reglas de Negocio |
-| :--- | :--- | :---: | :--- |
-| `id` | `VehicleId` | Privado | Identificador único universal del vehículo. |
-| `customerId` | `CustomerId` | Privado | Identificador del cliente propietario de la unidad. |
-| `vin` | `VinNumber` | Privado | Número de identificación vehicular de 17 caracteres ISO 3779. |
-| `plate` | `PlateNumber` | Privado | Placa de rodaje vehicular normalizada. |
-| `brand` | `VehicleBrand` | Privado | Marca comercial del fabricante automotriz. |
-| `model` | `VehicleModel` | Privado | Denominación del modelo vehicular. |
-| `year` | `VehicleYear` | Privado | Año de fabricación del vehículo. |
-| `mileage` | `Mileage` | Privado | Kilometraje actual certificado de la unidad. |
-| `color` | `String` | Privado | Color predominante de la carrocería del vehículo. |
-| `updateMileage` | `void updateMileage(Mileage newMileage)` | Público | Actualiza el odómetro exigiendo monotonicidad y emite `MileageUpdatedEvent`. |
-| `updateDetails` | `void updateDetails(String newColor)` | Público | Modifica atributos descriptivos secundarios del vehículo. |
-: Miembros de la Entidad Dependiente Vehicle {#tbl:crm-vehicle-members}
+En cuanto a sus relaciones de dominio, **Customer** extiende la superclase **AbstractDomainAggregateRoot<Customer>** para la acumulación y despacho atómico de eventos de dominio en memoria, manteniendo un aislamiento lógico estricto por taller mediante **TenantId** sin establecer referencias directas a colecciones de infraestructura.
 
-*Nota.* Especificación de miembros de la entidad Vehicle del paquete com.andeva.atelier.platform.crm.domain.model.entities.
+- **Vehicle**: Modela la unidad automotriz física de forma universal e independiente de cualquier inquilino o taller particular. El vehículo se identifica inequívocamente a nivel nacional mediante su placa de rodaje (**LicensePlate**), normalizada en mayúsculas sin guiones ni caracteres especiales, y opcionalmente por su número de identificación de chasis (**Vin**) bajo la norma internacional ISO 3779. El agregado encapsula especificaciones electromecánicas esenciales tales como la marca comercial, modelo, año de fabricación y tipología de propulsión (**EngineType**).
 
-3. `Appointment`: Raíz de agregado independiente que modela la solicitud y reserva temporal de un cupo de servicio en una sucursal del taller. Gobierna una máquina de estados estricta: transiciona de `SCHEDULED` (agendada por el cliente) a `CONFIRMED` (aprobada por el taller), `IN_PROGRESS` (vehículo ingresado a patio para inspección) y finalmente `COMPLETED` (orden de trabajo generada) o `CANCELLED` (anulada con motivo formal).
+Para gobernar la posesión del automóvil a lo largo del tiempo, **Vehicle** encapsula la colección histórica de entidades **VehicleOwnership**, imponiendo la invariante de que en todo momento debe existir exactamente una titularidad activa cuya fecha de término permanezca abierta. Cuando ocurre una enajenación o traspaso vehicular, el método *transferOwnership()* clausura el vínculo precedente y crea una nueva titularidad activa, emitiendo el evento correspondiente sin comprometer los registros de mantenimiento previos.
 
-| Elemento | Tipo o Firma | Ámbito | Descripción y Reglas de Negocio |
-| :--- | :--- | :---: | :--- |
-| `id` | `AppointmentId` | Privado | Identificador único universal de la cita. |
-| `tenantId` | `TenantId` | Privado | Taller en el que se llevará a cabo la atención. |
-| `branchId` | `BranchId` | Privado | Sucursal física seleccionada para el servicio. |
-| `customerId` | `CustomerId` | Privado | Cliente que solicita la cita. |
-| `vehicleId` | `VehicleId` | Privado | Vehículo que será objeto de revisión o mantenimiento. |
-| `timeWindow` | `AppointmentDateTime` | Privado | Intervalo temporal acordado para la recepción. |
-| `status` | `AppointmentStatus` | Privado | Estado actual de la cita en el taller. |
-| `serviceReason` | `String` | Privado | Motivo descriptivo del ingreso reportado por el cliente. |
-| `cancellationReason` | `CancellationReason` | Privado | Motivo de anulación en caso de estado `CANCELLED`. |
-| `schedule` | `static Appointment schedule(...)` | Público | Factoría constructora que inicializa la cita en estado `SCHEDULED` y emite evento. |
-| `confirm` | `void confirm()` | Público | Transiciona el estado a `CONFIRMED` y emite `AppointmentConfirmedEvent`. |
-| `startProgress` | `void startProgress()` | Público | Marca el inicio de la atención tras el arribo físico del vehículo al taller. |
-| `complete` | `void complete()` | Público | Finaliza la cita al aperturarse la orden de trabajo respectiva. |
-| `cancel` | `void cancel(CancellationReason reason)` | Público | Anula la cita registrando el motivo y emite `AppointmentCancelledEvent`. |
-: Miembros de la Raíz de Agregado Appointment {#tbl:crm-appointment-members}
+- **VehicleOwnership**: Entidad dependiente subordinada al ciclo de vida de **Vehicle** que documenta el período de posesión de un cliente sobre la unidad física. Almacena el identificador del titular (**CustomerId**), la fecha de inicio de custodia y la fecha de finalización. La entidad valida que la fecha de término sea cronológicamente posterior o igual a la fecha de adquisición, permitiendo discernir con precisión al propietario civil responsable del vehículo en cualquier instante del tiempo.
 
+En la @tbl:crm-vehicle-members se exponen los miembros y métodos de la raíz de agregado **Vehicle** y de su entidad dependiente **VehicleOwnership**.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Miembros de la Raíz de Agregado Vehicle y de la Entidad Dependiente VehicleOwnership} \label{tbl:crm-vehicle-members} \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Raíz de Agregado:} Vehicle (Parque Automotor Universal)} \\*
+\hline
+id & Identificador universal único del vehículo en el parque automotor global. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{VehicleId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+plate & Placa de rodaje vehicular normalizada única a nivel nacional. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{LicensePlate} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+vin & Número de identificación vehicular de 17 caracteres alfanuméricos ISO 3779 (opcional). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Vin} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+brand & Marca del fabricante automotriz normalizada (longitud entre 2 y 50 caracteres). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+model & Denominación comercial del modelo vehicular (longitud entre 1 y 50 caracteres). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+year & Año de fabricación dentro del intervalo histórico válido (año entre 1950 y el año actual más uno). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{int} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+engineType & Clasificación electromecánica de la propulsión vehicular. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{EngineType} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+ownershipHistory & Colección histórica de propietarios que han poseído o custodian este vehículo. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{List<\allowbreak VehicleOwnership>} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+register & Factoría que matricula el vehículo, crea la titularidad activa y emite evento. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{static Vehicle register(LicensePlate p,\allowbreak  Vin v,\allowbreak  String b,\allowbreak  String m,\allowbreak  int y,\allowbreak  EngineType e,\allowbreak  CustomerId o)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+transferOwnership & Cierra la titularidad previa, crea el nuevo registro activo y emite evento de dominio. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{VehicleOwnership transferOwnership(CustomerId newOwnerId,\allowbreak  LocalDate transferDate)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+getActiveOwnership & Consulta el registro de custodia y titularidad activo con fecha de culminación nula. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Optional<\allowbreak VehicleOwnership>\allowbreak  getActiveOwnership()} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+getCurrentOwnerId & Retorna el identificador del cliente que actualmente posee la titularidad del vehículo. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Optional<\allowbreak CustomerId>\allowbreak  getCurrentOwnerId()} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+updateTechnicalDetails & Actualiza la motorización o el número VIN verificado en inspección física. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void updateTechnicalDetails(Vin newVin,\allowbreak  EngineType newEngineType)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad Dependiente:} VehicleOwnership (Cadena de Custodia y Titularidad)} \\*
+\hline
+id & Identificador universal único del registro de titularidad y custodia. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{VehicleOwnershipId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+vehicleId & Identificador del vehículo físico asociado a este período de custodia. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{VehicleId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+customerId & Identificador del cliente propietario durante el lapso de vigencia. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{CustomerId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+startDate & Fecha de adquisición o inicio de custodia en la red del taller mecánico. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{LocalDate} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+endDate & Fecha de enajenación o fin de custodia (nula si es el propietario actual). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{LocalDate} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+isCurrent & Comprueba si el registro corresponde a la titularidad vigente (endDate == null). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{boolean isCurrent()} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+terminate & Fija la fecha de finalización exigiendo que sea posterior o igual a startDate. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void terminate(LocalDate terminationDate)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Especificación de miembros del agregado Vehicle y la entidad dependiente VehicleOwnership del paquete com.andeva.atelier.platform.crm.domain.
+
+En cuanto a sus relaciones, **Vehicle** extiende de **AbstractDomainAggregateRoot<Vehicle>** y mantiene una relación de composición 1 a 1..* con sus registros dependientes **VehicleOwnership**. Las consultas de historial mecánico en los módulos de inspección y taller operan directamente sobre el identificador universal **VehicleId**, garantizando que el expediente técnico del automóvil acompañe al vehículo sin importar qué taller de la red preste el servicio.
+
+- **Appointment**: Raíz de agregado encargada de coordinar el flujo de recepción programada en las sedes físicas del taller. La reserva se delimita en el espacio mediante **BranchId** y en el tiempo a través de una marca temporal UTC obligatoriamente futura al momento del registro, acompañada de una duración estimada de inspección previa.
+
+El ciclo de vida de la cita se gestiona mediante una máquina de estados finita y determinista que transiciona de forma secuencial desde el estado inicial **PENDING** hacia **CONFIRMED** cuando la sede valida su aforo técnico. Al momento en que el cliente arriba físicamente a las instalaciones del taller, el método *markArrived()* transiciona el estado a **ARRIVED** y emite **AppointmentArrivedEvent**, hecho que actúa como detonante perimetral para que el contexto de operaciones de taller proceda con la apertura preliminar de la orden de trabajo. Asimismo, el agregado admite reprogramaciones y cancelaciones justificadas, siempre que el vehículo no haya ingresado al patio de maniobras.
+
+En la @tbl:crm-appointment-members se detallan los miembros, firmas y condiciones de transición de la raíz de agregado **Appointment**.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Miembros de la Raíz de Agregado Appointment} \label{tbl:crm-appointment-members} \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Raíz de Agregado:} Appointment (Agendamiento y Reserva de Taller)} \\*
+\hline
+id & Identificador universal único de la cita en la plataforma. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{AppointmentId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+tenantId & Identificador del taller receptor de la solicitud de servicio técnico. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{TenantId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+branchId & Identificador de la sucursal física seleccionada para la recepción del vehículo. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{BranchId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+customerId & Identificador del cliente titular que solicita la atención. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{CustomerId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+vehicleId & Identificador del automóvil que será objeto de revisión o mantenimiento. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{VehicleId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+scheduledAt & Marca temporal acordada para la recepción en taller (debe ser futura al crearse). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Instant} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+estimatedDurationMinutes & Tiempo estimado de recepción e inspección inicial (mínimo 15 min, default 30). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{int} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+reason & Motivo descriptivo de la solicitud (longitud entre 5 y 255 caracteres). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+status & Estado actual en el ciclo de vida de la reserva (PENDING, CONFIRMED, ARRIVED, CANCELED). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{AppointmentStatus} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+cancellationReason & Justificación textual obligatoria en caso de anulación (mínimo 5 caracteres). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+schedule & Factoría en estado inicial PENDING que registra AppointmentScheduledEvent. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{static Appointment schedule(TenantId t,\allowbreak  BranchId b,\allowbreak  CustomerId c,\allowbreak  VehicleId v,\allowbreak  Instant s,\allowbreak  int d,\allowbreak  String r)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+confirm & Transiciona el estado de PENDING a CONFIRMED y emite AppointmentConfirmedEvent. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void confirm()} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+markArrived & Registra el arribo físico a patio (ARRIVED) y dispara AppointmentArrivedEvent hacia MRO. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void markArrived()} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+cancel & Anula la reserva exigiendo justificación válida de al menos 5 caracteres y emite AppointmentCanceledEvent. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void cancel(String reason)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+reschedule & Modifica la fecha acordada (en PENDING o CONFIRMED) y emite evento de dominio. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void reschedule(Instant newScheduledAt)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
 *Nota.* Especificación de miembros del agregado Appointment del paquete com.andeva.atelier.platform.crm.domain.model.aggregates.
 
-En cuanto a sus relaciones, `Appointment` hereda de `AbstractDomainAggregateRoot<Appointment>` y mantiene referencias por identificador (`CustomerId`, `VehicleId`, `BranchId`, `TenantId`) con los demás agregados del sistema, evitando acoplamientos directos en memoria.
+En cuanto a sus relaciones, **Appointment** extiende de **AbstractDomainAggregateRoot<Appointment>** y mantiene desacoplamiento con los demás agregados mediante referencias por identidad (**TenantId**, **BranchId**, **CustomerId**, **VehicleId**), evitando acoplamientos en memoria y garantizando límites transaccionales acotados.
 
-**Objetos de Valor del Bounded Context CRM**
+**Objetos de Valor y Enumeraciones del Bounded Context CRM**
 
-| Objeto de Valor | Atributos Clave | Restricciones de Validación y Reglas de Negocio |
-| :--- | :--- | :--- |
-| `DocumentNumber` | `value`: `String`, `type`: `DocumentType` | DNI (8 dígitos), RUC (11 dígitos con validación SUNAT), CE (9 a 12 caracteres). |
-| `CustomerName` | `fullName`: `String` | Longitud entre 2 y 150 caracteres, capitalización normalizada. |
-| `ContactInfo` | `email`: `EmailAddress`, `phone`: `PhoneNumber` | Objetos de valor delegados que validan RFC 5322 y UIT-T E.164. |
-| `VehicleBrand` | `name`: `String` | Denominación no vacía de longitud de 2 a 50 caracteres. |
-| `VehicleModel` | `name`: `String` | Denominación no vacía de longitud de 1 a 50 caracteres. |
-| `VehicleYear` | `year`: `int` | Intervalo cerrado $[1950, \text{añoActual} + 1]$. |
-| `AppointmentDateTime` | `start`: `LocalDateTime`, `end`: `LocalDateTime` | Invariante temporal: `start < end` con duración mínima de 30 minutos. |
-| `CancellationReason` | `reason`: `String` | Justificación obligatoria no vacía de al menos 10 caracteres. |
-: Objetos de Valor del Bounded Context CRM {#tbl:crm-value-objects}
+Para erradicar la obsesión por tipos primitivos y resguardar la inmutabilidad de los datos, el dominio de CRM estructura todos sus identificadores y conceptos atómicos mediante registros inmutables de Java. Las reglas de normalización y restricciones defensivas se ejecutan de manera inmediata en los constructores compactos:
 
-*Nota.* Especificación de Objetos de Valor del paquete com.andeva.atelier.platform.crm.domain.model.valueobjects.
+- **Identificadores fuertemente tipados**: Los tipos **CustomerId**, **VehicleId**, **VehicleOwnershipId** y **AppointmentId** encapsulan identificadores únicos universales inmutables basados en UUID, validando defensivamente la no vacuidad de sus valores.
+
+- **Especificaciones automotrices tipadas**: El objeto de valor **LicensePlate** normaliza automáticamente las matrículas vehiculares suprimiendo espacios o guiones y transformando el texto a mayúsculas, validando su sintaxis contra los patrones oficiales del Ministerio de Transportes y Comunicaciones (MTC). Por su parte, **Vin** encapsula el número de chasis internacional conforme al estándar ISO 3779, verificando una longitud exacta de 17 caracteres alfanuméricos y vetando caracteres ambiguos.
+
+- **Enumeraciones de control**: Las enumeraciones **CustomerType** y **CustomerStatus** regulan la personería jurídica y la viabilidad comercial del cliente; **EngineType** clasifica las variantes de tren motriz vehicular; y **AppointmentStatus** gobierna los estados secuenciales de agendamiento en taller.
+
+En la @tbl:crm-value-objects se especifican los objetos de valor y enumeraciones propios de este contexto.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Objetos de Valor y Enumeraciones del Bounded Context CRM} \label{tbl:crm-value-objects} \\
+\hline
+\thfirst{Aspecto del Tipo} & \thcell{Especificación de Dominio} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto del Tipo} & \thcell{Especificación de Dominio} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} CustomerId} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{value: UUID} \\*
+\hline
+\textbf{Restricciones y Reglas} & Identificador unívoco universal de cliente. no nulo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} VehicleId} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{value: UUID} \\*
+\hline
+\textbf{Restricciones y Reglas} & Identificador unívoco universal de vehículo. no nulo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} VehicleOwnershipId} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{value: UUID} \\*
+\hline
+\textbf{Restricciones y Reglas} & Identificador unívoco universal de titularidad y custodia vehicular. no nulo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} AppointmentId} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{value: UUID} \\*
+\hline
+\textbf{Restricciones y Reglas} & Identificador unívoco universal de cita técnica de taller. no nulo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} LicensePlate} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{value: String} \\*
+\hline
+\textbf{Restricciones y Reglas} & Matrícula vehicular normalizada en mayúsculas sin guiones. Valida formato peruano MTC (6 caracteres alfanuméricos). \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} Vin} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{value: String} \\*
+\hline
+\textbf{Restricciones y Reglas} & Número de Identificación Vehicular ISO 3779. Exactamente 17 caracteres alfanuméricos sin I, O ni Q. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Enumeración de Dominio:} CustomerType} \\*
+\hline
+\textbf{Valores Admisibles} & \texttt{INDIVIDUAL}, \texttt{COMPANY} \\*
+\hline
+\textbf{Restricciones y Reglas} & Clasificación jurídica del cliente (particular o empresa de flota). \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Enumeración de Dominio:} CustomerStatus} \\*
+\hline
+\textbf{Valores Admisibles} & \texttt{ACTIVE}, \texttt{INACTIVE} \\*
+\hline
+\textbf{Restricciones y Reglas} & Estados operativos de la ficha comercial del cliente en el taller mecánico. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Enumeración de Dominio:} EngineType} \\*
+\hline
+\textbf{Valores Admisibles} & \texttt{GASOLINE}, \texttt{DIESEL}, \texttt{ELECTRIC}, \texttt{HYBRID} \\*
+\hline
+\textbf{Restricciones y Reglas} & Tipología de propulsión y tren motriz electromecánico del vehículo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Enumeración de Dominio:} AppointmentStatus} \\*
+\hline
+\textbf{Valores Admisibles} & \texttt{PENDING}, \texttt{CONFIRMED}, \texttt{ARRIVED}, \texttt{CANCELED} \\*
+\hline
+\textbf{Restricciones y Reglas} & Estados secuenciales dentro del ciclo de vida de la reserva de servicio técnico. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes inmutables ubicados bajo el paquete com.andeva.atelier.platform.crm.domain.model.valueobjects.
 
 **Servicios de Dominio de CRM**
 
-1. `AppointmentSchedulingValidator`: Evalúa la viabilidad operativa de agendar una nueva cita en una sucursal determinada. El servicio valida que la marca temporal de inicio se encuentre dentro del horario de atención del taller, que se cumpla un tiempo de anticipación mínima de al menos 2 horas, y consulta la disponibilidad del repositorio de citas para asegurar que la cantidad de citas simultáneas no sobrepase la capacidad instalada de bahías operativas de la sede.
-2. `MileageMonotonicityValidator`: Valida algorítmicamente que cualquier nuevo odómetro reportado para un vehículo sea estrictamente mayor o igual al último kilometraje histórico registrado en base de datos. Ante una discrepancia que implique una reducción de odómetro, el servicio rechaza la actualización protegiendo la integridad probatoria de la ficha vehicular.
+Aquellas reglas de negocio que demandan coordinar múltiples agregados o consultar el estado concurrente de persistencia sin pertenecer de forma natural a una única entidad se modelan como servicios de dominio puros:
+
+- **AppointmentSchedulingService**: Evalúa la capacidad operativa y la disponibilidad física para agendar una cita en una sucursal determinada. El servicio verifica que la fecha y hora pactadas se sitúen dentro de la ventana de atención técnica, impone una antelación mínima de dos horas respecto a la marca temporal actual y consulta el repositorio de citas para asegurar que la cantidad de atenciones simultáneas no sobrepase el aforo de recepción de la sede.
+
+- **VehicleTransferDomainService**: Orquesta el traspaso seguro de propiedad vehicular entre clientes del sistema. Valida que el vehículo cuente con un titular activo vigente, corrobora que el cliente receptor se encuentre debidamente registrado y activo, y comprueba que no existan órdenes de trabajo abiertas o pendientes de liquidación en el contexto de operaciones antes de autorizar el cambio de titularidad en el agregado vehicular.
+
+En la @tbl:crm-domain-services se exponen las especificaciones y responsabilidades de estos dos servicios de dominio.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Servicios de Dominio del Bounded Context CRM} \label{tbl:crm-domain-services} \\
+\hline
+\thfirst{Aspecto de Servicio} & \thcell{Especificación Técnica y Responsabilidad} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Servicio} & \thcell{Especificación Técnica y Responsabilidad} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Dominio:} AppointmentSchedulingService} \\*
+\hline
+\textbf{Métodos Principales} & \texttt{validateSlotAvailability(...)} \\*
+\hline
+\textbf{Responsabilidad} & Evalúa la viabilidad horaria, antelación mínima (2 horas) y aforo concurrente de recepción en la sucursal. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Dominio:} VehicleTransferDomainService} \\*
+\hline
+\textbf{Métodos Principales} & \texttt{transferVehicle(...)} \\*
+\hline
+\textbf{Responsabilidad} & Orquesta el traspaso seguro de propiedad vehicular comprobando la ausencia de órdenes de trabajo activas en MRO. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes ubicados en el paquete com.andeva.atelier.platform.crm.domain.services.
 
 **Puertos de Repositorio de la Capa de Dominio**
 
-| Puerto de Repositorio | Métodos Principales | Responsabilidad de Dominio |
-| :--- | :--- | :--- |
-| `CustomerRepository` | `save`, `findById`, `findByDocumentNumber`, `findByTenantId` | Persistencia y consulta de la raíz de agregado `Customer`. |
-| `VehicleRepository` | `save`, `findById`, `findByPlate`, `findByVin`, `findByCustomerId` | Persistencia y recuperación de la entidad `Vehicle`. |
-| `AppointmentRepository` | `save`, `findById`, `findByBranchIdAndDateRange`, `countActiveByBranch` | Control de citas y disponibilidad de cupos en sucursal. |
-: Puertos de Repositorio del Bounded Context CRM {#tbl:crm-repository-ports}
+En estricta concordancia con los principios de Clean Architecture y aislamiento de persistencia, la capa de dominio de CRM expone puertos de salida abstractos que declaran las necesidades de almacenamiento y recuperación sin vincularse con Jakarta Persistence ni con bases de datos relacionales específicas:
 
-*Nota.* Interfaces de salida del paquete com.andeva.atelier.platform.crm.domain.repositories.
+- **CustomerRepository**: Contrato para la persistencia del agregado **Customer**, proveyendo consultas por identificador interno, documento tributario y listados filtrados por inquilino.
 
-**Eventos de Dominio y Manejo de Errores Semánticos**
+- **VehicleRepository**: Contrato agnóstico de taller para registrar y consultar automóviles en el parque automotor global mediante su identificador unívoco, placa de rodaje normalizada o número VIN.
 
-Los eventos de dominio de CRM coordinan la sincronización con los módulos operativos:
-* `CustomerRegisteredEvent`: Transporta el identificador del nuevo cliente para su indexación en el directorio de facturación.
-* `VehicleRegisteredEvent`: Notifica la incorporación del vehículo para habilitar la vinculación de dispositivos OBD-II en el módulo de IoT.
-* `MileageUpdatedEvent`: Dispara la evaluación de anomalías o umbrales de mantenimiento en el módulo predictivo.
-* `AppointmentScheduledEvent` y `AppointmentConfirmedEvent`: Habilitan la reserva previa de materiales y herramientas en taller.
-* `AppointmentCancelledEvent`: Notifica la liberación de cupos para reasignación en el calendario de recepción.
+- **VehicleOwnershipRepository**: Contrato especializado en la consulta y auditoría de la cadena de custodia vehicular, resolviendo la titularidad activa vigente o el historial cronológico de transferencias de una unidad física.
 
-Las infracciones de reglas se gestionan mediante `Result<T, ApplicationError>` y excepciones tipadas (`CustomerNotFoundException`, `VehicleAlreadyExistsException`, `InvalidAppointmentScheduleException`).
+- **AppointmentRepository**: Contrato para el control del ciclo de vida de las reservas, incorporando mecanismos de agregación para el cómputo de aforo de recepción por franja horaria y filtros combinados por taller, sucursal y rango de fechas.
 
+En la @tbl:crm-repository-ports se detallan las operaciones provistas por estos puertos de salida.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Puertos de Repositorio del Bounded Context CRM} \label{tbl:crm-repository-ports} \\
+\hline
+\thfirst{Aspecto de Puerto} & \thcell{Especificación Técnica y Responsabilidad} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Puerto} & \thcell{Especificación Técnica y Responsabilidad} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Repositorio:} CustomerRepository} \\*
+\hline
+\textbf{Métodos Principales} & - \texttt{save} \newline - \texttt{findById} \newline - \texttt{findByTenantIdAndTaxId} \newline - \texttt{findByTenantId} \newline - \texttt{existsByTenantIdAndTaxId} \\*
+\hline
+\textbf{Responsabilidad de Dominio} & Persistencia y consulta de la raíz de agregado Customer por identidad y documento tributario en el taller. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Repositorio:} VehicleRepository} \\*
+\hline
+\textbf{Métodos Principales} & - \texttt{save} \newline - \texttt{findById} \newline - \texttt{findByPlate} \newline - \texttt{findByVin} \newline - \texttt{existsByPlate} \newline - \texttt{findByCurrentOwnerId} \\*
+\hline
+\textbf{Responsabilidad de Dominio} & Persistencia y recuperación de vehículos en el catálogo universal independiente de taller. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Repositorio:} VehicleOwnershipRepository} \\*
+\hline
+\textbf{Métodos Principales} & - \texttt{save} \newline - \texttt{findByVehicleId} \newline - \texttt{findActiveOwnershipByVehicleId} \\*
+\hline
+\textbf{Responsabilidad de Dominio} & Trazabilidad y recuperación histórica de la cadena de custodia y titularidad vehicular. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Repositorio:} AppointmentRepository} \\*
+\hline
+\textbf{Métodos Principales} & - \texttt{save} \newline - \texttt{findById} \newline - \texttt{findByTenantIdAndBranchIdAndDate} \newline - \texttt{findByCustomerId} \newline - \texttt{findByVehicleId} \newline - \texttt{countActiveByBranchAndSlot} \\*
+\hline
+\textbf{Responsabilidad de Dominio} & Persistencia de citas, verificación de aforo por franja horaria y consulta por sede y cliente. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Interfaces de salida ubicadas en el paquete com.andeva.atelier.platform.crm.domain.repositories.
+
+**Taxonomía de Eventos de Dominio de CRM**
+
+Los eventos de dominio de CRM capturan hechos de negocio consumados y significativos, implementando la interfaz canónica **DomainEvent** provista por el Shared Kernel para su persistencia en el patrón Transactional Outbox y su posterior difusión reactiva:
+
+- **Sincronización comercial y facturación**: El evento **CustomerRegisteredEvent** notifica la incorporación de un nuevo cliente, posibilitando que el módulo de facturación inicialice su expediente de cobranza y SUNAT. Asimismo, **CustomerContactUpdatedEvent** propaga cambios en direcciones de correo o teléfonos hacia los servicios de notificación.
+
+- **Trazabilidad y telemetría automotriz**: **VehicleRegisteredEvent** difunde la matriculación de una unidad física para permitir el emparejamiento de adaptadores telemétricos en el módulo de IoT, mientras que **VehicleOwnershipTransferredEvent** comunica el relevo de propiedad a los módulos de mantenimiento sin que se pierdan las hojas de diagnóstico previas.
+
+- **Coordinación de operaciones de taller**: El agendamiento, confirmación y reprogramación de citas se informan mediante **AppointmentScheduledEvent**, **AppointmentConfirmedEvent** y **AppointmentRescheduledEvent**, coordinando avisos push vía Firebase Cloud Messaging. De forma crítica, el arribo físico registrado por **AppointmentArrivedEvent** actúa como el evento detonante que despierta al contexto de Workshop Operations para aperturar la orden de trabajo en patio.
+
+En la @tbl:crm-domain-events se sintetiza la taxonomía de eventos de dominio de este contexto.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Taxonomía de Eventos de Dominio del Bounded Context CRM} \label{tbl:crm-domain-events} \\
+\hline
+\thfirst{Aspecto del Evento} & \thcell{Especificación de Carga Útil y Efecto} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto del Evento} & \thcell{Especificación de Carga Útil y Efecto} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} CustomerRegisteredEvent \quad (\textit{Emisor:} Customer)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{customerId}, \texttt{tenantId}, \texttt{type}, \texttt{displayName}, \texttt{taxId}, \texttt{occurredOn} \\*
+\hline
+\textbf{Efecto Intermodular} & Notifica el alta del cliente para sincronización con facturación y directorio comercial. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} CustomerContactUpdatedEvent \quad (\textit{Emisor:} Customer)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{customerId}, \texttt{email}, \texttt{phone}, \texttt{occurredOn} \\*
+\hline
+\textbf{Efecto Intermodular} & Actualiza los canales de contacto para el despacho de avisos transaccionales. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} VehicleRegisteredEvent \quad (\textit{Emisor:} Vehicle)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{vehicleId}, \texttt{plate}, \texttt{initialOwnerId}, \texttt{occurredOn} \\*
+\hline
+\textbf{Efecto Intermodular} & Incorpora el vehículo al padrón global y habilita vinculación telemétrica en IoT. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} VehicleOwnershipTransferredEvent \quad (\textit{Emisor:} Vehicle)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{vehicleId}, \texttt{previousOwnerId}, \texttt{newOwnerId}, \texttt{transferDate}, \texttt{occurredOn} \\*
+\hline
+\textbf{Efecto Intermodular} & Actualiza la titularidad del vehículo manteniendo intacto el expediente técnico histórico. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} AppointmentScheduledEvent \quad (\textit{Emisor:} Appointment)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{appointmentId}, \texttt{tenantId}, \texttt{branchId}, \texttt{customerId}, \texttt{vehicleId}, \texttt{scheduledAt}, \texttt{occurredOn} \\*
+\hline
+\textbf{Efecto Intermodular} & Reserva provisional de cupo en sucursal y confirmación inicial en la aplicación móvil. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} AppointmentConfirmedEvent \quad (\textit{Emisor:} Appointment)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{appointmentId}, \texttt{customerId}, \texttt{scheduledAt}, \texttt{occurredOn} \\*
+\hline
+\textbf{Efecto Intermodular} & Confirma la cita y programa el recordatorio push mediante Firebase Cloud Messaging. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} AppointmentArrivedEvent \quad (\textit{Emisor:} Appointment)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{appointmentId}, \texttt{tenantId}, \texttt{branchId}, \texttt{customerId}, \texttt{vehicleId}, \texttt{occurredOn} \\*
+\hline
+\textbf{Efecto Intermodular} & Disparador primario que despierta la creación de la orden de trabajo preliminar en MRO. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} AppointmentCanceledEvent \quad (\textit{Emisor:} Appointment)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{appointmentId}, \texttt{tenantId}, \texttt{branchId}, \texttt{reason}, \texttt{occurredOn} \\*
+\hline
+\textbf{Efecto Intermodular} & Libera el cupo en la sucursal y desactiva recordatorios pendientes en los clientes. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} AppointmentRescheduledEvent \quad (\textit{Emisor:} Appointment)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{appointmentId}, \texttt{newScheduledAt}, \texttt{occurredOn} \\*
+\hline
+\textbf{Efecto Intermodular} & Actualiza la agenda de la sucursal y despacha notificación de nueva fecha acordada. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Eventos inmutables ubicados bajo el paquete com.andeva.atelier.platform.crm.domain.events.
+
+**Jerarquía de Excepciones de Dominio y Manejo Semántico de Errores**
+
+El resguardo de las invariantes y el tratamiento predecible de anomalías de negocio se articula mediante excepciones semánticas fuertemente tipadas que extienden de **DomainException**. Al detectarse la vulneración de una condición de consistencia, la capa de dominio interrumpe la operación arrojando una de estas anomalías, las cuales son capturadas en los servicios de aplicación y transformadas en resultados de fallo tipados **Result.Failure** o formateadas bajo el estándar de problemas RFC 7807:
+
+- **Anomalías de clientes**: **CustomerNotFoundException** ante identificadores o documentos inexistentes en el taller; **CustomerAlreadyExistsException** si se intenta duplicar un documento tributario en la misma empresa; **CustomerInactiveException** ante intentos de operar comercialmente con una ficha dada de baja.
+
+- **Anomalías de parque automotor y custodia**: **VehicleNotFoundException** ante unidades no catalogadas; **VehicleAlreadyExistsException** si la matrícula vehicular ya se encuentra registrada en el sistema; **InvalidLicensePlateException** e **InvalidVinException** si las cadenas suministradas no satisfacen los formatos oficiales MTC e ISO 3779; **VehicleActiveOwnershipNotFoundException** si el automóvil carece de un titular activo; **VehicleHasOpenWorkOrdersException** al intentar transferir un vehículo que mantiene órdenes de trabajo activas en taller.
+
+- **Anomalías de agendamiento**: **AppointmentNotFoundException** ante citas inexistentes; **AppointmentSlotUnavailableException** si la sucursal ha alcanzado el aforo máximo de recepción técnica; **AppointmentInvalidStateTransitionException** ante mutaciones incompatibles con la máquina de estados; **AppointmentAlreadyArrivedException** si se pretende cancelar o reprogramar una cita ya ingresada a taller; **AppointmentPastDateException** si se intenta programar una reserva en una marca temporal pretérita.
+
+En la @tbl:crm-domain-exceptions se sintetiza la jerarquía de excepciones de dominio y sus códigos de error semánticos asociados.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.8cm} | >{\raggedright\arraybackslash}p{9.6cm} |}
+\caption{Excepciones de Dominio y Códigos Semánticos de CRM} \label{tbl:crm-domain-exceptions} \\
+\hline
+\thfirst{Código de Error Semántico} & \thcell{Condición de Lanzamiento en el Modelo} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Código de Error Semántico} & \thcell{Condición de Lanzamiento en el Modelo} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} CustomerNotFoundException} \\*
+\hline
+\texttt{CUSTOMER\_\allowbreak NOT\_\allowbreak FOUND} & El cliente consultado no existe en la cartera comercial del taller. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} CustomerAlreadyExistsException} \\*
+\hline
+\texttt{CUSTOMER\_\allowbreak ALREADY\_\allowbreak EXISTS} & El documento de identidad tributaria ya se encuentra registrado en el taller. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} CustomerInactiveException} \\*
+\hline
+\texttt{CUSTOMER\_\allowbreak INACTIVE} & La ficha comercial del cliente se encuentra inhabilitada para transacciones. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} VehicleNotFoundException} \\*
+\hline
+\texttt{VEHICLE\_\allowbreak NOT\_\allowbreak FOUND} & El vehículo consultado no existe en el catálogo automotor global. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} VehicleAlreadyExistsException} \\*
+\hline
+\texttt{VEHICLE\_\allowbreak ALREADY\_\allowbreak EXISTS} & La placa de rodaje ya se encuentra matriculada en la plataforma. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} InvalidLicensePlateException} \\*
+\hline
+\texttt{INVALID\_\allowbreak LICENSE\_\allowbreak PLATE} & La matrícula no cumple la sintaxis vehicular oficial peruana MTC. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} InvalidVinException} \\*
+\hline
+\texttt{INVALID\_\allowbreak VIN} & El número de chasis no satisface los 17 caracteres alfanuméricos ISO 3779. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} VehicleActiveOwnershipNotFoundException} \\*
+\hline
+\texttt{VEHICLE\_\allowbreak ACTIVE\_\allowbreak OWNERSHIP\_\allowbreak NOT\_\allowbreak FOUND} & La unidad automotriz carece de un titular activo registrado en el sistema. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} VehicleHasOpenWorkOrdersException} \\*
+\hline
+\texttt{VEHICLE\_\allowbreak HAS\_\allowbreak OPEN\_\allowbreak WORK\_\allowbreak ORDERS} & No se permite transferir un vehículo que mantiene órdenes de trabajo abiertas. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} AppointmentNotFoundException} \\*
+\hline
+\texttt{APPOINTMENT\_\allowbreak NOT\_\allowbreak FOUND} & La cita de servicio técnico solicitada no existe en el sistema. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} AppointmentSlotUnavailableException} \\*
+\hline
+\texttt{APPOINTMENT\_\allowbreak SLOT\_\allowbreak UNAVAILABLE} & La sucursal ha alcanzado el aforo máximo de recepción en la franja solicitada. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} AppointmentInvalidStateTransitionException} \\*
+\hline
+\texttt{APPOINTMENT\_\allowbreak INVALID\_\allowbreak STATE\_\allowbreak TRANSITION} & La mutación solicitada no es admisible en el ciclo de vida de la reserva. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} AppointmentAlreadyArrivedException} \\*
+\hline
+\texttt{APPOINTMENT\_\allowbreak ALREADY\_\allowbreak ARRIVED} & La cita ya ingresó a patio de taller y no puede anularse ni reprogramarse. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} AppointmentPastDateException} \\*
+\hline
+\texttt{APPOINTMENT\_\allowbreak PAST\_\allowbreak DATE} & No se permite agendar una cita en una marca temporal anterior a la actual. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes ubicados bajo el paquete com.andeva.atelier.platform.crm.domain.exceptions.
 
 
 #### 2.6.3.2. Interface Layer
+
+La capa de interfaz del Bounded Context Customer and Fleet Management (CRM) opera como el adaptador primario de entrada dentro de la arquitectura de Atelier Platform, gobernando la interacción perimetral con los clientes del taller, la administración técnica del parque automotor y el ciclo de vida operativo de las citas de servicio.
+
+Ubicada en el paquete canónico **com.andeva.atelier.platform.crm.interfaces**, su concepción táctica responde a cuatro directrices esenciales de diseño:
+
+- **Desacoplamiento perimetral y mediación determinista:** Los controladores REST nunca interaccionan directamente con las raíces de agregado ni capturan excepciones de bajo nivel. Toda comunicación se canaliza hacia los servicios de aplicación a través de comandos y consultas inmutables, recibiendo como respuesta el tipo sellado **Result<T, ApplicationError>** para garantizar respuestas HTTP predecibles.
+
+- **Aislamiento multi-inquilino y contratos especializados:** La cartera de clientes se encuentra estrictamente segmentada por taller automotriz a través del identificador resuelto en el contexto de seguridad. Asimismo, la capa proporciona contratos especializados para personas naturales y empresas de flotas corporativas, erradicando ambigüedades en la validación tributaria perimetral.
+
+- **Catálogo automotriz universal y trazabilidad temporal de custodia:** El vehículo se modela como un activo físico global e independiente del inquilino, asegurando unicidad nacional por placa de rodaje y número de chasis bajo el estándar ISO 3779. La titularidad se gestiona mediante un historial cronológico inmutable de periodos de custodia, reflejando fielmente la transferencia de propiedad entre clientes.
+
+- **Fachada de contexto abierto y eventos de integración intermodulares:** La capa resguarda la pureza del modelo de dominio exponiendo la interfaz **CustomerFleetContextFacade** para consultas síncronas en memoria desde otros módulos, al tiempo que propaga eventos del lenguaje publicado mediante el patrón Transactional Outbox para coordinar de forma asíncrona la apertura de órdenes de trabajo, la provisión telemétrica y la facturación electrónica.
+
+En la @tbl:crm-interface-types se presenta el catálogo consolidado de los componentes que integran la Capa de Interfaz de Customer and Fleet Management (CRM).
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Catálogo Consolidado de la Capa de Interfaz de Customer \& Fleet Management (CRM)} \label{tbl:crm-interface-types} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\
+\hline
+\endhead
+CustomersController & Endpoints REST para administración de cartera de clientes, categorización persona o empresa y titularidad. \\*
+\hline
+\textbf{Categoría} & Controlador REST \\*
+\hline
+\textbf{Relaciones} & Invoca CustomerCommandService y CustomerQueryService. Utiliza ensambladores de recursos. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak rest.\allowbreak controllers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+VehiclesController & Endpoints REST para catálogo universal automotriz, consulta técnica por placa y traspasos de custodia. \\*
+\hline
+\textbf{Categoría} & Controlador REST \\*
+\hline
+\textbf{Relaciones} & Invoca VehicleCommandService y VehicleQueryService. Gestiona entidades Vehicle y VehicleOwnership. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak rest.\allowbreak controllers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+AppointmentsController & Endpoints REST para reserva, confirmación, registro de arribo físico y cancelación de citas previas. \\*
+\hline
+\textbf{Categoría} & Controlador REST \\*
+\hline
+\textbf{Relaciones} & Invoca AppointmentCommandService y AppointmentQueryService. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak rest.\allowbreak controllers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Create\allowbreak Individual\allowbreak Customer\allowbreak Resource & Carga útil inmutable para registro de clientes persona natural con DNI y datos de contacto. \\*
+\hline
+\textbf{Categoría} & Recurso de Petición \\*
+\hline
+\textbf{Relaciones} & Mapeado por RegisterCustomerCommandFromResourceAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Create\allowbreak Company\allowbreak Customer\allowbreak Resource & Carga útil inmutable para registro de clientes corporativos de flota con RUC y razón social. \\*
+\hline
+\textbf{Categoría} & Recurso de Petición \\*
+\hline
+\textbf{Relaciones} & Mapeado por RegisterCustomerCommandFromResourceAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Update\allowbreak Customer\allowbreak Contact\allowbreak Resource & Carga útil inmutable para actualización perimetral de correo electrónico y teléfono celular. \\*
+\hline
+\textbf{Categoría} & Recurso de Petición \\*
+\hline
+\textbf{Relaciones} & Mapeado por UpdateCustomerContactCommandFromResourceAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Create\allowbreak Vehicle\allowbreak Resource & Carga útil para incorporación de vehículo global con placa, VIN, especificaciones y titular inicial. \\*
+\hline
+\textbf{Categoría} & Recurso de Petición \\*
+\hline
+\textbf{Relaciones} & Mapeado por RegisterVehicleCommandFromResourceAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Transfer\allowbreak Vehicle\allowbreak Ownership\allowbreak Resource & Carga útil para traspaso de titularidad vehicular especificando nuevo dueño y fecha formal. \\*
+\hline
+\textbf{Categoría} & Recurso de Petición \\*
+\hline
+\textbf{Relaciones} & Mapeado por TransferVehicleOwnershipCommandFromResourceAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Schedule\allowbreak Appointment\allowbreak Resource & Carga útil para reserva de cita con identificación de sede, cliente, vehículo, fecha y motivo. \\*
+\hline
+\textbf{Categoría} & Recurso de Petición \\*
+\hline
+\textbf{Relaciones} & Mapeado por ScheduleAppointmentCommandFromResourceAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Reschedule\allowbreak Appointment\allowbreak Resource & Carga útil para reprogramación con nueva marca temporal acordada para la atención técnica. \\*
+\hline
+\textbf{Categoría} & Recurso de Petición \\*
+\hline
+\textbf{Relaciones} & Mapeado por RescheduleAppointmentCommandFromResourceAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Cancel\allowbreak Appointment\allowbreak Resource & Carga útil con motivo explícito de anulación justificada de la cita agendada. \\*
+\hline
+\textbf{Categoría} & Recurso de Petición \\*
+\hline
+\textbf{Relaciones} & Mapeado por CancelAppointmentCommandFromResourceAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+CustomerResource & Representación inmutable de la ficha comercial de cliente con denominación resuelta y estado. \\*
+\hline
+\textbf{Categoría} & Recurso de Respuesta \\*
+\hline
+\textbf{Relaciones} & Producido por CustomerResourceFromAggregateAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+VehicleResource & Representación inmutable de la ficha técnica de un automóvil con datos del custodio actual. \\*
+\hline
+\textbf{Categoría} & Recurso de Respuesta \\*
+\hline
+\textbf{Relaciones} & Producido por VehicleResourceFromAggregateAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+VehicleOwnershipResource & Representación inmutable de un segmento temporal de custodia y titularidad vehicular. \\*
+\hline
+\textbf{Categoría} & Recurso de Respuesta \\*
+\hline
+\textbf{Relaciones} & Producido por VehicleOwnershipResourceFromEntityAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+AppointmentResource & Representación inmutable de una cita técnica con nombres desnormalizados para visualización. \\*
+\hline
+\textbf{Categoría} & Recurso de Respuesta \\*
+\hline
+\textbf{Relaciones} & Producido por AppointmentResourceFromAggregateAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Customer\allowbreak Fleet\allowbreak Context\allowbreak Facade & Interfaz pública que expone consultas síncronas de clientes, vehículos y citas en memoria. \\*
+\hline
+\textbf{Categoría} & Fachada de Contexto (OHS) \\*
+\hline
+\textbf{Relaciones} & Consumida por Workshop Operations (MRO), Invoicing e IoT Telemetry. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak acl} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Customer\allowbreak Fleet\allowbreak Context\allowbreak FacadeImpl & Implementación de la fachada que consulta repositorios y preserva la pureza de los agregados. \\*
+\hline
+\textbf{Categoría} & Implementación ACL \\*
+\hline
+\textbf{Relaciones} & Implementa CustomerFleetContextFacade desacoplando el modelo interno. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak acl} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Customer\allowbreak Created\allowbreak Integration\allowbreak Event & Notificación asíncrona de cliente creado para pre-carga de datos fiscales en Invoicing. \\*
+\hline
+\textbf{Categoría} & Evento de Integración \\*
+\hline
+\textbf{Relaciones} & Publicado vía Outbox. Integra con el módulo de facturación electrónica. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Vehicle\allowbreak Registered\allowbreak Integration\allowbreak Event & Notificación asíncrona de vehículo registrado para provisión telemétrica en IoT Telemetry. \\*
+\hline
+\textbf{Categoría} & Evento de Integración \\*
+\hline
+\textbf{Relaciones} & Publicado vía Outbox. Integra con la plataforma telemétrica vehicular. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Vehicle\allowbreak Ownership\allowbreak Transferred\allowbreak Integration\allowbreak Event & Notificación asíncrona de cambio de titular para reasignación en Atelier Driver e IoT. \\*
+\hline
+\textbf{Categoría} & Evento de Integración \\*
+\hline
+\textbf{Relaciones} & Publicado vía Outbox. Integra con IoT Telemetry y la aplicación móvil del conductor. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Appointment\allowbreak Scheduled\allowbreak Integration\allowbreak Event & Notificación asíncrona de cita agendada para previsión de capacidad en Workshop Operations. \\*
+\hline
+\textbf{Categoría} & Evento de Integración \\*
+\hline
+\textbf{Relaciones} & Publicado vía Outbox. Integra con planificación de bahías de servicio técnico. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Appointment\allowbreak Arrived\allowbreak Integration\allowbreak Event & Notificación asíncrona de arribo físico para apertura de Orden de Trabajo en Workshop Operations. \\*
+\hline
+\textbf{Categoría} & Evento de Integración \\*
+\hline
+\textbf{Relaciones} & Publicado vía Outbox. Desencadena la recepción formal en el taller operativo. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak events} \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes pertenecientes al paquete canónico com.andeva.atelier.platform.crm.interfaces.
+
+A continuación, se profundiza en la especificación a manera de diccionario de cada una de las clases, controladores, contratos DTO y ensambladores que conforman esta capa.
+
+**Controladores REST y Endpoints de Comunicación**
+
+La exposición perimetral de los servicios web se organiza en tres controladores anotados con `@RestController`, delimitando con precisión las fronteras operativas del dominio:
+
+- **CustomersController**: Centraliza la administración de la cartera comercial del taller automotriz bajo la ruta base `/api/v1/customers`. Provee rutas semánticamente diferenciadas para el alta de personas naturales (`/individuals`) y empresas de flotas (`/companies`), evitando estructuras polimórficas ambiguas. Asimismo, implementa endpoints para la consulta paginada de clientes filtrada por taller, la inspección detallada por identificador, la actualización idempotente de canales de contacto directo y el listado del parque vehicular bajo titularidad activa del cliente.
+
+- **VehiclesController**: Expone las operaciones vinculadas al parque automotor global bajo `/api/v1/vehicles`. Gestiona el alta técnica de automóviles validando la placa de rodaje y el número de chasis ISO 3779, la consulta técnica por identificador único y la búsqueda por placa normalizada. Para modelar el cambio de custodio sin recurrir a verbos en las rutas, implementa el traspaso de propiedad mediante la creación de un nuevo recurso de custodia bajo `/api/v1/vehicles/{vehicleId}/ownerships`, permitiendo adicionalmente consultar la trazabilidad cronológica de dueños pasados y vigentes.
+
+- **AppointmentsController**: Gobierna el agendamiento y la máquina de estados de las citas previas bajo `/api/v1/appointments`. Ofrece la reserva de atenciones técnicas en sedes físicas, la búsqueda de citas filtradas por sucursal, fecha y estado, y la inspección individual de cada solicitud. Asimismo, expone endpoints de acción mediante peticiones POST para materializar transiciones de estado explícitas con efectos colaterales, tales como la confirmación formal de la cita, el registro de arribo físico a recepción (haciendo que el módulo de operaciones abra automáticamente la orden de trabajo), la reprogramación temporal y la anulación con justificación obligatoria.
+
+En la @tbl:crm-controllers-and-endpoints se detallan los controladores REST, rutas, verbos HTTP y tipos de respuesta asociados.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\raggedright\arraybackslash}p{6.0cm} | >{\raggedright\arraybackslash}p{9.4cm} |}
+\caption{Controladores REST y Endpoints de Comunicación de Customer \& Fleet Management (CRM)} \label{tbl:crm-controllers-and-endpoints} \\
+\hline
+\thfirst{Recurso de Petición} & \thcell{Código y Respuesta HTTP} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Recurso de Petición} & \thcell{Código y Respuesta HTTP} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Controlador REST:} CustomersController} \\*
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak customers/\allowbreak individuals}} \\*
+\hline
+\textbf{Petición:} \texttt{Create\allowbreak Individual\allowbreak Customer\allowbreak Resource} & \textbf{Respuesta:} 201 CREATED (\texttt{CustomerResource}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak customers/\allowbreak companies}} \\*
+\hline
+\textbf{Petición:} \texttt{Create\allowbreak Company\allowbreak Customer\allowbreak Resource} & \textbf{Respuesta:} 201 CREATED (\texttt{CustomerResource}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak customers}} \\*
+\hline
+\textbf{Petición:} Filtros query (\texttt{type}, \texttt{search}, \texttt{status}) & \textbf{Respuesta:} 200 OK (\texttt{List\textless CustomerResource\textgreater}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak customers/\allowbreak \{customerId\}}} \\*
+\hline
+\textbf{Petición:} Variable de ruta (\texttt{customerId}) & \textbf{Respuesta:} 200 OK (\texttt{CustomerResource}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{PUT} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak customers/\allowbreak \{customerId\}/\allowbreak contact}} \\*
+\hline
+\textbf{Petición:} \texttt{Update\allowbreak Customer\allowbreak Contact\allowbreak Resource} & \textbf{Respuesta:} 200 OK (\texttt{CustomerResource}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak customers/\allowbreak \{customerId\}/\allowbreak vehicles}} \\*
+\hline
+\textbf{Petición:} Variable de ruta (\texttt{customerId}) & \textbf{Respuesta:} 200 OK (\texttt{List\textless VehicleResource\textgreater}) \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Controlador REST:} VehiclesController} \\*
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak vehicles}} \\*
+\hline
+\textbf{Petición:} \texttt{CreateVehicleResource} & \textbf{Respuesta:} 201 CREATED (\texttt{VehicleResource}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak vehicles/\allowbreak \{vehicleId\}}} \\*
+\hline
+\textbf{Petición:} Variable de ruta (\texttt{vehicleId}) & \textbf{Respuesta:} 200 OK (\texttt{VehicleResource}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak vehicles/\allowbreak by-plate/\allowbreak \{plate\}}} \\*
+\hline
+\textbf{Petición:} Variable de ruta (\texttt{plate}) & \textbf{Respuesta:} 200 OK (\texttt{VehicleResource}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak vehicles/\allowbreak \{vehicleId\}/\allowbreak ownerships}} \\*
+\hline
+\textbf{Petición:} \texttt{Transfer\allowbreak Vehicle\allowbreak Ownership\allowbreak Resource} & \textbf{Respuesta:} 201 CREATED (\texttt{VehicleOwnershipResource}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak vehicles/\allowbreak \{vehicleId\}/\allowbreak ownerships}} \\*
+\hline
+\textbf{Petición:} Variable de ruta (\texttt{vehicleId}) & \textbf{Respuesta:} 200 OK (\texttt{List\textless VehicleOwnershipResource\textgreater}) \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Controlador REST:} AppointmentsController} \\*
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak appointments}} \\*
+\hline
+\textbf{Petición:} \texttt{ScheduleAppointmentResource} & \textbf{Respuesta:} 201 CREATED (\texttt{AppointmentResource}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak appointments}} \\*
+\hline
+\textbf{Petición:} Filtros query (\texttt{branchId}, \texttt{date}, \texttt{status}) & \textbf{Respuesta:} 200 OK (\texttt{List\textless AppointmentResource\textgreater}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak appointments/\allowbreak \{appointmentId\}}} \\*
+\hline
+\textbf{Petición:} Variable de ruta (\texttt{appointmentId}) & \textbf{Respuesta:} 200 OK (\texttt{AppointmentResource}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak appointments/\allowbreak \{appointmentId\}/\allowbreak confirm}} \\*
+\hline
+\textbf{Petición:} Variable de ruta (\texttt{appointmentId}) & \textbf{Respuesta:} 200 OK (\texttt{AppointmentResource}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak appointments/\allowbreak \{appointmentId\}/\allowbreak arrive}} \\*
+\hline
+\textbf{Petición:} Variable de ruta (\texttt{appointmentId}) & \textbf{Respuesta:} 200 OK (\texttt{AppointmentResource}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak appointments/\allowbreak \{appointmentId\}/\allowbreak reschedule}} \\*
+\hline
+\textbf{Petición:} \texttt{Reschedule\allowbreak Appointment\allowbreak Resource} & \textbf{Respuesta:} 200 OK (\texttt{AppointmentResource}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak appointments/\allowbreak \{appointmentId\}/\allowbreak cancel}} \\*
+\hline
+\textbf{Petición:} \texttt{CancelAppointmentResource} & \textbf{Respuesta:} 200 OK (\texttt{AppointmentResource}) \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Controladores REST ubicados en com.andeva.atelier.platform.crm.interfaces.rest.controllers.
+
+En sus relaciones de colaboración, estos controladores inyectan de forma exclusiva los servicios de comando y consulta de la Capa de Aplicación, delegando la ejecución transaccional y empleando ensambladores para desacoplar el transporte HTTP del modelo interno.
+
+**Recursos DTO de Petición y Respuesta HTTP**
+
+Para impedir la exposición directa de las entidades de persistencia y garantizar una validación sintáctica rigurosa en la frontera perimetral, la capa implementa estructuras inmutables estructuradas como registros de Java.
+
+Los recursos de petición incorporan restricciones de integridad declarativas mediante anotaciones de Jakarta Bean Validation. Componentes como **CreateIndividualCustomerResource**, **CreateCompanyCustomerResource**, **CreateVehicleResource** y **ScheduleAppointmentResource** comprueban de forma defensiva la no vaciedad de cadenas, la conformidad de documentos de identidad con estándares nacionales (DNI de 8 dígitos y RUC de 11 dígitos), la estructura de placas vehiculares, el cumplimiento de la norma ISO 3779 para números VIN y marcas temporales en tiempo futuro para citas antes de alcanzar los servicios de aplicación.
+
+Por su parte, los recursos de respuesta encapsulan las cargas útiles entregadas a las aplicaciones cliente mediante estructuras estables y optimizadas. Destacan **CustomerResource**, portador del estado comercial y nombre resuelto del cliente; **VehicleResource**, que expone la ficha técnica del vehículo junto con la identidad de su titular vigente; **VehicleOwnershipResource**, representativo del periodo de custodia; y **AppointmentResource**, que provee los metadatos consolidados de la cita para facilitar su renderización en paneles web y dispositivos móviles.
+
+En la @tbl:crm-resources-dtos se especifican los atributos y restricciones de validación de estos recursos DTO.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Recursos DTO de Entrada y Salida del Bounded Context Customer \& Fleet Management (CRM)} \label{tbl:crm-resources-dtos} \\
+\hline
+\thfirst{Aspecto de Recurso} & \thcell{Especificación de Atributos e Integridad} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Recurso} & \thcell{Especificación de Atributos e Integridad} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} CreateIndividualCustomerResource \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{firstName}, \texttt{lastName}, \texttt{taxId}, \texttt{email}, \texttt{phone} \\*
+\hline
+\textbf{Validación de Integridad} & Anotaciones \texttt{@NotBlank}, \texttt{@Size(min = 2, max = 100)}, patrón DNI 8 dígitos, \texttt{@Email} y formato E.164. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} CreateCompanyCustomerResource \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{companyName}, \texttt{taxId}, \texttt{email}, \texttt{phone} \\*
+\hline
+\textbf{Validación de Integridad} & Anotaciones \texttt{@NotBlank}, \texttt{@Size(min = 3, max = 150)}, patrón RUC 11 dígitos, \texttt{@Email} y formato E.164. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} UpdateCustomerContactResource \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{email}, \texttt{phone} \\*
+\hline
+\textbf{Validación de Integridad} & Anotaciones \texttt{@NotBlank}, \texttt{@Email} y validación telefónica E.164. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} CreateVehicleResource \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{plate}, \texttt{vin}, \texttt{brand}, \texttt{model}, \texttt{year}, \texttt{engineType}, \texttt{initialOwnerId} \\*
+\hline
+\textbf{Validación de Integridad} & Anotaciones \texttt{@NotBlank}, patrón placa alfanumérica, VIN ISO 3779, \texttt{@Min(1950)} y \texttt{@NotNull}. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} TransferVehicleOwnershipResource \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{newOwnerId}, \texttt{transferDate} \\*
+\hline
+\textbf{Validación de Integridad} & Anotaciones \texttt{@NotNull} para nuevo propietario y \texttt{@PastOrPresent} para fecha formal de custodia. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} ScheduleAppointmentResource \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{branchId}, \texttt{customerId}, \texttt{vehicleId}, \texttt{scheduledAt}, \texttt{estimatedDurationMinutes}, \texttt{reason} \\*
+\hline
+\textbf{Validación de Integridad} & Anotaciones \texttt{@NotNull} en identificadores, \texttt{@Future} para fecha pactada, \texttt{@Min(15)} y \texttt{@Size(5, 500)}. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} RescheduleAppointmentResource \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{newScheduledAt} \\*
+\hline
+\textbf{Validación de Integridad} & Anotaciones \texttt{@NotNull} y \texttt{@Future} para la nueva marca temporal pactada. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} CancelAppointmentResource \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{reason} \\*
+\hline
+\textbf{Validación de Integridad} & Anotaciones \texttt{@NotBlank} y \texttt{@Size(min = 5, max = 250)} para justificación de cancelación. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} CustomerResource \quad (\textit{Categoría:} Respuesta)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{id}, \texttt{tenantId}, \texttt{type}, \texttt{displayName}, \texttt{taxId}, \texttt{email}, \texttt{phone}, \texttt{status}, \texttt{createdAt} \\*
+\hline
+\textbf{Validación de Integridad} & Representación pública inmutable de la cartera comercial del taller automotriz. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} VehicleResource \quad (\textit{Categoría:} Respuesta)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{id}, \texttt{plate}, \texttt{vin}, \texttt{brand}, \texttt{model}, \texttt{year}, \texttt{engineType}, \texttt{currentOwnerId}, \texttt{currentOwnerName} \\*
+\hline
+\textbf{Validación de Integridad} & Ficha automotriz universal con identificación desnormalizada del custodio vigente. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} VehicleOwnershipResource \quad (\textit{Categoría:} Respuesta)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{id}, \texttt{vehicleId}, \texttt{customerId}, \texttt{ownerName}, \texttt{startDate}, \texttt{endDate}, \texttt{isCurrent} \\*
+\hline
+\textbf{Validación de Integridad} & Registro inmutable del periodo temporal de titularidad y custodia física del vehículo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} AppointmentResource \quad (\textit{Categoría:} Respuesta)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{id}, \texttt{tenantId}, \texttt{branchId}, \texttt{customerId}, \texttt{customerName}, \texttt{vehicleId}, \texttt{vehiclePlate}, \texttt{scheduledAt}, \texttt{status} \\*
+\hline
+\textbf{Validación de Integridad} & Ficha operativa de cita previa con nombres y placas resueltos para visualización cliente. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes ubicados en el paquete com.andeva.atelier.platform.crm.interfaces.rest.resources.
+
+**Ensambladores y Transformadores de Recursos**
+
+El desacoplamiento entre los contratos de transporte web y los modelos transaccionales de aplicación se consolida a través de ensambladores bidireccionales dedicados.
+
+Los ensambladores de entrada procesan las cargas útiles de las peticiones HTTP y construyen comandos inmutables de aplicación, inyectando identificadores de ruta y resolviendo conversiones tipadas. Entre ellos, destacan **RegisterCustomerCommandFromResourceAssembler**, que bifurca el mapeo según el tipo de cliente suministrado, **RegisterVehicleCommandFromResourceAssembler**, que traduce las especificaciones técnicas del vehículo, y **ScheduleAppointmentCommandFromResourceAssembler**, que compone los parámetros temporales y de localización física.
+
+En sentido inverso, los ensambladores de salida proyectan las raíces de agregado y entidades del dominio hacia representaciones DTO públicas. Componentes como **CustomerResourceFromAggregateAssembler**, **VehicleResourceFromAggregateAssembler**, **VehicleOwnershipResourceFromEntityAssembler** y **AppointmentResourceFromAggregateAssembler** formatean valores monetarios y temporales, resolviendo denominaciones amigables sin forzar consultas circulares en el cliente.
+
+En la @tbl:crm-resource-assemblers se detallan los métodos y tipos de transformación ejecutados por estos ensambladores.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.1cm} | >{\raggedright\arraybackslash}p{10.3cm} |}
+\caption{Ensambladores de Recursos del Bounded Context Customer \& Fleet Management (CRM)} \label{tbl:crm-resource-assemblers} \\
+\hline
+\thfirst{Aspecto del Ensamblador} & \thcell{Firma y Transformación de Tipos} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto del Ensamblador} & \thcell{Firma y Transformación de Tipos} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} Register\allowbreak Customer\allowbreak Command\allowbreak From\allowbreak Resource\allowbreak Assembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toCommandFromResource} \\*
+\hline
+\textbf{Transformación} & \texttt{CreateIndividualCustomerResource / CreateCompanyCustomerResource,\allowbreak  UUID} $\longrightarrow$ \texttt{RegisterCustomerCommand} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} Update\allowbreak Customer\allowbreak Contact\allowbreak Command\allowbreak From\allowbreak Resource\allowbreak Assembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toCommandFromResource} \\*
+\hline
+\textbf{Transformación} & \texttt{UpdateCustomerContactResource,\allowbreak  UUID} $\longrightarrow$ \texttt{UpdateCustomerContactCommand} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} Register\allowbreak Vehicle\allowbreak Command\allowbreak From\allowbreak Resource\allowbreak Assembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toCommandFromResource} \\*
+\hline
+\textbf{Transformación} & \texttt{CreateVehicleResource} $\longrightarrow$ \texttt{RegisterVehicleCommand} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} Transfer\allowbreak Vehicle\allowbreak Ownership\allowbreak Command\allowbreak From\allowbreak Resource\allowbreak Assembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toCommandFromResource} \\*
+\hline
+\textbf{Transformación} & \texttt{TransferVehicleOwnershipResource,\allowbreak  UUID} $\longrightarrow$ \texttt{TransferVehicleOwnershipCommand} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} Schedule\allowbreak Appointment\allowbreak Command\allowbreak From\allowbreak Resource\allowbreak Assembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toCommandFromResource} \\*
+\hline
+\textbf{Transformación} & \texttt{ScheduleAppointmentResource,\allowbreak  UUID} $\longrightarrow$ \texttt{ScheduleAppointmentCommand} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} Reschedule\allowbreak Appointment\allowbreak Command\allowbreak From\allowbreak Resource\allowbreak Assembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toCommandFromResource} \\*
+\hline
+\textbf{Transformación} & \texttt{RescheduleAppointmentResource,\allowbreak  UUID} $\longrightarrow$ \texttt{RescheduleAppointmentCommand} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} Cancel\allowbreak Appointment\allowbreak Command\allowbreak From\allowbreak Resource\allowbreak Assembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toCommandFromResource} \\*
+\hline
+\textbf{Transformación} & \texttt{CancelAppointmentResource,\allowbreak  UUID} $\longrightarrow$ \texttt{CancelAppointmentCommand} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} Customer\allowbreak Resource\allowbreak From\allowbreak Aggregate\allowbreak Assembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toResourceFromAggregate} \\*
+\hline
+\textbf{Transformación} & \texttt{Customer} $\longrightarrow$ \texttt{CustomerResource} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} Vehicle\allowbreak Resource\allowbreak From\allowbreak Aggregate\allowbreak Assembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toResourceFromAggregate} \\*
+\hline
+\textbf{Transformación} & \texttt{Vehicle,\allowbreak  Customer} $\longrightarrow$ \texttt{VehicleResource} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} Vehicle\allowbreak Ownership\allowbreak Resource\allowbreak From\allowbreak Entity\allowbreak Assembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toResourceFromEntity} \\*
+\hline
+\textbf{Transformación} & \texttt{VehicleOwnership,\allowbreak  Customer} $\longrightarrow$ \texttt{VehicleOwnershipResource} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} Appointment\allowbreak Resource\allowbreak From\allowbreak Aggregate\allowbreak Assembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toResourceFromAggregate} \\*
+\hline
+\textbf{Transformación} & \texttt{Appointment,\allowbreak  Customer,\allowbreak  Vehicle} $\longrightarrow$ \texttt{AppointmentResource} \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Clases ubicadas bajo el paquete com.andeva.atelier.platform.crm.interfaces.rest.transform.
+
+**Fachada de Contexto Abierto (Open Host Service / Inbound ACL)**
+
+Con el propósito de mantener el aislamiento de dominio y evitar dependencias circulares con otros módulos del backend, la capa de interfaz expone una fachada pública en memoria sustentada en los patrones Open Host Service y Capa Anticorrupción de entrada.
+
+Este mecanismo se instrumenta en la interfaz **CustomerFleetContextFacade**, alojada en el paquete canónico **com.andeva.atelier.platform.crm.interfaces.acl**. Dicha fachada proporciona métodos síncronos de consulta para que módulos consumidores como Workshop Operations (MRO), Facturación Electrónica (Invoicing) e IoT Telemetry verifiquen la existencia de clientes, obtengan la ficha técnica de un automóvil por identificador o placa de rodaje, resuelvan el titular legítimo para la emisión de comprobantes o consulten el estado de una cita técnica.
+
+La implementación **CustomerFleetContextFacadeImpl** delega estas operaciones en los repositorios y servicios de aplicación de CRM, convirtiendo las entidades internas en registros inmutables de frontera (**CustomerAclDto**, **VehicleAclDto** y **AppointmentAclDto**), preservando la integridad de los agregados.
+
+En la @tbl:crm-customer-fleet-facade se especifican los métodos y tipos de la fachada de contexto abierto.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Métodos de la Fachada de Contexto Abierto CustomerFleetContextFacade} \label{tbl:crm-customer-fleet-facade} \\
+\hline
+\thfirst{Aspecto del Contrato} & \thcell{Firma, Retorno y Consumidores} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto del Contrato} & \thcell{Firma, Retorno y Consumidores} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método de Fachada:} \texttt{fetchCustomerById}} \\*
+\hline
+\textbf{Parámetros y Retorno} & \texttt{UUID customerId} $\longrightarrow$ \texttt{Optional<\allowbreak CustomerAclDto>\allowbreak } \\*
+\hline
+\textbf{Módulos Consumidores} & Invoicing (Facturación electrónica), Workshop Operations (MRO), Billing \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método de Fachada:} \texttt{fetchVehicleById}} \\*
+\hline
+\textbf{Parámetros y Retorno} & \texttt{UUID vehicleId} $\longrightarrow$ \texttt{Optional<\allowbreak VehicleAclDto>\allowbreak } \\*
+\hline
+\textbf{Módulos Consumidores} & Workshop Operations (MRO), IoT Telemetry, Inventory \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método de Fachada:} \texttt{fetchVehicleByPlate}} \\*
+\hline
+\textbf{Parámetros y Retorno} & \texttt{String plate} $\longrightarrow$ \texttt{Optional<\allowbreak VehicleAclDto>\allowbreak } \\*
+\hline
+\textbf{Módulos Consumidores} & Workshop Operations (Recepción rápida en taller), IoT Telemetry \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método de Fachada:} \texttt{fetchCurrentOwnerId}} \\*
+\hline
+\textbf{Parámetros y Retorno} & \texttt{UUID vehicleId} $\longrightarrow$ \texttt{Optional<\allowbreak UUID>\allowbreak } \\*
+\hline
+\textbf{Módulos Consumidores} & Invoicing (Emisión de comprobante al custodio), Atelier Driver (App móvil) \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método de Fachada:} \texttt{fetchAppointmentById}} \\*
+\hline
+\textbf{Parámetros y Retorno} & \texttt{UUID appointmentId} $\longrightarrow$ \texttt{Optional<\allowbreak AppointmentAclDto>\allowbreak } \\*
+\hline
+\textbf{Módulos Consumidores} & Workshop Operations (MRO conversión a Orden de Trabajo) \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método de Fachada:} \texttt{markAppointmentAsConvertedToWorkOrder}} \\*
+\hline
+\textbf{Parámetros y Retorno} & \texttt{UUID appointmentId} $\longrightarrow$ \texttt{boolean} \\*
+\hline
+\textbf{Módulos Consumidores} & Workshop Operations (MRO registro de ingreso físico a bahía) \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes pertenecientes al paquete com.andeva.atelier.platform.crm.interfaces.acl.
+
+**Eventos de Integración (Published Language)**
+
+Para la sincronización reactiva e intermodular sin acoplamiento temporal ni dependencias de persistencia directa, el Bounded Context CRM define un lenguaje publicado conformado por cinco eventos de integración inmutables.
+
+Estos eventos notifican hitos sustanciales del ciclo de vida del negocio: **CustomerCreatedIntegrationEvent** permite a Facturación Electrónica precargar perfiles fiscales de clientes; **VehicleRegisteredIntegrationEvent** y **VehicleOwnershipTransferredIntegrationEvent** posibilitan a IoT Telemetry provisionar dispositivos OBD2 y reasignar privilegios telemétricos hacia la aplicación móvil del nuevo custodio; finalmente, **AppointmentScheduledIntegrationEvent** y **AppointmentArrivedIntegrationEvent** informan a Workshop Operations sobre la demanda esperada y desencadenan la apertura de órdenes de trabajo preliminares ante la llegada física del automóvil.
+
+En la @tbl:crm-integration-events se sintetiza la estructura de estos eventos de integración.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Eventos de Integración del Bounded Context Customer \& Fleet Management (CRM)} \label{tbl:crm-integration-events} \\
+\hline
+\thfirst{Aspecto de Integración} & \thcell{Carga Útil y Sincronización Intermodular} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Integración} & \thcell{Carga Útil y Sincronización Intermodular} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Integración:} CustomerCreatedIntegrationEvent} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{customerId}, \texttt{tenantId}, \texttt{displayName}, \texttt{taxId}, \texttt{occurredOn} \\*
+\hline
+\textbf{Módulos Receptores} & Invoicing \\*
+\hline
+\textbf{Propósito} & Pre-carga de datos fiscales en el catálogo de clientes receptores de comprobantes electrónicos. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Integración:} VehicleRegisteredIntegrationEvent} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{vehicleId}, \texttt{plate}, \texttt{vin}, \texttt{ownerId}, \texttt{occurredOn} \\*
+\hline
+\textbf{Módulos Receptores} & IoT Telemetry \\*
+\hline
+\textbf{Propósito} & Alta automática de vehículo en plataforma telemétrica para provisión de dispositivos OBD2. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Integración:} VehicleOwnershipTransferredIntegrationEvent} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{vehicleId}, \texttt{previousOwnerId}, \texttt{newOwnerId}, \texttt{occurredOn} \\*
+\hline
+\textbf{Módulos Receptores} & IoT Telemetry, Atelier Driver \\*
+\hline
+\textbf{Propósito} & Reasignación de permisos de monitoreo telemétrico hacia la cuenta del nuevo custodio. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Integración:} AppointmentScheduledIntegrationEvent} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{appointmentId}, \texttt{tenantId}, \texttt{branchId}, \texttt{customerId}, \texttt{vehicleId}, \texttt{scheduledAt}, \texttt{occurredOn} \\*
+\hline
+\textbf{Módulos Receptores} & Workshop Operations (MRO) \\*
+\hline
+\textbf{Propósito} & Previsión de capacidad de bahías operativas y asignación temprana de técnicos especialistas. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Integración:} AppointmentArrivedIntegrationEvent} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{appointmentId}, \texttt{tenantId}, \texttt{branchId}, \texttt{customerId}, \texttt{vehicleId}, \texttt{occurredOn} \\*
+\hline
+\textbf{Módulos Receptores} & Workshop Operations (MRO) \\*
+\hline
+\textbf{Propósito} & Apertura automática de Orden de Trabajo de recepción y generación de checklist vehicular. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Registros inmutables pertenecientes al paquete com.andeva.atelier.platform.crm.interfaces.events.
 
 
 
 #### 2.6.3.3. Application Layer
 
+La capa de aplicación del Bounded Context de Customer & Fleet Management (CRM) orquesta
+los casos de uso transaccionales de alta de clientes particulares y flotas corporativas,
+administración del catálogo universal vehicular, trazabilidad histórica de custodias,
+planificación de citas técnicas y transiciones de estado de recepción en la plataforma
+Atelier.
 
+Ubicada en el paquete canónico com.andeva.atelier.platform.crm.application, su concepción
+arquitectónica implementa una separación rigurosa bajo el patrón CQRS, desacoplando los
+flujos mutacionales de escritura de las proyecciones de solo lectura a través de cuatro
+directrices esenciales de diseño:
 
-#### 2.6.3.4 Infrastructure Layer
+- **Orquestación Transaccional Atómica:** Delimitación de fronteras de consistencia
+mediante la anotación de servicio transaccional con nivel de aislamiento de lectura
+confirmada. Esta estrategia asegura atomicidad estricta en operaciones multiorigen que
+coordinan la validación fiscal de documentos, la verificación de cuotas SaaS, el alta de
+clientes y la inicialización de custodias vehiculares.
+
+- **Flujo Determinista sin Excepciones:** Adopción del tipo de resultado sellado
+**Result<T, ApplicationError>** para gobernar las respuestas de los casos de uso. Las
+condiciones de fallo previsibles vinculadas a colisiones de documentos de identidad, placas
+automotrices preexistentes o saturación de bahías se tratan como valores inmutables de
+retorno, imponiendo verificación exhaustiva mediante coincidencia de patrones.
+
+- **Coreografía de Eventos de Dominio e Integración:** Manejo dual de eventos mediante
+oyentes locales para tareas accesorias sincrónicas y oyentes posteriores a la confirmación
+transaccional para la propagación de eventos de integración hacia el Transactional Outbox,
+asegurando consistencia eventual con los módulos de facturación, telemetría y operaciones.
+
+- **Inversión de Dependencias y Aislamiento Perimetral:** Abstracción de servicios de
+infraestructura externos mediante puertos de salida específicos para geocodificación de
+direcciones corporativas, despacho de notificaciones push móviles hacia conductores y
+verificación de cuotas contractuales del taller mecánico.
+
+A fin de ofrecer una visión sistemática de estos componentes, en la
+@tbl:crm-application-types se presenta el catálogo consolidado de las clases, interfaces y
+registros que estructuran la Capa de Aplicación de Customer & Fleet Management (CRM).
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Catálogo Consolidado de la Capa de Aplicación de Customer \& Fleet Management (CRM)} \label{tbl:crm-application-types} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\
+\hline
+\endhead
+Customer\allowbreak Command\allowbreak Service & Contrato de casos de uso de escritura para clientes particulares y empresas de flota. \\*
+\hline
+\textbf{Categoría} & Servicio de Comando \\*
+\hline
+\textbf{Relaciones} & Implementado por CustomerCommandServiceImpl. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Customer\allowbreak Command\allowbreak ServiceImpl & Orquesta el alta, actualización y desactivación de clientes con validación fiscal. \\*
+\hline
+\textbf{Categoría} & Implementación de Comando \\*
+\hline
+\textbf{Relaciones} & Coordina agregado Customer y repositorios con persistencia ACID. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Vehicle\allowbreak Command\allowbreak Service & Contrato para registro universal y traspaso formal de titularidad automotriz. \\*
+\hline
+\textbf{Categoría} & Servicio de Comando \\*
+\hline
+\textbf{Relaciones} & Implementado por VehicleCommandServiceImpl. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Vehicle\allowbreak Command\allowbreak ServiceImpl & Administra el catálogo global vehicular y gestiona periodos de custodia inmutables. \\*
+\hline
+\textbf{Categoría} & Implementación de Comando \\*
+\hline
+\textbf{Relaciones} & Coordina agregados Vehicle y VehicleOwnership. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Appointment\allowbreak Command\allowbreak Service & Contrato de casos de uso para agendamiento y transiciones de estado de citas. \\*
+\hline
+\textbf{Categoría} & Servicio de Comando \\*
+\hline
+\textbf{Relaciones} & Implementado por AppointmentCommandServiceImpl. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Appointment\allowbreak Command\allowbreak ServiceImpl & Orquesta la máquina de estados de citas y coordina efectos colaterales de arribo. \\*
+\hline
+\textbf{Categoría} & Implementación de Comando \\*
+\hline
+\textbf{Relaciones} & Coordina agregado Appointment y emite eventos de dominio. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Customer\allowbreak Query\allowbreak Service & Contrato de recuperación de clientes por identificador o documento tributario. \\*
+\hline
+\textbf{Categoría} & Servicio de Consulta \\*
+\hline
+\textbf{Relaciones} & Implementado por CustomerQueryServiceImpl. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Customer\allowbreak Query\allowbreak ServiceImpl & Consultas de lectura optimizada de clientes y segmentación de cartera por taller. \\*
+\hline
+\textbf{Categoría} & Implementación de Consulta \\*
+\hline
+\textbf{Relaciones} & Accede a CustomerRepository en modo de solo lectura. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Vehicle\allowbreak Query\allowbreak Service & Contrato de consulta técnica de vehículos, placas y trazabilidad de dueños. \\*
+\hline
+\textbf{Categoría} & Servicio de Consulta \\*
+\hline
+\textbf{Relaciones} & Implementado por VehicleQueryServiceImpl. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Vehicle\allowbreak Query\allowbreak ServiceImpl & Proyecta fichas automotrices y cadenas históricas de tenencia vehicular. \\*
+\hline
+\textbf{Categoría} & Implementación de Consulta \\*
+\hline
+\textbf{Relaciones} & Accede a VehicleRepository y VehicleOwnershipRepository. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Appointment\allowbreak Query\allowbreak Service & Contrato de lectura para agenda de citas por sede física, fecha y estado. \\*
+\hline
+\textbf{Categoría} & Servicio de Consulta \\*
+\hline
+\textbf{Relaciones} & Implementado por AppointmentQueryServiceImpl. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Appointment\allowbreak Query\allowbreak ServiceImpl & Proyecciones de citas previas para planificación operativa de bahías. \\*
+\hline
+\textbf{Categoría} & Implementación de Consulta \\*
+\hline
+\textbf{Relaciones} & Accede a AppointmentRepository en modo de solo lectura. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Customer\allowbreak Domain\allowbreak Events\allowbreak Handler & Suscriptor de eventos de cliente para sincronización asíncrona hacia facturación. \\*
+\hline
+\textbf{Categoría} & Manejador de Eventos \\*
+\hline
+\textbf{Relaciones} & Construye eventos de integración para el Transactional Outbox. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Vehicle\allowbreak Domain\allowbreak Events\allowbreak Handler & Suscriptor de eventos vehiculares y traspasos para provisión en IoT Telemetry. \\*
+\hline
+\textbf{Categoría} & Manejador de Eventos \\*
+\hline
+\textbf{Relaciones} & Deposita eventos de integración en el Transactional Outbox. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Appointment\allowbreak Domain\allowbreak Events\allowbreak Handler & Suscriptor dual de citas para notificaciones push móviles y apertura de ODT en MRO. \\*
+\hline
+\textbf{Categoría} & Manejador de Eventos \\*
+\hline
+\textbf{Relaciones} & Despacha push vía FCM y publica eventos de integración. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Places\allowbreak Address\allowbreak Verification\allowbreak Gateway & Interfaz de pasarela perimetral para normalización geográfica de direcciones. \\*
+\hline
+\textbf{Categoría} & Puerto de Salida \\*
+\hline
+\textbf{Relaciones} & Implementado en la Capa de Infraestructura vía Google Places API. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak acl} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Driver\allowbreak App\allowbreak Push\allowbreak Gateway & Interfaz de pasarela para envío de notificaciones push hacia la app móvil del conductor. \\*
+\hline
+\textbf{Categoría} & Puerto de Salida \\*
+\hline
+\textbf{Relaciones} & Implementado en Infraestructura mediante Firebase Cloud Messaging. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak acl} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Subscription\allowbreak Validation\allowbreak Service & Interfaz para verificación de cuotas y límites contratados en el plan SaaS del taller. \\*
+\hline
+\textbf{Categoría} & Puerto de Salida \\*
+\hline
+\textbf{Relaciones} & Consulta al Bounded Context Billing para gobernanza de límites. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak acl} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Verified\allowbreak Address\allowbreak Dto & Registro inmutable portador de la dirección normalizada y coordenadas resueltas. \\*
+\hline
+\textbf{Categoría} & Modelo de Frontera \\*
+\hline
+\textbf{Relaciones} & Entregado por PlacesAddressVerificationGateway. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak model} \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes pertenecientes al paquete canónico com.andeva.atelier.platform.crm.application.
+
+**Servicios de Comandos y Orquestación Transaccional**
+
+Los flujos de modificación de estado se implementan mediante servicios orquestadores
+decorados con anotaciones transaccionales que delimitan el alcance de persistencia y
+garantizan el cumplimiento de invariantes de negocio en el modelo.
+
+El servicio **CustomerCommandServiceImpl** centraliza el alta y gestión de clientes. Al
+procesar **RegisterIndividualCustomerCommand**, verifica la unicidad del documento nacional
+de identidad y del correo electrónico en el taller activo, comprueba la cuota máxima del
+plan SaaS contratado mediante **SubscriptionValidationService** y persiste el agregado
+**Customer** asociando sus datos de contacto.
+
+Cuando procesa **RegisterCompanyCustomerCommand**, valida el Registro Único de Contribuyentes,
+solicita la estandarización y coordenadas del domicilio fiscal corporativo a través de
+**PlacesAddressVerificationGateway** y registra la empresa. Asimismo, el servicio gobierna
+la actualización de información de contacto y la desactivación lógica de clientes que no
+mantengan citas activas ni órdenes pendientes.
+
+Por su parte, **VehicleCommandServiceImpl** administra el ciclo de vida del catálogo
+automotriz universal. Al ejecutar **RegisterVehicleCommand**, normaliza la placa de rodaje,
+comprueba su inexistencia global en la base de datos, valida el número de chasis bajo el
+estándar ISO 3779 e inicializa el historial de pertenencia vinculando al titular con una
+entidad **VehicleOwnership** activa.
+
+En el traspaso de titularidad vehicular mediante **TransferVehicleOwnershipCommand**,
+verifica la solvencia del nuevo cliente en el taller, cierra el intervalo temporal de la
+custodia anterior asignando fecha de término y registra el nuevo periodo de titularidad,
+emitiendo el evento de dominio correspondiente para su sincronización perimetral.
+
+Finalmente, **AppointmentCommandServiceImpl** orquesta la máquina de estados de las citas
+del taller. Mediante **ScheduleAppointmentCommand**, asegura una antelación mínima de dos
+horas, verifica la disponibilidad simultánea de bahías de atención y crea la cita en estado
+pendiente.
+
+Posteriormente, administra las confirmaciones (**ConfirmAppointmentCommand**) con despacho
+de alertas móviles, registra el arribo vehicular (**MarkAppointmentArrivedCommand**) para
+desencadenar la apertura de la orden de trabajo en operaciones de taller, y procesa
+reprogramaciones o cancelaciones justificadas.
+
+Para sintetizar los flujos mutacionales, en la @tbl:crm-command-services se detallan las
+operaciones, comandos de entrada, invariantes de consistencia transaccional y tipos de
+retorno de los servicios de comandos.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Operaciones Transaccionales de los Servicios de Comandos de Customer \& Fleet Management (CRM)} \label{tbl:crm-command-services} \\
+\hline
+\thfirst{Aspecto de Operación} & \thcell{Especificación de Orquestación y Consistencia} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Operación} & \thcell{Especificación de Orquestación y Consistencia} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} CustomerCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{RegisterIndividualCustomerCommand} $\longrightarrow$ \texttt{Result<\allowbreak Customer,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Valida DNI de 8 dígitos y unicidad en taller. Verifica cuota SaaS y crea cliente con nombre y contacto. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} CustomerCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{RegisterCompanyCustomerCommand} $\longrightarrow$ \texttt{Result<\allowbreak Customer,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Valida RUC de 11 dígitos, verifica dirección corporativa en Google Places y registra empresa de flota. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} CustomerCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{UpdateCustomerContactCommand} $\longrightarrow$ \texttt{Result<\allowbreak Customer,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Verifica existencia de cliente en taller y actualiza correo electrónico y teléfono E.164. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} CustomerCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{DeactivateCustomerCommand} $\longrightarrow$ \texttt{Result<\allowbreak Customer,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Comprueba ausencia de citas activas u órdenes de trabajo abiertas en MRO y transiciona a inactivo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} VehicleCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{RegisterVehicleCommand} $\longrightarrow$ \texttt{Result<\allowbreak Vehicle,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Valida placa normalizada única, formato VIN ISO 3779 y vincula el primer titular en historial. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} VehicleCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{TransferVehicleOwnershipCommand} $\longrightarrow$ \texttt{Result<\allowbreak Vehicle,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Verifica nuevo cliente en taller, cierra custodia vigente y crea nuevo segmento temporal de titularidad. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} AppointmentCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{ScheduleAppointmentCommand} $\longrightarrow$ \texttt{Result<\allowbreak Appointment,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Valida cliente, vehículo, sede y antelación mínima de 2 horas. Comprueba cupo en bahías y crea cita PENDING. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} AppointmentCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{ConfirmAppointmentCommand} $\longrightarrow$ \texttt{Result<\allowbreak Appointment,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Transiciona cita a CONFIRMED y emite evento para notificación push móvil al conductor. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} AppointmentCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{MarkAppointmentArrivedCommand} $\longrightarrow$ \texttt{Result<\allowbreak Appointment,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Transiciona a ARRIVED y emite evento que desencadena apertura automática de WorkOrder en MRO. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} AppointmentCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{RescheduleAppointmentCommand} $\longrightarrow$ \texttt{Result<\allowbreak Appointment,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Valida estado no finalizado, comprueba disponibilidad en nueva franja horaria y reprograma. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} AppointmentCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{CancelAppointmentCommand} $\longrightarrow$ \texttt{Result<\allowbreak Appointment,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Valida que vehículo no esté en patio, registra motivo de anulación y transiciona a CANCELED. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes ubicados en el paquete com.andeva.atelier.platform.crm.application.services.
+
+**Servicios de Consulta y Proyección de Datos**
+
+Las operaciones de recuperación de información se estructuran mediante servicios de
+consulta especializados anotados con transaccionalidad de solo lectura, permitiendo a la
+infraestructura relacional omitir la gestión de instantáneas de detección de cambios.
+
+Los tres servicios de consulta atienden las necesidades de visualización y filtrado del
+contexto: **CustomerQueryServiceImpl** recupera fichas individuales de clientes por
+identificador interno o documento de identidad, y suministra listados paginados aplicando
+criterios de tipo de cliente y búsquedas por coincidencia de texto.
+
+En el ámbito automotriz, **VehicleQueryServiceImpl** expone la consulta técnica universal
+de vehículos por identificador, la búsqueda rápida por placa de rodaje normalizada, la flota
+vigente asociada a un titular y el historial cronológico completo de transferencias de
+custodia del automotor.
+
+De forma complementaria, **AppointmentQueryServiceImpl** proporciona los detalles
+operativos de citas agendadas, proyecta la programación de recepciones filtrada por sede
+física y fecha de calendario, y expone el historial de visitas solicitado por cada cliente.
+
+Con el propósito de ilustrar las vías de recuperación de datos, en la
+@tbl:crm-query-services se presentan los métodos, parámetros de consulta y tipos
+proyectados por los servicios de consulta.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Métodos de Consulta de la Capa de Aplicación de Customer \& Fleet Management (CRM)} \label{tbl:crm-query-services} \\
+\hline
+\thfirst{Aspecto de Consulta} & \thcell{Especificación Técnica y Recuperación} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Consulta} & \thcell{Especificación Técnica y Recuperación} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} CustomerQueryService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Parámetro y Proyección} & \texttt{GetCustomerByIdQuery} $\longrightarrow$ \texttt{Optional<\allowbreak Customer>\allowbreak } \\*
+\hline
+\textbf{Propósito de Consulta} & Consulta de ficha de cliente por identificador dentro del taller autenticado. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} CustomerQueryService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Parámetro y Proyección} & \texttt{GetCustomersByTenantIdQuery} $\longrightarrow$ \texttt{List<\allowbreak Customer>\allowbreak } \\*
+\hline
+\textbf{Propósito de Consulta} & Listado paginado de clientes con filtros opcionales de tipo y texto. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} CustomerQueryService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Parámetro y Proyección} & \texttt{GetCustomerByTaxIdQuery} $\longrightarrow$ \texttt{Optional<\allowbreak Customer>\allowbreak } \\*
+\hline
+\textbf{Propósito de Consulta} & Localización rápida de cliente por DNI o RUC tributario. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} VehicleQueryService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Parámetro y Proyección} & \texttt{GetVehicleByIdQuery} $\longrightarrow$ \texttt{Optional<\allowbreak Vehicle>\allowbreak } \\*
+\hline
+\textbf{Propósito de Consulta} & Consulta técnica universal de vehículo por identificador UUID. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} VehicleQueryService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Parámetro y Proyección} & \texttt{GetVehicleByPlateQuery} $\longrightarrow$ \texttt{Optional<\allowbreak Vehicle>\allowbreak } \\*
+\hline
+\textbf{Propósito de Consulta} & Búsqueda vehicular rápida por placa de rodaje normalizada. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} VehicleQueryService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Parámetro y Proyección} & \texttt{GetVehiclesByCustomerIdQuery} $\longrightarrow$ \texttt{List<\allowbreak Vehicle>\allowbreak } \\*
+\hline
+\textbf{Propósito de Consulta} & Flota de vehículos actualmente bajo titularidad activa del cliente. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} VehicleQueryService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Parámetro y Proyección} & \texttt{GetVehicleOwnershipHistoryQuery} $\longrightarrow$ \texttt{List<\allowbreak VehicleOwnership>\allowbreak } \\*
+\hline
+\textbf{Propósito de Consulta} & Historial cronológico completo de transferencias y custodios del vehículo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} AppointmentQueryService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Parámetro y Proyección} & \texttt{GetAppointmentByIdQuery} $\longrightarrow$ \texttt{Optional<\allowbreak Appointment>\allowbreak } \\*
+\hline
+\textbf{Propósito de Consulta} & Detalle operativo individual de una cita técnica agendada. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} AppointmentQueryService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Parámetro y Proyección} & \texttt{GetAppointmentsByTenantAndBranchQuery} $\longrightarrow$ \texttt{List<\allowbreak Appointment>\allowbreak } \\*
+\hline
+\textbf{Propósito de Consulta} & Agenda de citas por sede física y fecha para gestión de recepción. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} AppointmentQueryService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Parámetro y Proyección} & \texttt{GetAppointmentsByCustomerQuery} $\longrightarrow$ \texttt{List<\allowbreak Appointment>\allowbreak } \\*
+\hline
+\textbf{Propósito de Consulta} & Historial de solicitudes de atención técnica agendadas por un cliente. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Métodos configurados con transaccionalidad de solo lectura en el paquete com.andeva.atelier.platform.crm.application.services.
+
+**Manejadores de Eventos de Dominio y Publicación Asíncrona**
+
+El desacoplamiento entre casos de uso mutacionales y sus efectos secundarios se articula a
+través de tres manejadores de eventos en memoria que responden a las mutaciones
+confirmadas de las entidades del dominio.
+
+El componente **CustomerDomainEventsHandler** captura la emisión de **CustomerCreatedEvent**
+tras la confirmación transaccional en la base de datos, estructurando y depositando el
+evento de integración **CustomerCreatedIntegrationEvent** en el Transactional Outbox para la
+sincronización con el módulo de facturación.
+
+De manera paralela, **VehicleDomainEventsHandler** responde a **VehicleRegisteredEvent** y
+**VehicleOwnershipTransferredEvent** en fase posterior a la confirmación, publicando los
+eventos de integración requeridos por el módulo de telemetría IoT para la provisión de
+dispositivos OBD2 y la asignación del vehículo en la aplicación móvil de conductores.
+
+Por último, **AppointmentDomainEventsHandler** implementa un esquema de manejo dual según
+la naturaleza del efecto colateral. Ante **AppointmentConfirmedEvent** y
+**AppointmentCanceledEvent**, actúa de forma sincrónica inmediata despachando
+notificaciones push al smartphone del cliente mediante **DriverAppPushGateway**.
+
+Por el contrario, ante **AppointmentScheduledEvent** y **AppointmentArrivedEvent**, opera
+tras la confirmación de la transacción, publicando eventos de integración en el
+Transactional Outbox para que el módulo de operaciones de taller anticipe la demanda o
+inicie la apertura automática de la orden de trabajo preliminar.
+
+A fin de resumir la arquitectura de eventos, en la @tbl:crm-event-handlers se especifican
+las responsabilidades, fases transaccionales y destinos de los manejadores de eventos de
+la capa.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Manejadores de Eventos de Dominio de Customer \& Fleet Management (CRM)} \label{tbl:crm-event-handlers} \\
+\hline
+\thfirst{Aspecto del Manejador} & \thcell{Orquestación y Efecto Colateral} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto del Manejador} & \thcell{Orquestación y Efecto Colateral} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Manejador:} CustomerDomainEventsHandler} \\*
+\hline
+\textbf{Evento Capturado} & \texttt{CustomerCreatedEvent} \quad (\textit{Fase:} Posterior a confirmación) \\*
+\hline
+\textbf{Acción Orquestada} & Traduce y publica CustomerCreatedIntegrationEvent para el catálogo de clientes de facturación. \\*
+\hline
+\textbf{Destino del Efecto} & Transactional Outbox / Event Bus \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Manejador:} VehicleDomainEventsHandler} \\*
+\hline
+\textbf{Evento Capturado} & \texttt{VehicleRegisteredEvent} \quad (\textit{Fase:} Posterior a confirmación) \\*
+\hline
+\textbf{Acción Orquestada} & Publica VehicleRegisteredIntegrationEvent para provisión telemétrica de dispositivos OBD2. \\*
+\hline
+\textbf{Destino del Efecto} & Transactional Outbox / Event Bus \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Manejador:} VehicleDomainEventsHandler} \\*
+\hline
+\textbf{Evento Capturado} & \texttt{VehicleOwnershipTransferredEvent} \quad (\textit{Fase:} Posterior a confirmación) \\*
+\hline
+\textbf{Acción Orquestada} & Publica VehicleOwnershipTransferredIntegrationEvent para reasignación en Atelier Driver e IoT. \\*
+\hline
+\textbf{Destino del Efecto} & Transactional Outbox / Event Bus \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Manejador:} AppointmentDomainEventsHandler} \\*
+\hline
+\textbf{Evento Capturado} & \texttt{AppointmentScheduledEvent} \quad (\textit{Fase:} Posterior a confirmación) \\*
+\hline
+\textbf{Acción Orquestada} & Publica AppointmentScheduledIntegrationEvent para previsión de capacidad en bahías técnicas. \\*
+\hline
+\textbf{Destino del Efecto} & Transactional Outbox / Event Bus \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Manejador:} AppointmentDomainEventsHandler} \\*
+\hline
+\textbf{Evento Capturado} & \texttt{AppointmentConfirmedEvent} \quad (\textit{Fase:} Inmediata) \\*
+\hline
+\textbf{Acción Orquestada} & Despacha alerta push móvil al smartphone del conductor con datos de fecha y sede. \\*
+\hline
+\textbf{Destino del Efecto} & DriverAppPushGateway (FCM) \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Manejador:} AppointmentDomainEventsHandler} \\*
+\hline
+\textbf{Evento Capturado} & \texttt{AppointmentArrivedEvent} \quad (\textit{Fase:} Posterior a confirmación) \\*
+\hline
+\textbf{Acción Orquestada} & Publica AppointmentArrivedIntegrationEvent que desencadena la apertura de Orden de Trabajo en MRO. \\*
+\hline
+\textbf{Destino del Efecto} & Transactional Outbox / Event Bus \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Manejador:} AppointmentDomainEventsHandler} \\*
+\hline
+\textbf{Evento Capturado} & \texttt{AppointmentCanceledEvent} \quad (\textit{Fase:} Inmediata) \\*
+\hline
+\textbf{Acción Orquestada} & Remite notificación push informando la anulación formal de la cita al cliente. \\*
+\hline
+\textbf{Destino del Efecto} & DriverAppPushGateway (FCM) \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Clases ubicadas bajo el paquete com.andeva.atelier.platform.crm.application.events.
+
+**Puertos de Salida y Pasarelas de Integración**
+
+Para preservar la independencia de la lógica de negocio respecto a bibliotecas
+propietarias y servicios perimetrales, la capa define contratos de puertos de salida que
+aíslan al dominio de dependencias de infraestructura externa.
+
+El puerto **PlacesAddressVerificationGateway** encapsula la interacción con servicios de
+geocodificación externa, resolviendo la estandarización de direcciones y coordenadas
+geográficas WGS84 para clientes corporativos de flota sin acoplar el servicio de comando al
+cliente HTTP subyacente.
+
+Por su parte, **DriverAppPushGateway** abstrae los mecanismos de comunicación móvil en tiempo
+real basados en Firebase Cloud Messaging, gestionando la entrega de alertas operativas
+sobre citas agendadas, confirmadas o anuladas hacia la aplicación móvil de conductores.
+
+Asimismo, **SubscriptionValidationService** establece el enlace de consulta síncrona hacia
+el contexto de facturación y membresías, garantizando que el alta de clientes y vehículos
+respete rigurosamente las cuotas contratadas por el taller en su suscripción SaaS.
+
+Finalmente, el registro inmutable **VerifiedAddressDto** materializa el modelo de frontera
+que encapsula los datos geográficos normalizados y coordenadas resueltas, evitando la
+exposición de tipos externos dentro del núcleo de la aplicación.
+
+Con el objeto de sistematizar las dependencias perimetrales, en la @tbl:crm-outbound-ports
+se describen los métodos y responsabilidades técnicas de estos puertos de salida y modelos
+de frontera.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.1cm} | >{\raggedright\arraybackslash}p{10.3cm} |}
+\caption{Puertos de Salida y Pasarelas de la Capa de Aplicación de Customer \& Fleet Management (CRM)} \label{tbl:crm-outbound-ports} \\
+\hline
+\thfirst{Aspecto del Componente} & \thcell{Especificación Técnica y Responsabilidad} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto del Componente} & \thcell{Especificación Técnica y Responsabilidad} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} PlacesAddressVerificationGateway \quad (\textit{Categoría:} Puerto de Salida)} \\*
+\hline
+\textbf{Métodos Principales} & \texttt{verifyAddress} \\*
+\hline
+\textbf{Responsabilidad Técnica} & Validación, georreferenciación y normalización de direcciones corporativas vía Google Places API. \\*
+\hline
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak acl} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} DriverAppPushGateway \quad (\textit{Categoría:} Puerto de Salida)} \\*
+\hline
+\textbf{Métodos Principales} & \texttt{sendPushNotification} \\*
+\hline
+\textbf{Responsabilidad Técnica} & Emisión de notificaciones push móviles hacia Atelier Driver mediante Firebase Cloud Messaging (FCM). \\*
+\hline
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak acl} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} SubscriptionValidationService \quad (\textit{Categoría:} Puerto de Salida)} \\*
+\hline
+\textbf{Métodos Principales} & \texttt{validateCustomerQuota}, \texttt{validateVehicleQuota} \\*
+\hline
+\textbf{Responsabilidad Técnica} & Consulta síncrona de cuotas activas hacia el módulo de Billing para gobernar límites del plan SaaS. \\*
+\hline
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak acl} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} VerifiedAddressDto \quad (\textit{Categoría:} Modelo de Frontera)} \\*
+\hline
+\textbf{Métodos Principales} & \texttt{formattedAddress}, \texttt{latitude}, \texttt{longitude}, \texttt{postalCode} \\*
+\hline
+\textbf{Responsabilidad Técnica} & Registro inmutable portador de la dirección normalizada y coordenadas resueltas por la pasarela. \\*
+\hline
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak model} \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Interfaces y registros ubicados en com.andeva.atelier.platform.crm.application.acl y model.
+
+#### 2.6.3.4. Infrastructure Layer
+
+La Capa de Infraestructura del Bounded Context Customer & Fleet Management (CRM) materializa técnicamente los puertos de persistencia física y comunicación perimetral definidos en los contratos de Dominio y Aplicación. Su implementación reside en el paquete canónico com.andeva.atelier.platform.crm.infrastructure, proveyendo el soporte relacional en PostgreSQL 16 sobre la infraestructura en la nube de Aiven Cloud mediante Spring Data JPA e Hibernate ORM.
+
+Asimismo, esta capa gobierna la transformación bidireccional de objetos de valor tipados hacia columnas escalares normalizadas, garantiza el despacho atómico de eventos hacia la tabla transaccional outbox_messages, y articula la integración síncrona y asíncrona con servicios de nube externos como Google Maps Places API, Firebase Cloud Messaging y el Bounded Context de Billing.
+
+El diseño arquitectónico de este subsistema se fundamenta en cuatro directrices esenciales:
+
+- **Desacoplamiento Estricto de Persistencia e Inversión de Dependencias:** Las entidades y agregados del dominio carecen deliberadamente de anotaciones relacionales de Jakarta Persistence. La persistencia física se confina en entidades de infraestructura especializadas que heredan un identificador primario universal y marcas temporales automáticas de auditoría desde la superclase **AuditableAbstractPersistenceEntity**.
+
+- **Normalización Relacional Segura de Objetos de Valor:** Los objetos de valor inmutables se traducen de forma transparente hacia tipos escalares nativos mediante convertidores JPA dedicados. Esta estrategia garantiza la integridad de invariantes como números de chasis ISO 3779, placas vehiculares reglamentarias y documentos tributarios sin acoplar el núcleo del negocio al dialecto de la base de datos.
+
+- **Consistencia Transaccional Mediante Transactional Outbox:** Las operaciones mutacionales orquestadas por los adaptadores de repositorio ejecutan la persistencia relacional y la inserción del evento de dominio en la tabla transaccional outbox_messages dentro de la misma transacción de base de datos, garantizando una semántica de entrega al menos una vez hacia consumidores asíncronos.
+
+- **Resiliencia e Integración Perimetral con Servicios Externos:** Las comunicaciones hacia APIs geográficas de terceros y redes de notificación push para dispositivos móviles se implementan mediante clientes desacoplados provistos de políticas de tiempo de espera rigurosas y mecanismos de respaldo que mitigan caídas operativas.
+
+A fin de ofrecer una visión sistemática de estos componentes, en la @tbl:crm-infrastructure-types se presenta el catálogo consolidado de los tipos técnicos que conforman la Capa de Infraestructura de Customer & Fleet Management (CRM).
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Catálogo Consolidado de la Capa de Infraestructura de Customer \& Fleet Management (CRM)} \label{tbl:crm-infrastructure-types} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\
+\hline
+\endhead
+Customer\allowbreak Persistence\allowbreak Entity & Mapeo relacional de clientes particulares y corporativos a la tabla customers. \\*
+\hline
+\textbf{Categoría} & Entidad JPA \\*
+\hline
+\textbf{Relaciones} & Hereda de AuditableAbstractPersistenceEntity. Aislada por taller. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak entities} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Vehicle\allowbreak Persistence\allowbreak Entity & Mapeo relacional del parque automotor universal a la tabla física vehicles. \\*
+\hline
+\textbf{Categoría} & Entidad JPA \\*
+\hline
+\textbf{Relaciones} & Hereda de AuditableAbstractPersistenceEntity. 1:N con titularidades. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak entities} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Vehicle\allowbreak Ownership\allowbreak Persistence\allowbreak Entity & Mapeo relacional de periodos de custodia a la tabla vehicle\_ownerships. \\*
+\hline
+\textbf{Categoría} & Entidad JPA \\*
+\hline
+\textbf{Relaciones} & Relación N:1 con VehiclePersistenceEntity y clave foránea a clientes. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak entities} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Appointment\allowbreak Persistence\allowbreak Entity & Mapeo relacional de citas de recepción técnica a la tabla appointments. \\*
+\hline
+\textbf{Categoría} & Entidad JPA \\*
+\hline
+\textbf{Relaciones} & Claves foráneas hacia talleres, sedes físicas, clientes y vehículos. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak entities} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+License\allowbreak Plate\allowbreak Attribute\allowbreak Converter & Conversión bidireccional entre LicensePlate y columna VARCHAR(15). \\*
+\hline
+\textbf{Categoría} & Convertidor JPA \\*
+\hline
+\textbf{Relaciones} & Normaliza placas a mayúsculas sin guiones para unicidad global. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak converters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Vin\allowbreak Attribute\allowbreak Converter & Conversión bidireccional entre Vin y columna VARCHAR(17) ISO 3779. \\*
+\hline
+\textbf{Categoría} & Convertidor JPA \\*
+\hline
+\textbf{Relaciones} & Mapea número de chasis estandarizado excluyendo letras ambiguas. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak converters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Customer\allowbreak Type\allowbreak Attribute\allowbreak Converter & Conversión bidireccional entre CustomerType y columna VARCHAR(20). \\*
+\hline
+\textbf{Categoría} & Convertidor JPA \\*
+\hline
+\textbf{Relaciones} & Mapea enumeraciones INDIVIDUAL y COMPANY a literales relacionales. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak converters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Engine\allowbreak Type\allowbreak Attribute\allowbreak Converter & Conversión bidireccional entre EngineType y columna VARCHAR(20). \\*
+\hline
+\textbf{Categoría} & Convertidor JPA \\*
+\hline
+\textbf{Relaciones} & Mapea opciones de propulsión térmica, híbrida y eléctrica. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak converters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Appointment\allowbreak Status\allowbreak Attribute\allowbreak Converter & Conversión bidireccional entre AppointmentStatus y VARCHAR(20). \\*
+\hline
+\textbf{Categoría} & Convertidor JPA \\*
+\hline
+\textbf{Relaciones} & Mapea estados PENDING, CONFIRMED, ARRIVED y CANCELED. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak converters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Tax\allowbreak Id\allowbreak Attribute\allowbreak Converter & Conversión bidireccional entre TaxId y columna VARCHAR(20). \\*
+\hline
+\textbf{Categoría} & Convertidor JPA \\*
+\hline
+\textbf{Relaciones} & Mapea documentos DNI de 8 dígitos y RUC fiscal de 11 dígitos. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak converters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Email\allowbreak Address\allowbreak Attribute\allowbreak Converter & Conversión bidireccional entre EmailAddress y VARCHAR(150). \\*
+\hline
+\textbf{Categoría} & Convertidor JPA \\*
+\hline
+\textbf{Relaciones} & Normaliza correos de contacto a minúsculas para persistencia homogénea. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak converters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Customer\allowbreak Persistence\allowbreak Repository & Operaciones de persistencia física y consultas de unicidad de clientes. \\*
+\hline
+\textbf{Categoría} & Repositorio Spring Data \\*
+\hline
+\textbf{Relaciones} & Extiende \texttt{JpaRepository<\allowbreak CustomerPersistenceEntity,\allowbreak  UUID>\allowbreak }. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Vehicle\allowbreak Persistence\allowbreak Repository & Consultas de unicidad global de placa de rodaje y código VIN. \\*
+\hline
+\textbf{Categoría} & Repositorio Spring Data \\*
+\hline
+\textbf{Relaciones} & Extiende \texttt{JpaRepository<\allowbreak VehiclePersistenceEntity,\allowbreak  UUID>\allowbreak }. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Vehicle\allowbreak Ownership\allowbreak Persistence\allowbreak Repository & Consultas de custodia activa e historial cronológico de propiedad. \\*
+\hline
+\textbf{Categoría} & Repositorio Spring Data \\*
+\hline
+\textbf{Relaciones} & Extiende \texttt{JpaRepository<\allowbreak VehicleOwnershipPersistenceEntity,\allowbreak  UUID>\allowbreak }. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Appointment\allowbreak Persistence\allowbreak Repository & Consultas de agenda de citas por taller, sede física y disponibilidad. \\*
+\hline
+\textbf{Categoría} & Repositorio Spring Data \\*
+\hline
+\textbf{Relaciones} & Extiende \texttt{JpaRepository<\allowbreak AppointmentPersistenceEntity,\allowbreak  UUID>\allowbreak }. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Customer\allowbreak Persistence\allowbreak Assembler & Transforma agregados Customer hacia y desde entidades JPA. \\*
+\hline
+\textbf{Categoría} & Ensamblador \\*
+\hline
+\textbf{Relaciones} & Traduce CustomerId y TenantId a UUID y reconstituye datos de contacto. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak transform} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Vehicle\allowbreak Persistence\allowbreak Assembler & Transforma agregados Vehicle hacia y desde entidades JPA. \\*
+\hline
+\textbf{Categoría} & Ensamblador \\*
+\hline
+\textbf{Relaciones} & Mapea especificaciones automotrices y colección de titularidades. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak transform} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Vehicle\allowbreak Ownership\allowbreak Persistence\allowbreak Assembler & Transforma entidades VehicleOwnership a representaciones JPA. \\*
+\hline
+\textbf{Categoría} & Ensamblador \\*
+\hline
+\textbf{Relaciones} & Preserva fechas de intervalo temporal y vinculación con vehículos. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak transform} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Appointment\allowbreak Persistence\allowbreak Assembler & Transforma agregados Appointment hacia y desde entidades JPA. \\*
+\hline
+\textbf{Categoría} & Ensamblador \\*
+\hline
+\textbf{Relaciones} & Mapea marcas temporales, sedes físicas y motivos de cita. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak transform} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Customer\allowbreak Repository\allowbreak Impl & Implementación del puerto de dominio CustomerRepository. \\*
+\hline
+\textbf{Categoría} & Adaptador de Persistencia \\*
+\hline
+\textbf{Relaciones} & Persiste entidades y canaliza eventos de dominio al Outbox. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak adapters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Vehicle\allowbreak Repository\allowbreak Impl & Implementación del puerto de dominio VehicleRepository. \\*
+\hline
+\textbf{Categoría} & Adaptador de Persistencia \\*
+\hline
+\textbf{Relaciones} & Garantiza unicidad global y publica eventos en Transactional Outbox. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak adapters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Vehicle\allowbreak Ownership\allowbreak Repository\allowbreak Impl & Implementación del puerto VehicleOwnershipRepository. \\*
+\hline
+\textbf{Categoría} & Adaptador de Persistencia \\*
+\hline
+\textbf{Relaciones} & Gestiona consultas de titulares activos e historial de custodias. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak adapters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Appointment\allowbreak Repository\allowbreak Impl & Implementación del puerto de dominio AppointmentRepository. \\*
+\hline
+\textbf{Categoría} & Adaptador de Persistencia \\*
+\hline
+\textbf{Relaciones} & Persiste citas previas y emite eventos de arribo para el taller. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak adapters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Google\allowbreak Places\allowbreak Client & Cliente REST HTTPS para validación y geocodificación de direcciones. \\*
+\hline
+\textbf{Categoría} & Adaptador de Salida \\*
+\hline
+\textbf{Relaciones} & Implementa PlacesAddressVerificationGateway vía Google Places API. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak external.\allowbreak places} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Driver\allowbreak App\allowbreak Fcm\allowbreak Client & Pasarela de mensajería push móvil para la app Atelier Driver. \\*
+\hline
+\textbf{Categoría} & Adaptador de Salida \\*
+\hline
+\textbf{Relaciones} & Implementa DriverAppPushGateway mediante Firebase Admin SDK. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak external.\allowbreak fcm} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Subscription\allowbreak Validation\allowbreak Client & Cliente de integración síncrona para verificación de límites SaaS. \\*
+\hline
+\textbf{Categoría} & Adaptador de Salida \\*
+\hline
+\textbf{Relaciones} & Implementa SubscriptionValidationService consultando Billing. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak external.\allowbreak billing} \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes pertenecientes al paquete canónico com.andeva.atelier.platform.crm.infrastructure.
+
+**Entidades JPA de Persistencia y Modelado Físico Relacional**
+
+El modelado físico relacional de Customer & Fleet Management confina las anotaciones de Hibernate en cuatro entidades de persistencia mapeadas directamente a tablas relacionales de PostgreSQL 16. Todas las entidades mutables extienden la superclase **AuditableAbstractPersistenceEntity**, adquiriendo un identificador primario universal y marcas temporales de auditoría gestionadas de forma nativa por el motor ORM.
+
+La entidad **CustomerPersistenceEntity** se asigna a la tabla customers, asegurando el aislamiento multi-inquilino mediante la columna obligatoria tenant_id. Su definición incorpora la restricción única compuesta uk_customers_tenant_tax_id sobre el identificador de inquilino y el número de documento tributario, así como índices secundarios para agilizar búsquedas filtradas por razón social, nombres de cliente o correo electrónico.
+
+Por su parte, **VehiclePersistenceEntity** se vincula a la tabla física vehicles bajo un diseño global desprovisto de tenant_id. Esta decisión arquitectónica modela al vehículo como un activo físico universal dentro de la plataforma automotriz, permitiendo que una unidad mecánica conserve intacto su historial técnico y cronológico de servicios aunque transite entre diferentes talleres o cambie de propietario.
+
+La relación histórica de custodia se materializa mediante **VehicleOwnershipPersistenceEntity** en la tabla vehicle_ownerships, asociando claves foráneas hacia el cliente y la unidad vehicular. A nivel de base de datos relacional, esta tabla incorpora el índice parcial único idx_vo_active sobre el identificador vehicular cuando la fecha de finalización es nula, garantizando que un automóvil ostente un único titular vigente simultáneamente.
+
+Finalmente, **AppointmentPersistenceEntity** se asigna a la tabla appointments, articulando las relaciones foráneas con el taller, la sede física operativa, el cliente y el vehículo en recepción. La entidad preserva la marca temporal pactada en horario UTC, la duración estimada de la inspección técnica, el motivo del servicio reportado y la justificación obligatoria en caso de cancelación de la reserva.
+
+Con el propósito de especificar la correlación física y estructural del modelo relacional, en la @tbl:crm-jpa-entities se detallan las entidades JPA, sus tablas correspondientes, columnas principales, restricciones e índices.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Especificación Relacional de Entidades JPA de Customer \& Fleet Management (CRM)} \label{tbl:crm-jpa-entities} \\
+\hline
+\thfirst{Aspecto de Persistencia} & \thcell{Especificación Físico-Relacional} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Persistencia} & \thcell{Especificación Físico-Relacional} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} CustomerPersistenceEntity \quad (\textit{Tabla:} \texttt{customers})} \\*
+\hline
+\textbf{Clave Primaria} & \texttt{id (UUID)} \\*
+\hline
+\textbf{Columnas Principales} & \texttt{tenant\_id}, \texttt{type}, \texttt{first\_name}, \texttt{last\_name}, \texttt{company\_name}, \texttt{tax\_id}, \texttt{email}, \texttt{phone}, \texttt{status} \\*
+\hline
+\textbf{Restricciones e Índices} & Restricción única uk\_customers\_tenant\_tax\_id. índice compuesto en tenant\_id y type. no nulo en tenant\_id y status. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} VehiclePersistenceEntity \quad (\textit{Tabla:} \texttt{vehicles})} \\*
+\hline
+\textbf{Clave Primaria} & \texttt{id (UUID)} \\*
+\hline
+\textbf{Columnas Principales} & \texttt{plate}, \texttt{vin}, \texttt{brand}, \texttt{model}, \texttt{year}, \texttt{engine\_type} \\*
+\hline
+\textbf{Restricciones e Índices} & Restricción única global uk\_vehicles\_plate. índice en columna vin. relación 1:N en cascada con vehicle\_ownerships. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} VehicleOwnershipPersistenceEntity \quad (\textit{Tabla:} \texttt{vehicle\_ownerships})} \\*
+\hline
+\textbf{Clave Primaria} & \texttt{id (UUID)} \\*
+\hline
+\textbf{Columnas Principales} & \texttt{customer\_id}, \texttt{vehicle\_id}, \texttt{start\_date}, \texttt{end\_date} \\*
+\hline
+\textbf{Restricciones e Índices} & Claves foráneas fk\_vo\_customer y fk\_vo\_vehicle. índice parcial idx\_vo\_active en vehicle\_id donde end\_date es nulo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} AppointmentPersistenceEntity \quad (\textit{Tabla:} \texttt{appointments})} \\*
+\hline
+\textbf{Clave Primaria} & \texttt{id (UUID)} \\*
+\hline
+\textbf{Columnas Principales} & \texttt{tenant\_id}, \texttt{branch\_id}, \texttt{customer\_id}, \texttt{vehicle\_id}, \texttt{scheduled\_at}, \texttt{estimated\_duration\_minutes}, \texttt{reason}, \texttt{status}, \texttt{cancellation\_reason} \\*
+\hline
+\textbf{Restricciones e Índices} & Claves foráneas a tenants, branches, customers y vehicles. índice compuesto idx\_appt\_tenant\_branch\_date. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Tablas físicas alojadas en el motor PostgreSQL 16 con motor InnoDB equivalente relacional.
+
+**Repositorios Spring Data JPA y Adaptadores de Persistencia**
+
+El acceso a los datos y la ejecución de sentencias relacionales se desacoplan rigurosamente mediante el patrón de Adaptador de Repositorio. Las interfaces Spring Data JPA ubicadas en el paquete com.andeva.atelier.platform.crm.infrastructure.persistence.jpa.repositories declaran métodos de consulta derivados y proyecciones JPQL optimizadas para resolver requerimientos de lectura y comprobación de unicidad.
+
+En este nivel, **CustomerPersistenceRepository** define consultas compuestas para validar la disponibilidad del documento fiscal o correo electrónico dentro de un taller, además de incorporar la sentencia JPQL *searchCustomers()* para búsquedas flexibles y paginadas. Complementariamente, **VehiclePersistenceRepository** gestiona la validación perimetral de placas de rodaje y números de chasis a escala global en toda la plataforma.
+
+Asimismo, **VehicleOwnershipPersistenceRepository** resuelve consultas sobre el titular activo y el historial cronológico de custodia de cada automóvil, mientras que **AppointmentPersistenceRepository** implementa la consulta de sobreposición temporal *countOverlappingAppointments()* para gobernar la capacidad de recepción técnica por sede, junto con la proyección de agendas diarias en patio.
+
+Los adaptadores secundarios de salida **CustomerRepositoryImpl**, **VehicleRepositoryImpl**, **VehicleOwnershipRepositoryImpl** y **AppointmentRepositoryImpl** implementan las interfaces del dominio encapsulando el ciclo de vida de persistencia relacional. Cada operación mutacional ejecuta una secuencia coordinada en seis pasos atómicos:
+
+- Convierte el agregado de dominio a su entidad de persistencia JPA mediante el ensamblador técnico respectivo.
+- Persiste y sincroniza la entidad físicamente en PostgreSQL ejecutando *saveAndFlush()* sobre el repositorio JPA.
+- Extrae la colección inmutable de eventos de dominio registrados en la raíz del agregado mediante *getDomainEvents()*.
+- Por cada evento extraído, genera un registro atómico en la tabla outbox_messages con su identificador, tipo de agregado, carga útil serializada en JSON y marca temporal UTC.
+- Limpia la cola interna de eventos del agregado invocando la operación *clearDomainEvents()*.
+- Retorna la instancia de dominio reconstituida hacia la Capa de Aplicación.
+
+A fin de sistematizar las responsabilidades y contratos de persistencia, en la @tbl:crm-repository-adapters se especifican los adaptadores de repositorio, sus puertos de dominio asociados y las operaciones relacionales implementadas.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Adaptadores de Persistencia y Puertos de Dominio de Customer \& Fleet Management (CRM)} \label{tbl:crm-repository-adapters} \\
+\hline
+\thfirst{Aspecto de Adaptador} & \thcell{Especificación Técnica y Persistencia} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Adaptador} & \thcell{Especificación Técnica y Persistencia} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} CustomerRepositoryImpl} \\*
+\hline
+\textbf{Puerto de Dominio} & \texttt{CustomerRepository} \\*
+\hline
+\textbf{Repositorio Inyectado} & \texttt{CustomerPersistenceRepository} \\*
+\hline
+\textbf{Operaciones Clave} & save con extracción de eventos al Outbox, findById, findByIdAndTenantId, findByTenantIdAndTaxId, existsByTenantIdAndTaxId, existsByTenantIdAndEmail, findAllByTenantId. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} VehicleRepositoryImpl} \\*
+\hline
+\textbf{Puerto de Dominio} & \texttt{VehicleRepository} \\*
+\hline
+\textbf{Repositorio Inyectado} & \texttt{VehiclePersistenceRepository} \\*
+\hline
+\textbf{Operaciones Clave} & save con publicación Outbox, findById, findByPlate, findByVin, existsByPlate, existsByVin. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} VehicleOwnershipRepositoryImpl} \\*
+\hline
+\textbf{Puerto de Dominio} & \texttt{VehicleOwnershipRepository} \\*
+\hline
+\textbf{Repositorio Inyectado} & \texttt{VehicleOwnershipPersistenceRepository} \\*
+\hline
+\textbf{Operaciones Clave} & save, findActiveByVehicleId, findAllByVehicleIdOrderByStartDateDesc, findAllByCustomerIdAndEndDateIsNull. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} AppointmentRepositoryImpl} \\*
+\hline
+\textbf{Puerto de Dominio} & \texttt{AppointmentRepository} \\*
+\hline
+\textbf{Repositorio Inyectado} & \texttt{AppointmentPersistenceRepository} \\*
+\hline
+\textbf{Operaciones Clave} & save con emisión de eventos al Outbox, findById, findByIdAndTenantId, findAllByTenantIdAndBranchIdAndDate, countOverlappingAppointments, existsActiveAppointmentsByCustomerId. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Clases ubicadas bajo el paquete com.andeva.atelier.platform.crm.infrastructure.persistence.jpa.adapters.
+
+**Ensambladores de Persistencia y Convertidores JPA**
+
+La correspondencia bidireccional entre los modelos inmutables del núcleo de dominio y las entidades relacionales mutables de JPA se gestiona mediante ensambladores de persistencia dedicados. Estos componentes aplican el principio de aislamiento del ciclo de vida: las transformaciones hacia el dominio reconstituyen las entidades mediante métodos de factoría específicos como *reconstitute()*, evitando invocar constructores de creación que emitan eventos espurios hacia el outbox durante operaciones de lectura.
+
+El componente **CustomerPersistenceAssembler** traduce los valores escalares de identificadores fuertemente tipados, nombres personales, documentos de identidad y correos electrónicos, discriminando entre clientes individuales y corporativos. De manera similar, **VehiclePersistenceAssembler** y **VehicleOwnershipPersistenceAssembler** orquestan la hidratación de datos técnicos vehiculares y de la colección histórica de propietarios sin degradar la inmutabilidad de las listas de dominio.
+
+Por su parte, **AppointmentPersistenceAssembler** mapea las marcas temporales, sedes operativas y motivos de atención hacia la entidad de persistencia, preservando la coherencia del estado operativo de la reserva al transitar entre capas arquitectónicas.
+
+En el plano de los convertidores de atributos JPA, la infraestructura incorpora siete clases especializadas que implementan la interfaz canónica de persistencia:
+
+- **LicensePlateAttributeConverter:** Normaliza las placas vehiculares a mayúsculas compactas sin guiones ni espacios para garantizar búsquedas unívocas sobre columnas de texto.
+- **VinAttributeConverter:** Valida la estructura alfanumérica del número de identificación vehicular bajo la norma ISO 3779, excluyendo caracteres ambiguos para almacenamiento en columnas de diecisiete caracteres.
+- **CustomerTypeAttributeConverter:** Traduce las constantes enumeradas de clientes particulares y corporativos a literales de base de datos en minúsculas.
+- **EngineTypeAttributeConverter:** Mapea las opciones de motorización a representaciones relacionales para configuraciones térmicas, híbridas y eléctricas.
+- **AppointmentStatusAttributeConverter:** Convierte los estados del ciclo de vida de la cita técnica hacia valores escalares normalizados.
+- **TaxIdAttributeConverter:** Persiste documentos de identidad fiscal distinguiendo entre registros de ocho dígitos para personas naturales y once dígitos para empresas.
+- **EmailAddressAttributeConverter:** Convierte direcciones de correo electrónico a cadenas homogéneas en minúsculas.
+
+Para sintetizar las reglas de transformación y correspondencia estructural, en la @tbl:crm-persistence-assemblers se describen los ensambladores de persistencia y convertidores JPA del contexto.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Ensambladores de Persistencia y Convertidores JPA de Customer \& Fleet Management (CRM)} \label{tbl:crm-persistence-assemblers} \\
+\hline
+\thfirst{Aspecto de Mapeo} & \thcell{Tipos Relacionados y Transformación} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Mapeo} & \thcell{Tipos Relacionados y Transformación} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} CustomerPersistenceAssembler} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{Customer} $\longleftrightarrow$ \texttt{CustomerPersistenceEntity} \\*
+\hline
+\textbf{Transformación} & Traduce CustomerId y TenantId a UUID. mapea PersonName, TaxId, EmailAddress y PhoneNumber. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} VehiclePersistenceAssembler} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{Vehicle} $\longleftrightarrow$ \texttt{VehiclePersistenceEntity} \\*
+\hline
+\textbf{Transformación} & Mapea VehicleId a UUID, LicensePlate, Vin, motorización y colección interna de titularidades. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} VehicleOwnershipPersistenceAssembler} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{VehicleOwnership} $\longleftrightarrow$ \texttt{VehicleOwnershipPersistenceEntity} \\*
+\hline
+\textbf{Transformación} & Mapea VehicleOwnershipId a UUID, customer\_id, fechas de inicio y término, y enlace a Vehicle. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} AppointmentPersistenceAssembler} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{Appointment} $\longleftrightarrow$ \texttt{AppointmentPersistenceEntity} \\*
+\hline
+\textbf{Transformación} & Mapea AppointmentId a UUID, sede física, cliente, vehículo, marca temporal Instant y estado. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} LicensePlateAttributeConverter} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{LicensePlate} $\longleftrightarrow$ \texttt{VARCHAR(15)} \\*
+\hline
+\textbf{Transformación} & Normaliza placas a mayúsculas sin guiones para garantizar unicidad e indexación rápida. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} VinAttributeConverter} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{Vin} $\longleftrightarrow$ \texttt{VARCHAR(17)} \\*
+\hline
+\textbf{Transformación} & Valida formato ISO 3779 excluyendo letras ambiguas y persiste en texto plano. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} CustomerTypeAttributeConverter} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{CustomerType} $\longleftrightarrow$ \texttt{VARCHAR(20)} \\*
+\hline
+\textbf{Transformación} & Convierte constantes INDIVIDUAL y COMPANY a literales de base de datos. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} EngineTypeAttributeConverter} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{EngineType} $\longleftrightarrow$ \texttt{VARCHAR(20)} \\*
+\hline
+\textbf{Transformación} & Mapea tipos de propulsión GASOLINE, DIESEL, ELECTRIC e HYBRID a cadenas relacionales. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} AppointmentStatusAttributeConverter} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{AppointmentStatus} $\longleftrightarrow$ \texttt{VARCHAR(20)} \\*
+\hline
+\textbf{Transformación} & Mapea estados PENDING, CONFIRMED, ARRIVED y CANCELED a columna física. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} TaxIdAttributeConverter} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{TaxId} $\longleftrightarrow$ \texttt{VARCHAR(20)} \\*
+\hline
+\textbf{Transformación} & Persiste DNI de 8 dígitos o RUC de 11 dígitos verificando formato numérico. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} EmailAddressAttributeConverter} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{EmailAddress} $\longleftrightarrow$ \texttt{VARCHAR(150)} \\*
+\hline
+\textbf{Transformación} & Normaliza correos de contacto a minúsculas para persistencia uniforme. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes ubicados en los paquetes transform y converters de la capa de infraestructura.
+
+**Pasarelas Externas de Infraestructura e Integración Cloud**
+
+La integración con plataformas externas y subsistemas adyacentes se canaliza mediante adaptadores secundarios ubicados en el paquete com.andeva.atelier.platform.crm.infrastructure.external. Estos componentes implementan los puertos de salida definidos en la Capa de Aplicación, aislando el núcleo operativo del taller de dependencias tecnológicas externas.
+
+El adaptador **GooglePlacesClient** materializa el puerto **PlacesAddressVerificationGateway** comunicándose con Google Maps Places API mediante peticiones seguras HTTPS sobre el puerto 443 utilizando Spring 6 **RestClient**. Este cliente estandariza domicilios fiscales y bases operativas de flotas corporativas, extrayendo coordenadas satelitales en formato WGS 84 y componentes estructurados de dirección bajo una política de tolerancia a fallos que preserva la dirección original ante indisponibilidad del proveedor.
+
+Por su parte, **DriverAppFcmClient** implementa el puerto **DriverAppPushGateway** mediante el kit de desarrollo oficial Firebase Admin SDK. Este componente construye y despacha notificaciones push móviles hacia las aplicaciones de conductores y propietarios ante la confirmación de citas técnicas, avisos de arribo a patio y alertas de cancelación, gestionando la invalidación de credenciales móviles cuando se reportan dispositivos desregistrados.
+
+Finalmente, **SubscriptionValidationClient** implementa la interfaz **SubscriptionValidationService** para auditar en tiempo real las cuotas contractuales de clientes y vehículos registradas en el Bounded Context de Billing antes de permitir mutaciones de alta en el sistema. Si el taller excede los límites contractuales de su plan comercial activo, la pasarela interrumpe la operación arrojando una excepción de negocio que protege el modelo de monetización de la plataforma.
+
+A fin de ilustrar la arquitectura de integración y servicios en la nube, en la @tbl:crm-external-infrastructure se presentan las tecnologías subyacentes y las responsabilidades técnicas de cada pasarela externa.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Pasarelas Externas y Adaptadores de Integración de Customer \& Fleet Management (CRM)} \label{tbl:crm-external-infrastructure} \\
+\hline
+\thfirst{Aspecto Técnico} & \thcell{Tecnología y Responsabilidad de Integración} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto Técnico} & \thcell{Tecnología y Responsabilidad de Integración} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Pasarela Externa:} GooglePlacesClient \quad (\textit{Categoría:} Pasarela Geográfica)} \\*
+\hline
+\textbf{Tecnología Subyacente} & Spring RestClient (HTTPS 443) \\*
+\hline
+\textbf{Responsabilidad} & Invoca Google Maps Places API para validar, geocodificar y normalizar domicilios fiscales de flotas B2B. Implementa PlacesAddressVerificationGateway. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Pasarela Externa:} DriverAppFcmClient \quad (\textit{Categoría:} Pasarela Push Móvil)} \\*
+\hline
+\textbf{Tecnología Subyacente} & Firebase Admin SDK (FCM HTTPS) \\*
+\hline
+\textbf{Responsabilidad} & Despacha notificaciones push móviles hacia Atelier Driver ante confirmaciones y recordatorios de citas técnicas. Implementa DriverAppPushGateway. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Pasarela Externa:} SubscriptionValidationClient \quad (\textit{Categoría:} Adaptador de Cuotas)} \\*
+\hline
+\textbf{Tecnología Subyacente} & In-Memory Module Facade / RestClient \\*
+\hline
+\textbf{Responsabilidad} & Consulta síncrona hacia el Bounded Context de Billing para validar cuotas de clientes y vehículos antes de mutaciones. Implementa SubscriptionValidationService. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes configurados bajo el paquete canónico com.andeva.atelier.platform.crm.infrastructure.external.
 
 
 
 #### 2.6.3.5. Bounded Context Software Architecture Component Level Diagrams
 
+En esta sección se expone la descomposición arquitectónica interna del contenedor central **API Application** en relación con el Bounded Context Customer & Fleet Management (CRM). Siguiendo el Nivel 3 del Modelo C4, se ilustran los bloques estructurales que conforman este subsistema, formalizando sus responsabilidades técnicas, fronteras operacionales y mecanismos de integración con clientes, módulos adyacentes y servicios externos.
 
+Dentro de la arquitectura de monolito modular de Atelier Platform, el Bounded Context Customer & Fleet Management asume la responsabilidad de gobernar la cartera comercial de clientes particulares y corporativos, el catálogo automotriz universal, la trazabilidad de tenencias vehiculares y el motor de agendamiento de citas. Las peticiones emitidas desde el portal administrativo web y los aplicativos móviles interactúan con este subsistema para coordinar la admisión de automotores y preparar las órdenes operativas.
+
+En la @tbl:crm-c4-components se presenta el catálogo estructurado de los siete componentes constitutivos del Bounded Context Customer & Fleet Management dentro del contenedor anfitrión. Cada bloque encapsula una responsabilidad arquitectónica cohesiva, delimitando con precisión la frontera entre la interfaz de controladores REST, la orquestación de casos de uso mediante CQRS, el modelo de dominio puro, la persistencia relacional en base de datos y la integración con pasarelas externas.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.5cm} | >{\raggedright\arraybackslash}p{10.9cm} |}
+\caption{Catálogo de Componentes de Arquitectura de Software del Bounded Context Customer \& Fleet Management (CRM)} \label{tbl:crm-c4-components} \\
+\hline
+\thfirst{Aspecto Técnico} & \thcell{Especificación de Arquitectura} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto Técnico} & \thcell{Especificación de Arquitectura} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} CRM REST Controllers \& Resource Assemblers} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & Spring MVC, SpringDoc OpenAPI, Jakarta Validation \\*
+\hline
+\textbf{Responsabilidad} & Expone endpoints REST perimetrales para la gestión de clientes, flotas corporativas, catálogo universal de vehículos y el ciclo de vida completo de citas técnicas. Valida sintácticamente las solicitudes entrantes y proyecta las respuestas mediante ensambladores de recursos. \\*
+\hline
+\textbf{Relaciones} & Entrada desde clientes WebApp y aplicaciones móviles. Despacha comandos de escritura y consultas de lectura a servicios de aplicación CQRS. Utiliza ensambladores de recursos REST. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} CRM CQRS Application Services} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & Spring Service, Transactional, CQRS, Interfaces Funcionales \\*
+\hline
+\textbf{Responsabilidad} & Orquesta los casos de uso de negocio de registro de clientes, validación de solvencia fiscal, alta universal de vehículos, transferencias de tenencia automotriz y transiciones de la máquina de estados de citas técnicas bajo consistencia transaccional. \\*
+\hline
+\textbf{Relaciones} & Implementa contratos de comando y consulta. Invoca reglas de negocio en el núcleo de dominio. Delega en adaptadores de persistencia JPA y pasarelas de nube. Emite eventos de dominio hacia oyentes dedicados. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} CRM Domain Event Listeners \& Integration Dispatcher} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & Spring Events, TransactionalEventListener, Outbox Pattern \\*
+\hline
+\textbf{Responsabilidad} & Captura eventos de dominio de citas técnicas y vehículos. Despacha notificaciones push móviles hacia conductores y deposita eventos de integración estructurados en el Transactional Outbox para su propagación asíncrona hacia módulos adyacentes. \\*
+\hline
+\textbf{Relaciones} & Suscrito a eventos de dominio. Delega en pasarelas externas para notificaciones móviles. Registra eventos de integración para sincronización con operaciones de taller, facturación y telemetría. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} CRM Domain Model \& Aggregate Roots} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & Dominio puro Java 26, AbstractDomainAggregateRoot, Records \\*
+\hline
+\textbf{Responsabilidad} & Encapsula las invariantes de negocio, normalización de placas de rodaje, validación de formato VIN bajo norma ISO 3779, reglas de tipología de clientes y la inmutabilidad de la cadena histórica de custodia vehicular. \\*
+\hline
+\textbf{Relaciones} & Raíces Customer, Vehicle, VehicleOwnership, Appointment. Entidades y objetos de valor inmutables. Acumula eventos de dominio en memoria. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} CRM Persistence Repositories \& JPA Adapters} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & Jakarta Persistence 3.1, Spring Data JPA, Hibernate, PostgreSQL 16 \\*
+\hline
+\textbf{Responsabilidad} & Materializa los contratos de repositorio del dominio mediante adaptadores JPA, gobernando el mapeo relacional bidireccional y la persistencia transaccional en el esquema físico de PostgreSQL 16 con aislamiento multi-inquilino. \\*
+\hline
+\textbf{Relaciones} & Realiza interfaces de repositorio del dominio. Ejecuta operaciones SQL relacionales en la base de datos central. Provee lecturas optimizadas para la fachada de integración. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} Inbound ACL \& Customer Fleet Facade} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & Spring Service, Capa Anticorrupción en Memoria, Published Language \\*
+\hline
+\textbf{Responsabilidad} & Publica una interfaz de servicio abierto en memoria para proveer fichas técnicas de vehículos, titulares activos y datos fiscales de clientes a bounded contexts externos sin comprometer el encapsulamiento del dominio. \\*
+\hline
+\textbf{Relaciones} & Invocado por Workshop Operations, Invoicing y Telemetría IoT. Delega lecturas desacopladas en repositorios de persistencia JPA. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} External Gateways \& Cloud Integration} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & Spring RestClient, Firebase Admin SDK, Billing Quota Client \\*
+\hline
+\textbf{Responsabilidad} & Canaliza la integración con plataformas en la nube mediante canales seguros HTTPS en puerto 443, normalizando direcciones corporativas con Google Maps Places API, enviando notificaciones push con Firebase FCM y auditando cuotas en SaaS Billing. \\*
+\hline
+\textbf{Relaciones} & Invocado por servicios de aplicación y oyentes de eventos. Conecta con Google Maps Platform, Firebase Cloud Messaging y el módulo de facturación de suscripciones. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes pertenecientes al contenedor API Application en com.andeva.atelier.platform.crm.
+
+En la @fig:c4-component-crm se ilustra el diagrama C4 de componentes para el Bounded Context Customer & Fleet Management (CRM), detallando las interacciones entre los controladores REST, los servicios de aplicación CQRS, los manejadores de eventos, el núcleo de dominio, los adaptadores de persistencia relacional, la fachada de integración y las pasarelas externas en la nube.
+
+![Diagrama de Componentes C4 (Nivel 3) para el Bounded Context Customer & Fleet Management (CRM) en API Application](report/assets/c4-diagrams/component-level-diagram-crm.png){#fig:c4-component-crm}
+
+*Nota.* Elaboración propia en base a la arquitectura táctica del backend y el estándar C4 Model.
+
+**Dinámica de Interacción y Flujos Operativos del Bounded Context Customer & Fleet Management (CRM)**
+
+Para comprender la colaboración dinámica y el flujo de control entre los componentes del Bounded Context Customer & Fleet Management y los módulos de negocio durante la ejecución del sistema, se analizan a continuación los tres flujos operacionales más representativos de la plataforma:
+
+- **Ciclo Transaccional de Alta Corporativa y Verificación Externa:**
+  Cuando un administrador de taller da de alta una empresa de transporte o flota corporativa desde la aplicación web, el componente **CRM REST Controllers & Resource Assemblers** intercepta la petición HTTP en la ruta correspondiente. Tras validar la estructura sintáctica del documento tributario mediante el objeto de valor de identificación fiscal, el controlador despacha el comando de registro hacia **CRM CQRS Application Services**.
+
+  El servicio de aplicación inicia una transacción atómica y consulta de forma síncrona a **External Gateways & Cloud Integration** para auditar que el taller no sobrepase las cuotas contractuales de clientes asignadas a su suscripción en el módulo de facturación. Tras validar la solvencia de la cuenta, la pasarela solicita la normalización geográfica del domicilio fiscal conectando con los servicios en la nube de Google Maps Platform sobre canales seguros en el puerto 443.
+
+  Con las coordenadas geocodificadas, el servicio instancia la raíz de agregado **Customer** de tipo corporativo en **CRM Domain Model & Aggregate Roots** y delega su almacenamiento en **CRM Persistence Repositories & JPA Adapters**, persistiendo en la tabla relacional de clientes de PostgreSQL 16. La raíz de agregado registra el evento de dominio correspondiente y deposita un evento de integración en el Transactional Outbox para coordinar la pre-carga fiscal en el subsistema de facturación electrónica.
+
+- **Ciclo de Agendamiento, Alertas Push Móviles y Recepción en Bahía:**
+  El agendamiento de atenciones técnicas se inicia cuando un conductor solicita una cita desde el aplicativo móvil o cuando recepción ingresa la reserva desde la consola de escritorio. El controlador valida una antelación temporal mínima de dos horas y traslada el comando hacia **CRM CQRS Application Services**, el cual corrobora la disponibilidad operativa de las bahías físicas y persiste la entidad **Appointment** en estado pendiente a través de los adaptadores JPA.
+
+  Al confirmarse la reserva por parte del taller, el servicio de comando ejecuta la transición formal en el agregado y emite el evento de confirmación de cita. El componente **CRM Domain Event Listeners & Integration Dispatcher** captura dicho evento y solicita a **External Gateways & Cloud Integration** el despacho de una notificación push mediante Firebase Cloud Messaging, alertando al dispositivo del conductor sobre la confirmación del servicio de manera inmediata.
+
+  Cuando el automotor ingresa físicamente al establecimiento, el personal técnico registra el arribo en patio desde la aplicación móvil de taller. El servicio de aplicación procesa el arribo transicionando el agregado al estado arribado y publicando un evento transaccional que el procesador outbox propaga hacia el módulo de operaciones de taller, desencadenando la apertura automática de la orden de trabajo y vinculando la bahía física asignada.
+
+- **Ciclo de Traspaso de Custodia Vehicular y Consumo por Servicios Abiertos:**
+  La venta o transferencia de titularidad de un automóvil registrado en el catálogo universal se gestiona mediante una solicitud de cambio de custodio recibida por **CRM REST Controllers & Resource Assemblers**. El controlador despacha el comando hacia **CRM CQRS Application Services**, el cual recupera el agregado automotriz y su colección histórica de titularidades mediante los adaptadores de persistencia relacional.
+
+  El servicio ejecuta la operación de traspaso en el agregado **Vehicle**, cerrando el segmento temporal de la custodia anterior e instanciando un nuevo registro inmutable **VehicleOwnership** para el cliente adquirente. Esta mutación salvaguarda la inmutabilidad del expediente técnico automotriz y garantiza que los mantenimientos históricos permanezcan ligados a la unidad física sin importar las variaciones en la titularidad jurídica del vehículo.
+
+  Para consultar los datos vehiculares consolidados sin violar el encapsulamiento de dominio, los módulos de operaciones de taller, facturación electrónica y telemetría consumen la interfaz provista por **Inbound ACL & Customer Fleet Facade**. Esta fachada ejecuta lecturas de solo lectura de alto rendimiento sobre los repositorios de persistencia y transforma las proyecciones en contratos inmutables del lenguaje publicado, permitiendo verificar coberturas y emitir comprobantes sin acoplamiento a los modelos internos.
 
 #### 2.6.3.6. Bounded Context Software Architecture Code Level Diagrams
 
+En esta sección se aborda el nivel de mayor granularidad y rigor técnico dentro de la arquitectura de software del Bounded Context Customer & Fleet Management (CRM), traduciendo los límites tácticos y responsabilidades funcionales hacia especificaciones estáticas que orientan la codificación de la plataforma. Mediante este enfoque, se garantiza que la gestión de clientes, la historia clínica automotriz y la recepción en taller se ejecuten bajo tipado estricto y consistencia determinista.
 
+Esta dimensión arquitectónica se estructura en dos perspectivas complementarias: el Diagrama de Clases de la Capa de Dominio, que modela en memoria las raíces de agregado, entidades dependientes, objetos de valor y puertos de repositorio; y el Diagrama de Base de Datos, que define la persistencia física en PostgreSQL 16 con aislamiento multi-inquilino mediante discriminador de taller, restricciones de unicidad e índices B-Tree de alta velocidad.
 
 ##### 2.6.3.6.1. *Bounded Context Domain Layer Class Diagrams*
 
+El modelado estático de la Capa de Dominio del Bounded Context Customer & Fleet Management (CRM) establece las estructuras de datos y contratos en memoria que gobiernan la relación con clientes y la trazabilidad del parque automotor. Su diseño prioriza el encapsulamiento estricto de reglas de negocio, erradica la obsesión por primitivos mediante identificadores fuertemente tipados y preserva la pureza conceptual al excluir anotaciones de frameworks o librerías de persistencia relacional.
 
+En la @fig:class-diagram-crm se expone el Diagrama de Clases UML detallado para la Capa de Dominio del Bounded Context Customer & Fleet Management (CRM), modelado conforme al estándar UML y compilado mediante la herramienta PlantUML bajo el enfoque de Diagram-as-Code.
+
+![Diagrama de Clases UML de la Capa de Dominio para el Bounded Context Customer & Fleet Management (CRM)](report/assets/class-diagrams/class-diagram-crm.png){#fig:class-diagram-crm}
+
+*Nota.* Elaboración propia en base al diseño táctico de dominio y el estándar UML en PlantUML.
+
+La organización interna del diagrama se estructura en ocho paquetes lógicos que agrupan las responsabilidades tácticas del subsistema comercial y de flota:
+
+- **Raíces de Agregado (`crm.domain.model.aggregates`):** Modela las entidades principales que delimitan las fronteras transaccionales: **Customer** para la ficha comercial y fiscal del cliente; **Vehicle** para la ficha técnica del automotor; y **Appointment** para la reserva y recepción de servicios en sede física. Todas las raíces heredan de **AbstractDomainAggregateRoot<T>**.
+- **Entidades Internas (`crm.domain.model.entities`):** Define entidades dependientes subordinadas al ciclo de vida de su raíz: **VehicleOwnership** para modelar la titularidad y periodos de custodia entre clientes y vehículos a lo largo del tiempo.
+- **Identificadores Fuertemente Tipados (`crm.domain.model.ids`):** Implementa la interfaz **TypedId<UUID>** mediante registros inmutables (**CustomerId**, **VehicleId**, **VehicleOwnershipId**, **AppointmentId**), reutilizando **TenantId** y **BranchId** de los módulos de soporte.
+- **Objetos de Valor Automotrices (`crm.domain.model.valueobjects`):** Encapsula conceptos inmutables como la placa vehicular normalizada (**LicensePlate**) y el número de chasis estandarizado (**Vin**), complementados por los tipos de contacto y tributarios provistos por el Shared Kernel.
+- **Enumeraciones de Dominio (`crm.domain.model.enums`):** Define los estados operativos y modalidades de negocio (**CustomerType**, **CustomerStatus**, **EngineType**, **AppointmentStatus**).
+- **Servicios de Dominio (`crm.domain.services`):** Incorpora lógica de negocio transversal que coordina múltiples agregados: **AppointmentSchedulingService** para el control de aforo y antelación en citas, y **VehicleTransferDomainService** para la orquestación atómica del traspaso vehicular.
+- **Puertos de Persistencia (`crm.domain.repositories`):** Establece contratos de persistencia pura (**CustomerRepository**, **VehicleRepository**, **VehicleOwnershipRepository**, **AppointmentRepository**) desacoplados de los motores de bases de datos.
+- **Jerarquía de Excepciones Semánticas (`crm.domain.exceptions`):** Provee clases no comprobadas que heredan de **DomainException**, asignando códigos de error unificados para infracciones de unicidad, estados inválidos o capacidad desbordada.
+
+En la @tbl:crm-domain-classes-members se detalla la especificación formal de atributos, firmas de métodos, modificadores de acceso y reglas de negocio para cada elemento de la Capa de Dominio.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Catálogo exhaustivo de clases, miembros, ámbitos y relaciones de la Capa de Dominio del Bounded Context Customer \& Fleet Management (CRM)} \label{tbl:crm-domain-classes-members} \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} Customer} \\*
+\hline
+Atributos & Raíz de agregado comercial. Administra cartera de clientes individuales y corporativos en el taller. Generalización de \texttt{AbstractDomainAggregateRoot<\allowbreak CustomerId>\allowbreak }. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{CustomerId id} \newline - \texttt{TenantId tenantId} \newline - \texttt{CustomerType type} \newline - \texttt{PersonName name} \newline - \texttt{String companyName} \newline - \texttt{TaxId taxId} \newline - \texttt{EmailAddress email} \newline - \texttt{PhoneNumber phone} \newline - \texttt{CustomerStatus status} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Métodos factoría y estado & Invariantes: nombre obligatorio en clientes individuales y razón social en corporativos. Estado inicial ACTIVE. Registra evento de registro. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{Customer registerIndividual(...)} \newline - \texttt{Customer registerCompany(...)} \newline - \texttt{void activate()} \newline - \texttt{void deactivate()} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Métodos de actualización & Permite modificar canales de contacto y datos de perfil. Resuelve la denominación comercial según la naturaleza jurídica. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{void updateContact(EmailAddress,\allowbreak  PhoneNumber)} \newline - \texttt{void updateProfile(PersonName)} \newline - \texttt{void updateCompanyDetails(String)} \newline - \texttt{String getDisplayName()} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} Vehicle} \\*
+\hline
+Atributos & Raíz de agregado automotriz. Registro universal del vehículo independiente de sede. Generalización de \texttt{AbstractDomainAggregateRoot<\allowbreak VehicleId>\allowbreak }. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{VehicleId id} \newline - \texttt{LicensePlate plate} \newline - \texttt{Vin vin} \newline - \texttt{String brand} \newline - \texttt{String model} \newline - \texttt{int year} \newline - \texttt{EngineType engineType} \newline - \texttt{List<\allowbreak VehicleOwnership>\allowbreak  ownershipHistory} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Métodos factoría y custodia & Composición 1 a 1..* con \textbf{VehicleOwnership}. Invariantes: año entre 1950 y año actual más uno. Exactamente un custodio activo con fecha de fin nula. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{Vehicle register(...)} \newline - \texttt{VehicleOwnership transferOwnership(CustomerId,\allowbreak  LocalDate)} \newline - \texttt{Optional<\allowbreak VehicleOwnership>\allowbreak  getActiveOwnership()} \newline - \texttt{Optional<\allowbreak CustomerId>\allowbreak  getCurrentOwnerId()} \newline - \texttt{void updateTechnicalDetails(Vin,\allowbreak  EngineType)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} VehicleOwnership} \\*
+\hline
+Atributos y métodos & Entidad dependiente de custodia. Modela el periodo de titularidad vehicular. Invariante: fecha de fin posterior a fecha de inicio. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{VehicleOwnershipId id} \newline - \texttt{VehicleId vehicleId} \newline - \texttt{CustomerId customerId} \newline - \texttt{LocalDate startDate} \newline - \texttt{LocalDate endDate} \newline - \texttt{boolean isCurrent()} \newline - \texttt{void terminate(LocalDate)} \\*
+\hline
+\textbf{Ámbito} & Privado / Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} Appointment} \\*
+\hline
+Atributos & Raíz de agregado de agendamiento y recepción de citas en taller. Generalización de \texttt{AbstractDomainAggregateRoot<\allowbreak AppointmentId>\allowbreak }. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{AppointmentId id} \newline - \texttt{TenantId tenantId} \newline - \texttt{BranchId branchId} \newline - \texttt{CustomerId customerId} \newline - \texttt{VehicleId vehicleId} \newline - \texttt{Instant scheduledAt} \newline - \texttt{int estimatedDurationMinutes} \newline - \texttt{String reason} \newline - \texttt{AppointmentStatus status} \newline - \texttt{String cancellationReason} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Métodos de ciclo de vida & Invariantes: agendamiento con antelación mínima de 2 horas. Máquina de estados determinista. Arribo físico irreversible. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{Appointment schedule(...)} \newline - \texttt{void confirm()} \newline - \texttt{void markArrived()} \newline - \texttt{void cancel(String)} \newline - \texttt{void reschedule(Instant)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} CustomerId, VehicleId, VehicleOwnershipId, AppointmentId} \\*
+\hline
+Atributo value y factoría & Registros inmutables que realizan la interfaz \texttt{TypedId<\allowbreak UUID>\allowbreak }, confiriendo tipado estricto a las identidades del dominio. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{UUID value} \newline - \texttt{of(UUID)} \\*
+\hline
+\textbf{Ámbito} & Privado / Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} LicensePlate, Vin} \\*
+\hline
+Atributos y validaciones & Objetos de valor inmutables. \textbf{LicensePlate} normaliza caracteres alfanuméricos oficiales MTC. \textbf{Vin} valida suma ponderada ISO 3779. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{String value} \newline - \texttt{LicensePlate of(String)} \newline - \texttt{String normalized()} \newline - \texttt{Vin of(String)} \newline - \texttt{boolean isValid()} \\*
+\hline
+\textbf{Ámbito} & Privado / Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} CustomerType, CustomerStatus, EngineType, AppointmentStatus} \\*
+\hline
+Valores constantes & Tipos enumerados que gobiernan la clasificación legal, vigencia comercial, tecnología de motorización y estados de citas. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{Enumeraciones de dominio} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} AppointmentSchedulingService, VehicleTransferDomainService} \\*
+\hline
+Servicios de dominio & Lógica pura sin estado. Validan aforo simultáneo de recepción en sucursal y orquestan el traspaso atómico de propiedad entre clientes. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{Result<\allowbreak Void,\allowbreak  DomainException>\allowbreak  validateSlotAvailability(...)} \newline - \texttt{Result<\allowbreak VehicleOwnership,\allowbreak  DomainException>\allowbreak  transferVehicle(...)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} CustomerRepository, VehicleRepository, VehicleOwnershipRepository, AppointmentRepository} \\*
+\hline
+Firmas de acceso persistente & Puertos secundarios para operaciones de persistencia agnóstica de agregados y resolución de consultas operativas de flota. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{Interfaces de repositorio} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} Jerarquía de Excepciones de Dominio} \\*
+\hline
+Constructores tipados & Excepciones no comprobadas derivadas de \texttt{DomainException} que portan códigos legibles por máquina para respuestas de error HTTP 4xx. \\*
+\hline
+\textbf{Firma o Tipo} & Subclases de \texttt{DomainException} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Elaboración propia en base al diseño táctico de dominio y la especificación UML de la solución.
+
+A partir del modelo estático ilustrado en la @fig:class-diagram-crm y formalizado en la @tbl:crm-domain-classes-members, se identifican tres fundamentos de ingeniería de software que consolidan la robustez y pureza del subsistema:
+
+- **Desacoplamiento entre la Identidad Física Automotriz y la Custodia Jurídica:**
+  Al concebir a **Vehicle** como una entidad universal dotada de ciclo de vida propio y separar los vínculos de posesión en **VehicleOwnership**, la plataforma asegura la inmutabilidad de la historia clínica automotriz. Cuando un automóvil es transferido entre particulares o flotas corporativas, los registros históricos de fallas, telemetría e intervenciones mecánicas permanecen ligados a la unidad física, evitando la pérdida de información técnica ante sucesivas compraventas.
+
+- **Determinismo Operativo en el Agendamiento y Recepción mediante Máquinas de Estados:**
+  La raíz **Appointment** restringe rigurosamente las transiciones de estado a través de métodos de mutación semánticos, impidiendo regresiones inconsistentes o cancelaciones indebidas. El arribo formal del automotor a la sucursal física consolida un estado terminal irrevocable, emitiendo de manera atómica el evento transaccional que instruye al módulo de operaciones de taller la apertura inmediata de la orden de trabajo correspondiente.
+
+- **Normalización Estricta de Activos y Mitigación de Vulnerabilidades Sintácticas:**
+  Los objetos de valor **LicensePlate** y **Vin** garantizan que ninguna cadena vehicular entre en memoria con formatos erróneos o caracteres ambiguos. La normalización de placas conforme al estándar del Ministerio de Transportes y Comunicaciones del Perú y la verificación de chasis bajo el estándar ISO 3779 erradican fallos de duplicidad o inconsistencia en consultas cruzadas con sistemas telemáticos e integraciones de aseguradoras.
 
 ##### 2.6.3.6.2. *Bounded Context Database Design Diagram*
+
+La persistencia del Bounded Context Customer & Fleet Management materializa el modelo de dominio mediante una arquitectura relacional distribuida en dos motores especializados. El repositorio central en PostgreSQL 16 garantiza la consistencia transaccional y el aislamiento multi-inquilino de las carteras comerciales, mientras que el motor embebido SQLite 3 provee autonomía operativa desconectada en la aplicación móvil de taller ante contingencias de conectividad en patio o fosas mecánicas.
+
+En la @fig:database-diagram-crm se presenta el Diagrama Entidad-Relación físico para la persistencia del Bounded Context Customer & Fleet Management en sus dos entornos operativos de despliegue: el repositorio central PostgreSQL 16 de la API de backend y el motor relacional local SQLite 3 de la aplicación móvil de taller.
+
+![Diagrama Entidad-Relación de Base de Datos para el Bounded Context Customer & Fleet Management (PostgreSQL 16 y SQLite 3)](report/assets/database-diagrams/database-diagram-crm.png){#fig:database-diagram-crm}
+
+*Nota.* Elaboración propia en base al diseño físico de persistencia y el estándar PlantUML ERD.
+
+A partir del modelo entidad-relación ilustrado, la arquitectura de datos se descompone en cuatro subsistemas relacionales especializados:
+
+- **Subsistema de Gestión Comercial y Cartera de Clientes:**
+  Formaliza el registro de clientes particulares y corporativos en la tabla **customers**, vinculada a la entidad raíz organizacional **tenants** mediante la clave foránea **tenant_id**. La tabla incorpora un discriminador semántico de tipo y restricciones de unicidad compuestas sobre el documento tributario, garantizando que cada taller administre su cartera de clientes con estricta confidencialidad comercial y sin duplicidad de registros fiscales.
+
+- **Subsistema de Parque Automotor e Historial de Tenencia:**
+  Estructura el catálogo físico vehicular a través de las tablas **vehicles** y **vehicle_ownerships**. La tabla **vehicles** modela el activo automotriz de forma universal sin asociarlo a un inquilino particular, normalizando placas de rodaje y números de chasis bajo estándares internacionales. A su vez, **vehicle_ownerships** preserva la trazabilidad cronológica de custodia mediante fechas de inicio y cese de propiedad, respaldada por un índice único parcial que restringe la titularidad vigente a un único custodio activo.
+
+- **Subsistema de Agendamiento y Recepción Operativa:**
+  Administra el flujo de reservas técnicas e ingreso a bahías mediante la tabla **appointments**. Cada registro articula las relaciones foráneas hacia el taller empleador, la sede física receptora, el cliente titular y el vehículo a inspeccionar. Su ciclo de vida es gobernado por restricciones de verificación de estados, facilitando la transición ordenada desde la reserva preliminar hasta la confirmación de arribo que dispara la apertura de órdenes de trabajo en el contexto de taller.
+
+- **Persistencia Desconectada de Recepción en SQLite 3:**
+  Provee continuidad operacional a la aplicación móvil de taller a través de las tablas locales **local_customers_cache**, **local_vehicles_cache**, **local_appointments_cache** y **offline_reception_mutations**. Este conjunto de estructuras resguarda réplicas ligeras de consulta inmediata y encola mutaciones de recepción en patio sin depender de red celular, replicando los arribos confirmados hacia el backend central mediante peticiones seguras al restablecer la conexión.
+
+A partir de la arquitectura relacional definida en el diagrama de persistencia, en la @tbl:crm-database-objects se cataloga la totalidad de las tablas y objetos físicos que conforman el modelo de datos, detallando el producto donde residen, sus atributos cardinales, restricciones de integridad, estrategias de indexación y su contribución al aislamiento de información.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.1cm} | >{\raggedright\arraybackslash}p{10.3cm} |}
+\caption{Catálogo exhaustivo de tablas, objetos de base de datos, restricciones e índices físicos del Bounded Context Customer \& Fleet Management} \label{tbl:crm-database-objects} \\
+\hline
+\thfirst{Aspecto de Persistencia} & \thcell{Especificación Físico-Relacional} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Persistencia} & \thcell{Especificación Físico-Relacional} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{customers}} \\*
+\hline
+\textbf{Motor y Producto} & PostgreSQL 16 (API) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Cartera de clientes particulares B2C y flotas corporativas B2B. Aislamiento por tenant\_id que previene fugas de datos comerciales entre talleres mecánicos concurrentes. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{id (UUID)}, \texttt{tenant\_id (UUID)}, \texttt{type (VARCHAR)}, \texttt{first\_name (VARCHAR)}, \texttt{last\_name (VARCHAR)}, \texttt{company\_name (VARCHAR)}, \texttt{tax\_id (VARCHAR)}, \texttt{email (VARCHAR)}, \texttt{phone (VARCHAR)}, \texttt{status (VARCHAR)}, auditoría transversal. \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_customers (id) \newline - FK: fk\_customers\_tenant\_id hacia tenants(id) \newline - UK: uk\_customers\_tenant\_tax\_id (tenant\_id, tax\_id) \newline - CHECK: chk\_customer\_type, chk\_customer\_status \newline - Índices B-Tree: idx\_customers\_tenant\_tax\_id, idx\_customers\_search \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{vehicles}} \\*
+\hline
+\textbf{Motor y Producto} & PostgreSQL 16 (API) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Catálogo automotriz universal. Activo físico independiente de tenant\_id para consolidar la historia clínica y técnica del vehículo a través de múltiples talleres. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{id (UUID)}, \texttt{plate (VARCHAR)}, \texttt{vin (VARCHAR)}, \texttt{brand (VARCHAR)}, \texttt{model (VARCHAR)}, \texttt{year (INTEGER)}, \texttt{engine\_type (VARCHAR)}, auditoría técnica transversal. \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_vehicles (id) \newline - UK: uk\_vehicles\_plate (plate) \newline - CHECK: chk\_vehicles\_engine\_type, chk\_vehicles\_year (year >= 1950) \newline - Índices B-Tree: idx\_vehicles\_plate, idx\_vehicles\_vin (parcial) \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{vehicle\_ownerships}} \\*
+\hline
+\textbf{Motor y Producto} & PostgreSQL 16 (API) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Trazabilidad temporal de custodia y propiedad legal del vehículo. Desacopla la unidad física del titular y permite transferencias de tenencia inmutables. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{id (UUID)}, \texttt{customer\_id (UUID)}, \texttt{vehicle\_id (UUID)}, \texttt{start\_date (DATE)}, \texttt{end\_date (DATE)}, auditoría transversal. \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_vehicle\_ownerships (id) \newline - FK: fk\_ownerships\_customer\_id, fk\_ownerships\_vehicle\_id \newline - CHECK: chk\_ownership\_dates \newline - UK parcial: uk\_vehicle\_active\_ownership (vehicle\_id) WHERE end\_date IS NULL \newline - Índices: idx\_ownerships\_customer, idx\_ownerships\_vehicle \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{appointments}} \\*
+\hline
+\textbf{Motor y Producto} & PostgreSQL 16 (API) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Programación y recepción de citas en sedes físicas. Aislamiento por tenant\_id y branch\_id con control de transiciones de estado operativo hacia órdenes de trabajo. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{id (UUID)}, \texttt{tenant\_id (UUID)}, \texttt{branch\_id (UUID)}, \texttt{customer\_id (UUID)}, \texttt{vehicle\_id (UUID)}, \texttt{scheduled\_at (TIMESTAMPTZ)}, \texttt{estimated\_duration\_minutes (INTEGER)}, \texttt{reason (TEXT)}, \texttt{status (VARCHAR)}, \texttt{cancellation\_reason (VARCHAR)}, auditoría transversal. \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_appointments (id) \newline - FK: fk\_appointments\_tenant\_id, fk\_appointments\_branch\_id, fk\_appointments\_customer\_id, fk\_appointments\_vehicle\_id \newline - CHECK: chk\_appointment\_status \newline - Índices: idx\_appointments\_tenant\_branch\_date, idx\_appointments\_customer, idx\_appointments\_vehicle \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{local\_customers\_cache}} \\*
+\hline
+\textbf{Motor y Producto} & SQLite 3 (Mobile) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Directorio local desconectado de clientes adscritos al taller del operario. Habilita búsquedas presenciales instantáneas durante la recepción en patio sin latencia de red. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{customer\_id (TEXT)}, \texttt{tenant\_id (TEXT)}, \texttt{display\_name (TEXT)}, \texttt{tax\_id (TEXT)}, \texttt{phone (TEXT)}, \texttt{type (TEXT)}, \texttt{synced\_at (TEXT).} \\*
+\hline
+\textbf{Constraints e Índices} & PK: pk\_local\_customers (customer\_id) \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{local\_vehicles\_cache}} \\*
+\hline
+\textbf{Motor y Producto} & SQLite 3 (Mobile) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Caché local de parque automotor para reconocimiento inmediato de placas de rodaje y validación preliminar de chasis en fosas mecánicas sin cobertura celular. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{vehicle\_id (TEXT)}, \texttt{plate (TEXT)}, \texttt{vin (TEXT)}, \texttt{brand\_model (TEXT)}, \texttt{current\_owner\_id (TEXT)}, \texttt{synced\_at (TEXT).} \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_local\_vehicles (vehicle\_id) \newline - Índice B-Tree: idx\_local\_vehicles\_plate (plate) \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{local\_appointments\_cache}} \\*
+\hline
+\textbf{Motor y Producto} & SQLite 3 (Mobile) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Agenda operativa del día filtrada para la sede asignada al dispositivo técnico. Permite consultar citas y anticipar bahías en frío. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{appointment\_id (TEXT)}, \texttt{tenant\_id (TEXT)}, \texttt{branch\_id (TEXT)}, \texttt{customer\_name (TEXT)}, \texttt{vehicle\_plate (TEXT)}, \texttt{scheduled\_at (TEXT)}, \texttt{status (TEXT)}, \texttt{reason (TEXT)}, \texttt{synced\_at (TEXT).} \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_local\_appointments (appointment\_id) \newline - Índice B-Tree: idx\_local\_appointments\_date (scheduled\_at) \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{offline\_reception\_mutations}} \\*
+\hline
+\textbf{Motor y Producto} & SQLite 3 (Mobile) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Buffer transaccional local que encola mutaciones de arribo vehicular e inspección preliminar registradas sin cobertura de red para su sincronización diferida. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{mutation\_id (TEXT)}, \texttt{appointment\_id (TEXT)}, \texttt{action\_type (TEXT)}, \texttt{payload (TEXT)}, \texttt{status (TEXT)}, \texttt{retry\_count (INTEGER)}, \texttt{created\_at (TEXT)}, \texttt{synced\_at (TEXT).} \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_offline\_reception\_mutations (mutation\_id) \newline - CHECK: chk\_mutation\_status \newline - Índice B-Tree: idx\_mutations\_status (status, created\_at) \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{auditable\_abstract\_entity}} \\*
+\hline
+\textbf{Motor y Producto} & PostgreSQL 16 (API) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Arquetipo transversal inyectado en entidades del backend para garantizar auditoría temporal, bloqueo optimista y aislamiento por tenant\_id. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{id (UUID)}, \texttt{tenant\_id (UUID)}, \texttt{created\_at (TIMESTAMPTZ)}, \texttt{updated\_at (TIMESTAMPTZ)}, \texttt{version (BIGINT)}, \texttt{deleted\_at (TIMESTAMPTZ).} \\*
+\hline
+\textbf{Constraints e Índices} & - PK técnica: id \newline - FK lógica: tenant\_id. Superclase MappedSuperclass JPA \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Elaboración propia en base al diseño relacional y la especificación física de persistencia.
+
+A partir de la estructura formalizada en la @fig:database-diagram-crm y la @tbl:crm-database-objects, se identifican tres fundamentos de ingeniería de software que sustentan la integridad, escalabilidad y resiliencia de la persistencia:
+
+- **Desacoplamiento entre la Identidad Física Automotriz y el Aislamiento Multi-Inquilino:**
+  La decisión arquitectónica de excluir la clave de particionamiento **tenant_id** en la tabla **vehicles** garantiza que cada unidad automotriz conserve una identidad global independiente de los talleres mecánicos. Al desacoplar el activo vehicular respecto a los registros de tenencia en **vehicle_ownerships**, la plataforma consolida una hoja técnica universal que preserva diagnósticos, lecturas de telemetría y mantenimientos previos ante transferencias de dominio entre clientes particulares o flotas corporativas.
+
+- **Determinismo Temporal en la Propiedad Vehicular mediante Índices Parciales Únicos:**
+  La integridad de la cadena de custodia se garantiza a nivel de motor relacional mediante el índice único condicional **uk_vehicle_active_ownership**, el cual restringe la existencia de registros con fecha de finalización nula a una sola tupla por vehículo. Este mecanismo previene condiciones de carrera o inconsistencias concurrentes durante el traspaso de activos entre empresas de transporte, asegurando que las órdenes de servicio y comprobantes fiscales se emitan inequívocamente al titular legítimo en cada fecha operativa.
+
+- **Resiliencia Operacional Desconectada y Drenaje Asíncrono en SQLite 3:**
+  La coexistencia del repositorio central en PostgreSQL 16 con el esquema local en SQLite 3 resuelve los desafíos de conectividad en fosas de inspección y patios de maniobra. La tabla **offline_reception_mutations** implementa el patrón de Outbox móvil, absorbiendo los registros de arribo vehicular y listas de verificación sin degradar la experiencia de usuario. Una vez restablecida la señal inalámbrica, los procesos en segundo plano sincronizan las mutaciones pendientes mediante reintentos exponenciales garantizando idempotencia transaccional.

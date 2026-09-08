@@ -1,0 +1,326 @@
+@startuml database-diagram-crm
+title <size:16>Diagrama de Base de Datos (ERD) - Bounded Context Customer & Fleet Management (CRM)</size>\n<size:11>Persistencia Relacional Multi-Producto: PostgreSQL 16 (API Application) y SQLite 3 (Mobile Workshop)</size>
+
+' Configuraciones visuales y de diseño profesional
+hide circle
+skinparam monochrome false
+skinparam shadowing false
+skinparam roundcorner 6
+skinparam linetype ortho
+skinparam nodesep 110
+skinparam ranksep 60
+skinparam defaultFontName "Helvetica", "Arial", sans-serif
+skinparam defaultFontSize 11
+skinparam defaultFontColor #2C3E50
+skinparam arrowColor #34495E
+skinparam arrowThickness 1.3
+skinparam packageBorderColor #7F8C8D
+skinparam packageFontSize 12
+skinparam packageFontStyle bold
+
+skinparam entity {
+    BackgroundColor #FFFFFF
+    BorderColor #34495E
+    HeaderBackgroundColor #EAEDED
+}
+
+' ==============================================================================
+' PRODUCTO 1: API APPLICATION (BACKEND CENTRAL - POSTGRESQL 16)
+' ==============================================================================
+package "PostgreSQL 16 (API Application - Backend Central)" as pg_backend #F8F9F9 {
+
+    ' ==========================================================================
+    ' COLUMNA 1: ARQUETIPO JPA Y CONTEXTO ORGANIZACIONAL EXTERNO
+    ' ==========================================================================
+    entity "auditable_abstract_entity" as auditable_abstract_entity <<archetype, JPA>> #E8F8F5 {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Propiedades del Arquetipo JPA:</b>
+        + Clave primaria técnica UUID v4
+        + Aislamiento multi-tenant obligatorio (tenant_id)
+        + Control de concurrencia optimista (version)
+        + Borrado lógico auditable (deleted_at)
+        + Heredado físicamente por entidades de negocio:
+          customers y appointments (@MappedSuperclass)
+    }
+
+    entity "tenants" as tenants <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * name : VARCHAR(100)
+        * legal_name : VARCHAR(150)
+        * tax_id : VARCHAR(20) <<UK>>
+        --
+        <b>Contexto Externo (IAM & Tenancy):</b>
+        + Delimita la frontera del taller automotriz
+    }
+
+    entity "branches" as branches <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        * name : VARCHAR(100)
+        sunat_code : VARCHAR(10)
+        --
+        <b>Contexto Externo (IAM & Tenancy):</b>
+        + Sede física del taller para recepción
+    }
+
+    ' ==========================================================================
+    ' COLUMNA 2: GESTIÓN DE CLIENTES Y CITAS OPERATIVAS
+    ' ==========================================================================
+    entity "customers" as customers <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        * type : VARCHAR(20)
+        first_name : VARCHAR(100)
+        last_name : VARCHAR(100)
+        company_name : VARCHAR(150)
+        tax_id : VARCHAR(20)
+        email : VARCHAR(150)
+        phone : VARCHAR(20)
+        * status : VARCHAR(20)
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_customers : PRIMARY KEY (id)
+        + fk_customers_tenant_id : FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+        + uk_customers_tenant_tax_id : UNIQUE (tenant_id, tax_id)
+        + chk_customer_type : CHECK (type IN ('individual', 'company'))
+        + chk_customer_status : CHECK (status IN ('active', 'inactive'))
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_customers_tenant_tax_id : (tenant_id, tax_id)
+        + idx_customers_search : (tenant_id, status)
+    }
+
+    entity "appointments" as appointments <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        * branch_id : UUID <<FK>>
+        * customer_id : UUID <<FK>>
+        * vehicle_id : UUID <<FK>>
+        * scheduled_at : TIMESTAMPTZ
+        * estimated_duration_minutes : INTEGER
+        reason : TEXT
+        * status : VARCHAR(20)
+        cancellation_reason : VARCHAR(500)
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_appointments : PRIMARY KEY (id)
+        + fk_appointments_tenant_id : FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+        + fk_appointments_branch_id : FOREIGN KEY (branch_id) REFERENCES branches(id)
+        + fk_appointments_customer_id : FOREIGN KEY (customer_id) REFERENCES customers(id)
+        + fk_appointments_vehicle_id : FOREIGN KEY (vehicle_id) REFERENCES vehicles(id)
+        + chk_appointment_status : CHECK (status IN ('pending', 'confirmed', 'arrived', 'canceled'))
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_appointments_tenant_branch_date : (tenant_id, branch_id, scheduled_at)
+        + idx_appointments_customer : (customer_id)
+        + idx_appointments_vehicle : (vehicle_id)
+    }
+
+    ' ==========================================================================
+    ' COLUMNA 3: PARQUE AUTOMOTOR Y CADENA DE CUSTODIA
+    ' ==========================================================================
+    entity "vehicles" as vehicles <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * plate : VARCHAR(15) <<UK>>
+        vin : VARCHAR(17)
+        * brand : VARCHAR(50)
+        * model : VARCHAR(50)
+        * year : INTEGER
+        * engine_type : VARCHAR(20)
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_vehicles : PRIMARY KEY (id)
+        + uk_vehicles_plate : UNIQUE (plate)
+        + chk_vehicles_engine_type : CHECK (engine_type IN ('gasoline', 'diesel', 'electric', 'hybrid'))
+        + chk_vehicles_year : CHECK (year >= 1950)
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_vehicles_plate : (plate)
+        + idx_vehicles_vin : (vin) WHERE vin IS NOT NULL
+        --
+        <b>Propiedad Arquitectónica:</b>
+        + Activo físico universal sin tenant_id
+    }
+
+    entity "vehicle_ownerships" as vehicle_ownerships <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * customer_id : UUID <<FK>>
+        * vehicle_id : UUID <<FK>>
+        * start_date : DATE
+        end_date : DATE
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_vehicle_ownerships : PRIMARY KEY (id)
+        + fk_ownerships_customer_id : FOREIGN KEY (customer_id) REFERENCES customers(id)
+        + fk_ownerships_vehicle_id : FOREIGN KEY (vehicle_id) REFERENCES vehicles(id)
+        + chk_ownership_dates : CHECK (end_date IS NULL OR end_date >= start_date)
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_ownerships_customer : (customer_id)
+        + idx_ownerships_vehicle : (vehicle_id, end_date)
+        + uk_vehicle_active_ownership : UNIQUE (vehicle_id) WHERE end_date IS NULL
+    }
+
+    ' Disposición vertical forzada por columnas
+    auditable_abstract_entity -[hidden]down-> tenants
+    tenants -[hidden]down-> branches
+
+    customers -[hidden]down-> appointments
+
+    vehicle_ownerships -[hidden]down-> vehicles
+
+    ' Disposición horizontal entre columnas de Backend
+    tenants -[hidden]right-> customers
+    customers -[hidden]right-> vehicle_ownerships
+
+    ' Relaciones de Herencia JPA
+    auditable_abstract_entity <|-- customers : "herencia física JPA\n(@MappedSuperclass)"
+
+    ' Relaciones Cardinales de Integridad Referencial
+    tenants "1  " ||--o{ "0..* " customers : "\ncartera clientes"
+    tenants "1  " ||--o{ "0..* " appointments : "gestiona citas"
+    branches "1  " ||--o{ "0..* " appointments : "sede física"
+
+    customers "1  " ||--o{ "0..* " vehicle_ownerships : "\ntitularidad"
+    customers "1  " ||--o{ "0..* " appointments : "agenda cita"
+
+    vehicles "1  " ||--o{ "0..* " vehicle_ownerships : "historial tenencia"
+    vehicles "1  " ||--o{ "0..* " appointments : "sujeto atención"
+}
+
+' ==============================================================================
+' PRODUCTO 2: MOBILE WORKSHOP (CLIENTE TÉCNICO OFFLINE - SQLITE 3)
+' ==============================================================================
+package "SQLite 3 (Mobile Workshop - Cliente Técnico Offline)" as sqlite_mobile #FEFDE8 {
+
+    entity "local_customers_cache" as local_customers_cache <<table, SQLite>> #FEF9E7 {
+        * customer_id : TEXT <<PK>>
+        --
+        * tenant_id : TEXT
+        * display_name : TEXT
+        tax_id : TEXT
+        phone : TEXT
+        * type : TEXT
+        * synced_at : TEXT (ISO8601)
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_local_customers : PRIMARY KEY (customer_id)
+        --
+        <b>Propósito Operativo:</b>
+        + Directorio local de clientes del taller
+        + Búsqueda instantánea en recepción de patio
+    }
+
+    entity "local_vehicles_cache" as local_vehicles_cache <<table, SQLite>> #FEF9E7 {
+        * vehicle_id : TEXT <<PK>>
+        --
+        * plate : TEXT
+        vin : TEXT
+        * brand_model : TEXT
+        current_owner_id : TEXT
+        * synced_at : TEXT (ISO8601)
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_local_vehicles : PRIMARY KEY (vehicle_id)
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_local_vehicles_plate : (plate)
+        --
+        <b>Propósito Operativo:</b>
+        + Validación instantánea de placas de rodaje
+        + Resolución de chasis e historial en frío
+    }
+
+    entity "local_appointments_cache" as local_appointments_cache <<table, SQLite>> #FEF9E7 {
+        * appointment_id : TEXT <<PK>>
+        --
+        * tenant_id : TEXT
+        * branch_id : TEXT
+        * customer_name : TEXT
+        * vehicle_plate : TEXT
+        * scheduled_at : TEXT (ISO8601)
+        * status : TEXT
+        reason : TEXT
+        * synced_at : TEXT (ISO8601)
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_local_appointments : PRIMARY KEY (appointment_id)
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_local_appointments_date : (scheduled_at)
+        --
+        <b>Propósito Operativo:</b>
+        + Agenda técnica del día en sucursal
+        + Visualización de citas sin latencia de red
+    }
+
+    entity "offline_reception_mutations" as offline_reception_mutations <<table, SQLite>> #FEF9E7 {
+        * mutation_id : TEXT <<PK>>
+        --
+        * appointment_id : TEXT
+        * action_type : TEXT
+        * payload : TEXT (JSON)
+        * status : TEXT
+        * retry_count : INTEGER
+        * created_at : TEXT (ISO8601)
+        synced_at : TEXT (ISO8601)
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_offline_reception_mutations : PRIMARY KEY (mutation_id)
+        + chk_mutation_status : CHECK (status IN ('PENDING', 'SYNCED', 'FAILED'))
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_mutations_status : (status, created_at)
+        --
+        <b>Propósito Operativo:</b>
+        + Cola de mutaciones de arribo y fichaje
+        + Buffer transaccional ante pérdida de señal
+    }
+
+    local_customers_cache -[hidden]down-> local_vehicles_cache
+    local_vehicles_cache -[hidden]down-> local_appointments_cache
+    local_appointments_cache -[hidden]down-> offline_reception_mutations
+}
+
+' Disposición horizontal entre paquetes
+vehicle_ownerships -[hidden]right-> local_customers_cache
+pg_backend -[hidden]right-> sqlite_mobile
+
+' ==============================================================================
+' RELACIONES DE SINCRONIZACIÓN INTER-PRODUCTO
+' ==============================================================================
+offline_reception_mutations .[#2980B9]left.> appointments : "<b>HTTPS REST Replicación de Arribo</b>\n(POST /api/v1/appointments/{id}/arrive)"
+local_appointments_cache .[#27AE60]left.> appointments : "<b>Descarga y Refresco de Agenda</b>\n(GET /api/v1/appointments?branchId=&date=)"
+local_customers_cache .[#8E44AD]left.> customers : "<b>Caché de Cartera Comercial</b>\n(GET /api/v1/customers)"
+local_vehicles_cache .[#D35400]left.> vehicles : "<b>Consulta Rápida de Placas</b>\n(GET /api/v1/vehicles/by-plate/...)"
+
+@enduml
