@@ -52,6 +52,7 @@ workspace "Atelier Architecture" "Diagramas de Arquitectura C4 para el Proyecto 
         !include model/components/webapp-relationships.dsl
         !include model/components/shared-relationships.dsl
         !include model/components/iam-relationships.dsl
+        !include model/components/crm-relationships.dsl
 
         !include model/deployment/production-environment.dsl
     }
