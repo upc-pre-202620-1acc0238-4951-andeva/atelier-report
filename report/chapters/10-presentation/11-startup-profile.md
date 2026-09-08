@@ -75,13 +75,13 @@ El ecosistema se divide estratégicamente en dos fases para conectar a todos los
         % ==============================
         % Alumno 3
         % ==============================
-        \multirow{5}{2.5cm}{\centering [Foto 3]} 
-        & Alumno 3 & [Carrera] \\
+        \multirow{5}{2.5cm}{\centering\includegraphics[width=2.2cm, keepaspectratio]{report/assets/startup-team-members/alvaro.jpg}} 
+        & Rocha Cotrina, Alvaro – U202411243 & Ingeniería de Software \\
         \cline{2-3}
-        & \thspan{2}{Descripción} \\
+        & \multicolumn{2}{l|}{\textbf{Descripción}} \\
         \cline{2-3}
         & \multicolumn{2}{p{\dimexpr\textwidth-2.5cm-4\tabcolsep-3\arrayrulewidth\relax}|}{%
-            [Descripción del Alumno 3...]
+            Soy Alvaro Rocha, estudiante de Ingeniería de Software de la Universidad Peruana de Ciencias Aplicadas. Dentro de la startup, mi rol se centra en la integración tecnológica y la arquitectura del ecosistema Atelier, fusionando mis conocimientos en desarrollo de software con mi profunda pasión por el sector automotriz. Me especializo en el diseño de sistemas orientados a la telemetría (IoT) y el procesamiento de datos en tiempo real, asegurando que nuestra plataforma pueda interpretar correctamente los diagnósticos OBD-II. Aporto al equipo un enfoque analítico, capacidad para resolver problemas complejos y una visión técnica que garantiza que nuestro producto no solo sea escalable y robusto, sino que responda con exactitud a las verdaderas necesidades mecánicas y operativas de los usuarios.
         } \\
         \hline
         
