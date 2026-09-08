@@ -74,6 +74,52 @@ Con el propósito de obtener hallazgos comparables y estructurados, se desarroll
 En esta sección presentamos los registros de las entrevistas que hicimos para cada segmento objetivo de nuestra aplicación.
 **Segmento 1:**
 
+<table>
+<colgroup>
+</colgroup>
+<thead>
+  <tr>
+    <th colspan="2">Entrevista #1<br></th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>Nombre</td>
+    <td>Jorge Marcelo</td>
+  </tr>
+  <tr>
+    <td>Apellidos</td>
+    <td>Aguilar Ramos</td>
+  </tr>
+  <tr>
+    <td>Edad</td>
+    <td>53 años</td>
+  </tr>
+  <tr>
+    <td>Distrito</td>
+    <td>Chorrillos</td>
+  </tr>
+  <tr>
+    <td>Evidencia</td>
+    <td><div align="center"><img src="../../assets/Interview-Evidence/Interview-of-Jorge-Aguilar.jpeg.jpeg" alt="Entrevista Jorge Aguilar"></div></td>
+  </tr>
+  <tr>
+    <td>Link</td>
+    <td><p><a target="_blank"  href="https://upcedupe-my.sharepoint.com/:v:/g/personal/u20241e287_upc_edu_pe/IQBzBV6lfIhFR6y-FD7FV72HAbKSap9KCkiX4idSlbt6zHE?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=rbGLmS" title="Title">Microsoft Stream</p></td>
+  </tr>
+  <tr>
+    <td>Duracion<br></td>
+    <td>0:00 min - 13:39 min</td>
+  </tr>
+  <tr>
+    <td>Resumen</td>
+    La entrevista se realizó a Jorge Aguilar, un técnico mecánico de 53 años con aproximadamente 35 años de experiencia en el rubro automotriz. Jorge ejerce como dueño y administrador de su propia empresa, gestionando de manera independiente tanto la parte operativa como la administrativa del negocio. Destaca como su principal habilidad administrativa la captación y fidelización de clientes mediante el buen trato, ofreciendo recomendaciones técnicas honestas sobre mantenimiento preventivo y selección de materiales para evitar inconvenientes futuros en sus unidades. A diferencia de un taller tradicional con sede fija, su rutina actual se centra en el trabajo de campo de manera itinerante (tipo delivery), desplazándose directamente hacia la ubicación de los equipos y maquinaria estacionaria (línea amarilla) para realizar los servicios mecánicos.
+    <td>
+</td>
+  </tr>
+</tbody>
+</table>
+
 **Segmento 2:**
 
 <table>
