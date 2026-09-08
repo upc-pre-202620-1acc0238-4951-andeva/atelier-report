@@ -2,6 +2,7 @@ component api "Components-API" "Diagrama de Componentes de la API Central de Ate
     include *
     exclude shared_perimeter shared_assemblers shared_cqrs shared_domain shared_persistence shared_outbox shared_openapi
     exclude iam_perimeter iam_controllers iam_app_services iam_security_services iam_domain iam_persistence iam_facade iam_external_gateways
+    exclude crm_controllers crm_app_services crm_event_handlers crm_domain crm_persistence crm_facade crm_external_gateways
     autoLayout tb 250 200
 }
 
@@ -21,5 +22,12 @@ component api "component-level-diagram-iam" "Diagrama de Componentes C4 (Nivel 3
     include iam_perimeter iam_controllers iam_app_services iam_security_services iam_domain iam_persistence iam_facade iam_external_gateways
     include webapp workshop_mobile driver_mobile db resend google_identity
     include mro_comp customer_fleet_comp hr_comp invoicing_comp billing_comp
+    autoLayout tb 250 200
+}
+
+component api "component-level-diagram-crm" "Diagrama de Componentes C4 (Nivel 3) para el Bounded Context Customer & Fleet Management (CRM) en API Application" {
+    include crm_controllers crm_app_services crm_event_handlers crm_domain crm_persistence crm_facade crm_external_gateways
+    include webapp workshop_mobile driver_mobile db google_maps fcm
+    include iam_comp mro_comp invoicing_comp billing_comp iot_comp
     autoLayout tb 250 200
 }
