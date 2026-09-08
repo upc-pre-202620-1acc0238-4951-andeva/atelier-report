@@ -1,22 +1,27 @@
-# IDEs and environments
+# IDEs
 .vscode/
 .idea/
+
+# OS
 .DS_Store
+
+# Agent / tooling
 .github/
 .antigravitycli
 .mimocode/
 .agents/
-
-# Compiled files and temporary files
-build/
-notes/
 AGENTS.md
 CLAUDE.md
+skills-lock.json
+docs/superpowers
 
-# Heavy binary files
+# Local notes and build output
+notes/
+build/
+
+# Heavy binaries
 *.jar
 *.exe
 
 # Temporary diagram exports
 report/assets/diagram-sources/c4-exported/
-docs/superpowers
