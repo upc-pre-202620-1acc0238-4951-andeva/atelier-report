@@ -101,13 +101,13 @@ El ecosistema se divide estratégicamente en dos fases para conectar a todos los
         % ==============================
         % Alumno 5
         % ==============================
-        \multirow{5}{2.5cm}{\centering [Foto 5]} 
-        & Alumno 5 & [Carrera] \\
+        \multirow{5}{2.5cm}{\centering\includegraphics[width=2.2cm, keepaspectratio]{report/assets/startup-team-members/Mauricio.jpeg}} 
+        & Teran Zavala, Mauricio – U202417423 & Ingeniería de Software \\
         \cline{2-3}
         & \thspan{2}{Descripción} \\
         \cline{2-3}
         & \multicolumn{2}{p{\dimexpr\textwidth-2.5cm-4\tabcolsep-3\arrayrulewidth\relax}|}{%
-            [Descripción del Alumno 5...]
+            Soy Mauricio Teran, estudiante de la Universidad Peruana de Ciencias Aplicadas, con una marcada especialización en el desarrollo backend y una sólida base en lógica de programación. Manejo lenguajes como Java, C++ y Python, y aplico los principios de Domain-Driven Design (DDD) para estructurar dominios complejos, diseñar APIs RESTful escalables y optimizar la gestión de bases de datos. Mi motivación va más allá de lo técnico; busco activamente generar un impacto social positivo a través de mis desarrollos. La disciplina y el compromiso forjados en el deporte me permiten mantener la calma bajo presión y adaptarme con rapidez a los cambios, cualidades que pongo al servicio del equipo. Mi objetivo final es entregar código limpio, mantenible y funcional, promoviendo una comunicación abierta y efectiva. Aportaré mi liderazgo proactivo y mi capacidad de organización para asegurar la cohesión del equipo y el desarrollo de soluciones robustas y significativas.
         } \\
         \hline
     \end{tabularx}
