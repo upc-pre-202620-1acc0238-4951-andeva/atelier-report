@@ -12,14 +12,14 @@ workshop_mobile -> mro_comp "Supervisa y sincroniza tareas, estados y evidencias
 workshop_mobile -> customer_fleet_comp "Consulta clientes, flotas y agenda citas en patio vía" "JSON/HTTPS"
 workshop_mobile -> inventory_comp "Consulta stock de repuestos y alertas FIFO en patio vía" "JSON/HTTPS"
 workshop_mobile -> hr_comp "Envía coordenadas GPS para marcación de entrada y salida vía" "JSON/HTTPS"
-workshop_mobile -> telemetry_comp "Transmite telemetría de diagnósticos por Bluetooth vía" "JSON/HTTPS"
+workshop_mobile -> iot_comp "Transmite telemetría de diagnósticos por Bluetooth vía" "JSON/HTTPS"
 
 driver_mobile -> iam_comp "Autentica conductores y propietarios vía" "JSON/HTTPS"
 driver_mobile -> customer_fleet_comp "Consulta histórico y solicita citas vía" "JSON/HTTPS"
 driver_mobile -> mro_comp "Aprueba presupuestos de mantenimiento vía" "JSON/HTTPS"
-driver_mobile -> telemetry_comp "Visualiza estado de salud vehicular y alertas vía" "JSON/HTTPS"
+driver_mobile -> iot_comp "Visualiza estado de salud vehicular y alertas vía" "JSON/HTTPS"
 
-obd2_sim -> telemetry_comp "Envía paquetes telemétricos por red celular vía" "HTTP POST / TCP"
+obd2_sim -> iot_comp "Envía paquetes telemétricos por red celular vía" "HTTP POST / TCP"
 
 // Relaciones intermodulares en memoria (Monolito Modular)
 customer_fleet_comp -> mro_comp "Convierte citas confirmadas en órdenes de trabajo usando" "In-Memory Call"
@@ -35,7 +35,7 @@ inventory_comp -> db "Lee y escribe catálogo, lotes y movimientos FIFO vía" "J
 hr_comp -> db "Lee y escribe asistencias, sucursales y turnos vía" "JDBC/TCP"
 invoicing_comp -> db "Lee y escribe comprobantes electrónicos vía" "JDBC/TCP"
 billing_comp -> db "Lee y escribe suscripciones e historial de cobros vía" "JDBC/TCP"
-telemetry_comp -> db "Escribe telemetría en hipertablas vía" "JDBC/TCP"
+iot_comp -> db "Escribe telemetría en hipertablas vía" "JDBC/TCP"
 outbox_comp -> db "Lee mensajes pendientes y actualiza estados de despacho vía" "JDBC/TCP"
 
 // Relaciones de componentes hacia sistemas externos
@@ -44,6 +44,6 @@ iam_comp -> google_identity "Valida certificados públicos y tokens de Google OA
 hr_comp -> google_maps "Valida distancias contra la sucursal por fórmula Haversine vía" "HTTPS/API"
 invoicing_comp -> nubefact "Delega validación fiscal de comprobantes SUNAT vía" "HTTPS/API"
 billing_comp -> stripe "Procesa cobros y valida webhooks idempotentes vía" "HTTPS/API"
-telemetry_comp -> fcm "Dispara notificaciones push preventivas y predictivas vía" "HTTPS/API"
+iot_comp -> fcm "Dispara notificaciones push preventivas y predictivas vía" "HTTPS/API"
 outbox_comp -> resend "Despacha notificaciones por correo asíncronas vía" "HTTPS/API"
 outbox_comp -> nubefact "Despacha comprobantes tributarios asíncronos vía" "HTTPS/API"

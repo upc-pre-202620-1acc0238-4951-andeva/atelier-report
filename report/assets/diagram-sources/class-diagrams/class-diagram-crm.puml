@@ -1,0 +1,484 @@
+@startuml class-diagram-crm
+title <size:18>Diagrama de Clases UML - Bounded Context Customer & Fleet Management (CRM) (Domain Layer)</size>\n<size:12>Paquete Canónico: com.andeva.atelier.platform.crm.domain</size>
+
+' Configuraciones visuales y de diseño profesional
+skinparam classAttributeIconSize 0
+skinparam monochrome false
+skinparam shadowing false
+skinparam roundcorner 6
+skinparam linetype ortho
+skinparam nodesep 24
+skinparam ranksep 28
+skinparam defaultFontName "Helvetica", "Arial", sans-serif
+skinparam defaultFontSize 10
+skinparam defaultFontColor #2C3E50
+skinparam arrowColor #34495E
+skinparam arrowThickness 1.1
+skinparam packageBorderColor #7F8C8D
+skinparam packageFontSize 11
+skinparam packageFontStyle bold
+
+' Estilos específicos por categoría táctica
+skinparam class {
+    BackgroundColor #FFFFFF
+    BorderColor #2C3E50
+    HeaderBackgroundColor #EAEDED
+}
+skinparam class<<AggregateRoot>> {
+    BackgroundColor #E8F8F5
+    BorderColor #16A085
+    HeaderBackgroundColor #A3E4D7
+}
+skinparam class<<Entity>> {
+    BackgroundColor #EBF5FB
+    BorderColor #2980B9
+    HeaderBackgroundColor #AED6F1
+}
+skinparam class<<ValueObject>> {
+    BackgroundColor #FEF9E7
+    BorderColor #D68910
+    HeaderBackgroundColor #FAD7A0
+}
+skinparam class<<TypedId>> {
+    BackgroundColor #EBF5FB
+    BorderColor #2980B9
+    HeaderBackgroundColor #AED6F1
+}
+skinparam class<<Exception>> {
+    BackgroundColor #F4ECF7
+    BorderColor #8E44AD
+    HeaderBackgroundColor #D2B4DE
+}
+skinparam class<<SharedKernel>> {
+    BackgroundColor #F8F9F9
+    BorderColor #BDC3C7
+    HeaderBackgroundColor #EAEDED
+}
+skinparam interface {
+    BackgroundColor #E8F6F3
+    BorderColor #117A65
+    HeaderBackgroundColor #A2D9CE
+}
+skinparam enum {
+    BackgroundColor #FCF3CF
+    BorderColor #B7950B
+    HeaderBackgroundColor #F9E79F
+}
+
+set separator none
+
+' ==============================================================================
+' 1. MODELO DE AGREGADOS (AGGREGATES)
+' ==============================================================================
+package "crm.domain.model.aggregates" as aggregates #FDFEFE {
+
+    abstract class "AbstractDomainAggregateRoot<T>" as AbstractDomainAggregateRoot <<SharedKernel>> {
+        # id: T
+        - domainEvents: List<DomainEvent>
+        --
+        # registerDomainEvent(event: DomainEvent): void
+        + domainEvents(): List<DomainEvent>
+        + clearDomainEvents(): void
+    }
+
+    class Customer <<AggregateRoot>> {
+        - id: CustomerId
+        - tenantId: TenantId
+        - type: CustomerType
+        - name: PersonName
+        - companyName: String
+        - taxId: TaxId
+        - email: EmailAddress
+        - phone: PhoneNumber
+        - status: CustomerStatus
+        --
+        + {static} registerIndividual(tenantId: TenantId, name: PersonName, taxId: TaxId, email: EmailAddress, phone: PhoneNumber): Customer
+        + {static} registerCompany(tenantId: TenantId, companyName: String, taxId: TaxId, email: EmailAddress, phone: PhoneNumber): Customer
+        + updateContact(newEmail: EmailAddress, newPhone: PhoneNumber): void
+        + updateProfile(newName: PersonName): void
+        + updateCompanyDetails(newCompanyName: String): void
+        + activate(): void
+        + deactivate(): void
+        + getDisplayName(): String
+        + id(): CustomerId
+        + tenantId(): TenantId
+        + taxId(): TaxId
+        + status(): CustomerStatus
+    }
+
+    class Vehicle <<AggregateRoot>> {
+        - id: VehicleId
+        - plate: LicensePlate
+        - vin: Vin
+        - brand: String
+        - model: String
+        - year: int
+        - engineType: EngineType
+        - ownershipHistory: List<VehicleOwnership>
+        --
+        + {static} register(plate: LicensePlate, vin: Vin, brand: String, model: String, year: int, engineType: EngineType, initialOwnerId: CustomerId): Vehicle
+        + transferOwnership(newOwnerId: CustomerId, transferDate: LocalDate): VehicleOwnership
+        + getActiveOwnership(): Optional<VehicleOwnership>
+        + getCurrentOwnerId(): Optional<CustomerId>
+        + updateTechnicalDetails(newVin: Vin, newEngineType: EngineType): void
+        + id(): VehicleId
+        + plate(): LicensePlate
+        + vin(): Vin
+        + engineType(): EngineType
+    }
+
+    class Appointment <<AggregateRoot>> {
+        - id: AppointmentId
+        - tenantId: TenantId
+        - branchId: BranchId
+        - customerId: CustomerId
+        - vehicleId: VehicleId
+        - scheduledAt: Instant
+        - estimatedDurationMinutes: int
+        - reason: String
+        - status: AppointmentStatus
+        - cancellationReason: String
+        --
+        + {static} schedule(tenantId: TenantId, branchId: BranchId, customerId: CustomerId, vehicleId: VehicleId, scheduledAt: Instant, duration: int, reason: String): Appointment
+        + confirm(): void
+        + markArrived(): void
+        + cancel(reason: String): void
+        + reschedule(newScheduledAt: Instant): void
+        + id(): AppointmentId
+        + status(): AppointmentStatus
+        + scheduledAt(): Instant
+        + estimatedDurationMinutes(): int
+    }
+}
+
+' ==============================================================================
+' 2. ENTIDADES DEPENDIENTES (ENTITIES)
+' ==============================================================================
+package "crm.domain.model.entities" as entities #FDFEFE {
+
+    class VehicleOwnership <<Entity>> {
+        - id: VehicleOwnershipId
+        - vehicleId: VehicleId
+        - customerId: CustomerId
+        - startDate: LocalDate
+        - endDate: LocalDate
+        --
+        + isCurrent(): boolean
+        + terminate(terminationDate: LocalDate): void
+        + id(): VehicleOwnershipId
+        + vehicleId(): VehicleId
+        + customerId(): CustomerId
+        + startDate(): LocalDate
+        + endDate(): LocalDate
+    }
+}
+
+' ==============================================================================
+' 3. SERVICIOS DE DOMINIO (DOMAIN SERVICES)
+' ==============================================================================
+package "crm.domain.services" as services #FDFEFE {
+    class AppointmentSchedulingService <<DomainService>> {
+        - appointmentRepository: AppointmentRepository
+        --
+        + validateSlotAvailability(tenantId: TenantId, branchId: BranchId, scheduledAt: Instant, maxSlots: int): Result<Void, DomainException>
+    }
+
+    class VehicleTransferDomainService <<DomainService>> {
+        - vehicleRepository: VehicleRepository
+        - ownershipRepository: VehicleOwnershipRepository
+        --
+        + transferVehicle(vehicle: Vehicle, targetCustomer: Customer, transferDate: LocalDate): Result<VehicleOwnership, DomainException>
+    }
+}
+
+' ==============================================================================
+' 4. PUERTOS DE REPOSITORIO (DOMAIN PORTS)
+' ==============================================================================
+package "crm.domain.repositories" as repositories #FDFEFE {
+    interface CustomerRepository <<Repository>> {
+        + save(customer: Customer): Customer
+        + findById(id: CustomerId): Optional<Customer>
+        + findByTenantIdAndTaxId(tenantId: TenantId, taxId: TaxId): Optional<Customer>
+        + findByTenantId(tenantId: TenantId): List<Customer>
+        + existsByTenantIdAndTaxId(tenantId: TenantId, taxId: TaxId): boolean
+    }
+
+    interface VehicleRepository <<Repository>> {
+        + save(vehicle: Vehicle): Vehicle
+        + findById(id: VehicleId): Optional<Vehicle>
+        + findByPlate(plate: LicensePlate): Optional<Vehicle>
+        + findByVin(vin: Vin): Optional<Vehicle>
+        + existsByPlate(plate: LicensePlate): boolean
+        + findByCurrentOwnerId(customerId: CustomerId): List<Vehicle>
+    }
+
+    interface VehicleOwnershipRepository <<Repository>> {
+        + save(ownership: VehicleOwnership): VehicleOwnership
+        + findByVehicleId(vehicleId: VehicleId): List<VehicleOwnership>
+        + findActiveOwnershipByVehicleId(vehicleId: VehicleId): Optional<VehicleOwnership>
+    }
+
+    interface AppointmentRepository <<Repository>> {
+        + save(appointment: Appointment): Appointment
+        + findById(id: AppointmentId): Optional<Appointment>
+        + findByTenantIdAndBranchIdAndDate(tenantId: TenantId, branchId: BranchId, start: Instant, end: Instant): List<Appointment>
+        + findByCustomerId(customerId: CustomerId): List<Appointment>
+        + findByVehicleId(vehicleId: VehicleId): List<Appointment>
+        + countActiveByBranchAndSlot(tenantId: TenantId, branchId: BranchId, slotStart: Instant, slotEnd: Instant): long
+    }
+}
+
+' ==============================================================================
+' 5. IDENTIFICADORES TIPADOS Y OBJETOS DE VALOR
+' ==============================================================================
+package "crm.domain.model.ids" as ids #FDFEFE {
+    interface "TypedId<UUID>" as TypedId <<SharedKernel>> {
+        + value(): UUID
+    }
+
+    class CustomerId <<TypedId, record>> {
+        - value: UUID
+        + {static} of(value: UUID): CustomerId
+        + value(): UUID
+    }
+
+    class VehicleId <<TypedId, record>> {
+        - value: UUID
+        + {static} of(value: UUID): VehicleId
+        + value(): UUID
+    }
+
+    class VehicleOwnershipId <<TypedId, record>> {
+        - value: UUID
+        + {static} of(value: UUID): VehicleOwnershipId
+        + value(): UUID
+    }
+
+    class AppointmentId <<TypedId, record>> {
+        - value: UUID
+        + {static} of(value: UUID): AppointmentId
+        + value(): UUID
+    }
+}
+
+package "crm.domain.model.valueobjects" as valueobjects #FDFEFE {
+    class LicensePlate <<ValueObject, record>> {
+        - value: String
+        --
+        + {static} of(plate: String): LicensePlate
+        + normalized(): String
+        + value(): String
+    }
+
+    class Vin <<ValueObject, record>> {
+        - value: String
+        --
+        + {static} of(vin: String): Vin
+        + isValid(): boolean
+        + value(): String
+    }
+}
+
+' ==============================================================================
+' 6. ENUMERACIONES DE DOMINIO
+' ==============================================================================
+package "crm.domain.model.enums" as enums #FDFEFE {
+    enum CustomerType <<Enum>> {
+        INDIVIDUAL
+        COMPANY
+    }
+
+    enum CustomerStatus <<Enum>> {
+        ACTIVE
+        INACTIVE
+    }
+
+    enum EngineType <<Enum>> {
+        GASOLINE
+        DIESEL
+        ELECTRIC
+        HYBRID
+    }
+
+    enum AppointmentStatus <<Enum>> {
+        PENDING
+        CONFIRMED
+        ARRIVED
+        CANCELED
+    }
+}
+
+' ==============================================================================
+' 7. JERARQUÍA DE EXCEPCIONES DE DOMINIO
+' ==============================================================================
+package "crm.domain.exceptions" as exceptions #FDFEFE {
+    abstract class DomainException <<SharedKernel>> {
+        - errorCode: String
+        + errorCode(): String
+    }
+
+    class CustomerNotFoundException <<Exception>> {
+        + CustomerNotFoundException(id: CustomerId)
+    }
+
+    class CustomerAlreadyExistsException <<Exception>> {
+        + CustomerAlreadyExistsException(taxId: TaxId)
+    }
+
+    class CustomerInactiveException <<Exception>> {
+        + CustomerInactiveException(id: CustomerId)
+    }
+
+    class VehicleNotFoundException <<Exception>> {
+        + VehicleNotFoundException(plate: LicensePlate)
+    }
+
+    class VehicleAlreadyExistsException <<Exception>> {
+        + VehicleAlreadyExistsException(plate: LicensePlate)
+    }
+
+    class InvalidLicensePlateException <<Exception>> {
+        + InvalidLicensePlateException(plate: String)
+    }
+
+    class InvalidVinException <<Exception>> {
+        + InvalidVinException(vin: String)
+    }
+
+    class VehicleActiveOwnershipNotFoundException <<Exception>> {
+        + VehicleActiveOwnershipNotFoundException(id: VehicleId)
+    }
+
+    class AppointmentNotFoundException <<Exception>> {
+        + AppointmentNotFoundException(id: AppointmentId)
+    }
+
+    class AppointmentSlotUnavailableException <<Exception>> {
+        + AppointmentSlotUnavailableException(slot: Instant)
+    }
+
+    class AppointmentInvalidStateTransitionException <<Exception>> {
+        + AppointmentInvalidStateTransitionException(current: AppointmentStatus, target: AppointmentStatus)
+    }
+
+    class AppointmentAlreadyArrivedException <<Exception>> {
+        + AppointmentAlreadyArrivedException(id: AppointmentId)
+    }
+}
+
+' ==============================================================================
+' RELACIONES ESTRUCTURALES Y CARDINALIDADES
+' ==============================================================================
+
+' Herencia de Agregados
+AbstractDomainAggregateRoot <|-- Customer
+AbstractDomainAggregateRoot <|-- Vehicle
+AbstractDomainAggregateRoot <|-- Appointment
+
+' Composiciones y Agregaciones de Customer
+Customer "1" o-- "1" CustomerType : "clasificación >"
+Customer "1" o-- "1" CustomerStatus : "estado >"
+Customer "1" o-- "1" CustomerId : "identificado por >"
+
+' Composiciones y Agregaciones de Vehicle
+Vehicle "1" *-- "1..*" VehicleOwnership : "historial custodia >"
+Vehicle "1" o-- "1" LicensePlate : "placa de rodaje >"
+Vehicle "1" o-- "0..1" Vin : "chasis ISO 3779 >"
+Vehicle "1" o-- "1" EngineType : "motorización >"
+Vehicle "1" o-- "1" VehicleId : "identificado por >"
+
+' Relaciones de VehicleOwnership
+VehicleOwnership "1" o-- "1" VehicleOwnershipId : "identificado por >"
+VehicleOwnership "1" o-- "1" CustomerId : "titular asignado >"
+
+' Relaciones de Appointment
+Appointment "1" o-- "1" AppointmentStatus : "estado operativo >"
+Appointment "1" o-- "1" AppointmentId : "identificada por >"
+Appointment "1" o-- "1" CustomerId : "solicitada por >"
+Appointment "1" o-- "1" VehicleId : "vehículo atención >"
+
+' Realizaciones de TypedId
+TypedId <|.. CustomerId
+TypedId <|.. VehicleId
+TypedId <|.. VehicleOwnershipId
+TypedId <|.. AppointmentId
+
+' Generalizaciones de Excepciones
+DomainException <|-- CustomerNotFoundException
+DomainException <|-- CustomerAlreadyExistsException
+DomainException <|-- CustomerInactiveException
+DomainException <|-- VehicleNotFoundException
+DomainException <|-- VehicleAlreadyExistsException
+DomainException <|-- InvalidLicensePlateException
+DomainException <|-- InvalidVinException
+DomainException <|-- VehicleActiveOwnershipNotFoundException
+DomainException <|-- AppointmentNotFoundException
+DomainException <|-- AppointmentSlotUnavailableException
+DomainException <|-- AppointmentInvalidStateTransitionException
+DomainException <|-- AppointmentAlreadyArrivedException
+
+' Enlaces de uso con Repositorios
+CustomerRepository ..up> Customer : "persiste"
+VehicleRepository ..up> Vehicle : "persiste"
+VehicleOwnershipRepository ..up> VehicleOwnership : "persiste"
+AppointmentRepository ..up> Appointment : "persiste"
+
+' Enlaces de Servicios de Dominio
+AppointmentSchedulingService ..down> AppointmentRepository : "consulta aforo"
+VehicleTransferDomainService ..up> Vehicle : "orquesta"
+VehicleTransferDomainService ..up> VehicleOwnership : "transfiere"
+
+' ==============================================================================
+' CONTROL DE DISPOSICIÓN ESPACIAL (ENLACES OCULTOS ENTRE CLASES)
+' ==============================================================================
+
+' Nivel 1: Superclase y Agregados principales
+AbstractDomainAggregateRoot -[hidden]down-> Customer
+Customer -[hidden]right-> Vehicle
+Vehicle -[hidden]right-> Appointment
+
+' Nivel 2: Entidades dependientes y Servicios de Dominio
+Customer -[hidden]down-> VehicleOwnership
+VehicleOwnership -[hidden]right-> AppointmentSchedulingService
+AppointmentSchedulingService -[hidden]right-> VehicleTransferDomainService
+
+' Nivel 3: Puertos de Repositorio (debajo de entidades y servicios)
+VehicleOwnership -[hidden]down-> CustomerRepository
+CustomerRepository -[hidden]right-> VehicleRepository
+VehicleRepository -[hidden]right-> VehicleOwnershipRepository
+VehicleOwnershipRepository -[hidden]right-> AppointmentRepository
+
+' Nivel 4: Typed IDs, Value Objects y Enumeraciones
+CustomerRepository -[hidden]down-> TypedId
+TypedId -[hidden]down-> CustomerId
+CustomerId -[hidden]right-> VehicleId
+VehicleId -[hidden]right-> VehicleOwnershipId
+VehicleOwnershipId -[hidden]right-> AppointmentId
+
+VehicleRepository -[hidden]down-> LicensePlate
+LicensePlate -[hidden]right-> Vin
+
+VehicleOwnershipRepository -[hidden]down-> CustomerType
+CustomerType -[hidden]right-> CustomerStatus
+
+AppointmentRepository -[hidden]down-> EngineType
+EngineType -[hidden]right-> AppointmentStatus
+
+' Nivel 5: Excepciones (en 3 filas equilibradas de 4)
+CustomerId -[hidden]down-> DomainException
+DomainException -[hidden]down-> CustomerNotFoundException
+CustomerNotFoundException -[hidden]right-> CustomerAlreadyExistsException
+CustomerAlreadyExistsException -[hidden]right-> CustomerInactiveException
+CustomerInactiveException -[hidden]right-> VehicleNotFoundException
+
+CustomerNotFoundException -[hidden]down-> VehicleAlreadyExistsException
+VehicleAlreadyExistsException -[hidden]right-> InvalidLicensePlateException
+InvalidLicensePlateException -[hidden]right-> InvalidVinException
+InvalidVinException -[hidden]right-> VehicleActiveOwnershipNotFoundException
+
+VehicleAlreadyExistsException -[hidden]down-> AppointmentNotFoundException
+AppointmentNotFoundException -[hidden]right-> AppointmentSlotUnavailableException
+AppointmentSlotUnavailableException -[hidden]right-> AppointmentInvalidStateTransitionException
+AppointmentInvalidStateTransitionException -[hidden]right-> AppointmentAlreadyArrivedException
+
+@enduml
