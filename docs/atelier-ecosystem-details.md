@@ -24,12 +24,20 @@ Es imperativo aclarar que **Andeva NO vende hardware**.
 Similar a plataformas de ecosistemas bilaterales (como Uber o Rappi), Atelier se divide en dos grandes aplicaciones para conectar a los talleres con sus clientes.
 
 ### Fase 1: Atelier Workshop
-Es el pilar operativo del ecosistema, diseñado específicamente para los **dos segmentos B2B: Personal de Gestión** (dueños, administradores) y **Personal Operativo** (mecánicos, recepcionistas, asesores de servicio).
+Es el pilar operativo del ecosistema, diseñado específicamente para los **dos segmentos B2B: Personal de Gestión** (dueños, administradores, recepcionistas) y **Personal Operativo** (mecánicos, técnicos de patio, asesores de servicio).
 
-* **Aplicación Web:** Un portal de gestión integral donde converge toda la administración del taller.
-  * **RBAC y Multi-tenant:** Está diseñado con una arquitectura segura basada en el control de acceso por roles (RBAC). Las vistas y permisos están estrictamente segmentados: el personal operativo (ej. un mecánico) no tiene acceso al módulo de *billing* o control de personal; un administrador de sucursal (gestión) tiene visión y control solo sobre el local asignado; y el dueño de la franquicia o taller posee el control maestro y la vista de todas sus sucursales.
-* **Aplicación Móvil Cross-Platform:** Una versión optimizada del ecosistema diseñada para smartphones y tablets que unifica a ambos segmentos mediante RBAC. Permite al Personal de Gestión supervisar el patio, aprobar presupuestos y revisar métricas de rentabilidad desde cualquier lugar, mientras brinda al Personal Operativo la movilidad necesaria para interactuar con escáneres OBD2 por Bluetooth y registrar tareas de mantenimiento.
-  * **Soporte Offline-First:** Las tareas asignadas y la recolección de evidencia fotográfica están diseñadas para funcionar sin conexión en las fosas o áreas de baja cobertura del taller, apoyándose en bases de datos relacionales locales sobre **SQLite** (implementadas mediante **Room Database** en la app nativa de Android/Kotlin y mediante **`sqflite`** en la versión de Flutter), que se sincronizan con la nube cuando el dispositivo se re-conecta a la red.
+> [!IMPORTANT]
+> **REGLA FUNDAMENTAL DE PRODUCTO Y ARQUITECTURA (Asimetría WebApp vs. Mobile Workshop):**
+> * **Atelier Workshop sirve a ambos segmentos B2B:**
+>   1. **Atelier Workshop WebApp (Escritorio):** Diseñada para **Personal de Gestión** (dueños, administradores y recepcionistas). Concentra la administración general del taller, finanzas, inventario FIFO, facturación electrónica SUNAT UBL 2.1 y planillas de RRHH. **La WebApp NO posee herramientas exclusivas de patio/piso de taller** (como escaneo Bluetooth BLE de OBD2, registro fotográfico en foso ni sincronización offline-first), ya que no tienen ninguna lógica ni utilidad para un usuario sentado frente a un escritorio.
+>   2. **Atelier Workshop Mobile (Smartphones y Tablets):** Es la aplicación unificada para **AMBOS segmentos B2B**:
+>      - **Para Dueños y Administradores:** Contiene **TODO lo que tiene la WebApp** (supervisión de órdenes, aprobación de presupuestos, métricas financieras, catálogo de inventario y estado del personal), permitiéndoles operar el taller en patio o fuera de la sede.
+>      - **Para Mecánicos y Personal Operativo (en constante movimiento físico):** Es su **ÚNICA herramienta de trabajo**, dotada de capacidades exclusivas de patio que no están en la Web: lectura telemétrica OBD-II directa por Bluetooth Low Energy (BLE), captura fotográfica de evidencias de desarme/armado y soporte *Offline-First* con base de datos local SQLite (`Room` / `sqflite`) para operar en fosos y zonas sin cobertura.
+
+* **Aplicación Web:** Un portal de gestión integral donde converge toda la administración de escritorio del taller.
+  * **RBAC y Multi-tenant:** Las vistas y permisos están estrictamente segmentados: el personal operativo (mecánicos) no accede a la web de escritorio; un administrador de sucursal tiene visión sobre el local asignado; y el dueño posee el control maestro y vista de todas sus sucursales.
+* **Aplicación Móvil Cross-Platform:** Versión unificada que cubre a ambos segmentos mediante RBAC: gestión completa para administradores en patio y herramientas de piso para mecánicos en bahías.
+  * **Soporte Offline-First:** Diseñado para funcionar sin conexión en fosas o zonas sin cobertura mediante base de datos relacional local sobre **SQLite** (`Room` / `sqflite`), sincronizando en bloque (*Batching*) al reconectar a la red.
 
 ### Fase 2: Atelier Driver
 Es la aplicación orientada al **Segmento 3: Propietarios de Vehículos (Particulares y Flotas)** (es decir, personas particulares con un vehículo o empresas con una flota de vehículos).

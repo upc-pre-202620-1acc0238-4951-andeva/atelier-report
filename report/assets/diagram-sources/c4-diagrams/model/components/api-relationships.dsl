@@ -7,8 +7,10 @@ webapp -> hr_comp "Consulta planillas y asistencia del personal vía" "JSON/HTTP
 webapp -> invoicing_comp "Solicita emisión de facturas y boletas SUNAT vía" "JSON/HTTPS"
 webapp -> billing_comp "Administra planes y métodos de pago del taller vía" "JSON/HTTPS"
 
-workshop_mobile -> iam_comp "Autentica credenciales de personal de taller vía" "JSON/HTTPS"
-workshop_mobile -> mro_comp "Sincroniza tareas, estados y evidencias vía" "JSON/HTTPS"
+workshop_mobile -> iam_comp "Autentica credenciales de personal (gestión y operativo) vía" "JSON/HTTPS"
+workshop_mobile -> mro_comp "Supervisa y sincroniza tareas, estados y evidencias vía" "JSON/HTTPS"
+workshop_mobile -> customer_fleet_comp "Consulta clientes, flotas y agenda citas en patio vía" "JSON/HTTPS"
+workshop_mobile -> inventory_comp "Consulta stock de repuestos y alertas FIFO en patio vía" "JSON/HTTPS"
 workshop_mobile -> hr_comp "Envía coordenadas GPS para marcación de entrada y salida vía" "JSON/HTTPS"
 workshop_mobile -> telemetry_comp "Transmite telemetría de diagnósticos por Bluetooth vía" "JSON/HTTPS"
 

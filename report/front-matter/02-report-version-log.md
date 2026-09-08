@@ -10,7 +10,7 @@
 |0.13.0|02/09/2026|Granda Ibarra Luis Daniel|Añadido de **Lean UX Assumptions** y **Hypothesis Statements**.|
 |0.14.0|02/09/2026|Granda Ibarra Luis Daniel|Inserción de la matriz gráfica de **Lean UX Canvas**.|
 |0.15.0|03/09/2026|Huamani Estefanero, Joel|Añadido de la sección de ***Software Architecture*** y reformulación de la documentación de Atelier.|
-|             |           |           |                                 |
+|0.17.0|07/09/2026|Huamani Estefanero, Joel|Añadido de ***Bounded Context: Shared*** y documentación del backend.|
 |             |           |           |                                 |
 |             |           |           |                                 |
 |             |           |           |                                 |

@@ -1,0 +1,8 @@
+// Definición de componentes del Bounded Context Shared dentro del contenedor API Application
+shared_perimeter = component "Perimeter Tracing & Exception Component" "Intercepta peticiones HTTP, inyecta X-Correlation-Id en MDC y formatea errores bajo RFC 7807." "Spring Web, SLF4J MDC, OncePerRequestFilter"
+shared_assemblers = component "REST Assembler & DTO Resource Component" "Mapea tipos de resultado funcionales Result<T, E> a ResponseEntity y formatea ErrorResource y PagedResultResource." "Spring MVC, Java 26 Records"
+shared_cqrs = component "CQRS Framework & Pagination Component" "Contratos base para Command/Query/Event Handlers, tipo sellado Result y modelos de paginación agnósticos." "Java 26 Interfaces, Railway-Oriented Programming"
+shared_domain = component "Domain Foundation & Value Objects Component" "Superclase base de agregados con acumulador de eventos, catálogo de tipos inmutables (Money, GeoPoint, TaxId) y excepciones." "Spring Data Commons, Java Records"
+shared_persistence = component "Persistence Superclass & Converters Component" "Superclase JPA auditable con UUID, convertidores de Value Objects a tipos nativos y estrategia física pluralizada." "Jakarta Persistence 3.1, Hibernate 6.x"
+shared_outbox = component "Transactional Outbox Publisher Component" "Implementa DomainEventPublisher; serializa eventos a JSONB y los persiste en outbox_messages dentro de la transacción activa." "Spring Data JPA, Jackson, Spring Events"
+shared_openapi = component "OpenAPI Specification Component" "Configura metadatos globales OpenAPI 3.0, servidores y esquema de autenticación Bearer JWT para Swagger UI." "SpringDoc OpenAPI 2.8"
