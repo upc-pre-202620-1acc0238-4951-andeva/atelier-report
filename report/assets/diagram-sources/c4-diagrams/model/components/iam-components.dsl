@@ -1,0 +1,9 @@
+// Definición de componentes del Bounded Context IAM & Tenancy dentro del contenedor API Application
+iam_perimeter = component "Perimeter Security & Tenancy Filter Component" "Intercepta peticiones HTTP, valida JWT HMAC-SHA256, extrae claims de tenant/usuario y establece el SecurityContext." "Spring Security 6, OncePerRequestFilter, JJWT"
+iam_controllers = component "REST Controllers & Inbound Interface Component" "Expone endpoints REST para login, registro de talleres, sedes, invitaciones y roles; ensambla recursos y valida DTOs." "Spring MVC, SpringDoc OpenAPI"
+iam_app_services = component "IAM CQRS Application Services Component" "Orquesta casos de uso de registro, onboarding, invitaciones y asignación de roles bajo transacciones ACID." "Spring Service, CQRS, Transactional"
+iam_security_services = component "Security & Cryptographic Services Component" "Emite y valida tokens JWT con claims enriquecidos, y realiza hashing y verificación de contraseñas con BCrypt." "JJWT 0.12.6, Spring Security Crypto"
+iam_domain = component "IAM Domain Aggregate Roots & Core Models Component" "Encapsula reglas de negocio, validación SUNAT RUC Módulo 11, geocercas Haversine y acumulación de eventos de dominio." "Java 26, Domain Model, Records"
+iam_persistence = component "Persistence Repositories & JPA Adapters Component" "Implementa puertos de persistencia con Spring Data JPA y Hibernate, mapeando agregados a tablas en PostgreSQL 16." "Jakarta Persistence 3.1, Spring Data JPA"
+iam_facade = component "Inbound ACL & Tenancy Facade Component" "Fachada Open Host Service en memoria para validación de talleres, membresías y permisos desde otros bounded contexts." "Spring Service, In-Memory ACL"
+iam_external_gateways = component "External Gateways & Outbound Integration Component" "Despacha correos transaccionales vía Resend API (HTTPS 443) y verifica tokens OAuth2 con Google Identity Services." "Spring RestClient, Google API Client SDK"

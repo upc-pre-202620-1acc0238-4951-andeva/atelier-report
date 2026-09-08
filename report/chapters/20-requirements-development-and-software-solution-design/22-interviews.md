@@ -103,7 +103,7 @@ En esta sección presentamos los registros de las entrevistas que hicimos para c
   </tr>
   <tr>
     <td>Evidencia</td>
-    <td><div align="center"><img src="../../assets/Interview-Evidence/Interview-of-Cesar-Nikolay.jpeg" alt="Entrevista Cesar Nikolay"></td>
+    <td><div align="center"><img src="../../assets/Interview-Evidence/Interview-of-Cesar-Nikolay.jpeg" alt="Entrevista Cesar Nikolay"></div></td>
   </tr>
   <tr>
     <td>Link</td>

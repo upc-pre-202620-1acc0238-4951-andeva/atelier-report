@@ -50,6 +50,7 @@ deploymentEnvironment "Production" {
         softwareSystemInstance nubefact
         softwareSystemInstance resend
         softwareSystemInstance google_maps
+        softwareSystemInstance google_identity
     }
 
     // Interacciones de hardware y servicios cloud específicos de despliegue
