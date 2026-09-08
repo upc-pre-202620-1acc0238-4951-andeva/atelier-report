@@ -1,0 +1,585 @@
+@startuml class-diagram-iam
+title <size:18>Diagrama de Clases UML - Bounded Context IAM & Tenancy (Domain Layer)</size>\n<size:12>Paquete Canónico: com.andeva.atelier.platform.iam.domain</size>
+
+' Configuraciones visuales y de diseño profesional
+skinparam classAttributeIconSize 0
+skinparam monochrome false
+skinparam shadowing false
+skinparam roundcorner 6
+skinparam linetype ortho
+skinparam nodesep 26
+skinparam ranksep 30
+skinparam defaultFontName "Helvetica", "Arial", sans-serif
+skinparam defaultFontSize 10
+skinparam defaultFontColor #2C3E50
+skinparam arrowColor #34495E
+skinparam arrowThickness 1.1
+skinparam packageBorderColor #7F8C8D
+skinparam packageFontSize 11
+skinparam packageFontStyle bold
+
+' Estilos específicos por categoría táctica
+skinparam class {
+    BackgroundColor #FFFFFF
+    BorderColor #2C3E50
+    HeaderBackgroundColor #EAEDED
+}
+skinparam class<<AggregateRoot>> {
+    BackgroundColor #E8F8F5
+    BorderColor #16A085
+    HeaderBackgroundColor #A3E4D7
+}
+skinparam class<<Entity>> {
+    BackgroundColor #EBF5FB
+    BorderColor #2980B9
+    HeaderBackgroundColor #AED6F1
+}
+skinparam class<<ValueObject>> {
+    BackgroundColor #FEF9E7
+    BorderColor #D68910
+    HeaderBackgroundColor #FAD7A0
+}
+skinparam class<<TypedId>> {
+    BackgroundColor #EBF5FB
+    BorderColor #2980B9
+    HeaderBackgroundColor #AED6F1
+}
+skinparam class<<Exception>> {
+    BackgroundColor #F4ECF7
+    BorderColor #8E44AD
+    HeaderBackgroundColor #D2B4DE
+}
+skinparam class<<SharedKernel>> {
+    BackgroundColor #F8F9F9
+    BorderColor #BDC3C7
+    HeaderBackgroundColor #EAEDED
+}
+skinparam interface {
+    BackgroundColor #E8F6F3
+    BorderColor #117A65
+    HeaderBackgroundColor #A2D9CE
+}
+skinparam enum {
+    BackgroundColor #FCF3CF
+    BorderColor #B7950B
+    HeaderBackgroundColor #F9E79F
+}
+
+set separator none
+
+' ==============================================================================
+' 1. MODELO DE AGREGADOS (AGGREGATES)
+' ==============================================================================
+package "iam.domain.model.aggregates" as aggregates #FDFEFE {
+
+    abstract class "AbstractDomainAggregateRoot<T>" as AbstractDomainAggregateRoot <<SharedKernel>> {
+        # id: T
+        - domainEvents: List<DomainEvent>
+        --
+        # registerDomainEvent(event: DomainEvent): void
+        + domainEvents(): List<DomainEvent>
+        + clearDomainEvents(): void
+    }
+
+    class Tenant <<AggregateRoot>> {
+        - id: TenantId
+        - name: String
+        - legalName: String
+        - taxId: TaxId
+        - status: TenantStatus
+        - stripeCustomerId: String
+        - branches: List<Branch>
+        --
+        + {static} create(name: String, legalName: String, taxId: TaxId): Tenant
+        + assignStripeCustomerId(customerId: String): void
+        + activate(): void
+        + suspend(reason: String): void
+        + addBranch(name: String, sunatCode: String, loc: GeoPoint, radius: int): Branch
+        + updateProfile(name: String, legalName: String): void
+        + findBranchById(branchId: BranchId): Optional<Branch>
+        + activeBranches(): List<Branch>
+        + id(): TenantId
+        + status(): TenantStatus
+        + taxId(): TaxId
+    }
+
+    class User <<AggregateRoot>> {
+        - id: UserId
+        - email: EmailAddress
+        - password: Password
+        - authProvider: AuthProvider
+        - googleId: String
+        - fcmToken: String
+        - status: UserStatus
+        - profile: Profile
+        - verificationTokens: List<VerificationToken>
+        --
+        + {static} registerWithLocalCredentials(email: EmailAddress, pass: Password, name: PersonName, phone: PhoneNumber): User
+        + {static} registerWithGoogle(email: EmailAddress, googleId: String, name: PersonName, avatarUrl: String): User
+        + verifyEmail(): void
+        + updatePassword(newPassword: Password): void
+        + updateFcmToken(fcmToken: String): void
+        + issueVerificationToken(type: TokenType, validity: Duration): VerificationToken
+        + validateAndConsumeToken(tokenVal: String, type: TokenType): boolean
+        + updateProfile(name: PersonName, phone: PhoneNumber): void
+        + suspend(): void
+        + id(): UserId
+        + email(): EmailAddress
+        + status(): UserStatus
+    }
+
+    class TenantMembership <<AggregateRoot>> {
+        - id: TenantMembershipId
+        - tenantId: TenantId
+        - userId: UserId
+        - status: MembershipStatus
+        - salaryType: SalaryType
+        - baseSalary: Money
+        - assignedRoles: Set<Role>
+        --
+        + {static} create(tenantId: TenantId, userId: UserId, type: SalaryType, salary: Money, roles: Set<Role>): TenantMembership
+        + assignRole(role: Role): void
+        + revokeRole(roleId: RoleId): void
+        + updateCompensation(type: SalaryType, salary: Money): void
+        + activate(): void
+        + deactivate(): void
+        + hasPermission(permissionName: String): boolean
+        + id(): TenantMembershipId
+        + tenantId(): TenantId
+        + userId(): UserId
+        + status(): MembershipStatus
+    }
+
+    class Role <<AggregateRoot>> {
+        - id: RoleId
+        - tenantId: TenantId
+        - name: String
+        - description: String
+        - isSystemRole: boolean
+        - permissions: Set<Permission>
+        --
+        + {static} defineTenantRole(tenantId: TenantId, name: String, desc: String, perms: Set<Permission>): Role
+        + {static} defineSystemRole(name: String, desc: String, perms: Set<Permission>): Role
+        + grantPermission(permission: Permission): void
+        + revokePermission(permissionId: PermissionId): void
+        + updateDetails(name: String, desc: String): void
+        + id(): RoleId
+        + tenantId(): TenantId
+        + isSystemRole(): boolean
+        + permissions(): Set<Permission>
+    }
+
+    class Invitation <<AggregateRoot>> {
+        - id: InvitationId
+        - tenantId: TenantId
+        - email: EmailAddress
+        - roleId: RoleId
+        - token: String
+        - status: InvitationStatus
+        - expiresAt: Instant
+        --
+        + {static} issue(tenantId: TenantId, email: EmailAddress, roleId: RoleId, token: String, validity: Duration): Invitation
+        + accept(): void
+        + revoke(): void
+        + isExpired(): boolean
+        + isValid(): boolean
+        + id(): InvitationId
+        + tenantId(): TenantId
+        + email(): EmailAddress
+        + roleId(): RoleId
+        + status(): InvitationStatus
+    }
+}
+
+' ==============================================================================
+' 2. ENTIDADES DEPENDIENTES (ENTITIES)
+' ==============================================================================
+package "iam.domain.model.entities" as entities #FDFEFE {
+
+    class Branch <<Entity>> {
+        - id: BranchId
+        - tenantId: TenantId
+        - name: String
+        - sunatCode: String
+        - location: GeoPoint
+        - geofenceRadiusMeters: int
+        - isActive: boolean
+        --
+        + updateLocation(newLoc: GeoPoint, newRadius: int): void
+        + updateDetails(newName: String, newSunatCode: String): void
+        + deactivate(): void
+        + activate(): void
+        + isWithinGeofence(coord: GeoPoint): boolean
+        + id(): BranchId
+        + location(): GeoPoint
+        + geofenceRadiusMeters(): int
+        + isActive(): boolean
+    }
+
+    class Profile <<Entity>> {
+        - userId: UserId
+        - name: PersonName
+        - phone: PhoneNumber
+        - avatarUrl: String
+        --
+        + update(name: PersonName, phone: PhoneNumber): void
+        + updateAvatar(avatarUrl: String): void
+        + fullName(): String
+        + name(): PersonName
+        + phone(): PhoneNumber
+        + avatarUrl(): String
+    }
+
+    class VerificationToken <<Entity>> {
+        - id: UUID
+        - userId: UserId
+        - tokenValue: String
+        - type: TokenType
+        - expiresAt: Instant
+        - isUsed: boolean
+        --
+        + isValid(): boolean
+        + consume(): void
+        + tokenValue(): String
+        + type(): TokenType
+        + isUsed(): boolean
+    }
+
+    class Permission <<Entity>> {
+        - id: PermissionId
+        - name: String
+        - description: String
+        - category: String
+        --
+        + {static} of(id: PermissionId, name: String, desc: String, cat: String): Permission
+        + id(): PermissionId
+        + name(): String
+        + category(): String
+    }
+}
+
+' ==============================================================================
+' 3. IDENTIFICADORES TIPADOS Y OBJETOS DE VALOR
+' ==============================================================================
+package "iam.domain.model.ids" as ids #FDFEFE {
+    interface "TypedId<UUID>" as TypedId <<SharedKernel>> {
+        + value(): UUID
+    }
+
+    class TenantMembershipId <<TypedId, record>> {
+        - value: UUID
+        + {static} of(value: UUID): TenantMembershipId
+        + value(): UUID
+    }
+
+    class RoleId <<TypedId, record>> {
+        - value: UUID
+        + {static} of(value: UUID): RoleId
+        + value(): UUID
+    }
+
+    class PermissionId <<TypedId, record>> {
+        - value: UUID
+        + {static} of(value: UUID): PermissionId
+        + value(): UUID
+    }
+
+    class InvitationId <<TypedId, record>> {
+        - value: UUID
+        + {static} of(value: UUID): InvitationId
+        + value(): UUID
+    }
+
+    class BranchId <<TypedId, record>> {
+        - value: UUID
+        + {static} of(value: UUID): BranchId
+        + value(): UUID
+    }
+}
+
+package "iam.domain.model.valueobjects" as valueobjects #FDFEFE {
+    class Password <<ValueObject, record>> {
+        - hashedValue: String
+        --
+        + {static} fromHash(hash: String): Password
+        + hashedValue(): String
+    }
+
+    class PersonName <<ValueObject, record>> {
+        - firstName: String
+        - lastName: String
+        --
+        + {static} of(first: String, last: String): PersonName
+        + fullName(): String
+    }
+}
+
+' ==============================================================================
+' 4. ENUMERACIONES DE DOMINIO
+' ==============================================================================
+package "iam.domain.model.enums" as enums #FDFEFE {
+    enum TenantStatus <<Enum>> {
+        PENDING
+        ACTIVE
+        SUSPENDED
+    }
+
+    enum UserStatus <<Enum>> {
+        PENDING_VERIFICATION
+        ACTIVE
+        SUSPENDED
+    }
+
+    enum AuthProvider <<Enum>> {
+        LOCAL
+        GOOGLE
+    }
+
+    enum TokenType <<Enum>> {
+        EMAIL_VERIFICATION
+        PASSWORD_RESET
+        LOGIN_OTP
+    }
+
+    enum MembershipStatus <<Enum>> {
+        ACTIVE
+        INACTIVE
+    }
+
+    enum SalaryType <<Enum>> {
+        FIXED
+        HOURLY
+    }
+
+    enum InvitationStatus <<Enum>> {
+        PENDING
+        ACCEPTED
+        EXPIRED
+        REVOKED
+    }
+}
+
+' ==============================================================================
+' 5. PUERTOS DE REPOSITORIO (DOMAIN PORTS)
+' ==============================================================================
+package "iam.domain.repositories" as repositories #FDFEFE {
+    interface TenantRepository <<Repository>> {
+        + save(tenant: Tenant): Tenant
+        + findById(id: TenantId): Optional<Tenant>
+        + findByTaxId(taxId: TaxId): Optional<Tenant>
+        + existsByTaxId(taxId: TaxId): boolean
+    }
+
+    interface UserRepository <<Repository>> {
+        + save(user: User): User
+        + findById(id: UserId): Optional<User>
+        + findByEmail(email: EmailAddress): Optional<User>
+        + findByGoogleId(googleId: String): Optional<User>
+        + existsByEmail(email: EmailAddress): boolean
+    }
+
+    interface BranchRepository <<Repository>> {
+        + save(branch: Branch): Branch
+        + findById(id: BranchId): Optional<Branch>
+        + findByTenantId(tenantId: TenantId): List<Branch>
+    }
+
+    interface TenantMembershipRepository <<Repository>> {
+        + save(membership: TenantMembership): TenantMembership
+        + findById(id: TenantMembershipId): Optional<TenantMembership>
+        + findByTenantIdAndUserId(tenantId: TenantId, userId: UserId): Optional<TenantMembership>
+        + findByUserId(userId: UserId): List<TenantMembership>
+        + findByTenantId(tenantId: TenantId): List<TenantMembership>
+    }
+
+    interface RoleRepository <<Repository>> {
+        + save(role: Role): Role
+        + findById(id: RoleId): Optional<Role>
+        + findByTenantIdOrSystem(tenantId: TenantId): List<Role>
+        + findSystemRoles(): List<Role>
+    }
+
+    interface PermissionRepository <<Repository>> {
+        + findAll(): List<Permission>
+        + findById(id: PermissionId): Optional<Permission>
+        + findByName(name: String): Optional<Permission>
+    }
+
+    interface InvitationRepository <<Repository>> {
+        + save(invitation: Invitation): Invitation
+        + findById(id: InvitationId): Optional<Invitation>
+        + findByToken(token: String): Optional<Invitation>
+        + findByTenantIdAndEmail(tenantId: TenantId, email: EmailAddress): Optional<Invitation>
+    }
+}
+
+' ==============================================================================
+' 6. JERARQUÍA DE EXCEPCIONES DE DOMINIO
+' ==============================================================================
+package "iam.domain.exceptions" as exceptions #FDFEFE {
+    abstract class DomainException <<SharedKernel>> {
+        - errorCode: String
+        + errorCode(): String
+    }
+
+    class TenantNotFoundException <<Exception>> {
+        + TenantNotFoundException(id: TenantId)
+    }
+
+    class TenantAlreadyExistsException <<Exception>> {
+        + TenantAlreadyExistsException(taxId: TaxId)
+    }
+
+    class UserNotFoundException <<Exception>> {
+        + UserNotFoundException(email: EmailAddress)
+    }
+
+    class UserAlreadyExistsException <<Exception>> {
+        + UserAlreadyExistsException(email: EmailAddress)
+    }
+
+    class InvalidCredentialsException <<Exception>> {
+        + InvalidCredentialsException(msg: String)
+    }
+
+    class MembershipNotFoundException <<Exception>> {
+        + MembershipNotFoundException(tenantId: TenantId, userId: UserId)
+    }
+
+    class RoleNotFoundException <<Exception>> {
+        + RoleNotFoundException(roleId: RoleId)
+    }
+
+    class InvitationNotFoundException <<Exception>> {
+        + InvitationNotFoundException(token: String)
+    }
+}
+
+' ==============================================================================
+' RELACIONES ESTRUCTURALES Y CARDINALIDADES
+' ==============================================================================
+
+' Herencia de Agregados
+AbstractDomainAggregateRoot <|-- Tenant
+AbstractDomainAggregateRoot <|-- User
+AbstractDomainAggregateRoot <|-- TenantMembership
+AbstractDomainAggregateRoot <|-- Role
+AbstractDomainAggregateRoot <|-- Invitation
+
+' Composiciones y Agregaciones de Tenant
+Tenant "1" *-- "1..*" Branch : "administra sedes >"
+Tenant "1" o-- "1" TenantStatus : "estado >"
+Branch "1" o-- "1" BranchId : "identificada por >"
+
+' Composiciones y Agregaciones de User
+User "1" *-- "1" Profile : "perfil biográfico >"
+User "1" *-- "0..*" VerificationToken : "emite tokens >"
+User "1" o-- "0..1" Password : "hash de acceso >"
+User "1" o-- "1" UserStatus : "estado >"
+User "1" o-- "1" AuthProvider : "proveedor >"
+Profile "1" o-- "1" PersonName : "nombre >"
+VerificationToken "1" o-- "1" TokenType : "propósito >"
+
+' Relaciones de TenantMembership
+TenantMembership "1" o-- "1..*" Role : "roles asignados >"
+TenantMembership "1" o-- "1" SalaryType : "esquema >"
+TenantMembership "1" o-- "1" MembershipStatus : "vigencia >"
+TenantMembership "1" o-- "1" TenantMembershipId : "identificada por >"
+
+' Relaciones de Role y Permission
+Role "1" o-- "1..*" Permission : "agrupa privilegios >"
+Role "1" o-- "1" RoleId : "identificado por >"
+Permission "1" o-- "1" PermissionId : "identificado por >"
+
+' Relaciones de Invitation
+Invitation "1" o-- "1" InvitationStatus : "estado >"
+Invitation "1" o-- "1" InvitationId : "identificada por >"
+
+' Realizaciones de TypedId
+TypedId <|.. BranchId
+TypedId <|.. TenantMembershipId
+TypedId <|.. RoleId
+TypedId <|.. PermissionId
+TypedId <|.. InvitationId
+
+' Generalizaciones de Excepciones
+DomainException <|-- TenantNotFoundException
+DomainException <|-- TenantAlreadyExistsException
+DomainException <|-- UserNotFoundException
+DomainException <|-- UserAlreadyExistsException
+DomainException <|-- InvalidCredentialsException
+DomainException <|-- MembershipNotFoundException
+DomainException <|-- RoleNotFoundException
+DomainException <|-- InvitationNotFoundException
+
+' Enlaces de uso con Repositorios
+TenantRepository ..> Tenant : "persiste"
+BranchRepository ..> Branch : "persiste"
+UserRepository ..> User : "persiste"
+TenantMembershipRepository ..> TenantMembership : "persiste"
+RoleRepository ..> Role : "persiste"
+PermissionRepository ..> Permission : "consulta"
+InvitationRepository ..> Invitation : "persiste"
+
+' ==============================================================================
+' CONTROL DE DISPOSICIÓN ESPACIAL (ENLACES OCULTOS ENTRE CLASES)
+' ==============================================================================
+' Nivel 1 (Superclase y Agregados principales)
+AbstractDomainAggregateRoot -[hidden]down-> Tenant
+Tenant -[hidden]right-> User
+
+' Nivel 2 (Agregados secundarios)
+Tenant -[hidden]down-> TenantMembership
+User -[hidden]down-> Role
+TenantMembership -[hidden]right-> Role
+Role -[hidden]right-> Invitation
+
+' Nivel 3 (Entidades dependientes)
+TenantMembership -[hidden]down-> Branch
+Role -[hidden]down-> Profile
+Invitation -[hidden]down-> VerificationToken
+Profile -[hidden]right-> Permission
+
+' Nivel 4 (Puertos de Repositorio - Fila 1)
+Branch -[hidden]down-> TenantRepository
+TenantRepository -[hidden]right-> BranchRepository
+BranchRepository -[hidden]right-> UserRepository
+
+' Nivel 5 (Puertos de Repositorio - Fila 2)
+TenantRepository -[hidden]down-> TenantMembershipRepository
+TenantMembershipRepository -[hidden]right-> RoleRepository
+RoleRepository -[hidden]right-> PermissionRepository
+PermissionRepository -[hidden]right-> InvitationRepository
+
+' Nivel 6 (Typed IDs, VOs y Enums)
+TenantMembershipRepository -[hidden]down-> TypedId
+TypedId -[hidden]down-> BranchId
+BranchId -[hidden]right-> TenantMembershipId
+TenantMembershipId -[hidden]right-> RoleId
+RoleId -[hidden]right-> PermissionId
+PermissionId -[hidden]right-> InvitationId
+
+RoleRepository -[hidden]down-> Password
+Password -[hidden]right-> PersonName
+PersonName -[hidden]right-> TenantStatus
+TenantStatus -[hidden]right-> UserStatus
+UserStatus -[hidden]right-> AuthProvider
+
+PermissionRepository -[hidden]down-> TokenType
+TokenType -[hidden]right-> MembershipStatus
+MembershipStatus -[hidden]right-> SalaryType
+SalaryType -[hidden]right-> InvitationStatus
+
+' Nivel 7 (Excepciones en 2 filas de 4)
+BranchId -[hidden]down-> DomainException
+DomainException -[hidden]down-> TenantNotFoundException
+TenantNotFoundException -[hidden]right-> TenantAlreadyExistsException
+TenantAlreadyExistsException -[hidden]right-> UserNotFoundException
+UserNotFoundException -[hidden]right-> UserAlreadyExistsException
+
+TenantNotFoundException -[hidden]down-> InvalidCredentialsException
+InvalidCredentialsException -[hidden]right-> MembershipNotFoundException
+MembershipNotFoundException -[hidden]right-> RoleNotFoundException
+RoleNotFoundException -[hidden]right-> InvitationNotFoundException
+
+@enduml

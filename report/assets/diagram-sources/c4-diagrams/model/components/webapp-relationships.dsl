@@ -32,3 +32,4 @@ auth_guard_comp -> api_client_comp "Envía credenciales y solicita renovación d
 // Llamadas salientes desde Web Application
 api_client_comp -> api "Transmite peticiones RESTful autenticadas con Bearer JWT vía" "JSON/HTTPS"
 subscription_comp_ui -> stripe "Tokeniza datos de tarjetas bancarias directamente vía" "Stripe.js / HTTPS"
+auth_guard_comp -> google_identity "Autentica usuarios mediante Single Sign-On y obtiene ID Token vía" "Google Identity Services / HTTPS"

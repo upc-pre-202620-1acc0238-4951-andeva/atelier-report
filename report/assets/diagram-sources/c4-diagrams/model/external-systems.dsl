@@ -19,3 +19,7 @@ google_maps = softwareSystem "Google Maps Platform" "Servicios de geolocalizaci�
 obd2_sim = softwareSystem "Dispositivos OBD2 con SIM" "Equipos telemétricos independientes que transmiten métricas vehiculares por red celular." {
     tags "External"
 }
+google_identity = softwareSystem "Google Identity Services" "Plataforma OAuth2 y OpenID Connect para Single Sign-On y verificación de credenciales federadas." {
+    tags "External"
+}
+
