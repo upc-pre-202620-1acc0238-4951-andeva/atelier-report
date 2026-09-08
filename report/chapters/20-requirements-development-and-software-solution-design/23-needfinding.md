@@ -8,13 +8,13 @@ En esta sección se describen dos User Personas que representan los segmentos cl
 
 **Segmento 1**
 
-![User Persona 1](../../assets/NeedFinding/User-Personas/User-Persona-Cesar-Nikolay.png)
+![User Persona 1](report/assets/NeedFinding/User-Personas/User-Persona-Cesar-Nikolay.png){#fig:user-persona-cesar}
 
 El User Persona de Jorge Aguilar representa al Segmento 1: Personal de Gestión y Propietarios de Taller. A sus 53 años y con más de tres décadas de experiencia en el rubro automotriz, Jorge lidera de forma independiente un servicio mecánico de campo enfocado en maquinaria y unidades estacionarias. Su día a día combina la ejecución técnica con la administración general del negocio, por lo que busca herramientas sencillas que le permitan mantener una comunicación transparente con sus clientes y recomendar mantenimientos preventivos oportunos. Su principal motivación es garantizar la rentabilidad y reputación de su empresa, mientras que sus mayores frustraciones radican en la sobrecarga de trabajo al gestionar la operación en solitario, la resistencia de algunos clientes a realizar mantenimientos antes de una avería grave y la falta de visibilidad del estado de los vehículos cuando no se encuentra presente en el lugar.
 
 **Segmento 2**
 
-![User Persona 2](../../assets/NeedFinding/User-Personas/User-Persona-Jorge-Aguilar.png)
+![User Persona 2](report/assets/NeedFinding/User-Personas/User-Persona-Jorge-Aguilar.png){#fig:user-persona-jorge}
 
 Por otro lado, el User Persona de Nicolai encarna al Segmento 2: Personal Operativo del Taller. Como técnico especialista en diagnóstico y mantenimiento de 23 años, Nicolai trabaja en un entorno de alta exigencia donde utiliza escáneres computarizados para la lectura de flujos de datos por puerto OBD2. Altamente familiarizado con el uso de smartphones Android, busca optimizar su flujo de trabajo y reducir los tiempos muertos causados por la desorganización en la aprobación de repuestos o presupuestos. Sus metas profesionales se centran en obtener certificaciones en mecatrónica automotriz y ascender hacia la gestión de centros de servicio estandarizados. No obstante, se enfrenta a la imprecisión del registro manual de sus tiempos de reparación, la falta de señal en fosos de inspección y el uso de canales de comunicación informales que traspapelan la información técnica, obligándolo a guardar respaldos fotográficos en su teléfono personal para evidenciar el volumen real de sus tareas completadas.
 
@@ -34,11 +34,15 @@ Por otro lado, el User Persona de Nicolai encarna al Segmento 2: Personal Operat
 
 Como parte fundamental de la fase de exploración y comprensión de necesidades (*Needfinding*), el equipo llevó a cabo un taller colaborativo de **Big Picture EventStorming**. Esta dinámica, concebida por Alberto Brandolini, tuvo como propósito construir un modelo mental compartido y sinérgico entre todos los integrantes sobre la totalidad del ciclo de vida operativo del ecosistema **Atelier**, identificando las interacciones entre los diferentes actores, los puntos de fricción (*hotspots*), los cuellos de botella en la gestión de talleres y las oportunidades para la automatización mediante telemetría IoT.
 
-A diferencia del modelado detallado a nivel de diseño de software, el nivel *Big Picture* se enfoca en la visión panorámica del negocio, permitiendo alinear la comprensión del flujo de valor antes de formular límites técnicos rígidos. El resultado de esta exploración integral en la herramienta colaborativa Miro se sintetiza en la @fig:big-picture-eventstorming.
+A diferencia del modelado detallado a nivel de diseño de software, el nivel *Big Picture* se enfoca en la visión panorámica del negocio, permitiendo alinear la comprensión del flujo de valor antes de formular límites técnicos rígidos. El resultado de esta exploración integral en la herramienta colaborativa Miro se presenta en dos dimensiones complementarias: la recolección exhaustiva del flujo de eventos (@fig:big-picture-flujo-eventos) y la estructuración por carriles de actores, etapas del proceso y puntos críticos del servicio (@fig:big-picture-actores-puntos-criticos).
 
-![Big Picture EventStorming del Ecosistema Atelier](report/assets/strategic-ddd/big-picture-event-storming.png){#fig:big-picture-eventstorming}
+![Big Picture EventStorming: Recolección y Flujo de Eventos de Dominio](report/assets/strategic-ddd/big-picture-01-flujo-eventos.png){#fig:big-picture-flujo-eventos}
 
-*Nota.* Vista panorámica del taller de Big Picture EventStorming elaborado por el equipo en Miro, trazando los eventos de dominio desde la ingesta de telemetría hasta el cierre de la orden de trabajo.
+*Nota.* Vista de la recolección y secuencia de eventos de dominio durante el taller de Big Picture EventStorming en Miro.
+
+![Big Picture EventStorming: Actores, Etapas del Proceso y Puntos Críticos](report/assets/strategic-ddd/big-picture-02-actores-puntos-criticos.png){#fig:big-picture-actores-puntos-criticos}
+
+*Nota.* Vista estructurada por carriles de actores (Conductor, Asesor de Servicio, Mecánico / Jefe de Taller, Administrador), etapas operativas y puntos críticos de decisión en Miro.
 
 El recorrido del dominio modelado en el Big Picture abarca los siguientes momentos clave de la operativa automotriz:
 

@@ -23,14 +23,77 @@ El *EventStorming* es una metodología de modelado rápido, colaborativo y centr
 
 El descubrimiento de los contextos candidatos para el ecosistema Atelier se llevó a cabo mediante un riguroso proceso de ocho fases estructuradas durante la sesión de *EventStorming*:
 
-1. **Fase 1: Exploración Caótica de Eventos de Dominio:** Los participantes generaron sin restricciones iniciales todos los eventos concebibles que ocurren a lo largo del ciclo de vida automotriz, desde la adquisición de un repuesto hasta la entrega del auto reparado y la monitorización de telemetría.
-2. **Fase 2: Ordenamiento Temporal y Línea de Tiempo:** Se organizaron los eventos en secuencias cronológicas concurrentes para modelar la línea de tiempo principal del taller y los flujos paralelos de los clientes particulares y flotas corporativas.
-3. **Fase 3: Identificación de Disparadores y Comandos:** Se identificaron las causas de cada evento de dominio, determinando qué comandos específicos emitidos por actores o sistemas desencadenaron las transiciones de estado.
-4. **Fase 4: Formulación de Políticas Reactivas:** Se trazaron las políticas automatizadas que responden a eventos clave, garantizando que los módulos colaboren sin acoplamiento temporal directo.
-5. **Fase 5: Modelado de Interfaces de Información y Vistas de Lectura:** Se vincularon las pantallas de las aplicaciones web y móviles con los modelos de lectura requeridos por los mecánicos y administradores.
-6. **Fase 6: Detección de Fronteras e Integraciones Externas:** Se aislaron las responsabilidades que deben delegarse a proveedores de infraestructura externa (validación de comprobantes ante SUNAT, almacenamiento telemétrico en la nube y pasarelas de cobro).
-7. **Fase 7: Consolidación de Agregados:** Se asociaron los comandos y eventos a sus respectivas raíces de agregado, definiendo qué objetos de negocio son responsables de mantener invariantes transaccionales.
-8. **Fase 8: Delimitación de Contextos Candidatos:** Mediante análisis semántico y fronteras lingüísticas, se agruparon los agregados afines, descubriendo ocho *Bounded Contexts* claramente diferenciados más un contexto compartido.
+1. **Fase 1: Exploración Caótica de Eventos de Dominio:** Los participantes generaron sin restricciones iniciales todos los eventos concebibles que ocurren a lo largo del ciclo de vida automotriz (@fig:es-step-1).
+
+![EventStorming Paso 1: Recolección de Eventos del Dominio](report/assets/strategic-ddd/event-storming-step-1-events.png){#fig:es-step-1}
+
+*Nota.* Lluvia de ideas inicial con notas adhesivas naranjas registrando los eventos consumados del dominio automotriz en participio pasado.
+
+2. **Fase 2: Ordenamiento Temporal y Línea de Tiempo:** Se organizaron los eventos en secuencias cronológicas concurrentes para modelar la línea de tiempo principal del taller y los flujos de soporte (@fig:es-step-2-1 y @fig:es-step-2-2).
+
+![EventStorming Paso 2: Línea de Tiempo - Identidad, Clientes, Telemetría y Operaciones](report/assets/strategic-ddd/event-storming-step-2-timeline-1.png){#fig:es-step-2-1}
+
+*Nota.* Secuenciación temporal de eventos para los carriles operativos principales.
+
+![EventStorming Paso 2: Línea de Tiempo - Inventario, Asistencia, Facturación y Suscripción](report/assets/strategic-ddd/event-storming-step-2-timeline-2.png){#fig:es-step-2-2}
+
+*Nota.* Secuenciación temporal de eventos para los carriles de soporte administrativo y financiero.
+
+3. **Fase 3: Identificación de Disparadores y Comandos:** Se identificaron las causas de cada evento de dominio, determinando qué comandos específicos en color azul emitidos por actores o sistemas desencadenaron las transiciones de estado (@fig:es-step-3-1 y @fig:es-step-3-2).
+
+![EventStorming Paso 3: Identificación de Comandos (Parte 1)](report/assets/strategic-ddd/event-storming-step-3-commands-1.png){#fig:es-step-3-1}
+
+*Nota.* Inserción de notas azules correspondientes a las intenciones de usuario y directivas del sistema.
+
+![EventStorming Paso 3: Identificación de Comandos (Parte 2)](report/assets/strategic-ddd/event-storming-step-3-commands-2.png){#fig:es-step-3-2}
+
+*Nota.* Mapeo de comandos para los flujos de almacén, recursos humanos, facturación y cobros.
+
+4. **Fase 4: Formulación de Políticas Reactivas y Actores:** Se asociaron los roles de usuario (notas amarillas) y las políticas reactivas en color morado que rigen la interacción intermodular sin acoplamiento temporal directo (@fig:es-step-4-1 y @fig:es-step-4-2).
+
+![EventStorming Paso 4: Políticas Reactivas y Actores (Parte 1)](report/assets/strategic-ddd/event-storming-step-4-policies-actors-1.png){#fig:es-step-4-1}
+
+*Nota.* Vinculación de actores operativos y formulación de reglas condicionales "Cuando [Evento], Entonces [Comando]".
+
+![EventStorming Paso 4: Políticas Reactivas y Actores (Parte 2)](report/assets/strategic-ddd/event-storming-step-4-policies-actors-2.png){#fig:es-step-4-2}
+
+*Nota.* Mapeo de políticas para la validación georreferenciada de asistencia y disparo de liquidación contable.
+
+5. **Fase 5: Modelado de Interfaces de Información y Vistas de Lectura:** Se estructuraron los modelos de lectura en notas verdes (*Read Models*) necesarios para que los usuarios tomen decisiones operativas informadas antes de emitir un comando (@fig:es-step-5-1 y @fig:es-step-5-2).
+
+![EventStorming Paso 5: Modelos de Lectura (Read Models) (Parte 1)](report/assets/strategic-ddd/event-storming-step-5-read-models-1.png){#fig:es-step-5-1}
+
+*Nota.* Proyecciones visuales requeridas en la interfaz de usuario para la asignación de bahías y seguimiento de fallas.
+
+![EventStorming Paso 5: Modelos de Lectura (Read Models) (Parte 2)](report/assets/strategic-ddd/event-storming-step-5-read-models-2.png){#fig:es-step-5-2}
+
+*Nota.* Vistas informativas para el control de asistencia, saldos de stock FIFO y tarifas de suscripción.
+
+6. **Fase 6: Detección de Fronteras e Integraciones Externas:** Se aislaron las responsabilidades delegadas a plataformas y servicios externos mediante notas rosas (@fig:es-step-6-1 y @fig:es-step-6-2).
+
+![EventStorming Paso 6: Detección de Sistemas Externos (Parte 1)](report/assets/strategic-ddd/event-storming-step-6-external-systems-1.png){#fig:es-step-6-1}
+
+*Nota.* Identificación de hardware OBD-II, Firebase Storage y servicios de mensajería externa.
+
+![EventStorming Paso 6: Detección de Sistemas Externos (Parte 2)](report/assets/strategic-ddd/event-storming-step-6-external-systems-2.png){#fig:es-step-6-2}
+
+*Nota.* Delimitación de fronteras de integración hacia Nubefact (SUNAT), Stripe y Google Maps Geolocation.
+
+7. **Fase 7: Consolidación de Agregados:** Se delimitaron las unidades de consistencia transaccional e invariantes mediante notas amarillo mostaza (*Aggregates*) (@fig:es-step-7-1 y @fig:es-step-7-2).
+
+![EventStorming Paso 7: Consolidación de Agregados (Parte 1)](report/assets/strategic-ddd/event-storming-step-7-aggregates-1.png){#fig:es-step-7-1}
+
+*Nota.* Identificación de raíces de agregado clave como `WorkOrder`, `Vehicle`, `Appointment` y `DiagnosticAlert`.
+
+![EventStorming Paso 7: Consolidación de Agregados (Parte 2)](report/assets/strategic-ddd/event-storming-step-7-aggregates-2.png){#fig:es-step-7-2}
+
+*Nota.* Identificación de agregados para gestión de lotes FIFO, planillas laborales y comprobantes fiscales.
+
+8. **Fase 8: Delimitación de Bounded Contexts:** A partir de la cohesión semántica y transaccional, se trazaron los límites contextuales definitivos que agrupan los subdominios del sistema (@fig:es-step-8).
+
+![EventStorming Paso 8: Delimitación de Bounded Contexts y Flujos de Mensajes](report/assets/strategic-ddd/event-storming-step-8-bounded-contexts.png){#fig:es-step-8}
+
+*Nota.* Agrupación final de los ocho Bounded Contexts y visualización de los canales de comunicación asíncrona.
 
 A continuación, la @tbl:candidate-contexts-classification resume la clasificación estratégica de los subdominios descubiertos en el ecosistema Atelier:
 
@@ -52,55 +115,55 @@ A continuación, la @tbl:candidate-contexts-classification resume la clasificaci
 
 Los flujos de mensajes de dominio modelan la interacción dinámica y asíncrona entre los diferentes *Bounded Contexts*. Cada flujo representa un escenario operativo de extremo a extremo, mostrando cómo los eventos de dominio y los comandos atraviesan las fronteras contextuales manteniendo consistencia eventual y bajo acoplamiento.
 
-A continuación, se documentan los seis escenarios operativos fundamentales del ecosistema:
+A continuación, se documentan los seis escenarios operativos fundamentales del ecosistema Atelier:
 
-##### Escenario 1: Ingesta de Telemetría IoT y Detección de Anomalías Predictivas
+##### Escenario 1: Detección de Falla Telemática y Alerta Preventiva
 
-Este flujo modela el ciclo de vida del monitoreo telemático predictivo. Cuando un dispositivo OBD-II transmite lecturas continuas del vehículo, el contexto **IoT Telemetry** ingesta los flujos de datos y evalúa los parámetros del motor frente a modelos analíticos. Al registrarse un valor anómalo, se dispara el evento `falla telemática detectada`, lo que desencadena políticas reactivas hacia **Customer & Fleet** para alertar al conductor y hacia **Workshop Operation** para la apertura de una pre-orden de servicio preventivo.
+Este flujo modela el ciclo de vida del monitoreo telemático vehicular continuo. Cuando el escáner OBD-II emite lecturas de parámetros del motor, el contexto **IoT Telemetry** ingesta los flujos y evalúa posibles desviaciones críticas. Al detectarse una anomalía, se genera el evento `código de falla fue detectado`, desencadenando la emisión de una alerta preventiva hacia **Customer & Fleet** para informar al conductor y coordinar la cita de revisión, y hacia **Workshop Operation** para la apertura de la orden correspondiente.
 
-![Flujo de Mensajes del Dominio: Ingesta de Telemetría IoT y Detección de Anomalías Predictivas](report/assets/strategic-ddd/domain-message-flow-scenario-1.png){#fig:dmf-scenario-1}
+![Flujo de Mensajes: Escenario 1 - Detección de Falla Telemática y Alerta Preventiva](report/assets/strategic-ddd/domain-message-flow-scenario-1.png){#fig:dmf-scenario-1}
 
-*Nota.* Diagrama de secuencia intercontextual que ilustra la propagación del evento de anomalía telemática y la creación de la pre-orden de trabajo preventiva.
+*Nota.* Diagrama de flujo de mensajes intercontextual para la captura telemática y generación de alertas preventivas.
 
-##### Escenario 2: Onboarding de Taller y Aprovisionamiento Multi-Tenant
+##### Escenario 2: Recepción del Vehículo y Diagnóstico de Taller
 
-Representa la incorporación de un nuevo taller al ecosistema SaaS. El proceso inicia en **IAM & Tenancy** con el registro del propietario y la verificación de credenciales corporativas, generando el evento `cuenta de usuario creada`. La política asociada delega el aprovisionamiento del espacio de trabajo aislado (*tenant*) y notifica a **SaaS Billing** para activar el periodo de prueba o membresía del plan seleccionado.
+Modela la llegada del vehículo al taller automotriz. El asesor de servicio registra la recepción pericial capturando las evidencias fotográficas de carrocería y kilometraje. Al formalizarse el ingreso, **Workshop Operation** genera la orden de trabajo, vincula la cita confirmada proveniente de **Customer & Fleet**, asigna la bahía correspondiente y encarga al mecánico el diagnóstico computarizado por puerto OBD-II.
 
-![Flujo de Mensajes del Dominio: Onboarding de Taller y Aprovisionamiento Multi-Tenant](report/assets/strategic-ddd/domain-message-flow-scenario-2.png){#fig:dmf-scenario-2}
+![Flujo de Mensajes: Escenario 2 - Recepción del Vehículo y Diagnóstico de Taller](report/assets/strategic-ddd/domain-message-flow-scenario-2.png){#fig:dmf-scenario-2}
 
-*Nota.* Interacción entre identidad, gestión de inquilinos y facturación SaaS para la inicialización segura del entorno del taller automotriz.
+*Nota.* Diagrama de flujo de mensajes intercontextual para la recepción, apertura de orden y asignación diagnóstica.
 
-##### Escenario 3: Generación y Aprobación Digital de Presupuesto MRO
+##### Escenario 3: Preparación y Aprobación de Presupuesto
 
-Modela la interacción comercial y de diagnóstico previo a la intervención mecánica. Tras la evaluación del vehículo en patio o el análisis de la alerta telemática, **Workshop Operation** estructura el presupuesto estimando costos de mano de obra y consultando la disponibilidad de repuestos en **Inventory**. Una vez consolidado, se emite el evento `presupuesto mro generado`, permitiendo que el cliente final apruebe el presupuesto digitalmente desde la aplicación móvil *Atelier Driver*.
+Abarca la formulación de la propuesta técnico-económica de reparación (MRO). Concluida la inspección, el personal de taller elabora el presupuesto calculando los costos de mano de obra y consultando la disponibilidad de repuestos en el contexto **Inventory**. Una vez estructurada la cotización, se emite para que el cliente la revise y la autorice digitalmente desde la aplicación móvil *Atelier Driver*.
 
-![Flujo de Mensajes del Dominio: Generación y Aprobación Digital de Presupuesto MRO](report/assets/strategic-ddd/domain-message-flow-scenario-3.png){#fig:dmf-scenario-3}
+![Flujo de Mensajes: Escenario 3 - Preparación y Aprobación de Presupuesto](report/assets/strategic-ddd/domain-message-flow-scenario-3.png){#fig:dmf-scenario-3}
 
-*Nota.* Flujo colaborativo entre el taller, el cliente y el inventario para la confirmación de presupuestos y reserva preventiva de insumos.
+*Nota.* Diagrama de flujo de mensajes intercontextual para la verificación de insumos y aprobación formal del presupuesto.
 
-##### Escenario 4: Ejecución de Reparación y Consumo FIFO de Repuestos
+##### Escenario 4: Reserva y Despacho de Repuestos por FIFO
 
-Describe el proceso operativo de piso de taller durante el cual los mecánicos ejecutan las tareas asignadas en sus dispositivos móviles. Al requerir partes mecánicas o lubricantes, **Workshop Operation** despacha comandos hacia **Inventory** para ejecutar el consumo contable bajo el algoritmo de Primeras Entradas, Primeras Salidas (FIFO), garantizando la descarga de los lotes correspondientes y disparando alertas si se alcanza el umbral de stock mínimo.
+Describe el flujo de piso durante el desensamble y sustitución de piezas. Al autorizarse el trabajo, **Workshop Operation** remite el comando de reserva hacia **Inventory**, contexto que bloquea las unidades requeridas y las descarga contablemente imputando el costo del lote más antiguo disponible bajo el método FIFO. Si el nivel de inventario alcanza el límite de seguridad, el contexto emite automáticamente una alerta de reabastecimiento hacia el módulo de proveedores.
 
-![Flujo de Mensajes del Dominio: Ejecución de Reparación y Consumo FIFO de Repuestos](report/assets/strategic-ddd/domain-message-flow-scenario-4.png){#fig:dmf-scenario-4}
+![Flujo de Mensajes: Escenario 4 - Reserva y Despacho de Repuestos por FIFO](report/assets/strategic-ddd/domain-message-flow-scenario-4.png){#fig:dmf-scenario-4}
 
-*Nota.* Sincronización entre la ejecución técnica de tareas de mantenimiento y la gestión de lotes de inventario FIFO.
+*Nota.* Diagrama de flujo de mensajes intercontextual para la reserva física y liquidación contable de insumos por FIFO.
 
-##### Escenario 5: Liquidación y Facturación Electrónica SUNAT
+##### Escenario 5: Control de Calidad y Finalización de Reparación
 
-Abarca el cierre económico de la orden de trabajo una vez superadas las pruebas de control de calidad. **Workshop Operation** emite el comando de liquidación hacia el contexto **Invoicing**, el cual estructura el comprobante tributario bajo el estándar UBL 2.1, interactúa con la plataforma Nubefact mediante una Capa Anticorrupción (ACL) y confirma la validez fiscal del documento ante la SUNAT antes de emitir la factura final al cliente.
+Representa la verificación técnica posterior a la ejecución mecánica. El técnico mecánico reporta el fin de sus tareas asignadas y adjunta la evidencia fotográfica del trabajo realizado. El Jefe de Taller realiza las pruebas de validación técnica (*Quality Gate*); una vez certificada la conformidad del estándar de calidad, se emite el evento de culminación de reparación para habilitar el cierre administrativo.
 
-![Flujo de Mensajes del Dominio: Liquidación y Facturación Electrónica SUNAT](report/assets/strategic-ddd/domain-message-flow-scenario-5.png){#fig:dmf-scenario-5}
+![Flujo de Mensajes: Escenario 5 - Control de Calidad y Finalización de Reparación](report/assets/strategic-ddd/domain-message-flow-scenario-5.png){#fig:dmf-scenario-5}
 
-*Nota.* Flujo de cierre contable y cumplimiento tributario mediante integración desacoplada con el proveedor de facturación electrónica.
+*Nota.* Diagrama de flujo de mensajes intercontextual para la aprobación pericial y cierre técnico de la orden de trabajo.
 
-##### Escenario 6: Entrega de Vehículo y Cierre Operativo
+##### Escenario 6: Entrega de Vehículo y Facturación Electrónica SUNAT
 
-Representa el acto formal de entrega del vehículo reparado al cliente en el taller. **Workshop Operation** registra la conformidad del cliente y publica el evento `vehículo entregado al cliente`. Esta notificación desencadena la actualización del estatus en **Customer & Fleet**, solicita la retroalimentación de satisfacción del servicio y notifica a **IoT Telemetry** para restablecer la monitorización telemática predictiva bajo los nuevos parámetros del motor.
+Comprende el acto formal de liquidación, facturación fiscal y entrega final al cliente. Con la orden cerrada, se envían los conceptos liquidados al contexto **Invoicing**, el cual estructura el comprobante de pago electrónico bajo el estándar UBL 2.1 y lo valida ante la SUNAT mediante la Capa Anticorrupción de Nubefact. Tras la confirmación del pago y la obtención de la Constancia de Recepción (CDR), se efectúa la entrega física de la unidad y se reactiva la monitorización telemática.
 
-![Flujo de Mensajes del Dominio: Entrega de Vehículo y Cierre Operativo](report/assets/strategic-ddd/domain-message-flow-scenario-6.png){#fig:dmf-scenario-6}
+![Flujo de Mensajes: Escenario 6 - Entrega de Vehículo y Facturación Electrónica SUNAT](report/assets/strategic-ddd/domain-message-flow-scenario-6.png){#fig:dmf-scenario-6}
 
-*Nota.* Proceso de cierre de ciclo de servicio, entrega física y reactivación del monitoreo telemático vehicular.
+*Nota.* Diagrama de flujo de mensajes intercontextual para la liquidación tributaria ante SUNAT y entrega formal del vehículo.
 
 #### 2.5.1.3. Bounded Context Canvases
 
