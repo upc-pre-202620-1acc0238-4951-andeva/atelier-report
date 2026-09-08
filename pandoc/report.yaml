@@ -71,15 +71,6 @@ variables:
       \usepackage{tabularx}
       \usepackage{multirow}
       \usepackage{array}
-<<<<<<< HEAD
-      
-      % Macros globales para encabezados de tablas complejas
-      \newcommand{\thfirst}[1]{\multicolumn{1}{|c|}{\textbf{#1}}}
-      \newcommand{\thcell}[1]{\multicolumn{1}{c|}{\textbf{#1}}}
-      \newcommand{\thc}[1]{\multicolumn{1}{c}{\textbf{#1}}}
-      \newcommand{\thspan}[2]{\multicolumn{#1}{c|}{\textbf{#2}}}
-      \newcommand{\thspanfirst}[2]{\multicolumn{#1}{|c|}{\textbf{#2}}}
-=======
       % Commands to auto-center header titles in LaTeX tables
       \newcommand{\thfirst}[1]{\multicolumn{1}{|c|}{\textbf{#1}}}
       \newcommand{\thcell}[1]{\multicolumn{1}{c|}{\textbf{#1}}}
@@ -91,7 +82,6 @@ variables:
       \AtBeginDocument{
         \setlength{\heavyrulewidth}{\lightrulewidth}
       }
->>>>>>> 68c4c8a (chore: add pandoc filters and table styling.)
     - |
       % APA 7 caption setup for tables and figures
       \usepackage{caption}
