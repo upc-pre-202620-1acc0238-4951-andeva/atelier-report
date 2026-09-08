@@ -6,6 +6,6 @@ inventory_comp = component "Inventory y Supply Chain Module" "Catálogo de repue
 hr_comp = component "Human Resources Module" "Gestión de turnos, planillas y validación de asistencia por geocercas GPS con fórmula Haversine." "Spring Service, Haversine Engine"
 invoicing_comp = component "Invoicing y Compliance Module" "Emisión y anulación de comprobantes SUNAT UBL 2.1 con capa anticorrupción hacia Nubefact." "Spring Service, ACL Nubefact"
 billing_comp = component "SaaS Billing Module" "Gestión de suscripciones B2B, cobros recurrentes y validación de webhooks idempotentes." "Spring Service, Stripe SDK, ACL"
-telemetry_comp = component "IoT Telemetry Module" "Ingesta masiva de PIDs y DTCs, detección de fallas y disparo de alertas predictivas." "Spring Service, Timescale Client"
+iot_comp = component "IoT Telemetry Module" "Ingesta masiva de PIDs y DTCs, detección de fallas y disparo de alertas predictivas." "Spring Service, Timescale Client"
 outbox_comp = component "Transactional Outbox Worker" "Procesador en segundo plano que sondea outbox_messages para garantizar entrega confiable." "Spring Scheduled, Spring Events"
 cache_comp = component "Caffeine Cache Manager" "Almacenamiento de alta velocidad en memoria para catálogos y sesiones frecuentes." "Caffeine Cache, Spring Cache"
