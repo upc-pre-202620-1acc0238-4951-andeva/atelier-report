@@ -23,6 +23,7 @@ Gracias a los filtros Lua del proyecto (`pandoc/filters/table-headers-autocenter
 - **Alineación según Longitud de Texto:** Columnas cuyo contenido consista en textos cortos ($\le 3$ palabras por celda, como nombres cortos de Elemento, Ámbito, Tipo C4, Motor, Categoría Táctica, Estados o Códigos HTTP) deben estar **centradas** (`:---:`). Dejar alineadas a la izquierda (`:---`) las columnas narrativas, descripciones de reglas de negocio o firmas extensas.
 - **Líneas Divisorias Congruentes:** Cada fila del cuerpo cuenta con una línea horizontal divisoria con el mismo grosor homogéneo (`\lightrulewidth`).
 - **Notas al Pie en Texto Plano:** En las notas explicativas (`*Nota.* ...`), redactar el texto en texto plano tal cual, sin comillas invertidas (`` ` ``).
+- **Prohibición de Punto y Coma (`;`) en Celdas:** NUNCA utilizar punto y coma (`;`) para separar oraciones o múltiples conceptos dentro de las celdas de una tabla. En su lugar, utilizar saltos de línea (`\newline` en LaTeX o saltos en Markdown) o viñetas con guion (`- `) para estructurar y diferenciar claramente varias reglas o características.
 
 **Código:**
 ```markdown

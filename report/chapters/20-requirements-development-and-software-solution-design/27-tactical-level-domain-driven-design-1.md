@@ -40,30 +40,217 @@ La capa de dominio del Bounded Context Shared concentra las abstracciones arquit
 
 - **Precisión matemática y rigor normativo:** Modelado estricto de importes financieros (**Money**) y cubicajes (**Quantity**) mediante el tipo numérico exacto **BigDecimal** con redondeo bancario legal Half-Even a dos decimales, cálculo ortodrómico satelital puro mediante la fórmula del Haversine (**GeoPoint**) y verificación fiscal de documentos de identidad tributaria (**TaxId**) aplicando el algoritmo de Módulo 11 ponderado de la SUNAT.
 
-| Clase o Tipo | Categoría Táctica | Paquete Canónico | Propósito en el Dominio | Relaciones Principales |
-| :---: | :---: | :--- | :--- | :--- |
-| AbstractDomainAggregateRoot<T> | Raíz de Agregado Base | `...shared.domain.model.aggregates` | Superclase abstracta que gestiona la acumulación en memoria de eventos de dominio. | Heredada por todas las Raíces de Agregado del sistema. |
-| DomainEvent | Interfaz de Evento | `...shared.domain.events` | Contrato inmutable base para la publicación de eventos y el patrón Outbox. | Implementada por todos los eventos de dominio de la plataforma. |
-| Currency | Enumeración de Dominio | `...shared.domain.model.valueobjects` | Catálogo de divisas formales aceptadas en la plataforma (PEN y USD). | Utilizada por el objeto de valor Money. |
-| Money | Objeto de Valor | `...shared.domain.model.valueobjects` | Magnitud monetaria inmutable con escala a 2 decimales y redondeo Half-Even. | Asociada a precios, costos, cotizaciones y facturas. |
-| MeasurementUnit | Enumeración de Dominio | `...shared.domain.model.valueobjects` | Catálogo de unidades físicas de almacenamiento y consumo en taller. | Utilizada por el objeto de valor Quantity. |
-| Quantity | Objeto de Valor | `...shared.domain.model.valueobjects` | Cantidad física no negativa con escala decimal asociada a su unidad de medida. | Utilizada en inventario de repuestos y partidas de MRO. |
-| Mileage | Objeto de Valor | `...shared.domain.model.valueobjects` | Odómetro automotriz expresado como entero no negativo en kilómetros. | Vinculado a vehículos, recepciones y telemetría OBD-II. |
-| TenantId | Objeto de Valor (ID) | `...shared.domain.model.valueobjects` | Identificador único universal fuertemente tipado del taller mecánico. | Clave transversal de particionamiento multi-inquilino. |
-| BranchId | Objeto de Valor (ID) | `...shared.domain.model.valueobjects` | Identificador único universal de la sede o sucursal física de atención. | Vinculado a bahías de servicio, almacenes y turnos. |
-| CustomerId | Objeto de Valor (ID) | `...shared.domain.model.valueobjects` | Identificador único universal del cliente particular o corporativo. | Vinculado a perfiles de clientes, vehículos y comprobantes. |
-| VehicleId | Objeto de Valor (ID) | `...shared.domain.model.valueobjects` | Identificador único universal de la unidad vehicular automotriz. | Vinculado a órdenes de trabajo, citas y telemetría. |
-| UserId | Objeto de Valor (ID) | `...shared.domain.model.valueobjects` | Identificador único universal de la cuenta de usuario del sistema. | Vinculado a membresías de taller, perfiles y auditorías. |
-| DistanceMeters | Objeto de Valor | `...shared.domain.model.valueobjects` | Magnitud escalar de separación espacial en metros no negativa. | Utilizada en la evaluación de geocercas satelitales. |
-| GeoPoint | Objeto de Valor | `...shared.domain.model.valueobjects` | Coordenadas WGS84 con cálculo ortodrómico basado en la fórmula del Haversine. | Utilizada en ubicación de sucursales y marcación de asistencia. |
-| TaxIdType | Enumeración de Dominio | `...shared.domain.model.valueobjects` | Tipología legal de documentos tributarios nacionales e internacionales. | Utilizada por el objeto de valor TaxId. |
-| TaxId | Objeto de Valor | `...shared.domain.model.valueobjects` | Documento tributario validado mediante Módulo 11 (RUC) y longitud (DNI). | Vinculado a talleres concesionarios, clientes y facturación. |
-| EmailAddress | Objeto de Valor | `...shared.domain.model.valueobjects` | Dirección de correo electrónico normalizada y validada bajo la RFC 5322. | Vinculada a cuentas de usuario, notificaciones y contactos. |
-| PhoneNumber | Objeto de Valor | `...shared.domain.model.valueobjects` | Número telefónico internacional formateado según el estándar UIT-T E.164. | Vinculado a datos de contacto de clientes y mecánicos. |
-| DateRange | Objeto de Valor | `...shared.domain.model.valueobjects` | Intervalo temporal cerrado con invariante estricta de orden cronológico. | Utilizado en turnos laborales, contratos y períodos de análisis. |
-| DomainException | Excepción Base | `...shared.domain.exceptions` | Superclase abstracta no comprobada portadora de código de error semántico. | Base para todas las excepciones del dominio del ecosistema. |
-: Catálogo de la Capa de Dominio del Bounded Context Shared {#tbl:shared-domain-types}
-
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Catálogo de la Capa de Dominio del Bounded Context Shared} \label{tbl:shared-domain-types} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\
+\hline
+\endhead
+AbstractDomainAggregateRoot<T> & Superclase abstracta que gestiona la acumulación en memoria de eventos de dominio. \\*
+\hline
+\textbf{Categoría} & Raíz de Agregado Base \\*
+\hline
+\textbf{Relaciones} & Heredada por todas las Raíces de Agregado del sistema. \\*
+\hline
+\textbf{Paquete} & \texttt{...shared.domain.model.aggregates} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+DomainEvent & Contrato inmutable base para la publicación de eventos y el patrón Outbox. \\*
+\hline
+\textbf{Categoría} & Interfaz de Evento \\*
+\hline
+\textbf{Relaciones} & Implementada por todos los eventos de dominio de la plataforma. \\*
+\hline
+\textbf{Paquete} & \texttt{...shared.domain.events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Currency & Catálogo de divisas formales aceptadas en la plataforma (PEN y USD). \\*
+\hline
+\textbf{Categoría} & Enumeración de Dominio \\*
+\hline
+\textbf{Relaciones} & Utilizada por el objeto de valor Money. \\*
+\hline
+\textbf{Paquete} & \texttt{...shared.domain.model.valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Money & Magnitud monetaria inmutable con escala a 2 decimales y redondeo Half-Even. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor \\*
+\hline
+\textbf{Relaciones} & Asociada a precios, costos, cotizaciones y facturas. \\*
+\hline
+\textbf{Paquete} & \texttt{...shared.domain.model.valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+MeasurementUnit & Catálogo de unidades físicas de almacenamiento y consumo en taller. \\*
+\hline
+\textbf{Categoría} & Enumeración de Dominio \\*
+\hline
+\textbf{Relaciones} & Utilizada por el objeto de valor Quantity. \\*
+\hline
+\textbf{Paquete} & \texttt{...shared.domain.model.valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Quantity & Cantidad física no negativa con escala decimal asociada a su unidad de medida. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor \\*
+\hline
+\textbf{Relaciones} & Utilizada en inventario de repuestos y partidas de MRO. \\*
+\hline
+\textbf{Paquete} & \texttt{...shared.domain.model.valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Mileage & Odómetro automotriz expresado como entero no negativo en kilómetros. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor \\*
+\hline
+\textbf{Relaciones} & Vinculado a vehículos, recepciones y telemetría OBD-II. \\*
+\hline
+\textbf{Paquete} & \texttt{...shared.domain.model.valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+TenantId & Identificador único universal fuertemente tipado del taller mecánico. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor (ID) \\*
+\hline
+\textbf{Relaciones} & Clave transversal de particionamiento multi-inquilino. \\*
+\hline
+\textbf{Paquete} & \texttt{...shared.domain.model.valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+BranchId & Identificador único universal de la sede o sucursal física de atención. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor (ID) \\*
+\hline
+\textbf{Relaciones} & Vinculado a bahías de servicio, almacenes y turnos. \\*
+\hline
+\textbf{Paquete} & \texttt{...shared.domain.model.valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+CustomerId & Identificador único universal del cliente particular o corporativo. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor (ID) \\*
+\hline
+\textbf{Relaciones} & Vinculado a perfiles de clientes, vehículos y comprobantes. \\*
+\hline
+\textbf{Paquete} & \texttt{...shared.domain.model.valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+VehicleId & Identificador único universal de la unidad vehicular automotriz. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor (ID) \\*
+\hline
+\textbf{Relaciones} & Vinculado a órdenes de trabajo, citas y telemetría. \\*
+\hline
+\textbf{Paquete} & \texttt{...shared.domain.model.valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+UserId & Identificador único universal de la cuenta de usuario del sistema. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor (ID) \\*
+\hline
+\textbf{Relaciones} & Vinculado a membresías de taller, perfiles y auditorías. \\*
+\hline
+\textbf{Paquete} & \texttt{...shared.domain.model.valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+DistanceMeters & Magnitud escalar de separación espacial en metros no negativa. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor \\*
+\hline
+\textbf{Relaciones} & Utilizada en la evaluación de geocercas satelitales. \\*
+\hline
+\textbf{Paquete} & \texttt{...shared.domain.model.valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+GeoPoint & Coordenadas WGS84 con cálculo ortodrómico basado en la fórmula del Haversine. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor \\*
+\hline
+\textbf{Relaciones} & Utilizada en ubicación de sucursales y marcación de asistencia. \\*
+\hline
+\textbf{Paquete} & \texttt{...shared.domain.model.valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+TaxIdType & Tipología legal de documentos tributarios nacionales e internacionales. \\*
+\hline
+\textbf{Categoría} & Enumeración de Dominio \\*
+\hline
+\textbf{Relaciones} & Utilizada por el objeto de valor TaxId. \\*
+\hline
+\textbf{Paquete} & \texttt{...shared.domain.model.valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+TaxId & Documento tributario validado mediante Módulo 11 (RUC) y longitud (DNI). \\*
+\hline
+\textbf{Categoría} & Objeto de Valor \\*
+\hline
+\textbf{Relaciones} & Vinculado a talleres concesionarios, clientes y facturación. \\*
+\hline
+\textbf{Paquete} & \texttt{...shared.domain.model.valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+EmailAddress & Dirección de correo electrónico normalizada y validada bajo la RFC 5322. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor \\*
+\hline
+\textbf{Relaciones} & Vinculada a cuentas de usuario, notificaciones y contactos. \\*
+\hline
+\textbf{Paquete} & \texttt{...shared.domain.model.valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+PhoneNumber & Número telefónico internacional formateado según el estándar UIT-T E.164. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor \\*
+\hline
+\textbf{Relaciones} & Vinculado a datos de contacto de clientes y mecánicos. \\*
+\hline
+\textbf{Paquete} & \texttt{...shared.domain.model.valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+DateRange & Intervalo temporal cerrado con invariante estricta de orden cronológico. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor \\*
+\hline
+\textbf{Relaciones} & Utilizado en turnos laborales, contratos y períodos de análisis. \\*
+\hline
+\textbf{Paquete} & \texttt{...shared.domain.model.valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+DomainException & Superclase abstracta no comprobada portadora de código de error semántico. \\*
+\hline
+\textbf{Categoría} & Excepción Base \\*
+\hline
+\textbf{Relaciones} & Base para todas las excepciones del dominio del ecosistema. \\*
+\hline
+\textbf{Paquete} & \texttt{...shared.domain.exceptions} \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
 *Nota.* Tipos de datos canónicos correspondientes al paquete com.andeva.atelier.platform.shared.domain.
 
 A continuación, se profundiza en la especificación a manera de diccionario de cada una de las clases, objetos de valor y estructuras que componen esta capa.
@@ -80,20 +267,99 @@ Por su parte, la interfaz **DomainEvent** establece el contrato inmutable univer
 
 En la @tbl:shared-aggregates-and-events se detallan los miembros de la superclase de agregados y el contrato de eventos.
 
-| Elemento | Tipo o Firma | Ámbito | Propósito y Reglas de Negocio |
-| :---: | :--- | :---: | :--- |
-| domainEvents | Collection<Object> | Protegido | Acumulador interno de eventos generados durante la transacción en memoria. |
-| registerDomainEvent | `void registerDomainEvent(Object event)` | Protegido | Registra un evento de dominio no nulo; rechaza argumentos nulos con validación estricta. |
-| domainEvents | `Collection<Object> domainEvents()` | Público | Expone una vista inmutable de los eventos acumulados mediante colección no modificable. |
-| clearDomainEvents | `void clearDomainEvents()` | Público | Purga todos los eventos acumulados tras la persistencia transaccional. |
-| equals | `boolean equals(Object obj)` | Público | Evalúa la igualdad semántica basada exclusivamente en la identidad del agregado. |
-| hashCode | `int hashCode()` | Público | Genera el código hash fundamentado en la identidad del agregado. |
-| eventId | UUID | Público | Retorna el identificador unívoco universal del evento para deduplicación. |
-| occurredOn | Instant | Público | Retorna la marca de tiempo exacta de ocurrencia en el huso horario UTC. |
-| aggregateId | String | Público | Retorna la clave de la raíz de agregado que originó el evento. |
-| eventType | String | Público | Retorna el nombre semántico calificado del evento para el enrutamiento asíncrono. |
-: Miembros de la Superclase Base de Agregados y la Interfaz de Eventos de Dominio {#tbl:shared-aggregates-and-events}
-
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Miembros de la Superclase Base de Agregados y la Interfaz de Eventos de Dominio} \label{tbl:shared-aggregates-and-events} \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\
+\hline
+\endhead
+\multicolumn{2}{|c|}{\textbf{Componente:} AbstractDomainAggregateRoot<T> (Superclase Base de Agregados)} \\*
+\hline
+domainEvents (Atributo) & Acumulador interno de eventos de dominio generados durante la transacción en memoria. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Collection<Object>} \\*
+\hline
+\textbf{Ámbito de Acceso} & Protegido \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+registerDomainEvent & Registra un nuevo evento de dominio en la colección acumuladora en memoria. \newline \textbf{Reglas de negocio:} \newline - Rechaza argumentos nulos mediante validación estricta. \newline - Asocia la identidad del agregado al evento emitido. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void registerDomainEvent(Object event)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Protegido \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+domainEvents (Método) & Expone la colección de eventos de dominio acumulados para su procesamiento posterior. \newline \textbf{Reglas de negocio:} \newline - Retorna una vista inmutable mediante colección no modificable para impedir mutaciones externas. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Collection<Object> domainEvents()} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+clearDomainEvents & Purga la colección de eventos de dominio en memoria. \newline \textbf{Reglas de negocio:} \newline - Se ejecuta exclusivamente tras la confirmación atómica de la transacción de persistencia. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void clearDomainEvents()} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+equals & Evalúa la igualdad semántica entre dos instancias de raíz de agregado. \newline \textbf{Reglas de negocio:} \newline - Se fundamenta única y exclusivamente en la identidad de dominio (\textit{id}). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{boolean equals(Object obj)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+hashCode & Genera el código hash de la entidad para estructuras de datos basadas en tablas hash. \newline \textbf{Reglas de negocio:} \newline - Se calcula a partir de la identidad de dominio para mantener coherencia estricta con \textit{equals()}. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{int hashCode()} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Componente:} DomainEvent (Interfaz de Contrato de Eventos de Dominio)} \\*
+\hline
+eventId & Expone el identificador global unívoco del evento de dominio. \newline \textbf{Reglas de negocio:} \newline - Garantiza la idempotencia y deduplicación en el despacho hacia brokers de mensajería. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{UUID} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+occurredOn & Expone la marca temporal precisa de ocurrencia del evento. \newline \textbf{Reglas de negocio:} \newline - Registrada inmutablemente en el huso horario estándar UTC. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Instant} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+aggregateId & Expone la clave textual unívoca de la raíz de agregado que originó el evento. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+eventType & Expone el descriptor semántico calificado del tipo de evento. \newline \textbf{Reglas de negocio:} \newline - Utilizado para el enrutamiento polimórfico en el Transactional Outbox. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
 *Nota.* Componentes ubicados en com.andeva.atelier.platform.shared.domain.model.aggregates y com.andeva.atelier.platform.shared.domain.events.
 
 En términos de relaciones, **AbstractDomainAggregateRoot<T>** actúa como superclase generalizadora directa de las raíces de agregado de todos los módulos de negocio de Atelier: **Tenant**, **User** y **TenantMembership** para el bounded context IAM, **Customer** y **Vehicle** para el bounded context CRM, **WorkOrder** para el bounded context MRO, **InventoryItem** para el bounded context Inventory, **WorkShift** y **PayrollPayment** para el bounded context Human Resources, **ElectronicVoucher** para el bounded context Invoicing, **SubscriptionPlan** por parte del bounded context Billing y **Obd2Device** para el bounded context IoT.
@@ -116,29 +382,171 @@ La gestión de talleres mecánicos demanda una precisión aritmética rigurosa e
 
 En la @tbl:shared-financial-and-measurement-vos se detalla la estructura y comportamiento de estos objetos de valor.
 
-| Elemento | Tipo o Firma | Ámbito | Propósito y Reglas de Negocio |
-| :---: | :--- | :---: | :--- |
-| amount | BigDecimal | Privado | Monto monetario inmutable escalado a 2 decimales exactos. |
-| currency | Currency | Privado | Divisa formal asociada al importe monetario. |
-| ZERO_PEN | Money | Público | Constante estática representativa de cero soles (S/ 0.00). |
-| ZERO_USD | Money | Público | Constante estática representativa de cero dólares ($ 0.00). |
-| add | `Money add(Money other)` | Público | Suma importes; exige divisas homogéneas o arroja CurrencyMismatchException. |
-| subtract | `Money subtract(Money other)` | Público | Resta importes; exige divisas homogéneas y escala uniforme. |
-| multiply | `Money multiply(BigDecimal factor)` | Público | Multiplica el importe por un factor numérico con redondeo Half-Even. |
-| divide | `Money divide(BigDecimal divisor)` | Público | Divide el importe; rechaza divisores iguales a cero con validación de frontera. |
-| isGreaterThan | `boolean isGreaterThan(Money other)` | Público | Determina si el importe actual supera al suministrado. |
-| isPositive | `boolean isPositive()` | Público | Determina si el importe es estrictamente mayor a cero. |
-| isZero | `boolean isZero()` | Público | Determina si el importe es exactamente equivalente a cero. |
-| value (Quantity) | BigDecimal | Privado | Magnitud cuantitativa no negativa escalada a 2 decimales. |
-| unit | MeasurementUnit | Privado | Unidad de almacenamiento o tarificación física asociada. |
-| add (Quantity) | `Quantity add(Quantity other)` | Público | Incrementa la cantidad asegurando correspondencia en la unidad de medida. |
-| subtract (Quantity) | `Quantity subtract(Quantity other)` | Público | Reduce la cantidad sin permitir resultados por debajo de cero. |
-| hasSufficient | `boolean hasSufficient(Quantity req)` | Público | Evalúa si la cantidad actual cubre o supera la magnitud requerida. |
-| value (Mileage) | int | Privado | Valor numérico entero del odómetro; impone invariante (*value* ≥ 0). |
-| isGreaterThan | `boolean isGreaterThan(Mileage o)` | Público | Comprueba si el kilometraje supera al valor de comparación. |
-| difference | `int difference(Mileage other)` | Público | Calcula el delta absoluto de kilometraje entre dos lecturas. |
-: Miembros de los Objetos de Valor Financieros, Cuantitativos y Métricos {#tbl:shared-financial-and-measurement-vos}
-
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Miembros de los Objetos de Valor Financieros, Cuantitativos y Métricos} \label{tbl:shared-financial-and-measurement-vos} \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\
+\hline
+\endhead
+\multicolumn{2}{|c|}{\textbf{Componente:} Money (Objeto de Valor Financiero)} \\*
+\hline
+amount & Almacena la cuantía numérica inmutable del importe monetario. \newline \textbf{Reglas de negocio:} \newline - Normalizado a escala fija de 2 decimales exactos. \newline - Redondeo bancario legal bajo la estrategia \textit{RoundingMode.HALF\_EVEN}. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{BigDecimal} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+currency & Divisa formal asociada al importe monetario. \newline \textbf{Reglas de negocio:} \newline - Restringida estrictamente a los valores autorizados en la enumeración \textit{Currency}. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Currency} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+ZERO\_PEN & Constante estática representativa de importe nulo en moneda nacional (S/ 0.00). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Money} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+ZERO\_USD & Constante estática representativa de importe nulo en moneda extranjera (\$ 0.00). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Money} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+add & Suma aritméticamente dos objetos de valor monetarios. \newline \textbf{Reglas de negocio:} \newline - Exige homogeneidad estricta de divisas entre ambos importes. \newline - Arroja \textit{CurrencyMismatchException} ante discrepancia de moneda. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Money add(Money other)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+subtract & Resta aritméticamente dos objetos de valor monetarios. \newline \textbf{Reglas de negocio:} \newline - Exige homogeneidad estricta de divisas entre ambos importes. \newline - Arroja \textit{CurrencyMismatchException} si las divisas no coinciden. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Money subtract(Money other)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+multiply & Multiplica el importe monetario por un factor numérico escalar. \newline \textbf{Reglas de negocio:} \newline - Aplica redondeo bancario \textit{HALF\_EVEN} a 2 decimales sobre el resultado. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Money multiply(BigDecimal factor)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+divide & Divide el importe monetario entre un divisor numérico escalar. \newline \textbf{Reglas de negocio:} \newline - Prohíbe terminantemente divisores iguales a cero. \newline - Aplica redondeo bancario \textit{HALF\_EVEN} a 2 decimales sobre el cociente. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Money divide(BigDecimal divisor)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+isGreaterThan & Determina si el importe actual supera estrictamente al importe suministrado. \newline \textbf{Reglas de negocio:} \newline - Exige homogeneidad estricta de divisas antes de la comparación. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{boolean isGreaterThan(Money other)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+isPositive & Determina si el importe monetario es estrictamente mayor a cero. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{boolean isPositive()} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+isZero & Determina si el importe monetario es exactamente equivalente a cero. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{boolean isZero()} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Componente:} Quantity (Objeto de Valor Cuantitativo)} \\*
+\hline
+value & Almacena la magnitud numérica cuantitativa del insumo o servicio. \newline \textbf{Reglas de negocio:} \newline - Impone la invariante de no negatividad (\textit{value} ≥ 0.00). \newline - Escala fijada a 2 decimales con redondeo \textit{HALF\_EVEN}. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{BigDecimal} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+unit & Unidad de almacenamiento o tarificación física asociada. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{MeasurementUnit} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+add & Incrementa la cantidad actual sumando otra magnitud cuantitativa. \newline \textbf{Reglas de negocio:} \newline - Exige correspondencia exacta en la unidad de medida (\textit{unit}). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Quantity add(Quantity other)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+subtract & Reduce la cantidad actual restando otra magnitud cuantitativa. \newline \textbf{Reglas de negocio:} \newline - Exige correspondencia exacta en la unidad de medida (\textit{unit}). \newline - Prohíbe resultados negativos arrojando \textit{BusinessRuleValidationException}. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Quantity subtract(Quantity other)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+hasSufficient & Evalúa si la cantidad actual cubre o supera la magnitud requerida. \newline \textbf{Reglas de negocio:} \newline - Exige que ambas cantidades compartan la misma unidad de medida. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{boolean hasSufficient(Quantity req)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Componente:} Mileage (Objeto de Valor Métrico)} \\*
+\hline
+value & Almacena el valor escalar del odómetro vehicular en kilómetros. \newline \textbf{Reglas de negocio:} \newline - Impone la invariante de no negatividad (\textit{value} ≥ 0). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{int} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+isGreaterThan & Comprueba si el kilometraje actual supera al valor de comparación. \newline \textbf{Reglas de negocio:} \newline - Utilizado para validar que el odómetro no decrezca en inspecciones sucesivas. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{boolean isGreaterThan(Mileage o)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+difference & Calcula el delta absoluto de recorrido en kilómetros entre dos lecturas. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{int difference(Mileage other)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
 *Nota.* Componentes pertenecientes al paquete com.andeva.atelier.platform.shared.domain.model.valueobjects.
 
 Respecto a sus relaciones, Money y Currency son consumidos directamente por los contextos de MRO, Inventario y Facturación. El objeto Quantity interactúa íntimamente con los agregados InventoryItem y WorkOrder para controlar el despacho de insumos, mientras que Mileage es utilizado por CRM para el historial vehicular, por MRO en la recepción de la unidad y por IoT Telemetry para contrastar lecturas de odometría extraídas de la computadora a bordo del automóvil.
@@ -159,14 +567,39 @@ Cada uno de estos registros implementa validación estricta de no nulidad en su 
 
 En la @tbl:shared-identity-vos se expone la especificación de estos identificadores tipados.
 
-| Identificador | Tipo Subyacente | Factorías Estáticas | Propósito Arquitectónico y Frontera de Dominio |
-| :---: | :---: | :--- | :--- |
-| TenantId | UUID | `of(UUID)`, `of(String)`, `generate()` | Clave transversal obligatoria de particionamiento lógico multi-inquilino. |
-| BranchId | UUID | `of(UUID)`, `of(String)`, `generate()` | Demarcación física de inventarios de almacén, bahías y turnos de trabajo. |
-| CustomerId | UUID | `of(UUID)`, `of(String)`, `generate()` | Asociación unívoca de clientes particulares y flotas comerciales. |
-| VehicleId | UUID | `of(UUID)`, `of(String)`, `generate()` | Identificación de unidades automotrices para trazabilidad MRO y telemetría. |
-| UserId | UUID | `of(UUID)`, `of(String)`, `generate()` | Identificación de usuarios del sistema para control de acceso y auditoría. |
-: Especificación de los Objetos de Valor de Identidad Fuertemente Tipados {#tbl:shared-identity-vos}
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\raggedright\arraybackslash}p{4.2cm} | >{\raggedright\arraybackslash}p{11.2cm} |}
+\caption{Especificación de los Objetos de Valor de Identidad Fuertemente Tipados} \label{tbl:shared-identity-vos} \\
+\hline
+\thfirst{Factorías Estáticas} & \thcell{Propósito Arquitectónico y Frontera de Dominio} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Factorías Estáticas} & \thcell{Propósito Arquitectónico y Frontera de Dominio} \\
+\hline
+\endhead
+\multicolumn{2}{|c|}{\textbf{Objeto de Valor:} TenantId (UUID)} \\*
+\hline
+- \texttt{of(UUID)} \newline - \texttt{of(String)} \newline - \texttt{generate()} & Clave transversal obligatoria de particionamiento lógico multi-inquilino. \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Objeto de Valor:} BranchId (UUID)} \\*
+\hline
+- \texttt{of(UUID)} \newline - \texttt{of(String)} \newline - \texttt{generate()} & Demarcación física de inventarios de almacén, bahías y turnos de trabajo. \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Objeto de Valor:} CustomerId (UUID)} \\*
+\hline
+- \texttt{of(UUID)} \newline - \texttt{of(String)} \newline - \texttt{generate()} & Asociación unívoca de clientes particulares y flotas comerciales. \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Objeto de Valor:} VehicleId (UUID)} \\*
+\hline
+- \texttt{of(UUID)} \newline - \texttt{of(String)} \newline - \texttt{generate()} & Identificación de unidades automotrices para trazabilidad MRO y telemetría. \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Objeto de Valor:} UserId (UUID)} \\*
+\hline
+- \texttt{of(UUID)} \newline - \texttt{of(String)} \newline - \texttt{generate()} & Identificación de usuarios del sistema para control de acceso y auditoría. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
 
 *Nota.* Registros inmutables del paquete com.andeva.atelier.platform.shared.domain.model.valueobjects.
 
@@ -195,25 +628,139 @@ La operación física de los talleres automotrices involucra geolocalización de
 
 En la @tbl:shared-spatial-fiscal-contact-vos se exponen los miembros y reglas operativas de estos objetos de valor.
 
-| Elemento | Tipo o Firma | Ámbito | Propósito y Reglas de Negocio |
-| :---: | :--- | :---: | :--- |
-| latitude | double | Privado | Latitud geográfica WGS84 dentro del rango [-90.0, 90.0]. |
-| longitude | double | Privado | Longitud geográfica WGS84 dentro del rango [-180.0, 180.0]. |
-| distanceTo | `DistanceMeters distanceTo(GeoPoint o)` | Público | Calcula la distancia geodésica ortodrómica aplicando la fórmula del Haversine. |
-| value (Distance) | double | Privado | Magnitud física escalar en metros; impone invariante (*value* ≥ 0.0). |
-| isWithinThreshold | `boolean isWithinThreshold(double t)` | Público | Evalúa si la distancia calculada se encuentra dentro del radio límite permitido. |
-| value (TaxId) | String | Privado | Cadena alfanumérica depurada representativa del documento tributario. |
-| type | TaxIdType | Privado | Tipología legal del documento (RUC, DNI, CE, PASSPORT). |
-| ruc | `TaxId ruc(String rucValue)` | Público | Factoría estática con verificación algorítmica de Módulo 11 de SUNAT. |
-| dni | `TaxId dni(String dniValue)` | Público | Factoría estática con validación estricta de 8 dígitos numéricos. |
-| value (Email) | String | Privado | Dirección de correo electrónico normalizada a minúsculas bajo RFC 5322. |
-| value (Phone) | String | Privado | Número telefónico internacional formateado conforme al estándar E.164. |
-| startDate | LocalDate | Privado | Fecha inicial del intervalo temporal; no nula. |
-| endDate | LocalDate | Privado | Fecha de término del intervalo temporal; no anterior a startDate. |
-| contains | `boolean contains(LocalDate date)` | Público | Determina si una fecha específica se ubica dentro del rango cronológico. |
-| overlaps | `boolean overlaps(DateRange other)` | Público | Comprueba si dos intervalos temporales presentan traslape o solapamiento. |
-: Miembros de los Objetos de Valor Espaciales, Fiscales y de Contacto {#tbl:shared-spatial-fiscal-contact-vos}
-
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Miembros de los Objetos de Valor Espaciales, Fiscales y de Contacto} \label{tbl:shared-spatial-fiscal-contact-vos} \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\
+\hline
+\endhead
+\multicolumn{2}{|c|}{\textbf{Componente:} GeoPoint (Objeto de Valor Geoespacial)} \\*
+\hline
+latitude & Almacena la latitud geográfica en el datum geodésico WGS84. \newline \textbf{Reglas de negocio:} \newline - Rango angular restringido estrictamente al intervalo [-90.0, 90.0]. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{double} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+longitude & Almacena la longitud geográfica en el datum geodésico WGS84. \newline \textbf{Reglas de negocio:} \newline - Rango angular restringido estrictamente al intervalo [-180.0, 180.0]. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{double} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+distanceTo & Calcula la distancia geodésica ortodrómica hacia otro punto geográfico. \newline \textbf{Reglas de negocio:} \newline - Aplica la formulación del Semiverseno (\textit{Haversine}) sobre una esfera de radio medio terrestre \textit{R} = 6,371,000 m. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{DistanceMeters distanceTo(GeoPoint o)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Componente:} DistanceMeters (Objeto de Valor de Separación Espacial)} \\*
+\hline
+value & Almacena la magnitud física escalar de separación espacial en metros. \newline \textbf{Reglas de negocio:} \newline - Impone la invariante de distancia no negativa (\textit{value} ≥ 0.0). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{double} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+isWithinThreshold & Evalúa si la distancia calculada se encuentra dentro del radio límite permitido. \newline \textbf{Reglas de negocio:} \newline - Utilizado para la validación de geocercas en la marcación presencial de mecánicos. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{boolean isWithinThreshold(double t)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Componente:} TaxId (Objeto de Valor Fiscal)} \\*
+\hline
+value & Almacena la cadena alfanumérica depurada representativa del documento tributario. \newline \textbf{Reglas de negocio:} \newline - Desprovista de guiones, espacios o caracteres especiales. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+type & Tipología legal del documento según el catálogo normativo SUNAT. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{TaxIdType} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+ruc & Factoría estática para la construcción de identificadores tributarios de tipo RUC. \newline \textbf{Reglas de negocio:} \newline - Exige exactamente 11 dígitos numéricos. \newline - Prefijo inicial restringido a 10, 15, 17 o 20. \newline - Superación mandatoria del algoritmo de verificación ponderada por Módulo 11. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{TaxId ruc(String rucValue)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+dni & Factoría estática para la construcción de documentos de identidad nacional (DNI). \newline \textbf{Reglas de negocio:} \newline - Exige exactamente 8 dígitos numéricos continuos. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{TaxId dni(String dniValue)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Componente:} EmailAddress (Objeto de Valor de Contacto)} \\*
+\hline
+value & Almacena la dirección de correo electrónico normalizada para comunicaciones. \newline \textbf{Reglas de negocio:} \newline - Validación de estructura sintáctica conforme a la norma RFC 5322. \newline - Conversión automática a minúsculas canónicas para prevenir duplicidad de cuentas. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Componente:} PhoneNumber (Objeto de Valor de Contacto)} \\*
+\hline
+value & Almacena el número telefónico para mensajería SMS y WhatsApp. \newline \textbf{Reglas de negocio:} \newline - Formato internacional conforme al estándar ITU-T E.164 (signo '+' seguido de código de país y abonado). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Componente:} DateRange (Objeto de Valor Temporal)} \\*
+\hline
+startDate & Almacena la fecha inicial del intervalo temporal. \newline \textbf{Reglas de negocio:} \newline - Valor obligatorio no nulo. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{LocalDate} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+endDate & Almacena la fecha de término del intervalo temporal. \newline \textbf{Reglas de negocio:} \newline - Obligatoriamente posterior o igual a \textit{startDate} (\textit{endDate} ≥ \textit{startDate}). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{LocalDate} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+contains & Evalúa si una fecha específica se ubica dentro del intervalo cronológico cerrado. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{boolean contains(LocalDate date)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+overlaps & Comprueba si dos intervalos temporales presentan traslape o solapamiento parcial. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{boolean overlaps(DateRange other)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
 *Nota.* Componentes del paquete com.andeva.atelier.platform.shared.domain.model.valueobjects.
 
 En cuanto a sus relaciones en el ecosistema, **GeoPoint** y **DistanceMeters** son utilizados por el módulo IAM para fijar las coordenadas de cada sucursal y por el módulo de Recursos Humanos para verificar que la marcación presencial de asistencia de los mecánicos ocurra dentro del radio circular permitido del taller.
@@ -234,13 +781,35 @@ Dicho diseño facilita que las capas superiores traduzcan de manera inmediata el
 
 En la @tbl:shared-domain-exceptions se sintetiza la taxonomía de excepciones de dominio.
 
-| Excepción | Clase Base | Código de Error | Causal de Lanzamiento en el Dominio |
-| :---: | :---: | :---: | :--- |
-| DomainException | RuntimeException | Parametrizado | Superclase abstracta de anomalías de lógica del dominio; transporta el código de error. |
-| BusinessRuleValidationException | DomainException | BUSINESS_RULE_VIOLATION | Violación explícita de invariantes de estado, argumentos no válidos o transiciones ilícitas. |
-| EntityNotFoundException | DomainException | ENTITY_NOT_FOUND | Ausencia de una entidad requerida dentro de las fronteras de consistencia del agregado. |
-| CurrencyMismatchException | DomainException | CURRENCY_MISMATCH | Intento de realizar operaciones aritméticas entre objetos Money de divisas incompatibles. |
-: Jerarquía de Excepciones de Dominio y Códigos de Error Semánticos {#tbl:shared-domain-exceptions}
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.8cm} | >{\raggedright\arraybackslash}p{9.6cm} |}
+\caption{Jerarquía de Excepciones de Dominio y Códigos de Error Semánticos} \label{tbl:shared-domain-exceptions} \\
+\hline
+\thfirst{Código de Error Semántico} & \thcell{Causal de Lanzamiento en el Dominio} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Código de Error Semántico} & \thcell{Causal de Lanzamiento en el Dominio} \\
+\hline
+\endhead
+\multicolumn{2}{|c|}{\textbf{Excepción:} DomainException (Superclase abstracta)} \\*
+\hline
+\textit{Parametrizado} & Superclase abstracta de anomalías de lógica del dominio. Transporta e inicializa el código semántico de error. \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Excepción:} BusinessRuleValidationException (\texttt{DomainException})} \\*
+\hline
+\texttt{BUSINESS\_RULE\_VIOLATION} & Violación explícita de invariantes de estado, argumentos no válidos o transiciones de ciclo de vida ilícitas. \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Excepción:} EntityNotFoundException (\texttt{DomainException})} \\*
+\hline
+\texttt{ENTITY\_NOT\_FOUND} & Ausencia o inexistencia de una entidad o agregado requerido dentro del límite de consistencia transaccional. \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Excepción:} CurrencyMismatchException (\texttt{DomainException})} \\*
+\hline
+\texttt{CURRENCY\_MISMATCH} & Intento de realizar operaciones aritméticas entre objetos de valor \textit{Money} con divisas heterogéneas. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
 
 *Nota.* Componentes del paquete com.andeva.atelier.platform.shared.domain.exceptions.
 
@@ -259,16 +828,87 @@ Ubicada en el paquete raíz `com.andeva.atelier.platform.shared.interfaces`, su 
 
 En la @tbl:shared-interface-types se presenta el catálogo consolidado de los tipos que componen la Capa de Interfaz del Bounded Context Shared.
 
-| Clase o Tipo | Categoría Táctica | Paquete Canónico | Propósito en la Capa | Relaciones Principales |
-| :---: | :---: | :--- | :--- | :--- |
-| ErrorResource | Recurso REST (DTO) | `...shared.interfaces.rest.resources` | Representación inmutable de errores HTTP estandarizada conforme a RFC 7807. | Generado por ErrorResponseAssembler y GlobalExceptionHandler. |
-| MessageResource | Recurso REST (DTO) | `...shared.interfaces.rest.resources` | Respuesta inmutable para confirmaciones operativas simples sin cuerpo de entidad. | Consumido en endpoints de acciones asíncronas o de comando. |
-| PagedResultResource<T> | Recurso REST (DTO) | `...shared.interfaces.rest.resources` | Contenedor genérico inmutable para colecciones paginadas de recursos. | Utilizado por controladores REST de CRM, MRO, Inventario y Facturación. |
-| ErrorResponseAssembler | Ensamblador REST | `...shared.interfaces.rest.transform` | Mapea errores de aplicación hacia respuestas HTTP con ErrorResource. | Traduce códigos semánticos hacia códigos de estado HTTP oficiales. |
-| ResponseEntityAssembler | Ensamblador REST | `...shared.interfaces.rest.transform` | Ensamblador genérico que traduce resultados de tipo Result a respuestas ResponseEntity. | Utilizado por los controladores REST de todos los Bounded Contexts. |
-| GlobalExceptionHandler | Asesor de Controladores | `...shared.interfaces.rest` | Interceptor global (`@RestControllerAdvice`) de excepciones web y dominio. | Captura anomalías durante el ciclo de despacho HTTP de Spring MVC. |
-| CorrelationIdFilter | Filtro Web Perimetral | `...shared.interfaces.rest.filters` | Filtro perimetral que inyecta X-Correlation-Id en petición, respuesta y MDC. | Filtro de máxima precedencia en la cadena de filtros web. |
-: Catálogo Consolidado de la Capa de Interfaz del Bounded Context Shared {#tbl:shared-interface-types}
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Catálogo Consolidado de la Capa de Interfaz del Bounded Context Shared} \label{tbl:shared-interface-types} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\
+\hline
+\endhead
+ErrorResource & Representación inmutable de errores HTTP estandarizada conforme a RFC 7807. \\*
+\hline
+\textbf{Categoría} & Recurso REST (DTO) \\*
+\hline
+\textbf{Relaciones} & Generado por ErrorResponseAssembler y GlobalExceptionHandler. \\*
+\hline
+\textbf{Paquete} & \texttt{...shared.interfaces.rest.resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+MessageResource & Respuesta inmutable para confirmaciones operativas simples sin cuerpo de entidad. \\*
+\hline
+\textbf{Categoría} & Recurso REST (DTO) \\*
+\hline
+\textbf{Relaciones} & Consumido en endpoints de acciones asíncronas o de comando. \\*
+\hline
+\textbf{Paquete} & \texttt{...shared.interfaces.rest.resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+PagedResultResource<T> & Contenedor genérico inmutable para colecciones paginadas de recursos. \\*
+\hline
+\textbf{Categoría} & Recurso REST (DTO) \\*
+\hline
+\textbf{Relaciones} & Utilizado por controladores REST de CRM, MRO, Inventario y Facturación. \\*
+\hline
+\textbf{Paquete} & \texttt{...shared.interfaces.rest.resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+ErrorResponseAssembler & Mapea errores de aplicación hacia respuestas HTTP con ErrorResource. \\*
+\hline
+\textbf{Categoría} & Ensamblador REST \\*
+\hline
+\textbf{Relaciones} & Traduce códigos semánticos hacia códigos de estado HTTP oficiales. \\*
+\hline
+\textbf{Paquete} & \texttt{...shared.interfaces.rest.transform} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+ResponseEntityAssembler & Ensamblador genérico que traduce resultados de tipo Result a respuestas ResponseEntity. \\*
+\hline
+\textbf{Categoría} & Ensamblador REST \\*
+\hline
+\textbf{Relaciones} & Utilizado por los controladores REST de todos los Bounded Contexts. \\*
+\hline
+\textbf{Paquete} & \texttt{...shared.interfaces.rest.transform} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+GlobalExceptionHandler & Interceptor global (\texttt{@RestControllerAdvice}) de excepciones web y dominio. \\*
+\hline
+\textbf{Categoría} & Asesor de Controladores \\*
+\hline
+\textbf{Relaciones} & Captura anomalías durante el ciclo de despacho HTTP de Spring MVC. \\*
+\hline
+\textbf{Paquete} & \texttt{...shared.interfaces.rest} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+CorrelationIdFilter & Filtro perimetral que inyecta \texttt{X-Correlation-Id} en petición, respuesta y MDC. \\*
+\hline
+\textbf{Categoría} & Filtro Web Perimetral \\*
+\hline
+\textbf{Relaciones} & Filtro de máxima precedencia en la cadena de filtros web. \\*
+\hline
+\textbf{Paquete} & \texttt{...shared.interfaces.rest.filters} \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
 
 *Nota.* Componentes pertenecientes al paquete canónico com.andeva.atelier.platform.shared.interfaces.
 
@@ -292,26 +932,147 @@ Para evitar la exposición directa de las entidades de persistencia y preservar 
 
 En la @tbl:shared-interface-resources se detallan los atributos, constructores y métodos de estos recursos DTO.
 
-| Elemento | Tipo o Firma | Ámbito | Propósito y Reglas de Negocio |
-| :---: | :--- | :---: | :--- |
-| code | String | Privado | Código semántico unívoco representativo del error. |
-| message | String | Privado | Explicación legible y contextual de la condición de error producida. |
-| details | List<String> | Privado | Lista inmutable de fallas de validación a nivel de campo; nunca nula. |
-| timestamp | Instant | Privado | Marca temporal precisa en huso horario UTC del instante del error. |
-| of (Error) | `ErrorResource of(String c, String m)` | Público | Factoría estática para instanciación rápida de errores sin lista de detalles. |
-| of (Error con detalles) | `ErrorResource of(String c, String m, List<String> d)` | Público | Factoría estática para errores complejos con desglose de campos observados. |
-| message | String | Privado | Mensaje textual de confirmación operativa en MessageResource. |
-| of (Message) | `MessageResource of(String msg)` | Público | Factoría estática que asocia el mensaje con la estampa de tiempo actual. |
-| items | List<T> | Privado | Colección inmutable de elementos correspondientes a la página solicitada. |
-| page | int | Privado | Índice de página actual; impone invariante estricta (*page* ≥ 0). |
-| size | int | Privado | Cantidad máxima de registros por página; impone invariante (*size* > 0). |
-| totalElements | long | Privado | Cardinalidad total de registros existentes; impone (*totalElements* ≥ 0). |
-| totalPages | int | Privado | Total de páginas resultantes calculadas mediante redondeo hacia arriba. |
-| first | boolean | Privado | Bandera lógica que certifica si la respuesta corresponde a la primera página. |
-| last | boolean | Privado | Bandera lógica que certifica si la respuesta corresponde a la página de término. |
-| of (PagedResult) | `PagedResultResource<T> of(List<T> i, int p, int s, long t)` | Público | Factoría estática que computa automáticamente totales y banderas de frontera. |
-: Miembros de los Recursos REST DTO del Bounded Context Shared {#tbl:shared-interface-resources}
-
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Miembros de los Recursos REST DTO del Bounded Context Shared} \label{tbl:shared-interface-resources} \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\
+\hline
+\endhead
+\multicolumn{2}{|c|}{\textbf{Componente:} ErrorResource (Recurso REST DTO de Errores RFC 7807)} \\*
+\hline
+code (Atributo) & Código semántico unívoco representativo del error. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+message (Atributo) & Explicación legible y contextual de la condición de error producida. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+details (Atributo) & Lista inmutable de fallas de validación a nivel de campo. \newline \textbf{Reglas de negocio:} \newline - Garantiza invariante de no nulidad mediante copia defensiva inmutable (\textit{List.copyOf}). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{List<String>} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+timestamp (Atributo) & Marca temporal precisa en huso horario estándar UTC del instante del error. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Instant} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+of (Factoría) & Factoría estática para instanciación rápida de errores sin lista de detalles. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{ErrorResource of(String c, String m)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+of (Factoría con detalles) & Factoría estática para errores complejos con desglose de campos observados. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{ErrorResource of(String c, String m, List<String> d)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Componente:} MessageResource (Recurso REST DTO de Confirmación Operativa)} \\*
+\hline
+message (Atributo) & Mensaje textual de confirmación operativa para endpoints de comando sin retorno de entidad. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+of (Factoría) & Factoría estática que asocia el mensaje con la estampa de tiempo actual del sistema. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{MessageResource of(String msg)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Componente:} PagedResultResource<T> (Recurso REST DTO para Respuestas Paginadas)} \\*
+\hline
+items (Atributo) & Colección inmutable de elementos correspondientes a la página solicitada. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{List<T>} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+page (Atributo) & Índice numérico de la página actual en base cero. \newline \textbf{Reglas de negocio:} \newline - Impone invariante de no negatividad (\textit{page} $\ge$ 0). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{int} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+size (Atributo) & Cantidad máxima de registros por página solicitada. \newline \textbf{Reglas de negocio:} \newline - Impone invariante estrictamente positiva (\textit{size} > 0). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{int} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+totalElements (Atributo) & Cardinalidad total de registros existentes en la base de datos. \newline \textbf{Reglas de negocio:} \newline - Impone invariante de no negatividad (\textit{totalElements} $\ge$ 0). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{long} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+totalPages (Atributo) & Total de páginas resultantes computadas mediante redondeo hacia arriba. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{int} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+first (Atributo) & Bandera lógica que certifica si la respuesta corresponde a la primera página (\textit{page} == 0). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{boolean} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+last (Atributo) & Bandera lógica que certifica si la respuesta corresponde a la página de término (\textit{page} $\ge$ \textit{totalPages} - 1). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{boolean} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+of (Factoría) & Factoría estática que calcula automáticamente totales de página y banderas booleanas de frontera. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{PagedResultResource<T> of(List<T> i, int p, int s, long t)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
 *Nota.* Componentes pertenecientes al paquete com.andeva.atelier.platform.shared.interfaces.rest.resources.
 
 En cuanto a sus relaciones en el sistema, **ErrorResource** es generado internamente por **ErrorResponseAssembler** y por el controlador global **GlobalExceptionHandler**, siendo consumido por clientes externos ante cualquier anomalía. **MessageResource** es utilizado por los controladores de IAM y Billing para acuses de recibo operativos. Por su parte, **PagedResultResource<T>** mantiene una relación de asociación genérica con las consultas de listado de todos los bounded contexts de la plataforma.
@@ -338,14 +1099,51 @@ El desarrollo de controladores REST bajo enfoques tradicionales suele adolecer d
 
 En la @tbl:shared-interface-assemblers se resumen las firmas y comportamientos de estos ensambladores.
 
-| Elemento | Tipo o Firma | Ámbito | Propósito y Reglas de Negocio |
-| :---: | :--- | :---: | :--- |
-| toErrorResponseFromApplicationError | `ResponseEntity<ErrorResource> (ApplicationError error)` | Público | Traduce el código de error semántico a código de estado HTTP y genera ErrorResource. |
-| toResponseEntityFromResult | `ResponseEntity<?> (Result<T, ApplicationError>, Function<T, R>, HttpStatus)` | Público | Mapea resultados funcionales de entidades individuales aplicando ensamblado funcional. |
-| toResponseEntityFromListResult | `ResponseEntity<?> (Result<List<T>, ApplicationError>, Function<T, R>, HttpStatus)` | Público | Mapea resultados funcionales de listas de entidades transformando cada registro. |
-| toResponseEntityFromEmptyResult | `ResponseEntity<?> (Result<Void, ApplicationError>, HttpStatus)` | Público | Mapea resultados funcionales vacíos emitiendo cabeceras de éxito sin cuerpo de respuesta. |
-: Métodos de los Ensambladores REST del Bounded Context Shared {#tbl:shared-interface-assemblers}
-
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Métodos de los Ensambladores REST del Bounded Context Shared} \label{tbl:shared-interface-assemblers} \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\
+\hline
+\endhead
+\multicolumn{2}{|c|}{\textbf{Componente:} ErrorResponseAssembler (Ensamblador de Respuestas de Error)} \\*
+\hline
+toErrorResponseFromApplicationError & Traduce el código de error semántico a código de estado HTTP oficial y construye el recurso estructurado. \newline \textbf{Reglas de negocio:} \newline - Mapea códigos semánticos hacia códigos de estado RFC 7807 (400, 401, 403, 404, 409, 422 o 500). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{ResponseEntity<ErrorResource> toErrorResponse(ApplicationError error)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Componente:} ResponseEntityAssembler (Ensamblador Genérico de Respuestas Funcionales)} \\*
+\hline
+toResponseEntityFromResult & Mapea resultados funcionales de entidades individuales aplicando ensamblado funcional declarativo. \newline \textbf{Reglas de negocio:} \newline - Ante \textit{Result.Success}, transforma la entidad con la función de mapeo y emite el código HTTP de éxito. \newline - Ante \textit{Result.Failure}, delega automáticamente en \textit{ErrorResponseAssembler}. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{ResponseEntity<?> toResponseEntityFromResult(Result<T, ApplicationError>, Function<T, R>, HttpStatus)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+toResponseEntityFromListResult & Mapea resultados funcionales de colecciones transformando cada registro de forma funcional. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{ResponseEntity<?> toResponseEntityFromListResult(Result<List<T>, ApplicationError>, Function<T, R>, HttpStatus)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+toResponseEntityFromEmptyResult & Mapea resultados funcionales vacíos emitiendo cabeceras de éxito sin cuerpo de respuesta. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{ResponseEntity<?> toResponseEntityFromEmptyResult(Result<Void, ApplicationError>, HttpStatus)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
 *Nota.* Componentes pertenecientes al paquete com.andeva.atelier.platform.shared.interfaces.rest.transform.
 
 Respecto a sus relaciones, estos ensambladores representan el puente de enlace canónico entre la Capa de Aplicación y los Controladores REST de los ocho bounded contexts. Al utilizar **ResponseEntityAssembler**, los controladores de IAM, CRM, MRO, Inventario, Facturación, Recursos Humanos, Suscripciones y Telemetría reducen el cuerpo de sus métodos a una sola invocación declarativa, garantizando un manejo determinista y homogéneo de los flujos de respuesta en toda la plataforma.
@@ -365,16 +1163,47 @@ Para gobernar estos escenarios de forma centralizada y transparente, el Bounded 
 
 En la @tbl:shared-global-exception-handler se especifican los métodos manejadores y códigos HTTP asignados por este componente.
 
-| Método Manejador | Excepción Interceptada | Código Emitido | Código HTTP Resultante | Causal de Activación |
-| :---: | :--- | :---: | :---: | :--- |
-| handleMethodArgumentNotValid | MethodArgumentNotValidException | VALIDATION_FAILED | 400 BAD REQUEST | Fallas en restricciones Bean Validation (`@Valid`) en cuerpos DTO entrantes. |
-| handleConstraintViolation | ConstraintViolationException | CONSTRAINT_VIOLATION | 400 BAD REQUEST | Violación de restricciones en parámetros de consulta (`@RequestParam`) o ruta. |
-| handleDomainException | DomainException | Parametrizado (errorCode) | 422 UNPROCESSABLE_ENTITY | Transgresión de invariantes de negocio no interceptadas en la capa de aplicación. |
-| handleHttpMessageNotReadable | HttpMessageNotReadableException | MALFORMED_JSON_REQUEST | 400 BAD REQUEST | Cuerpos de solicitud con sintaxis JSON corrupta o tipos de datos incompatibles. |
-| handleMethodNotSupported | HttpRequestMethodNotSupportedException | METHOD_NOT_ALLOWED | 405 METHOD NOT ALLOWED | Invocación de un endpoint mediante un verbo HTTP no habilitado. |
-| handleMediaTypeNotSupported | HttpMediaTypeNotSupportedException | UNSUPPORTED_MEDIA_TYPE | 415 UNSUPPORTED MEDIA | Peticiones que especifican un encabezado Content-Type no aceptado por la API. |
-| handleUnhandledException | Exception | INTERNAL_SERVER_ERROR | 500 INTERNAL ERROR | Fallos imprevistos de infraestructura; registra en log con correlationId y oculta stack trace. |
-: Métodos de Intercepción del Controlador Global de Excepciones {#tbl:shared-global-exception-handler}
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.2cm} | >{\centering\arraybackslash}p{4.4cm} | >{\centering\arraybackslash}p{3.8cm} | >{\centering\arraybackslash}p{2.6cm} |}
+\caption{Métodos de Intercepción del Controlador Global de Excepciones} \label{tbl:shared-global-exception-handler} \\
+\hline
+\thfirst{Método Manejador} & \thcell{Excepción Interceptada} & \thcell{Código Emitido} & \thcell{Código HTTP} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Método Manejador} & \thcell{Excepción Interceptada} & \thcell{Código Emitido} & \thcell{Código HTTP} \\
+\hline
+\endhead
+handleMethodArgumentNotValid & \texttt{\small MethodArgumentNotValidException} & \texttt{\small VALIDATION\_FAILED} & \texttt{\small 400 BAD REQUEST} \\*
+\hline
+\multicolumn{1}{|c|}{\textbf{Causal de Activación}} & \multicolumn{3}{p{10.8cm}|}{Fallas en restricciones Bean Validation (\texttt{@Valid}) en cuerpos DTO entrantes.} \\
+\hline
+handleConstraintViolation & \texttt{\small ConstraintViolationException} & \texttt{\small CONSTRAINT\_VIOLATION} & \texttt{\small 400 BAD REQUEST} \\*
+\hline
+\multicolumn{1}{|c|}{\textbf{Causal de Activación}} & \multicolumn{3}{p{10.8cm}|}{Violación de restricciones en parámetros de consulta (\texttt{@RequestParam}) o variables de ruta.} \\
+\hline
+handleDomainException & \texttt{\small DomainException} & \textit{Parametrizado (errorCode)} & \texttt{\small 422 UNPROCESSABLE} \\*
+\hline
+\multicolumn{1}{|c|}{\textbf{Causal de Activación}} & \multicolumn{3}{p{10.8cm}|}{Transgresión de invariantes de negocio no interceptadas en la capa de aplicación.} \\
+\hline
+handleHttpMessageNotReadable & \texttt{\small HttpMessageNotReadableException} & \texttt{\small MALFORMED\_JSON\_REQUEST} & \texttt{\small 400 BAD REQUEST} \\*
+\hline
+\multicolumn{1}{|c|}{\textbf{Causal de Activación}} & \multicolumn{3}{p{10.8cm}|}{Cuerpos de solicitud con sintaxis JSON corrupta o tipos de datos incompatibles.} \\
+\hline
+handleMethodNotSupported & \texttt{\small HttpRequestMethodNotSupportedException} & \texttt{\small METHOD\_NOT\_ALLOWED} & \texttt{\small 405 METHOD NOT ALLOWED} \\*
+\hline
+\multicolumn{1}{|c|}{\textbf{Causal de Activación}} & \multicolumn{3}{p{10.8cm}|}{Invocación de un endpoint mediante un verbo HTTP no habilitado.} \\
+\hline
+handleMediaTypeNotSupported & \texttt{\small HttpMediaTypeNotSupportedException} & \texttt{\small UNSUPPORTED\_MEDIA\_TYPE} & \texttt{\small 415 UNSUPPORTED MEDIA} \\*
+\hline
+\multicolumn{1}{|c|}{\textbf{Causal de Activación}} & \multicolumn{3}{p{10.8cm}|}{Peticiones que especifican un encabezado \texttt{Content-Type} no aceptado por la API.} \\
+\hline
+handleUnhandledException & \texttt{\small Exception} & \texttt{\small INTERNAL\_SERVER\_ERROR} & \texttt{\small 500 INTERNAL ERROR} \\*
+\hline
+\multicolumn{1}{|c|}{\textbf{Causal de Activación}} & \multicolumn{3}{p{10.8cm}|}{Fallos imprevistos de infraestructura. Registra en log con \texttt{correlationId} y oculta la traza de error.} \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
 
 *Nota.* Componente anotado con RestControllerAdvice en el paquete com.andeva.atelier.platform.shared.interfaces.rest.
 
@@ -395,13 +1224,43 @@ Su comportamiento operativo se resume en las siguientes fases:
 
 En la @tbl:shared-correlation-filter se exponen las constantes y métodos que definen este componente perimetral.
 
-| Elemento | Tipo o Firma | Ámbito | Propósito y Reglas de Negocio |
-| :---: | :--- | :---: | :--- |
-| CORRELATION_ID_HEADER | String | Público | Constante estática con el nombre oficial del encabezado HTTP (`X-Correlation-Id`). |
-| CORRELATION_ID_MDC_KEY | String | Público | Clave identificadora para el contexto Mapped Diagnostic Context (`correlationId`). |
-| doFilterInternal | `void (HttpServletRequest, HttpServletResponse, FilterChain)` | Protegido | Lógica de extracción, generación, inyección en MDC, asignación en respuesta y purga. |
-: Miembros del Filtro de Trazabilidad y Correlación Distribuida {#tbl:shared-correlation-filter}
-
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Miembros del Filtro de Trazabilidad y Correlación Distribuida} \label{tbl:shared-correlation-filter} \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\
+\hline
+\endhead
+\multicolumn{2}{|c|}{\textbf{Componente:} CorrelationIdFilter (Filtro Perimetral de Trazabilidad)} \\*
+\hline
+CORRELATION\_ID\_HEADER & Constante estática con el nombre oficial del encabezado HTTP (\texttt{X-Correlation-Id}). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+CORRELATION\_ID\_MDC\_KEY & Clave identificadora para el contexto Mapped Diagnostic Context (\texttt{correlationId}). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+doFilterInternal & Lógica de extracción, generación, inyección en MDC, asignación en respuesta y purga. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void (HttpServletRequest,\allowbreak  HttpServletResponse,\allowbreak  FilterChain)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Protegido \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
 *Nota.* Componente del paquete com.andeva.atelier.platform.shared.interfaces.rest.filters configurado con Ordered.HIGHEST_PRECEDENCE.
 
 En cuanto a sus relaciones en el sistema, **CorrelationIdFilter** precede a los filtros de autenticación de seguridad perimetral, garantizando que incluso las peticiones rechazadas por credenciales no válidas o tokens expirados cuenten con un identificador de correlación persistido en los registros de auditoría del sistema.
@@ -419,20 +1278,117 @@ Ubicada en el paquete canónico `com.andeva.atelier.platform.shared.application`
 
 En la @tbl:shared-application-types se presenta el catálogo consolidado de los tipos que componen la Capa de Aplicación del Bounded Context Shared.
 
-| Clase o Tipo | Categoría Táctica | Paquete Canónico | Propósito en la Capa | Relaciones Principales |
-| :---: | :---: | :--- | :--- | :--- |
-| Result<T, E> | Tipo de Resultado | `...shared.application.result` | Interfaz sellada que modela el resultado determinista de operaciones de negocio. | Retorno universal de Command y Query Handlers. |
-| ApplicationError | Registro de Error | `...shared.application.result` | Estructura inmutable portadora de código semántico, mensaje y detalles. | Transportado en el camino Failure del tipo de resultado Result. |
-| CommandHandler<C, R> | Contrato CQRS | `...shared.application.handlers` | Interfaz funcional para casos de uso de mutación transaccional con retorno. | Implementada por servicios de comando en todos los módulos. |
-| VoidCommandHandler<C> | Contrato CQRS | `...shared.application.handlers` | Interfaz funcional para casos de uso mutacionales sin valor de retorno. | Implementada por comandos de acción mutacional simple. |
-| QueryHandler<Q, R> | Contrato CQRS | `...shared.application.handlers` | Interfaz funcional para casos de uso de recuperación y lectura de datos. | Implementada por servicios de consulta en todos los módulos. |
-| DomainEventHandler<E> | Manejador de Eventos | `...shared.application.handlers` | Interfaz funcional para consumidores en memoria de eventos de dominio. | Suscrita a eventos emitidos tras el commit transaccional. |
-| SortDirection | Enumeración | `...shared.application.pagination` | Sentido de ordenamiento cronológico o alfabético (ASC, DESC). | Utilizada por el registro de consulta PagedQuery. |
-| PagedQuery | Modelo de Consulta | `...shared.application.pagination` | Solicitud inmutable de paginación agnóstica de frameworks ORM. | Parámetro de entrada en consultas paginadas de la aplicación. |
-| PagedResult<T> | Contenedor de Datos | `...shared.application.pagination` | Envoltorio inmutable de colecciones paginadas con metadatos de cálculo. | Retorno de consultas de listado; mapeado a la Capa de Interfaz. |
-| DomainEventPublisher | Puerto de Aplicación | `...shared.application.events` | Contrato para la emisión de eventos hacia el Transactional Outbox. | Invocado por repositorios y servicios de aplicación. |
-: Catálogo Consolidado de la Capa de Aplicación del Bounded Context Shared {#tbl:shared-application-types}
-
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Catálogo Consolidado de la Capa de Aplicación del Bounded Context Shared} \label{tbl:shared-application-types} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\
+\hline
+\endhead
+Result<T, E> & Interfaz sellada que modela el resultado determinista de operaciones de negocio. \\*
+\hline
+\textbf{Categoría} & Tipo de Resultado \\*
+\hline
+\textbf{Relaciones} & Retorno universal de Command y Query Handlers. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak shared.\allowbreak application.\allowbreak result} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+ApplicationError & Estructura inmutable portadora de código semántico, mensaje y detalles. \\*
+\hline
+\textbf{Categoría} & Registro de Error \\*
+\hline
+\textbf{Relaciones} & Transportado en el camino Failure del tipo de resultado Result. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak shared.\allowbreak application.\allowbreak result} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+CommandHandler<C, R> & Interfaz funcional para casos de uso de mutación transaccional con retorno. \\*
+\hline
+\textbf{Categoría} & Contrato CQRS \\*
+\hline
+\textbf{Relaciones} & Implementada por servicios de comando en todos los módulos. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak shared.\allowbreak application.\allowbreak handlers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+VoidCommandHandler<C> & Interfaz funcional para casos de uso mutacionales sin valor de retorno. \\*
+\hline
+\textbf{Categoría} & Contrato CQRS \\*
+\hline
+\textbf{Relaciones} & Implementada por comandos de acción mutacional simple. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak shared.\allowbreak application.\allowbreak handlers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+QueryHandler<Q, R> & Interfaz funcional para casos de uso de recuperación y lectura de datos. \\*
+\hline
+\textbf{Categoría} & Contrato CQRS \\*
+\hline
+\textbf{Relaciones} & Implementada por servicios de consulta en todos los módulos. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak shared.\allowbreak application.\allowbreak handlers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+DomainEventHandler<E> & Interfaz funcional para consumidores en memoria de eventos de dominio. \\*
+\hline
+\textbf{Categoría} & Manejador de Eventos \\*
+\hline
+\textbf{Relaciones} & Suscrita a eventos emitidos tras el commit transaccional. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak shared.\allowbreak application.\allowbreak handlers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+SortDirection & Sentido de ordenamiento cronológico o alfabético (ASC, DESC). \\*
+\hline
+\textbf{Categoría} & Enumeración \\*
+\hline
+\textbf{Relaciones} & Utilizada por el registro de consulta PagedQuery. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak shared.\allowbreak application.\allowbreak pagination} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+PagedQuery & Solicitud inmutable de paginación agnóstica de frameworks ORM. \\*
+\hline
+\textbf{Categoría} & Modelo de Consulta \\*
+\hline
+\textbf{Relaciones} & Parámetro de entrada en consultas paginadas de la aplicación. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak shared.\allowbreak application.\allowbreak pagination} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+PagedResult<T> & Envoltorio inmutable de colecciones paginadas con metadatos de cálculo. \\*
+\hline
+\textbf{Categoría} & Contenedor de Datos \\*
+\hline
+\textbf{Relaciones} & Retorno de consultas de listado. mapeado a la Capa de Interfaz. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak shared.\allowbreak application.\allowbreak pagination} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+DomainEventPublisher & Contrato para la emisión de eventos hacia el Transactional Outbox. \\*
+\hline
+\textbf{Categoría} & Puerto de Aplicación \\*
+\hline
+\textbf{Relaciones} & Invocado por repositorios y servicios de aplicación. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak shared.\allowbreak application.\allowbreak events} \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
 *Nota.* Componentes pertenecientes al paquete canónico com.andeva.atelier.platform.shared.application.
 
 A continuación, se profundiza en la especificación a manera de diccionario de cada uno de los componentes que integran esta capa.
@@ -454,27 +1410,155 @@ En las arquitecturas empresariales basadas en el lanzamiento de excepciones para
 
 En la @tbl:shared-result-type se detallan exhaustivamente las operaciones, factorías y métodos del tipo de resultado funcional **Result<T, E>**.
 
-| Elemento | Tipo o Firma | Ámbito | Propósito y Reglas de Negocio |
-| :---: | :--- | :---: | :--- |
-| Success | `record Success<T, E>(T value)` | Público | Subtipo inmutable que encapsula el valor satisfactorio no nulo. |
-| Failure | `record Failure<T, E>(E error)` | Público | Subtipo inmutable que encapsula la condición de error no nula. |
-| success | `Result<T, E> success(T value)` | Público | Factoría estática que instancia un resultado exitoso validando no nulidad. |
-| failure | `Result<T, E> failure(E error)` | Público | Factoría estática que instancia un resultado fallido validando no nulidad. |
-| fromOptional | `Result<T, E> fromOptional(Optional<T>, E)` | Público | Convierte un `Optional` a `Result`, asignando el error indicado si está vacío. |
-| isSuccess | `boolean isSuccess()` | Público | Predicado booleano que certifica si la ejecución fue satisfactoria (`instanceof Success`). |
-| isFailure | `boolean isFailure()` | Público | Predicado booleano que certifica si la ejecución experimentó un fallo (`instanceof Failure`). |
-| toOptional | `Optional<T> toOptional()` | Público | Proyecta el valor exitoso a un `Optional`, retornando `Optional.empty()` si es fallo. |
-| toErrorOptional | `Optional<E> toErrorOptional()` | Público | Proyecta el error a un `Optional`, retornando `Optional.empty()` si es éxito. |
-| map | `Result<R, E> map(Function<? super T, ? extends R>)` | Público | Aplica la función transformadora sobre el valor en caso de éxito. |
-| flatMap | `Result<R, E> flatMap(Function<? super T, Result<R, E>>)` | Público | Encadena secuencialmente otra operación funcional sobre el valor exitoso. |
-| mapError | `Result<T, F> mapError(Function<? super E, ? extends F>)` | Público | Transforma funcionalmente la estructura del objeto de error en caso de fallo. |
-| onSuccess | `Result<T, E> onSuccess(Consumer<? super T>)` | Público | Ejecuta un efecto secundario declarativo únicamente si el resultado es exitoso. |
-| onFailure | `Result<T, E> onFailure(Consumer<? super E>)` | Público | Ejecuta un efecto secundario declarativo únicamente si el resultado es un fallo. |
-| orElse | `T orElse(T defaultValue)` | Público | Retorna el valor contenido o el valor predeterminado si es fallo. |
-| orElseGet | `T orElseGet(Supplier<? extends T>)` | Público | Retorna el valor contenido o invoca el proveedor suministrado si es fallo. |
-| orElseThrow | `T orElseThrow(Function<? super E, X>) throws X` | Público | Extrae el valor exitoso o arroja la excepción derivada del error. |
-: Miembros y Operaciones del Tipo de Resultado Funcional Result {#tbl:shared-result-type}
-
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Miembros y Operaciones del Tipo de Resultado Funcional Result} \label{tbl:shared-result-type} \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\
+\hline
+\endhead
+\multicolumn{2}{|c|}{\textbf{Componente:} Result<T, E> (Tipo de Resultado Funcional Sellado)} \\*
+\hline
+Success & Subtipo inmutable que encapsula el valor satisfactorio no nulo. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{record Success<T,\allowbreak  E>(T value)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+Failure & Subtipo inmutable que encapsula la condición de error no nula. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{record Failure<T,\allowbreak  E>(E error)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+success & Factoría estática que instancia un resultado exitoso validando no nulidad. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Result<T,\allowbreak  E> success(T value)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+failure & Factoría estática que instancia un resultado fallido validando no nulidad. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Result<T,\allowbreak  E> failure(E error)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+fromOptional & Convierte un \texttt{Optional} a \texttt{Result}, asignando el error indicado si está vacío. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Result<T,\allowbreak  E> fromOptional(Optional<T>,\allowbreak  E)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+isSuccess & Predicado booleano que certifica si la ejecución fue satisfactoria (\texttt{instanceof Success}). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{boolean isSuccess()} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+isFailure & Predicado booleano que certifica si la ejecución experimentó un fallo (\texttt{instanceof Failure}). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{boolean isFailure()} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+toOptional & Proyecta el valor exitoso a un \texttt{Optional}, retornando \texttt{Optional.empty()} si es fallo. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Optional<T> toOptional()} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+toErrorOptional & Proyecta el error a un \texttt{Optional}, retornando \texttt{Optional.empty()} si es éxito. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Optional<E> toErrorOptional()} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+map & Aplica la función transformadora sobre el valor en caso de éxito. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Result<R,\allowbreak  E> map(Function<? super T,\allowbreak  ? extends R>)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+flatMap & Encadena secuencialmente otra operación funcional sobre el valor exitoso. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Result<R,\allowbreak  E> flatMap(Function<? super T,\allowbreak  Result<R,\allowbreak  E>>)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+mapError & Transforma funcionalmente la estructura del objeto de error en caso de fallo. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Result<T,\allowbreak  F> mapError(Function<? super E,\allowbreak  ? extends F>)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+onSuccess & Ejecuta un efecto secundario declarativo únicamente si el resultado es exitoso. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Result<T,\allowbreak  E> onSuccess(Consumer<? super T>)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+onFailure & Ejecuta un efecto secundario declarativo únicamente si el resultado es un fallo. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Result<T,\allowbreak  E> onFailure(Consumer<? super E>)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+orElse & Retorna el valor contenido o el valor predeterminado si es fallo. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{T orElse(T defaultValue)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+orElseGet & Retorna el valor contenido o invoca el proveedor suministrado si es fallo. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{T orElseGet(Supplier<? extends T>)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+orElseThrow & Extrae el valor exitoso o arroja la excepción derivada del error. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{T orElseThrow(Function<? super E,\allowbreak  X>) throws X} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
 *Nota.* Componente ubicado en el paquete com.andeva.atelier.platform.shared.application.result.
 
 - **ApplicationError**: Registro inmutable que tipifica semánticamente las condiciones anómalas de la aplicación. Encapsula un código alfanumérico identificador (**code**), un mensaje inteligible para el usuario o diagnóstico (**message**) y una lista inmutable de detalles específicos de validación (**details**).
@@ -483,23 +1567,123 @@ En la @tbl:shared-result-type se detallan exhaustivamente las operaciones, facto
 
 En la @tbl:shared-application-error se especifican los atributos y el catálogo completo de factorías semánticas de **ApplicationError**.
 
-| Elemento | Tipo o Firma | Ámbito | Propósito y Reglas de Negocio |
-| :---: | :--- | :---: | :--- |
-| code | String | Privado | Código alfanumérico estandarizado del error (no nulo). |
-| message | String | Privado | Mensaje explicativo y contextual de la condición observada (no nulo). |
-| details | List<String> | Privado | Lista inmutable de observaciones o fallas específicas de validación de campo. |
-| Constructor Compacto | `ApplicationError(...)` | Público | Garantiza no nulidad de código y mensaje, y genera copia inmutable de `details`. |
-| notFound (con ID) | `ApplicationError notFound(String, Object)` | Público | Genera error NOT_FOUND con mensaje formateado de recurso e identificador. |
-| notFound (simple) | `ApplicationError notFound(String)` | Público | Genera error NOT_FOUND con mensaje descriptivo directo. |
-| conflict | `ApplicationError conflict(String)` | Público | Genera error CONFLICT ante colisiones de unicidad o conflictos de concurrencia. |
-| badRequest (simple) | `ApplicationError badRequest(String)` | Público | Genera error BAD_REQUEST ante argumentos inválidos o sintaxis incorrecta. |
-| badRequest (con detalles) | `ApplicationError badRequest(String, List<String>)` | Público | Genera error BAD_REQUEST asociando la lista de transgresiones por campo observadas. |
-| unauthorized | `ApplicationError unauthorized(String)` | Público | Genera error UNAUTHORIZED ante fallas de autenticación o credenciales ausentes. |
-| forbidden | `ApplicationError forbidden(String)` | Público | Genera error FORBIDDEN ante transgresiones de permisos o restricciones de rol (RBAC). |
-| unprocessableEntity | `ApplicationError unprocessableEntity(String)` | Público | Genera error UNPROCESSABLE_ENTITY ante invariantes de negocio procesables insatisfechas. |
-| internalError | `ApplicationError internalError(String)` | Público | Genera error INTERNAL_ERROR ante contingencias inesperadas o fallas de infraestructura. |
-: Miembros y Factorías Semánticas del Registro ApplicationError {#tbl:shared-application-error}
-
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Miembros y Factorías Semánticas del Registro ApplicationError} \label{tbl:shared-application-error} \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\
+\hline
+\endhead
+\multicolumn{2}{|c|}{\textbf{Componente:} ApplicationError (Registro Inmutable de Errores de Aplicación)} \\*
+\hline
+code & Código alfanumérico estandarizado del error (no nulo). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+message & Mensaje explicativo y contextual de la condición observada (no nulo). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+details & Lista inmutable de observaciones o fallas específicas de validación de campo. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{List<String>} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+Constructor Compacto & Garantiza no nulidad de código y mensaje, y genera copia inmutable de \texttt{details}. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{ApplicationError(...)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+notFound (con ID) & Genera error NOT\_FOUND con mensaje formateado de recurso e identificador. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{ApplicationError notFound(String,\allowbreak  Object)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+notFound (simple) & Genera error NOT\_FOUND con mensaje descriptivo directo. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{ApplicationError notFound(String)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+conflict & Genera error CONFLICT ante colisiones de unicidad o conflictos de concurrencia. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{ApplicationError conflict(String)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+badRequest (simple) & Genera error BAD\_REQUEST ante argumentos inválidos o sintaxis incorrecta. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{ApplicationError badRequest(String)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+badRequest (con detalles) & Genera error BAD\_REQUEST asociando la lista de transgresiones por campo observadas. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{ApplicationError badRequest(String,\allowbreak  List<String>)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+unauthorized & Genera error UNAUTHORIZED ante fallas de autenticación o credenciales ausentes. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{ApplicationError unauthorized(String)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+forbidden & Genera error FORBIDDEN ante transgresiones de permisos o restricciones de rol (RBAC). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{ApplicationError forbidden(String)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+unprocessableEntity & Genera error UNPROCESSABLE\_ENTITY ante invariantes de negocio procesables insatisfechas. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{ApplicationError unprocessableEntity(String)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+internalError & Genera error INTERNAL\_ERROR ante contingencias inesperadas o fallas de infraestructura. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{ApplicationError internalError(String)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
 *Nota.* Componente ubicado en el paquete com.andeva.atelier.platform.shared.application.result.
 
 En cuanto a sus relaciones en el sistema, el tipo de resultado **Result** actúa como el tipo de retorno universal para la totalidad de servicios de aplicación y manejadores CQRS de los ocho bounded contexts. A su vez, es consumida en la Capa de Interfaz por **ResponseEntityAssembler**, cerrando el ciclo de vida de la petición de forma limpia y tipada.
@@ -514,14 +1698,51 @@ Para asegurar que los casos de uso en todos los módulos de Atelier mantengan un
 
 En la @tbl:shared-cqrs-handlers se sintetizan las firmas y responsabilidades de estos contratos CQRS.
 
-| Contrato | Tipo de Componente | Método Principal | Responsabilidad Arquitectónica |
-| :---: | :---: | :--- | :--- |
-| CommandHandler<C, R> | Interfaz Funcional | `Result<R, ApplicationError> handle(C command)` | Coordina mutaciones transaccionales que producen un resultado o entidad. |
-| VoidCommandHandler<C> | Interfaz Funcional | `Result<Void, ApplicationError> handle(C command)` | Coordina mutaciones transaccionales de acción simple sin carga útil de retorno. |
-| QueryHandler<Q, R> | Interfaz Funcional | `Result<R, ApplicationError> handle(Q query)` | Ejecuta consultas de lectura optimizadas proyectando resultados en DTOs. |
-| DomainEventHandler<E> | Interfaz Funcional | `void handle(E event)` | Consume y procesa de forma desacoplada eventos de dominio en memoria. |
-: Contratos Base para Manejadores CQRS del Bounded Context Shared {#tbl:shared-cqrs-handlers}
-
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Contratos Base para Manejadores CQRS del Bounded Context Shared} \label{tbl:shared-cqrs-handlers} \\
+\hline
+\thfirst{Aspecto del Contrato} & \thcell{Especificación Técnica y Responsabilidad} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto del Contrato} & \thcell{Especificación Técnica y Responsabilidad} \\
+\hline
+\endhead
+\multicolumn{2}{|c|}{\textbf{Contrato CQRS:} CommandHandler<C, R>} \\*
+\hline
+\textbf{Tipo de Componente} & Interfaz Funcional \\*
+\hline
+\textbf{Método Principal} & \texttt{Result<R,\allowbreak  ApplicationError> handle(C command)} \\*
+\hline
+\textbf{Responsabilidad} & Coordina mutaciones transaccionales que producen un resultado o entidad. \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Contrato CQRS:} VoidCommandHandler<C>} \\*
+\hline
+\textbf{Tipo de Componente} & Interfaz Funcional \\*
+\hline
+\textbf{Método Principal} & \texttt{Result<Void,\allowbreak  ApplicationError> handle(C command)} \\*
+\hline
+\textbf{Responsabilidad} & Coordina mutaciones transaccionales de acción simple sin carga útil de retorno. \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Contrato CQRS:} QueryHandler<Q, R>} \\*
+\hline
+\textbf{Tipo de Componente} & Interfaz Funcional \\*
+\hline
+\textbf{Método Principal} & \texttt{Result<R,\allowbreak  ApplicationError> handle(Q query)} \\*
+\hline
+\textbf{Responsabilidad} & Ejecuta consultas de lectura optimizadas proyectando resultados en DTOs. \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Contrato CQRS:} DomainEventHandler<E>} \\*
+\hline
+\textbf{Tipo de Componente} & Interfaz Funcional \\*
+\hline
+\textbf{Método Principal} & \texttt{void handle(E event)} \\*
+\hline
+\textbf{Responsabilidad} & Consume y procesa de forma desacoplada eventos de dominio en memoria. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
 *Nota.* Componentes pertenecientes al paquete com.andeva.atelier.platform.shared.application.handlers.
 
 Respecto a sus relaciones, estas interfaces son implementadas por las clases de servicio de aplicación de todos los bounded contexts de Atelier, permitiendo una organización modular conforme al Principio de Responsabilidad Única.
@@ -543,22 +1764,115 @@ En arquitecturas desacopladas, emplear abstracciones de infraestructura como `Pa
 
 En la @tbl:shared-pagination-models se detallan los miembros y reglas operativas de estos modelos de paginación.
 
-| Elemento | Tipo o Firma | Ámbito | Propósito y Reglas de Negocio |
-| :---: | :--- | :---: | :--- |
-| ASC / DESC | SortDirection | Público | Constantes que delimitan el sentido del ordenamiento en consultas. |
-| page (Query) | int | Privado | Índice de página solicitado; impone la invariante estricta (*page* ≥ 0). |
-| size (Query) | int | Privado | Límite de elementos por página; impone la invariante estricta (*size* > 0). |
-| sortBy | String | Privado | Nombre del atributo sobre el cual ordenar; asigna "id" por defecto. |
-| sortDirection | SortDirection | Privado | Dirección de ordenación asociada; asigna ASC por defecto. |
-| of (simple) | `PagedQuery of(int page, int size)` | Público | Factoría estática con valores por defecto para campo ("id") y dirección (ASC). |
-| of (completa) | `PagedQuery of(int, int, String, SortDirection)` | Público | Factoría estática con parametrización total de ordenamiento. |
-| content | List<T> | Privado | Colección inmutable y copia defensiva de elementos de la página. |
-| totalElements | long | Privado | Cantidad total de registros existentes en base de datos (*totalElements* ≥ 0). |
-| totalPages | int | Privado | Número total de páginas calculadas mediante función techo matemática. |
-| of (PagedResult) | `PagedResult<T> of(List<T>, int, int, long)` | Público | Factoría estática que computa automáticamente las páginas totales. |
-| map | `PagedResult<R> map(Function<? super T, ? extends R>)` | Público | Transforma funcionalmente los elementos preservando metadatos de paginación. |
-: Miembros de los Modelos de Paginación de la Capa de Aplicación {#tbl:shared-pagination-models}
-
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Miembros de los Modelos de Paginación de la Capa de Aplicación} \label{tbl:shared-pagination-models} \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\
+\hline
+\endhead
+\multicolumn{2}{|c|}{\textbf{Componente:} Modelos de Paginación (SortDirection, PagedQuery, PagedResult<T>)} \\*
+\hline
+ASC / DESC & Constantes que delimitan el sentido del ordenamiento en consultas. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{SortDirection} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+page (Query) & Índice de página solicitado. impone la invariante estricta (\textit{page} $\ge$ 0). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{int} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+size (Query) & Límite de elementos por página. impone la invariante estricta (\textit{size} > 0). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{int} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+sortBy & Nombre del atributo sobre el cual ordenar. asigna "id" por defecto. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+sortDirection & Dirección de ordenación asociada. asigna ASC por defecto. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{SortDirection} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+of (simple) & Factoría estática con valores por defecto para campo ("id") y dirección (ASC). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{PagedQuery of(int page,\allowbreak  int size)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+of (completa) & Factoría estática con parametrización total de ordenamiento. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{PagedQuery of(int,\allowbreak  int,\allowbreak  String,\allowbreak  SortDirection)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+content & Colección inmutable y copia defensiva de elementos de la página. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{List<T>} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+totalElements & Cantidad total de registros existentes en base de datos (\textit{totalElements} $\ge$ 0). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{long} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+totalPages & Número total de páginas calculadas mediante función techo matemática. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{int} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+of (PagedResult) & Factoría estática que computa automáticamente las páginas totales. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{PagedResult<T> of(List<T>,\allowbreak  int,\allowbreak  int,\allowbreak  long)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+map & Transforma funcionalmente los elementos preservando metadatos de paginación. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{PagedResult<R> map(Function<? super T,\allowbreak  ? extends R>)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
 *Nota.* Componentes pertenecientes al paquete com.andeva.atelier.platform.shared.application.pagination.
 
 En cuanto a sus relaciones, **PagedQuery** es recibido por los manejadores de consultas de CRM (búsqueda de clientes y flotas), MRO (órdenes de trabajo por estado o mecánico), Inventario (repuestos con stock crítico) y Facturación (comprobantes por rango de fechas). A su vez, **PagedResult<T>** es devuelto por dichos manejadores y transformado directamente hacia **PagedResultResource<T>** en la Capa de Interfaz.
@@ -574,12 +1888,35 @@ Para gobernar este proceso, la Capa de Aplicación del Bounded Context Shared de
 
 En la @tbl:shared-event-publisher se especifican los métodos de este puerto de aplicación.
 
-| Método | Firma | Ámbito | Propósito y Reglas de Negocio |
-| :---: | :--- | :---: | :--- |
-| publish | `void publish(DomainEvent event)` | Público | Despacha un evento de dominio individual verificando su no nulidad. |
-| publishAll | `void publishAll(Collection<Object> events)` | Público | Despacha en lote la colección de eventos extraída de la raíz de agregado. |
-: Métodos del Puerto de Publicación de Eventos de Dominio {#tbl:shared-event-publisher}
-
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Métodos del Puerto de Publicación de Eventos de Dominio} \label{tbl:shared-event-publisher} \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\
+\hline
+\endhead
+\multicolumn{2}{|c|}{\textbf{Componente:} DomainEventPublisher (Puerto de Publicación de Eventos)} \\*
+\hline
+publish & Despacha un evento de dominio individual verificando su no nulidad. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void publish(DomainEvent event)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+publishAll & Despacha en lote la colección de eventos extraída de la raíz de agregado. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void publishAll(Collection<Object> events)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
 *Nota.* Componente ubicado en el paquete com.andeva.atelier.platform.shared.application.events.
 
 En términos de relaciones, **DomainEventPublisher** es invocado por los manejadores de comandos de todos los bounded contexts y es implementado en la Capa de Infraestructura por adaptadores que persisten los eventos en PostgreSQL bajo el patrón Transactional Outbox, garantizando consistencia eventual y una semántica de entrega al menos una vez hacia sistemas externos.
@@ -598,22 +1935,137 @@ Ubicada en el paquete canónico `com.andeva.atelier.platform.shared.infrastructu
 
 En la @tbl:shared-infrastructure-types se presenta el catálogo consolidado de los tipos que componen la Capa de Infraestructura del Bounded Context Shared.
 
-| Clase o Tipo | Categoría Táctica | Paquete Canónico | Propósito en la Capa | Relaciones Principales |
-| :---: | :---: | :--- | :--- | :--- |
-| AuditableAbstractPersistenceEntity | Superclase JPA | `...shared.infrastructure.persistence.jpa.entities` | Base abstracta con clave primaria UUID y marcas temporales de auditoría automáticas. | Heredada por todas las entidades **PersistenceEntity** del sistema. |
-| MoneyAttributeConverter | Convertidor JPA | `...shared.infrastructure.persistence.jpa.converters` | Mapeo bidireccional seguro entre **Money** y NUMERIC(12, 2). | Aplica sobre columnas de importe en cotizaciones, órdenes y facturas. |
-| MileageAttributeConverter | Convertidor JPA | `...shared.infrastructure.persistence.jpa.converters` | Mapeo bidireccional entre **Mileage** y columna escalar INTEGER. | Aplica sobre odómetros en vehículos, recepciones y telemetría. |
-| TaxIdAttributeConverter | Convertidor JPA | `...shared.infrastructure.persistence.jpa.converters` | Mapeo bidireccional nulo-seguro entre **TaxId** y columna VARCHAR(11). | Aplica sobre identificadores fiscales (RUC, DNI) en clientes y talleres. |
-| EmailAddressAttributeConverter | Convertidor JPA | `...shared.infrastructure.persistence.jpa.converters` | Mapeo bidireccional normalizado entre **EmailAddress** y VARCHAR(254). | Aplica sobre direcciones de correo en perfiles de usuario y contacto. |
-| PhoneNumberAttributeConverter | Convertidor JPA | `...shared.infrastructure.persistence.jpa.converters` | Mapeo bidireccional entre **PhoneNumber** y columna VARCHAR(15). | Aplica sobre números telefónicos estandarizados bajo la norma E.164. |
-| SnakeCaseWithPluralizedTablePhysicalNamingStrategy | Estrategia Física | `...shared.infrastructure.persistence.jpa.configuration.strategy` | Convención Hibernate de nombrado de tablas pluralizadas en snake_case. | Integrada en la configuración de EntityManagerFactory de Spring Boot. |
-| OutboxStatus | Enumeración | `...shared.infrastructure.outbox.entities` | Ciclo de vida transaccional del mensaje outbox (PENDING, PUBLISHED, FAILED). | Atributo de estado en **OutboxMessagePersistenceEntity**. |
-| OutboxMessagePersistenceEntity | Entidad JPA | `...shared.infrastructure.outbox.entities` | Entidad relacional mapeada a la tabla transaccional **outbox_messages**. | Persistida en PostgreSQL por **JpaDomainEventPublisher**. |
-| OutboxMessageJpaRepository | Repositorio Spring Data | `...shared.infrastructure.outbox.repositories` | Interfaz de persistencia y sondeo ordenado de mensajes outbox pendientes. | Invocada por el worker asíncrono de reintento y despacho a colas. |
-| JpaDomainEventPublisher | Adaptador de Salida | `...shared.infrastructure.outbox.publisher` | Implementación del puerto **DomainEventPublisher** mediante inserción outbox. | Implementa el puerto de aplicación; interactúa con PostgreSQL y Spring. |
-| OpenApiConfiguration | Configuración | `...shared.infrastructure.documentation.openapi.configuration` | Definición de metadatos globales OpenAPI 3.0 y esquemas de seguridad Bearer JWT. | Utilizada por Swagger UI y herramientas de generación de contratos. |
-: Catálogo Consolidado de la Capa de Infraestructura del Bounded Context Shared {#tbl:shared-infrastructure-types}
-
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Catálogo Consolidado de la Capa de Infraestructura del Bounded Context Shared} \label{tbl:shared-infrastructure-types} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\
+\hline
+\endhead
+AuditableAbstractPersistenceEntity & Base abstracta con clave primaria UUID y marcas temporales de auditoría automáticas. \\*
+\hline
+\textbf{Categoría} & Superclase JPA \\*
+\hline
+\textbf{Relaciones} & Heredada por todas las entidades \textbf{PersistenceEntity} del sistema. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak shared.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak entities} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+MoneyAttributeConverter & Mapeo bidireccional seguro entre \textbf{Money} y NUMERIC(12, 2). \\*
+\hline
+\textbf{Categoría} & Convertidor JPA \\*
+\hline
+\textbf{Relaciones} & Aplica sobre columnas de importe en cotizaciones, órdenes y facturas. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak shared.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak converters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+MileageAttributeConverter & Mapeo bidireccional entre \textbf{Mileage} y columna escalar INTEGER. \\*
+\hline
+\textbf{Categoría} & Convertidor JPA \\*
+\hline
+\textbf{Relaciones} & Aplica sobre odómetros en vehículos, recepciones y telemetría. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak shared.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak converters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+TaxIdAttributeConverter & Mapeo bidireccional nulo-seguro entre \textbf{TaxId} y columna VARCHAR(11). \\*
+\hline
+\textbf{Categoría} & Convertidor JPA \\*
+\hline
+\textbf{Relaciones} & Aplica sobre identificadores fiscales (RUC, DNI) en clientes y talleres. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak shared.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak converters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+EmailAddressAttributeConverter & Mapeo bidireccional normalizado entre \textbf{EmailAddress} y VARCHAR(254). \\*
+\hline
+\textbf{Categoría} & Convertidor JPA \\*
+\hline
+\textbf{Relaciones} & Aplica sobre direcciones de correo en perfiles de usuario y contacto. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak shared.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak converters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+PhoneNumberAttributeConverter & Mapeo bidireccional entre \textbf{PhoneNumber} y columna VARCHAR(15). \\*
+\hline
+\textbf{Categoría} & Convertidor JPA \\*
+\hline
+\textbf{Relaciones} & Aplica sobre números telefónicos estandarizados bajo la norma E.164. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak shared.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak converters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+SnakeCaseWithPluralizedTablePhysicalNamingStrategy & Convención Hibernate de nombrado de tablas pluralizadas en snake\_case. \\*
+\hline
+\textbf{Categoría} & Estrategia Física \\*
+\hline
+\textbf{Relaciones} & Integrada en la configuración de EntityManagerFactory de Spring Boot. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak shared.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak configuration.\allowbreak strategy} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+OutboxStatus & Ciclo de vida transaccional del mensaje outbox (PENDING, PUBLISHED, FAILED). \\*
+\hline
+\textbf{Categoría} & Enumeración \\*
+\hline
+\textbf{Relaciones} & Atributo de estado en \textbf{OutboxMessagePersistenceEntity}. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak shared.\allowbreak infrastructure.\allowbreak outbox.\allowbreak entities} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+OutboxMessagePersistenceEntity & Entidad relacional mapeada a la tabla transaccional \textbf{outbox\_messages}. \\*
+\hline
+\textbf{Categoría} & Entidad JPA \\*
+\hline
+\textbf{Relaciones} & Persistida en PostgreSQL por \textbf{JpaDomainEventPublisher}. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak shared.\allowbreak infrastructure.\allowbreak outbox.\allowbreak entities} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+OutboxMessageJpaRepository & Interfaz de persistencia y sondeo ordenado de mensajes outbox pendientes. \\*
+\hline
+\textbf{Categoría} & Repositorio Spring Data \\*
+\hline
+\textbf{Relaciones} & Invocada por el worker asíncrono de reintento y despacho a colas. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak shared.\allowbreak infrastructure.\allowbreak outbox.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+JpaDomainEventPublisher & Implementación del puerto \textbf{DomainEventPublisher} mediante inserción outbox. \\*
+\hline
+\textbf{Categoría} & Adaptador de Salida \\*
+\hline
+\textbf{Relaciones} & Implementa el puerto de aplicación. interactúa con PostgreSQL y Spring. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak shared.\allowbreak infrastructure.\allowbreak outbox.\allowbreak publisher} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+OpenApiConfiguration & Definición de metadatos globales OpenAPI 3.0 y esquemas de seguridad Bearer JWT. \\*
+\hline
+\textbf{Categoría} & Configuración \\*
+\hline
+\textbf{Relaciones} & Utilizada por Swagger UI y herramientas de generación de contratos. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak shared.\allowbreak infrastructure.\allowbreak documentation.\allowbreak openapi.\allowbreak configuration} \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
 *Nota.* Componentes pertenecientes al paquete canónico com.andeva.atelier.platform.shared.infrastructure.
 
 A continuación, se detalla la especificación formal a manera de diccionario de cada uno de los componentes de esta capa.
@@ -628,18 +2080,83 @@ Asimismo, captura de forma transparente las marcas temporales de auditoría medi
 
 En la @tbl:shared-auditable-entity se detallan los miembros y directrices de diseño de esta superclase.
 
-| Elemento | Tipo o Firma | Ámbito | Propósito y Reglas de Persistencia |
-| :---: | :--- | :---: | :--- |
-| id | UUID | Privado | Clave primaria técnica `@Id`; columna uuid inmodificable y no nula. |
-| createdAt | Instant | Privado | Marca temporal de creación `@CreatedDate`; columna inmodificable y no nula. |
-| updatedAt | Instant | Privado | Marca temporal de última modificación `@LastModifiedDate`; columna no nula. |
-| getId / setId | `UUID getId()`, `void setId(UUID)` | Público | Métodos de acceso y asignación requeridos por la especificación JPA. |
-| getCreatedAt / setCreatedAt | `Instant getCreatedAt()`, `void setCreatedAt(Instant)` | Público | Métodos de acceso para la marca temporal auditada de inserción. |
-| getUpdatedAt / setUpdatedAt | `Instant getUpdatedAt()`, `void setUpdatedAt(Instant)` | Público | Métodos de acceso para la marca temporal auditada de actualización. |
-| equals | `boolean equals(Object o)` | Público | Evalúa igualdad basada exclusivamente en el identificador técnico no nulo. |
-| hashCode | `int hashCode()` | Público | Retorna código hash consistente basado en la clase de persistencia. |
-: Miembros de la Superclase Base de Persistencia y Auditoría JPA {#tbl:shared-auditable-entity}
-
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Miembros de la Superclase Base de Persistencia y Auditoría JPA} \label{tbl:shared-auditable-entity} \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\
+\hline
+\endhead
+\multicolumn{2}{|c|}{\textbf{Componente:} AuditableAbstractPersistenceEntity (Superclase JPA de Persistencia)} \\*
+\hline
+id & Clave primaria técnica \texttt{@Id}. columna uuid inmodificable y no nula. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{UUID} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+createdAt & Marca temporal de creación \texttt{@CreatedDate}. columna inmodificable y no nula. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Instant} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+updatedAt & Marca temporal de última modificación \texttt{@LastModifiedDate}. columna no nula. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Instant} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+getId / setId & Métodos de acceso y asignación requeridos por la especificación JPA. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{UUID getId()`,\allowbreak  `void setId(UUID)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+getCreatedAt / setCreatedAt & Métodos de acceso para la marca temporal auditada de inserción. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Instant getCreatedAt()`,\allowbreak  `void setCreatedAt(Instant)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+getUpdatedAt / setUpdatedAt & Métodos de acceso para la marca temporal auditada de actualización. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Instant getUpdatedAt()`,\allowbreak  `void setUpdatedAt(Instant)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+equals & Evalúa igualdad basada exclusivamente en el identificador técnico no nulo. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{boolean equals(Object o)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Propósito} \\*
+\hline
+hashCode & Retorna código hash consistente basado en la clase de persistencia. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{int hashCode()} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
 *Nota.* Componente ubicado en el paquete com.andeva.atelier.platform.shared.infrastructure.persistence.jpa.entities.
 
 En términos de relaciones arquitectónicas, **AuditableAbstractPersistenceEntity** es extendida exclusivamente por las clases de entidad de persistencia de los diferentes bounded contexts del sistema. Los agregados del dominio jamás heredan de ella.
@@ -656,15 +2173,59 @@ Para preservar la pureza del dominio y la seguridad de tipos, los atributos de n
 
 En la @tbl:shared-jpa-converters se detallan los tipos mapeados y métodos de conversión de este catálogo.
 
-| Convertidor | Tipo Dominio | Tipo Base de Datos | Método a Base de Datos | Método a Entidad Dominio |
-| :---: | :---: | :--- | :--- | :--- |
-| MoneyAttributeConverter | Money | BigDecimal (NUMERIC(12,2)) | `attribute.amount()` (o null) | `Money.of(dbData, Currency.PEN)` |
-| MileageAttributeConverter | Mileage | Integer (INTEGER) | `attribute.value()` (o null) | `new Mileage(dbData)` |
-| TaxIdAttributeConverter | TaxId | String (VARCHAR(11)) | `attribute.value()` (o null) | `new TaxId(deduceType(dbData), dbData)` |
-| EmailAddressAttributeConverter | EmailAddress | String (VARCHAR(254)) | `attribute.value()` (o null) | `new EmailAddress(dbData)` |
-| PhoneNumberAttributeConverter | PhoneNumber | String (VARCHAR(15)) | `attribute.value()` (o null) | `new PhoneNumber(dbData)` |
-: Catálogo de Convertidores JPA para Objetos de Valor {#tbl:shared-jpa-converters}
-
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Catálogo de Convertidores JPA para Objetos de Valor} \label{tbl:shared-jpa-converters} \\
+\hline
+\thfirst{Método de Conversión} & \thcell{Firma y Comportamiento} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Método de Conversión} & \thcell{Firma y Comportamiento} \\
+\hline
+\endhead
+\multicolumn{2}{|c|}{\textbf{Convertidor JPA:} MoneyAttributeConverter} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{Money} $\longleftrightarrow$ \texttt{BigDecimal (NUMERIC(12,\allowbreak 2))} \\*
+\hline
+\textbf{Hacia Base de Datos} & \texttt{attribute.amount()} (o null) \\*
+\hline
+\textbf{Hacia Entidad Dominio} & \texttt{Money.of(dbData, Currency.PEN)} \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Convertidor JPA:} MileageAttributeConverter} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{Mileage} $\longleftrightarrow$ \texttt{Integer (INTEGER)} \\*
+\hline
+\textbf{Hacia Base de Datos} & \texttt{attribute.value()} (o null) \\*
+\hline
+\textbf{Hacia Entidad Dominio} & \texttt{new Mileage(dbData)} \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Convertidor JPA:} TaxIdAttributeConverter} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{TaxId} $\longleftrightarrow$ \texttt{String (VARCHAR(11))} \\*
+\hline
+\textbf{Hacia Base de Datos} & \texttt{attribute.value()} (o null) \\*
+\hline
+\textbf{Hacia Entidad Dominio} & \texttt{new TaxId(deduceType(dbData), dbData)} \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Convertidor JPA:} EmailAddressAttributeConverter} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{EmailAddress} $\longleftrightarrow$ \texttt{String (VARCHAR(254))} \\*
+\hline
+\textbf{Hacia Base de Datos} & \texttt{attribute.value()} (o null) \\*
+\hline
+\textbf{Hacia Entidad Dominio} & \texttt{new EmailAddress(dbData)} \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Convertidor JPA:} PhoneNumberAttributeConverter} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{PhoneNumber} $\longleftrightarrow$ \texttt{String (VARCHAR(15))} \\*
+\hline
+\textbf{Hacia Base de Datos} & \texttt{attribute.value()} (o null) \\*
+\hline
+\textbf{Hacia Entidad Dominio} & \texttt{new PhoneNumber(dbData)} \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
 *Nota.* Componentes pertenecientes al paquete com.andeva.atelier.platform.shared.infrastructure.persistence.jpa.converters.
 
 Respecto a sus relaciones, estos convertidores son referenciados explícitamente mediante la anotación `@Convert(converter = ...)` en los campos correspondientes de las entidades de persistencia en todos los módulos de Atelier, eliminando la necesidad de tablas secundarias para tipos de dato escalares.
@@ -680,13 +2241,43 @@ Esta clase hereda de **CamelCaseToUnderscoresNamingStrategy** de Hibernate 6.x y
 
 En la @tbl:shared-naming-strategy se sintetizan las responsabilidades y métodos de esta estrategia.
 
-| Método | Firma | Ámbito | Regla de Transformación Físico-Relacional |
-| :---: | :--- | :---: | :--- |
-| toPhysicalTableName | `Identifier toPhysicalTableName(Identifier, JdbcEnv)` | Público | Elimina sufijos técnicos, pluraliza en inglés y convierte a snake_case minúsculas. |
-| toPhysicalColumnName | `Identifier toPhysicalColumnName(Identifier, JdbcEnv)` | Público | Transforma nombres de campos camelCase en columnas snake_case minúsculas. |
-| pluralize | `String pluralize(String input)` | Privado | Aplica reglas gramaticales estándar de sufijación plural en inglés. |
-: Métodos de la Estrategia Física de Nombrado Relacional {#tbl:shared-naming-strategy}
-
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Métodos de la Estrategia Física de Nombrado Relacional} \label{tbl:shared-naming-strategy} \\
+\hline
+\thfirst{Elemento} & \thcell{Regla de Transformación Físico-Relacional} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Elemento} & \thcell{Regla de Transformación Físico-Relacional} \\
+\hline
+\endhead
+\multicolumn{2}{|c|}{\textbf{Componente:} PhysicalNamingStrategyImpl (Estrategia Física de Nombrado)} \\*
+\hline
+toPhysicalTableName & Elimina sufijos técnicos, pluraliza en inglés y convierte a snake\_case minúsculas. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Identifier toPhysicalTableName(Identifier,\allowbreak  JdbcEnv)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Regla de Transformación Físico-Relacional} \\*
+\hline
+toPhysicalColumnName & Transforma nombres de campos camelCase en columnas snake\_case minúsculas. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Identifier toPhysicalColumnName(Identifier,\allowbreak  JdbcEnv)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Regla de Transformación Físico-Relacional} \\*
+\hline
+pluralize & Aplica reglas gramaticales estándar de sufijación plural en inglés. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String pluralize(String input)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
 *Nota.* Componente ubicado en com.andeva.atelier.platform.shared.infrastructure.persistence.jpa.configuration.strategy.
 
 En términos de integración, esta estrategia se registra en el archivo de configuración `application.yml` bajo la propiedad `spring.jpa.hibernate.naming.physical-strategy`, gobernando de manera transversal la generación física del esquema en PostgreSQL.
@@ -702,16 +2293,67 @@ La comunicación asíncrona confiable entre bounded contexts o hacia sistemas ex
 
 En la @tbl:shared-outbox-infrastructure se detallan los elementos de la infraestructura del Transactional Outbox.
 
-| Componente | Tipo de Elemento | Firma o Definición | Responsabilidad Arquitectónica |
-| :---: | :---: | :--- | :--- |
-| OutboxStatus | Enumeración | PENDING, PUBLISHED, FAILED | Modela las etapas de vida transaccional del mensaje outbox. |
-| OutboxMessagePersistenceEntity | Entidad JPA | Tabla outbox_messages | Estructura inmutable relacional con carga útil JSONB y auditoría de reintentos. |
-| pendingOf | Factoría Estática | `pendingOf(type, id, event, payload, date)` | Construye un registro outbox en estado inicial PENDING con contador cero. |
-| findTop50ByStatusOrderByOccurredOnAsc | Consulta Derivada | `List<OutboxMessagePersistenceEntity> (...)` | Sondeo cronológico de los 50 mensajes pendientes prioritarios para despacho. |
-| publish | Método Adaptador | `void publish(DomainEvent event)` | Serializa el evento a JSON e inserta el registro outbox dentro de la transacción. |
-| publishAll | Método Adaptador | `void publishAll(Collection<Object> events)` | Itera y despacha la colección completa de eventos extraída de la raíz de agregado. |
-: Componentes y Métodos de la Infraestructura del Transactional Outbox {#tbl:shared-outbox-infrastructure}
-
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Componentes y Métodos de la Infraestructura del Transactional Outbox} \label{tbl:shared-outbox-infrastructure} \\
+\hline
+\thfirst{Aspecto de Infraestructura} & \thcell{Especificación Técnica y Responsabilidad} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Infraestructura} & \thcell{Especificación Técnica y Responsabilidad} \\
+\hline
+\endhead
+\multicolumn{2}{|c|}{\textbf{Componente Outbox:} OutboxStatus} \\*
+\hline
+\textbf{Tipo de Elemento} & Enumeración \\*
+\hline
+\textbf{Firma o Definición} & \texttt{PENDING,\allowbreak  PUBLISHED,\allowbreak  FAILED} \\*
+\hline
+\textbf{Responsabilidad} & Modela las etapas de vida transaccional del mensaje outbox. \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Componente Outbox:} OutboxMessagePersistenceEntity} \\*
+\hline
+\textbf{Tipo de Elemento} & Entidad JPA \\*
+\hline
+\textbf{Firma o Definición} & \texttt{Tabla outbox\_messages} \\*
+\hline
+\textbf{Responsabilidad} & Estructura inmutable relacional con carga útil JSONB y auditoría de reintentos. \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Componente Outbox:} pendingOf} \\*
+\hline
+\textbf{Tipo de Elemento} & Factoría Estática \\*
+\hline
+\textbf{Firma o Definición} & \texttt{pendingOf(type,\allowbreak  id,\allowbreak  event,\allowbreak  payload,\allowbreak  date)} \\*
+\hline
+\textbf{Responsabilidad} & Construye un registro outbox en estado inicial PENDING con contador cero. \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Componente Outbox:} findTop50ByStatusOrderByOccurredOnAsc} \\*
+\hline
+\textbf{Tipo de Elemento} & Consulta Derivada \\*
+\hline
+\textbf{Firma o Definición} & \texttt{List<OutboxMessagePersistenceEntity> (...)} \\*
+\hline
+\textbf{Responsabilidad} & Sondeo cronológico de los 50 mensajes pendientes prioritarios para despacho. \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Componente Outbox:} publish} \\*
+\hline
+\textbf{Tipo de Elemento} & Método Adaptador \\*
+\hline
+\textbf{Firma o Definición} & \texttt{void publish(DomainEvent event)} \\*
+\hline
+\textbf{Responsabilidad} & Serializa el evento a JSON e inserta el registro outbox dentro de la transacción. \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Componente Outbox:} publishAll} \\*
+\hline
+\textbf{Tipo de Elemento} & Método Adaptador \\*
+\hline
+\textbf{Firma o Definición} & \texttt{void publishAll(Collection<Object> events)} \\*
+\hline
+\textbf{Responsabilidad} & Itera y despacha la colección completa de eventos extraída de la raíz de agregado. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
 *Nota.* Componentes ubicados en com.andeva.atelier.platform.shared.infrastructure.outbox.
 
 Respecto a sus relaciones, este mecanismo desacopla la mutación local del agregado del transporte externo. Los manejadores de comandos invocan **JpaDomainEventPublisher**, el cual persiste el mensaje en PostgreSQL; posteriormente, un proceso worker desacoplado consulta **OutboxMessageJpaRepository** periódicamente para publicar los mensajes en el intermediario de mensajería asíncrona **RabbitMQ**, garantizando entrega confiable sin bloqueo transaccional.
@@ -724,14 +2366,51 @@ Configurada con la anotación `@Configuration`, declara el bean *customOpenAPI()
 
 En la @tbl:shared-openapi-configuration se resumen los parámetros configurados por este componente.
 
-| Elemento de Configuración | Parámetro o Esquema | Valor o Definición | Propósito en la Arquitectura |
-| :---: | :--- | :--- | :--- |
-| applicationName | Inyección `@Value` | `spring.application.name` | Título dinámico asignado a la documentación interactiva. |
-| customOpenAPI | Bean Spring `@Bean` | Retorna instancia OpenAPI | Ensambla información, servidores y esquemas de seguridad global. |
-| bearerAuth | Esquema de Seguridad | HTTP Bearer (JWT RFC 7519) | Exige inclusión de token de autorización en peticiones protegidas. |
-| Servidores de Ejecución | Lista de Server | `/api/v1` y URL de Producción | Enrutamiento perimetral para ejecución de pruebas interactivas. |
-: Parámetros y Componentes de Configuración de OpenAPI 3.0 {#tbl:shared-openapi-configuration}
-
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Parámetros y Componentes de Configuración de OpenAPI 3.0} \label{tbl:shared-openapi-configuration} \\
+\hline
+\thfirst{Aspecto de Configuración} & \thcell{Especificación Técnica y Propósito} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Configuración} & \thcell{Especificación Técnica y Propósito} \\
+\hline
+\endhead
+\multicolumn{2}{|c|}{\textbf{Elemento:} applicationName} \\*
+\hline
+\textbf{Parámetro o Esquema} & Inyección \texttt{@Value} \\*
+\hline
+\textbf{Valor o Definición} & \texttt{spring.application.name} \\*
+\hline
+\textbf{Propósito} & Título dinámico asignado a la documentación interactiva. \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Elemento:} customOpenAPI} \\*
+\hline
+\textbf{Parámetro o Esquema} & Bean Spring \texttt{@Bean} \\*
+\hline
+\textbf{Valor o Definición} & \texttt{Retorna instancia OpenAPI} \\*
+\hline
+\textbf{Propósito} & Ensambla información, servidores y esquemas de seguridad global. \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Elemento:} bearerAuth} \\*
+\hline
+\textbf{Parámetro o Esquema} & Esquema de Seguridad \\*
+\hline
+\textbf{Valor o Definición} & \texttt{HTTP Bearer (JWT RFC 7519)} \\*
+\hline
+\textbf{Propósito} & Exige inclusión de token de autorización en peticiones protegidas. \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Elemento:} Servidores de Ejecución} \\*
+\hline
+\textbf{Parámetro o Esquema} & Lista de Server \\*
+\hline
+\textbf{Valor o Definición} & \texttt{/api/v1` y URL de Producción} \\*
+\hline
+\textbf{Propósito} & Enrutamiento perimetral para ejecución de pruebas interactivas. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
 *Nota.* Componente ubicado en com.andeva.atelier.platform.shared.infrastructure.documentation.openapi.configuration.
 
 En cuanto a sus relaciones en el sistema, **OpenApiConfiguration** opera transversalmente descubriendo y catalogando automáticamente los controladores REST definidos en los ocho bounded contexts de Atelier, sirviendo como contrato formal para la interoperabilidad del ecosistema cliente-servidor.
@@ -746,17 +2425,89 @@ Todos los controladores REST, servicios de comando y consulta, agregados de domi
 
 En la @tbl:shared-c4-components se presenta el catálogo estructurado de los siete componentes constitutivos del Bounded Context Shared dentro del contenedor central.
 
-| Componente | Tipo C4 | Tecnología | Responsabilidad Arquitectónica | Relaciones y Dependencias |
-| :--- | :---: | :--- | :--- | :--- |
-| Perimeter Tracing & Exception Handling | Componente | Spring Web, OncePerRequestFilter, SLF4J MDC, RFC 7807 | Intercepta solicitudes HTTP inyectando `X-Correlation-Id`, enriquece el contexto diagnóstico MDC para logs distribuidos y captura fallas traduciéndolas a la norma RFC 7807. | Entrada perimetral desde WebApp y Mobile Workshop; envuelve controladores REST; propaga contexto a SLF4J MDC. |
-| REST Assembler & DTO Resource | Componente | Spring MVC, Java 26 Records, Generics | Transforma deterministamente el tipo de resultado **Result<T, ApplicationError>** a `ResponseEntity<?>`, asigna códigos HTTP semánticos y formatea sobres paginados **PagedResultResource<T>**. | Invocado por controladores REST de los 8 módulos; consume **Result<T, E>** y **ApplicationError**. |
-| CQRS Framework & Pagination | Componente | Java 26 Functional Interfaces, Sealed Interfaces, Railway-Oriented Programming | Suministra los contratos base para manejadores CQRS (**CommandHandler**, **QueryHandler**, **DomainEventHandler**) y los modelos de paginación (**PagedQuery**, **PagedResult<T>**). | Implementado por servicios de aplicación en todos los módulos; base de casos de uso. |
-| Domain Foundation & Value Objects | Componente | Spring Data Commons, Java Records, Haversine Engine, SUNAT Módulo 11 | Provee la superclase base de agregados **AbstractDomainAggregateRoot<T>**, el contrato **DomainEvent**, identificadores UUID tipados, objetos de valor inmutables y **DomainException**. | Heredado por raíces de agregado de todos los módulos; núcleo del lenguaje ubicuo. |
-| Persistence Superclass & Converters | Componente | Jakarta Persistence 3.1, Spring Data JPA Auditing, Hibernate 6.x | Provee la superclase **AuditableAbstractPersistenceEntity** con auditoría automática y UUID técnico, convertidores JPA para Value Objects y estrategia física de nombrado. | Heredado por entidades **PersistenceEntity**; interactúa con PostgreSQL 16. |
-| Transactional Outbox Publisher | Componente | Spring Data JPA, Jackson JSONB, Spring ApplicationEventPublisher, PostgreSQL 16 | Implementa el puerto **DomainEventPublisher**, serializando eventos a JSON e insertándolos atómicamente en **outbox_messages** dentro de la transacción activa con publicación local. | Invocado por Command Handlers; persiste en base de datos; alimenta contexto Spring. |
-| OpenAPI Specification | Componente | SpringDoc OpenAPI 2.8, Swagger UI, RFC 7519 (JWT Bearer) | Centraliza la definición de metadatos globales OpenAPI 3.0, servidores de ejecución y el esquema de seguridad **bearerAuth** con tokens JWT para la generación de contratos. | Descubre dinámicamente endpoints REST; consultado por desarrolladores y clientes. |
-: Catálogo de Componentes de Arquitectura de Software del Bounded Context Shared {#tbl:shared-c4-components}
-
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.5cm} | >{\raggedright\arraybackslash}p{10.9cm} |}
+\caption{Catálogo de Componentes de Arquitectura de Software del Bounded Context Shared} \label{tbl:shared-c4-components} \\
+\hline
+\thfirst{Aspecto Técnico} & \thcell{Especificación de Arquitectura} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto Técnico} & \thcell{Especificación de Arquitectura} \\
+\hline
+\endhead
+\multicolumn{2}{|c|}{\textbf{Componente C4:} Perimeter Tracing \& Exception Handling} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & Spring Web, OncePerRequestFilter, SLF4J MDC, RFC 7807 \\*
+\hline
+\textbf{Responsabilidad} & Intercepta solicitudes HTTP inyectando \texttt{X-Correlation-Id}, enriquece el contexto diagnóstico MDC para logs distribuidos y captura fallas traduciéndolas a la norma RFC 7807. \\*
+\hline
+\textbf{Relaciones} & - Entrada perimetral desde WebApp y Mobile Workshop \newline - Envuelve controladores REST \newline - Propaga contexto a SLF4J MDC \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Componente C4:} REST Assembler \& DTO Resource} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & Spring MVC, Java 26 Records, Generics \\*
+\hline
+\textbf{Responsabilidad} & Transforma deterministamente el tipo de resultado \textbf{Result<T, ApplicationError>} a \texttt{ResponseEntity<?>}, asigna códigos HTTP semánticos y formatea sobres paginados \textbf{PagedResultResource<T>}. \\*
+\hline
+\textbf{Relaciones} & - Invocado por controladores REST de los 8 módulos \newline - Consume \textbf{Result<T, E>} y \textbf{ApplicationError} \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Componente C4:} CQRS Framework \& Pagination} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & Java 26 Functional Interfaces, Sealed Interfaces, Railway-Oriented Programming \\*
+\hline
+\textbf{Responsabilidad} & Suministra los contratos base para manejadores CQRS (\textbf{CommandHandler}, \textbf{QueryHandler}, \textbf{DomainEventHandler}) y los modelos de paginación (\textbf{PagedQuery}, \textbf{PagedResult<T>}). \\*
+\hline
+\textbf{Relaciones} & - Implementado por servicios de aplicación en todos los módulos \newline - Base estructural de casos de uso \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Componente C4:} Domain Foundation \& Value Objects} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & Spring Data Commons, Java Records, Haversine Engine, SUNAT Módulo 11 \\*
+\hline
+\textbf{Responsabilidad} & Provee la superclase base de agregados \textbf{AbstractDomainAggregateRoot<T>}, el contrato \textbf{DomainEvent}, identificadores UUID tipados, objetos de valor inmutables y \textbf{DomainException}. \\*
+\hline
+\textbf{Relaciones} & - Heredado por raíces de agregado de todos los módulos \newline - Núcleo del lenguaje ubicuo \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Componente C4:} Persistence Superclass \& Converters} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & Jakarta Persistence 3.1, Spring Data JPA Auditing, Hibernate 6.x \\*
+\hline
+\textbf{Responsabilidad} & Provee la superclase \textbf{AuditableAbstractPersistenceEntity} con auditoría automática y UUID técnico, convertidores JPA para Value Objects y estrategia física de nombrado. \\*
+\hline
+\textbf{Relaciones} & - Heredado por entidades \textbf{PersistenceEntity} \newline - Interactúa con PostgreSQL 16 \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Componente C4:} Transactional Outbox Publisher} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & Spring Data JPA, Jackson JSONB, Spring ApplicationEventPublisher, PostgreSQL 16 \\*
+\hline
+\textbf{Responsabilidad} & Implementa el puerto \textbf{DomainEventPublisher}, serializando eventos a JSON e insertándolos atómicamente en \textbf{outbox\_messages} dentro de la transacción activa con publicación local. \\*
+\hline
+\textbf{Relaciones} & - Invocado por Command Handlers \newline - Persiste en base de datos \newline - Alimenta contexto Spring \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Componente C4:} OpenAPI Specification} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & SpringDoc OpenAPI 2.8, Swagger UI, RFC 7519 (JWT Bearer) \\*
+\hline
+\textbf{Responsabilidad} & Centraliza la definición de metadatos globales OpenAPI 3.0, servidores de ejecución y el esquema de seguridad \textbf{bearerAuth} con tokens JWT para la generación de contratos. \\*
+\hline
+\textbf{Relaciones} & - Descubre dinámicamente endpoints REST \newline - Consultado por desarrolladores y clientes \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
 *Nota.* Componentes pertenecientes al contenedor API Application en com.andeva.atelier.platform.shared.
 
 En la @fig:c4-component-shared se ilustra el diagrama C4 de componentes para el Bounded Context Shared, detallando las interacciones entre los componentes transversales, los clientes perimetrales, los módulos de negocio de la aplicación y los servicios de infraestructura física.
@@ -818,60 +2569,419 @@ La estructura del diagrama se articula en cuatro paquetes lógicos cohesivos que
 
 En la @tbl:shared-domain-classes-members se detalla la especificación exhaustiva de cada clase, interfaz, registro inmutable y enumeración, explicitando sus atributos, firmas de métodos con tipos de retorno, ámbito de visibilidad y relaciones con cardinalidad asociada.
 
-| Clase o Estructura | Elemento | Firma o Tipo | Ámbito | Descripción, Relaciones y Reglas de Negocio |
-| :---: | :---: | :--- | :---: | :--- |
-| AbstractDomainAggregateRoot<ID> | Atributo id | ID | Protegido | Identificador único genérico del agregado; hereda el parámetro de tipo ID. |
-| AbstractDomainAggregateRoot<ID> | Atributo domainEvents | List<DomainEvent> | Privado | Acumulador interno en memoria para eventos de dominio generados. |
-| AbstractDomainAggregateRoot<ID> | Constructor | `AbstractDomainAggregateRoot(id: ID)` | Protegido | Inicializa el agregado asignando el identificador y una lista vacía de eventos. |
-| AbstractDomainAggregateRoot<ID> | Método id | ID | Público | Retorna el identificador fuertemente tipado de la raíz de agregado. |
-| AbstractDomainAggregateRoot<ID> | Método domainEvents | List<DomainEvent> | Público | Retorna una vista inmutable de los eventos de dominio acumulados. |
-| AbstractDomainAggregateRoot<ID> | Método registerDomainEvent | `void registerDomainEvent(DomainEvent event)` | Protegido | Registra un nuevo evento verificando no-nulidad. Composición 1 a 0..* con **DomainEvent**. |
-| AbstractDomainAggregateRoot<ID> | Método clearDomainEvents | `void clearDomainEvents()` | Público | Purga la colección de eventos tras su almacenamiento atómico en el Transactional Outbox. |
-| DomainEvent | Método eventId | UUID | Público | Identificador global único del evento para trazabilidad y deduplicación. |
-| DomainEvent | Método occurredOn | Instant | Público | Marca temporal UTC en la que ocurrió el evento de dominio. |
-| DomainEvent | Método eventType | String | Público | Clasificador semántico o nombre canónico calificado del evento. |
-| TypedId<T> | Método value | T | Público | Contrato genérico de interfaz para obtener el valor primitivo subyacente. |
-| TenantId | Atributo value | UUID | Privado | Registro inmutable; realiza `TypedId<UUID>`. Identificador universal del taller. |
-| TenantId | Métodos estáticos | `TenantId of(UUID)`, `fromString(String)`, `generate()` | Público | Factorías estáticas de instanciación y generación criptográfica de identificador. |
-| UserId | Atributo value | UUID | Privado | Registro inmutable; realiza `TypedId<UUID>`. Identificador de usuario del sistema. |
-| UserId | Métodos estáticos | `UserId of(UUID)`, `fromString(String)`, `generate()` | Público | Factorías estáticas para vinculación de credenciales y miembros de taller. |
-| WorkOrderId | Atributo value | UUID | Privado | Registro inmutable; realiza `TypedId<UUID>`. Identificador de orden de trabajo. |
-| WorkOrderId | Métodos estáticos | `WorkOrderId of(UUID)`, `fromString(String)`, `generate()` | Público | Factorías estáticas para órdenes de servicio mecánico y mantenimiento. |
-| VehicleId | Atributo value | UUID | Privado | Registro inmutable; realiza `TypedId<UUID>`. Identificador de unidad vehicular. |
-| VehicleId | Métodos estáticos | `VehicleId of(UUID)`, `fromString(String)`, `generate()` | Público | Factorías estáticas para vehículos ingresados a custodia y diagnóstico. |
-| CustomerId | Atributo value | UUID | Privado | Registro inmutable; realiza `TypedId<UUID>`. Identificador de cliente o propietario. |
-| CustomerId | Métodos estáticos | `CustomerId of(UUID)`, `fromString(String)`, `generate()` | Público | Factorías estáticas para personas naturales y empresas propietarias de vehículos. |
-| Currency | Constantes | PEN, USD | Público | Enumeración de divisas; Soles peruanos y Dólares estadounidenses. |
-| Money | Atributo amount | BigDecimal | Privado | Cuantía monetaria normalizada a dos decimales con redondeo Half-Even. |
-| Money | Atributo currency | Currency | Privado | Composición 1 a 1 con enumeración **Currency**. Divisa oficial del importe. |
-| Money | Constructor compacto | `Money(BigDecimal amount, Currency currency)` | Público | Invariante: valida no-nulidad y redondea a escala 2. Lanza **BusinessRuleValidationException**. |
-| Money | Factorías | `Money of(BigDecimal, Currency)`, `pen(...)`, `usd(...)` | Público | Métodos de construcción segura para monedas estándar. |
-| Money | Métodos aritméticos | `Money add(Money)`, `subtract(Money)`, `multiply(...)` | Público | Opera importes inmutables. Lanza **CurrencyMismatchException** ante divisas heterogéneas. |
-| Money | Métodos de estado | `boolean isPositive()`, `boolean isZero()` | Público | Predicados lógicos para validaciones de tarifas, saldos y presupuestos. |
-| UnitOfMeasure | Constantes | UNIT, LITER, GALLON, KILOGRAM, METER | Público | Enumeración de unidades físicas de almacenamiento y consumo de repuestos. |
-| Quantity | Atributo value | BigDecimal | Privado | Cuantía cuantitativa física con escala configurable a 4 decimales. |
-| Quantity | Atributo uom | UnitOfMeasure | Privado | Composición 1 a 1 con **UnitOfMeasure**. Unidad física de magnitud. |
-| Quantity | Métodos operativos | `Quantity of(...)`, `units(...)`, `add(...)`, `subtract(...)` | Público | Factorías y operaciones de suma/resta con validación de concordancia de unidad. |
-| Mileage | Atributo kilometers | int | Privado | Registro inmutable. Odómetro expresado como valor escalar entero no negativo. |
-| Mileage | Métodos | `Mileage of(int)`, `boolean isGreaterThan(...)`, `int distanceTo(...)` | Público | Invariante: rechaza valores negativos (*km* ≥ 0). Calcula distancias entre lecturas. |
-| GeoPoint | Atributos | `double latitude`, `double longitude` | Privado | Registro inmutable de coordenadas satelitales bajo datum WGS84. |
-| GeoPoint | Métodos | `GeoPoint of(...)`, `double distanceTo(GeoPoint)` | Público | Invariante: latitud en [-90.0, 90.0], longitud en [-180.0, 180.0]. Computa distancia ortodrómica vía Haversine. |
-| TaxIdType | Constantes | DNI, RUC, CE, PASSPORT | Público | Enumeración legal de documentos de identidad tributaria ante la SUNAT. |
-| TaxId | Atributos | `TaxIdType type`, `String value` | Privado | Composición 1 a 1 con **TaxIdType**. Número de documento tributario validado. |
-| TaxId | Factorías y métodos | `TaxId dni(String)`, `ruc(String)`, `passport(String)` | Público | Invariante: verifica longitud (8 para DNI, 11 para RUC) y suma ponderada de Módulo 11. |
-| EmailAddress | Atributo value | String | Privado | Registro inmutable. Dirección de correo electrónico validada. |
-| EmailAddress | Métodos | `EmailAddress of(String)`, `String value()` | Público | Invariante: valida estructura conforme a la especificación sintáctica RFC 5322. |
-| PhoneNumber | Atributo value | String | Privado | Registro inmutable. Número telefónico formateado en estándar internacional. |
-| PhoneNumber | Métodos | `PhoneNumber of(String)`, `String value()` | Público | Invariante: valida prefijo internacional y longitud bajo norma ITU-T E.164. |
-| DateRange | Atributos | `LocalDate startDate`, `LocalDate endDate` | Privado | Registro inmutable de intervalo temporal cerrado para turnos y contratos. |
-| DateRange | Métodos | `DateRange of(...)`, `boolean contains(...)`, `overlaps(...)` | Público | Invariante: requiere *startDate* ≤ *endDate*. Evalúa contención y traslape. |
-| DomainException | Atributo errorCode | String | Privado | Superclase abstracta de excepciones no comprobadas de dominio. |
-| DomainException | Métodos | `DomainException(errorCode, msg)`, `String errorCode()` | Protegido / Público | Constructor protegido para subclases e inspector del código de error semántico. |
-| BusinessRuleValidationException | Constructor | `BusinessRuleValidationException(errorCode, msg)` | Público | Generalización de **DomainException**. Lanza en violación de invariantes de dominio. |
-| EntityNotFoundException | Constructor | `EntityNotFoundException(entityName, id)` | Público | Generalización de **DomainException**. Lanza ante entidades inexistentes. |
-| CurrencyMismatchException | Constructor | `CurrencyMismatchException(sourceCur, targetCur)` | Público | Generalización de **DomainException**. Lanza ante incompatibilidad de divisas en **Money**. |
-: Catálogo exhaustivo de clases, miembros, ámbitos y relaciones de la Capa de Dominio del Bounded Context Shared {#tbl:shared-domain-classes-members}
-
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Catálogo exhaustivo de clases, miembros, ámbitos y relaciones de la Capa de Dominio del Bounded Context Shared} \label{tbl:shared-domain-classes-members} \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endhead
+\multicolumn{2}{|c|}{\textbf{Clase o Estructura:} AbstractDomainAggregateRoot<ID>} \\*
+\hline
+Atributo id & Identificador único genérico del agregado. hereda el parámetro de tipo ID. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{ID} \\*
+\hline
+\textbf{Ámbito} & Protegido \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Atributo domainEvents & Acumulador interno en memoria para eventos de dominio generados. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{List<DomainEvent>} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Constructor & Inicializa el agregado asignando el identificador y una lista vacía de eventos. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{AbstractDomainAggregateRoot(id: ID)} \\*
+\hline
+\textbf{Ámbito} & Protegido \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Método id & Retorna el identificador fuertemente tipado de la raíz de agregado. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{ID} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Método domainEvents & Retorna una vista inmutable de los eventos de dominio acumulados. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{List<DomainEvent>} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Método registerDomainEvent & Registra un nuevo evento verificando no-nulidad. Composición 1 a 0..* con \textbf{DomainEvent}. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{void registerDomainEvent(DomainEvent event)} \\*
+\hline
+\textbf{Ámbito} & Protegido \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Método clearDomainEvents & Purga la colección de eventos tras su almacenamiento atómico en el Transactional Outbox. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{void clearDomainEvents()} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Clase o Estructura:} DomainEvent} \\*
+\hline
+Método eventId & Identificador global único del evento para trazabilidad y deduplicación. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{UUID} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Método occurredOn & Marca temporal UTC en la que ocurrió el evento de dominio. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{Instant} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Método eventType & Clasificador semántico o nombre canónico calificado del evento. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{String} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Clase o Estructura:} TypedId<T>} \\*
+\hline
+Método value & Contrato genérico de interfaz para obtener el valor primitivo subyacente. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{T} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Clase o Estructura:} TenantId} \\*
+\hline
+Atributo value & Registro inmutable. realiza \texttt{TypedId<UUID>}. Identificador universal del taller. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{UUID} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Métodos estáticos & Factorías estáticas de instanciación y generación criptográfica de identificador. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{TenantId of(UUID)`,\allowbreak  `fromString(String)`,\allowbreak  `generate()} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Clase o Estructura:} UserId} \\*
+\hline
+Atributo value & Registro inmutable. realiza \texttt{TypedId<UUID>}. Identificador de usuario del sistema. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{UUID} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Métodos estáticos & Factorías estáticas para vinculación de credenciales y miembros de taller. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{UserId of(UUID)`,\allowbreak  `fromString(String)`,\allowbreak  `generate()} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Clase o Estructura:} WorkOrderId} \\*
+\hline
+Atributo value & Registro inmutable. realiza \texttt{TypedId<UUID>}. Identificador de orden de trabajo. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{UUID} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Métodos estáticos & Factorías estáticas para órdenes de servicio mecánico y mantenimiento. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{WorkOrderId of(UUID)`,\allowbreak  `fromString(String)`,\allowbreak  `generate()} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Clase o Estructura:} VehicleId} \\*
+\hline
+Atributo value & Registro inmutable. realiza \texttt{TypedId<UUID>}. Identificador de unidad vehicular. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{UUID} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Métodos estáticos & Factorías estáticas para vehículos ingresados a custodia y diagnóstico. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{VehicleId of(UUID)`,\allowbreak  `fromString(String)`,\allowbreak  `generate()} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Clase o Estructura:} CustomerId} \\*
+\hline
+Atributo value & Registro inmutable. realiza \texttt{TypedId<UUID>}. Identificador de cliente o propietario. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{UUID} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Métodos estáticos & Factorías estáticas para personas naturales y empresas propietarias de vehículos. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{CustomerId of(UUID)`,\allowbreak  `fromString(String)`,\allowbreak  `generate()} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Clase o Estructura:} Currency} \\*
+\hline
+Constantes & Enumeración de divisas. Soles peruanos y Dólares estadounidenses. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{PEN,\allowbreak  USD} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Clase o Estructura:} Money} \\*
+\hline
+Atributo amount & Cuantía monetaria normalizada a dos decimales con redondeo Half-Even. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{BigDecimal} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Atributo currency & Composición 1 a 1 con enumeración \textbf{Currency}. Divisa oficial del importe. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{Currency} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Constructor compacto & Invariante: valida no-nulidad y redondea a escala 2. Lanza \textbf{BusinessRuleValidationException}. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{Money(BigDecimal amount,\allowbreak  Currency currency)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Factorías & Métodos de construcción segura para monedas estándar. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{Money of(BigDecimal,\allowbreak  Currency)`,\allowbreak  `pen(...)`,\allowbreak  `usd(...)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Métodos aritméticos & Opera importes inmutables. Lanza \textbf{CurrencyMismatchException} ante divisas heterogéneas. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{Money add(Money)`,\allowbreak  `subtract(Money)`,\allowbreak  `multiply(...)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Métodos de estado & Predicados lógicos para validaciones de tarifas, saldos y presupuestos. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{boolean isPositive()`,\allowbreak  `boolean isZero()} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Clase o Estructura:} UnitOfMeasure} \\*
+\hline
+Constantes & Enumeración de unidades físicas de almacenamiento y consumo de repuestos. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{UNIT,\allowbreak  LITER,\allowbreak  GALLON,\allowbreak  KILOGRAM,\allowbreak  METER} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Clase o Estructura:} Quantity} \\*
+\hline
+Atributo value & Cuantía cuantitativa física con escala configurable a 4 decimales. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{BigDecimal} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Atributo uom & Composición 1 a 1 con \textbf{UnitOfMeasure}. Unidad física de magnitud. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{UnitOfMeasure} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Métodos operativos & Factorías y operaciones de suma/resta con validación de concordancia de unidad. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{Quantity of(...)`,\allowbreak  `units(...)`,\allowbreak  `add(...)`,\allowbreak  `subtract(...)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Clase o Estructura:} Mileage} \\*
+\hline
+Atributo kilometers & Registro inmutable. Odómetro expresado como valor escalar entero no negativo. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{int} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Métodos & Invariante: rechaza valores negativos (\textit{km} $\ge$ 0). Calcula distancias entre lecturas. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{Mileage of(int)`,\allowbreak  `boolean isGreaterThan(...)`,\allowbreak  `int distanceTo(...)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Clase o Estructura:} GeoPoint} \\*
+\hline
+Atributos & Registro inmutable de coordenadas satelitales bajo datum WGS84. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{double latitude`,\allowbreak  `double longitude} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Métodos & Invariante: latitud en [-90.0, 90.0], longitud en [-180.0, 180.0]. Computa distancia ortodrómica vía Haversine. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{GeoPoint of(...)`,\allowbreak  `double distanceTo(GeoPoint)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Clase o Estructura:} TaxIdType} \\*
+\hline
+Constantes & Enumeración legal de documentos de identidad tributaria ante la SUNAT. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{DNI,\allowbreak  RUC,\allowbreak  CE,\allowbreak  PASSPORT} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Clase o Estructura:} TaxId} \\*
+\hline
+Atributos & Composición 1 a 1 con \textbf{TaxIdType}. Número de documento tributario validado. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{TaxIdType type`,\allowbreak  `String value} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Factorías y métodos & Invariante: verifica longitud (8 para DNI, 11 para RUC) y suma ponderada de Módulo 11. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{TaxId dni(String)`,\allowbreak  `ruc(String)`,\allowbreak  `passport(String)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Clase o Estructura:} EmailAddress} \\*
+\hline
+Atributo value & Registro inmutable. Dirección de correo electrónico validada. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{String} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Métodos & Invariante: valida estructura conforme a la especificación sintáctica RFC 5322. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{EmailAddress of(String)`,\allowbreak  `String value()} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Clase o Estructura:} PhoneNumber} \\*
+\hline
+Atributo value & Registro inmutable. Número telefónico formateado en estándar internacional. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{String} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Métodos & Invariante: valida prefijo internacional y longitud bajo norma ITU-T E.164. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{PhoneNumber of(String)`,\allowbreak  `String value()} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Clase o Estructura:} DateRange} \\*
+\hline
+Atributos & Registro inmutable de intervalo temporal cerrado para turnos y contratos. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{LocalDate startDate`,\allowbreak  `LocalDate endDate} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Métodos & Invariante: requiere \textit{startDate} $\le$ \textit{endDate}. Evalúa contención y traslape. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{DateRange of(...)`,\allowbreak  `boolean contains(...)`,\allowbreak  `overlaps(...)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Clase o Estructura:} DomainException} \\*
+\hline
+Atributo errorCode & Superclase abstracta de excepciones no comprobadas de dominio. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{String} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Métodos & Constructor protegido para subclases e inspector del código de error semántico. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{DomainException(errorCode,\allowbreak  msg)`,\allowbreak  `String errorCode()} \\*
+\hline
+\textbf{Ámbito} & Protegido / Público \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Clase o Estructura:} BusinessRuleValidationException} \\*
+\hline
+Constructor & Generalización de \textbf{DomainException}. Lanza en violación de invariantes de dominio. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{BusinessRuleValidationException(errorCode,\allowbreak  msg)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Clase o Estructura:} EntityNotFoundException} \\*
+\hline
+Constructor & Generalización de \textbf{DomainException}. Lanza ante entidades inexistentes. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{EntityNotFoundException(entityName,\allowbreak  id)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Clase o Estructura:} CurrencyMismatchException} \\*
+\hline
+Constructor & Generalización de \textbf{DomainException}. Lanza ante incompatibilidad de divisas en \textbf{Money}. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{CurrencyMismatchException(sourceCur,\allowbreak  targetCur)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
 *Nota.* Elaboración propia en base al diseño táctico de dominio y la especificación UML de la solución.
 
 A partir de la estructura plasmada en la @fig:class-diagram-shared y descrita en la @tbl:shared-domain-classes-members, se identifican tres fundamentos de ingeniería de software que sustentan la solidez del modelo de dominio:
@@ -898,13 +3008,49 @@ En la @fig:database-diagram-shared se presenta el Diagrama Entidad-Relación for
 
 A partir del modelo plasmado en el diagrama de persistencia, en la @tbl:shared-database-objects se sintetiza el catálogo formal de objetos de base de datos, detallando el producto donde se alojan, su propósito arquitectónico, columnas esenciales, restricciones de integridad e índices de rendimiento.
 
-| Objeto de Base de Datos | Motor y Producto | Propósito Arquitectónico | Columnas Clave | Restricciones e Índices |
-| :---: | :--- | :--- | :--- | :--- |
-| outbox_messages | PostgreSQL 16 (API Application) | Cola transaccional de eventos de dominio para garantizar entrega confiable y consistencia eventual con brokers externos. | id (UUID), aggregate_type, aggregate_id, event_type, payload (JSONB), status, retry_count, occurred_on. | PK: pk_outbox_messages. CHECK: chk_outbox_status. Índice Parcial: idx_outbox_status_occurred_on (B-Tree). Índice: idx_outbox_aggregate. |
-| pending_sync_events | SQLite 3 (Mobile Workshop) | Cola local persistente de mutaciones generadas por mecánicos durante trabajos en condiciones desconectadas (Outbox móvil). | id (TEXT), tenant_id, action_type, payload (TEXT/JSON), status, retry_count, created_at, synced_at. | PK: pk_pending_sync_events. CHECK: chk_sync_status. Índice: idx_sync_status_created para procesamiento FIFO. |
-| local_cache_metadata | SQLite 3 (Mobile Workshop) | Control de marcas de agua e invalidación incremental de catálogos cacheados en el dispositivo. | entity_type (TEXT), last_sync_timestamp, record_count, schema_version. | PK: pk_local_cache_metadata. Soporta validación condicional de deltas mediante cabeceras HTTP ETag. |
-: Objetos de persistencia física y estructuras relacionales del Bounded Context Shared {#tbl:shared-database-objects}
-
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.5cm} | >{\raggedright\arraybackslash}p{10.9cm} |}
+\caption{Objetos de persistencia física y estructuras relacionales del Bounded Context Shared} \label{tbl:shared-database-objects} \\
+\hline
+\thfirst{Aspecto de Persistencia} & \thcell{Especificación Físico-Relacional} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Persistencia} & \thcell{Especificación Físico-Relacional} \\
+\hline
+\endhead
+\multicolumn{2}{|c|}{\textbf{Objeto de Persistencia:} \texttt{outbox\_messages}} \\*
+\hline
+\textbf{Motor y Producto} & PostgreSQL 16 (API Application) \\*
+\hline
+\textbf{Propósito Arquitectónico} & Cola transaccional de eventos de dominio para garantizar entrega confiable y consistencia eventual con brokers externos. \\*
+\hline
+\textbf{Columnas Clave} & \texttt{id (UUID),\allowbreak  aggregate\_type,\allowbreak  aggregate\_id,\allowbreak  event\_type,\allowbreak  payload (JSONB),\allowbreak  status,\allowbreak  retry\_count,\allowbreak  occurred\_on} \\*
+\hline
+\textbf{Restricciones e Índices} & - \textbf{Clave Primaria:} \texttt{pk\_outbox\_messages} \newline - \textbf{Restricción CHECK:} \texttt{chk\_outbox\_status} \newline - \textbf{Índice Parcial (B-Tree):} \texttt{idx\_outbox\_status\_occurred\_on} \newline - \textbf{Índice (B-Tree):} \texttt{idx\_outbox\_aggregate} \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Objeto de Persistencia:} \texttt{pending\_sync\_events}} \\*
+\hline
+\textbf{Motor y Producto} & SQLite 3 (Mobile Workshop) \\*
+\hline
+\textbf{Propósito Arquitectónico} & Cola local persistente de mutaciones generadas por mecánicos durante trabajos en condiciones desconectadas (Outbox móvil). \\*
+\hline
+\textbf{Columnas Clave} & \texttt{id (TEXT),\allowbreak  tenant\_id,\allowbreak  action\_type,\allowbreak  payload (TEXT/JSON),\allowbreak  status,\allowbreak  retry\_count,\allowbreak  created\_at,\allowbreak  synced\_at} \\*
+\hline
+\textbf{Restricciones e Índices} & - \textbf{Clave Primaria:} \texttt{pk\_pending\_sync\_events} \newline - \textbf{Restricción CHECK:} \texttt{chk\_sync\_status} \newline - \textbf{Índice (B-Tree):} \texttt{idx\_sync\_status\_created} para procesamiento FIFO \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Objeto de Persistencia:} \texttt{local\_cache\_metadata}} \\*
+\hline
+\textbf{Motor y Producto} & SQLite 3 (Mobile Workshop) \\*
+\hline
+\textbf{Propósito Arquitectónico} & Control de marcas de agua e invalidación incremental de catálogos cacheados en el dispositivo. \\*
+\hline
+\textbf{Columnas Clave} & \texttt{entity\_type (TEXT),\allowbreak  last\_sync\_timestamp,\allowbreak  record\_count,\allowbreak  schema\_version} \\*
+\hline
+\textbf{Restricciones e Índices} & - \textbf{Clave Primaria:} \texttt{pk\_local\_cache\_metadata} \newline - \textbf{Validación Delta:} Soporta validación condicional de deltas mediante cabeceras HTTP ETag \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
 *Nota.* Resumen de esquemas de almacenamiento para el backend central (PostgreSQL 16) y la aplicación técnica móvil (SQLite 3).
 
 A partir de la estructura formalizada en la @fig:database-diagram-shared y la @tbl:shared-database-objects, se identifican cuatro fundamentos de ingeniería de software que respaldan la resiliencia y escalabilidad de la arquitectura de datos:
@@ -931,224 +3077,5079 @@ A partir de la estructura formalizada en la @fig:database-diagram-shared y la @t
 
 ### 2.6.2. *Bounded Context: Identity and Access Management (IAM) & Tenancy*
 
+El Bounded Context Identity and Access Management (IAM) & Tenancy constituye el pilar fundacional de seguridad, gobernanza multi-inquilino y administración de identidades en Atelier Platform. Su responsabilidad dentro del ecosistema radica en resolver tres necesidades operativas críticas:
 
+- **Aislamiento multi-inquilino de primer nivel:** Modela la estructura empresarial de los talleres automotrices (**Tenant**) y sus sedes físicas (**Branch**), asegurando que cualquier operación o registro transaccional en el sistema esté particionado lógicamente por el identificador de inquilino (**TenantId**). Delimita el perímetro geográfico de los talleres mediante geocercas satelitales circulares calculadas con la formulación del Haversine para habilitar el control presencial del personal.
 
+- **Identidad universal y autenticación federada:** Centraliza la administración de cuentas de usuario globales (**User**) y sus perfiles personales (**Profile**), admitiendo tanto credenciales locales aseguradas mediante la función criptográfica BCrypt como autenticación federada con Google OAuth2. Asimismo, gobierna el ciclo de vida de tokens de un solo uso (**VerificationToken**) para la confirmación de correos electrónicos y la recuperación segura de contraseñas.
+
+- **Membresías laborales y control de acceso basado en roles:** Desacopla la cuenta de la persona de su relación con una empresa determinada a través de membresías (**TenantMembership**), regulando esquemas de retribución salarial, gestionando roles dinámicos (**Role**) vinculados a permisos atómicos (**Permission**) y coordinando la incorporación digital de colaboradores mediante invitaciones tokenizadas (**Invitation**).
 
 #### 2.6.2.1. Domain Layer
 
-El núcleo de la capa de dominio de IAM & Tenancy encapsula las entidades fundamentales, objetos de valor y reglas de negocio sin depender de ningún framework tecnológico ni mecanismo de persistencia. En la @tbl:iam-domain-types se presenta el catálogo unificado de clases, agregados, objetos de valor, servicios de dominio, repositorios, eventos y excepciones que componen esta capa.
+La capa de dominio de IAM & Tenancy encapsula los modelos conceptuales, las invariantes transaccionales y las políticas de seguridad sin establecer dependencia alguna con frameworks tecnológicos o motores de persistencia relacional. Residiendo bajo el paquete canónico **com.andeva.atelier.platform.iam.domain**, su diseño táctico se estructura bajo cuatro fundamentos arquitectónicos:
 
-| Clase o Tipo | Categoría Táctica | Responsabilidad Principal en el Dominio |
-| :--- | :--- | :--- |
-| `Tenant` | Raíz de Agregado | Raíz de consistencia del taller; gestiona RUC, razón social, slug único, estado operativo y sedes físicas. |
-| `Branch` | Entidad Dependiente | Sede física del taller; administra código de anexo SUNAT, capacidad instalada de bahías y geocerca GPS circular. |
-| `User` | Raíz de Agregado | Identidad global de autenticación; gestiona credenciales seguras, tokens OTP, estado de verificación y perfil personal. |
-| `TenantMembership` | Entidad Dependiente | Vinculación contractual entre un usuario y un taller específico; asocia rol de seguridad y esquema salarial pactado. |
-| `Role` | Raíz de Agregado | Agrupador de privilegios de seguridad por taller o del sistema (`ROLE_OWNER`, `ROLE_ADMIN`, `ROLE_MECHANIC`, `ROLE_RECEPTIONIST`). |
-| `Permission` | Entidad Dependiente | Privilegio atómico de autorización modelado como cadena de autoridad canónica (ej. `mro:order:create`). |
-| `Invitation` | Raíz de Agregado | Ciclo de vida del proceso de incorporación y onboarding digital de colaboradores mediante correo transaccional (TTL 72h). |
-| `VerificationToken` | Entidad Dependiente | Código OTP numérico de 6 dígitos para validación de email y restablecimiento de contraseñas con TTL de 15 minutos. |
-| `TenantName` | Objeto de Valor | Nombre comercial del taller mecánico; valida longitud de 3 a 100 caracteres y elimina espacios superfluos. |
-| `TenantSlug` | Objeto de Valor | Identificador legible URL-safe normalizado (`^[a-z0-9]+(?:-[a-z0-9]+)*$`) para subdominios y rutas web del taller. |
-| `RucNumber` | Objeto de Valor | Registro Único de Contribuyentes peruano; valida 11 dígitos numéricos, prefijos válidos y algoritmo Módulo 11 de SUNAT. |
-| `TenantStatus` | Enumeración de Dominio | Estados del ciclo de vida del taller (`PENDING`, `ACTIVE`, `SUSPENDED`). |
-| `UserEmail` | Objeto de Valor | Correo electrónico canónico; valida estándar RFC 5322 y normaliza estrictamente a minúsculas. |
-| `HashedPassword` | Objeto de Valor | Contenedor de contraseña cifrada; impone validación estricta de hash BCrypt y longitud exacta de 60 caracteres. |
-| `PersonName` | Objeto de Valor | Nombres y apellidos de la persona; valida longitud mínima de 2 caracteres y normaliza capitalización. |
-| `UserStatus` | Enumeración de Dominio | Estados de la cuenta de usuario (`PENDING_VERIFICATION`, `ACTIVE`, `SUSPENDED`). |
-| `RoleId` | Objeto de Valor | Identificador universal único (`UUID`) fuertemente tipado para roles de seguridad. |
-| `RoleName` | Objeto de Valor | Denominación estandarizada del rol; valida formato alfanumérico con prefijo formal `ROLE_`. |
-| `PermissionName` | Objeto de Valor | Cadena atómica de autoridad bajo la convención formal `<bounded_context>:<resource>:<action>`. |
-| `BranchId` | Objeto de Valor | Identificador universal único (`UUID`) fuertemente tipado para sedes físicas. |
-| `InvitationToken` | Objeto de Valor | Token criptográfico seguro y aleatorio de alta entropía para el enlace de invitación de personal. |
-| `OtpCode` | Objeto de Valor | Código numérico decimal de 6 dígitos (`^[0-9]{6}$`) para autenticación de dos factores o verificación rápida. |
-| `PasswordPolicyEnforcer` | Servicio de Dominio | Servicio puro que valida la entropía y complejidad de contraseñas (mínimo 8 caracteres, mayúscula, minúscula, dígito y símbolo). |
-| `TenantSlugGenerator` | Servicio de Dominio | Algoritmo puro de normalización léxica, eliminación de diacríticos y resolución de colisiones para generar slugs de talleres. |
-| `TenantRepository` | Puerto de Salida | Contrato de persistencia de dominio para la Raíz de Agregado `Tenant`. |
-| `UserRepository` | Puerto de Salida | Contrato de persistencia de dominio para la Raíz de Agregado `User`. |
-| `RoleRepository` | Puerto de Salida | Contrato de persistencia de dominio para la Raíz de Agregado `Role`. |
-| `InvitationRepository` | Puerto de Salida | Contrato de persistencia de dominio para la Raíz de Agregado `Invitation`. |
-| `VerificationTokenRepository`| Puerto de Salida | Contrato de persistencia de dominio para tokens de verificación y OTPs. |
-| `TenantRegisteredEvent` | Evento de Dominio | Notifica el registro inicial y exitoso de un nuevo taller mecánico en la plataforma. |
-| `BranchCreatedEvent` | Evento de Dominio | Notifica la creación y delimitación perimetral de una nueva sede física operativa. |
-| `UserCreatedEvent` | Evento de Dominio | Notifica el alta de una nueva identidad de usuario en el sistema. |
-| `UserInvitedEvent` | Evento de Dominio | Notifica la emisión de una invitación de onboarding para un colaborador hacia su correo electrónico. |
-| `UserVerifiedEvent` | Evento de Dominio | Notifica la verificación satisfactoria del correo electrónico y activación plena de la cuenta de usuario. |
-| `TenantSuspendedEvent` | Evento de Dominio | Notifica la suspensión administrativa de un taller y la inhabilitación inmediata del acceso de su personal. |
-: Catálogo de Tipos de Dominio del Bounded Context IAM & Tenancy {#tbl:iam-domain-types}
+- **Aislamiento estricto de infraestructura:** Las raíces de agregado extienden de **AbstractDomainAggregateRoot<T>** para la acumulación desacoplada de eventos de dominio en memoria, careciendo de anotaciones JPA, Hibernate o validadores dependientes de contenedor.
 
-*Nota.* Componentes del modelo táctico de dominio para el Bounded Context de IAM & Tenancy implementados en Java 24 bajo el paquete canónico com.andeva.atelier.platform.iam.domain.
+- **Segregación entre identidad global y vinculación laboral:** Una cuenta **User** representa a un individuo en la plataforma global, mientras que **TenantMembership** modela su contrato en un taller específico. Esta separación permite que un mecánico o asesor trabaje en distintos talleres sin duplicar credenciales ni mezclar accesos.
+
+- **Modelo de autorización granular:** Control de acceso basado en roles con soporte para plantillas inmutables del sistema y roles personalizados a nivel de inquilino, compuestos por permisos atómicos expresados en convenciones canónicas de recurso y acción.
+
+- **Inmutabilidad y seguridad de tipos:** Todo identificador y objeto de valor se implementa mediante registros inmutables de Java, asegurando que las reglas sintácticas y semánticas se validen defensivamente en los constructores compactos.
+
+En la @tbl:iam-domain-types se presenta el catálogo unificado de componentes que conforman la capa de dominio de IAM & Tenancy.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Catálogo de la Capa de Dominio del Bounded Context IAM \& Tenancy} \label{tbl:iam-domain-types} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\
+\hline
+\endhead
+Tenant & Raíz de consistencia del taller. administra RUC fiscal, razón social, sedes físicas y estado operativo. \\*
+\hline
+\textbf{Categoría} & Raíz de Agregado \\*
+\hline
+\textbf{Relaciones} & Generalización de AbstractDomainAggregateRoot<Tenant>. composición 1 a 1..* con Branch. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak model.\allowbreak aggregates} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Branch & Sede física de atención. administra código de anexo SUNAT, coordenadas WGS84 y geocerca circular. \\*
+\hline
+\textbf{Categoría} & Entidad Dependiente \\*
+\hline
+\textbf{Relaciones} & Dependiente subordinada a Tenant. compuesta por BranchId, TenantId y GeoPoint. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak model.\allowbreak entities} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+User & Cuenta global de identidad y autenticación. gestiona credenciales seguras, proveedor federado y estado. \\*
+\hline
+\textbf{Categoría} & Raíz de Agregado \\*
+\hline
+\textbf{Relaciones} & Generalización de AbstractDomainAggregateRoot<User>. composición 1 a 1 con Profile y 1 a N con VerificationToken. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak model.\allowbreak aggregates} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Profile & Datos demográficos del usuario. administra nombres, teléfono normalizado E.164 y fotografía de perfil. \\*
+\hline
+\textbf{Categoría} & Entidad Dependiente \\*
+\hline
+\textbf{Relaciones} & Dependiente subordinada a User en relación 1 a 1. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak model.\allowbreak entities} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+VerificationToken & Código OTP numérico o token alfanumérico para validación de correo y restablecimiento de claves con expiración temporal. \\*
+\hline
+\textbf{Categoría} & Entidad Dependiente \\*
+\hline
+\textbf{Relaciones} & Dependiente subordinada a User. almacena UserId y TokenType. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak model.\allowbreak entities} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+TenantMembership & Contrato laboral operativo entre un usuario y un taller específico. administra roles de seguridad y esquema salarial. \\*
+\hline
+\textbf{Categoría} & Raíz de Agregado \\*
+\hline
+\textbf{Relaciones} & Generalización de AbstractDomainAggregateRoot<TenantMembership>. referencia a TenantId, UserId y Role. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak model.\allowbreak aggregates} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Role & Agrupador de privilegios de seguridad por taller o provisto globalmente por la plataforma como plantilla del sistema. \\*
+\hline
+\textbf{Categoría} & Raíz de Agregado \\*
+\hline
+\textbf{Relaciones} & Generalización de AbstractDomainAggregateRoot<Role>. agregación con entidades Permission. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak model.\allowbreak aggregates} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Permission & Privilegio atómico de autorización modelado como cadena canónica de autoridad por recurso y acción. \\*
+\hline
+\textbf{Categoría} & Entidad Dependiente \\*
+\hline
+\textbf{Relaciones} & Dependiente subordinada a Role. identificada por PermissionId. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak model.\allowbreak entities} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Invitation & Control de incorporación y onboarding digital de colaboradores mediante correo transaccional y token uniuso. \\*
+\hline
+\textbf{Categoría} & Raíz de Agregado \\*
+\hline
+\textbf{Relaciones} & Generalización de AbstractDomainAggregateRoot<Invitation>. referencia a TenantId, EmailAddress y RoleId. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak model.\allowbreak aggregates} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+TenantMembershipId & Identificador único universal fuertemente tipado para el contrato de membresía laboral. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor (ID) \\*
+\hline
+\textbf{Relaciones} & Registro inmutable de identidad basado en UUID. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+RoleId & Identificador único universal fuertemente tipado para roles de seguridad en la plataforma. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor (ID) \\*
+\hline
+\textbf{Relaciones} & Registro inmutable de identidad basado en UUID. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+PermissionId & Identificador único universal fuertemente tipado para permisos atómicos del catálogo de seguridad. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor (ID) \\*
+\hline
+\textbf{Relaciones} & Registro inmutable de identidad basado en UUID. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+InvitationId & Identificador único universal fuertemente tipado para invitaciones de onboarding de personal. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor (ID) \\*
+\hline
+\textbf{Relaciones} & Registro inmutable de identidad basado en UUID. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Password & Contenedor de contraseña cifrada que valida formato y entropía de hash BCrypt de 60 caracteres. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor \\*
+\hline
+\textbf{Relaciones} & Utilizado por la raíz de agregado User para cuentas locales. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+PersonName & Nombre y apellido estructurado de la persona con normalización léxica y supresión de espacios superfluos. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor \\*
+\hline
+\textbf{Relaciones} & Utilizado por la entidad Profile. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+TenantStatus & Estados operativos del taller mecánico (PENDING, ACTIVE, SUSPENDED). \\*
+\hline
+\textbf{Categoría} & Enumeración de Dominio \\*
+\hline
+\textbf{Relaciones} & Utilizada por la raíz de agregado Tenant. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+UserStatus & Estados del ciclo de vida de la cuenta de usuario (PENDING\_VERIFICATION, ACTIVE, SUSPENDED). \\*
+\hline
+\textbf{Categoría} & Enumeración de Dominio \\*
+\hline
+\textbf{Relaciones} & Utilizada por la raíz de agregado User. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+MembershipStatus & Estados de vigencia contractual del trabajador en el taller (ACTIVE, INACTIVE). \\*
+\hline
+\textbf{Categoría} & Enumeración de Dominio \\*
+\hline
+\textbf{Relaciones} & Utilizada por el agregado TenantMembership. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+SalaryType & Modalidad de retribución pactada para el personal operativo (FIXED, HOURLY). \\*
+\hline
+\textbf{Categoría} & Enumeración de Dominio \\*
+\hline
+\textbf{Relaciones} & Utilizada por el agregado TenantMembership. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+TokenType & Tipología funcional de tokens de un solo uso (EMAIL\_VERIFICATION, PASSWORD\_RESET). \\*
+\hline
+\textbf{Categoría} & Enumeración de Dominio \\*
+\hline
+\textbf{Relaciones} & Utilizada por la entidad VerificationToken. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+InvitationStatus & Estados del ciclo de vida de la invitación (PENDING, ACCEPTED, EXPIRED, REVOKED). \\*
+\hline
+\textbf{Categoría} & Enumeración de Dominio \\*
+\hline
+\textbf{Relaciones} & Utilizada por el agregado Invitation. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+AuthProvider & Mecanismo de procedencia y autenticación de la cuenta (LOCAL, GOOGLE). \\*
+\hline
+\textbf{Categoría} & Enumeración de Dominio \\*
+\hline
+\textbf{Relaciones} & Utilizada por la raíz de agregado User. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+TenantRegistrationDomainService & Orquesta la creación atómica de taller, sede matriz, usuario administrador, membresía y rol de propietario. \\*
+\hline
+\textbf{Categoría} & Servicio de Dominio \\*
+\hline
+\textbf{Relaciones} & Coordina Tenant, Branch, User, Profile, Role y TenantMembership. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+PasswordEncryptionDomainService & Encapsula el algoritmo de derivación de claves BCrypt y la verificación de solidez de contraseñas. \\*
+\hline
+\textbf{Categoría} & Servicio de Dominio \\*
+\hline
+\textbf{Relaciones} & Empleado en registro y cambio de credenciales de User. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+TokenGeneratorDomainService & Algoritmo criptográfico seguro para la generación de OTPs decimales y tokens URL-safe de onboarding. \\*
+\hline
+\textbf{Categoría} & Servicio de Dominio \\*
+\hline
+\textbf{Relaciones} & Empleado por User, VerificationToken e Invitation. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+TenantRepository & Contrato de persistencia agnóstico para la raíz de agregado Tenant. \\*
+\hline
+\textbf{Categoría} & Puerto de Salida \\*
+\hline
+\textbf{Relaciones} & Implementado en la capa de infraestructura. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+UserRepository & Contrato de persistencia agnóstico para la raíz de agregado User. \\*
+\hline
+\textbf{Categoría} & Puerto de Salida \\*
+\hline
+\textbf{Relaciones} & Implementado en la capa de infraestructura. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+TenantMembershipRepository & Contrato de persistencia agnóstico para la raíz de agregado TenantMembership. \\*
+\hline
+\textbf{Categoría} & Puerto de Salida \\*
+\hline
+\textbf{Relaciones} & Implementado en la capa de infraestructura. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+RoleRepository & Contrato de persistencia agnóstico para la raíz de agregado Role. \\*
+\hline
+\textbf{Categoría} & Puerto de Salida \\*
+\hline
+\textbf{Relaciones} & Implementado en la capa de infraestructura. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+PermissionRepository & Contrato de persistencia y consulta para entidades Permission. \\*
+\hline
+\textbf{Categoría} & Puerto de Salida \\*
+\hline
+\textbf{Relaciones} & Implementado en la capa de infraestructura. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+InvitationRepository & Contrato de persistencia agnóstico para la raíz de agregado Invitation. \\*
+\hline
+\textbf{Categoría} & Puerto de Salida \\*
+\hline
+\textbf{Relaciones} & Implementado en la capa de infraestructura. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+VerificationTokenRepository & Contrato de persistencia y consumo para tokens de verificación y OTPs. \\*
+\hline
+\textbf{Categoría} & Puerto de Salida \\*
+\hline
+\textbf{Relaciones} & Implementado en la capa de infraestructura. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+TenantRegisteredEvent & Notifica el alta exitosa de un nuevo taller mecánico en la plataforma. \\*
+\hline
+\textbf{Categoría} & Evento de Dominio \\*
+\hline
+\textbf{Relaciones} & Implementa DomainEvent para el Transactional Outbox. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+TenantActivatedEvent & Notifica la reactivación de un taller previamente suspendido. \\*
+\hline
+\textbf{Categoría} & Evento de Dominio \\*
+\hline
+\textbf{Relaciones} & Implementa DomainEvent para el Transactional Outbox. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+TenantSuspendedEvent & Notifica la suspensión administrativa de un taller por morosidad o infracción. \\*
+\hline
+\textbf{Categoría} & Evento de Dominio \\*
+\hline
+\textbf{Relaciones} & Implementa DomainEvent para el Transactional Outbox. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+BranchCreatedEvent & Notifica la apertura y delimitación perimetral de una nueva sucursal física. \\*
+\hline
+\textbf{Categoría} & Evento de Dominio \\*
+\hline
+\textbf{Relaciones} & Implementa DomainEvent para el Transactional Outbox. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+BranchUpdatedEvent & Notifica modificaciones en la denominación o coordenadas de la sede física. \\*
+\hline
+\textbf{Categoría} & Evento de Dominio \\*
+\hline
+\textbf{Relaciones} & Implementa DomainEvent para el Transactional Outbox. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+BranchDeactivatedEvent & Notifica el cese temporal o definitivo de operaciones en una sucursal física. \\*
+\hline
+\textbf{Categoría} & Evento de Dominio \\*
+\hline
+\textbf{Relaciones} & Implementa DomainEvent para el Transactional Outbox. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+UserRegisteredEvent & Notifica el registro inicial de una identidad de usuario en la plataforma. \\*
+\hline
+\textbf{Categoría} & Evento de Dominio \\*
+\hline
+\textbf{Relaciones} & Implementa DomainEvent para el Transactional Outbox. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+UserVerifiedEvent & Notifica la confirmación de la dirección de correo y activación de la cuenta. \\*
+\hline
+\textbf{Categoría} & Evento de Dominio \\*
+\hline
+\textbf{Relaciones} & Implementa DomainEvent para el Transactional Outbox. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+UserPasswordResetRequestedEvent & Notifica la solicitud de restablecimiento de contraseña para despacho de OTP. \\*
+\hline
+\textbf{Categoría} & Evento de Dominio \\*
+\hline
+\textbf{Relaciones} & Implementa DomainEvent para el Transactional Outbox. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+UserPasswordChangedEvent & Notifica la actualización satisfactoria de la credencial de acceso. \\*
+\hline
+\textbf{Categoría} & Evento de Dominio \\*
+\hline
+\textbf{Relaciones} & Implementa DomainEvent para el Transactional Outbox. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+UserSuspendedEvent & Notifica la inhabilitación global de una cuenta de usuario. \\*
+\hline
+\textbf{Categoría} & Evento de Dominio \\*
+\hline
+\textbf{Relaciones} & Implementa DomainEvent para el Transactional Outbox. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+TenantMembershipCreatedEvent & Notifica la vinculación contractual de un colaborador a la planilla de un taller. \\*
+\hline
+\textbf{Categoría} & Evento de Dominio \\*
+\hline
+\textbf{Relaciones} & Implementa DomainEvent para el Transactional Outbox. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+TenantMembershipDeactivatedEvent & Notifica el cese o desvinculación laboral de un colaborador en el taller. \\*
+\hline
+\textbf{Categoría} & Evento de Dominio \\*
+\hline
+\textbf{Relaciones} & Implementa DomainEvent para el Transactional Outbox. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+StaffInvitedEvent & Notifica la emisión de una invitación de personal para despacho por correo. \\*
+\hline
+\textbf{Categoría} & Evento de Dominio \\*
+\hline
+\textbf{Relaciones} & Implementa DomainEvent para el Transactional Outbox. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+StaffInvitationAcceptedEvent & Notifica la aceptación del colaborador y la consumación del onboarding. \\*
+\hline
+\textbf{Categoría} & Evento de Dominio \\*
+\hline
+\textbf{Relaciones} & Implementa DomainEvent para el Transactional Outbox. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+TenantNotFoundException & Señaliza la inexistencia de un taller para el identificador suministrado. \\*
+\hline
+\textbf{Categoría} & Excepción de Dominio \\*
+\hline
+\textbf{Relaciones} & Especialización de DomainException. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak exceptions} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+TenantAlreadyExistsException & Señaliza el intento de registrar un taller con un RUC fiscal duplicado. \\*
+\hline
+\textbf{Categoría} & Excepción de Dominio \\*
+\hline
+\textbf{Relaciones} & Especialización de DomainException. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak exceptions} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+TenantSuspendedException & Impide operaciones sobre un taller cuyo estado se encuentra inhabilitado. \\*
+\hline
+\textbf{Categoría} & Excepción de Dominio \\*
+\hline
+\textbf{Relaciones} & Especialización de DomainException. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak exceptions} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+UserNotFoundException & Señaliza la inexistencia de una cuenta de usuario durante la autenticación. \\*
+\hline
+\textbf{Categoría} & Excepción de Dominio \\*
+\hline
+\textbf{Relaciones} & Especialización de DomainException. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak exceptions} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+UserAlreadyExistsException & Señaliza la colisión de direcciones de correo en el registro global. \\*
+\hline
+\textbf{Categoría} & Excepción de Dominio \\*
+\hline
+\textbf{Relaciones} & Especialización de DomainException. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak exceptions} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+UserSuspendedException & Impide el inicio de sesión a usuarios con cuentas inhabilitadas. \\*
+\hline
+\textbf{Categoría} & Excepción de Dominio \\*
+\hline
+\textbf{Relaciones} & Especialización de DomainException. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak exceptions} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+InvalidCredentialsException & Señaliza el rechazo de credenciales por discrepancia de contraseña o proveedor. \\*
+\hline
+\textbf{Categoría} & Excepción de Dominio \\*
+\hline
+\textbf{Relaciones} & Especialización de DomainException. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak exceptions} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+MembershipNotFoundException & Señaliza la ausencia de vínculo laboral entre un usuario y un taller. \\*
+\hline
+\textbf{Categoría} & Excepción de Dominio \\*
+\hline
+\textbf{Relaciones} & Especialización de DomainException. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak exceptions} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+MembershipAlreadyExistsException & Impide la duplicación de contratos de trabajo entre un mismo usuario y taller. \\*
+\hline
+\textbf{Categoría} & Excepción de Dominio \\*
+\hline
+\textbf{Relaciones} & Especialización de DomainException. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak exceptions} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+RoleNotFoundException & Señaliza la inexistencia del rol asignado en el contexto del taller. \\*
+\hline
+\textbf{Categoría} & Excepción de Dominio \\*
+\hline
+\textbf{Relaciones} & Especialización de DomainException. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak exceptions} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+SystemRoleImmutableException & Impide la alteración o eliminación de roles semilla globales del sistema. \\*
+\hline
+\textbf{Categoría} & Excepción de Dominio \\*
+\hline
+\textbf{Relaciones} & Especialización de DomainException. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak exceptions} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+InvitationNotFoundException & Señaliza que el token de invitación no corresponde a ningún registro activo. \\*
+\hline
+\textbf{Categoría} & Excepción de Dominio \\*
+\hline
+\textbf{Relaciones} & Especialización de DomainException. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak exceptions} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+InvitationExpiredException & Señaliza que el plazo de vigencia temporal de la invitación ha caducado. \\*
+\hline
+\textbf{Categoría} & Excepción de Dominio \\*
+\hline
+\textbf{Relaciones} & Especialización de DomainException. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak exceptions} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+InvitationAlreadyAcceptedException & Impide el reuso de un token de invitación que ya fue canjeado previamente. \\*
+\hline
+\textbf{Categoría} & Excepción de Dominio \\*
+\hline
+\textbf{Relaciones} & Especialización de DomainException. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak exceptions} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+InvalidVerificationTokenException & Señaliza que el código OTP provisto es erróneo, caduco o ya consumido. \\*
+\hline
+\textbf{Categoría} & Excepción de Dominio \\*
+\hline
+\textbf{Relaciones} & Especialización de DomainException. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak exceptions} \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes ubicados bajo el paquete com.andeva.atelier.platform.iam.domain.
 
 **Raíces de Agregado y Entidades Dependientes de IAM & Tenancy**
 
 El diseño de las entidades de este contexto asegura que toda mutación de estado preserve las invariantes de gobernanza, seguridad y consistencia transaccional:
 
-1. `Tenant`: Modela la empresa automotriz titular en la plataforma. Actúa como la frontera de consistencia transaccional y particionamiento lógico para el aislamiento multi-inquilino. Impone como invariante que toda empresa posea un `RucNumber` formalmente validado ante el algoritmo Módulo 11 de SUNAT, el cual resulta inmutable tras su confirmación tributaria. Asimismo, el `TenantSlug` debe ser único en toda la plataforma global, impidiendo colisiones de rutas web. Todo taller operativo debe contar con al menos una sede física activa que actúe como sede matriz (código de anexo "0000"). Las transiciones de estado siguen el flujo `PENDING` $\to$ `ACTIVE` $\to$ `SUSPENDED`.
+- **Tenant**: Representa la empresa o taller mecánico titular de una cuenta en la plataforma. Es la raíz de particionamiento lógico para el aislamiento multi-inquilino. Impone como regla inquebrantable que toda organización posea un documento tributario **TaxId** formalmente validado bajo el algoritmo Módulo 11 de SUNAT, el cual resulta inmutable tras su confirmación fiscal. Administra el identificador de cliente en la pasarela Stripe (**stripeCustomerId**) y regula el ciclo de vida operativo mediante transiciones estrictas: PENDING → ACTIVE → SUSPENDED. Toda empresa operativa debe contar con al menos una sede física activa que actúe como sede matriz.
 
-| Elemento | Tipo o Firma | Ámbito | Descripción y Reglas de Negocio |
-| :--- | :--- | :---: | :--- |
-| `id` | `TenantId` | Privado | Identificador único universal del taller. |
-| `name` | `TenantName` | Privado | Denominación comercial y de marca del taller automotriz. |
-| `legalName` | `String` | Privado | Razón social oficial inscrita ante registros públicos y SUNAT. |
-| `slug` | `TenantSlug` | Privado | Identificador amigable único para URLs y subdominios. |
-| `ruc` | `RucNumber` | Privado | Registro Único de Contribuyentes validado. |
-| `status` | `TenantStatus` | Privado | Estado operativo de la cuenta del taller en el SaaS. |
-| `stripeCustomerId` | `String` | Privado | Identificador de cliente asignado en Stripe para cobros recurrentes. |
-| `branches` | `List<Branch>` | Privado | Colección de sedes físicas administradas por el taller. |
-| `register` | `static Tenant register(...)` | Público | Factoría que instancia el taller en estado `ACTIVE`, crea la sede matriz y registra `TenantRegisteredEvent`. |
-| `addBranch` | `Branch addBranch(...)` | Público | Instancia e incorpora una nueva sede física, emitiendo `BranchCreatedEvent`. |
-| `updateProfile` | `void updateProfile(...)` | Público | Modifica la razón social y nombre comercial bajo validación de estado activo. |
-| `activate` | `void activate()` | Público | Transiciona el estado a `ACTIVE`, rehabilitando el acceso a sus usuarios. |
-| `suspend` | `void suspend(String reason)` | Público | Transiciona el estado a `SUSPENDED` y registra `TenantSuspendedEvent`. |
-: Miembros de la Raíz de Agregado Tenant {#tbl:iam-tenant-members}
+En la @tbl:iam-tenant-members se detallan los miembros y reglas operativas de la raíz de agregado **Tenant**.
 
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Miembros de la Raíz de Agregado Tenant} \label{tbl:iam-tenant-members} \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Raíz de Agregado:} Tenant (Núcleo Organizacional del Taller)} \\*
+\hline
+id & Identificador universal único del taller mecánico. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{TenantId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+name & Nombre comercial del taller automotriz. longitud entre 3 y 100 caracteres. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+legalName & Razón social formal registrada ante la autoridad tributaria SUNAT. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+taxId & Registro Único de Contribuyentes validado con algoritmo Módulo 11. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{TaxId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+status & Estado operativo del taller en la plataforma (PENDING, ACTIVE, SUSPENDED). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{TenantStatus} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+stripeCustomerId & Identificador de cliente asignado en Stripe para facturación de suscripción. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+branches & Colección interna de sedes físicas administradas por el taller automotriz. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{List<\allowbreak Branch>\allowbreak } \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+create & Factoría de dominio que valida datos, instancia el agregado y registra TenantRegisteredEvent. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{static Tenant create(String name,\allowbreak  String legalName,\allowbreak  TaxId taxId)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+assignStripeCustomerId & Asocia el identificador de cliente de Stripe una vez sincronizado por Billing. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void assignStripeCustomerId(String customerId)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+activate & Transiciona el estado del taller a ACTIVE y registra TenantActivatedEvent. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void activate()} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+suspend & Transiciona el estado a SUSPENDED y registra TenantSuspendedEvent. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void suspend(String reason)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+addBranch & Instancia e incorpora una nueva sede física, emitiendo BranchCreatedEvent. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Branch addBranch(String name,\allowbreak  String sunatCode,\allowbreak  GeoPoint location,\allowbreak  int radius)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+updateProfile & Modifica los datos corporativos del taller bajo validación de estado activo. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void updateProfile(String name,\allowbreak  String legalName)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+findBranchById & Consulta una sede física específica dentro de la colección interna. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Optional<\allowbreak Branch>\allowbreak  findBranchById(BranchId branchId)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+activeBranches & Retorna una vista inmutable de las sedes operativas no dadas de baja. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{List<\allowbreak Branch>\allowbreak  activeBranches()} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
 *Nota.* Especificación de miembros y métodos del agregado Tenant del paquete com.andeva.atelier.platform.iam.domain.model.aggregates.
 
-En cuanto a sus relaciones, `Tenant` hereda de `AbstractDomainAggregateRoot<Tenant>` y mantiene una relación de composición 1 a 1..* con sus entidades dependientes `Branch`. Si el `Tenant` es eliminado o purgado, sus sedes físicas se extinguen con él.
+En cuanto a sus relaciones, **Tenant** hereda de **AbstractDomainAggregateRoot<Tenant>** y mantiene una relación de composición 1 a 1..* con sus entidades dependientes **Branch**. Si el taller es suspendido o eliminado, el acceso a sus sedes y operaciones queda revocado de inmediato.
 
-2. `Branch`: Representa un establecimiento o sucursal física perteneciente al taller automotriz. Su código de anexo tributario `branchCode` debe contener una cadena de 4 dígitos numéricos asignada por la administración tributaria. Su capacidad instalada `capacity` representa el número simultáneo de bahías de trabajo activas y debe ser un entero estrictamente positivo ($\ge 1$). Asimismo, delimita una geocerca circular con un radio radial en metros ($geofenceRadiusMeters \ge 10$), utilizado para validar la proximidad del personal operativo en el control de asistencia.
+- **Branch**: Representa una sucursal o establecimiento físico perteneciente a la empresa automotriz. Su código de anexo tributario **sunatCode** exige una cadena de cuatro dígitos asignada por SUNAT (fijando "0000" para la sede matriz). Su ubicación geográfica se modela mediante el objeto de valor **GeoPoint** en coordenadas WGS84, delimitando una geocerca circular con radio radial en metros (*geofenceRadiusMeters* ≥ 10). La entidad ofrece el método *isWithinGeofence(GeoPoint)*, el cual evalúa la proximidad física del personal contrastando la distancia ortodrómica calculada por Haversine con el radio perimetral autorizado.
 
-| Elemento | Tipo o Firma | Ámbito | Descripción y Reglas de Negocio |
-| :--- | :--- | :---: | :--- |
-| `id` | `BranchId` | Privado | Identificador universal único de la sede física. |
-| `tenantId` | `TenantId` | Privado | Identificador del taller propietario. |
-| `name` | `String` | Privado | Denominación operativa de la sede física (entre 3 y 100 caracteres). |
-| `branchCode` | `String` | Privado | Código tributario de anexo SUNAT (`^[0-9]{4}$`). |
-| `address` | `Address` | Privado | Dirección física postal estructurada. |
-| `location` | `GeoPoint` | Privado | Centroide geográfico WGS84 de la sede. |
-| `geofenceRadiusMeters` | `int` | Privado | Radio radial en metros ($[10, 500]$) para control presencial. |
-| `capacity` | `int` | Privado | Cantidad simultánea de bahías vehiculares disponibles ($\ge 1$). |
-| `isActive` | `boolean` | Privado | Indicador de operatividad activa de la sede. |
-| `isWithinGeofence` | `boolean isWithinGeofence(GeoPoint coord)` | Público | Verifica si una coordenada GPS se ubica dentro del perímetro radial de la sede. |
-| `updateCapacity` | `void updateCapacity(int capacity)` | Público | Modifica la capacidad instalada de bahías del local. |
-| `deactivate` | `void deactivate()` | Público | Inhabilita operativamente la sucursal. |
-: Miembros de la Entidad Dependiente Branch {#tbl:iam-branch-members}
+En la @tbl:iam-branch-members se exponen los atributos y métodos de la entidad **Branch**.
 
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Miembros de la Entidad Dependiente Branch} \label{tbl:iam-branch-members} \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad Dependiente:} Branch (Sede Operativa del Taller)} \\*
+\hline
+id & Identificador universal único de la sede física de atención. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{BranchId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+tenantId & Identificador del taller automotriz propietario. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{TenantId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+name & Denominación operativa de la sucursal (longitud entre 3 y 100 caracteres). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+sunatCode & Código tributario de anexo SUNAT de cuatro dígitos (por defecto 0000). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+location & Coordenadas geodésicas WGS84 correspondientes al centroide del taller. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{GeoPoint} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+geofenceRadiusMeters & Radio radial en metros (\textit{geofenceRadiusMeters} $\ge$ 10) para control presencial. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{int} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+isActive & Indicador de disponibilidad operativa de la sucursal. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{boolean} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+updateLocation & Modifica la posición satelital y el radio perimetral de la sede física. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void updateLocation(GeoPoint newLocation,\allowbreak  int newRadiusMeters)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+updateDetails & Actualiza el nombre operativo y el código de anexo tributario de la sede. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void updateDetails(String newName,\allowbreak  String newSunatCode)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+deactivate & Inhabilita operativamente la sede y registra BranchDeactivatedEvent. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void deactivate()} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+isWithinGeofence & Verifica si una coordenada GPS se sitúa dentro del radio perimetral autorizado. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{boolean isWithinGeofence(GeoPoint coordinate)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
 *Nota.* Especificación de miembros de la entidad Branch del paquete com.andeva.atelier.platform.iam.domain.model.entities.
 
-Respecto a sus relaciones, `Branch` es una entidad subordinada a la raíz `Tenant` (N a 1) y compone los objetos de valor `BranchId`, `TenantId`, `Address` y `GeoPoint`.
+Respecto a sus relaciones, **Branch** es una entidad subordinada a la raíz **Tenant** y encapsula los objetos de valor **BranchId**, **TenantId** y **GeoPoint**, interactuando con el Bounded Context Human Resources para la validación satelital del marcaje de asistencia de mecánicos.
 
-3. `User`: Modela la identidad global de un individuo dentro de Atelier (dueño, administrador, recepcionista o técnico mecánico). El correo electrónico `email` es estrictamente único en la plataforma global, fungiendo como credencial principal. Cuando la autenticación es local (`authProvider == LOCAL`), la contraseña cifrada `password` es mandatoria y debe contener un hash BCrypt válido. Las cuentas locales inician en estado `PENDING_VERIFICATION` y solo transicionan a `ACTIVE` tras la validación de un código OTP de 6 dígitos.
+- **User**: Modela la identidad global de un individuo dentro del ecosistema Atelier, ya sea propietario, recepcionista, mecánico o conductor particular. La dirección de correo electrónico (**EmailAddress**) actúa como credencial canónica única a nivel global. En cuentas de autenticación local, la credencial **Password** es obligatoria y contiene un hash BCrypt verificado, mientras que en cuentas federadas con Google OAuth2 se vincula el identificador externo (**googleId**) sin requerir contraseña local. Administra el token de mensajería Firebase (**fcmToken**) y el ciclo de vida de la cuenta: PENDING_VERIFICATION → ACTIVE → SUSPENDED.
 
-| Elemento | Tipo o Firma | Ámbito | Descripción y Reglas de Negocio |
-| :--- | :--- | :---: | :--- |
-| `id` | `UserId` | Privado | Identificador universal único de la cuenta de usuario. |
-| `email` | `UserEmail` | Privado | Dirección de correo electrónico canónica normalizada. |
-| `password` | `HashedPassword` | Privado | Hash BCrypt de la contraseña para cuentas de autenticación local. |
-| `name` | `PersonName` | Privado | Nombres y apellidos completos del usuario. |
-| `authProvider` | `AuthProvider` | Privado | Proveedor de identidad (`LOCAL`, `GOOGLE`). |
-| `status` | `UserStatus` | Privado | Estado de la cuenta (`PENDING_VERIFICATION`, `ACTIVE`, `SUSPENDED`). |
-| `memberships` | `List<TenantMembership>` | Privado | Colección de relaciones laborales y de membresía con talleres. |
-| `registerLocal` | `static User registerLocal(...)` | Público | Factoría para cuentas locales en estado pendiente que registra `UserCreatedEvent`. |
-| `verifyEmail` | `void verifyEmail()` | Público | Valida la cuenta y transiciona a estado `ACTIVE`, emitiendo `UserVerifiedEvent`. |
-| `issueVerificationToken` | `VerificationToken issueVerificationToken(...)` | Público | Genera un código OTP de 6 dígitos con vigencia de 15 minutos. |
-| `validateAndConsumeToken` | `boolean validateAndConsumeToken(...)` | Público | Comprueba la vigencia del OTP y lo marca como consumido. |
-| `addMembership` | `void addMembership(TenantMembership mem)` | Público | Incorpora una nueva vinculación laboral a un taller específico. |
-: Miembros de la Raíz de Agregado User {#tbl:iam-user-members}
+- **Profile**: Entidad dependiente en relación 1 a 1 con **User** que resguarda los datos demográficos del individuo. Encapsula el nombre estructurado (**PersonName**), el número telefónico normalizado bajo estándar internacional E.164 (**PhoneNumber**) y la dirección URI de la imagen de avatar. Su mutación se encuentra controlada por métodos de frontera en el agregado raíz.
 
-*Nota.* Especificación de miembros del agregado User del paquete com.andeva.atelier.platform.iam.domain.model.aggregates.
+- **VerificationToken**: Entidad dependiente que gestiona credenciales de un solo uso requeridas para confirmar correos electrónicos y procesar el restablecimiento de contraseñas olvidadas. Puede almacenar códigos OTP decimales de 6 dígitos con vigencia estricta de 15 minutos o tokens alfanuméricos de alta entropía con caducidad de 24 horas. Registra una bandera de consumo (**isUsed**) para imposibilitar ataques de reutilización.
 
-En sus relaciones, `User` hereda de `AbstractDomainAggregateRoot<User>` y mantiene composición 1 a N con las entidades `TenantMembership` y `VerificationToken`.
+En la @tbl:iam-user-profile-token-members se especifican los miembros de **User**, **Profile** y **VerificationToken**.
 
-4. `TenantMembership`: Modela la vinculación contractual y laboral entre un usuario y un taller específico. Impone la invariante de que la tupla `(tenantId, userId)` es unívoca en el sistema: un usuario no puede registrar membresías duplicadas en el mismo taller. Cada membresía exige la asignación de un `Role` válido y registra el esquema de compensación económica (`FIXED` para salario mensual o quincenal, `HOURLY` para retribución por hora efectiva de trabajo mecánico), cuyo monto base debe ser mayor o igual a cero ($baseSalary \ge 0.00$).
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Miembros de la Raíz de Agregado User y Entidades Profile y VerificationToken} \label{tbl:iam-user-profile-token-members} \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Raíz de Agregado:} User (Identidad Universal de Usuario)} \\*
+\hline
+id (User) & Identificador universal único de la cuenta de usuario. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{UserId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+email & Dirección de correo electrónico canónica normalizada a minúsculas. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{EmailAddress} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+password & Hash BCrypt de la contraseña para cuentas de autenticación local. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Password} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+authProvider & Mecanismo de autenticación de la cuenta (LOCAL o GOOGLE). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{AuthProvider} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+googleId & Identificador federado de usuario provisto por Google OAuth2 SSO. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+fcmToken & Token de registro en Firebase Cloud Messaging para notificaciones push. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+status & Estado del usuario (PENDING\_VERIFICATION, ACTIVE, SUSPENDED). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{UserStatus} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+profile & Entidad interna 1 a 1 con los datos biográficos de la persona. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Profile} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+verificationTokens & Colección interna de tokens de verificación emitidos y consumidos. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{List<\allowbreak VerificationToken>\allowbreak } \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+registerWithLocalCredentials & Factoría para cuentas locales en estado pendiente que registra UserRegisteredEvent. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{static User registerWithLocalCredentials(...)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+registerWithGoogle & Factoría para cuentas federadas activas validadas por Google OAuth2. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{static User registerWithGoogle(...)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+verifyEmail & Confirma el correo electrónico, transiciona a ACTIVE y emite UserVerifiedEvent. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void verifyEmail()} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+updatePassword & Actualiza el hash de la contraseña y registra UserPasswordChangedEvent. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void updatePassword(Password newPassword)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+updateFcmToken & Actualiza el token de mensajería push de Firebase para el dispositivo móvil. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void updateFcmToken(String fcmToken)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+validateAndConsumeToken & Valida la vigencia del token y lo marca como consumido de forma irreversible. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{boolean validateAndConsumeToken(...)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad Dependiente:} Profile (Perfil Biográfico de Usuario)} \\*
+\hline
+updateProfile & Delega la mutación de atributos demográficos a la entidad interna Profile. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void updateProfile(PersonName name,\allowbreak  PhoneNumber phone)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+name (Profile) & Nombres y apellidos normalizados de la persona. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{PersonName} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+phone & Número telefónico formateado conforme a la norma internacional E.164. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{PhoneNumber} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+avatarUrl & Enlace URI hacia el archivo de imagen de perfil del usuario en almacenamiento de objetos. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad Dependiente:} VerificationToken (Token Criptográfico Temporal)} \\*
+\hline
+issueVerificationToken & Genera un token numérico OTP o alfanumérico seguro con vigencia temporal. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{VerificationToken issueVerificationToken(...)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+token (VerificationToken) & Valor criptográfico o código numérico decimal de un solo uso. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+tokenType & Propósito del token (EMAIL\_VERIFICATION o PASSWORD\_RESET). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{TokenType} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+expiresAt & Marca temporal límite de validez en horario UTC. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Instant} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+isUsed & Indicador booleano que certifica si el token ya fue consumido. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{boolean} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes pertenecientes a los paquetes com.andeva.atelier.platform.iam.domain.model.aggregates y com.andeva.atelier.platform.iam.domain.model.entities.
 
-| Elemento | Tipo o Firma | Ámbito | Descripción y Reglas de Negocio |
-| :--- | :--- | :---: | :--- |
-| `id` | `TenantMembershipId` | Privado | Identificador universal de la membresía laboral. |
-| `tenantId` | `TenantId` | Privado | Taller empleador al que se adscribe el trabajador. |
-| `userId` | `UserId` | Privado | Usuario adscrito a la relación contractual. |
-| `role` | `Role` | Privado | Rol de seguridad y privilegios operativos concedidos. |
-| `status` | `MembershipStatus` | Privado | Estado de la relación laboral (`ACTIVE`, `INACTIVE`). |
-| `salaryType` | `SalaryType` | Privado | Modalidad de compensación (`FIXED`, `HOURLY`). |
-| `baseSalary` | `Money` | Privado | Salario base pactado en moneda local ($\ge 0.00$). |
-| `joinedAt` | `Instant` | Privado | Fecha y hora de incorporación formal al taller. |
-| `changeRole` | `void changeRole(Role newRole)` | Público | Actualiza el rol asignado al colaborador. |
-| `updateSalary` | `void updateSalary(Money salary)` | Público | Modifica la remuneración base pactada. |
-: Miembros de la Entidad Dependiente TenantMembership {#tbl:iam-membership-members}
+En sus relaciones, **User** hereda de **AbstractDomainAggregateRoot<User>** y compone de forma unívoca a **Profile** y de forma múltiple a **VerificationToken**. Si la cuenta es purgada del sistema, su perfil y tokens asociados se eliminan en cascada sin afectar los registros históricos de auditoría.
 
-*Nota.* Especificación de miembros de TenantMembership del paquete com.andeva.atelier.platform.iam.domain.model.entities.
+- **TenantMembership**: Modela el vínculo contractual y operativo entre una cuenta global **User** y un taller específico **Tenant**. Representa formalmente la figura del colaborador o trabajador automotriz. Su invariante fundamental es la unicidad estricta del par compuesto por (**tenantId**, **userId**), impidiendo contratos duplicados para la misma persona en una sola empresa. Asocia el esquema de retribución salarial pactado (**SalaryType**: FIXED para sueldo mensual o quincenal, HOURLY para retribución por hora de labor en taller) y el importe económico base (**baseSalary**: **Money**) con restricción (*amount* ≥ 0.00). Centraliza el conjunto de roles de seguridad (**Role**) concedidos al trabajador y regula su vigencia mediante los estados ACTIVE e INACTIVE.
 
-5. `Role`, `Permission`, `Invitation` y `VerificationToken`: Completan la seguridad del contexto. `Role` agrupa un conjunto de entidades `Permission` que representan cadenas atómicas de autorización formateadas según la convención `<contexto>:<recurso>:<accion>`. Por su parte, `Invitation` gestiona el flujo de onboarding mediante tokens criptográficos aleatorios con una vigencia temporal estricta de 72 horas, emitiendo el evento `UserInvitedEvent`. Finalmente, `VerificationToken` modela códigos OTP numéricos de 6 dígitos empleados en la activación de cuentas y restablecimiento seguro de credenciales con una caducidad de 15 minutos.
+En la @tbl:iam-membership-members se detallan los atributos y operaciones de **TenantMembership**.
 
-**Objetos de Valor del Bounded Context IAM & Tenancy**
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Miembros de la Raíz de Agregado TenantMembership} \label{tbl:iam-membership-members} \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Raíz de Agregado:} TenantMembership (Vinculación Laboral y Acceso)} \\*
+\hline
+id & Identificador universal único del contrato de membresía laboral. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{TenantMembershipId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+tenantId & Identificador del taller mecánico empleador. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{TenantId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+userId & Identificador de la cuenta de usuario adscrita al contrato. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{UserId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+status & Estado de vigencia del vínculo de trabajo (ACTIVE o INACTIVE). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{MembershipStatus} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+salaryType & Modalidad de retribución convenida con el trabajador (FIXED u HOURLY). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{SalaryType} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+baseSalary & Monto de retribución base pactada expresada en moneda local (\textit{amount} $\ge$ 0.00). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Money} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+assignedRoles & Colección de roles de seguridad y permisos concedidos en este taller. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Set<\allowbreak Role>\allowbreak } \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+create & Factoría de dominio que inicializa el contrato y registra TenantMembershipCreatedEvent. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{static TenantMembership create(...)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+assignRole & Otorga un nuevo rol al colaborador dentro del marco operativo del taller. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void assignRole(Role role)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+revokeRole & Remueve un rol asignado asegurando que el colaborador conserve al menos uno activo. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void revokeRole(RoleId roleId)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+updateCompensation & Modifica la modalidad salarial y el importe pactado con el colaborador. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void updateCompensation(SalaryType type,\allowbreak  Money salary)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+activate & Restablece la vigencia del contrato laboral a estado ACTIVE. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void activate()} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+deactivate & Inhabilita el contrato laboral y registra TenantMembershipDeactivatedEvent. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void deactivate()} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+hasPermission & Evalúa si alguno de los roles asignados al colaborador posee el permiso consultado. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{boolean hasPermission(String permissionName)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Especificación de miembros de TenantMembership del paquete com.andeva.atelier.platform.iam.domain.model.aggregates.
 
-Los objetos de valor de IAM encapsulan las reglas sintácticas y de integridad de datos para credenciales, documentos tributarios e identificadores:
+Respecto a sus relaciones, **TenantMembership** hereda de **AbstractDomainAggregateRoot<TenantMembership>** y actúa como puente de referencia débil hacia **TenantId** y **UserId**, estableciendo una agregación directa con las entidades **Role** del taller. Esta estructura suministra el sustrato para la generación de liquidaciones en Human Resources y la asignación técnica de órdenes en MRO.
 
-| Objeto de Valor | Atributos Clave | Restricciones de Validación y Reglas de Negocio |
-| :--- | :--- | :--- |
-| `TenantName` | `value`: `String` | Longitud entre 3 y 100 caracteres, normalizado sin espacios múltiples. |
-| `TenantSlug` | `value`: `String` | Formato alfanumérico URL-safe en minúsculas (`^[a-z0-9]+(?:-[a-z0-9]+)*$`). |
-| `RucNumber` | `value`: `String` | 11 dígitos numéricos con prefijo 10 o 20, validado con algoritmo Módulo 11 de SUNAT. |
-| `UserEmail` | `value`: `String` | Sintaxis RFC 5322, conversión obligatoria a minúsculas. |
-| `HashedPassword` | `value`: `String` | Longitud exacta de 60 caracteres, prefijo de algoritmo BCrypt (`$2a$`, `$2b$`, `$2y$`). |
-| `PersonName` | `firstName`, `lastName`: `String` | Longitud mínima de 2 caracteres por componente, normalización léxica. |
-| `OtpCode` | `value`: `String` | Exactamente 6 dígitos numéricos decimales (`^[0-9]{6}$`). |
-| `InvitationToken` | `value`: `String` | Cadena hexadecimal de alta entropía generada criptográficamente. |
-| `RoleName` | `value`: `String` | Denominación en mayúsculas con prefijo mandatorio `ROLE_`. |
-| `PermissionName` | `value`: `String` | Convención formal de autoridad atómica `<bounded_context>:<resource>:<action>`. |
-: Objetos de Valor del Bounded Context IAM & Tenancy {#tbl:iam-value-objects}
+- **Role**, **Permission** e **Invitation**: Completan el subsistema de gobernanza y control de acceso. **Role** actúa como raíz de agregado que agrupa un conjunto de entidades dependientes **Permission**, las cuales modelan privilegios atómicos según la convención canónica `<contexto>:<recurso>:<accion>`. Los roles pueden pertenecer a un taller específico o ser roles semilla del sistema protegidos por la bandera **isSystemRole**, lo que impide su alteración o supresión por parte de usuarios del taller. Por su parte, **Invitation** gestiona el proceso de onboarding mediante tokens criptográficos de un solo uso generados aleatoriamente con validez estricta de 72 horas, permitiendo que nuevos colaboradores activen su cuenta e ingresen a la membresía del taller emitiendo los eventos StaffInvitedEvent y StaffInvitationAcceptedEvent.
 
-*Nota.* Especificación de Objetos de Valor del paquete com.andeva.atelier.platform.iam.domain.model.valueobjects.
+En la @tbl:iam-security-members se sintetizan los miembros de **Role**, **Permission** e **Invitation**.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Miembros de las Entidades de Seguridad Role, Permission e Invitation} \label{tbl:iam-security-members} \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Raíz de Agregado:} Role (Rol de Seguridad RBAC)} \\*
+\hline
+id (Role) & Identificador universal único del rol de seguridad. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{RoleId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+tenantId (Role) & Identificador del taller propietario (nulo en roles globales del sistema). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{TenantId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+name (Role) & Denominación funcional del rol (única dentro del ámbito del taller). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+isSystemRole & Bandera de inmutabilidad para roles nativos provistos por la plataforma. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{boolean} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+permissions & Conjunto de permisos atómicos asignados al rol. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Set<\allowbreak Permission>\allowbreak } \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+grantPermission & Incorpora un permiso al rol asegurando que no se encuentre protegido por el sistema. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void grantPermission(Permission permission)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+revokePermission & Remueve un permiso del conjunto verificando la mutabilidad del rol. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void revokePermission(PermissionId id)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad de Dominio:} Permission (Permiso Atómico del Sistema)} \\*
+\hline
+id (Permission) & Identificador universal único del permiso atómico. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{PermissionId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+name (Permission) & Nombre descriptivo del permiso dentro del catálogo del sistema. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+resource & Recurso o entidad de negocio protegida por la regla de seguridad. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+action & Operación permitida sobre el recurso (creación, lectura, edición, baja o ejecución). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Raíz de Agregado:} Invitation (Invitación de Personal)} \\*
+\hline
+id (Invitation) & Identificador universal único de la invitación de personal. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{InvitationId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+token (Invitation) & Token criptográfico aleatorio de alta entropía codificado en Base64 URL-safe. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+status (Invitation) & Estado de la invitación (PENDING, ACCEPTED, EXPIRED, REVOKED). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{InvitationStatus} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+targetRoleId & Rol que se concederá automáticamente al usuario una vez canjeado el token. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{RoleId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+expiresAt (Invitation) & Límite temporal de vigencia fijado en 72 horas desde la emisión. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Instant} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+issue & Factoría de dominio que emite la invitación y registra StaffInvitedEvent. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{static Invitation issue(...)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+accept & Canjea el token, transiciona a ACCEPTED y emite StaffInvitationAcceptedEvent. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void accept(UserId acceptedByUserId)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+expire & Transiciona el estado a EXPIRED si se sobrepasó la marca temporal límite. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void expire()} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+revoke & Anula administrativamente la invitación impidiendo su posterior canje. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void revoke()} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes pertenecientes a los paquetes com.andeva.atelier.platform.iam.domain.model.aggregates y com.andeva.atelier.platform.iam.domain.model.entities.
+
+**Objetos de Valor y Enumeraciones de Dominio de IAM & Tenancy**
+
+Para salvaguardar la pureza del modelo y prevenir errores derivados de tipos de datos primitivos desprovistos de contexto semántico, el Bounded Context IAM adopta una colección rigurosa de registros inmutables y tipos enumerados:
+
+- **Identificadores fuertemente tipados**: Registros inmutables que encapsulan identificadores universales de 128 bits para conferir seguridad de tipos absoluta: **TenantMembershipId**, **RoleId**, **PermissionId** e **InvitationId**. Cada uno valida en su constructor compacto que el valor no sea nulo y provee factorías para cadenas de texto, UUIDs directos y generación aleatoria segura. Los identificadores transversales **TenantId**, **BranchId** y **UserId** son reutilizados directamente desde el Bounded Context Shared.
+
+- **Password**: Registro inmutable de Java `Password(String hash)` que actúa como contenedor inviolable de credenciales locales. Su constructor compacto exige una longitud exacta de 60 caracteres y valida la presencia de los prefijos estandarizados de la función de derivación de claves BCrypt (variantes 2a, 2b o 2y delimitadas por el carácter de moneda). Impide almacenar o manipular contraseñas en texto plano dentro del modelo de dominio.
+
+- **PersonName**: Registro inmutable de Java `PersonName(String firstName, String lastName)` que modela los componentes patronímicos del usuario. Valida que ninguno de sus atributos sea nulo ni posea una longitud inferior a 2 caracteres, suprimiendo espacios sobrantes y garantizando coherencia tipográfica en perfiles y credenciales.
+
+- **Enumeraciones del ciclo de vida y seguridad**: El modelo incorpora un conjunto de tipos enumerados cerrados para tipificar las transiciones operativas:
+  - **TenantStatus**: Estados operativos de la empresa automotriz (PENDING, ACTIVE, SUSPENDED).
+  - **UserStatus**: Estados de habilitación de la cuenta de usuario (PENDING_VERIFICATION, ACTIVE, SUSPENDED).
+  - **MembershipStatus**: Vigencia contractual del colaborador en un taller determinado (ACTIVE, INACTIVE).
+  - **SalaryType**: Modalidad de retribución convenida con el personal (FIXED, HOURLY).
+  - **TokenType**: Propósito funcional de los tokens temporales (EMAIL_VERIFICATION, PASSWORD_RESET).
+  - **InvitationStatus**: Fases del flujo de onboarding de personal (PENDING, ACCEPTED, EXPIRED, REVOKED).
+  - **AuthProvider**: Origen de identidad y mecanismo de autenticación (LOCAL, GOOGLE).
+
+En la @tbl:iam-value-objects se especifican los objetos de valor y enumeraciones propios de este contexto.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Objetos de Valor y Enumeraciones del Bounded Context IAM \& Tenancy} \label{tbl:iam-value-objects} \\
+\hline
+\thfirst{Aspecto del Tipo} & \thcell{Especificación de Dominio} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto del Tipo} & \thcell{Especificación de Dominio} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} TenantMembershipId} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{value: UUID} \\*
+\hline
+\textbf{Restricciones y Reglas} & Identificador unívoco universal de membresía laboral. no nulo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} RoleId} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{value: UUID} \\*
+\hline
+\textbf{Restricciones y Reglas} & Identificador unívoco universal de rol de seguridad. no nulo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} PermissionId} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{value: UUID} \\*
+\hline
+\textbf{Restricciones y Reglas} & Identificador unívoco universal de permiso atómico. no nulo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} InvitationId} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{value: UUID} \\*
+\hline
+\textbf{Restricciones y Reglas} & Identificador unívoco universal de invitación de personal. no nulo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} Password} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{hash: String} \\*
+\hline
+\textbf{Restricciones y Reglas} & Longitud exacta de 60 caracteres. prefijos válidos de BCrypt. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} PersonName} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{firstName}, \texttt{lastName: String} \\*
+\hline
+\textbf{Restricciones y Reglas} & Mínimo 2 caracteres por atributo. eliminación de espacios superfluos. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Enumeración:} TenantStatus} \\*
+\hline
+\textbf{Atributos Clave} & Enumeración \\*
+\hline
+\textbf{Restricciones y Reglas} & Tres valores cerrados representativos del ciclo de vida del taller. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Enumeración:} UserStatus} \\*
+\hline
+\textbf{Atributos Clave} & Enumeración \\*
+\hline
+\textbf{Restricciones y Reglas} & Tres valores cerrados representativos de la habilitación de la cuenta. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Enumeración:} MembershipStatus} \\*
+\hline
+\textbf{Atributos Clave} & Enumeración \\*
+\hline
+\textbf{Restricciones y Reglas} & Dos estados que regulan el acceso activo a las operaciones del taller. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Enumeración:} SalaryType} \\*
+\hline
+\textbf{Atributos Clave} & Enumeración \\*
+\hline
+\textbf{Restricciones y Reglas} & Dos esquemas de retribución económica homologados para el personal. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Enumeración:} TokenType} \\*
+\hline
+\textbf{Atributos Clave} & Enumeración \\*
+\hline
+\textbf{Restricciones y Reglas} & Dos modalidades de tokens de verificación temporal emitidos por la plataforma. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Enumeración:} InvitationStatus} \\*
+\hline
+\textbf{Atributos Clave} & Enumeración \\*
+\hline
+\textbf{Restricciones y Reglas} & Cuatro estados que gobiernan el ciclo de vida del onboarding digital. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Enumeración:} AuthProvider} \\*
+\hline
+\textbf{Atributos Clave} & Enumeración \\*
+\hline
+\textbf{Restricciones y Reglas} & Dos mecanismos de autenticación admitidos en el acceso al ecosistema. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes ubicados en com.andeva.atelier.platform.iam.domain.model.valueobjects.
 
 **Servicios de Dominio de IAM & Tenancy**
 
-Los servicios de dominio encapsulan lógica de negocio pura y algoritmos que operan de forma transversal a múltiples entidades:
+Los servicios de dominio encapsulan operaciones de lógica de negocio pura y algoritmos criptográficos que operan sobre múltiples raíces de agregado o que no pertenecen por cohesión a una sola entidad:
 
-1. `PasswordPolicyEnforcer`: Evalúa la solidez y entropía de las contraseñas provistas por los usuarios durante el registro o actualización de credenciales. La regla exige una longitud mínima de 8 caracteres, la presencia de al menos una letra mayúscula, una letra minúscula, un dígito numérico y un carácter especial o símbolo. Si la contraseña no satisface estos requisitos, el servicio rechaza la operación retornando un error descriptivo tipado sin recurrir a excepciones de infraestructura.
-2. `TenantSlugGenerator`: Servicio algorítmico encargado de generar identificadores de URL legibles a partir del nombre comercial o razón social del taller automotriz. El proceso realiza la eliminación de diacríticos y tildes mediante normalización Unicode NFD, convierte los caracteres a minúsculas, sustituye espacios y signos de puntuación por guiones simples, y resuelve colisiones consultando al repositorio de talleres para anexar sufijos numéricos incrementales cuando el slug base ya se encuentra ocupado.
+- **TenantRegistrationDomainService**: Orquesta el caso de negocio fundacional de Atelier: el alta integral de una empresa automotriz. Esta operación atómica comprende la validación tributaria del RUC mediante el objeto de valor **TaxId**, la creación de la raíz **Tenant**, la apertura automática de la sede matriz inicial con código de anexo "0000", la creación de la cuenta **User** del propietario con su entidad dependiente **Profile**, la provisión de la plantilla de roles del sistema para el nuevo taller, la concesión del rol de administrador y la formalización de la primera membresía **TenantMembership**. Asimismo, vincula el identificador de cliente en Stripe si se encuentra disponible.
+
+- **PasswordEncryptionDomainService**: Servicio puro que encapsula el algoritmo criptográfico BCrypt con factor de costo computacional de 12 rondas. Provee el método *hashPassword(String rawPassword)* para derivar resúmenes criptográficos seguros e impone la política de complejidad de contraseñas de Atelier: longitud mínima de 8 caracteres, al menos una letra mayúscula, una letra minúscula, un dígito numérico y un símbolo especial. Ofrece también el método *verifyPassword(String rawPassword, Password hashedPassword)* para la evaluación segura de credenciales sin riesgos de ataques de sincronización temporal.
+
+- **TokenGeneratorDomainService**: Servicio criptográfico responsable de generar valores aleatorios de alta entropía empleando la clase segura **SecureRandom**. Suministra el método *generateNumericOtp(int digits)*, el cual produce secuencias decimales uniformemente distribuidas de 6 dígitos para validación rápida en canales móviles y correo electrónico, y el método *generateSecureToken(int byteLength)*, que produce cadenas alfanuméricas seguras codificadas en Base64 URL-safe.
+
+En la @tbl:iam-domain-services se exponen las interfaces de estos tres servicios de dominio.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Servicios de Dominio del Bounded Context IAM \& Tenancy} \label{tbl:iam-domain-services} \\
+\hline
+\thfirst{Aspecto de Servicio} & \thcell{Especificación Técnica y Responsabilidad} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Servicio} & \thcell{Especificación Técnica y Responsabilidad} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Dominio:} TenantRegistrationDomainService} \\*
+\hline
+\textbf{Métodos Principales} & \texttt{registerTenant(...)} \\*
+\hline
+\textbf{Responsabilidad} & Orquesta la creación atómica de taller, sede matriz, usuario titular y membresía inicial. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Dominio:} PasswordEncryptionDomainService} \\*
+\hline
+\textbf{Métodos Principales} & - \texttt{hashPassword(...)} \newline - \texttt{verifyPassword(...)} \newline - \texttt{validatePolicy(...)} \\*
+\hline
+\textbf{Responsabilidad} & Cifrado seguro BCrypt y verificación de políticas de complejidad de credenciales. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Dominio:} TokenGeneratorDomainService} \\*
+\hline
+\textbf{Métodos Principales} & - \texttt{generateNumericOtp(...)} \newline - \texttt{generateSecureToken(...)} \\*
+\hline
+\textbf{Responsabilidad} & Generación de números OTP de 6 dígitos y tokens criptográficos Base64 URL-safe. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes ubicados en el paquete com.andeva.atelier.platform.iam.domain.services.
 
 **Puertos de Repositorio de la Capa de Dominio**
 
-Las interfaces de repositorio definen los contratos puros de persistencia y recuperación requeridos por los agregados de IAM, utilizando únicamente tipos de dominio y abstrayéndose de cualquier tecnología de base de datos relacional:
+En concordancia con los principios de Clean Architecture, la persistencia de las entidades de IAM se desacopla mediante puertos de salida abstractos en el dominio. Las interfaces definen los contratos requeridos utilizando estrictamente tipos de dominio, sin anotaciones de Spring ni de Jakarta Persistence:
 
-| Puerto de Repositorio | Métodos Principales | Responsabilidad de Dominio |
-| :--- | :--- | :--- |
-| `TenantRepository` | `save`, `findById`, `findByRuc`, `findBySlug`, `existsBySlug` | Persistencia y recuperación de la raíz de agregado `Tenant`. |
-| `UserRepository` | `save`, `findById`, `findByEmail`, `existsByEmail` | Persistencia y recuperación de identidades de usuario. |
-| `RoleRepository` | `save`, `findById`, `findByNameAndTenantId`, `findSystemRoles` | Gestión de roles de seguridad personalizados y predefinidos. |
-| `InvitationRepository` | `save`, `findById`, `findByToken`, `findByEmailAndTenantId` | Control de invitaciones de incorporación de personal. |
-| `VerificationTokenRepository`| `save`, `findByTokenAndType`, `deleteExpired` | Almacenamiento y validación de tokens OTP temporales. |
-: Puertos de Repositorio del Bounded Context IAM & Tenancy {#tbl:iam-repository-ports}
+- **TenantRepository**: Define las operaciones para persistir y consultar talleres automotrices mediante **TenantId**, razón social o número de **TaxId**.
 
-*Nota.* Interfaces de salida del paquete com.andeva.atelier.platform.iam.domain.repositories.
+- **UserRepository**: Administra la persistencia de identidades de acceso, ofreciendo consultas deterministas por **UserId** y búsqueda canónica por **EmailAddress**.
 
-**Eventos de Dominio y Manejo de Errores Semánticos**
+- **TenantMembershipRepository**: Gestiona los contratos laborales, permitiendo recuperar la membresía activa por el par compuesto por **TenantId** y **UserId**, listar colaboradores por taller y consultar el personal asignado a una sucursal específica.
 
-Las mutaciones válidas de estado en IAM registran eventos de dominio inmutables que notifican cambios relevantes para la sincronización intermodular:
-* `TenantRegisteredEvent`: Transporta `tenantId`, `ruc`, `slug` y marca de tiempo tras el alta exitosa de un taller.
-* `BranchCreatedEvent`: Notifica la creación de una nueva sede física con sus coordenadas y radio perimetral.
-* `UserCreatedEvent`: Notifica el registro de un nuevo usuario en la plataforma.
-* `UserInvitedEvent`: Transporta el token de invitación y el correo destinatario para su envío asíncrono vía Resend.
-* `UserVerifiedEvent`: Notifica la confirmación de identidad y habilitación plena de acceso.
-* `TenantSuspendedEvent`: Notifica la suspensión del taller para la revocación inmediata de sesiones activas.
+- **RoleRepository**: Provee métodos de recuperación para roles personalizados del taller y consulta de plantillas globales del sistema protegidas contra modificación.
 
-Para el manejo de errores, el contexto adopta el tipo de resultado `Result<T, ApplicationError>`, complementado por excepciones semánticas de dominio (`TenantNotFoundException`, `InvalidCredentialsException`, `UserAlreadyExistsException`, `TenantSuspendedException`) reservadas para infracciones críticas de invariantes.
+- **PermissionRepository**: Catálogo de solo lectura para la resolución en memoria de permisos atómicos y códigos de autoridad del ecosistema.
+
+- **InvitationRepository**: Controla la persistencia de invitaciones de onboarding, facilitando la consulta de invitaciones pendientes por token criptográfico o por correo destinatario dentro de un taller.
+
+- **VerificationTokenRepository**: Administra el almacenamiento y consumo de tokens OTP de un solo uso, implementando métodos para validar códigos vigentes y purgar registros caducos.
+
+En la @tbl:iam-repository-ports se detallan las operaciones provistas por estos puertos de salida.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Puertos de Repositorio del Bounded Context IAM \& Tenancy} \label{tbl:iam-repository-ports} \\
+\hline
+\thfirst{Aspecto de Puerto} & \thcell{Especificación Técnica y Responsabilidad} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Puerto} & \thcell{Especificación Técnica y Responsabilidad} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Repositorio:} TenantRepository} \\*
+\hline
+\textbf{Métodos Principales} & - \texttt{save} \newline - \texttt{findById} \newline - \texttt{findByTaxId} \newline - \texttt{existsByTaxId} \\*
+\hline
+\textbf{Responsabilidad de Dominio} & Persistencia y consulta de la raíz de agregado Tenant por identidad y RUC fiscal. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Repositorio:} UserRepository} \\*
+\hline
+\textbf{Métodos Principales} & - \texttt{save} \newline - \texttt{findById} \newline - \texttt{findByEmail} \newline - \texttt{existsByEmail} \\*
+\hline
+\textbf{Responsabilidad de Dominio} & Persistencia de cuentas de usuario y recuperación por dirección canónica de correo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Repositorio:} TenantMembershipRepository} \\*
+\hline
+\textbf{Métodos Principales} & - \texttt{save} \newline - \texttt{findById} \newline - \texttt{findByTenantIdAndUserId} \newline - \texttt{findByTenantId} \\*
+\hline
+\textbf{Responsabilidad de Dominio} & Gestión contractual de colaboradores y resolución de membresías por empresa. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Repositorio:} RoleRepository} \\*
+\hline
+\textbf{Métodos Principales} & - \texttt{save} \newline - \texttt{findById} \newline - \texttt{findByTenantIdAndName} \newline - \texttt{findSystemRoles} \\*
+\hline
+\textbf{Responsabilidad de Dominio} & Administración de roles de seguridad personalizados de taller y roles globales. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Repositorio:} PermissionRepository} \\*
+\hline
+\textbf{Métodos Principales} & - \texttt{findAll} \newline - \texttt{findById} \newline - \texttt{findByName} \\*
+\hline
+\textbf{Responsabilidad de Dominio} & Catálogo de privilegios de seguridad y consulta de autoridades del sistema. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Repositorio:} InvitationRepository} \\*
+\hline
+\textbf{Métodos Principales} & - \texttt{save} \newline - \texttt{findById} \newline - \texttt{findByToken} \newline - \texttt{findByTenantIdAndEmail} \\*
+\hline
+\textbf{Responsabilidad de Dominio} & Control del ciclo de vida y canje de invitaciones de incorporación de personal. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Repositorio:} VerificationTokenRepository} \\*
+\hline
+\textbf{Métodos Principales} & - \texttt{save} \newline - \texttt{findByTokenAndType} \newline - \texttt{deleteExpiredTokens} \\*
+\hline
+\textbf{Responsabilidad de Dominio} & Almacenamiento, validación y depuración de tokens OTP temporales de un solo uso. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Interfaces de salida pertenecientes al paquete com.andeva.atelier.platform.iam.domain.repositories.
+
+**Eventos de Dominio y Taxonomía de Excepciones Semánticas**
+
+La sincronización entre el Bounded Context IAM y los demás módulos de negocio de Atelier Platform se articula mediante eventos de dominio inmutables que implementan el contrato base **DomainEvent**. Estos eventos se publican transaccionalmente mediante el patrón Transactional Outbox, asegurando entrega con semántica at-least-once:
+
+- **Eventos de taller**: **TenantRegisteredEvent** notifica el alta inicial de la empresa automotriz para provisionar su catálogo inicial en Inventario y Facturación; **TenantActivatedEvent** señala la rehabilitación de operaciones; **TenantSuspendedEvent** notifica la revocación inmediata de accesos y la suspensión de servicios por morosidad o infracción contractual.
+
+- **Eventos de sede física**: **BranchCreatedEvent** notifica la delimitación de una nueva sucursal con sus coordenadas satelitales WGS84 para la apertura de turnos en Human Resources; **BranchUpdatedEvent** transporta ajustes en nombre o perímetro; **BranchDeactivatedEvent** notifica el cese operativo de la sede.
+
+- **Eventos de identidad y credenciales**: **UserRegisteredEvent** notifica el alta de una cuenta para iniciar la verificación de correo electrónico; **UserVerifiedEvent** confirma la activación plena del usuario; **UserPasswordResetRequestedEvent** transporta el token OTP para su despacho mediante la API REST de Resend; **UserPasswordChangedEvent** registra la renovación de credenciales; **UserSuspendedEvent** revoca las sesiones activas en todos los clientes móviles y web.
+
+- **Eventos de contratación y onboarding**: **TenantMembershipCreatedEvent** notifica la adscripción de un trabajador al taller para el registro de su legajo en Recursos Humanos; **TenantMembershipDeactivatedEvent** notifica la baja laboral; **StaffInvitedEvent** transporta el token de invitación para el envío del correo de bienvenida; **StaffInvitationAcceptedEvent** formaliza la incorporación del colaborador al equipo operativo del taller.
+
+En la @tbl:iam-domain-events se sintetiza la taxonomía de eventos de dominio de este contexto.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Taxonomía de Eventos de Dominio del Bounded Context IAM \& Tenancy} \label{tbl:iam-domain-events} \\
+\hline
+\thfirst{Aspecto del Evento} & \thcell{Especificación de Carga Útil y Efecto} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto del Evento} & \thcell{Especificación de Carga Útil y Efecto} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} TenantRegisteredEvent \quad (\textit{Emisor:} Tenant)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{tenantId}, \texttt{name}, \texttt{taxId}, \texttt{status} \\*
+\hline
+\textbf{Efecto Intermodular} & Notifica el alta del taller para inicialización de catálogos y contabilidad. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} TenantActivatedEvent \quad (\textit{Emisor:} Tenant)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{tenantId}, \texttt{occurredOn} \\*
+\hline
+\textbf{Efecto Intermodular} & Restablece los permisos y accesos operativos del personal en el taller. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} TenantSuspendedEvent \quad (\textit{Emisor:} Tenant)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{tenantId}, \texttt{reason}, \texttt{occurredOn} \\*
+\hline
+\textbf{Efecto Intermodular} & Revoca de inmediato los accesos y sesiones de usuarios adscritos al taller. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} BranchCreatedEvent \quad (\textit{Emisor:} Tenant)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{branchId}, \texttt{tenantId}, \texttt{name}, \texttt{location} \\*
+\hline
+\textbf{Efecto Intermodular} & Provisiona bahías de servicio y habilita la marcación de asistencia presencial. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} BranchUpdatedEvent \quad (\textit{Emisor:} Tenant)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{branchId}, \texttt{name}, \texttt{location}, \texttt{radius} \\*
+\hline
+\textbf{Efecto Intermodular} & Actualiza el perímetro satelital de la sede para el control de geocercas GPS. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} BranchDeactivatedEvent \quad (\textit{Emisor:} Tenant)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{branchId}, \texttt{tenantId}, \texttt{occurredOn} \\*
+\hline
+\textbf{Efecto Intermodular} & Cierra la disponibilidad operativa de la sucursal para nuevas órdenes de trabajo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} UserRegisteredEvent \quad (\textit{Emisor:} User)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{userId}, \texttt{email}, \texttt{authProvider} \\*
+\hline
+\textbf{Efecto Intermodular} & Dispara el envío de correo de bienvenida y verificación inicial de identidad. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} UserVerifiedEvent \quad (\textit{Emisor:} User)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{userId}, \texttt{email}, \texttt{occurredOn} \\*
+\hline
+\textbf{Efecto Intermodular} & Habilita el inicio de sesión y la asignación plena de credenciales. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} UserPasswordResetRequestedEvent \quad (\textit{Emisor:} User)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{userId}, \texttt{email}, \texttt{token}, \texttt{expiresAt} \\*
+\hline
+\textbf{Efecto Intermodular} & Despacha el código OTP mediante el servicio transaccional de mensajería. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} UserPasswordChangedEvent \quad (\textit{Emisor:} User)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{userId}, \texttt{occurredOn} \\*
+\hline
+\textbf{Efecto Intermodular} & Invalida tokens de sesión previos exigiendo reautenticación en clientes. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} UserSuspendedEvent \quad (\textit{Emisor:} User)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{userId}, \texttt{reason}, \texttt{occurredOn} \\*
+\hline
+\textbf{Efecto Intermodular} & Bloquea el acceso universal de la cuenta a todos los talleres y aplicaciones. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} TenantMembershipCreatedEvent \quad (\textit{Emisor:} TenantMembership)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{membershipId}, \texttt{tenantId}, \texttt{userId}, \texttt{role} \\*
+\hline
+\textbf{Efecto Intermodular} & Registra el alta del trabajador en el padrón laboral y control de asistencia. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} TenantMembershipDeactivatedEvent \quad (\textit{Emisor:} TenantMembership)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{membershipId}, \texttt{tenantId}, \texttt{userId} \\*
+\hline
+\textbf{Efecto Intermodular} & Da de baja las credenciales del trabajador en el taller y liquida turnos activos. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} StaffInvitedEvent \quad (\textit{Emisor:} Invitation)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{invitationId}, \texttt{tenantId}, \texttt{email}, \texttt{token} \\*
+\hline
+\textbf{Efecto Intermodular} & Despacha la invitación por correo electrónico con enlace tokenizado uniuso. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} StaffInvitationAcceptedEvent \quad (\textit{Emisor:} Invitation)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{invitationId}, \texttt{tenantId}, \texttt{userId}, \texttt{role} \\*
+\hline
+\textbf{Efecto Intermodular} & Consolida la afiliación del nuevo trabajador y crea su membresía laboral. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Eventos inmutables ubicados bajo el paquete com.andeva.atelier.platform.iam.domain.events.
+
+Por último, el manejo determinista de anomalías de negocio se implementa mediante excepciones semánticas fuertemente tipadas que heredan de la clase base **DomainException** provista por el Bounded Context Shared. Al producirse la transgresión de una regla o invariante, la capa de dominio interrumpe la operación arrojando una de estas anomalías, las cuales son interceptadas por los manejadores de comandos de la Capa de Aplicación y transformadas en resultados de falla **Result.Failure** o formateadas como problemas estándar bajo la RFC 7807:
+
+- **Anomalías de taller**: **TenantNotFoundException** ante identificadores de taller inexistentes; **TenantAlreadyExistsException** ante intentos de duplicar un RUC registrado; **TenantSuspendedException** si se intenta operar sobre una empresa con actividades comerciales suspendidas.
+
+- **Anomalías de usuario y credenciales**: **UserNotFoundException** ante cuentas inexistentes; **UserAlreadyExistsException** cuando una dirección de correo ya se encuentra en uso; **UserSuspendedException** al detectar accesos de cuentas suspendidas; **InvalidCredentialsException** ante contraseñas incorrectas; **InvalidVerificationTokenException** ante códigos OTP erróneos, vencidos o previamente consumidos.
+
+- **Anomalías de membresía y roles**: **MembershipNotFoundException** cuando un usuario no posee contrato en un taller consultado; **MembershipAlreadyExistsException** al intentar duplicar el contrato de un trabajador en el mismo taller; **RoleNotFoundException** si se hace referencia a un rol no catalogado; **SystemRoleImmutableException** si se intenta modificar o eliminar un rol predefinido de la plataforma.
+
+- **Anomalías de onboarding**: **InvitationNotFoundException** si el token de invitación no corresponde a ningún registro; **InvitationExpiredException** cuando se sobrepasa el plazo de 72 horas; **InvitationAlreadyAcceptedException** si se intenta canjear un enlace previamente utilizado.
+
+En la @tbl:iam-domain-exceptions se sintetiza la jerarquía de excepciones de dominio y sus códigos de error semánticos asociados.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.8cm} | >{\raggedright\arraybackslash}p{9.6cm} |}
+\caption{Excepciones de Dominio y Códigos Semánticos de IAM \& Tenancy} \label{tbl:iam-domain-exceptions} \\
+\hline
+\thfirst{Código de Error Semántico} & \thcell{Condición de Lanzamiento en el Modelo} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Código de Error Semántico} & \thcell{Condición de Lanzamiento en el Modelo} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} TenantNotFoundException} \\*
+\hline
+\texttt{TENANT\_NOT\_FOUND} & El identificador de taller consultado no existe en el sistema. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} TenantAlreadyExistsException} \\*
+\hline
+\texttt{TENANT\_ALREADY\_EXISTS} & El documento RUC provisto ya se encuentra registrado por otra empresa. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} TenantSuspendedException} \\*
+\hline
+\texttt{TENANT\_SUSPENDED} & La empresa titular se encuentra inhabilitada para operar transacciones. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} UserNotFoundException} \\*
+\hline
+\texttt{USER\_NOT\_FOUND} & La identidad de usuario consultada no existe en la plataforma global. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} UserAlreadyExistsException} \\*
+\hline
+\texttt{USER\_ALREADY\_EXISTS} & La dirección de correo electrónico ya está registrada en otra cuenta. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} UserSuspendedException} \\*
+\hline
+\texttt{USER\_SUSPENDED} & La cuenta global de usuario ha sido suspendida administrativamente. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} InvalidCredentialsException} \\*
+\hline
+\texttt{INVALID\_CREDENTIALS} & La contraseña o credencial federada provista no coincide con el registro. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} MembershipNotFoundException} \\*
+\hline
+\texttt{MEMBERSHIP\_NOT\_FOUND} & El usuario no cuenta con un contrato laboral activo en el taller consultado. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} MembershipAlreadyExistsException} \\*
+\hline
+\texttt{MEMBERSHIP\_ALREADY\_EXISTS} & Ya existe una relación laboral activa para este usuario en el taller. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} RoleNotFoundException} \\*
+\hline
+\texttt{ROLE\_NOT\_FOUND} & El rol de seguridad solicitado no está disponible en el taller. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} SystemRoleImmutableException} \\*
+\hline
+\texttt{SYSTEM\_ROLE\_IMMUTABLE} & Se intentó modificar o dar de baja un rol semilla global del sistema. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} InvitationNotFoundException} \\*
+\hline
+\texttt{INVITATION\_NOT\_FOUND} & El token de invitación suministrado no corresponde a ningún registro. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} InvitationExpiredException} \\*
+\hline
+\texttt{INVITATION\_EXPIRED} & El token de invitación ha superado su plazo máximo de vigencia de 72 horas. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} InvitationAlreadyAcceptedException} \\*
+\hline
+\texttt{INVITATION\_ALREADY\_ACCEPTED} & El token de invitación suministrado ya fue canjeado con anterioridad. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} InvalidVerificationTokenException} \\*
+\hline
+\texttt{INVALID\_VERIFICATION\_TOKEN} & El código OTP o token de un solo uso es inválido, vencido o consumido. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes ubicados bajo el paquete com.andeva.atelier.platform.iam.domain.exceptions.
 
 #### 2.6.2.2. Interface Layer
 
+La capa de interfaz del Bounded Context Identity and Access Management (IAM) & Tenancy constituye el adaptador primario de entrada para la autenticación perimetral, la administración de talleres automotrices, la configuración de sedes físicas, la gestión de colaboradores y el control de acceso basado en roles en Atelier Platform.
 
+Ubicada en el paquete canónico **com.andeva.atelier.platform.iam.interfaces**, su concepción arquitectónica responde a cuatro directrices esenciales de diseño táctico:
+
+- **Desacoplamiento perimetral y traducción determinista:** Los controladores REST nunca interactúan de forma directa con los agregados de dominio ni capturan excepciones de bajo nivel. Toda comunicación se canaliza hacia los servicios de aplicación mediante comandos y consultas, recibiendo como respuesta el tipo de resultado sellado **Result<T, ApplicationError>**. La conversión hacia respuestas HTTP se delega en ensambladores especializados y en el componente transversal **ResponseEntityAssembler**.
+
+- **Tokens de seguridad contextuales y enriquecidos:** El emisor de tokens genera credenciales JWT que integran en sus declaraciones criptográficas el identificador de usuario, el taller activo, la sucursal predeterminada y el conjunto consolidado de autoridades de seguridad. Este esquema permite que los filtros perimetrales autoricen peticiones en memoria con complejidad de tiempo constante, eliminando consultas repetitivas a la base de datos relacional.
+
+- **Verificación perimetral de fronteras multi-inquilino:** Los controladores que exponen rutas parametrizadas por taller verifican que el identificador suministrado en la ruta coincida con el taller autenticado en el contexto de seguridad. Esta validación previene vulnerabilidades de acceso horizontal entre distintos talleres mecánicos que coexisten en la plataforma.
+
+- **Fachada de contexto abierto para integración intermodular:** Para posibilitar que otros módulos consulten la vigencia de talleres, la afiliación de mecánicos o la ubicación de sedes sin acoplamientos circulares, la capa expone la interfaz **TenancyContextFacade**, resguardando la pureza interna de los agregados de identidad.
+
+En la @tbl:iam-interface-types se presenta el catálogo consolidado de los componentes que integran la Capa de Interfaz de IAM & Tenancy.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Catálogo Consolidado de la Capa de Interfaz de IAM \& Tenancy} \label{tbl:iam-interface-types} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\
+\hline
+\endhead
+AuthenticationController & Endpoints para registro de talleres, autenticación local y federada, y recuperación de claves. \\*
+\hline
+\textbf{Categoría} & Controlador REST \\*
+\hline
+\textbf{Relaciones} & Invoca TenantCommandService y UserCommandService. utiliza ensambladores de recursos. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak controllers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+TenantsController & Endpoints de consulta y actualización de metadatos de la empresa automotriz titular. \\*
+\hline
+\textbf{Categoría} & Controlador REST \\*
+\hline
+\textbf{Relaciones} & Invoca TenantCommandService y TenantQueryService. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak controllers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+BranchesController & Endpoints para creación, consulta, modificación de geocercas y baja de sedes físicas. \\*
+\hline
+\textbf{Categoría} & Controlador REST \\*
+\hline
+\textbf{Relaciones} & Invoca TenantCommandService y TenantQueryService. gestiona entidades Branch. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak controllers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+MembershipsController & Endpoints para administración de colaboradores, asignación de roles y esquema salarial. \\*
+\hline
+\textbf{Categoría} & Controlador REST \\*
+\hline
+\textbf{Relaciones} & Invoca MembershipCommandService y MembershipQueryService. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak controllers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+InvitationsController & Endpoints para emisión, validación previa y aceptación de invitaciones de personal. \\*
+\hline
+\textbf{Categoría} & Controlador REST \\*
+\hline
+\textbf{Relaciones} & Invoca InvitationCommandService e InvitationQueryService. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak controllers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+RolesController & Endpoints para consulta y definición de roles de seguridad y catálogo de permisos. \\*
+\hline
+\textbf{Categoría} & Controlador REST \\*
+\hline
+\textbf{Relaciones} & Invoca RoleCommandService y RoleQueryService. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak controllers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+CreateTenantResource & Carga útil para registro simultáneo de taller, sede matriz y cuenta administradora. \\*
+\hline
+\textbf{Categoría} & Recurso de Petición \\*
+\hline
+\textbf{Relaciones} & Mapeado por CreateTenantCommandFromResourceAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+SignInResource & Credenciales de acceso local mediante correo electrónico y contraseña. \\*
+\hline
+\textbf{Categoría} & Recurso de Petición \\*
+\hline
+\textbf{Relaciones} & Mapeado por SignInCommandFromResourceAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+GoogleSignInResource & Credencial federada compuesta por el token de identidad provisto por Google OAuth2. \\*
+\hline
+\textbf{Categoría} & Recurso de Petición \\*
+\hline
+\textbf{Relaciones} & Procesado en AuthenticationController para autenticación SSO. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+VerifyEmailResource & Código OTP numérico de 6 dígitos para validación y activación de cuenta. \\*
+\hline
+\textbf{Categoría} & Recurso de Petición \\*
+\hline
+\textbf{Relaciones} & Consumido en el endpoint de verificación de correo. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+ForgotPasswordResource & Dirección de correo electrónico receptora del enlace de recuperación de contraseña. \\*
+\hline
+\textbf{Categoría} & Recurso de Petición \\*
+\hline
+\textbf{Relaciones} & Dispara la generación de token y despacho transaccional por Resend. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+ResetPasswordResource & Token de seguridad y nueva contraseña para restablecimiento de credenciales. \\*
+\hline
+\textbf{Categoría} & Recurso de Petición \\*
+\hline
+\textbf{Relaciones} & Procesado para la actualización segura de contraseña. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+UpdateTenantProfileResource & Datos modificables de denominación comercial y razón social del taller automotriz. \\*
+\hline
+\textbf{Categoría} & Recurso de Petición \\*
+\hline
+\textbf{Relaciones} & Consumido en el endpoint de actualización de perfil de taller. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+CreateBranchResource & Datos para apertura de sede: nombre, anexo SUNAT, coordenadas WGS84 y radio. \\*
+\hline
+\textbf{Categoría} & Recurso de Petición \\*
+\hline
+\textbf{Relaciones} & Mapeado por CreateBranchCommandFromResourceAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+UpdateBranchLocationResource & Nuevas coordenadas geográficas y radio en metros para el perímetro de la sede. \\*
+\hline
+\textbf{Categoría} & Recurso de Petición \\*
+\hline
+\textbf{Relaciones} & Consumido en el endpoint de actualización de geocerca satelital. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+InviteStaffResource & Correo electrónico de destino y rol asignado para invitación de nuevo personal. \\*
+\hline
+\textbf{Categoría} & Recurso de Petición \\*
+\hline
+\textbf{Relaciones} & Mapeado por InviteStaffCommandFromResourceAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+AcceptInvitationResource & Token de invitación, contraseña elegida y datos biográficos del colaborador. \\*
+\hline
+\textbf{Categoría} & Recurso de Petición \\*
+\hline
+\textbf{Relaciones} & Mapeado por AcceptInvitationCommandFromResourceAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+AssignRolesResource & Lista de identificadores de roles concedidos a un colaborador en el taller. \\*
+\hline
+\textbf{Categoría} & Recurso de Petición \\*
+\hline
+\textbf{Relaciones} & Consumido en el endpoint de asignación de roles. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+CreateRoleResource & Denominación, descripción y conjunto de permisos para un rol personalizado. \\*
+\hline
+\textbf{Categoría} & Recurso de Petición \\*
+\hline
+\textbf{Relaciones} & Mapeado por CreateRoleCommandFromResourceAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+UpdateCompensationResource & Esquema de retribución económica e importe salarial pactado con el colaborador. \\*
+\hline
+\textbf{Categoría} & Recurso de Petición \\*
+\hline
+\textbf{Relaciones} & Consumido en el endpoint de ajuste de remuneración laboral. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+AuthenticatedUserResource & Token JWT emitido, datos de usuario, taller activo y lista de permisos autorizados. \\*
+\hline
+\textbf{Categoría} & Recurso de Respuesta \\*
+\hline
+\textbf{Relaciones} & Retornado tras el inicio de sesión o aceptación de invitación. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+TenantResource & Representación pública inmutable de los datos corporativos de la empresa automotriz. \\*
+\hline
+\textbf{Categoría} & Recurso de Respuesta \\*
+\hline
+\textbf{Relaciones} & Producido por TenantResourceFromAggregateAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+TenantSummaryResource & Resumen ligero del taller titular para inclusión en respuestas contextuales. \\*
+\hline
+\textbf{Categoría} & Recurso de Respuesta \\*
+\hline
+\textbf{Relaciones} & Incluido dentro de AuthenticatedUserResource. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+BranchResource & Representación inmutable de una sede física, su código SUNAT y geocerca perimetral. \\*
+\hline
+\textbf{Categoría} & Recurso de Respuesta \\*
+\hline
+\textbf{Relaciones} & Producido por BranchResourceFromEntityAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+MembershipResource & Ficha contractual del colaborador con datos de usuario, roles y esquema salarial. \\*
+\hline
+\textbf{Categoría} & Recurso de Respuesta \\*
+\hline
+\textbf{Relaciones} & Producido por MembershipResourceFromAggregateAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+RoleResource & Definición de rol de seguridad con su indicador de sistema y lista de permisos. \\*
+\hline
+\textbf{Categoría} & Recurso de Respuesta \\*
+\hline
+\textbf{Relaciones} & Producido por RoleResourceFromAggregateAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+PermissionResource & Detalle de un permiso atómico con código canónico de recurso y acción. \\*
+\hline
+\textbf{Categoría} & Recurso de Respuesta \\*
+\hline
+\textbf{Relaciones} & Producido por PermissionResourceFromEntityAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+InvitationResource & Estado, correo destinatario y marca temporal límite de vigencia de una invitación. \\*
+\hline
+\textbf{Categoría} & Recurso de Respuesta \\*
+\hline
+\textbf{Relaciones} & Producido por InvitationResourceFromAggregateAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+InvitationValidationResource & Estado de vigencia de token y metadatos de bienvenida para la interfaz de usuario. \\*
+\hline
+\textbf{Categoría} & Recurso de Respuesta \\*
+\hline
+\textbf{Relaciones} & Retornado en la pantalla de pre-registro de colaboradores. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+TenancyContextFacade & Interfaz pública que expone consultas y validaciones de tenencia en memoria. \\*
+\hline
+\textbf{Categoría} & Fachada de Contexto (OHS) \\*
+\hline
+\textbf{Relaciones} & Consumida por MRO, CRM, Facturación y Recursos Humanos. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak acl} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+TenancyContextFacadeImpl & Implementación de la fachada que consulta repositorios y evalúa geocercas GPS. \\*
+\hline
+\textbf{Categoría} & Implementación ACL \\*
+\hline
+\textbf{Relaciones} & Implementa TenancyContextFacade. desacopla entidades internas. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak acl} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+TenantCreatedIntegrationEvent & Notificación asíncrona de creación de taller para inicialización en Billing e Invoicing. \\*
+\hline
+\textbf{Categoría} & Evento de Integración \\*
+\hline
+\textbf{Relaciones} & Publicado vía Outbox. integra con módulos de suscripciones y facturación. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+BranchCreatedIntegrationEvent & Notificación asíncrona de nueva sede física para configuración de bahías y turnos. \\*
+\hline
+\textbf{Categoría} & Evento de Integración \\*
+\hline
+\textbf{Relaciones} & Publicado vía Outbox. integra con Workshop Operations y HR. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+UserRegisteredIntegrationEvent & Notificación asíncrona de registro de usuario para sincronización con CRM. \\*
+\hline
+\textbf{Categoría} & Evento de Integración \\*
+\hline
+\textbf{Relaciones} & Publicado vía Outbox. integra con Customer \& Fleet Management. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+TenantMembershipCreatedIntegrationEvent & Notificación asíncrona de nuevo colaborador para apertura de legajo laboral. \\*
+\hline
+\textbf{Categoría} & Evento de Integración \\*
+\hline
+\textbf{Relaciones} & Publicado vía Outbox. integra con Human Resources Management. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+StaffInvitedIntegrationEvent & Registro de auditoría de invitación emitida para trazabilidad de onboarding. \\*
+\hline
+\textbf{Categoría} & Evento de Integración \\*
+\hline
+\textbf{Relaciones} & Publicado vía Outbox para auditoría y monitorización. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+BearerAuthorizationRequestFilter & Filtro web que valida el token JWT e inyecta la autenticación en Spring Security. \\*
+\hline
+\textbf{Categoría} & Filtro Perimetral \\*
+\hline
+\textbf{Relaciones} & Extrae claims de usuario, taller y permisos para autorización en memoria. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak filters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+TenantContextResolver & Verificador de frontera que comprueba concordancia entre URL y taller activo. \\*
+\hline
+\textbf{Categoría} & Validador Perimetral \\*
+\hline
+\textbf{Relaciones} & Previene accesos horizontales no autorizados entre talleres. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak filters} \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes pertenecientes al paquete canónico com.andeva.atelier.platform.iam.interfaces.
+
+A continuación, se profundiza en la especificación a manera de diccionario de cada una de las clases, ensambladores y controladores que integran esta capa.
+
+**Controladores REST y Endpoints de Comunicación**
+
+La exposición perimetral de servicios HTTP se organiza en seis controladores anotados con `@RestController` y documentados mediante especificaciones OpenAPI 3, distribuyendo responsabilidades operativas claras:
+
+- **AuthenticationController**: Gestiona el ciclo de vida de credenciales y acceso global. Su endpoint `/api/v1/auth/sign-up` procesa el registro fundacional del taller automotriz, coordinando la validación del RUC y la creación simultánea del usuario administrador. Asimismo, provee endpoints para autenticación local (`/sign-in`), inicio de sesión federado con Google OAuth2 (`/google-sign-in`), activación de cuentas mediante código OTP (`/verify-email`) y el flujo de recuperación de contraseñas olvidadas (`/forgot-password` y `/reset-password`) con despacho transaccional a través de la API REST de Resend.
+
+- **TenantsController**: Expone operaciones de administración corporativa para el taller mecánico titular. El endpoint `GET /api/v1/tenants/current` recupera los datos del taller resuelto a partir del contexto del token JWT autenticado, permitiendo que la aplicación cliente cargue la identidad corporativa sin requerir parámetros de consulta superfluos. Por su parte, `PUT /api/v1/tenants/current` permite modificar la denominación comercial y razón social del taller.
+
+- **BranchesController**: Administra las sedes físicas del taller bajo la ruta `/api/v1/tenants/{tenantId}/branches`. Centraliza el alta de nuevas sucursales con su respectivo código de anexo tributario SUNAT, el listado de sedes activas, la consulta detallada por identificador, la actualización de coordenadas satelitales WGS84 con radio de cobertura en metros y la desactivación operativa de locales.
+
+- **MembershipsController**: Modela la administración del personal del taller en `/api/v1/tenants/{tenantId}/memberships`. Ofrece endpoints para listar colaboradores, consultar el detalle de legajos laborales, asignar o revocar roles de seguridad de forma dinámica, renegociar condiciones salariales pactadas y tramitar la desvinculación laboral mediante la desactivación del contrato.
+
+- **InvitationsController**: Conduce el flujo de onboarding digital bajo las rutas `/api/v1/tenants/{tenantId}/invitations` y `/api/v1/invitations/{token}`. Permite que la administración del taller emita invitaciones formales despachadas por correo transaccional, provee la resolución previa del token de invitación para renderizar el formulario de bienvenida en la interfaz de usuario, y procesa la aceptación formal bajo `/api/v1/invitations/{token}/accept` con registro de credenciales y creación inmediata de la membresía.
+
+- **RolesController**: Provee el gobierno de permisos y perfiles de seguridad bajo la ruta `/api/v1/tenants/{tenantId}/roles`. Permite consultar los roles disponibles para el taller (tanto plantillas del sistema como roles a medida), crear roles personalizados seleccionando privilegios específicos y consultar el catálogo transversal de permisos del sistema en `/api/v1/permissions`.
+
+En la @tbl:iam-controllers-and-endpoints se detallan los controladores REST, rutas, verbos HTTP y tipos de respuesta asociados.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\raggedright\arraybackslash}p{6.0cm} | >{\raggedright\arraybackslash}p{9.4cm} |}
+\caption{Controladores REST y Endpoints de Comunicación de IAM \& Tenancy} \label{tbl:iam-controllers-and-endpoints} \\
+\hline
+\thfirst{Recurso de Petición} & \thcell{Código y Respuesta HTTP} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Recurso de Petición} & \thcell{Código y Respuesta HTTP} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Controlador REST:} AuthenticationController} \\*
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak auth/\allowbreak sign-up}} \\*
+\hline
+\textbf{Petición:} \texttt{CreateTenantResource} & \textbf{Respuesta:} 201 CREATED (\texttt{TenantResource}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak auth/\allowbreak sign-in}} \\*
+\hline
+\textbf{Petición:} \texttt{SignInResource} & \textbf{Respuesta:} 200 OK (\texttt{AuthenticatedUserResource}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak auth/\allowbreak google-sign-in}} \\*
+\hline
+\textbf{Petición:} \texttt{GoogleSignInResource} & \textbf{Respuesta:} 200 OK (\texttt{AuthenticatedUserResource}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak auth/\allowbreak verify-email}} \\*
+\hline
+\textbf{Petición:} \texttt{VerifyEmailResource} & \textbf{Respuesta:} 200 OK (\texttt{MessageResource}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak auth/\allowbreak forgot-password}} \\*
+\hline
+\textbf{Petición:} \texttt{ForgotPasswordResource} & \textbf{Respuesta:} 200 OK (\texttt{MessageResource}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak auth/\allowbreak reset-password}} \\*
+\hline
+\textbf{Petición:} \texttt{ResetPasswordResource} & \textbf{Respuesta:} 200 OK (\texttt{MessageResource}) \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Controlador REST:} TenantsController} \\*
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak tenants/\allowbreak current}} \\*
+\hline
+\textbf{Petición:} Ninguno & \textbf{Respuesta:} 200 OK (\texttt{TenantResource}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{PUT} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak tenants/\allowbreak current}} \\*
+\hline
+\textbf{Petición:} \texttt{UpdateTenantProfileResource} & \textbf{Respuesta:} 200 OK (\texttt{TenantResource}) \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Controlador REST:} BranchesController} \\*
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak tenants/\allowbreak \{tenantId\}/\allowbreak branches}} \\*
+\hline
+\textbf{Petición:} \texttt{CreateBranchResource} & \textbf{Respuesta:} 201 CREATED (\texttt{BranchResource}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak tenants/\allowbreak \{tenantId\}/\allowbreak branches}} \\*
+\hline
+\textbf{Petición:} Ninguno & \textbf{Respuesta:} 200 OK (\texttt{List\textless BranchResource\textgreater}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak tenants/\allowbreak \{tenantId\}/\allowbreak branches/\allowbreak \{branchId\}}} \\*
+\hline
+\textbf{Petición:} Ninguno & \textbf{Respuesta:} 200 OK (\texttt{BranchResource}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{PUT} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak tenants/\allowbreak \{tenantId\}/\allowbreak branches/\allowbreak \{branchId\}/\allowbreak location}} \\*
+\hline
+\textbf{Petición:} \texttt{UpdateBranchLocationResource} & \textbf{Respuesta:} 200 OK (\texttt{BranchResource}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{DELETE} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak tenants/\allowbreak \{tenantId\}/\allowbreak branches/\allowbreak \{branchId\}}} \\*
+\hline
+\textbf{Petición:} Ninguno & \textbf{Respuesta:} 204 NO CONTENT \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Controlador REST:} MembershipsController} \\*
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak tenants/\allowbreak \{tenantId\}/\allowbreak memberships}} \\*
+\hline
+\textbf{Petición:} Ninguno & \textbf{Respuesta:} 200 OK (\texttt{List\textless MembershipResource\textgreater}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak tenants/\allowbreak \{tenantId\}/\allowbreak memberships/\allowbreak \{membershipId\}}} \\*
+\hline
+\textbf{Petición:} Ninguno & \textbf{Respuesta:} 200 OK (\texttt{MembershipResource}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{PUT} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak tenants/\allowbreak \{tenantId\}/\allowbreak memberships/\allowbreak \{membershipId\}/\allowbreak roles}} \\*
+\hline
+\textbf{Petición:} \texttt{AssignRolesResource} & \textbf{Respuesta:} 200 OK (\texttt{MembershipResource}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{PUT} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak tenants/\allowbreak \{tenantId\}/\allowbreak memberships/\allowbreak \{membershipId\}/\allowbreak compensation}} \\*
+\hline
+\textbf{Petición:} \texttt{UpdateCompensationResource} & \textbf{Respuesta:} 200 OK (\texttt{MembershipResource}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{DELETE} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak tenants/\allowbreak \{tenantId\}/\allowbreak memberships/\allowbreak \{membershipId\}}} \\*
+\hline
+\textbf{Petición:} Ninguno & \textbf{Respuesta:} 204 NO CONTENT \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Controlador REST:} InvitationsController} \\*
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak tenants/\allowbreak \{tenantId\}/\allowbreak invitations}} \\*
+\hline
+\textbf{Petición:} \texttt{InviteStaffResource} & \textbf{Respuesta:} 201 CREATED (\texttt{InvitationResource}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak invitations/\allowbreak \{token\}}} \\*
+\hline
+\textbf{Petición:} Parámetro en ruta (\texttt{token}) & \textbf{Respuesta:} 200 OK (\texttt{InvitationValidationResource}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak invitations/\allowbreak \{token\}/\allowbreak accept}} \\*
+\hline
+\textbf{Petición:} \texttt{AcceptInvitationResource} & \textbf{Respuesta:} 201 CREATED (\texttt{AuthenticatedUserResource}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{DELETE} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak tenants/\allowbreak \{tenantId\}/\allowbreak invitations/\allowbreak \{invitationId\}}} \\*
+\hline
+\textbf{Petición:} Ninguno & \textbf{Respuesta:} 204 NO CONTENT \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Controlador REST:} RolesController} \\*
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak tenants/\allowbreak \{tenantId\}/\allowbreak roles}} \\*
+\hline
+\textbf{Petición:} Ninguno & \textbf{Respuesta:} 200 OK (\texttt{List\textless RoleResource\textgreater}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak tenants/\allowbreak \{tenantId\}/\allowbreak roles}} \\*
+\hline
+\textbf{Petición:} \texttt{CreateRoleResource} & \textbf{Respuesta:} 201 CREATED (\texttt{RoleResource}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak permissions}} \\*
+\hline
+\textbf{Petición:} Ninguno & \textbf{Respuesta:} 200 OK (\texttt{List\textless PermissionResource\textgreater}) \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Controladores REST ubicados en com.andeva.atelier.platform.iam.interfaces.rest.controllers.
+
+En sus relaciones de colaboración, estos controladores inyectan los servicios de comando y consulta de la Capa de Aplicación, delegando de forma exclusiva la ejecución de la lógica transaccional y empleando ensambladores para desacoplar el transporte web del modelo de dominio interno.
+
+**Recursos DTO de Petición y Respuesta HTTP**
+
+Para impedir la exposición directa de las entidades de persistencia y asegurar la validación sintáctica de las peticiones en el perímetro, la capa define un catálogo de registros inmutables estructurados como objetos de transferencia de datos.
+
+Los recursos de petición se implementan como registros inmutables de Java decorados con anotaciones de Jakarta Bean Validation. Componentes como **CreateTenantResource**, **SignInResource**, **CreateBranchResource** e **InviteStaffResource** validan de forma defensiva la no nulidad de cadenas, la sintaxis de correos bajo la RFC 5322, la estructura numérica del RUC fiscal y longitudes de contraseña antes de alcanzar los servicios de aplicación.
+
+Por su parte, los recursos de respuesta encapsulan las cargas útiles entregadas a los clientes web y móviles mediante estructuras inmutables. Destacan **AuthenticatedUserResource**, portador del token Bearer JWT y autoridades de seguridad; **TenantResource** y **BranchResource**, que exponen los datos corporativos y de geocercas satelitales; y **MembershipResource**, que consolida la ficha contractual del colaborador en el taller.
+
+En la @tbl:iam-resources-dtos se especifican los atributos y restricciones de validación de estos recursos DTO.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Recursos DTO de Entrada y Salida del Bounded Context IAM \& Tenancy} \label{tbl:iam-resources-dtos} \\
+\hline
+\thfirst{Aspecto de Recurso} & \thcell{Especificación de Atributos e Integridad} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Recurso} & \thcell{Especificación de Atributos e Integridad} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} CreateTenantResource \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{name}, \texttt{legalName}, \texttt{taxId}, \texttt{adminEmail}, \texttt{adminPassword}, \texttt{adminPhone} \\*
+\hline
+\textbf{Validación de Integridad} & Anotaciones \texttt{@NotBlank}, \texttt{@Email}, \texttt{@Pattern} para RUC y \texttt{@Size(min = 8)}. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} SignInResource \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{email}, \texttt{password} \\*
+\hline
+\textbf{Validación de Integridad} & Anotaciones \texttt{@NotBlank} y \texttt{@Email}. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} GoogleSignInResource \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{idToken} \\*
+\hline
+\textbf{Validación de Integridad} & Anotación \texttt{@NotBlank}. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} VerifyEmailResource \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{token} \\*
+\hline
+\textbf{Validación de Integridad} & Anotación \texttt{@NotBlank} con patrón numérico de 6 dígitos. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} ForgotPasswordResource \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{email} \\*
+\hline
+\textbf{Validación de Integridad} & Anotaciones \texttt{@NotBlank} y \texttt{@Email}. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} ResetPasswordResource \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{token}, \texttt{newPassword} \\*
+\hline
+\textbf{Validación de Integridad} & Anotaciones \texttt{@NotBlank} y \texttt{@Size(min = 8)}. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} UpdateTenantProfileResource \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{name}, \texttt{legalName} \\*
+\hline
+\textbf{Validación de Integridad} & Anotación \texttt{@NotBlank} en ambas propiedades. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} CreateBranchResource \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{name}, \texttt{sunatCode}, \texttt{latitude}, \texttt{longitude}, \texttt{geofenceRadiusMeters} \\*
+\hline
+\textbf{Validación de Integridad} & Anotaciones \texttt{@NotBlank}, código SUNAT de 4 dígitos y radio mayor o igual a 10. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} UpdateBranchLocationResource \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{latitude}, \texttt{longitude}, \texttt{geofenceRadiusMeters} \\*
+\hline
+\textbf{Validación de Integridad} & Coordenadas no nulas y radio mayor o igual a 10 metros. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} InviteStaffResource \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{email}, \texttt{roleId} \\*
+\hline
+\textbf{Validación de Integridad} & Anotaciones \texttt{@NotBlank}, \texttt{@Email} y \texttt{@NotNull} para el rol. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} AcceptInvitationResource \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{token}, \texttt{password}, \texttt{firstName}, \texttt{lastName}, \texttt{phone} \\*
+\hline
+\textbf{Validación de Integridad} & Anotaciones \texttt{@NotBlank}, \texttt{@Size(min = 8)} y formato telefónico. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} AssignRolesResource \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{roleIds} \\*
+\hline
+\textbf{Validación de Integridad} & Anotación \texttt{@NotEmpty} para la lista de roles asignados. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} CreateRoleResource \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{name}, \texttt{description}, \texttt{permissionIds} \\*
+\hline
+\textbf{Validación de Integridad} & Anotaciones \texttt{@NotBlank} y \texttt{@NotEmpty} para el conjunto de permisos. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} UpdateCompensationResource \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{salaryType}, \texttt{baseSalary}, \texttt{currency} \\*
+\hline
+\textbf{Validación de Integridad} & Esquema salarial válido e importe numérico mayor o igual a cero. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} AuthenticatedUserResource \quad (\textit{Categoría:} Respuesta)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{userId}, \texttt{email}, \texttt{fullName}, \texttt{token}, \texttt{tokenType}, \texttt{activeTenant}, \texttt{permissions} \\*
+\hline
+\textbf{Validación de Integridad} & Serialización inmutable JSON con encabezados de autorización. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} TenantResource \quad (\textit{Categoría:} Respuesta)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{id}, \texttt{name}, \texttt{legalName}, \texttt{taxId}, \texttt{status}, \texttt{stripeCustomerId}, \texttt{createdAt} \\*
+\hline
+\textbf{Validación de Integridad} & Representación pública del taller mecánico. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} BranchResource \quad (\textit{Categoría:} Respuesta)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{id}, \texttt{tenantId}, \texttt{name}, \texttt{sunatCode}, \texttt{latitude}, \texttt{longitude}, \texttt{geofenceRadiusMeters}, \texttt{isActive} \\*
+\hline
+\textbf{Validación de Integridad} & Representación de sede física y geocerca satelital. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} MembershipResource \quad (\textit{Categoría:} Respuesta)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{id}, \texttt{tenantId}, \texttt{userId}, \texttt{employeeName}, \texttt{email}, \texttt{status}, \texttt{salaryType}, \texttt{baseSalary}, \texttt{roles} \\*
+\hline
+\textbf{Validación de Integridad} & Ficha laboral y contractual del colaborador. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} RoleResource \quad (\textit{Categoría:} Respuesta)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{id}, \texttt{name}, \texttt{description}, \texttt{isSystemRole}, \texttt{permissions} \\*
+\hline
+\textbf{Validación de Integridad} & Definición de rol y privilegios concedidos. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} PermissionResource \quad (\textit{Categoría:} Respuesta)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{id}, \texttt{name}, \texttt{description}, \texttt{resource}, \texttt{action} \\*
+\hline
+\textbf{Validación de Integridad} & Detalle atómico del permiso de seguridad. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} InvitationResource \quad (\textit{Categoría:} Respuesta)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{id}, \texttt{tenantId}, \texttt{email}, \texttt{status}, \texttt{expiresAt} \\*
+\hline
+\textbf{Validación de Integridad} & Estado y vigencia de la invitación de personal. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes ubicados en el paquete com.andeva.atelier.platform.iam.interfaces.rest.resources.
+
+**Ensambladores y Transformadores de Recursos**
+
+El desacoplamiento entre las peticiones HTTP y los casos de uso transaccionales se materializa a través de ensambladores bidireccionales. Los ensambladores de entrada, tales como **CreateTenantCommandFromResourceAssembler** y **SignInCommandFromResourceAssembler**, extraen los valores de los registros DTO y construyen los comandos inmutables correspondientes, inyectando identificadores de ruta cuando corresponde.
+
+De forma complementaria, los ensambladores de salida traducen las raíces de agregado y entidades del dominio hacia representaciones DTO públicas. Componentes como **TenantResourceFromAggregateAssembler**, **BranchResourceFromEntityAssembler** y **MembershipResourceFromAggregateAssembler** formatean los datos del negocio, mientras que **AuthenticatedUserResourceAssembler** integra el token criptográfico emitido y el catálogo de permisos concedidos.
+
+En la @tbl:iam-resource-assemblers se detallan los métodos y tipos de transformación ejecutados por estos ensambladores.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.1cm} | >{\raggedright\arraybackslash}p{10.3cm} |}
+\caption{Ensambladores de Recursos del Bounded Context IAM \& Tenancy} \label{tbl:iam-resource-assemblers} \\
+\hline
+\thfirst{Aspecto del Ensamblador} & \thcell{Firma y Transformación de Tipos} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto del Ensamblador} & \thcell{Firma y Transformación de Tipos} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} CreateTenantCommandFromResourceAssembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toCommandFromResource} \\*
+\hline
+\textbf{Transformación} & \texttt{CreateTenantResource} $\longrightarrow$ \texttt{CreateTenantCommand} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} SignInCommandFromResourceAssembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toCommandFromResource} \\*
+\hline
+\textbf{Transformación} & \texttt{SignInResource} $\longrightarrow$ \texttt{AuthenticateUserCommand} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} CreateBranchCommandFromResourceAssembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toCommandFromResource} \\*
+\hline
+\textbf{Transformación} & \texttt{CreateBranchResource,\allowbreak  UUID} $\longrightarrow$ \texttt{CreateBranchCommand} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} UpdateBranchLocationCommandFromResourceAssembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toCommandFromResource} \\*
+\hline
+\textbf{Transformación} & \texttt{UpdateBranchLocationResource,\allowbreak  UUID} $\longrightarrow$ \texttt{UpdateBranchLocationCommand} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} InviteStaffCommandFromResourceAssembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toCommandFromResource} \\*
+\hline
+\textbf{Transformación} & \texttt{InviteStaffResource,\allowbreak  UUID} $\longrightarrow$ \texttt{InviteStaffCommand} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} AcceptInvitationCommandFromResourceAssembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toCommandFromResource} \\*
+\hline
+\textbf{Transformación} & \texttt{AcceptInvitationResource} $\longrightarrow$ \texttt{AcceptInvitationCommand} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} CreateRoleCommandFromResourceAssembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toCommandFromResource} \\*
+\hline
+\textbf{Transformación} & \texttt{CreateRoleResource,\allowbreak  UUID} $\longrightarrow$ \texttt{CreateRoleCommand} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} UpdateCompensationCommandFromResourceAssembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toCommandFromResource} \\*
+\hline
+\textbf{Transformación} & \texttt{UpdateCompensationResource,\allowbreak  UUID} $\longrightarrow$ \texttt{UpdateCompensationCommand} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} TenantResourceFromAggregateAssembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toResourceFromAggregate} \\*
+\hline
+\textbf{Transformación} & \texttt{Tenant} $\longrightarrow$ \texttt{TenantResource} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} BranchResourceFromEntityAssembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toResourceFromEntity} \\*
+\hline
+\textbf{Transformación} & \texttt{Branch} $\longrightarrow$ \texttt{BranchResource} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} MembershipResourceFromAggregateAssembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toResourceFromAggregate} \\*
+\hline
+\textbf{Transformación} & \texttt{TenantMembership,\allowbreak  User} $\longrightarrow$ \texttt{MembershipResource} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} RoleResourceFromAggregateAssembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toResourceFromAggregate} \\*
+\hline
+\textbf{Transformación} & \texttt{Role} $\longrightarrow$ \texttt{RoleResource} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} PermissionResourceFromEntityAssembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toResourceFromEntity} \\*
+\hline
+\textbf{Transformación} & \texttt{Permission} $\longrightarrow$ \texttt{PermissionResource} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} InvitationResourceFromAggregateAssembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toResourceFromAggregate} \\*
+\hline
+\textbf{Transformación} & \texttt{Invitation} $\longrightarrow$ \texttt{InvitationResource} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} AuthenticatedUserResourceAssembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toResource} \\*
+\hline
+\textbf{Transformación} & \texttt{User,\allowbreak  Tenant,\allowbreak  String,\allowbreak  List<\allowbreak String>\allowbreak } $\longrightarrow$ \texttt{AuthenticatedUserResource} \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Clases ubicadas bajo el paquete com.andeva.atelier.platform.iam.interfaces.rest.transform.
+
+**Fachada de Contexto Abierto (Open Host Service / Inbound ACL)**
+
+Para preservar la pureza del modelo de dominio de IAM y evitar acoplamientos circulares con otros bounded contexts de la plataforma, la capa de interfaz implementa el patrón Open Host Service complementado con una Capa Anticorrupción de entrada.
+
+Este patrón se materializa en la interfaz **TenancyContextFacade**, ubicada en el paquete canónico **com.andeva.atelier.platform.iam.interfaces.acl**. Esta fachada define contratos públicos en memoria para que módulos consumidores como MRO, CRM, Facturación y Recursos Humanos consulten datos de talleres, validen la vigencia de membresías de mecánicos o evalúen la proximidad de coordenadas GPS respecto a la geocerca de una sede física mediante la formulación del Haversine sin acceder a entidades JPA.
+
+La implementación **TenancyContextFacadeImpl** delega estas consultas en los servicios de aplicación de IAM y transforma los resultados en registros inmutables de frontera, tales como **TenantAclDto**, **BranchAclDto**, **UserAclDto** y **BranchGeofenceAclDto**, asegurando un aislamiento total entre contextos.
+
+En la @tbl:iam-tenancy-facade se especifican los métodos y tipos de la fachada de contexto abierto.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Métodos de la Fachada de Contexto Abierto TenancyContextFacade} \label{tbl:iam-tenancy-facade} \\
+\hline
+\thfirst{Aspecto del Contrato} & \thcell{Firma, Retorno y Consumidores} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto del Contrato} & \thcell{Firma, Retorno y Consumidores} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método de Fachada:} \texttt{fetchTenantById}} \\*
+\hline
+\textbf{Parámetros y Retorno} & \texttt{UUID tenantId} $\longrightarrow$ \texttt{Optional<\allowbreak TenantAclDto>\allowbreak } \\*
+\hline
+\textbf{Módulos Consumidores} & Invoicing, Billing, MRO \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método de Fachada:} \texttt{fetchBranchById}} \\*
+\hline
+\textbf{Parámetros y Retorno} & \texttt{UUID branchId} $\longrightarrow$ \texttt{Optional<\allowbreak BranchAclDto>\allowbreak } \\*
+\hline
+\textbf{Módulos Consumidores} & Workshop Operations (MRO), Inventory \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método de Fachada:} \texttt{fetchUserById}} \\*
+\hline
+\textbf{Parámetros y Retorno} & \texttt{UUID userId} $\longrightarrow$ \texttt{Optional<\allowbreak UserAclDto>\allowbreak } \\*
+\hline
+\textbf{Módulos Consumidores} & CRM, Human Resources, Notifications \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método de Fachada:} \texttt{validateTenantMembership}} \\*
+\hline
+\textbf{Parámetros y Retorno} & \texttt{UUID tenantId,\allowbreak  UUID userId} $\longrightarrow$ \texttt{boolean} \\*
+\hline
+\textbf{Módulos Consumidores} & Human Resources, MRO, Inventory \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método de Fachada:} \texttt{fetchUserPermissionsInTenant}} \\*
+\hline
+\textbf{Parámetros y Retorno} & \texttt{UUID tenantId,\allowbreak  UUID userId} $\longrightarrow$ \texttt{List<\allowbreak String>\allowbreak } \\*
+\hline
+\textbf{Módulos Consumidores} & Security Filter, MRO, Human Resources \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método de Fachada:} \texttt{fetchBranchGeofence}} \\*
+\hline
+\textbf{Parámetros y Retorno} & \texttt{UUID branchId} $\longrightarrow$ \texttt{Optional<\allowbreak BranchGeofenceAclDto>\allowbreak } \\*
+\hline
+\textbf{Módulos Consumidores} & Human Resources (Marcación de asistencia) \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método de Fachada:} \texttt{isPointWithinBranchGeofence}} \\*
+\hline
+\textbf{Parámetros y Retorno} & \texttt{UUID branchId,\allowbreak  Double lat,\allowbreak  Double lng} $\longrightarrow$ \texttt{boolean} \\*
+\hline
+\textbf{Módulos Consumidores} & Human Resources (Control presencial móvil) \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes pertenecientes al paquete com.andeva.atelier.platform.iam.interfaces.acl.
+
+**Eventos de Integración (Published Language)**
+
+Para la sincronización asíncrona intermodular sin incurrir en consistencia transaccional inmediata ni bloqueos de concurrencia, el Bounded Context IAM define un lenguaje publicado compuesto por cinco eventos de integración inmutables.
+
+Dichos eventos notifican hitos relevantes del ciclo de vida: **TenantCreatedIntegrationEvent** y **BranchCreatedIntegrationEvent** permiten a Facturación, Suscripciones y Operaciones inicializar catálogos y bahías; **UserRegisteredIntegrationEvent** sincroniza fichas vehiculares en CRM; y **TenantMembershipCreatedIntegrationEvent** apertura el legajo laboral en Recursos Humanos para el control de asistencia presencial.
+
+En la @tbl:iam-integration-events se sintetiza la estructura de estos eventos de integración.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Eventos de Integración del Bounded Context IAM \& Tenancy} \label{tbl:iam-integration-events} \\
+\hline
+\thfirst{Aspecto de Integración} & \thcell{Carga Útil y Sincronización Intermodular} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Integración} & \thcell{Carga Útil y Sincronización Intermodular} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Integración:} TenantCreatedIntegrationEvent} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{tenantId}, \texttt{name}, \texttt{legalName}, \texttt{taxId}, \texttt{occurredOn} \\*
+\hline
+\textbf{Módulos Receptores} & Billing, Invoicing \\*
+\hline
+\textbf{Propósito} & Provisión de cuenta SaaS e inicialización de configuración fiscal. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Integración:} BranchCreatedIntegrationEvent} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{branchId}, \texttt{tenantId}, \texttt{name}, \texttt{sunatCode}, \texttt{lat}, \texttt{lng}, \texttt{radius} \\*
+\hline
+\textbf{Módulos Receptores} & MRO, Human Resources \\*
+\hline
+\textbf{Propósito} & Habilitación de bahías operativas y turnos presenciales de trabajo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Integración:} UserRegisteredIntegrationEvent} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{userId}, \texttt{email}, \texttt{fullName}, \texttt{occurredOn} \\*
+\hline
+\textbf{Módulos Receptores} & CRM \\*
+\hline
+\textbf{Propósito} & Alta automática del perfil de cliente para conductores particulares. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Integración:} TenantMembershipCreatedIntegrationEvent} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{membershipId}, \texttt{tenantId}, \texttt{userId}, \texttt{roleNames}, \texttt{occurredOn} \\*
+\hline
+\textbf{Módulos Receptores} & Human Resources \\*
+\hline
+\textbf{Propósito} & Apertura del legajo laboral del mecánico y control de asistencia. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Integración:} StaffInvitedIntegrationEvent} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{invitationId}, \texttt{tenantId}, \texttt{email}, \texttt{occurredOn} \\*
+\hline
+\textbf{Módulos Receptores} & Auditoría de Seguridad \\*
+\hline
+\textbf{Propósito} & Trazabilidad del flujo de incorporación y bienvenida de personal. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Registros inmutables pertenecientes al paquete com.andeva.atelier.platform.iam.interfaces.events.
+
+**Filtros Perimetrales de Seguridad y Validación Multi-Tenant**
+
+La protección perimetral del ecosistema Atelier se ejecuta antes de que las solicitudes alcancen los controladores web, gobernada por dos filtros de seguridad especializados.
+
+El componente **BearerAuthorizationRequestFilter** extiende de `OncePerRequestFilter` y valida criptográficamente los tokens JWT mediante la biblioteca Jjwt. Al verificar la firma, extrae los identificadores de usuario, taller, sucursal y la lista de autoridades concedidas, inyectando la autenticación en el **SecurityContextHolder** para posibilitar autorizaciones en memoria con coste temporal constante.
+
+Por su parte, el filtro **TenantContextResolver** comprueba que el identificador de taller especificado en rutas relativas de tipo `/api/v1/tenants/{tenantId}/**` concuerde estrictamente con el inquilino activo autenticado en el token JWT. Esta validación perimetral neutraliza de forma preventiva ataques de escalamiento horizontal entre talleres mecánicos independientes.
+
+En la @tbl:iam-security-filters se especifican los métodos y reglas de estos componentes perimetrales de seguridad.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Filtros Perimetrales de Seguridad de IAM \& Tenancy} \label{tbl:iam-security-filters} \\
+\hline
+\thfirst{Aspecto del Filtro} & \thcell{Especificación Técnica y Responsabilidad} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto del Filtro} & \thcell{Especificación Técnica y Responsabilidad} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Filtro Perimetral:} BearerAuthorizationRequestFilter \quad (\textit{Tipo:} OncePerRequestFilter)} \\*
+\hline
+\textbf{Orden de Ejecución} & Filtro de Seguridad perimetral \\*
+\hline
+\textbf{Responsabilidad} & Valida firma JWT, extrae claims de tenencia y pobla el SecurityContext. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Filtro Perimetral:} TenantContextResolver \quad (\textit{Tipo:} OncePerRequestFilter)} \\*
+\hline
+\textbf{Orden de Ejecución} & Previo a controladores REST \\*
+\hline
+\textbf{Responsabilidad} & Verifica coincidencia entre tenantId de ruta y taller autenticado en JWT. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes pertenecientes al paquete com.andeva.atelier.platform.iam.interfaces.rest.filters.
 
 #### 2.6.2.3. Application Layer
 
+La capa de aplicación del Bounded Context de Identity and Access Management (IAM) &
+Tenancy orquesta los casos de uso transaccionales de alta empresarial, autenticación y
+credenciales, administración de sedes físicas, membresías de personal, invitaciones y
+roles de seguridad en la plataforma Atelier.
 
+Ubicada en el paquete canónico com.andeva.atelier.platform.iam.application, su concepción
+arquitectónica implementa una separación rigurosa bajo el patrón CQRS, desacoplando los
+flujos mutacionales de escritura de las proyecciones de solo lectura a través de cuatro
+directrices esenciales de diseño:
+
+- **Orquestación Transaccional Atómica:** Delimitación de fronteras de consistencia
+mediante la anotación de servicio transaccional con nivel de aislamiento de lectura
+confirmada. Esta estrategia asegura atomicidad estricta en operaciones multiorigen
+complejas que integran el aprovisionamiento coordinado de taller, sucursal inicial, cuenta
+administradora y membresía de empleo.
+
+- **Flujo Determinista sin Excepciones:** Adopción del tipo de resultado sellado
+**Result<T, ApplicationError>** para gobernar las respuestas de los casos de uso. Las
+condiciones de fallo previsibles vinculadas a colisiones de identificador tributario o
+credenciales inválidas se tratan como valores inmutables de retorno, imponiendo
+verificación exhaustiva mediante coincidencia de patrones.
+
+- **Coreografía de Eventos de Dominio e Integración:** Manejo dual de eventos mediante
+oyentes locales para tareas accesorias sincrónicas y oyentes posteriores a la confirmación
+transaccional para la propagación de eventos de integración hacia el Transactional Outbox,
+evitando inconsistencias entre la base de datos y la mensajería asíncrona.
+
+- **Inversión de Dependencias y Aislamiento Perimetral:** Abstracción de servicios de
+infraestructura externos mediante puertos de salida específicos para mensajería
+transaccional vía HTTPS, validación de identidades federadas, derivación criptográfica de
+contraseñas y emisión de tokens de seguridad enriquecidos.
+
+A fin de ofrecer una visión sistemática de estos componentes, en la
+@tbl:iam-application-types se presenta el catálogo consolidado de las clases, interfaces y
+registros que estructuran la Capa de Aplicación de IAM & Tenancy.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Catálogo Consolidado de la Capa de Aplicación de IAM \& Tenancy} \label{tbl:iam-application-types} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\
+\hline
+\endhead
+TenantCommandService & Contrato de casos de uso de escritura para talleres y sedes. \\*
+\hline
+\textbf{Categoría} & Servicio de Comando \\*
+\hline
+\textbf{Relaciones} & Implementado por TenantCommandServiceImpl. \\*
+\hline
+\textbf{Paquete} & \texttt{...application.services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+TenantCommandServiceImpl & Orquesta la creación atómica de empresas, sedes iniciales y perfiles. \\*
+\hline
+\textbf{Categoría} & Implementación de Comando \\*
+\hline
+\textbf{Relaciones} & Coordina agregados Tenant y User con persistencia ACID. \\*
+\hline
+\textbf{Paquete} & \texttt{...application.services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+UserCommandService & Contrato de casos de uso para autenticación, registro y contraseñas. \\*
+\hline
+\textbf{Categoría} & Servicio de Comando \\*
+\hline
+\textbf{Relaciones} & Implementado por UserCommandServiceImpl. \\*
+\hline
+\textbf{Paquete} & \texttt{...application.services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+UserCommandServiceImpl & Ejecuta validación de credenciales, derivación criptográfica y tokens. \\*
+\hline
+\textbf{Categoría} & Implementación de Comando \\*
+\hline
+\textbf{Relaciones} & Utiliza BCryptHashingService y BearerTokenService. \\*
+\hline
+\textbf{Paquete} & \texttt{...application.services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+BranchCommandService & Contrato para incorporación y actualización de sedes físicas. \\*
+\hline
+\textbf{Categoría} & Servicio de Comando \\*
+\hline
+\textbf{Relaciones} & Implementado por BranchCommandServiceImpl. \\*
+\hline
+\textbf{Paquete} & \texttt{...application.services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+BranchCommandServiceImpl & Gestiona geocercas satelitales y códigos anexos de sucursales. \\*
+\hline
+\textbf{Categoría} & Implementación de Comando \\*
+\hline
+\textbf{Relaciones} & Modifica la colección interna de sedes en Tenant. \\*
+\hline
+\textbf{Paquete} & \texttt{...application.services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+MembershipCommandService & Contrato para gestión laboral y esquemas remunerativos. \\*
+\hline
+\textbf{Categoría} & Servicio de Comando \\*
+\hline
+\textbf{Relaciones} & Implementado por MembershipCommandServiceImpl. \\*
+\hline
+\textbf{Paquete} & \texttt{...application.services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+MembershipCommandServiceImpl & Actualiza roles y condiciones contractuales de colaboradores. \\*
+\hline
+\textbf{Categoría} & Implementación de Comando \\*
+\hline
+\textbf{Relaciones} & Coordina agregados TenantMembership y Role. \\*
+\hline
+\textbf{Paquete} & \texttt{...application.services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+InvitationCommandService & Contrato de onboarding y bienvenida de nuevos colaboradores. \\*
+\hline
+\textbf{Categoría} & Servicio de Comando \\*
+\hline
+\textbf{Relaciones} & Implementado por InvitationCommandServiceImpl. \\*
+\hline
+\textbf{Paquete} & \texttt{...application.services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+InvitationCommandServiceImpl & Emite y valida tokens de invitación despachados por correo. \\*
+\hline
+\textbf{Categoría} & Implementación de Comando \\*
+\hline
+\textbf{Relaciones} & Interactúa con ResendEmailService y emite eventos. \\*
+\hline
+\textbf{Paquete} & \texttt{...application.services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+RoleCommandService & Contrato para administración de roles y privilegios RBAC. \\*
+\hline
+\textbf{Categoría} & Servicio de Comando \\*
+\hline
+\textbf{Relaciones} & Implementado por RoleCommandServiceImpl. \\*
+\hline
+\textbf{Paquete} & \texttt{...application.services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+RoleCommandServiceImpl & Configura roles por taller y realiza el semillero inicial del sistema. \\*
+\hline
+\textbf{Categoría} & Implementación de Comando \\*
+\hline
+\textbf{Relaciones} & Administra entidades Role y Permission. \\*
+\hline
+\textbf{Paquete} & \texttt{...application.services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+TenantQueryService & Contrato de recuperación de datos de talleres mecánicos. \\*
+\hline
+\textbf{Categoría} & Servicio de Consulta \\*
+\hline
+\textbf{Relaciones} & Implementado por TenantQueryServiceImpl. \\*
+\hline
+\textbf{Paquete} & \texttt{...application.services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+TenantQueryServiceImpl & Consultas de lectura optimizada de empresas y razones sociales. \\*
+\hline
+\textbf{Categoría} & Implementación de Consulta \\*
+\hline
+\textbf{Relaciones} & Accede a TenantRepository en modo de solo lectura. \\*
+\hline
+\textbf{Paquete} & \texttt{...application.services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+UserQueryService & Contrato de búsqueda y proyección de cuentas de usuario. \\*
+\hline
+\textbf{Categoría} & Servicio de Consulta \\*
+\hline
+\textbf{Relaciones} & Implementado por UserQueryServiceImpl. \\*
+\hline
+\textbf{Paquete} & \texttt{...application.services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+UserQueryServiceImpl & Consultas de identidad por identificador único o correo canónico. \\*
+\hline
+\textbf{Categoría} & Implementación de Consulta \\*
+\hline
+\textbf{Relaciones} & Accede a UserRepository en modo de solo lectura. \\*
+\hline
+\textbf{Paquete} & \texttt{...application.services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+BranchQueryService & Contrato de consulta de sucursales y geocercas activas. \\*
+\hline
+\textbf{Categoría} & Servicio de Consulta \\*
+\hline
+\textbf{Relaciones} & Implementado por BranchQueryServiceImpl. \\*
+\hline
+\textbf{Paquete} & \texttt{...application.services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+BranchQueryServiceImpl & Recupera listados y detalles de sedes físicas por taller. \\*
+\hline
+\textbf{Categoría} & Implementación de Consulta \\*
+\hline
+\textbf{Relaciones} & Accede a BranchRepository en modo de solo lectura. \\*
+\hline
+\textbf{Paquete} & \texttt{...application.services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+MembershipQueryService & Contrato de lectura de contratos y personal del taller. \\*
+\hline
+\textbf{Categoría} & Servicio de Consulta \\*
+\hline
+\textbf{Relaciones} & Implementado por MembershipQueryServiceImpl. \\*
+\hline
+\textbf{Paquete} & \texttt{...application.services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+MembershipQueryServiceImpl & Proyecta listas de colaboradores, roles asignados y compensación. \\*
+\hline
+\textbf{Categoría} & Implementación de Consulta \\*
+\hline
+\textbf{Relaciones} & Accede a TenantMembershipRepository de solo lectura. \\*
+\hline
+\textbf{Paquete} & \texttt{...application.services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+RoleQueryService & Contrato de consulta de catálogo de roles y permisos. \\*
+\hline
+\textbf{Categoría} & Servicio de Consulta \\*
+\hline
+\textbf{Relaciones} & Implementado por RoleQueryServiceImpl. \\*
+\hline
+\textbf{Paquete} & \texttt{...application.services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+RoleQueryServiceImpl & Consulta roles configurados y catálogo transversal de permisos. \\*
+\hline
+\textbf{Categoría} & Implementación de Consulta \\*
+\hline
+\textbf{Relaciones} & Accede a RoleRepository y PermissionRepository. \\*
+\hline
+\textbf{Paquete} & \texttt{...application.services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+InvitationQueryService & Contrato de verificación de tokens y solicitudes de onboarding. \\*
+\hline
+\textbf{Categoría} & Servicio de Consulta \\*
+\hline
+\textbf{Relaciones} & Implementado por InvitationQueryServiceImpl. \\*
+\hline
+\textbf{Paquete} & \texttt{...application.services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+InvitationQueryServiceImpl & Comprueba vigencia y datos de invitaciones emitidas. \\*
+\hline
+\textbf{Categoría} & Implementación de Consulta \\*
+\hline
+\textbf{Relaciones} & Accede a InvitationRepository en modo de solo lectura. \\*
+\hline
+\textbf{Paquete} & \texttt{...application.services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+UserDomainEventsHandler & Suscriptor en memoria de eventos emitidos por usuarios. \\*
+\hline
+\textbf{Categoría} & Manejador de Eventos \\*
+\hline
+\textbf{Relaciones} & Despacha notificaciones de correo mediante Resend. \\*
+\hline
+\textbf{Paquete} & \texttt{...application.events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+TenantDomainEventsHandler & Suscriptor de ciclo de vida corporativo y publicación Outbox. \\*
+\hline
+\textbf{Categoría} & Manejador de Eventos \\*
+\hline
+\textbf{Relaciones} & Transforma eventos locales a eventos de integración. \\*
+\hline
+\textbf{Paquete} & \texttt{...application.events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+ResendEmailService & Interfaz para el despacho transaccional de correos vía REST HTTPS. \\*
+\hline
+\textbf{Categoría} & Puerto de Salida \\*
+\hline
+\textbf{Relaciones} & Implementado en la Capa de Infraestructura. \\*
+\hline
+\textbf{Paquete} & \texttt{...application.acl} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+GoogleIdentityGateway & Interfaz para validación de firmas de identidad federada OAuth2. \\*
+\hline
+\textbf{Categoría} & Puerto de Salida \\*
+\hline
+\textbf{Relaciones} & Consumido por casos de uso de inicio de sesión social. \\*
+\hline
+\textbf{Paquete} & \texttt{...application.acl} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+BearerTokenService & Interfaz para generación y extracción de tokens JWT enriquecidos. \\*
+\hline
+\textbf{Categoría} & Servicio de Seguridad \\*
+\hline
+\textbf{Relaciones} & Inyecta identificadores de tenencia y autoridades. \\*
+\hline
+\textbf{Paquete} & \texttt{...application.acl} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+BCryptHashingService & Interfaz para derivación y confrontación segura de contraseñas. \\*
+\hline
+\textbf{Categoría} & Servicio Criptográfico \\*
+\hline
+\textbf{Relaciones} & Aplica funciones criptográficas de derivación de claves. \\*
+\hline
+\textbf{Paquete} & \texttt{...application.acl} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+AuthenticatedUser & Registro inmutable de sesión que agrupa usuario, token y permisos. \\*
+\hline
+\textbf{Categoría} & Modelo de Sesión \\*
+\hline
+\textbf{Relaciones} & Entregado como resultado exitoso de autenticación. \\*
+\hline
+\textbf{Paquete} & \texttt{...application.model} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+GoogleUserPayload & Registro con datos biográficos extraídos de credenciales federadas. \\*
+\hline
+\textbf{Categoría} & Modelo de Identidad \\*
+\hline
+\textbf{Relaciones} & Utilizado en aprovisionamiento de cuentas federadas. \\*
+\hline
+\textbf{Paquete} & \texttt{...application.model} \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes implementados en Java 26 bajo el paquete canónico com.andeva.atelier.platform.iam.application.
+
+**Servicios de Comandos y Orquestación Transaccional**
+
+Los flujos de modificación de estado se implementan mediante servicios orquestadores
+decorados con anotaciones transaccionales que delimitan el alcance de persistencia y
+garantizan el cumplimiento de invariantes de negocio en el modelo.
+
+El servicio **TenantCommandServiceImpl** centraliza el caso de uso de alta integral de
+talleres mecánicos. Al procesar el comando **CreateTenantCommand**, el orquestador valida
+la disponibilidad del Registro Único de Contribuyentes y del correo electrónico antes de
+instanciar entidades en el dominio automotriz.
+
+Posteriormente, cifra la contraseña administrativa mediante **BCryptHashingService**,
+instancia la raíz de agregado **User** junto a su entidad **Profile**, construye el
+agregado **Tenant** asociando su sede principal inicial con código de anexo tributario
+SUNAT y genera la membresía laboral vinculante con el rol de administración de taller.
+
+De manera análoga, **BranchCommandServiceImpl** coordina la incorporación de sedes
+operativas mediante **CreateBranchCommand**, asegurando que las coordenadas geográficas
+WGS84 y el radio de cobertura satelital satisfagan las reglas de proximidad antes de mutar
+la colección interna de sucursales del taller mecánico.
+
+En el ámbito de la identidad, **UserCommandServiceImpl** gestiona el ciclo de vida de
+credenciales. Administra el registro de usuarios con despacho de códigos de un solo uso,
+la autenticación local validando resúmenes criptográficos y el inicio de sesión federado
+mediante el componente **GoogleIdentityGateway**.
+
+Asimismo, orquesta la emisión de tokens enriquecidos con tenencia y permisos, la
+confirmación de correos electrónicos y la renovación de contraseñas. Por su parte,
+**MembershipCommandServiceImpl** e **InvitationCommandServiceImpl** regulan el vínculo
+contractual de los colaboradores del taller mecánico.
+
+Dichos servicios gobiernan la asignación de roles de seguridad, la actualización de
+esquemas de remuneración fija o por horas y la emisión de invitaciones tokenizadas con
+plazo de expiración de siete días. Finalmente, **RoleCommandServiceImpl** respalda la
+creación de roles personalizados y ejecuta la inicialización canónica de permisos.
+
+Para sintetizar los flujos mutacionales, en la @tbl:iam-command-services se detallan las
+operaciones, comandos de entrada, invariantes de consistencia transaccional y tipos de
+retorno de los servicios de comandos.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Operaciones Transaccionales de los Servicios de Comandos de IAM \& Tenancy} \label{tbl:iam-command-services} \\
+\hline
+\thfirst{Aspecto de Operación} & \thcell{Especificación de Orquestación y Consistencia} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Operación} & \thcell{Especificación de Orquestación y Consistencia} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} TenantCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{CreateTenantCommand} $\longrightarrow$ \texttt{Result<\allowbreak Tenant,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Valida RUC y email únicos. crea User, Tenant, Sede 0000 y asigna rol de taller. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} TenantCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{UpdateTenantProfileCommand} $\longrightarrow$ \texttt{Result<\allowbreak Tenant,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Verifica existencia del taller. actualiza razón social y nombre comercial. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} TenantCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{SuspendTenantCommand} $\longrightarrow$ \texttt{Result<\allowbreak Tenant,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Transiciona estado a suspendido e inhabilita acceso a colaboradores. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} BranchCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{CreateBranchCommand} $\longrightarrow$ \texttt{Result<\allowbreak Branch,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Valida código SUNAT no repetido. agrega sede con geocerca satelital. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} BranchCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{UpdateBranchLocationCommand} $\longrightarrow$ \texttt{Result<\allowbreak Branch,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Actualiza coordenadas WGS84 y radio en metros para el control de asistencia. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} UserCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{RegisterUserCommand} $\longrightarrow$ \texttt{Result<\allowbreak User,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Valida correo disponible. emite token OTP numérico de seis dígitos. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} UserCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{AuthenticateUserCommand} $\longrightarrow$ \texttt{Result<\allowbreak AuthenticatedUser,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Valida hash BCrypt. resuelve tenencia activa y genera token Bearer JWT. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} UserCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{AuthenticateWithGoogleCommand} $\longrightarrow$ \texttt{Result<\allowbreak AuthenticatedUser,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Valida firma del token con Google. aprovisiona cuenta si es nueva y emite JWT. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} UserCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{VerifyEmailTokenCommand} $\longrightarrow$ \texttt{Result<\allowbreak Void,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Valida código OTP vigente. transiciona estado de cuenta a verificado. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} UserCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{RequestPasswordResetCommand} $\longrightarrow$ \texttt{Result<\allowbreak Void,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Genera token criptográfico de reseteo con caducidad de dos horas. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} UserCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{ResetPasswordCommand} $\longrightarrow$ \texttt{Result<\allowbreak Void,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Valida token de reseteo. actualiza el resumen criptográfico de clave. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} MembershipCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{AssignRoleToMembershipCommand} $\longrightarrow$ \texttt{Result<\allowbreak TenantMembership,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Verifica pertenencia de roles al taller. garantiza al menos un rol asignado. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} MembershipCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{UpdateMembershipCompensationCommand} $\longrightarrow$ \texttt{Result<\allowbreak TenantMembership,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Valida importe mayor o igual a cero. actualiza esquema salarial fijo o por hora. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} InvitationCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{InviteStaffCommand} $\longrightarrow$ \texttt{Result<\allowbreak Invitation,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Comprueba ausencia de invitación pendiente. genera token URL de siete días. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} InvitationCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{AcceptInvitationCommand} $\longrightarrow$ \texttt{Result<\allowbreak AuthenticatedUser,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Valida token vigente. crea cuenta User, membresía en taller y sesión JWT. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} RoleCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{CreateCustomRoleCommand} $\longrightarrow$ \texttt{Result<\allowbreak Role,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Valida unicidad de nombre en el taller. enlaza permisos del catálogo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} RoleCommandService \quad (\texttt{seedDefaultRolesAndPermissions})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{Ninguno} $\longrightarrow$ \texttt{void} \\*
+\hline
+\textbf{Reglas de Consistencia} & Inicializa roles canónicos globales y matriz de privilegios en el arranque. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes ubicados en el paquete com.andeva.atelier.platform.iam.application.services.
+
+**Servicios de Consulta y Proyección de Datos**
+
+Las operaciones de recuperación de información se estructuran mediante servicios de
+consulta especializados anotados con transaccionalidad de solo lectura, permitiendo a la
+infraestructura relacional omitir la gestión de instantáneas de detección de cambios.
+
+Los seis servicios de consulta abarcan la totalidad de requerimientos del contexto:
+**TenantQueryServiceImpl** recupera fichas corporativas por identificador o RUC;
+**UserQueryServiceImpl** provee consultas demográficas y de credenciales; mientras que
+**BranchQueryServiceImpl** lista las sedes físicas y geocercas satelitales.
+
+De forma complementaria, **MembershipQueryServiceImpl** consolida el legajo de personal y
+esquemas remunerativos; **RoleQueryServiceImpl** expone la matriz de privilegios de
+seguridad; e **InvitationQueryServiceImpl** valida la vigencia de solicitudes de
+onboarding previas a la visualización del formulario web de registro.
+
+Con el propósito de ilustrar las vías de recuperación de datos, en la
+@tbl:iam-query-services se presentan los métodos, parámetros de consulta y tipos
+proyectados por los servicios de consulta.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Métodos de Consulta de la Capa de Aplicación de IAM \& Tenancy} \label{tbl:iam-query-services} \\
+\hline
+\thfirst{Aspecto de Consulta} & \thcell{Especificación Técnica y Recuperación} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Consulta} & \thcell{Especificación Técnica y Recuperación} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} TenantQueryService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Parámetro y Proyección} & \texttt{GetTenantByIdQuery} $\longrightarrow$ \texttt{Optional<\allowbreak Tenant>\allowbreak } \\*
+\hline
+\textbf{Propósito de Consulta} & Consulta de ficha de taller mecánico por identificador universal. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} TenantQueryService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Parámetro y Proyección} & \texttt{GetTenantByTaxIdQuery} $\longrightarrow$ \texttt{Optional<\allowbreak Tenant>\allowbreak } \\*
+\hline
+\textbf{Propósito de Consulta} & Verificación previa de RUC tributario ante registros de empresas. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} UserQueryService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Parámetro y Proyección} & \texttt{GetUserByIdQuery} $\longrightarrow$ \texttt{Optional<\allowbreak User>\allowbreak } \\*
+\hline
+\textbf{Propósito de Consulta} & Proyección de datos biográficos y estado de cuenta de usuario. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} UserQueryService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Parámetro y Proyección} & \texttt{GetUserByEmailQuery} $\longrightarrow$ \texttt{Optional<\allowbreak User>\allowbreak } \\*
+\hline
+\textbf{Propósito de Consulta} & Búsqueda canónica de usuario para validación de acceso. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} BranchQueryService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Parámetro y Proyección} & \texttt{GetBranchByIdQuery} $\longrightarrow$ \texttt{Optional<\allowbreak Branch>\allowbreak } \\*
+\hline
+\textbf{Propósito de Consulta} & Detalle operativo y límites satelitales de una sede específica. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} BranchQueryService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Parámetro y Proyección} & \texttt{GetBranchesByTenantIdQuery} $\longrightarrow$ \texttt{List<\allowbreak Branch>\allowbreak } \\*
+\hline
+\textbf{Propósito de Consulta} & Listado completo de sedes físicas administradas por el taller. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} MembershipQueryService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Parámetro y Proyección} & \texttt{GetMembershipByIdQuery} $\longrightarrow$ \texttt{Optional<\allowbreak TenantMembership>\allowbreak } \\*
+\hline
+\textbf{Propósito de Consulta} & Ficha contractual individual del colaborador en el taller. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} MembershipQueryService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Parámetro y Proyección} & \texttt{GetMembershipsByTenantIdQuery} $\longrightarrow$ \texttt{List<\allowbreak TenantMembership>\allowbreak } \\*
+\hline
+\textbf{Propósito de Consulta} & Nómina completa del personal laboral asignado a la empresa. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} MembershipQueryService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Parámetro y Proyección} & \texttt{GetMembershipByTenantAndUserQuery} $\longrightarrow$ \texttt{Optional<\allowbreak TenantMembership>\allowbreak } \\*
+\hline
+\textbf{Propósito de Consulta} & Resolución de afiliación activa para autorización perimetral. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} RoleQueryService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Parámetro y Proyección} & \texttt{GetRolesByTenantIdQuery} $\longrightarrow$ \texttt{List<\allowbreak Role>\allowbreak } \\*
+\hline
+\textbf{Propósito de Consulta} & Catálogo de roles configurados para el esquema RBAC del taller. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} RoleQueryService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Parámetro y Proyección} & \texttt{GetAllPermissionsQuery} $\longrightarrow$ \texttt{List<\allowbreak Permission>\allowbreak } \\*
+\hline
+\textbf{Propósito de Consulta} & Listado transversal de privilegios del sistema para asignación. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} InvitationQueryService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Parámetro y Proyección} & \texttt{GetInvitationByTokenQuery} $\longrightarrow$ \texttt{Optional<\allowbreak Invitation>\allowbreak } \\*
+\hline
+\textbf{Propósito de Consulta} & Validación de vigencia de token de onboarding para registro web. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Métodos configurados con transaccionalidad de solo lectura en el paquete com.andeva.atelier.platform.iam.application.services.
+
+**Manejadores de Eventos de Dominio y Publicación Asíncrona**
+
+El desacoplamiento entre casos de uso mutacionales y sus efectos secundarios se articula a
+través de dos manejadores de eventos especializados en memoria que responden a las
+mutaciones confirmadas de las entidades del dominio.
+
+La clase **UserDomainEventsHandler** captura los eventos de identidad mediante oyentes de
+eventos convencionales. Cuando se emite **VerificationTokenIssuedEvent**, extrae el código
+numérico y activa el puerto de correo transaccional para remitir la clave de un solo uso
+con plantilla estructurada.
+
+Ante la captura de **PasswordResetRequestedEvent**, despacha la notificación con el enlace
+seguro de restablecimiento de credenciales hacia la interfaz web. Por su parte,
+**TenantDomainEventsHandler** combina oyentes estándar con oyentes condicionados a la
+confirmación exitosa de la transacción en la base de datos.
+
+Mientras que los avisos de invitación a colaboradores (**StaffInvitedEvent**) se remiten
+de forma sincrónica, eventos corporativos como **TenantRegisteredEvent**,
+**BranchCreatedEvent** y **TenantMembershipCreatedEvent** se capturan tras la confirmación
+para construir y publicar los eventos de integración hacia el Transactional Outbox.
+
+A fin de resumir la arquitectura de eventos, en la @tbl:iam-event-handlers se especifican
+las responsabilidades, fases transaccionales y destinos de los manejadores de eventos de
+la capa.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Manejadores de Eventos de Dominio de IAM \& Tenancy} \label{tbl:iam-event-handlers} \\
+\hline
+\thfirst{Aspecto del Manejador} & \thcell{Orquestación y Efecto Colateral} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto del Manejador} & \thcell{Orquestación y Efecto Colateral} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Manejador:} UserDomainEventsHandler} \\*
+\hline
+\textbf{Evento Capturado} & \texttt{VerificationTokenIssuedEvent} \quad (\textit{Fase:} Inmediata) \\*
+\hline
+\textbf{Acción Orquestada} & Despacha correo electrónico transaccional con plantilla HTML y OTP. \\*
+\hline
+\textbf{Destino del Efecto} & Resend REST Client (Puerto 443) \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Manejador:} UserDomainEventsHandler} \\*
+\hline
+\textbf{Evento Capturado} & \texttt{PasswordResetRequestedEvent} \quad (\textit{Fase:} Inmediata) \\*
+\hline
+\textbf{Acción Orquestada} & Remite enlace web con token criptográfico de actualización de clave. \\*
+\hline
+\textbf{Destino del Efecto} & Resend REST Client (Puerto 443) \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Manejador:} TenantDomainEventsHandler} \\*
+\hline
+\textbf{Evento Capturado} & \texttt{StaffInvitedEvent} \quad (\textit{Fase:} Inmediata) \\*
+\hline
+\textbf{Acción Orquestada} & Envía invitación de empleo con enlace de aceptación al taller. \\*
+\hline
+\textbf{Destino del Efecto} & Resend REST Client (Puerto 443) \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Manejador:} TenantDomainEventsHandler} \\*
+\hline
+\textbf{Evento Capturado} & \texttt{TenantRegisteredEvent} \quad (\textit{Fase:} Posterior a confirmación) \\*
+\hline
+\textbf{Acción Orquestada} & Traduce y publica TenantCreatedIntegrationEvent para suscripciones. \\*
+\hline
+\textbf{Destino del Efecto} & Transactional Outbox / Event Bus \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Manejador:} TenantDomainEventsHandler} \\*
+\hline
+\textbf{Evento Capturado} & \texttt{BranchCreatedEvent} \quad (\textit{Fase:} Posterior a confirmación) \\*
+\hline
+\textbf{Acción Orquestada} & Publica BranchCreatedIntegrationEvent para bahías y turnos. \\*
+\hline
+\textbf{Destino del Efecto} & Transactional Outbox / Event Bus \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Manejador:} TenantDomainEventsHandler} \\*
+\hline
+\textbf{Evento Capturado} & \texttt{TenantMembershipCreatedEvent} \quad (\textit{Fase:} Posterior a confirmación) \\*
+\hline
+\textbf{Acción Orquestada} & Publica TenantMembershipCreatedIntegrationEvent para legajo laboral. \\*
+\hline
+\textbf{Destino del Efecto} & Transactional Outbox / Event Bus \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Clases ubicadas bajo el paquete com.andeva.atelier.platform.iam.application.events.
+
+**Puertos de Salida y Modelos Inmutables de Sesión**
+
+Para preservar la independencia de la lógica de negocio respecto a bibliotecas
+propietarias y servicios en la nube, la capa define puertos de salida que establecen
+contratos semánticos puros para interactuar con proveedores perimetrales.
+
+El puerto **ResendEmailService** sustituye la pila de despacho SMTP tradicional por
+peticiones HTTPS asíncronas sobre el puerto 443, neutralizando fallos de conexión en
+plataformas en la nube. A su vez, **GoogleIdentityGateway** encapsula la verificación de
+tokens criptográficos emitidos por el proveedor de inicio de sesión federado.
+
+En el ámbito criptográfico y de seguridad, **BCryptHashingService** gestiona las funciones
+de resumen unidireccional con coste computacional configurable, mientras que
+**BearerTokenService** administra la conformación y análisis de firmas de tokens JWT
+enriquecidos con atributos de tenencia y autoridades.
+
+Finalmente, los registros inmutables **AuthenticatedUser** y **GoogleUserPayload**
+consolidan las cargas útiles de sesión y perfiles federados, protegiendo las entidades
+internas de dominio contra exposiciones involuntarias hacia capas externas.
+
+Con el objeto de sistematizar las dependencias perimetrales, en la @tbl:iam-outbound-ports
+se describen los métodos y responsabilidades técnicas de estos puertos de salida y modelos
+de sesión.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.1cm} | >{\raggedright\arraybackslash}p{10.3cm} |}
+\caption{Puertos de Salida y Modelos de la Capa de Aplicación de IAM \& Tenancy} \label{tbl:iam-outbound-ports} \\
+\hline
+\thfirst{Aspecto del Componente} & \thcell{Especificación Técnica y Responsabilidad} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto del Componente} & \thcell{Especificación Técnica y Responsabilidad} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} ResendEmailService \quad (\textit{Categoría:} Puerto de Salida)} \\*
+\hline
+\textbf{Métodos Principales} & \texttt{sendVerificationEmail}, \texttt{sendPasswordResetEmail}, \texttt{sendStaffInvitationEmail} \\*
+\hline
+\textbf{Responsabilidad Técnica} & Despacho de correos transaccionales vía HTTPS REST sin bloqueos SMTP. \\*
+\hline
+\textbf{Paquete Canónico} & \texttt{...application.acl} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} GoogleIdentityGateway \quad (\textit{Categoría:} Puerto de Salida)} \\*
+\hline
+\textbf{Métodos Principales} & \texttt{verifyIdToken} \\*
+\hline
+\textbf{Responsabilidad Técnica} & Validación criptográfica de firmas de tokens emitidos por Google OAuth2. \\*
+\hline
+\textbf{Paquete Canónico} & \texttt{...application.acl} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} BearerTokenService \quad (\textit{Categoría:} Servicio de Seguridad)} \\*
+\hline
+\textbf{Métodos Principales} & \texttt{generateToken}, \texttt{validateToken}, \texttt{extractClaims} \\*
+\hline
+\textbf{Responsabilidad Técnica} & Generación y lectura de tokens Bearer JWT con tenencia y permisos. \\*
+\hline
+\textbf{Paquete Canónico} & \texttt{...application.acl} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} BCryptHashingService \quad (\textit{Categoría:} Servicio Criptográfico)} \\*
+\hline
+\textbf{Métodos Principales} & \texttt{hash}, \texttt{matches} \\*
+\hline
+\textbf{Responsabilidad Técnica} & Derivación y validación de contraseñas mediante función hash adaptativa. \\*
+\hline
+\textbf{Paquete Canónico} & \texttt{...application.acl} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} AuthenticatedUser \quad (\textit{Categoría:} Modelo de Sesión)} \\*
+\hline
+\textbf{Métodos Principales} & \texttt{userId}, \texttt{email}, \texttt{token}, \texttt{activeTenant}, \texttt{permissions} \\*
+\hline
+\textbf{Responsabilidad Técnica} & Registro inmutable representativo de una sesión autenticada válida. \\*
+\hline
+\textbf{Paquete Canónico} & \texttt{...application.model} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} GoogleUserPayload \quad (\textit{Categoría:} Modelo de Identidad)} \\*
+\hline
+\textbf{Métodos Principales} & \texttt{sub}, \texttt{email}, \texttt{givenName}, \texttt{familyName}, \texttt{pictureUrl} \\*
+\hline
+\textbf{Responsabilidad Técnica} & Carga útil demográfica validada proveniente de Google Identity Services. \\*
+\hline
+\textbf{Paquete Canónico} & \texttt{...application.model} \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes pertenecientes al paquete com.andeva.atelier.platform.iam.application.
 
 #### 2.6.2.4 Infrastructure Layer
 
+La capa de infraestructura del Bounded Context de Identity and Access Management (IAM) &
+Tenancy materializa los adaptadores técnicos y mecanismos de persistencia relacional,
+seguridad perimetral, criptografía y comunicaciones externas que respaldan el modelo de
+dominio de Atelier Platform.
 
+Ubicada en el paquete canónico com.andeva.atelier.platform.iam.infrastructure, su diseño
+arquitectónico confina los acoplamientos a bases de datos relacionales, marcos de trabajo
+de seguridad y pasarelas de nube mediante cuatro directrices fundamentales:
+
+- **Desacoplamiento Estricto de Persistencia:** Los agregados de dominio carecen por
+completo de anotaciones del estándar Jakarta Persistence. La persistencia física en
+PostgreSQL 16 se encomienda a entidades de persistencia dedicadas que heredan auditoría
+temporal automática y clave técnica UUID de la superclase
+AuditableAbstractPersistenceEntity.
+
+- **Persistencia Nulo-Segura de Objetos de Valor:** Los objetos de valor inmutables del
+dominio se transforman a tipos escalares nativos en PostgreSQL mediante convertidores JPA
+especializados y componentes embebibles para coordenadas geográficas WGS84, asegurando
+normalización relacional sin degradar el encapsulamiento.
+
+- **Seguridad Perimetral Sin Estado y Multi-Inquilino:** La arquitectura de seguridad se
+fundamenta en Spring Security 6 bajo una política estrictamente sin estado, gobernada por
+filtros que validan firmas criptográficas de tokens JWT con claims enriquecidos y
+comprueban la coincidencia de identificadores de taller en rutas relativas.
+
+- **Comunicaciones Externas Confiables vía HTTPS:** Eliminación definitiva de protocolos
+SMTP propensos a bloqueos en plataformas en la nube, delegando el despacho transaccional
+de correos a la API REST de Resend sobre el puerto 443, e integrando la validación
+criptográfica de Single Sign-On con Google Identity Services.
+
+A fin de ofrecer una visión sistemática de estos componentes, en la
+@tbl:iam-infrastructure-types se presenta el catálogo consolidado de los tipos técnicos
+que conforman la Capa de Infraestructura de IAM & Tenancy.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Catálogo Consolidado de la Capa de Infraestructura de IAM \& Tenancy} \label{tbl:iam-infrastructure-types} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\
+\hline
+\endhead
+TenantPersistenceEntity & Mapeo relacional de talleres automotrices a la tabla física tenants. \\*
+\hline
+\textbf{Categoría} & Entidad JPA \\*
+\hline
+\textbf{Relaciones} & Hereda de AuditableAbstractPersistenceEntity. 1:N con sedes. \\*
+\hline
+\textbf{Paquete} & \texttt{...persistence.jpa.entities} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+BranchPersistenceEntity & Mapeo relacional de sedes físicas y geocercas satelitales a branches. \\*
+\hline
+\textbf{Categoría} & Entidad JPA \\*
+\hline
+\textbf{Relaciones} & Pertenece a un taller específico mediante clave foránea. \\*
+\hline
+\textbf{Paquete} & \texttt{...persistence.jpa.entities} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+UserPersistenceEntity & Mapeo relacional de credenciales e identidad a la tabla users. \\*
+\hline
+\textbf{Categoría} & Entidad JPA \\*
+\hline
+\textbf{Relaciones} & 1:1 con perfiles biográficos y 1:N con tokens OTP. \\*
+\hline
+\textbf{Paquete} & \texttt{...persistence.jpa.entities} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+ProfilePersistenceEntity & Mapeo de datos biográficos a la tabla relacional profiles. \\*
+\hline
+\textbf{Categoría} & Entidad JPA \\*
+\hline
+\textbf{Relaciones} & Comparte clave primaria compartida con la cuenta de usuario. \\*
+\hline
+\textbf{Paquete} & \texttt{...persistence.jpa.entities} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+VerificationTokenPersistenceEntity & Mapeo de tokens de verificación y reseteo a verification\_tokens. \\*
+\hline
+\textbf{Categoría} & Entidad JPA \\*
+\hline
+\textbf{Relaciones} & Vinculado a usuarios con control de caducidad temporal. \\*
+\hline
+\textbf{Paquete} & \texttt{...persistence.jpa.entities} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+TenantMembershipPersistenceEntity & Mapeo de contratos laborales a la tabla tenant\_memberships. \\*
+\hline
+\textbf{Categoría} & Entidad JPA \\*
+\hline
+\textbf{Relaciones} & Relación N:M con roles mediante membership\_roles. \\*
+\hline
+\textbf{Paquete} & \texttt{...persistence.jpa.entities} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+InvitationPersistenceEntity & Mapeo de invitaciones de onboarding a la tabla invitations. \\*
+\hline
+\textbf{Categoría} & Entidad JPA \\*
+\hline
+\textbf{Relaciones} & Clave foránea al taller emisor y token URL seguro. \\*
+\hline
+\textbf{Paquete} & \texttt{...persistence.jpa.entities} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+RolePersistenceEntity & Mapeo relacional de roles de seguridad a la tabla roles. \\*
+\hline
+\textbf{Categoría} & Entidad JPA \\*
+\hline
+\textbf{Relaciones} & Relación N:M con permisos mediante role\_permissions. \\*
+\hline
+\textbf{Paquete} & \texttt{...persistence.jpa.entities} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+PermissionPersistenceEntity & Mapeo relacional del catálogo atómico a la tabla permissions. \\*
+\hline
+\textbf{Categoría} & Entidad JPA \\*
+\hline
+\textbf{Relaciones} & Entidad de catálogo transversal referenciada por roles. \\*
+\hline
+\textbf{Paquete} & \texttt{...persistence.jpa.entities} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+GeoPointEmbeddable & Estructura embebible con coordenadas de latitud y longitud WGS84. \\*
+\hline
+\textbf{Categoría} & Componente Embebible \\*
+\hline
+\textbf{Relaciones} & Integrada en BranchPersistenceEntity para geocercas. \\*
+\hline
+\textbf{Paquete} & \texttt{...persistence.jpa.entities} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+TaxIdAttributeConverter & Conversión bidireccional entre TaxId y columna VARCHAR(11). \\*
+\hline
+\textbf{Categoría} & Convertidor JPA \\*
+\hline
+\textbf{Relaciones} & Aplica sobre RUC fiscal en la entidad de taller. \\*
+\hline
+\textbf{Paquete} & \texttt{...persistence.jpa.converters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+EmailAddressAttributeConverter & Conversión bidireccional entre EmailAddress y VARCHAR(150). \\*
+\hline
+\textbf{Categoría} & Convertidor JPA \\*
+\hline
+\textbf{Relaciones} & Normaliza correos electrónicos canónicos a minúsculas. \\*
+\hline
+\textbf{Paquete} & \texttt{...persistence.jpa.converters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+MoneyAttributeConverter & Conversión bidireccional entre Money y columna NUMERIC(10,2). \\*
+\hline
+\textbf{Categoría} & Convertidor JPA \\*
+\hline
+\textbf{Relaciones} & Mapea salario base en membresías de colaboradores. \\*
+\hline
+\textbf{Paquete} & \texttt{...persistence.jpa.converters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+TenantPersistenceRepository & Operaciones de persistencia física y consultas de unicidad de RUC. \\*
+\hline
+\textbf{Categoría} & Repositorio Spring Data \\*
+\hline
+\textbf{Relaciones} & Extiende \texttt{JpaRepository<\allowbreak TenantPersistenceEntity,\allowbreak  UUID>\allowbreak }. \\*
+\hline
+\textbf{Paquete} & \texttt{...persistence.jpa.repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+BranchPersistenceRepository & Consultas de sedes físicas y geocercas satelitales por taller. \\*
+\hline
+\textbf{Categoría} & Repositorio Spring Data \\*
+\hline
+\textbf{Relaciones} & Extiende \texttt{JpaRepository<\allowbreak BranchPersistenceEntity,\allowbreak  UUID>\allowbreak }. \\*
+\hline
+\textbf{Paquete} & \texttt{...persistence.jpa.repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+UserPersistenceRepository & Consultas de cuentas de usuario por correo canónico o Google ID. \\*
+\hline
+\textbf{Categoría} & Repositorio Spring Data \\*
+\hline
+\textbf{Relaciones} & Extiende \texttt{JpaRepository<\allowbreak UserPersistenceEntity,\allowbreak  UUID>\allowbreak }. \\*
+\hline
+\textbf{Paquete} & \texttt{...persistence.jpa.repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+TenantMembershipPersistenceRepository & Consultas de afiliación laboral y nómina activa por taller. \\*
+\hline
+\textbf{Categoría} & Repositorio Spring Data \\*
+\hline
+\textbf{Relaciones} & Extiende \texttt{JpaRepository<\allowbreak TenantMembershipPersistenceEntity,\allowbreak  UUID>\allowbreak }. \\*
+\hline
+\textbf{Paquete} & \texttt{...persistence.jpa.repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+RolePersistenceRepository & Consultas de roles configurados en el taller y roles globales. \\*
+\hline
+\textbf{Categoría} & Repositorio Spring Data \\*
+\hline
+\textbf{Relaciones} & Extiende \texttt{JpaRepository<\allowbreak RolePersistenceEntity,\allowbreak  UUID>\allowbreak }. \\*
+\hline
+\textbf{Paquete} & \texttt{...persistence.jpa.repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+PermissionPersistenceRepository & Consultas del catálogo de permisos de seguridad por categoría. \\*
+\hline
+\textbf{Categoría} & Repositorio Spring Data \\*
+\hline
+\textbf{Relaciones} & Extiende \texttt{JpaRepository<\allowbreak PermissionPersistenceEntity,\allowbreak  UUID>\allowbreak }. \\*
+\hline
+\textbf{Paquete} & \texttt{...persistence.jpa.repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+InvitationPersistenceRepository & Búsqueda y validación de tokens secretos de onboarding laboral. \\*
+\hline
+\textbf{Categoría} & Repositorio Spring Data \\*
+\hline
+\textbf{Relaciones} & Extiende \texttt{JpaRepository<\allowbreak InvitationPersistenceEntity,\allowbreak  UUID>\allowbreak }. \\*
+\hline
+\textbf{Paquete} & \texttt{...persistence.jpa.repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+TenantPersistenceAssembler & Transforma agregados Tenant hacia y desde entidades JPA. \\*
+\hline
+\textbf{Categoría} & Ensamblador \\*
+\hline
+\textbf{Relaciones} & Traduce identificadores fuertemente tipados a UUID. \\*
+\hline
+\textbf{Paquete} & \texttt{...persistence.jpa.transform} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+BranchPersistenceAssembler & Transforma entidades Branch hacia y desde entidades JPA. \\*
+\hline
+\textbf{Categoría} & Ensamblador \\*
+\hline
+\textbf{Relaciones} & Mapea coordenadas geográficas y radios de geocerca. \\*
+\hline
+\textbf{Paquete} & \texttt{...persistence.jpa.transform} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+UserPersistenceAssembler & Transforma agregados User hacia y desde entidades JPA. \\*
+\hline
+\textbf{Categoría} & Ensamblador \\*
+\hline
+\textbf{Relaciones} & Reconstituye perfiles demográficos y tokens asociados. \\*
+\hline
+\textbf{Paquete} & \texttt{...persistence.jpa.transform} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+TenantMembershipPersistenceAssembler & Transforma agregados TenantMembership a entidades JPA. \\*
+\hline
+\textbf{Categoría} & Ensamblador \\*
+\hline
+\textbf{Relaciones} & Mapea esquemas remunerativos y roles vinculados. \\*
+\hline
+\textbf{Paquete} & \texttt{...persistence.jpa.transform} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+RolePersistenceAssembler & Transforma agregados Role hacia y desde entidades JPA. \\*
+\hline
+\textbf{Categoría} & Ensamblador \\*
+\hline
+\textbf{Relaciones} & Hidrata el conjunto inmutable de permisos del rol. \\*
+\hline
+\textbf{Paquete} & \texttt{...persistence.jpa.transform} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+InvitationPersistenceAssembler & Transforma agregados Invitation a entidades JPA. \\*
+\hline
+\textbf{Categoría} & Ensamblador \\*
+\hline
+\textbf{Relaciones} & Preserva el token criptográfico y fecha de expiración. \\*
+\hline
+\textbf{Paquete} & \texttt{...persistence.jpa.transform} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+TenantRepositoryImpl & Implementación del puerto de dominio TenantRepository. \\*
+\hline
+\textbf{Categoría} & Adaptador de Persistencia \\*
+\hline
+\textbf{Relaciones} & Persiste entidades y despacha eventos al Outbox. \\*
+\hline
+\textbf{Paquete} & \texttt{...persistence.jpa.adapters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+BranchRepositoryImpl & Implementación del puerto de dominio BranchRepository. \\*
+\hline
+\textbf{Categoría} & Adaptador de Persistencia \\*
+\hline
+\textbf{Relaciones} & Coordina consultas y mutaciones de sucursales físicas. \\*
+\hline
+\textbf{Paquete} & \texttt{...persistence.jpa.adapters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+UserRepositoryImpl & Implementación del puerto de dominio UserRepository. \\*
+\hline
+\textbf{Categoría} & Adaptador de Persistencia \\*
+\hline
+\textbf{Relaciones} & Gestiona almacenamiento de identidades y credenciales. \\*
+\hline
+\textbf{Paquete} & \texttt{...persistence.jpa.adapters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+TenantMembershipRepositoryImpl & Implementación del puerto TenantMembershipRepository. \\*
+\hline
+\textbf{Categoría} & Adaptador de Persistencia \\*
+\hline
+\textbf{Relaciones} & Sincroniza vínculos laborales y extrae eventos de dominio. \\*
+\hline
+\textbf{Paquete} & \texttt{...persistence.jpa.adapters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+RoleRepositoryImpl & Implementación del puerto de dominio RoleRepository. \\*
+\hline
+\textbf{Categoría} & Adaptador de Persistencia \\*
+\hline
+\textbf{Relaciones} & Gestiona persistencia de esquemas RBAC personalizados. \\*
+\hline
+\textbf{Paquete} & \texttt{...persistence.jpa.adapters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+PermissionRepositoryImpl & Implementación del puerto PermissionRepository. \\*
+\hline
+\textbf{Categoría} & Adaptador de Persistencia \\*
+\hline
+\textbf{Relaciones} & Provee acceso de lectura al catálogo atómico de permisos. \\*
+\hline
+\textbf{Paquete} & \texttt{...persistence.jpa.adapters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+InvitationRepositoryImpl & Implementación del puerto InvitationRepository. \\*
+\hline
+\textbf{Categoría} & Adaptador de Persistencia \\*
+\hline
+\textbf{Relaciones} & Almacena invitaciones y garantiza unicidad de token. \\*
+\hline
+\textbf{Paquete} & \texttt{...persistence.jpa.adapters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+ResendEmailClient & Cliente REST HTTPS que despacha correos vía Resend API. \\*
+\hline
+\textbf{Categoría} & Adaptador de Salida \\*
+\hline
+\textbf{Relaciones} & Implementa el puerto de aplicación ResendEmailService. \\*
+\hline
+\textbf{Paquete} & \texttt{...communication.resend} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+GoogleTokenVerifierGatewayImpl & Pasarela que verifica tokens Google OAuth2 con certificados. \\*
+\hline
+\textbf{Categoría} & Adaptador de Salida \\*
+\hline
+\textbf{Relaciones} & Implementa el puerto de aplicación GoogleIdentityGateway. \\*
+\hline
+\textbf{Paquete} & \texttt{...identity.google} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+BearerTokenServiceImpl & Genera y valida tokens JWT enriquecidos mediante JJWT. \\*
+\hline
+\textbf{Categoría} & Servicio Criptográfico \\*
+\hline
+\textbf{Relaciones} & Implementa el puerto de aplicación BearerTokenService. \\*
+\hline
+\textbf{Paquete} & \texttt{...security.jwt} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+BCryptHashingServiceImpl & Cifra y confronta contraseñas con factor de coste 12. \\*
+\hline
+\textbf{Categoría} & Servicio Criptográfico \\*
+\hline
+\textbf{Relaciones} & Implementa el puerto de aplicación BCryptHashingService. \\*
+\hline
+\textbf{Paquete} & \texttt{...security.crypto} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+WebSecurityConfiguration & Configuración perimetral de filtros, CORS y rutas en Spring. \\*
+\hline
+\textbf{Categoría} & Configuración de Seguridad \\*
+\hline
+\textbf{Relaciones} & Publica la cadena de filtros SecurityFilterChain. \\*
+\hline
+\textbf{Paquete} & \texttt{...security.configuration} \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes implementados en Java 26 bajo el paquete canónico com.andeva.atelier.platform.iam.infrastructure.
+
+**Entidades JPA de Persistencia y Modelado Físico Relacional**
+
+El modelado relacional de la persistencia confina las anotaciones de Hibernate en nueve
+entidades dedicadas que reflejan la estructura física de tablas de PostgreSQL 16 alojadas
+en la infraestructura gestionada de Aiven Cloud.
+
+La entidad **TenantPersistenceEntity** se asigna a la tabla tenants, encapsulando las
+columnas de razón social, nombre comercial, RUC fiscal con restricción de unicidad y el
+identificador de cliente de Stripe. Establece una relación compositiva en cascada con
+**BranchPersistenceEntity**, mapeada a la tabla branches con coordenadas satelitales
+WGS84.
+
+Por su parte, **UserPersistenceEntity** se vincula a la tabla users con índice único sobre
+el correo electrónico canónico. Comparte su clave primaria con
+**ProfilePersistenceEntity** mediante la anotación de mapeo compartido de clave foránea, y
+sostiene una relación de un titular a múltiples tokens temporales con
+**VerificationTokenPersistenceEntity**.
+
+El esquema de personal y seguridad contractual se materializa mediante
+**TenantMembershipPersistenceEntity**, vinculada a talleres y usuarios. Esta entidad
+define una relación de múltiples a múltiples hacia **RolePersistenceEntity** soportada en
+la tabla intermedia membership_roles, mientras que los privilegios atómicos se vinculan a
+roles mediante la tabla intermedia role_permissions.
+
+Para consolidar el flujo de incorporación laboral, la entidad
+**InvitationPersistenceEntity** se asigna a la tabla invitations, imponiendo restricción
+de unicidad sobre el token criptográfico URL-safe y preservando la marca temporal de
+expiración.
+
+A fin de detallar la correlación física, en la @tbl:iam-jpa-entities se especifican las
+entidades JPA, sus tablas correspondientes, columnas clave, constraints e índices
+relacionales.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Especificación Relacional de Entidades JPA de IAM \& Tenancy} \label{tbl:iam-jpa-entities} \\
+\hline
+\thfirst{Aspecto de Persistencia} & \thcell{Especificación Físico-Relacional} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Persistencia} & \thcell{Especificación Físico-Relacional} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} TenantPersistenceEntity \quad (\textit{Tabla:} \texttt{tenants})} \\*
+\hline
+\textbf{Clave Primaria} & \texttt{id (UUID)} \\*
+\hline
+\textbf{Columnas Principales} & \texttt{name}, \texttt{legal\_name}, \texttt{tax\_id}, \texttt{status}, \texttt{stripe\_customer\_id} \\*
+\hline
+\textbf{Restricciones e Índices} & Restricción única uk\_tenants\_tax\_id. no nulo en name y legal\_name. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} BranchPersistenceEntity \quad (\textit{Tabla:} \texttt{branches})} \\*
+\hline
+\textbf{Clave Primaria} & \texttt{id (UUID)} \\*
+\hline
+\textbf{Columnas Principales} & \texttt{tenant\_id}, \texttt{name}, \texttt{sunat\_code}, \texttt{latitude}, \texttt{longitude}, \texttt{geofence\_radius\_m}, \texttt{is\_active} \\*
+\hline
+\textbf{Restricciones e Índices} & Clave foránea a tenants. índice compuesto en tenant\_id y sunat\_code. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} UserPersistenceEntity \quad (\textit{Tabla:} \texttt{users})} \\*
+\hline
+\textbf{Clave Primaria} & \texttt{id (UUID)} \\*
+\hline
+\textbf{Columnas Principales} & \texttt{email}, \texttt{password\_hash}, \texttt{auth\_provider}, \texttt{google\_id}, \texttt{fcm\_token}, \texttt{status} \\*
+\hline
+\textbf{Restricciones e Índices} & Restricción única uk\_users\_email. índice en google\_id. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} ProfilePersistenceEntity \quad (\textit{Tabla:} \texttt{profiles})} \\*
+\hline
+\textbf{Clave Primaria} & \texttt{user\_id (UUID)} \\*
+\hline
+\textbf{Columnas Principales} & \texttt{first\_name}, \texttt{last\_name}, \texttt{phone\_number} \\*
+\hline
+\textbf{Restricciones e Índices} & Clave primaria compartida MapsId con clave foránea a users. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} VerificationTokenPersistenceEntity \quad (\textit{Tabla:} \texttt{verification\_tokens})} \\*
+\hline
+\textbf{Clave Primaria} & \texttt{id (UUID)} \\*
+\hline
+\textbf{Columnas Principales} & \texttt{user\_id}, \texttt{token}, \texttt{type}, \texttt{expires\_at}, \texttt{is\_used} \\*
+\hline
+\textbf{Restricciones e Índices} & Clave foránea a users. índice en token y expires\_at. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} TenantMembershipPersistenceEntity \quad (\textit{Tabla:} \texttt{tenant\_memberships})} \\*
+\hline
+\textbf{Clave Primaria} & \texttt{id (UUID)} \\*
+\hline
+\textbf{Columnas Principales} & \texttt{tenant\_id}, \texttt{user\_id}, \texttt{status}, \texttt{salary\_type}, \texttt{base\_salary} \\*
+\hline
+\textbf{Restricciones e Índices} & Restricción única en tupla (tenant\_id, user\_id). claves foráneas dobles. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} InvitationPersistenceEntity \quad (\textit{Tabla:} \texttt{invitations})} \\*
+\hline
+\textbf{Clave Primaria} & \texttt{id (UUID)} \\*
+\hline
+\textbf{Columnas Principales} & \texttt{tenant\_id}, \texttt{email}, \texttt{token}, \texttt{status}, \texttt{target\_role\_id}, \texttt{expires\_at} \\*
+\hline
+\textbf{Restricciones e Índices} & Restricción única uk\_invitations\_token. clave foránea a tenants. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} RolePersistenceEntity \quad (\textit{Tabla:} \texttt{roles})} \\*
+\hline
+\textbf{Clave Primaria} & \texttt{id (UUID)} \\*
+\hline
+\textbf{Columnas Principales} & \texttt{tenant\_id}, \texttt{name}, \texttt{description}, \texttt{is\_system\_role} \\*
+\hline
+\textbf{Restricciones e Índices} & Clave foránea nullable a tenants. índice en tenant\_id y name. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} PermissionPersistenceEntity \quad (\textit{Tabla:} \texttt{permissions})} \\*
+\hline
+\textbf{Clave Primaria} & \texttt{id (UUID)} \\*
+\hline
+\textbf{Columnas Principales} & \texttt{name}, \texttt{description}, \texttt{category} \\*
+\hline
+\textbf{Restricciones e Índices} & Restricción única uk\_permissions\_name. índice en columna category. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Tablas físicas alojadas en el motor PostgreSQL 16 con motor InnoDB equivalente relacional.
+
+**Repositorios Spring Data JPA y Adaptadores de Persistencia**
+
+La interacción técnica con la base de datos se desacopla mediante el patrón Adaptador de
+Repositorio. Las interfaces Spring Data JPA declaran operaciones optimizadas de acceso a
+datos, mientras que las clases adaptadoras implementan los puertos de dominio.
+
+Durante las operaciones de mutación, el adaptador **TenantRepositoryImpl** transforma el
+agregado puro en su representación relacional mediante su ensamblador, persiste el
+registro mediante **TenantPersistenceRepository**, extrae la colección de eventos de
+dominio acumulados y los canaliza al componente **DomainEventPublisher** para su inserción
+en el Transactional Outbox.
+
+El mismo ciclo transaccional se ejecuta en los adaptadores **UserRepositoryImpl**,
+**TenantMembershipRepositoryImpl**, **RoleRepositoryImpl** e **InvitationRepositoryImpl**,
+garantizando que ninguna entidad física escape de la frontera de persistencia y
+preservando la pureza de los modelos del dominio.
+
+A fin de sintetizar estos componentes de persistencia relacional, en la
+@tbl:iam-repository-adapters se detallan exhaustivamente los adaptadores de repositorio,
+las interfaces de dominio implementadas y las operaciones transaccionales de acceso a
+datos.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Adaptadores de Persistencia y Puertos de Dominio de IAM \& Tenancy} \label{tbl:iam-repository-adapters} \\
+\hline
+\thfirst{Aspecto de Adaptador} & \thcell{Especificación Técnica y Persistencia} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Adaptador} & \thcell{Especificación Técnica y Persistencia} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} TenantRepositoryImpl} \\*
+\hline
+\textbf{Puerto de Dominio} & \texttt{TenantRepository} \\*
+\hline
+\textbf{Repositorio Inyectado} & \texttt{TenantPersistenceRepository} \\*
+\hline
+\textbf{Operaciones Clave} & save con extracción de eventos, findById, findByTaxId, existsByTaxId. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} BranchRepositoryImpl} \\*
+\hline
+\textbf{Puerto de Dominio} & \texttt{BranchRepository} \\*
+\hline
+\textbf{Repositorio Inyectado} & \texttt{BranchPersistenceRepository} \\*
+\hline
+\textbf{Operaciones Clave} & save, findById, findAllByTenantId, findByIdAndTenantId. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} UserRepositoryImpl} \\*
+\hline
+\textbf{Puerto de Dominio} & \texttt{UserRepository} \\*
+\hline
+\textbf{Repositorio Inyectado} & \texttt{UserPersistenceRepository} \\*
+\hline
+\textbf{Operaciones Clave} & save con despacho Outbox, findById, findByEmail, existsByEmail. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} TenantMembershipRepositoryImpl} \\*
+\hline
+\textbf{Puerto de Dominio} & \texttt{TenantMembershipRepository} \\*
+\hline
+\textbf{Repositorio Inyectado} & \texttt{TenantMembershipPersistenceRepository} \\*
+\hline
+\textbf{Operaciones Clave} & save, findById, findAllByTenantId, findByTenantIdAndUserId. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} RoleRepositoryImpl} \\*
+\hline
+\textbf{Puerto de Dominio} & \texttt{RoleRepository} \\*
+\hline
+\textbf{Repositorio Inyectado} & \texttt{RolePersistenceRepository} \\*
+\hline
+\textbf{Operaciones Clave} & save, findById, findAllByTenantIdOrTenantIdIsNull, findByNameAndTenantId. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} PermissionRepositoryImpl} \\*
+\hline
+\textbf{Puerto de Dominio} & \texttt{PermissionRepository} \\*
+\hline
+\textbf{Repositorio Inyectado} & \texttt{PermissionPersistenceRepository} \\*
+\hline
+\textbf{Operaciones Clave} & findById, findAll, findAllByCategory, findByName. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} InvitationRepositoryImpl} \\*
+\hline
+\textbf{Puerto de Dominio} & \texttt{InvitationRepository} \\*
+\hline
+\textbf{Repositorio Inyectado} & \texttt{InvitationPersistenceRepository} \\*
+\hline
+\textbf{Operaciones Clave} & save con eventos, findByToken, findAllByTenantId, existsPending. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Clases ubicadas bajo el paquete com.andeva.atelier.platform.iam.infrastructure.persistence.jpa.adapters.
+
+**Ensambladores de Persistencia y Convertidores JPA**
+
+La correspondencia entre estructuras inmutables del dominio y modelos relacionales
+mutables se resuelve a través de siete ensambladores de persistencia dedicados,
+garantizando que los agregados se hidraten sin disparar eventos de dominio espurios
+durante la lectura.
+
+Los ensambladores extraen los valores escalares de objetos de valor representativos de
+identificadores fuertemente tipados, números de documento tributario y coordenadas
+geográficas para poblar las entidades JPA, reconstituyendo las raíces de agregado mediante
+constructores de dominio controlados que validan exhaustivamente las invariantes.
+
+De forma complementaria, los convertidores de atributos JPA **TaxIdAttributeConverter**,
+**EmailAddressAttributeConverter** y **MoneyAttributeConverter** efectúan la normalización
+automática a tipos VARCHAR y NUMERIC, mientras que **GeoPointEmbeddable** estructura
+coordenadas de latitud y longitud satelital de forma embebida.
+
+Con el propósito de ilustrar estas transformaciones bidireccionales, en la
+@tbl:iam-persistence-assemblers se describen los ensambladores de persistencia,
+convertidores de tipos, estructuras de entrada y reglas de mapeo relacional.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Ensambladores de Persistencia y Convertidores JPA de IAM \& Tenancy} \label{tbl:iam-persistence-assemblers} \\
+\hline
+\thfirst{Aspecto de Mapeo} & \thcell{Tipos Relacionados y Transformación} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Mapeo} & \thcell{Tipos Relacionados y Transformación} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} TenantPersistenceAssembler} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{Tenant} $\longleftrightarrow$ \texttt{TenantPersistenceEntity} \\*
+\hline
+\textbf{Transformación} & Traduce TenantId a UUID. mapea sedes hijas y atributos corporativos. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} BranchPersistenceAssembler} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{Branch} $\longleftrightarrow$ \texttt{BranchPersistenceEntity} \\*
+\hline
+\textbf{Transformación} & Mapea BranchId a UUID, código SUNAT y GeoPointEmbeddable. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} UserPersistenceAssembler} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{User} $\longleftrightarrow$ \texttt{UserPersistenceEntity} \\*
+\hline
+\textbf{Transformación} & Traduce UserId a UUID. mapea entidad Profile y tokens de verificación. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} TenantMembershipPersistenceAssembler} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{TenantMembership} $\longleftrightarrow$ \texttt{TenantMembershipPersistenceEntity} \\*
+\hline
+\textbf{Transformación} & Mapea TenantMembershipId, esquema salarial y colección de roles. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} RolePersistenceAssembler} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{Role} $\longleftrightarrow$ \texttt{RolePersistenceEntity} \\*
+\hline
+\textbf{Transformación} & Mapea RoleId, bandera de sistema y catálogo de permisos vinculados. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} InvitationPersistenceAssembler} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{Invitation} $\longleftrightarrow$ \texttt{InvitationPersistenceEntity} \\*
+\hline
+\textbf{Transformación} & Traduce InvitationId a UUID, rol objetivo y token URL-safe. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} TaxIdAttributeConverter} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{TaxId} $\longleftrightarrow$ \texttt{VARCHAR(11)} \\*
+\hline
+\textbf{Transformación} & Mapea el número de RUC deduciendo el tipo según longitud de caracteres. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} EmailAddressAttributeConverter} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{EmailAddress} $\longleftrightarrow$ \texttt{VARCHAR(150)} \\*
+\hline
+\textbf{Transformación} & Normaliza el correo canónico a minúsculas para persistencia relacional. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} MoneyAttributeConverter} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{Money} $\longleftrightarrow$ \texttt{NUMERIC(10,\allowbreak 2)} \\*
+\hline
+\textbf{Transformación} & Extrae el valor numérico decimal preservando la moneda en el contexto. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} GeoPointEmbeddable} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{GeoPoint} $\longleftrightarrow$ \texttt{Columnas latitude y longitude} \\*
+\hline
+\textbf{Transformación} & Componente embebible con precisión de ocho decimales para geocercas. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes ubicados en los paquetes transform y converters de la capa de infraestructura.
+
+**Seguridad Perimetral, Criptografía y Pasarelas de Nube**
+
+La protección perimetral del sistema y la comunicación con servicios externos se consolida
+en componentes de infraestructura desacoplados que materializan los puertos de aplicación
+bajo estrictos estándares de seguridad informática.
+
+La clase de configuración **WebSecurityConfiguration** establece una cadena de filtros de
+seguridad estrictamente sin estado en Spring Security 6. Deshabilita la protección contra
+CSRF por tratarse de una API REST consumida mediante tokens de autorización Bearer,
+configura políticas de CORS restrictivas e inyecta los filtros perimetrales
+especializados.
+
+En el plano criptográfico, **BearerTokenServiceImpl** administra la emisión y verificación
+de firmas HMAC-SHA256 mediante JJWT 0.12.6, inyectando claims contextuales que posibilitan
+autorizaciones en memoria de coste constante. Por su parte, **BCryptHashingServiceImpl**
+aplica funciones hash adaptativas con factor de coste 12 para contraseñas de acceso.
+
+Finalmente, la integración externa comprende el cliente **ResendEmailClient**, que efectúa
+peticiones REST HTTPS sobre el puerto 443 hacia la API de Resend para el despacho de
+correos transaccionales, y la pasarela **GoogleTokenVerifierGatewayImpl**, que comprueba
+las firmas de Google Identity Services frente a certificados criptográficos rotativos.
+
+A fin de resumir la arquitectura de seguridad y servicios perimetrales, en la
+@tbl:iam-security-infrastructure se especifican las responsabilidades de estos
+componentes.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Componentes de Seguridad e Integración Externa de IAM \& Tenancy} \label{tbl:iam-security-infrastructure} \\
+\hline
+\thfirst{Aspecto Técnico} & \thcell{Tecnología y Responsabilidad de Seguridad} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto Técnico} & \thcell{Tecnología y Responsabilidad de Seguridad} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente Técnico:} WebSecurityConfiguration \quad (\textit{Categoría:} Configuración)} \\*
+\hline
+\textbf{Tecnología Subyacente} & Spring Security 6 \\*
+\hline
+\textbf{Responsabilidad} & Publica SecurityFilterChain sin estado, deshabilita CSRF y gestiona CORS. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente Técnico:} BearerAuthorizationRequestFilter \quad (\textit{Categoría:} Filtro Perimetral)} \\*
+\hline
+\textbf{Tecnología Subyacente} & OncePerRequestFilter \\*
+\hline
+\textbf{Responsabilidad} & Extrae token Bearer, verifica firma e inyecta el SecurityContext. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente Técnico:} TenantContextResolver \quad (\textit{Categoría:} Filtro Perimetral)} \\*
+\hline
+\textbf{Tecnología Subyacente} & OncePerRequestFilter \\*
+\hline
+\textbf{Responsabilidad} & Comprueba que el tenant\_id de la ruta coincida con el inquilino en JWT. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente Técnico:} BearerTokenServiceImpl \quad (\textit{Categoría:} Servicio Criptográfico)} \\*
+\hline
+\textbf{Tecnología Subyacente} & JJWT 0.12.6 (HMAC-SHA256) \\*
+\hline
+\textbf{Responsabilidad} & Emite y valida tokens JWT inyectando claims de usuario, taller y permisos. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente Técnico:} BCryptHashingServiceImpl \quad (\textit{Categoría:} Servicio Criptográfico)} \\*
+\hline
+\textbf{Tecnología Subyacente} & Spring Security Crypto \\*
+\hline
+\textbf{Responsabilidad} & Derivación unidireccional de contraseñas con factor de trabajo adaptativo 12. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente Técnico:} ResendEmailClient \quad (\textit{Categoría:} Adaptador de Salida)} \\*
+\hline
+\textbf{Tecnología Subyacente} & Spring RestClient (HTTPS 443) \\*
+\hline
+\textbf{Responsabilidad} & Despacho de correos transaccionales vía Resend API con plantillas HTML. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente Técnico:} GoogleTokenVerifierGatewayImpl \quad (\textit{Categoría:} Adaptador de Salida)} \\*
+\hline
+\textbf{Tecnología Subyacente} & Google API Client SDK \\*
+\hline
+\textbf{Responsabilidad} & Validación de certificados públicos y claims de tokens Google OAuth2. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes configurados bajo los paquetes security, communication e identity.
 
 #### 2.6.2.5. Bounded Context Software Architecture Component Level Diagrams
 
+En esta sección se presenta la descomposición arquitectónica interna del contenedor central **API Application** en relación con el Bounded Context IAM & Tenancy. Siguiendo el Nivel 3 del Modelo C4, se ilustran los bloques estructurales que conforman este subsistema perimetral, formalizando sus responsabilidades técnicas, fronteras operacionales y mecanismos de integración con clientes, módulos adyacentes y servicios externos.
 
+Dentro de la arquitectura de monolito modular de Atelier Platform, el Bounded Context IAM & Tenancy asume la responsabilidad crítica de gobernar la identidad, la autenticación sin estado y el aislamiento multi-inquilino. La totalidad de peticiones emitidas desde el portal administrativo web y los aplicativos móviles transita por este subsistema antes de alcanzar la lógica operacional de órdenes de trabajo, inventario, facturación o telemetría.
+
+En la @tbl:iam-c4-components se presenta el catálogo estructurado de los ocho componentes constitutivos del Bounded Context IAM & Tenancy dentro del contenedor anfitrión. Cada bloque encapsula una responsabilidad arquitectónica cohesiva, delimitando con precisión la frontera entre la seguridad perimetral, la orquestación de casos de uso, el modelo de dominio puro y la persistencia física en base de datos.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.5cm} | >{\raggedright\arraybackslash}p{10.9cm} |}
+\caption{Catálogo de Componentes de Arquitectura de Software del Bounded Context IAM \& Tenancy} \label{tbl:iam-c4-components} \\
+\hline
+\thfirst{Aspecto Técnico} & \thcell{Especificación de Arquitectura} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto Técnico} & \thcell{Especificación de Arquitectura} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} Perimeter Security \& Tenancy Filter} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & Spring Security 6, OncePerRequestFilter, JJWT \\*
+\hline
+\textbf{Responsabilidad} & Intercepta solicitudes HTTP entrantes, valida la firma HMAC-SHA256 de tokens Bearer JWT, extrae identificadores de inquilino y usuario, y establece el contexto de seguridad. \\*
+\hline
+\textbf{Relaciones} & Entrada desde clientes HTTP. invoca servicio de tokens. canaliza peticiones hacia controladores REST y módulos de negocio. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} REST Controllers \& Inbound Interface} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & Spring MVC, SpringDoc OpenAPI, Jakarta Validation \\*
+\hline
+\textbf{Responsabilidad} & Expone endpoints REST para autenticación local y federada, administración de talleres, sedes físicas con geocercas, invitaciones de personal y roles RBAC. \\*
+\hline
+\textbf{Relaciones} & Invocado por WebApp y aplicaciones móviles. delega en servicios de aplicación CQRS. utiliza ensambladores de respuesta. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} IAM CQRS Application Services} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & Spring Service, Transactional, Interfaces Funcionales \\*
+\hline
+\textbf{Responsabilidad} & Orquesta los casos de uso de registro, incorporación de talleres, emisión de invitaciones y asignación de permisos bajo demarcación transaccional estricta. \\*
+\hline
+\textbf{Relaciones} & Implementa contratos de comando y consulta. orquesta modelos de dominio. delega en adaptadores de persistencia JPA. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} Security \& Cryptographic Services} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & JJWT 0.12.6, Spring Security Crypto \\*
+\hline
+\textbf{Responsabilidad} & Emite y valida tokens JWT sin estado con asertos de usuario, taller y permisos. efectúa el cifrado unidireccional y verificación de contraseñas mediante algoritmo BCrypt. \\*
+\hline
+\textbf{Relaciones} & Consumido por filtros perimetrales, servicios de comando y controladores de autenticación. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} IAM Domain Aggregate Roots \& Core Models} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & Dominio puro Java 26, AbstractDomainAggregateRoot \\*
+\hline
+\textbf{Responsabilidad} & Encapsula las invariantes de negocio, validación de RUC bajo Módulo 11 de la SUNAT, delimitación de geocercas Haversine y acumulación de eventos de dominio en memoria. \\*
+\hline
+\textbf{Relaciones} & Raíces Tenant, User, TenantMembership, Role, Invitation. entidades y objetos de valor inmutables. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} Persistence Repositories \& JPA Adapters} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & Jakarta Persistence 3.1, Spring Data JPA, Hibernate \\*
+\hline
+\textbf{Responsabilidad} & Materializa los puertos de repositorio del dominio mediante adaptadores JPA, gobernando el mapeo relacional bidireccional y la persistencia en PostgreSQL 16. \\*
+\hline
+\textbf{Relaciones} & Realiza interfaces de repositorio del dominio. interactúa directamente con el esquema relacional de la base de datos. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} Inbound ACL \& Tenancy Facade} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & Spring Service, Capa Anticorrupción en Memoria \\*
+\hline
+\textbf{Responsabilidad} & Publica una fachada de servicio abierto para que bounded contexts externos consulten la validez de inquilinos, membresías laborales y permisos sin acoplamiento. \\*
+\hline
+\textbf{Relaciones} & Invocado por Workshop Operations, HR, CRM, Invoicing y SaaS Billing. delega lecturas en repositorios JPA. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} External Gateways \& Outbound Integration} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & Spring RestClient, Google API Client SDK \\*
+\hline
+\textbf{Responsabilidad} & Comunica con pasarelas de nube mediante canales seguros HTTPS en puerto 443, gestionando el despacho de correos transaccionales y la verificación de identidad federada. \\*
+\hline
+\textbf{Relaciones} & Invocado por servicios de aplicación. conecta con Resend API y Google Identity Services. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes pertenecientes al contenedor API Application en com.andeva.atelier.platform.iam.
+
+En la @fig:c4-component-iam se ilustra el diagrama C4 de componentes para el Bounded Context IAM & Tenancy, detallando las interacciones entre los componentes perimetrales de seguridad, los controladores REST, los servicios de aplicación CQRS, el núcleo de dominio, los adaptadores de persistencia relacional y las pasarelas externas.
+
+![Diagrama de Componentes C4 (Nivel 3) para el Bounded Context IAM & Tenancy en API Application](report/assets/c4-diagrams/component-level-diagram-iam.png){#fig:c4-component-iam}
+
+*Nota.* Elaboración propia en base a la arquitectura táctica del backend y el estándar C4 Model.
+
+**Dinámica de Interacción y Flujos Operativos del Bounded Context IAM & Tenancy**
+
+Para comprender la colaboración entre los componentes de IAM & Tenancy y los módulos de negocio durante la ejecución del sistema, se analizan a continuación los tres flujos operacionales más representativos de la plataforma:
+
+- **Ciclo de Autenticación Perimetral y Control de Acceso:**
+  Cuando un usuario transmite sus credenciales desde la interfaz web o móvil, el componente **Perimeter Security & Tenancy Filter** intercepta la petición HTTP. Al reconocer una ruta pública de ingreso, la cadena de filtros autoriza el paso hacia el controlador de autenticación en **REST Controllers & Inbound Interface**, el cual valida el contrato de entrada y despacha el comando correspondiente hacia **IAM CQRS Application Services**.
+
+  El servicio de aplicación recupera el usuario mediante **Persistence Repositories & JPA Adapters** y delega en **Security & Cryptographic Services** la verificación de la contraseña mediante el cotejo del hash BCrypt. Comprobada la identidad, se determina el taller activo y se solicita la generación de un token Bearer JWT con los identificadores requeridos y la lista inmutable de permisos autorizados, retornándolo al cliente con estado satisfactorio.
+
+  En solicitudes protegidas subsecuentes, el filtro perimetral extrae el token del encabezado Authorization, verifica la firma criptográfica HMAC-SHA256 en memoria sin consultar la base de datos e inyecta la autenticación en el contexto de seguridad. Adicionalmente, comprueba que el identificador de taller de la ruta coincida con el inquilino autorizado en el token, rechazando intentos de acceso no autorizados entre talleres.
+
+- **Ciclo Transaccional de Registro de Taller y Aprovisionamiento Multi-Inquilino:**
+  Al registrarse un nuevo taller, el controlador recibe la solicitud y valida la estructura sintáctica del documento tributario mediante el objeto de valor correspondiente. El comando de creación se canaliza hacia **IAM CQRS Application Services**, el cual inicia una transacción de base de datos y confirma la inexistencia previa del número de RUC en el repositorio de persistencia.
+
+  Posteriormente, el servicio instancia la raíz de agregado **Tenant** en el componente **IAM Domain Aggregate Roots & Core Models**, junto con su sucursal inicial validada mediante coordenadas geoespaciales. De manera simultánea, se crea el usuario administrador con contraseña cifrada, se configura el rol con privilegios globales de taller y se materializa la membresía contractual que vincula al usuario con la empresa.
+
+  El componente **Persistence Repositories & JPA Adapters** persiste atómicamente la constelación de entidades en las tablas relacionales de PostgreSQL 16. La raíz de agregado registra el evento de aprovisionamiento en memoria, y el servicio delega en **External Gateways & Outbound Integration** la emisión de un correo electrónico de bienvenida mediante la API REST de Resend a través de HTTPS en el puerto 443, garantizando entrega confiable sin bloqueos de red.
+
+- **Ciclo de Consumo Intercontextual mediante Fachada de Control de Acceso:**
+  Cuando los módulos de operaciones de taller, recursos humanos o facturación requieren verificar la vigencia de una sucursal o los permisos de un operario, no acceden a las tablas de usuarios ni a los repositorios de seguridad. En su lugar, invocan la interfaz en memoria provista por **Inbound ACL & Tenancy Facade**, la cual implementa el patrón de servicio abierto y capa anticorrupción.
+
+  La fachada recibe los identificadores inmutables de consulta y delega en **Persistence Repositories & JPA Adapters** una lectura optimizada de solo lectura. Los datos recuperados se proyectan hacia contratos inmutables del lenguaje publicado, tales como registros de transferencia de datos de inquilino o membresía, los cuales exponen únicamente los atributos pertinentes para la operación solicitada.
+
+  Este mecanismo permite que el módulo de recursos humanos valide si un mecánico se encuentra dentro del radio de geocerca de la sucursal para registrar su asistencia, o que operaciones de taller verifique si una orden corresponde a un taller activo, preservando la pureza de los modelos de dominio y evitando acoplamientos innecesarios con la infraestructura de seguridad.
 
 #### 2.6.2.6. Bounded Context Software Architecture Code Level Diagrams
 
+En esta sección se profundiza en el nivel de mayor detalle técnico para la arquitectura de software del Bounded Context IAM & Tenancy, trasladando las fronteras conceptuales y las responsabilidades tácticas hacia especificaciones estáticas que guían la codificación de la plataforma. Mediante esta aproximación, se asegura que las reglas de negocio, los contratos de seguridad y el aislamiento multi-inquilino se ejecuten de manera determinista y tipificada.
 
+Esta perspectiva abarca dos representaciones complementarias: el Diagrama de Clases de la Capa de Dominio, que modela las entidades, raíces de agregado, objetos de valor y puertos de persistencia en memoria; y el Diagrama de Base de Datos, que formaliza el esquema físico relacional en PostgreSQL 16 con claves de particionamiento lógico, restricciones de unicidad e integridad referencial.
 
 ##### 2.6.2.6.1. *Bounded Context Domain Layer Class Diagrams*
+
+El modelado estático de la Capa de Dominio del Bounded Context IAM & Tenancy establece las estructuras operativas que regulan la identidad, el aprovisionamiento de talleres automotrices y el control de accesos basado en roles. Su diseño prioriza la encapsulación de invariantes en modelos de dominio ricos, erradica la obsesión por tipos primitivos mediante identificadores fuertemente tipados y desacopla la lógica de negocio de cualquier dependencia de frameworks externos.
+
+En la @fig:class-diagram-iam se expone el Diagrama de Clases UML detallado para la Capa de Dominio del Bounded Context IAM & Tenancy, modelado conforme al estándar UML y compilado mediante la herramienta PlantUML bajo el enfoque de Diagram-as-Code.
+
+![Diagrama de Clases UML de la Capa de Dominio para el Bounded Context IAM & Tenancy](report/assets/class-diagrams/class-diagram-iam.png){#fig:class-diagram-iam}
+
+*Nota.* Elaboración propia en base al diseño táctico de dominio y el estándar UML en PlantUML.
+
+La organización interna del diagrama se estructura en siete paquetes lógicos que agrupan las responsabilidades del dominio de seguridad:
+
+- **Raíces de Agregado (`iam.domain.model.aggregates`):** Modela las entidades maestras que preservan la consistencia transaccional: **Tenant** para la gestión del taller y sus sedes físicas; **User** para la cuenta universal de usuario; **TenantMembership** para la relación contractual y asignación de roles; **Role** para la definición de privilegios RBAC; e **Invitation** para la incorporación controlada de colaboradores. Todas las raíces heredan de **AbstractDomainAggregateRoot<T>**.
+- **Entidades Internas (`iam.domain.model.entities`):** Define entidades dependientes que carecen de existencia autónoma fuera de su raíz: **Branch** para las sedes operativas del taller; **Profile** para los datos biográficos del usuario; **VerificationToken** para la validación de credenciales efímeras; y **Permission** para privilegios atómicos de autorización.
+- **Identificadores Fuertemente Tipados (`iam.domain.model.ids`):** Implementa la interfaz **TypedId<UUID>** mediante registros inmutables (**BranchId**, **TenantMembershipId**, **RoleId**, **PermissionId**, **InvitationId**), complementando las identidades universales del Shared Kernel (**TenantId**, **UserId**).
+- **Objetos de Valor de Seguridad (`iam.domain.model.valueobjects`):** Encapsula conceptos inmutables como la credencial cifrada (**Password**) y la identidad nominal (**PersonName**), vinculando tipos del Shared Kernel para coordenadas satelitales (**GeoPoint**), identificación tributaria (**TaxId**), mensajería (**EmailAddress**, **PhoneNumber**) y cuantías económicas (**Money**).
+- **Enumeraciones de Dominio (`iam.domain.model.enums`):** Estandariza los estados de ciclo de vida y modalidades operativas (**TenantStatus**, **UserStatus**, **AuthProvider**, **TokenType**, **MembershipStatus**, **SalaryType**, **InvitationStatus**).
+- **Puertos de Persistencia (`iam.domain.repositories`):** Establece contratos de persistencia pura (**TenantRepository**, **UserRepository**, **BranchRepository**, **TenantMembershipRepository**, **RoleRepository**, **PermissionRepository**, **InvitationRepository**) sin dependencias de infraestructura.
+- **Jerarquía de Excepciones Semánticas (`iam.domain.exceptions`):** Provee clases no comprobadas que heredan de **DomainException**, asignando códigos de error legibles por máquina para incidentes de autenticación, unicidad o autorización.
+
+En la @tbl:iam-domain-classes-members se detalla la especificación formal de atributos, firmas de métodos, modificadores de acceso y reglas de negocio para cada elemento de la Capa de Dominio.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Catálogo exhaustivo de clases, miembros, ámbitos y relaciones de la Capa de Dominio del Bounded Context IAM \& Tenancy} \label{tbl:iam-domain-classes-members} \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} Tenant} \\*
+\hline
+Atributos & Raíz de agregado. Administra razón social, RUC y sedes operativas. Generalización de \texttt{AbstractDomainAggregateRoot<\allowbreak TenantId>\allowbreak }. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{TenantId id} \newline - \texttt{String name} \newline - \texttt{String legalName} \newline - \texttt{TaxId taxId} \newline - \texttt{TenantStatus status} \newline - \texttt{String stripeCustomerId} \newline - \texttt{List<\allowbreak Branch>\allowbreak  branches} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Métodos factoría y estado & Invariantes: estado inicial PENDING. activación sujeta a RUC válido y sede principal. Transiciones semánticas de estado. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{Tenant create(...)} \newline - \texttt{void activate()} \newline - \texttt{void suspend(String reason)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Métodos de sedes & Composición 1 a 1..* con \textbf{Branch}. Asegura que el taller mantenga al menos una sede física activa en todo momento. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{Branch addBranch(name,\allowbreak  sunatCode,\allowbreak  loc,\allowbreak  radius)} \newline - \texttt{Optional<\allowbreak Branch>\allowbreak  findBranchById(BranchId)} \newline - \texttt{List<\allowbreak Branch>\allowbreak  activeBranches()} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} Branch} \\*
+\hline
+Atributos & Entidad de sede física. Delimitada espacialmente por \textbf{GeoPoint}. Vinculada al taller mediante \texttt{TenantId}. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{BranchId id} \newline - \texttt{TenantId tenantId} \newline - \texttt{String name} \newline - \texttt{String sunatCode} \newline - \texttt{GeoPoint location} \newline - \texttt{int geofenceRadiusMeters} \newline - \texttt{boolean isActive} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Métodos operativos & Invariantes: radio de geocerca estrictamente positivo. Evalúa proximidad física mediante la formulación de Haversine. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{void updateLocation(GeoPoint,\allowbreak  int)} \newline - \texttt{void updateDetails(String,\allowbreak  String)} \newline - \texttt{boolean isWithinGeofence(GeoPoint)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} User} \\*
+\hline
+Atributos & Raíz de agregado de identidad universal. Generalización de \texttt{AbstractDomainAggregateRoot<\allowbreak UserId>\allowbreak }. Composición 1 a 1 con \textbf{Profile} y 1 a 0..* con \textbf{VerificationToken}. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{UserId id} \newline - \texttt{EmailAddress email} \newline - \texttt{Password password} \newline - \texttt{AuthProvider authProvider} \newline - \texttt{String googleId} \newline - \texttt{String fcmToken} \newline - \texttt{UserStatus status} \newline - \texttt{Profile profile} \newline - \texttt{List<\allowbreak VerificationToken>\allowbreak  verificationTokens} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Métodos factoría & Factorías estáticas según proveedor. Asigna estado inicial PENDING\_VERIFICATION en flujo local o ACTIVE en federación. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{User registerWithLocalCredentials(...)} \newline - \texttt{User registerWithGoogle(...)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Métodos de seguridad & Invariantes: renovación de clave requiere hash previo válido. Suspensión inhabilita inmediatamente credenciales de acceso. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{void verifyEmail()} \newline - \texttt{void updatePassword(Password)} \newline - \texttt{void updateFcmToken(String)} \newline - \texttt{void suspend()} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Métodos de tokens & Emite y consume tokens criptográficos temporales. Invalida tokens canjeados de manera irrevocable. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{VerificationToken issueVerificationToken(TokenType,\allowbreak  Duration)} \newline - \texttt{boolean validateAndConsumeToken(String,\allowbreak  TokenType)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} Profile} \\*
+\hline
+Atributos y métodos & Entidad biográfica asociada en relación 1 a 1 con \textbf{User}. Centraliza nombres completos y teléfono internacional. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{UserId userId} \newline - \texttt{PersonName name} \newline - \texttt{PhoneNumber phone} \newline - \texttt{String avatarUrl} \newline - \texttt{void update(PersonName,\allowbreak  PhoneNumber)} \newline - \texttt{String fullName()} \\*
+\hline
+\textbf{Ámbito} & Privado / Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} VerificationToken} \\*
+\hline
+Atributos y métodos & Entidad efímera. Invariante: vigente si el indicador de uso es falso y la marca de tiempo actual no excede la expiración. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{UUID id} \newline - \texttt{UserId userId} \newline - \texttt{String tokenValue} \newline - \texttt{TokenType type} \newline - \texttt{Instant expiresAt} \newline - \texttt{boolean isUsed} \newline - \texttt{boolean isValid()} \newline - \texttt{void consume()} \\*
+\hline
+\textbf{Ámbito} & Privado / Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} TenantMembership} \\*
+\hline
+Atributos & Raíz de agregado de vinculación laboral. Conecta un \textbf{Tenant} con un \textbf{User}. Agregación 1 a 1..* con \textbf{Role}. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{TenantMembershipId id} \newline - \texttt{TenantId tenantId} \newline - \texttt{UserId userId} \newline - \texttt{MembershipStatus status} \newline - \texttt{SalaryType salaryType} \newline - \texttt{Money baseSalary} \newline - \texttt{Set<\allowbreak Role>\allowbreak  assignedRoles} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Métodos de roles & Invariantes: restringe la asignación a roles del mismo taller o de alcance global. Evalúa privilegios atómicos. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{void assignRole(Role)} \newline - \texttt{void revokeRole(RoleId)} \newline - \texttt{boolean hasPermission(String)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Métodos contractuales & Invariantes: compensación monetaria no negativa. Gestiona el alta, cese o reactivación laboral del operario. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{void updateCompensation(SalaryType,\allowbreak  Money)} \newline - \texttt{void activate()} \newline - \texttt{void deactivate()} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} Role} \\*
+\hline
+Atributos & Raíz de agregado de seguridad RBAC. Identificador \texttt{tenantId} nulo indica rol global. Agregación 1 a 1..* con \textbf{Permission}. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{RoleId id} \newline - \texttt{TenantId tenantId} \newline - \texttt{String name} \newline - \texttt{String description} \newline - \texttt{boolean isSystemRole} \newline - \texttt{Set<\allowbreak Permission>\allowbreak  permissions} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Métodos operativos & Invariantes: roles predefinidos del sistema son inmutables frente a supresión. Roles locales gestionados por el taller. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{Role defineTenantRole(...)} \newline - \texttt{Role defineSystemRole(...)} \newline - \texttt{void grantPermission(Permission)} \newline - \texttt{void revokePermission(PermissionId)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} Permission} \\*
+\hline
+Atributos y métodos & Entidad de privilegio atómico inmutable. Representa la acción autorizada bajo formato jerárquico. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{PermissionId id} \newline - \texttt{String name} \newline - \texttt{String description} \newline - \texttt{String category} \newline - \texttt{Permission of(...)} \\*
+\hline
+\textbf{Ámbito} & Privado / Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} Invitation} \\*
+\hline
+Atributos y métodos & Raíz de agregado para incorporación de usuarios. Invariante: aceptación exige estado PENDING y plazo vigente. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{InvitationId id} \newline - \texttt{TenantId tenantId} \newline - \texttt{EmailAddress email} \newline - \texttt{RoleId roleId} \newline - \texttt{String token} \newline - \texttt{InvitationStatus status} \newline - \texttt{Instant expiresAt} \newline - \texttt{void accept()} \newline - \texttt{void revoke()} \\*
+\hline
+\textbf{Ámbito} & Privado / Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} Password} \\*
+\hline
+Atributo y factoría & Objeto de valor inmutable en Java Record. Resguarda el hash BCrypt e impide la fuga de claves en memoria. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{String hashedValue} \newline - \texttt{Password fromHash(String)} \\*
+\hline
+\textbf{Ámbito} & Privado / Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} PersonName} \\*
+\hline
+Atributos y métodos & Objeto de valor inmutable en Java Record. Normaliza nombres y apellidos de contacto personal. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{String firstName} \newline - \texttt{String lastName} \newline - \texttt{PersonName of(String,\allowbreak  String)} \newline - \texttt{String fullName()} \\*
+\hline
+\textbf{Ámbito} & Privado / Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} BranchId, TenantMembershipId, RoleId, PermissionId, InvitationId} \\*
+\hline
+Atributo value y factoría & Registros inmutables que realizan la interfaz \texttt{TypedId<\allowbreak UUID>\allowbreak }, confiriendo tipado estricto a identificadores de entidad. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{UUID value} \newline - \texttt{of(UUID)} \\*
+\hline
+\textbf{Ámbito} & Privado / Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} TenantStatus, UserStatus, AuthProvider, TokenType, MembershipStatus, SalaryType, InvitationStatus} \\*
+\hline
+Valores constantes & Tipos enumerados que gobiernan las transiciones de estado, esquemas de retribución y canales de federación. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{Enumeraciones de dominio} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} TenantRepository, UserRepository, BranchRepository, TenantMembershipRepository, RoleRepository, PermissionRepository, InvitationRepository} \\*
+\hline
+Firmas de acceso persistente & Puertos de persistencia para operaciones atómicas de lectura y escritura, desacoplados del motor de persistencia. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{Interfaces de repositorio} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} Jerarquía de Excepciones de Dominio} \\*
+\hline
+Constructores tipados & Excepciones semánticas no comprobadas que portan códigos de error normalizados para respuestas HTTP 4xx. \\*
+\hline
+\textbf{Firma o Tipo} & Subclases de \texttt{DomainException} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Elaboración propia en base al diseño táctico de dominio y la especificación UML de la solución.
+
+A partir del modelo estático ilustrado en la @fig:class-diagram-iam y desglosado en la @tbl:iam-domain-classes-members, se identifican tres fundamentos de ingeniería de software que respaldan la solidez y seguridad de la plataforma:
+
+- **Desacoplamiento entre Identidad Universal y Membresía Multitenant:**
+  El diseño separa la existencia ontológica del individuo en **User** de su vínculo laboral o administrativo formalizado en **TenantMembership**. Esta división permite que un mismo técnico u operario acceda a múltiples talleres automotrices con credenciales federadas centralizadas, desempeñando roles y esquemas remunerativos independientes sin provocar inconsistencias en los datos ni acoplar las cuentas personales a la estructura societaria del taller.
+
+- **Validación Geodésica de Geocercas mediante la Ecuación de Haversine:**
+  Para verificar la presencia del mecánico en las instalaciones antes de convalidar el registro de asistencia o permitir intervenciones mecánicas, el método *isWithinGeofence()* calcula la distancia esférica entre la posición del dispositivo móvil $(\phi_u, \lambda_u)$ y la coordenada central de la sede física $(\phi_b, \lambda_b)$ sobre un radio terrestre medio $R = 6\,371\,000 \text{ m}$:
+  $$d = 2 R \arcsin \left( \sqrt{\sin^2\left(\frac{\Delta\phi}{2}\right) + \cos(\phi_b)\cos(\phi_u)\sin^2\left(\frac{\Delta\lambda}{2}\right)} \right)$$
+  donde $\Delta\phi = \phi_u - \phi_b$ y $\Delta\lambda = \lambda_u - \lambda_b$ se computan en radianes. Si la distancia resultante $d$ es menor o igual al radio asignado en **geofenceRadiusMeters**, la operación se aprueba en el agregado sin requerir cálculos geoespaciales externos en base de datos.
+
+- **Encapsulamiento Criptográfico e Invariantes Tributarias:**
+  La integridad del sistema se preserva mediante constructores compactos y objetos de valor inmutables. El objeto **TaxId** evalúa el algoritmo ponderado de Módulo 11 de la SUNAT sobre los 11 dígitos del RUC, abortando la creación del taller ante numeraciones inválidas. A su vez, el objeto **Password** restringe el almacenamiento a hashes BCrypt con salting adaptativo, mientras que las entidades **VerificationToken** e **Invitation** garantizan la validez temporal de los procesos de autenticación e incorporación, previniendo ataques de reutilización mediante revocación atómica tras su primer consumo.
 
 
 
 ##### 2.6.2.6.2. *Bounded Context Database Design Diagram*
+
+El diseño de persistencia del Bounded Context IAM & Tenancy materializa el modelo de dominio en un esquema relacional enfocado en garantizar aislamiento de datos, consistencia transaccional y disponibilidad continua. La persistencia se distribuye en dos componentes físicos complementarios: la base de datos central PostgreSQL 16 para el backend de la plataforma (**API Application**) y el motor relacional embebido SQLite 3 para la aplicación técnica móvil de taller (**Mobile Workshop**).
+
+En la @fig:database-diagram-iam se presenta el Diagrama Entidad-Relación físico para la persistencia del Bounded Context IAM & Tenancy en sus dos entornos operativos de despliegue: la base de datos central PostgreSQL 16 de la API de backend y el motor relacional local SQLite 3 de la aplicación móvil de taller.
+
+![Diagrama Entidad-Relación de Base de Datos para el Bounded Context IAM & Tenancy (PostgreSQL 16 y SQLite 3)](report/assets/database-diagrams/database-diagram-iam.png){#fig:database-diagram-iam}
+
+*Nota.* Elaboración propia en base al diseño físico de persistencia y el estándar PlantUML ERD.
+
+- **Subsistema de Tenancy y Sedes Físicas:**
+  Gobierna la jerarquía organizacional de la plataforma mediante las tablas **tenants** y **branches**. La tabla **tenants** representa la persona jurídica del taller automotriz, resguardando su razón social, identificador tributario único validado y estado de suscripción. A su vez, la tabla **branches** modela los establecimientos físicos y almacenes anexos, incorporando coordenadas geodésicas en latitud y longitud junto con el radio métrico de geocerca para delimitar el perímetro espacial del taller.
+
+- **Subsistema de Identidad Universal y Credenciales:**
+  Administra el ciclo de vida ontológico del usuario mediante las tablas **users**, **profiles** y **verification_tokens**. La tabla **users** centraliza el acceso unificado a través de correo electrónico y contraseñas protegidas con el algoritmo criptográfico BCrypt o identificadores federados OAuth2. La tabla **profiles** preserva la información demográfica personal en una relación uno a uno, mientras que **verification_tokens** gestiona códigos de seguridad de un solo uso con caducidad temporal para confirmaciones y reajustes de clave.
+
+- **Subsistema de Contratación Laboral y Seguridad RBAC:**
+  Desacopla la identidad del personal mediante las tablas **tenant_memberships**, **roles**, **permissions**, **membership_roles**, **role_permissions** e **invitations**. La tabla **tenant_memberships** formaliza el vínculo contractual y régimen remunerativo del colaborador en un taller específico. El esquema de control de accesos se normaliza mediante las tablas asociativas **membership_roles** y **role_permissions**, que enlazan roles de sistema o personalizados con el catálogo canónico de operaciones atómicas en **permissions**, mientras **invitations** orquesta el enrolamiento seguro de colaboradores mediante tokens de alta entropía.
+
+- **Persistencia Técnica Desconectada en SQLite 3:**
+  Otorga autonomía operacional al cliente móvil de taller mediante las tablas locales **auth_session** y **local_permissions_cache**. La tabla **auth_session** resguarda en el almacenamiento seguro del dispositivo las credenciales de acceso JWT activas, el contexto de membresía, los roles asignados y las coordenadas geográficas de la sucursal asignada. Por su parte, la tabla **local_permissions_cache** conserva una copia sincronizada de las autorizaciones operativas, facultando la validación inmediata de privilegios y el cómputo de proximidad física en fosos mecánicos sin depender de señal celular.
+
+A partir de la arquitectura relacional definida en el diagrama de persistencia, en la @tbl:iam-database-objects se cataloga la totalidad de las tablas y objetos físicos que conforman el modelo de datos, detallando el producto donde residen, sus atributos cardinales, restricciones de integridad, estrategias de indexación y su contribución al aislamiento de información.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.1cm} | >{\raggedright\arraybackslash}p{10.3cm} |}
+\caption{Catálogo exhaustivo de tablas, objetos de base de datos, restricciones e índices físicos del Bounded Context IAM \& Tenancy} \label{tbl:iam-database-objects} \\
+\hline
+\thfirst{Aspecto de Persistencia} & \thcell{Especificación Físico-Relacional} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Persistencia} & \thcell{Especificación Físico-Relacional} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{tenants}} \\*
+\hline
+\textbf{Motor y Producto} & PostgreSQL 16 (API) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Entidad raíz organizacional del taller automotriz. Delimita la frontera lógica superior de multi-inquilino en toda la base de datos. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{id (UUID)}, \texttt{name (VARCHAR)}, \texttt{legal\_name (VARCHAR)}, \texttt{tax\_id (VARCHAR)}, \texttt{status (VARCHAR)}, \texttt{stripe\_customer\_id (VARCHAR)}, \texttt{created\_at (TIMESTAMPTZ)}, \texttt{updated\_at (TIMESTAMPTZ)}, \texttt{version (BIGINT)}, \texttt{deleted\_at (TIMESTAMPTZ).} \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_tenants (id) \newline - UK: uk\_tenants\_tax\_id (tax\_id) \newline - CHECK: chk\_tenant\_status \newline - Índices B-Tree: idx\_tenants\_tax\_id, idx\_tenants\_status \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{branches}} \\*
+\hline
+\textbf{Motor y Producto} & PostgreSQL 16 (API) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Modela las sedes físicas y talleres. Aislamiento por discriminador tenant\_id y soporte espacial para delimitación de geocercas satelitales. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{id (UUID)}, \texttt{tenant\_id (UUID)}, \texttt{name (VARCHAR)}, \texttt{sunat\_code (VARCHAR)}, \texttt{latitude (DECIMAL)}, \texttt{longitude (DECIMAL)}, \texttt{geofence\_radius\_m (INTEGER)}, \texttt{is\_active (BOOLEAN)}, auditoría transversal. \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_branches (id) \newline - FK: fk\_branches\_tenant\_id (tenant\_id) \newline - CHECK: chk\_geofence\_radius (geofence\_radius\_m >= 10) \newline - Índices B-Tree: idx\_branches\_tenant\_id, idx\_branches\_coords \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{users}} \\*
+\hline
+\textbf{Motor y Producto} & PostgreSQL 16 (API) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Identidad universal del individuo transversal a múltiples talleres. Desacoplada del inquilino para permitir credenciales federadas. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{id (UUID)}, \texttt{email (VARCHAR)}, \texttt{password\_hash (VARCHAR)}, \texttt{auth\_provider (VARCHAR)}, \texttt{google\_id (VARCHAR)}, \texttt{fcm\_token (VARCHAR)}, \texttt{status (VARCHAR)}, auditoría transversal. \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_users (id) \newline - UK: uk\_users\_email (email) \newline - CHECK: chk\_users\_auth\_provider, chk\_users\_status \newline - Índices: idx\_users\_email, idx\_users\_google\_id (parcial) \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{profiles}} \\*
+\hline
+\textbf{Motor y Producto} & PostgreSQL 16 (API) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Información demográfica personal en relación uno a uno con users. Segregación asociada al ciclo de vida del usuario. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{user\_id (UUID)}, \texttt{first\_name (VARCHAR)}, \texttt{last\_name (VARCHAR)}, \texttt{phone\_number (VARCHAR)}, \texttt{avatar\_url (VARCHAR)}, \texttt{created\_at (TIMESTAMPTZ)}, \texttt{updated\_at (TIMESTAMPTZ).} \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_profiles (user\_id) \newline - FK: fk\_profiles\_user\_id hacia users(id) con ON DELETE CASCADE \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{verification\_tokens}} \\*
+\hline
+\textbf{Motor y Producto} & PostgreSQL 16 (API) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Custodia de códigos de verificación y recuperación. Invalidación atómica tras consumo para prevenir ataques de repetición. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{id (UUID)}, \texttt{user\_id (UUID)}, \texttt{token (VARCHAR)}, \texttt{type (VARCHAR)}, \texttt{expires\_at (TIMESTAMPTZ)}, \texttt{is\_used (BOOLEAN)}, \texttt{created\_at (TIMESTAMPTZ)}, \texttt{updated\_at (TIMESTAMPTZ).} \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_verification\_tokens (id) \newline - FK: fk\_verification\_tokens\_user\_id hacia users(id) \newline - CHECK: chk\_token\_type \newline - Índice compuesto: idx\_verification\_tokens\_lookup \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{tenant\_memberships}} \\*
+\hline
+\textbf{Motor y Producto} & PostgreSQL 16 (API) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Contrato laboral del usuario en un taller específico. Aislamiento estricto por tenant\_id garantizando particionamiento de datos. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{id (UUID)}, \texttt{tenant\_id (UUID)}, \texttt{user\_id (UUID)}, \texttt{status (VARCHAR)}, \texttt{salary\_type (VARCHAR)}, \texttt{base\_salary (DECIMAL)}, auditoría transversal. \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_tenant\_memberships (id) \newline - FK: fk\_memberships\_tenant\_id, fk\_memberships\_user\_id \newline - UK: uk\_memberships\_tenant\_user \newline - CHECK: chk\_membership\_status, chk\_base\_salary (base\_salary >= 0.00) \newline - Índices: idx\_memberships\_tenant\_status, idx\_memberships\_user\_id \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{roles}} \\*
+\hline
+\textbf{Motor y Producto} & PostgreSQL 16 (API) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Definición de roles de seguridad. Roles de sistema con tenant\_id nulo compartidos. roles personalizados aislados por tenant\_id. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{id (UUID)}, \texttt{tenant\_id (UUID)}, \texttt{name (VARCHAR)}, \texttt{description (VARCHAR)}, \texttt{is\_system\_role (BOOLEAN)}, auditoría transversal. \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_roles (id) \newline - FK: fk\_roles\_tenant\_id con ON DELETE CASCADE \newline - CHECK: chk\_roles\_tenant\_or\_system \newline - Índice B-Tree: idx\_roles\_tenant\_name \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{permissions}} \\*
+\hline
+\textbf{Motor y Producto} & PostgreSQL 16 (API) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Catálogo canónico e inmutable de operaciones atómicas del sistema agrupadas por Bounded Context. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{id (UUID)}, \texttt{name (VARCHAR)}, \texttt{description (VARCHAR)}, \texttt{category (VARCHAR).} \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_permissions (id) \newline - UK: uk\_permissions\_name (name) \newline - Índice B-Tree: idx\_permissions\_category \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{membership\_roles}} \\*
+\hline
+\textbf{Motor y Producto} & PostgreSQL 16 (API) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Tabla asociativa que adjudica roles a miembros laborales dentro del alcance del taller empleador. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{membership\_id (UUID)}, \texttt{role\_id (UUID)}, \texttt{granted\_at (TIMESTAMPTZ).} \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_membership\_roles (membership\_id, role\_id) \newline - FK: fk\_membership\_roles\_membership, fk\_membership\_roles\_role con ON DELETE CASCADE \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{role\_permissions}} \\*
+\hline
+\textbf{Motor y Producto} & PostgreSQL 16 (API) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Tabla asociativa que vincula permisos canónicos a roles de sistema o específicos de taller. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{role\_id (UUID)}, \texttt{permission\_id (UUID)}, \texttt{granted\_at (TIMESTAMPTZ).} \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_role\_permissions (role\_id, permission\_id) \newline - FK: fk\_role\_permissions\_role, fk\_role\_permissions\_permission con ON DELETE CASCADE \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{invitations}} \\*
+\hline
+\textbf{Motor y Producto} & PostgreSQL 16 (API) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Enrolamiento de colaboradores por correo transaccional. Aislamiento por tenant\_id y token de alta entropía. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{id (UUID)}, \texttt{tenant\_id (UUID)}, \texttt{email (VARCHAR)}, \texttt{target\_role\_id (UUID)}, \texttt{token (VARCHAR)}, \texttt{status (VARCHAR)}, \texttt{expires\_at (TIMESTAMPTZ)}, auditoría transversal. \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_invitations (id) \newline - FK: fk\_invitations\_tenant\_id con ON DELETE CASCADE, fk\_invitations\_role\_id \newline - UK: uk\_invitations\_token \newline - CHECK: chk\_invitations\_status \newline - Índices: idx\_invitations\_tenant\_status, idx\_invitations\_token \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{auth\_session}} \\*
+\hline
+\textbf{Motor y Producto} & SQLite 3 (Mobile) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Persistencia local de credenciales, roles, tokens y sede en el terminal móvil para operación desconectada sin red. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{user\_id (TEXT)}, \texttt{tenant\_id (TEXT)}, \texttt{membership\_id (TEXT)}, \texttt{email (TEXT)}, \texttt{full\_name (TEXT)}, \texttt{avatar\_url (TEXT)}, \texttt{access\_token (TEXT)}, \texttt{refresh\_token (TEXT)}, \texttt{cached\_roles (TEXT)}, \texttt{cached\_permissions (TEXT)}, \texttt{branch\_id (TEXT)}, \texttt{branch\_latitude (REAL)}, \texttt{branch\_longitude (REAL)}, \texttt{geofence\_radius\_m (INTEGER)}, \texttt{session\_expires\_at (TEXT)}, \texttt{last\_authenticated\_at (TEXT).} \\*
+\hline
+\textbf{Constraints e Índices} & PK: pk\_auth\_session (user\_id). \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{local\_permissions\_cache}} \\*
+\hline
+\textbf{Motor y Producto} & SQLite 3 (Mobile) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Caché local de autorizaciones operativas para inspección y renderizado reactivo de la interfaz móvil en frío. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{permission\_name (TEXT)}, \texttt{category (TEXT)}, \texttt{description (TEXT)}, \texttt{synced\_at (TEXT).} \\*
+\hline
+\textbf{Constraints e Índices} & PK: pk\_local\_permissions\_cache (permission\_name). \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{auditable\_abstract\_entity}} \\*
+\hline
+\textbf{Motor y Producto} & PostgreSQL 16 (API) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Arquetipo transversal inyectado en entidades del backend para garantizar auditoría temporal, bloqueo optimista y aislamiento por tenant\_id. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{id (UUID)}, \texttt{tenant\_id (UUID)}, \texttt{created\_at (TIMESTAMPTZ)}, \texttt{updated\_at (TIMESTAMPTZ)}, \texttt{version (BIGINT)}, \texttt{deleted\_at (TIMESTAMPTZ).} \\*
+\hline
+\textbf{Constraints e Índices} & - PK técnica: id \newline - FK lógica: tenant\_id. Superclase MappedSuperclass JPA \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Elaboración propia en base al diseño relacional y la especificación física de persistencia.
+
+A partir de la estructura formalizada en la @fig:database-diagram-iam y la @tbl:iam-database-objects, se identifican tres fundamentos de ingeniería de software que respaldan la solidez, seguridad y resiliencia de la persistencia:
+
+- **Aislamiento Multi-Inquilino y Mitigación de Fuga de Datos:**
+  La arquitectura física delega la segregación de inquilinos en el discriminador indexado **tenant_id**, presente en toda tabla sujeta a fronteras corporativas. Esta clave de particionamiento lógico, respaldada por índices B-Tree específicos, garantiza que los filtros de persistencia descarten de forma determinista tuplas ajenas al taller en sesión, erradicando vectores de fuga de información entre organizaciones concurrentes. Asimismo, la inclusión del atributo secuencial **version** habilita el control de concurrencia optimista en el motor relacional, bloqueando sobreescrituras accidentales cuando múltiples usuarios interactúan en simultáneo sobre una misma entidad.
+
+- **Normalización 3NF del Esquema RBAC y Auditoría Transversal Heredada:**
+  El diseño desacopla las credenciales globales del individuo respecto a sus facultades de acceso mediante la descomposición en Tercera Forma Normal (3NF) del modelo de seguridad. La articulación de **tenant_memberships**, **roles** y **permissions** a través de tablas asociativas previene anomalías de actualización y asegura la propagación inmediata de cambios en privilegios sin redundancia estructural. Además, la herencia uniforme del arquetipo **auditable_abstract_entity** mediante superclases JPA proporciona marcas temporales inmutables en UTC y soporte para borrado lógico, consolidando una pista de auditoría forense indispensable para el cumplimiento normativo.
+
+- **Autonomía Operativa Desconectada en SQLite 3 para Mobile Workshop:**
+  La persistencia local en el dispositivo móvil neutraliza las contingencias de conectividad en zonas con apantallamiento electromagnético o fosos mecánicos profundos. Mediante la tabla **auth_session**, el cliente técnico almacena credenciales criptográficas JWT y las coordenadas de la sede de trabajo, permitiendo evaluar la proximidad física mediante geocercas satelitales directamente en el dispositivo antes de autorizar el fichaje. Al complementar esta estructura con **local_permissions_cache**, la interfaz de usuario convalida privilegios de manera instantánea en frío, asegurando la continuidad de la jornada operativa sin latencia de red.
 
 
 

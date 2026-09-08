@@ -40,6 +40,7 @@ outbox_comp -> db "Lee mensajes pendientes y actualiza estados de despacho vía"
 
 // Relaciones de componentes hacia sistemas externos
 iam_comp -> resend "Envía correos de invitación y códigos OTP vía" "HTTPS/API"
+iam_comp -> google_identity "Valida certificados públicos y tokens de Google OAuth2 vía" "HTTPS/API"
 hr_comp -> google_maps "Valida distancias contra la sucursal por fórmula Haversine vía" "HTTPS/API"
 invoicing_comp -> nubefact "Delega validación fiscal de comprobantes SUNAT vía" "HTTPS/API"
 billing_comp -> stripe "Procesa cobros y valida webhooks idempotentes vía" "HTTPS/API"

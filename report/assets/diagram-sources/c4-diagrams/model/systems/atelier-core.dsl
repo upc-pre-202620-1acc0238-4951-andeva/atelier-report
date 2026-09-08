@@ -9,6 +9,7 @@ group "Andeva" {
         api = container "API Application" "Monolito modular con DDD, Clean Architecture, CQRS, ACL y Outbox Pattern para ERP, MRO, IoT y facturación." "Java 24, Spring Boot 3.5, Caffeine" "BackendApi" {
             !include ../components/api-components.dsl
             !include ../components/shared-components.dsl
+            !include ../components/iam-components.dsl
         }
         db = container "Database" "Base de datos multi-tenant relacional y de series de tiempo para telemetría vehicular." "PostgreSQL 16, TimescaleDB" "Database"
     }

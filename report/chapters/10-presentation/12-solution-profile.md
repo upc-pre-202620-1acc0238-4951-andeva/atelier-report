@@ -103,11 +103,11 @@ Lo que los productos y servicios existentes no logran abordar es la disponibilid
 
 Nuestro producto abordará esta brecha mediante **Atelier Workshop**, una plataforma SaaS B2B integral desarrollada bajo principios de Domain-Driven Design (DDD). Atelier Workshop capacita al taller para conectar escáneres OBD-II estándar del mercado, ingestando telemetría en series temporales para agilizar diagnósticos preliminares y disparar alertas predictivas en el panel de control del taller. Simultáneamente, articula dos interfaces especializadas por rol: un panel web gerencial para el gestor del taller y una aplicación móvil de uso rudo y arquitectura *Offline-First* para el mecánico en bahía.
 
-**Nuestro enfoque inicial estará en** los dos perfiles operativos internos de talleres automotrices independientes (MYPEs) de Lima Metropolitana: los gestores y propietarios de talleres y los técnicos mecánicos automotrices.
+Nuestro enfoque inicial estará en los dos perfiles operativos internos de talleres automotrices independientes (MYPEs) de Lima Metropolitana: los gestores y propietarios de talleres y los técnicos mecánicos automotrices.
 
-**¿Cómo podríamos** dotar a los administradores y técnicos mecánicos de talleres MYPE con una herramienta digital integrada que elimine la fricción operativa y probatoria en bahía, asegure la rentabilidad real de las reparaciones mediante costeo FIFO y habilite diagnósticos telemétricos predictivos sin requerir inversiones prohibitivas en hardware propietario?
+¿Cómo podríamos dotar a los administradores y técnicos mecánicos de talleres MYPE con una herramienta digital integrada que elimine la fricción operativa y probatoria en bahía, asegure la rentabilidad real de las reparaciones mediante costeo FIFO y habilite diagnósticos telemétricos predictivos sin requerir inversiones prohibitivas en hardware propietario?
 
-**Sabremos que tenemos éxito cuando observemos** los siguientes cambios medibles en el comportamiento de nuestro público objetivo:
+Sabremos que tenemos éxito cuando observemos los siguientes cambios medibles en el comportamiento de nuestro público objetivo:
 
 1. Una **reducción de al menos el 40%** en el tiempo promedio de recepción vehicular y emisión de diagnóstico preliminar en bahía, gracias a los datos telemétricos precargados y al flujo digital de órdenes de trabajo.
 2. Al menos el **35% de los servicios de mantenimiento preventivo** gestionados en el taller se originen a partir de alertas tempranas detectadas por el monitoreo telemétrico de anomalías (DTCs y desviaciones de PIDs).
@@ -217,7 +217,7 @@ Nuestro producto abordará esta brecha mediante **Atelier Workshop**, una plataf
 
 #### 1.2.2.4. Lean UX Canvas
 
-![Matriz del Lean UX Canvas para el Ecosistema Atelier Workshop](../../assets/lean-ux/Lean-ux-cnava.jpg)
+![Matriz del Lean UX Canvas para el Ecosistema Atelier Workshop](assets/lean-ux/Lean-ux-cnava.jpg)
 
 *Enlace al tablero interactivo:* [Ver en Miro](https://miro.com/welcomeonboard/ZEZJcWF2dElmbVAwcG1VV2JxUEc2RHpsSkxHL25uNE9RcFBVaTdxekxqNTlxK2xmczRXTDVXTzNvS2NDMXdKUkRjQmxNMDZhUmpvQlZ0cEllS21yMHZZMDFnbHRlL0pwSHhNR2l0WmhaL0ZNNytYQzhyb0dIWkpQaFN5WkNaMkNzVXVvMm53MW9OWFg5bkJoVXZxdFhRPT0hdjE=?share_link_id=454241249260)
 

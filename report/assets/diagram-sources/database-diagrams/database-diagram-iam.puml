@@ -1,0 +1,382 @@
+@startuml database-diagram-iam
+title <size:16>Diagrama de Base de Datos (ERD) - Bounded Context IAM & Tenancy</size>\n<size:11>Persistencia Relacional Multi-Producto: PostgreSQL 16 (API Application) y SQLite 3 (Mobile Workshop)</size>
+
+' Configuraciones visuales y de diseño profesional
+hide circle
+skinparam monochrome false
+skinparam shadowing false
+skinparam roundcorner 6
+skinparam linetype ortho
+skinparam nodesep 70
+skinparam ranksep 55
+skinparam defaultFontName "Helvetica", "Arial", sans-serif
+skinparam defaultFontSize 11
+skinparam defaultFontColor #2C3E50
+skinparam arrowColor #34495E
+skinparam arrowThickness 1.3
+skinparam packageBorderColor #7F8C8D
+skinparam packageFontSize 12
+skinparam packageFontStyle bold
+
+skinparam entity {
+    BackgroundColor #FFFFFF
+    BorderColor #34495E
+    HeaderBackgroundColor #EAEDED
+}
+
+' ==============================================================================
+' PRODUCTO 1: API APPLICATION (BACKEND CENTRAL - POSTGRESQL 16)
+' ==============================================================================
+package "PostgreSQL 16 (API Application - Backend Central)" as pg_backend #F8F9F9 {
+
+    ' ==========================================================================
+    ' COLUMNA 1: ARQUETIPO JPA, ORGANIZACIÓN Y SEDES (TENANCY)
+    ' ==========================================================================
+    entity "auditable_abstract_entity" as auditable_abstract_entity <<archetype, JPA>> #E8F8F5 {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Propiedades del Arquetipo JPA:</b>
+        + Clave primaria técnica UUID v4
+        + Aislamiento multi-tenant obligatorio (tenant_id)
+        + Control de concurrencia optimista (version)
+        + Borrado lógico auditable (deleted_at)
+        + Heredado físicamente por entidades raíz de negocio:
+          tenants, branches, users, tenant_memberships,
+          roles e invitations (@MappedSuperclass)
+    }
+
+    entity "tenants" as tenants <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * name : VARCHAR(100)
+        * legal_name : VARCHAR(150)
+        * tax_id : VARCHAR(20) <<UK>>
+        * status : VARCHAR(20)
+        stripe_customer_id : VARCHAR(100)
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_tenants : PRIMARY KEY (id)
+        + uk_tenants_tax_id : UNIQUE (tax_id)
+        + chk_tenant_status : CHECK (status IN ('active', 'suspended', 'pending'))
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_tenants_tax_id : (tax_id)
+        + idx_tenants_status : (status)
+    }
+
+    entity "branches" as branches <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        * name : VARCHAR(100)
+        sunat_code : VARCHAR(10)
+        latitude : DECIMAL(10,8)
+        longitude : DECIMAL(11,8)
+        * geofence_radius_m : INTEGER
+        * is_active : BOOLEAN
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_branches : PRIMARY KEY (id)
+        + fk_branches_tenant_id : FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+        + chk_geofence_radius : CHECK (geofence_radius_m >= 10)
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_branches_tenant_id : (tenant_id)
+        + idx_branches_coords : (latitude, longitude)
+    }
+
+    entity "invitations" as invitations <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        * email : VARCHAR(150)
+        * target_role_id : UUID <<FK>>
+        * token : VARCHAR(255) <<UK>>
+        * status : VARCHAR(20)
+        * expires_at : TIMESTAMPTZ
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_invitations : PRIMARY KEY (id)
+        + fk_invitations_tenant_id : FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+        + fk_invitations_role_id : FOREIGN KEY (target_role_id) REFERENCES roles(id)
+        + uk_invitations_token : UNIQUE (token)
+        + chk_invitations_status : CHECK (status IN ('pending', 'accepted', 'expired', 'revoked'))
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_invitations_tenant_status : (tenant_id, status)
+        + idx_invitations_token : (token)
+    }
+
+    ' ==========================================================================
+    ' COLUMNA 2: MEMBRESÍAS, CONTRATOS Y CONTROL DE ACCESOS (RBAC)
+    ' ==========================================================================
+    entity "tenant_memberships" as tenant_memberships <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        * user_id : UUID <<FK>>
+        * status : VARCHAR(20)
+        * salary_type : VARCHAR(20)
+        * base_salary : DECIMAL(10,2)
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_tenant_memberships : PRIMARY KEY (id)
+        + fk_memberships_tenant_id : FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+        + fk_memberships_user_id : FOREIGN KEY (user_id) REFERENCES users(id)
+        + uk_memberships_tenant_user : UNIQUE (tenant_id, user_id)
+        + chk_membership_status : CHECK (status IN ('active', 'inactive'))
+        + chk_membership_salary_type : CHECK (salary_type IN ('fixed', 'hourly'))
+        + chk_base_salary : CHECK (base_salary >= 0.00)
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_memberships_tenant_status : (tenant_id, status)
+        + idx_memberships_user_id : (user_id)
+    }
+
+    entity "membership_roles" as membership_roles <<table, PostgreSQL>> #FFFFFF {
+        * membership_id : UUID <<PK, FK>>
+        * role_id : UUID <<PK, FK>>
+        --
+        * granted_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_membership_roles : PRIMARY KEY (membership_id, role_id)
+        + fk_membership_roles_membership : FOREIGN KEY (membership_id) REFERENCES tenant_memberships(id) ON DELETE CASCADE
+        + fk_membership_roles_role : FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
+    }
+
+    entity "roles" as roles <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        tenant_id : UUID <<FK>>
+        * name : VARCHAR(100)
+        * description : VARCHAR(255)
+        * is_system_role : BOOLEAN
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_roles : PRIMARY KEY (id)
+        + fk_roles_tenant_id : FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+        + chk_roles_tenant_or_system : CHECK ((is_system_role = TRUE AND tenant_id IS NULL) OR (is_system_role = FALSE AND tenant_id IS NOT NULL))
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_roles_tenant_name : (tenant_id, name)
+    }
+
+    entity "role_permissions" as role_permissions <<table, PostgreSQL>> #FFFFFF {
+        * role_id : UUID <<PK, FK>>
+        * permission_id : UUID <<PK, FK>>
+        --
+        * granted_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_role_permissions : PRIMARY KEY (role_id, permission_id)
+        + fk_role_permissions_role : FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
+        + fk_role_permissions_permission : FOREIGN KEY (permission_id) REFERENCES permissions(id) ON DELETE CASCADE
+    }
+
+    entity "permissions" as permissions <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * name : VARCHAR(100) <<UK>>
+        * description : VARCHAR(255)
+        * category : VARCHAR(50)
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_permissions : PRIMARY KEY (id)
+        + uk_permissions_name : UNIQUE (name)
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_permissions_category : (category)
+    }
+
+    ' ==========================================================================
+    ' COLUMNA 3: IDENTIDAD GLOBAL, PERFILES Y TOKENS
+    ' ==========================================================================
+    entity "users" as users <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * email : VARCHAR(150) <<UK>>
+        password_hash : VARCHAR(255)
+        * auth_provider : VARCHAR(20)
+        google_id : VARCHAR(255)
+        fcm_token : VARCHAR(255)
+        * status : VARCHAR(20)
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_users : PRIMARY KEY (id)
+        + uk_users_email : UNIQUE (email)
+        + chk_users_auth_provider : CHECK (auth_provider IN ('local', 'google'))
+        + chk_users_status : CHECK (status IN ('pending_verification', 'active', 'suspended'))
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_users_email : (email)
+        + idx_users_google_id : (google_id) WHERE google_id IS NOT NULL
+    }
+
+    entity "profiles" as profiles <<table, PostgreSQL>> #FFFFFF {
+        * user_id : UUID <<PK, FK>>
+        --
+        * first_name : VARCHAR(100)
+        * last_name : VARCHAR(100)
+        phone_number : VARCHAR(20)
+        avatar_url : VARCHAR(255)
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_profiles : PRIMARY KEY (user_id)
+        + fk_profiles_user_id : FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    }
+
+    entity "verification_tokens" as verification_tokens <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * user_id : UUID <<FK>>
+        * token : VARCHAR(255)
+        * type : VARCHAR(30)
+        * expires_at : TIMESTAMPTZ
+        * is_used : BOOLEAN
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_verification_tokens : PRIMARY KEY (id)
+        + fk_verification_tokens_user_id : FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        + chk_token_type : CHECK (type IN ('email_verification', 'password_reset', 'login_otp'))
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_verification_tokens_lookup : (user_id, token, type)
+    }
+
+    ' Disposición vertical forzada en Columnas
+    auditable_abstract_entity -[hidden]down-> tenants
+    tenants -[hidden]down-> branches
+    branches -[hidden]down-> invitations
+
+    tenant_memberships -[hidden]down-> membership_roles
+    membership_roles -[hidden]down-> roles
+    roles -[hidden]down-> role_permissions
+    role_permissions -[hidden]down-> permissions
+
+    users -[hidden]down-> profiles
+    profiles -[hidden]down-> verification_tokens
+
+    ' Disposición horizontal entre columnas de Backend
+    tenants -[hidden]right-> tenant_memberships
+    tenant_memberships -[hidden]right-> users
+
+    ' Relaciones de Herencia JPA
+    auditable_abstract_entity <|-- tenants : "herencia física JPA\n(@MappedSuperclass)"
+
+    ' Relaciones Cardinales de Integridad Referencial
+    tenants "1  " ||--o{ "0..* " branches : "posee sedes"
+    tenants "1  " ||--o{ "0..* " invitations : "emite"
+    tenants "0..1" ||--o{ "0..* " roles : "define roles"
+    tenants "1  " ||--o{ "0..* " tenant_memberships : "emplea"
+
+    users "1  " ||--|| "1  " profiles : "perfil demográfico"
+    users "1  " ||--o{ "0..* " verification_tokens : "recibe"
+    users "1  " ||--o{ "0..* " tenant_memberships : "contratado en"
+
+    tenant_memberships "1  " ||--o{ "0..* " membership_roles : "asigna rol"
+    roles "1  " ||--o{ "0..* " membership_roles : "concedido a"
+    roles "1  " ||--o{ "0..* " role_permissions : "agrupa"
+    permissions "1  " ||--o{ "0..* " role_permissions : "incluido en"
+    roles "1  " ||--o{ "0..* " invitations : "rol predeterminado"
+}
+
+' ==============================================================================
+' PRODUCTO 2: MOBILE WORKSHOP (CLIENTE TÉCNICO OFFLINE - SQLITE 3)
+' ==============================================================================
+package "SQLite 3 (Mobile Workshop - Cliente Técnico Offline)" as sqlite_mobile #FEFDE8 {
+
+    entity "auth_session" as auth_session <<table, SQLite>> #FEF9E7 {
+        * user_id : TEXT <<PK>>
+        --
+        * tenant_id : TEXT
+        * membership_id : TEXT
+        * email : TEXT
+        * full_name : TEXT
+        avatar_url : TEXT
+        * access_token : TEXT
+        * refresh_token : TEXT
+        * cached_roles : TEXT (JSON)
+        * cached_permissions : TEXT (JSON)
+        * branch_id : TEXT
+        branch_latitude : REAL
+        branch_longitude : REAL
+        * geofence_radius_m : INTEGER
+        * session_expires_at : TEXT (ISO8601)
+        * last_authenticated_at : TEXT (ISO8601)
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_auth_session : PRIMARY KEY (user_id)
+        --
+        <b>Propósito Operativo:</b>
+        + Almacenamiento seguro de sesión offline
+        + Validación instantánea de roles y permisos en frío
+        + Validación local de geocerca para marcación
+    }
+
+    entity "local_permissions_cache" as local_permissions_cache <<table, SQLite>> #FEF9E7 {
+        * permission_name : TEXT <<PK>>
+        --
+        * category : TEXT
+        * description : TEXT
+        * synced_at : TEXT (ISO8601)
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_local_permissions_cache : PRIMARY KEY (permission_name)
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_local_permissions_category : (category)
+        --
+        <b>Propósito Operativo:</b>
+        + Caché local de catálogo de permisos
+        + Control de autorización offline en patio
+    }
+
+    auth_session -[hidden]down-> local_permissions_cache
+}
+
+' Disposición horizontal entre paquetes
+users -[hidden]right-> auth_session
+pg_backend -[hidden]right-> sqlite_mobile
+
+' ==============================================================================
+' RELACIONES DE SINCRONIZACIÓN INTER-PRODUCTO
+' ==============================================================================
+auth_session .[#2980B9]left.> users : "<b>HTTPS REST OAuth2</b>\n(Token Refresh & Auth Sync)"
+local_permissions_cache .[#27AE60]left.> permissions : "<b>Sincronización Incremental</b>\n(Delta de catálogo de permisos)"
+
+@enduml
