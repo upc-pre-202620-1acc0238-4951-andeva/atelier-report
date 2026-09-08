@@ -168,9 +168,7 @@ En esta sección presentamos los registros de las entrevistas que hicimos para c
 </tbody>
 </table>
 
-
 ### 2.2.3. *Análisis de entrevistas*
-
 
 
 \newpage

@@ -14,7 +14,7 @@
 |0.15.0|06/09/2026|Teran Zavala, Mauricio Alejandro|Inserción de la primera entervista del segmento y todo el marco de las entrevistas
 |0.17.0|07/09/2026|Huamani Estefanero, Joel|Añadido de ***Bounded Context: Shared*** y documentación del backend.|
 |0.20.0|08/09/2026|Huamani Estefanero, Joel|Añadido de ***Bounded Context: Identity and Access Management (IAM) & Tenancy*** y documentación del backend.|
-|             |           |           |                                 |
+|0.20.0|08/09/2026| Teran Zavala, Mauricio Alejandro|Añadido de **User Persona** para ambos segementos|
 |             |           |           |                                 |
 
 \newpage
