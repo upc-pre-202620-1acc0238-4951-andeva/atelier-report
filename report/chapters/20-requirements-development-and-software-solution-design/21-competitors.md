@@ -4,26 +4,37 @@
 
 En esta sección se identifican, analizan y comparan las principales soluciones tecnológicas existentes en el mercado frente a nuestra propuesta de valor **Atelier** (específicamente a través de su plataforma SaaS B2B **Atelier Workshop**). Este estudio comparativo permite evaluar las fortalezas, debilidades y modelos operativos de los competidores directos e indirectos, con el objetivo de identificar oportunidades estratégicas y ventajas competitivas que permitan resolver eficientemente las necesidades de nuestros segmentos objetivo en el sector de micro y pequeñas empresas (MYPE) de mantenimiento, reparación y operaciones automotrices (MRO).
 
+\newpage
+
 ### 2.1.1. *Análisis Competitivo*
 
 A continuación, en la Tabla \ref{tbl:analisis-competitivo}, se presenta la matriz de análisis comparativo integral entre Atelier Workshop y tres competidores representativos del mercado: **Mi Taller CRM** (competidor directo local en Perú), **OK CAR** (competidor directo regional en Latinoamérica) y **Taller GP** (competidor indirecto internacional de nivel enterprise).
 
-\renewcommand{\arraystretch}{1.4}
-\setlength{\tabcolsep}{4pt}
-\begin{longtable}{|p{2.4cm}|p{3.2cm}|p{3.2cm}|p{3.2cm}|p{3.2cm}|}
+\small
+\renewcommand{\arraystretch}{1.25}
+\setlength{\tabcolsep}{3.5pt}
+\begin{longtable}{| >{\raggedright\arraybackslash}p{2.3cm} | >{\raggedright\arraybackslash}p{3.3cm} | >{\raggedright\arraybackslash}p{3.3cm} | >{\raggedright\arraybackslash}p{3.3cm} | >{\raggedright\arraybackslash}p{3.3cm} |}
 \caption{Matriz de Análisis Comparativo de Competidores} \label{tbl:analisis-competitivo} \\
 \hline
-\thfirst{Criterio} & \thcell{Atelier Workshop} & \thcell{Mi Taller CRM} & \thcell{OK CAR} & \thcell{Taller GP} \\
+\multicolumn{1}{|>{\centering\arraybackslash}p{2.3cm}|}{\textbf{Criterio}} & 
+\multicolumn{1}{>{\centering\arraybackslash}p{3.3cm}|}{\vspace{0.1cm}\includegraphics[width=2.5cm, height=0.9cm, keepaspectratio]{report/assets/logos/imagotipo-atelier.jpg}\vspace{0.05cm}\newline \textbf{Atelier Workshop}} & 
+\multicolumn{1}{>{\centering\arraybackslash}p{3.3cm}|}{\vspace{0.1cm}\includegraphics[width=2.5cm, height=0.9cm, keepaspectratio]{report/assets/competidores/mitaller.png}\vspace{0.05cm}\newline \textbf{Mi Taller CRM}} & 
+\multicolumn{1}{>{\centering\arraybackslash}p{3.3cm}|}{\vspace{0.1cm}\includegraphics[width=2.5cm, height=0.9cm, keepaspectratio]{report/assets/competidores/okcar.jpeg}\vspace{0.05cm}\newline \textbf{OK CAR}} & 
+\multicolumn{1}{>{\centering\arraybackslash}p{3.3cm}|}{\vspace{0.1cm}\includegraphics[width=2.5cm, height=0.9cm, keepaspectratio]{report/assets/competidores/tallergp.png}\vspace{0.05cm}\newline \textbf{Taller GP}} \\
 \hline
 \endfirsthead
 
 \hline
-\thfirst{Criterio} & \thcell{Atelier Workshop} & \thcell{Mi Taller CRM} & \thcell{OK CAR} & \thcell{Taller GP} \\
+\multicolumn{1}{|>{\centering\arraybackslash}p{2.3cm}|}{\textbf{Criterio}} & 
+\multicolumn{1}{>{\centering\arraybackslash}p{3.3cm}|}{\textbf{Atelier Workshop}} & 
+\multicolumn{1}{>{\centering\arraybackslash}p{3.3cm}|}{\textbf{Mi Taller CRM}} & 
+\multicolumn{1}{>{\centering\arraybackslash}p{3.3cm}|}{\textbf{OK CAR}} & 
+\multicolumn{1}{>{\centering\arraybackslash}p{3.3cm}|}{\textbf{Taller GP}} \\
 \hline
 \endhead
 
 \hline
-\thspanfirst{5}{Perfil Empresarial y Propuesta de Valor} \\
+\multicolumn{5}{|c|}{\textbf{Perfil Empresarial y Propuesta de Valor}} \\*
 \hline
 \textbf{Overview} 
 & Startup peruana originada en la Universidad Peruana de Ciencias Aplicadas (UPC) en 2026, enfocada en profesionalizar y digitalizar talleres automotrices MYPE mediante telemetría IoT y gestión operativa. Su producto Atelier Workshop es un ecosistema SaaS B2B nativo en la nube que integra el flujo de bahía con administración contable.
@@ -38,7 +49,7 @@ A continuación, en la Tabla \ref{tbl:analisis-competitivo}, se presenta la matr
 & Escalabilidad enterprise con soporte para más de 50 sucursales, gestión de roles granulares, consolidación contable multi-empresa y certificación internacional de seguridad ISO 27001 para grandes operadores. \\
 \hline
 
-\thspanfirst{5}{Perfil de Marketing} \\
+\multicolumn{5}{|c|}{\textbf{Perfil de Marketing}} \\*
 \hline
 \textbf{Mercado Objetivo} 
 & Talleres mecánicos multimarca independientes de pequeña y mediana escala (1 a 5 bahías o puestos de trabajo) en Lima Metropolitana, gestionados por dueños o administradores (decisores B2B) y operados por mecánicos en bahía (operarios B2B).
@@ -53,7 +64,7 @@ A continuación, en la Tabla \ref{tbl:analisis-competitivo}, se presenta la matr
 & Venta consultiva corporativa B2B de ciclo largo, participación en ferias industriales internacionales y alianzas con firmas consultoras automotrices; no emplea publicidad masiva en medios digitales. \\
 \hline
 
-\thspanfirst{5}{Perfil de Producto y Modelo Operativo} \\
+\multicolumn{5}{|c|}{\textbf{Perfil de Producto y Modelo Operativo}} \\*
 \hline
 \textbf{Productos y Servicios} 
 & Ecosistema SaaS B2B multiplataforma compuesto por un Dashboard Web gerencial (finanzas, inventario FIFO, agenda de bahías y SUNAT) y una Mobile App Android de uso rudo y arquitectura Offline-First para mecánicos en bahía (órdenes digitales, fotos inmutables, geocerca e ingesta OBD-II).
@@ -74,7 +85,7 @@ A continuación, en la Tabla \ref{tbl:analisis-competitivo}, se presenta la matr
 & SaaS en la nube con proceso de venta consultiva asistida, operado mediante partners y consultores autorizados en Europa y ventas remotas en Latinoamérica. \\
 \hline
 
-\thspanfirst{5}{Análisis FODA Comparativo (SWOT)} \\
+\multicolumn{5}{|c|}{\textbf{Análisis FODA Comparativo (SWOT)}} \\*
 \hline
 \textbf{Fortalezas} 
 & Integración telemática OBD-II genérica en tiempo real; facturación SUNAT nativa (RMT) integrada al cierre de órdenes; registro fotográfico inmutable en la nube; inventario valorizado por FIFO estricto; doble interfaz especializada por rol B2B.
@@ -101,6 +112,7 @@ A continuación, en la Tabla \ref{tbl:analisis-competitivo}, se presenta la matr
 & Desplazamiento frente a soluciones SaaS ligeras, ágiles y económicas que resuelven las necesidades del taller independiente sin costos de consultoría europea. \\
 \hline
 \end{longtable}
+\normalsize
 
 *Nota.* Elaboración propia basada en la investigación de mercado y análisis de competidores del ecosistema automotriz (2026).
 
@@ -110,32 +122,58 @@ A continuación, en la Tabla \ref{tbl:analisis-competitivo}, se presenta la matr
 
 En la Tabla \ref{tbl:estrategias-tacticas-competidores} se detallan las tácticas diferenciadoras, las fortalezas que enfrentamos y las debilidades que aprovecharemos de cada competidor evaluado para posicionar estratégicamente a **Atelier Workshop** en el mercado automotriz peruano.
 
-\begin{table}[htpb]
-\centering
-\caption{Matriz de Estrategias y Tácticas frente a Competidores}
-\label{tbl:estrategias-tacticas-competidores}
-\renewcommand{\arraystretch}{1.4}
-\begin{tabularx}{\textwidth}{| m{3.2cm} | X | X | X |}
+\small
+\renewcommand{\arraystretch}{1.3}
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{| >{\centering\arraybackslash}p{3.2cm} | >{\raggedright\arraybackslash}p{4.1cm} | >{\raggedright\arraybackslash}p{4.1cm} | >{\raggedright\arraybackslash}p{4.1cm} |}
+\caption{Matriz de Estrategias y Tácticas frente a Competidores} \label{tbl:estrategias-tacticas-competidores} \\
 \hline
-\thfirst{Competidores} & \thcell{Táctica Diferenciadora} & \thcell{Fortalezas del Rival Enfrentadas} & \thcell{Debilidad del Rival Aprovechada} \\
+\multicolumn{1}{|>{\centering\arraybackslash}p{3.2cm}|}{\textbf{Competidores}} & 
+\multicolumn{1}{>{\centering\arraybackslash}p{4.1cm}|}{\textbf{Táctica Diferenciadora}} & 
+\multicolumn{1}{>{\centering\arraybackslash}p{4.1cm}|}{\textbf{Fortalezas Enfrentadas}} & 
+\multicolumn{1}{>{\centering\arraybackslash}p{4.1cm}|}{\textbf{Debilidad Aprovechada}} \\
 \hline
-\textbf{Mi Taller CRM} 
+\endfirsthead
+
+\hline
+\multicolumn{1}{|>{\centering\arraybackslash}p{3.2cm}|}{\textbf{Competidores}} & 
+\multicolumn{1}{>{\centering\arraybackslash}p{4.1cm}|}{\textbf{Táctica Diferenciadora}} & 
+\multicolumn{1}{>{\centering\arraybackslash}p{4.1cm}|}{\textbf{Fortalezas Enfrentadas}} & 
+\multicolumn{1}{>{\centering\arraybackslash}p{4.1cm}|}{\textbf{Debilidad Aprovechada}} \\
+\hline
+\endhead
+
+\vspace{0.15cm}
+\includegraphics[width=2.7cm, height=0.9cm, keepaspectratio]{report/assets/competidores/mitaller.png}
+\vspace{0.1cm} \newline
+\textbf{Mi Taller CRM}
+\vspace{0.15cm}
 & Posicionarse como la evolución operativa del taller: mientras Mi Taller CRM ofrece digitalización puramente administrativa en web, Atelier Workshop conecta la administración con el vehículo en la bahía de servicio mediante telemetría OBD-II agnóstica y órdenes móviles Offline-First con fotos Direct-to-Cloud.
 & Reconocimiento y confianza local de más de 80 talleres en Lima junto con facturación SUNAT madura. Atelier neutraliza esta ventaja ofreciendo facturación electrónica SUNAT nativa bajo el Régimen MYPE Tributario (RMT) integrada al cierre de orden sin fricción.
 & Mi Taller CRM es ciego al estado físico del vehículo (el mecánico debe diagnosticar por separado y redigitar datos). Atelier elimina la transcripción manual leyendo DTCs y PIDs directamente, acelerando la recepción en al menos 40\% y respaldando al taller con fotos inmutables. \\
 \hline
-\textbf{OK CAR} 
+
+\vspace{0.15cm}
+\includegraphics[width=2.7cm, height=0.9cm, keepaspectratio]{report/assets/competidores/okcar.jpeg}
+\vspace{0.1cm} \newline
+\textbf{OK CAR}
+\vspace{0.15cm}
 & Confrontar su proyección teórica con diagnóstico telemétrico real: OK CAR basa el preventivo en estimaciones de fechas, mientras que Atelier Workshop procesa lecturas en tiempo real de los sensores del motor y códigos de falla activos, sumando cumplimiento tributario local directo.
 & Posicionamiento en 6 países y aplicativo pulido. Atelier contrarresta esto mediante una aplicación móvil Android de uso rudo diseñada para la bahía de servicio (alto contraste, pocos toques, Offline-First), adaptada a las condiciones hostiles de fosas y talleres mecánicos.
 & OK CAR carece de facturación SUNAT para Perú (obliga al taller a usar un software contable paralelo) y su predictivo carece de sustento telemétrico. Atelier resuelve esto con una solución todo-en-uno que factura en soles y emite alertas mecánicas precisas sin costos en dólares. \\
 \hline
-\textbf{Taller GP} 
+
+\vspace{0.15cm}
+\includegraphics[width=2.7cm, height=0.9cm, keepaspectratio]{report/assets/competidores/tallergp.png}
+\vspace{0.1cm} \newline
+\textbf{Taller GP}
+\vspace{0.15cm}
 & Ofrecer agilidad, bajo costo e integración técnica para el 90\% del mercado independiente: mientras Taller GP requiere semanas de implantación y miles de euros de inversión para cadenas corporativas, Atelier Workshop se implementa en menos de 48 horas a costo MYPE.
 & Trayectoria de más de 15 años, solidez enterprise y certificación ISO 27001. Atelier responde implementando una arquitectura de software modular guiada por el dominio (DDD), que asegura alta disponibilidad, resiliencia y separación limpia de módulos.
 & Elevados costos de implementación, procesos lentos de onboarding, ausencia de facturación SUNAT y desvinculación del diagnóstico en bahía. Atelier capitaliza este vacío atendiendo a talleres independientes que buscan modernizarse sin tarifas de consultoría europea. \\
 \hline
-\end{tabularx}
-\end{table}
+\end{longtable}
+\normalsize
 
 *Nota.* Elaboración propia (2026).
 
