@@ -41,9 +41,9 @@ El ecosistema se divide estratégicamente en dos fases para conectar a todos los
     \caption{Startup Working Team Profile Matrix}
     \label{tbl:startup-working-team-profile-matrix}
     \renewcommand{\arraystretch}{1.5}
-    \begin{tabularx}{\textwidth}{| m{2.5cm} | X | m{4.5cm} |}
+    \begin{tabularx}{\textwidth}{| m{2.5cm} | X | >{\centering\arraybackslash}m{4.5cm} |}
         \hline
-        \textbf{Foto} & \textbf{Nombre} & \textbf{Carrera} \\
+        \thfirst{Foto} & \thcell{Nombre} & \thcell{Carrera} \\
         \hline
         
         % ==============================
@@ -52,7 +52,7 @@ El ecosistema se divide estratégicamente en dos fases para conectar a todos los
         \multirow{5}{2.5cm}{\centering [Foto 1]} 
         & Alumno 1 & [Carrera] \\
         \cline{2-3}
-        & \multicolumn{2}{l|}{\textbf{Descripción}} \\
+        & \thspan{2}{Descripción} \\
         \cline{2-3}
         & \multicolumn{2}{p{\dimexpr\textwidth-2.5cm-4\tabcolsep-3\arrayrulewidth\relax}|}{%
             [Descripción del Alumno 1...]
@@ -65,7 +65,7 @@ El ecosistema se divide estratégicamente en dos fases para conectar a todos los
         \multirow{5}{2.5cm}{\centering\includegraphics[width=2.2cm, keepaspectratio]{report/assets/startup-team-members/joel.jpg}} 
         & Huamani Estefanero, Joel – U20241E275 & Ingeniería de Software \\
         \cline{2-3}
-        & \multicolumn{2}{l|}{\textbf{Descripción}} \\
+        & \thspan{2}{Descripción} \\
         \cline{2-3}
         & \multicolumn{2}{p{\dimexpr\textwidth-2.5cm-4\tabcolsep-3\arrayrulewidth\relax}|}{%
             Soy Joel Huamani Estefanero, estudiante de la Universidad Peruana de Ciencias Aplicadas, tengo 20 años y actualmente lidero el ecosistema Atelier como CEO. Me especializo como desarrollador backend y arquitecto de software, con conocimientos técnicos en SQL, C++, Python, C\# y Java, destacando en este último mediante el uso del framework Spring Boot. Aplico arquitecturas como DDD, CQRS y Arquitectura Hexagonal, con el uso de patrones de diseño. Me considero una persona comprensiva con gran disposición para el trabajo en equipo, aparte de buscar mejorar y aprender a diario. Además de mi experiencia técnica, aportaré control, liderazgo y supervisión al grupo para asegurar un trabajo cohesionado y desarrollar productos de la mejor calidad.
@@ -78,7 +78,7 @@ El ecosistema se divide estratégicamente en dos fases para conectar a todos los
         \multirow{5}{2.5cm}{\centering [Foto 3]} 
         & Alumno 3 & [Carrera] \\
         \cline{2-3}
-        & \multicolumn{2}{l|}{\textbf{Descripción}} \\
+        & \thspan{2}{Descripción} \\
         \cline{2-3}
         & \multicolumn{2}{p{\dimexpr\textwidth-2.5cm-4\tabcolsep-3\arrayrulewidth\relax}|}{%
             [Descripción del Alumno 3...]
@@ -91,7 +91,7 @@ El ecosistema se divide estratégicamente en dos fases para conectar a todos los
         \multirow{5}{2.5cm}{\centering [Foto 4]} 
         & Alumno 4 & [Carrera] \\
         \cline{2-3}
-        & \multicolumn{2}{l|}{\textbf{Descripción}} \\
+        & \thspan{2}{Descripción} \\
         \cline{2-3}
         & \multicolumn{2}{p{\dimexpr\textwidth-2.5cm-4\tabcolsep-3\arrayrulewidth\relax}|}{%
             [Descripción del Alumno 4...]
@@ -104,7 +104,7 @@ El ecosistema se divide estratégicamente en dos fases para conectar a todos los
         \multirow{5}{2.5cm}{\centering [Foto 5]} 
         & Alumno 5 & [Carrera] \\
         \cline{2-3}
-        & \multicolumn{2}{l|}{\textbf{Descripción}} \\
+        & \thspan{2}{Descripción} \\
         \cline{2-3}
         & \multicolumn{2}{p{\dimexpr\textwidth-2.5cm-4\tabcolsep-3\arrayrulewidth\relax}|}{%
             [Descripción del Alumno 5...]

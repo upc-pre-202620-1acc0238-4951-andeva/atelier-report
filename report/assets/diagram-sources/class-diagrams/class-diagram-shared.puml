@@ -1,0 +1,340 @@
+@startuml class-diagram-shared
+title <size:18>Diagrama de Clases UML - Bounded Context Shared (Domain Layer)</size>\n<size:12>Paquete Canónico: com.andeva.atelier.platform.shared.domain</size>
+
+' Configuraciones visuales y de diseño profesional
+skinparam classAttributeIconSize 0
+skinparam monochrome false
+skinparam shadowing false
+skinparam roundcorner 6
+skinparam linetype ortho
+skinparam nodesep 40
+skinparam ranksep 50
+skinparam defaultFontName "Helvetica", "Arial", sans-serif
+skinparam defaultFontSize 11
+skinparam defaultFontColor #2C3E50
+skinparam arrowColor #34495E
+skinparam arrowThickness 1.2
+skinparam packageBorderColor #7F8C8D
+skinparam packageFontSize 12
+skinparam packageFontStyle bold
+
+' Estilos específicos por categoría táctica
+skinparam class {
+    BackgroundColor #FFFFFF
+    BorderColor #2C3E50
+    HeaderBackgroundColor #EAEDED
+}
+skinparam class<<AggregateBase>> {
+    BackgroundColor #E8F8F5
+    BorderColor #16A085
+    HeaderBackgroundColor #A3E4D7
+}
+skinparam class<<ValueObject>> {
+    BackgroundColor #FEF9E7
+    BorderColor #D68910
+    HeaderBackgroundColor #FAD7A0
+}
+skinparam class<<TypedId>> {
+    BackgroundColor #EBF5FB
+    BorderColor #2980B9
+    HeaderBackgroundColor #AED6F1
+}
+skinparam class<<Exception>> {
+    BackgroundColor #F4ECF7
+    BorderColor #8E44AD
+    HeaderBackgroundColor #D2B4DE
+}
+skinparam interface {
+    BackgroundColor #E8F6F3
+    BorderColor #117A65
+    HeaderBackgroundColor #A2D9CE
+}
+skinparam enum {
+    BackgroundColor #FCF3CF
+    BorderColor #B7950B
+    HeaderBackgroundColor #F9E79F
+}
+
+' Evitar anidamiento automático por puntos en los nombres de paquetes
+set separator none
+
+' ==============================================================================
+' 1. MODELO DE AGREGADOS Y EVENTOS DE DOMINIO
+' ==============================================================================
+package "domain.model.aggregates" as aggregates #FDFEFE {
+
+    interface DomainEvent <<DomainEvent>> {
+        + eventId(): UUID
+        + occurredOn(): Instant
+        + eventType(): String
+    }
+
+    abstract class "AbstractDomainAggregateRoot<ID>" as AbstractDomainAggregateRoot <<AggregateBase>> {
+        # id: ID
+        - domainEvents: List<DomainEvent>
+        --
+        # AbstractDomainAggregateRoot(id: ID)
+        + id(): ID
+        + domainEvents(): List<DomainEvent>
+        # registerDomainEvent(event: DomainEvent): void
+        + clearDomainEvents(): void
+    }
+}
+
+' ==============================================================================
+' 2. IDENTIFICADORES FUERTEMENTE TIPADOS (TYPED IDS)
+' ==============================================================================
+package "domain.model.ids" as ids #FDFEFE {
+
+    interface "TypedId<T>" as TypedId <<Interface>> {
+        + value(): T
+    }
+
+    class TenantId <<TypedId, record>> {
+        - value: UUID
+        --
+        + TenantId(value: UUID)
+        + {static} of(value: UUID): TenantId
+        + {static} fromString(value: String): TenantId
+        + {static} generate(): TenantId
+        + value(): UUID
+    }
+
+    class UserId <<TypedId, record>> {
+        - value: UUID
+        --
+        + UserId(value: UUID)
+        + {static} of(value: UUID): UserId
+        + {static} fromString(value: String): UserId
+        + {static} generate(): UserId
+        + value(): UUID
+    }
+
+    class WorkOrderId <<TypedId, record>> {
+        - value: UUID
+        --
+        + WorkOrderId(value: UUID)
+        + {static} of(value: UUID): WorkOrderId
+        + {static} fromString(value: String): WorkOrderId
+        + {static} generate(): WorkOrderId
+        + value(): UUID
+    }
+
+    class VehicleId <<TypedId, record>> {
+        - value: UUID
+        --
+        + VehicleId(value: UUID)
+        + {static} of(value: UUID): VehicleId
+        + {static} fromString(value: String): VehicleId
+        + {static} generate(): VehicleId
+        + value(): UUID
+    }
+
+    class CustomerId <<TypedId, record>> {
+        - value: UUID
+        --
+        + CustomerId(value: UUID)
+        + {static} of(value: UUID): CustomerId
+        + {static} fromString(value: String): CustomerId
+        + {static} generate(): CustomerId
+        + value(): UUID
+    }
+}
+
+' ==============================================================================
+' 3. OBJETOS DE VALOR FINANCIEROS, MÉTRICOS Y OPERATIVOS
+' ==============================================================================
+package "domain.model.valueobjects" as valueobjects #FDFEFE {
+
+    enum Currency <<Enum>> {
+        PEN
+        USD
+    }
+
+    class Money <<ValueObject, record>> {
+        - amount: BigDecimal
+        - currency: Currency
+        --
+        + Money(amount: BigDecimal, currency: Currency)
+        + {static} of(amount: BigDecimal, currency: Currency): Money
+        + {static} pen(amount: BigDecimal): Money
+        + {static} usd(amount: BigDecimal): Money
+        + add(other: Money): Money
+        + subtract(other: Money): Money
+        + multiply(factor: BigDecimal): Money
+        + isPositive(): boolean
+        + isZero(): boolean
+        + amount(): BigDecimal
+        + currency(): Currency
+    }
+
+    enum UnitOfMeasure <<Enum>> {
+        UNIT
+        LITER
+        GALLON
+        KILOGRAM
+        METER
+    }
+
+    class Quantity <<ValueObject, record>> {
+        - value: BigDecimal
+        - uom: UnitOfMeasure
+        --
+        + Quantity(value: BigDecimal, uom: UnitOfMeasure)
+        + {static} of(value: BigDecimal, uom: UnitOfMeasure): Quantity
+        + {static} units(value: BigDecimal): Quantity
+        + add(other: Quantity): Quantity
+        + subtract(other: Quantity): Quantity
+        + value(): BigDecimal
+        + uom(): UnitOfMeasure
+    }
+
+    class Mileage <<ValueObject, record>> {
+        - kilometers: int
+        --
+        + Mileage(kilometers: int)
+        + {static} of(kilometers: int): Mileage
+        + isGreaterThan(other: Mileage): boolean
+        + distanceTo(other: Mileage): int
+        + kilometers(): int
+    }
+
+    class GeoPoint <<ValueObject, record>> {
+        - latitude: double
+        - longitude: double
+        --
+        + GeoPoint(latitude: double, longitude: double)
+        + {static} of(latitude: double, longitude: double): GeoPoint
+        + distanceTo(other: GeoPoint): double
+        + latitude(): double
+        + longitude(): double
+    }
+
+    enum TaxIdType <<Enum>> {
+        DNI
+        RUC
+        CE
+        PASSPORT
+    }
+
+    class TaxId <<ValueObject, record>> {
+        - type: TaxIdType
+        - value: String
+        --
+        + TaxId(type: TaxIdType, value: String)
+        + {static} dni(value: String): TaxId
+        + {static} ruc(value: String): TaxId
+        + {static} passport(value: String): TaxId
+        + {static} of(type: TaxIdType, value: String): TaxId
+        + type(): TaxIdType
+        + value(): String
+    }
+
+    class EmailAddress <<ValueObject, record>> {
+        - value: String
+        --
+        + EmailAddress(value: String)
+        + {static} of(email: String): EmailAddress
+        + value(): String
+    }
+
+    class PhoneNumber <<ValueObject, record>> {
+        - value: String
+        --
+        + PhoneNumber(value: String)
+        + {static} of(phone: String): PhoneNumber
+        + value(): String
+    }
+
+    class DateRange <<ValueObject, record>> {
+        - startDate: LocalDate
+        - endDate: LocalDate
+        --
+        + DateRange(startDate: LocalDate, endDate: LocalDate)
+        + {static} of(start: LocalDate, end: LocalDate): DateRange
+        + contains(date: LocalDate): boolean
+        + overlaps(other: DateRange): boolean
+        + startDate(): LocalDate
+        + endDate(): LocalDate
+    }
+}
+
+' ==============================================================================
+' 4. JERARQUÍA DE EXCEPCIONES DE DOMINIO
+' ==============================================================================
+package "domain.exceptions" as exceptions #FDFEFE {
+
+    abstract class DomainException <<Exception>> {
+        - errorCode: String
+        --
+        # DomainException(errorCode: String, message: String)
+        + errorCode(): String
+    }
+
+    class BusinessRuleValidationException <<Exception>> {
+        + BusinessRuleValidationException(errorCode: String, message: String)
+    }
+
+    class EntityNotFoundException <<Exception>> {
+        + EntityNotFoundException(entityName: String, id: Object)
+    }
+
+    class CurrencyMismatchException <<Exception>> {
+        + CurrencyMismatchException(sourceCurrency: String, targetCurrency: String)
+    }
+}
+
+' ==============================================================================
+' RELACIONES ESTRUCTURALES Y CARDINALIDADES
+' ==============================================================================
+
+' Agregado y Eventos
+AbstractDomainAggregateRoot "1" o-- "0..*" DomainEvent : "acumula en memoria >"
+
+' Realización de TypedId
+TypedId <|.. TenantId
+TypedId <|.. UserId
+TypedId <|.. WorkOrderId
+TypedId <|.. VehicleId
+TypedId <|.. CustomerId
+
+' Dependencia de Agregado con TypedId
+AbstractDomainAggregateRoot .down.> TypedId : "identificado por >"
+
+' Composiciones y Asociaciones de Value Objects
+Money "1" *-- "1" Currency : "denominado en >"
+Quantity "1" *-- "1" UnitOfMeasure : "expresado en >"
+TaxId "1" *-- "1" TaxIdType : "clasificado como >"
+
+' Jerarquía de Excepciones
+DomainException <|-- BusinessRuleValidationException
+DomainException <|-- EntityNotFoundException
+DomainException <|-- CurrencyMismatchException
+
+' Disparo de Excepciones de Negocio
+Money .down.> CurrencyMismatchException : "lanza en disparidad >"
+TaxId .down.> BusinessRuleValidationException : "lanza si falla Módulo 11 >"
+valueobjects .down.> BusinessRuleValidationException : "invariantes de validación >"
+
+' Disposición espacial interna para equilibrar el lienzo (evitar bandas horizontales ultra-anchas)
+TypedId -[hidden]down-> TenantId
+TenantId -[hidden]down-> VehicleId
+UserId -[hidden]down-> CustomerId
+
+Currency -[hidden]down-> Mileage
+Money -[hidden]down-> GeoPoint
+UnitOfMeasure -[hidden]down-> TaxIdType
+Quantity -[hidden]down-> TaxId
+Mileage -[hidden]down-> EmailAddress
+GeoPoint -[hidden]down-> PhoneNumber
+TaxId -[hidden]down-> DateRange
+
+' Forzar disposición en dos filas (Row 1 arriba, Row 2 abajo) mediante enlaces ocultos a nivel de clase
+AbstractDomainAggregateRoot -[hidden]down-> DomainException
+DomainEvent -[hidden]down-> BusinessRuleValidationException
+TenantId -[hidden]down-> Money
+UserId -[hidden]down-> Quantity
+WorkOrderId -[hidden]down-> TaxId
+
+@enduml
+

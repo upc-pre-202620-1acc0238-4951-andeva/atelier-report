@@ -23,14 +23,14 @@ workspace "Atelier Architecture" "Diagramas de Arquitectura C4 para el Proyecto 
         // Relaciones a nivel de Contenedor (Container Level)
         manager -> landing "Explora la propuesta de valor y planes de suscripción usando" "HTTPS"
         driver -> landing "Consulta información de talleres afiliados usando" "HTTPS"
-        manager -> webapp "Administra el taller, inventario FIFO, RRHH y finanzas usando" "HTTPS"
-        manager -> workshop_mobile "Supervisa órdenes y consulta métricas operativas en patio usando" "UI Móvil"
-        mechanic -> workshop_mobile "Gestiona tareas MRO, escanea fallas OBD2 y captura evidencia usando" "UI Móvil"
+        manager -> webapp "Administra el taller, inventario FIFO, RRHH y finanzas desde escritorio usando" "HTTPS"
+        manager -> workshop_mobile "Supervisa operaciones, aprueba presupuestos y gestiona el taller en patio usando" "UI Móvil"
+        mechanic -> workshop_mobile "Ejecuta tareas MRO en foso, escanea OBD2 por BLE y captura evidencia usando" "UI Móvil"
         driver -> driver_mobile "Agenda citas, visualiza salud vehicular y aprueba presupuestos usando" "UI Móvil"
 
         landing -> webapp "Redirige al inicio de sesión y registro de talleres usando" "HTTPS"
         webapp -> api "Consume endpoints RESTful de gestión y reportes vía" "JSON/HTTPS"
-        workshop_mobile -> api "Sincroniza órdenes MRO y telemetría por lotes en modo offline vía" "JSON/HTTPS"
+        workshop_mobile -> api "Consume endpoints de gestión para dueños y sincroniza órdenes MRO/telemetría vía" "JSON/HTTPS"
         driver_mobile -> api "Envía solicitudes de citas y consultas telemétricas vía" "JSON/HTTPS"
         api -> db "Lee y escribe datos relacionales y series de tiempo telemétricas vía" "JDBC/TCP"
 
@@ -45,6 +45,7 @@ workspace "Atelier Architecture" "Diagramas de Arquitectura C4 para el Proyecto 
 
         !include model/components/api-relationships.dsl
         !include model/components/webapp-relationships.dsl
+        !include model/components/shared-relationships.dsl
 
         !include model/deployment/production-environment.dsl
     }

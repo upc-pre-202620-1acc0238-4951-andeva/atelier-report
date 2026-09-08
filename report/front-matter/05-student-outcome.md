@@ -8,12 +8,12 @@ En el siguiente cuadro se describe las acciones realizadas y enunciados de concl
 
 \begin{longtable}{|p{4.5cm}|p{6cm}|p{4.5cm}|}
 \hline
-\textbf{Criterio Específico} & \textbf{Acciones Realizadas} & \textbf{Conclusiones} \\
+\thfirst{Criterio Específico} & \thcell{Acciones Realizadas} & \thcell{Conclusiones} \\
 \hline
 \endfirsthead
 
 \hline
-\textbf{Criterio Específico} & \textbf{Acciones Realizadas} & \textbf{Conclusiones} \\
+\thfirst{Criterio Específico} & \thcell{Acciones Realizadas} & \thcell{Conclusiones} \\
 \hline
 \endhead
 
