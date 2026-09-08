@@ -9,9 +9,11 @@
 |0.12.0|02/09/2026|Granda Ibarra Luis Daniel|Añadido de **Lean UX Problem Statement** y definición de *Outcomes*.|
 |0.13.0|02/09/2026|Granda Ibarra Luis Daniel|Añadido de **Lean UX Assumptions** y **Hypothesis Statements**.|
 |0.14.0|02/09/2026|Granda Ibarra Luis Daniel|Inserción de la matriz gráfica de **Lean UX Canvas**.|
+|0.14.0|03/09/2026|Teran Zavala, Mauricio Alejandro|Añadido de **Diseño de Entrevistas**.|
 |0.15.0|03/09/2026|Huamani Estefanero, Joel|Añadido de la sección de ***Software Architecture*** y reformulación de la documentación de Atelier.|
+|0.15.0|06/09/2026|Teran Zavala, Mauricio Alejandro|Inserción de la primera entervista del segmento y todo el marco de las entrevistas
 |0.17.0|07/09/2026|Huamani Estefanero, Joel|Añadido de ***Bounded Context: Shared*** y documentación del backend.|
-|             |           |           |                                 |
+|       |           |           |                                 |
 |             |           |           |                                 |
 |             |           |           |                                 |
 
