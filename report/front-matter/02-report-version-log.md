@@ -15,7 +15,9 @@
 |0.17.0|07/09/2026|Huamani Estefanero, Joel|Añadido de ***Bounded Context: Shared*** y documentación del backend.|
 |0.20.0|08/09/2026|Huamani Estefanero, Joel|Añadido de ***Bounded Context: Identity and Access Management (IAM) & Tenancy*** y documentación del backend.|
 |0.21.0|08/09/2026|Huamani Estefanero, Joel|Añadido de ***Bounded Context: Customer and Fleet Management (CRM)*** y documentación del backend.|
-|0.23.0|08/09/2026| Teran Zavala, Mauricio Alejandro|Añadido de **User Persona** para ambos segmentos|
-|             |           |           |                                 |
+|0.23.0|08/09/2026|Teran Zavala, Mauricio Alejandro|Añadido de **User Persona** para ambos segmentos|
+|0.24.0|06/09/2026|Sanchez Santin, Adiel Abdiaz|Elaboración del ***Big Picture EventStorming*** y definición del ***Lenguaje Ubicuo*** del dominio automotriz.|
+|0.24.0|07/09/2026|Sanchez Santin, Adiel Abdiaz|Diseño de ***Candidate Context Discovery*** (pasos 1 al 8) y modelado de ***Domain Message Flows***.|
+|0.24.0|08/09/2026|Sanchez Santin, Adiel Abdiaz|Inserción de ***Bounded Context Canvases*** (8 contextos), elaboración de ***Context Mapping*** y actualización de perfil de integrante.|
 
 \newpage
