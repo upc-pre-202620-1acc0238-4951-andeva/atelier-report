@@ -124,7 +124,6 @@ En esta sección presentamos los registros de las entrevistas que hicimos para c
 </table>
 
 **Segmento 2:**
-
 <table>
 <colgroup>
 </colgroup>
@@ -152,7 +151,7 @@ En esta sección presentamos los registros de las entrevistas que hicimos para c
   </tr>
   <tr>
     <td>Evidencia</td>
-    <td><div align="center"><img src=".../../assets/Interview-Evidence/Interview-of-Cesar-Nikolay.jpeg" alt="Entrevista Cesar Nikolay"></div></td>
+    <td><div align="center"><img src="../../assets/Interview-Evidence/Interview-of-Cesar-Nikolay.jpeg" alt="Entrevista Cesar Nikolay"></div></td>
   </tr>
   <tr>
     <td>Link</td>
@@ -212,6 +211,52 @@ En esta sección presentamos los registros de las entrevistas que hicimos para c
     <td>Resumen</td>
     <td>
       La entrevista se realizó a Bruno Pacheco, un técnico egresado en mecánica automotriz de 25 años, soltero y residente en el distrito de Chorrillos. Bruno ocupa el cargo oficial de Técnico Mecánico Especialista en Diagnóstico y Mantenimiento; ante situaciones de alta presión laboral procura mantener la calma y actuar de forma metódica para prevenir errores. Destaca como su principal fortaleza el diagnóstico electrónico, la lectura de datos de inyección y el manejo fluido de escáneres multimarca para la interpretación de códigos de falla (DTC). Su proceso operativo inicia con la recepción de la orden de trabajo física, inspección visual, lectura con escáner, solicitud de repuestos al almacén, ejecución de la reparación, prueba de ruta, borrado de códigos y la firma final de la orden. En cuanto a las fricciones del entorno, reporta desorganización en la gestión de repuestos y pérdida de mensajes en grupos informales de WhatsApp, señalando que su mayor frustración son los "tiempos muertos" con vehículos desarmados en el elevador a la espera de aprobaciones de presupuestos o repuestos faltantes, lo cual perjudica directamente su rendimiento diario. En el ámbito profesional, busca llevar cursos de mecatrónica y diagnóstico de vehículos híbridos o eléctricos a corto plazo, con la meta a largo plazo de dirigir un taller o administrar un centro de servicio propio. Finalmente, en el aspecto digital, utiliza un smartphone Android (Samsung), siendo WhatsApp, Google y YouTube sus aplicaciones más consultadas para coordinaciones laborales y búsqueda de diagramas técnicos.
+    </td>
+  </tr>
+</tbody>
+</table>
+
+<table>
+<colgroup>
+</colgroup>
+<thead>
+  <tr>
+    <th colspan="2">Entrevista #3<br></th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>Nombre</td>
+    <td>Angie Karol</td>
+  </tr>
+  <tr>
+    <td>Apellidos</td>
+    <td>Choque Pura</td>
+  </tr>
+  <tr>
+    <td>Edad</td>
+    <td>25 años</td>
+  </tr>
+  <tr>
+    <td>Distrito</td>
+    <td>Santiago de Surco</td>
+  </tr>
+  <tr>
+    <td>Evidencia</td>
+    <td><div align="center"><img src="../../assets/Interview-Evidence/Interview-of-Angie-Choque.jpeg" alt="Entrevista Angie Choque"></div></td>
+  </tr>
+  <tr>
+    <td>Link</td>
+    <td><p><a target="_blank"  href="https://upcedupe-my.sharepoint.com/:v:/g/personal/u202417423_upc_edu_pe/IQAQzuYv24YaQ4rr3KBVy_h9ATiqMfjgKCKbJEliJxw2-3A?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=mQzfFd" title="Title">Microsoft Stream</p></td>
+  </tr>
+  <tr>
+    <td>Duracion<br></td>
+    <td>0:30 min - 14:56 min</td>
+  </tr>
+  <tr>
+    <td>Resumen</td>
+    <td>
+		   La entrevista se realizó a Angie, una ingeniera mecatrónica de 25 años, soltera y residente en el distrito de Santiago de Surco. Cuenta con 2 años de experiencia laboral desempeñándose en el cargo técnico de Diagnóstico y Mantenimiento Automotriz; ante momentos de alta carga de trabajo destaca por ser una persona tranquila, enfocada en resolver las fallas paso a paso para evitar errores operativos como la rotura de sensores o un mal ensamblaje de componentes. Cuenta con especialización en mecánica automotriz y vehículos autónomos, orientando sus conocimientos hacia el diagnóstico electrónico, la lectura e interpretación de códigos de falla (DTC), inyección electrónica y el manejo de escáneres multimarca. Su flujo de trabajo inicia cuando el jefe de taller le entrega la orden de trabajo física con las observaciones del cliente, tras lo cual traslada el vehículo a la zona de mantenimiento, conecta el escáner para evaluar las computadoras del auto y efectúa la inspección visual correspondiente.
     </td>
   </tr>
 </tbody>
