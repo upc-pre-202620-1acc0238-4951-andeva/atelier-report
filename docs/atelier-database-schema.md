@@ -9,7 +9,7 @@ Este documento define la estructura relacional de la base de datos de Atelier, m
 > **¿Qué tablas son Aggregate Roots y reciben estos atributos?**
 > * **IAM:** `tenants`, `branches`, `users`, `tenant_memberships`, `invitations`, `roles`. *(Hijos no auditables: `profiles`, intermedia de permisos).*
 > * **CRM:** `customers`, `vehicles`, `appointments`.
-> * **MRO:** `work_orders`, `work_bays`. *(Hijos no auditables: `work_order_images`, `work_order_tasks`, `work_order_task_products`, `work_order_task_images`. Estas entidades hijas cambian el `updated_at` y `version` de su padre `work_orders` cuando son modificadas).*
+> * **MRO:** `work_orders`, `work_bays`. *(Hijos no auditables: `work_order_images`, `work_order_tasks`, `work_order_task_products`, `work_order_task_images`, `task_proposals`. Estas entidades hijas cambian el `updated_at` y `version` de su padre `work_orders` cuando son modificadas).*
 > * **Inventory:** `inventory_items`, `services`, `suppliers`, `inventory_batches`.
 > * **HR:** `work_shifts`, `attendance_records`, `payroll_payments`.
 > * **Invoicing:** `electronic_vouchers`. *(Hijos no auditables: `voucher_lines`).*
@@ -162,14 +162,14 @@ Es el motor operativo del taller. Orquesta el flujo de reparación, asignación 
 |----------|--------------|-------|------|---------|-------------|
 | `id` | `UUID` | PK | Sí | `uuid()`| Identificador de la OT |
 | `tenant_id` | `UUID` | FK | Sí | - | Taller |
-| `appointment_id`| `UUID` | FK | Sí | - | Cita de la que deriva |
+| `appointment_id`| `UUID` | FK | No | `null` | Cita previa de la que deriva (nullable) |
 | `vehicle_id` | `UUID` | FK | Sí | - | Vehículo a reparar |
 | `internal_number`| `INT` | - | Sí | - | Correlativo visible para el cliente (Ej. 1004) |
 | `current_bay_id`| `UUID` | FK | No | `null` | Bahía física donde está el auto ahora |
 | `mileage_in` | `INT` | - | Sí | - | Kilometraje exacto de ingreso |
 | `diagnostic_summary`|`TEXT`| - | Sí | - | Resumen del diagnóstico del auto |
 | `total_amount` | `DECIMAL(10,2)`| - | Sí | `0.00` | Subtotal calculado (Suma de tareas y repuestos) |
-| `status` | `VARCHAR(20)` | - | Sí | `'pending'`| `pending`, `in_progress`, `completed`, `paid` |
+| `status` | `VARCHAR(20)` | - | Sí | `'draft'` | `draft`, `in_progress`, `completed`, `paid`, `canceled` |
 
 ### 3.3 `work_order_images` (Inspección de Ingreso)
 | Atributo | Tipo de Dato | Llave | Req. | Default | Descripción |
@@ -187,9 +187,13 @@ Es el motor operativo del taller. Orquesta el flujo de reparación, asignación 
 | `work_order_id` | `UUID` | FK | Sí | - | OT a la que pertenece |
 | `service_id` | `UUID` | FK | Sí | - | Servicio catálogo (ej. "Cambio de aceite")|
 | `mechanic_id` | `UUID` | FK | No | `null` | Ref. a `tenant_memberships` (Mecánico asignado)|
-| `status` | `VARCHAR(20)` | - | Sí | `'pending'`| `pending`, `in_progress`, `completed` |
+| `status` | `VARCHAR(20)` | - | Sí | `'pending'`| `pending`, `assigned`, `in_progress`, `on_hold`, `completed`, `cancelled` |
 | `description` | `TEXT` | - | Sí | - | Descripción/Diagnóstico del mecánico |
 | `price` | `DECIMAL(10,2)`| - | Sí | `0.00` | Costo cobrado por la mano de obra |
+| `hold_reason` | `VARCHAR(50)` | - | No | `null` | Causal de pausa técnica (`waiting_parts`) |
+| `missing_item_description` | `TEXT` | - | No | `null` | Repuesto o insumo faltante reportado en foso |
+| `paused_at` | `TIMESTAMP` | - | No | `null` | Fecha/Hora de suspensión técnica |
+| `total_paused_seconds` | `BIGINT` | - | Sí | `0` | Tiempo total acumulado en pausa (segundos) |
 | `started_at` | `TIMESTAMP` | - | No | `null` | Fecha/Hora de inicio real |
 | `completed_at` | `TIMESTAMP` | - | No | `null` | Fecha/Hora de fin real (mide productividad) |
 
@@ -213,6 +217,24 @@ Es el motor operativo del taller. Orquesta el flujo de reparación, asignación 
 | `image_url` | `VARCHAR(255)`| - | Sí | - | URL pública devuelta por **Firebase Storage** |
 | `description` | `VARCHAR(200)`| - | No | `null` | Ej. "Filtro de aire viejo vs instalado" |
 | `uploaded_at` | `TIMESTAMP` | - | Sí | `NOW()` | Fecha de subida |
+
+### 3.7 `task_proposals` (Hallazgos y Propuestas de Tareas Adicionales)
+*Nota: Representa averías o trabajos adicionales detectados por el técnico durante la inspección en elevador/foso. El mecánico no calcula montos financieros. Requiere cotización del Asesor de Servicio y diálogo pedagógico con el cliente antes de convertirse en una tarea formal (`work_order_tasks`). Si el cliente desestima la propuesta, permanece registrada como antecedente en la historia clínica del vehículo.*
+
+| Atributo | Tipo de Dato | Llave | Req. | Default | Descripción |
+|----------|--------------|-------|------|---------|-------------|
+| `id` | `UUID` | PK | Sí | `uuid()`| Identificador único del hallazgo / propuesta |
+| `work_order_id` | `UUID` | FK | Sí | - | Orden de trabajo vinculada |
+| `task_id` | `UUID` | FK | No | `null` | Tarea durante la cual se detectó la avería (nullable) |
+| `service_id` | `UUID` | FK | No | `null` | Servicio de catálogo sugerido para resolver la falla |
+| `mechanic_id` | `UUID` | FK | Sí | - | Mecánico que detectó el hallazgo (ref. a `tenant_memberships`) |
+| `description` | `TEXT` | - | Sí | - | Detalle técnico de la avería encontrada |
+| `severity` | `VARCHAR(20)` | - | Sí | `'medium'`| Severidad (`low`, `medium`, `critical`) |
+| `image_url` | `VARCHAR(255)`| - | Sí | - | Foto pericial del hallazgo alojada en Firebase Storage |
+| `status` | `VARCHAR(20)` | - | Sí | `'pending_review'`| Estado (`pending_review`, `approved`, `rejected`) |
+| `customer_notes` | `VARCHAR(500)`| - | No | `null` | Justificación del cliente ante aprobación o rechazo |
+| `created_at` | `TIMESTAMP` | - | Sí | `NOW()` | Fecha de registro del hallazgo en foso |
+| `updated_at` | `TIMESTAMP` | - | Sí | `NOW()` | Fecha de resolución por el asesor de servicio |
 
 ## 4. Inventory and Supply Chain Context
 **Paquete Backend:** `com.atelier.inventory`

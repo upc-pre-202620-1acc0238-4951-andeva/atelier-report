@@ -7959,8 +7959,6 @@ A partir del modelo estático ilustrado en la @fig:class-diagram-iam y desglosad
 - **Encapsulamiento Criptográfico e Invariantes Tributarias:**
   La integridad del sistema se preserva mediante constructores compactos y objetos de valor inmutables. El objeto **TaxId** evalúa el algoritmo ponderado de Módulo 11 de la SUNAT sobre los 11 dígitos del RUC, abortando la creación del taller ante numeraciones inválidas. A su vez, el objeto **Password** restringe el almacenamiento a hashes BCrypt con salting adaptativo, mientras que las entidades **VerificationToken** e **Invitation** garantizan la validez temporal de los procesos de autenticación e incorporación, previniendo ataques de reutilización mediante revocación atómica tras su primer consumo.
 
-
-
 ##### 2.6.2.6.2. *Bounded Context Database Design Diagram*
 
 El diseño de persistencia del Bounded Context IAM & Tenancy materializa el modelo de dominio en un esquema relacional enfocado en garantizar aislamiento de datos, consistencia transaccional y disponibilidad continua. La persistencia se distribuye en dos componentes físicos complementarios: la base de datos central PostgreSQL 16 para el backend de la plataforma (**API Application**) y el motor relacional embebido SQLite 3 para la aplicación técnica móvil de taller (**Mobile Workshop**).
@@ -8150,8 +8148,6 @@ A partir de la estructura formalizada en la @fig:database-diagram-iam y la @tbl:
 
 - **Autonomía Operativa Desconectada en SQLite 3 para Mobile Workshop:**
   La persistencia local en el dispositivo móvil neutraliza las contingencias de conectividad en zonas con apantallamiento electromagnético o fosos mecánicos profundos. Mediante la tabla **auth_session**, el cliente técnico almacena credenciales criptográficas JWT y las coordenadas de la sede de trabajo, permitiendo evaluar la proximidad física mediante geocercas satelitales directamente en el dispositivo antes de autorizar el fichaje. Al complementar esta estructura con **local_permissions_cache**, la interfaz de usuario convalida privilegios de manera instantánea en frío, asegurando la continuidad de la jornada operativa sin latencia de red.
-
-
 
 ### 2.6.3. *Bounded Context: Customer and Fleet Management (CRM)*
 
@@ -9316,7 +9312,6 @@ En la @tbl:crm-domain-exceptions se sintetiza la jerarquía de excepciones de do
 \renewcommand{\arraystretch}{1.0}
 *Nota.* Componentes ubicados bajo el paquete com.andeva.atelier.platform.crm.domain.exceptions.
 
-
 #### 2.6.3.2. Interface Layer
 
 La capa de interfaz del Bounded Context Customer and Fleet Management (CRM) opera como el adaptador primario de entrada dentro de la arquitectura de Atelier Platform, gobernando la interacción perimetral con los clientes del taller, la administración técnica del parque automotor y el ciclo de vida operativo de las citas de servicio.
@@ -9986,8 +9981,6 @@ En la @tbl:crm-integration-events se sintetiza la estructura de estos eventos de
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
 *Nota.* Registros inmutables pertenecientes al paquete com.andeva.atelier.platform.crm.interfaces.events.
-
-
 
 #### 2.6.3.3. Application Layer
 
@@ -11192,8 +11185,6 @@ A fin de ilustrar la arquitectura de integración y servicios en la nube, en la 
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
 *Nota.* Componentes configurados bajo el paquete canónico com.andeva.atelier.platform.crm.infrastructure.external.
-
-
 
 #### 2.6.3.5. Bounded Context Software Architecture Component Level Diagrams
 

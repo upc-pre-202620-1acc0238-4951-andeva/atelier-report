@@ -1,0 +1,703 @@
+@startuml class-diagram-mro
+title <size:18>Diagrama de Clases UML - Bounded Context Workshop Operations (MRO) (Domain Layer)</size>\n<size:12>Paquete Canónico: com.andeva.atelier.platform.operations.domain</size>
+
+' Configuraciones visuales y de diseño profesional
+skinparam classAttributeIconSize 0
+skinparam monochrome false
+skinparam shadowing false
+skinparam roundcorner 6
+skinparam linetype ortho
+skinparam nodesep 24
+skinparam ranksep 28
+skinparam defaultFontName "Helvetica", "Arial", sans-serif
+skinparam defaultFontSize 10
+skinparam defaultFontColor #2C3E50
+skinparam arrowColor #34495E
+skinparam arrowThickness 1.1
+skinparam packageBorderColor #7F8C8D
+skinparam packageFontSize 11
+skinparam packageFontStyle bold
+
+' Estilos específicos por categoría táctica
+skinparam class {
+    BackgroundColor #FFFFFF
+    BorderColor #2C3E50
+    HeaderBackgroundColor #EAEDED
+}
+skinparam class<<AggregateRoot>> {
+    BackgroundColor #E8F8F5
+    BorderColor #16A085
+    HeaderBackgroundColor #A3E4D7
+}
+skinparam class<<Entity>> {
+    BackgroundColor #EBF5FB
+    BorderColor #2980B9
+    HeaderBackgroundColor #AED6F1
+}
+skinparam class<<ValueObject>> {
+    BackgroundColor #FEF9E7
+    BorderColor #D68910
+    HeaderBackgroundColor #FAD7A0
+}
+skinparam class<<TypedId>> {
+    BackgroundColor #EBF5FB
+    BorderColor #2980B9
+    HeaderBackgroundColor #AED6F1
+}
+skinparam class<<Exception>> {
+    BackgroundColor #F4ECF7
+    BorderColor #8E44AD
+    HeaderBackgroundColor #D2B4DE
+}
+skinparam class<<SharedKernel>> {
+    BackgroundColor #F8F9F9
+    BorderColor #BDC3C7
+    HeaderBackgroundColor #EAEDED
+}
+skinparam interface {
+    BackgroundColor #E8F6F3
+    BorderColor #117A65
+    HeaderBackgroundColor #A2D9CE
+}
+skinparam enum {
+    BackgroundColor #FCF3CF
+    BorderColor #B7950B
+    HeaderBackgroundColor #F9E79F
+}
+
+set separator none
+
+' ==============================================================================
+' 1. MODELO DE AGREGADOS (AGGREGATES)
+' ==============================================================================
+package "operations.domain.model.aggregates" as aggregates #FDFEFE {
+
+    abstract class "AbstractDomainAggregateRoot<T>" as AbstractDomainAggregateRoot <<SharedKernel>> {
+        # id: T
+        - domainEvents: List<DomainEvent>
+        --
+        # registerDomainEvent(event: DomainEvent): void
+        + domainEvents(): List<DomainEvent>
+        + clearDomainEvents(): void
+    }
+
+    class WorkOrder <<AggregateRoot>> {
+        - id: WorkOrderId
+        - tenantId: TenantId
+        - branchId: BranchId
+        - appointmentId: AppointmentId
+        - vehicleId: VehicleId
+        - customerId: CustomerId
+        - internalNumber: WorkOrderNumber
+        - currentBayId: WorkBayId
+        - mileageIn: Mileage
+        - diagnosticSummary: DiagnosticSummary
+        - subtotal: Money
+        - tax: Money
+        - totalAmount: Money
+        - status: WorkOrderStatus
+        - tasks: List<WorkOrderTask>
+        - proposals: List<TaskProposal>
+        - intakeImages: List<WorkOrderImage>
+        --
+        + {static} create(tenantId: TenantId, branchId: BranchId, vehicleId: VehicleId, customerId: CustomerId, mileage: Mileage, summary: DiagnosticSummary, apptId: AppointmentId): WorkOrder
+        + assignWorkBay(bayId: WorkBayId): void
+        + releaseBay(): void
+        + startWork(): void
+        + addTask(serviceId: ServiceId, mechanicId: UUID, desc: String, price: Money, estHours: LaborHours): WorkOrderTask
+        + removeTask(taskId: WorkOrderTaskId): void
+        + startTask(taskId: WorkOrderTaskId): void
+        + completeTask(taskId: WorkOrderTaskId, actualHours: LaborHours): void
+        + submitProposal(mechanicId: UUID, desc: String, sev: ProposalSeverity, url: StorageUrl, serviceId: ServiceId): TaskProposal
+        + approveProposal(propId: UUID, serviceId: ServiceId, mechanicId: UUID, price: Money, hrs: LaborHours, notes: String): WorkOrderTask
+        + rejectProposal(propId: UUID, notes: String): void
+        + addProductToTask(taskId: WorkOrderTaskId, productId: UUID, qty: Quantity, price: Money): void
+        + removeProductFromTask(taskId: WorkOrderTaskId, prodId: WorkOrderTaskProductId): void
+        + attachIntakeImage(imageUrl: StorageUrl, description: String): void
+        + recalculateTotalAmount(): void
+        + markPaid(): void
+        + deliverVehicle(): void
+        + cancel(reason: String): void
+        + id(): WorkOrderId
+        + status(): WorkOrderStatus
+        + totalAmount(): Money
+        + currentBayId(): WorkBayId
+    }
+
+    class WorkBay <<AggregateRoot>> {
+        - id: WorkBayId
+        - tenantId: TenantId
+        - branchId: BranchId
+        - name: String
+        - type: BayType
+        - status: BayStatus
+        - currentWorkOrderId: WorkOrderId
+        --
+        + {static} create(tenantId: TenantId, branchId: BranchId, name: String, type: BayType): WorkBay
+        + occupy(orderId: WorkOrderId): void
+        + release(): void
+        + setUnderMaintenance(reason: String): void
+        + restoreAvailable(): void
+        + id(): WorkBayId
+        + status(): BayStatus
+        + type(): BayType
+        + currentWorkOrderId(): WorkOrderId
+    }
+
+    class Service <<AggregateRoot>> {
+        - id: ServiceId
+        - tenantId: TenantId
+        - name: String
+        - basePrice: Money
+        - estimatedDurationMinutes: int
+        --
+        + {static} create(tenantId: TenantId, name: String, basePrice: Money, duration: int): Service
+        + updateDetails(name: String, price: Money, minutes: int): void
+        + id(): ServiceId
+        + name(): String
+        + basePrice(): Money
+        + estimatedDurationMinutes(): int
+    }
+}
+
+' ==============================================================================
+' 2. ENTIDADES DEPENDIENTES (ENTITIES)
+' ==============================================================================
+package "operations.domain.model.entities" as entities #FDFEFE {
+
+    class WorkOrderTask <<Entity>> {
+        - id: WorkOrderTaskId
+        - workOrderId: WorkOrderId
+        - serviceId: ServiceId
+        - mechanicId: UUID
+        - status: WorkOrderTaskStatus
+        - description: String
+        - price: Money
+        - estimatedHours: LaborHours
+        - actualHours: LaborHours
+        - holdReason: HoldReason
+        - missingItemDescription: String
+        - pausedAt: Instant
+        - totalPausedSeconds: Long
+        - startedAt: Instant
+        - completedAt: Instant
+        - consumedProducts: List<WorkOrderTaskProduct>
+        - taskImages: List<WorkOrderTaskImage>
+        --
+        + assignMechanic(mechanicId: UUID): void
+        + start(): void
+        + holdForWaitingParts(missingItemDescription: String): void
+        + resume(): void
+        + complete(actualHours: LaborHours): void
+        + reopen(): void
+        + updatePrice(newPrice: Money): void
+        + addProduct(product: WorkOrderTaskProduct): void
+        + removeProduct(productId: WorkOrderTaskProductId): void
+        + attachEvidenceImage(imageUrl: StorageUrl, type: EvidenceType, desc: String): void
+        + id(): WorkOrderTaskId
+        + status(): WorkOrderTaskStatus
+        + price(): Money
+    }
+
+    class WorkOrderTaskProduct <<Entity>> {
+        - id: WorkOrderTaskProductId
+        - taskId: WorkOrderTaskId
+        - productId: UUID
+        - quantity: Quantity
+        - unitPrice: Money
+        - totalAmount: Money
+        --
+        + updateQuantity(newQuantity: Quantity): void
+        + id(): WorkOrderTaskProductId
+        + totalAmount(): Money
+        + quantity(): Quantity
+        + unitPrice(): Money
+    }
+
+    class TaskProposal <<Entity>> {
+        - id: UUID
+        - workOrderId: WorkOrderId
+        - taskId: WorkOrderTaskId
+        - serviceId: ServiceId
+        - mechanicId: UUID
+        - description: String
+        - severity: ProposalSeverity
+        - imageUrl: StorageUrl
+        - status: ProposalStatus
+        - customerNotes: String
+        - createdAt: Instant
+        - updatedAt: Instant
+        --
+        + approve(notes: String): void
+        + reject(customerReason: String): void
+        + id(): UUID
+        + status(): ProposalStatus
+        + severity(): ProposalSeverity
+    }
+
+    class WorkOrderImage <<Entity>> {
+        - id: UUID
+        - workOrderId: WorkOrderId
+        - imageUrl: StorageUrl
+        - description: String
+        - uploadedAt: Instant
+        --
+        + id(): UUID
+        + imageUrl(): StorageUrl
+        + description(): String
+    }
+
+    class WorkOrderTaskImage <<Entity>> {
+        - id: UUID
+        - taskId: WorkOrderTaskId
+        - imageUrl: StorageUrl
+        - evidenceType: EvidenceType
+        - description: String
+        - uploadedAt: Instant
+        --
+        + id(): UUID
+        + imageUrl(): StorageUrl
+        + evidenceType(): EvidenceType
+        + description(): String
+    }
+}
+
+' ==============================================================================
+' 3. SERVICIOS DE DOMINIO (DOMAIN SERVICES)
+' ==============================================================================
+package "operations.domain.services" as services #FDFEFE {
+    class WorkOrderCostCalculator <<DomainService>> {
+        + calculateTotal(workOrder: WorkOrder): Money
+    }
+
+    class WorkOrderTransitionValidator <<DomainService>> {
+        + validateTransition(workOrder: WorkOrder, targetStatus: WorkOrderStatus): Result<Void, DomainException>
+    }
+
+    class BayAllocationService <<DomainService>> {
+        - bayRepository: WorkBayRepository
+        --
+        + validateBayAvailability(bayId: WorkBayId, orderId: WorkOrderId): Result<Void, DomainException>
+    }
+}
+
+' ==============================================================================
+' 4. PUERTOS DE REPOSITORIO (DOMAIN PORTS)
+' ==============================================================================
+package "operations.domain.repositories" as repositories #FDFEFE {
+    interface WorkOrderRepository <<Repository>> {
+        + save(workOrder: WorkOrder): WorkOrder
+        + findById(id: WorkOrderId): Optional<WorkOrder>
+        + findByOrderNumber(tenantId: TenantId, orderNumber: WorkOrderNumber): Optional<WorkOrder>
+        + findByTenantId(tenantId: TenantId): List<WorkOrder>
+        + findByBranchId(tenantId: TenantId, branchId: BranchId): List<WorkOrder>
+        + findByVehicleId(vehicleId: VehicleId): List<WorkOrder>
+        + findByCustomerId(customerId: CustomerId): List<WorkOrder>
+        + findByCurrentBayId(bayId: WorkBayId): Optional<WorkOrder>
+        + findNextInternalSequence(tenantId: TenantId, branchId: BranchId): long
+    }
+
+    interface WorkBayRepository <<Repository>> {
+        + save(bay: WorkBay): WorkBay
+        + findById(id: WorkBayId): Optional<WorkBay>
+        + findByTenantIdAndBranchId(tenantId: TenantId, branchId: BranchId): List<WorkBay>
+        + findAvailableBays(tenantId: TenantId, branchId: BranchId, type: BayType): List<WorkBay>
+    }
+
+    interface ServiceRepository <<Repository>> {
+        + save(service: Service): Service
+        + findById(id: ServiceId): Optional<Service>
+        + findByTenantId(tenantId: TenantId): List<Service>
+        + findByTenantIdAndName(tenantId: TenantId, name: String): Optional<Service>
+    }
+}
+
+' ==============================================================================
+' 5. IDENTIFICADORES TIPADOS Y OBJETOS DE VALOR
+' ==============================================================================
+package "operations.domain.model.ids" as ids #FDFEFE {
+    interface "TypedId<UUID>" as TypedId <<SharedKernel>> {
+        + value(): UUID
+    }
+
+    class WorkOrderId <<TypedId, record>> {
+        - value: UUID
+        --
+        + {static} of(value: UUID): WorkOrderId
+        + value(): UUID
+    }
+
+    class WorkOrderTaskId <<TypedId, record>> {
+        - value: UUID
+        --
+        + {static} of(value: UUID): WorkOrderTaskId
+        + value(): UUID
+    }
+
+    class WorkOrderTaskProductId <<TypedId, record>> {
+        - value: UUID
+        --
+        + {static} of(value: UUID): WorkOrderTaskProductId
+        + value(): UUID
+    }
+
+    class WorkBayId <<TypedId, record>> {
+        - value: UUID
+        --
+        + {static} of(value: UUID): WorkBayId
+        + value(): UUID
+    }
+
+    class ServiceId <<TypedId, record>> {
+        - value: UUID
+        --
+        + {static} of(value: UUID): ServiceId
+        + value(): UUID
+    }
+
+    ' Referencias externas de identidad
+    class TenantId <<SharedKernel, record>> {
+        - value: UUID
+        + value(): UUID
+    }
+
+    class BranchId <<SharedKernel, record>> {
+        - value: UUID
+        + value(): UUID
+    }
+
+    class AppointmentId <<SharedKernel, record>> {
+        - value: UUID
+        + value(): UUID
+    }
+
+    class VehicleId <<SharedKernel, record>> {
+        - value: UUID
+        + value(): UUID
+    }
+
+    class CustomerId <<SharedKernel, record>> {
+        - value: UUID
+        + value(): UUID
+    }
+}
+
+package "operations.domain.model.valueobjects" as valueobjects #FDFEFE {
+    class WorkOrderNumber <<ValueObject, record>> {
+        - value: String
+        --
+        + {static} of(number: String): WorkOrderNumber
+        + value(): String
+    }
+
+    class Mileage <<ValueObject, record>> {
+        - value: Integer
+        --
+        + {static} of(mileage: Integer): Mileage
+        + value(): Integer
+    }
+
+    class DiagnosticSummary <<ValueObject, record>> {
+        - value: String
+        --
+        + {static} of(summary: String): DiagnosticSummary
+        + value(): String
+    }
+
+    class LaborHours <<ValueObject, record>> {
+        - value: BigDecimal
+        --
+        + {static} of(hours: BigDecimal): LaborHours
+        + value(): BigDecimal
+    }
+
+    class Quantity <<ValueObject, record>> {
+        - value: BigDecimal
+        --
+        + {static} of(quantity: BigDecimal): Quantity
+        + value(): BigDecimal
+    }
+
+    class StorageUrl <<ValueObject, record>> {
+        - value: String
+        --
+        + {static} of(url: String): StorageUrl
+        + isValid(): boolean
+        + value(): String
+    }
+
+    ' Referencia monetaria externa
+    class Money <<SharedKernel, ValueObject>> {
+        - amount: BigDecimal
+        - currency: Currency
+        --
+        + {static} of(amount: BigDecimal, currency: Currency): Money
+        + amount(): BigDecimal
+        + currency(): Currency
+    }
+}
+
+' ==============================================================================
+' 6. ENUMERACIONES DE DOMINIO
+' ==============================================================================
+package "operations.domain.model.enums" as enums #FDFEFE {
+    enum WorkOrderStatus <<Enum>> {
+        DRAFT
+        IN_PROGRESS
+        COMPLETED
+        PAID
+        CANCELED
+    }
+
+    enum WorkOrderTaskStatus <<Enum>> {
+        PENDING
+        ASSIGNED
+        IN_PROGRESS
+        ON_HOLD
+        COMPLETED
+        CANCELLED
+    }
+
+    enum HoldReason <<Enum>> {
+        WAITING_PARTS
+    }
+
+    enum BayType <<Enum>> {
+        LIFT
+        PAINT_BOOTH
+        WASHING
+        ALIGNMENT
+    }
+
+    enum BayStatus <<Enum>> {
+        AVAILABLE
+        OCCUPIED
+        MAINTENANCE
+    }
+
+    enum ProposalSeverity <<Enum>> {
+        LOW
+        MEDIUM
+        CRITICAL
+    }
+
+    enum ProposalStatus <<Enum>> {
+        PENDING_REVIEW
+        APPROVED
+        REJECTED
+    }
+
+    enum EvidenceType <<Enum>> {
+        INITIAL_INSPECTION
+        DEFECT
+        IN_PROGRESS
+        COMPLETED
+    }
+}
+
+' ==============================================================================
+' 7. JERARQUÍA DE EXCEPCIONES DE DOMINIO
+' ==============================================================================
+package "operations.domain.exceptions" as exceptions #FDFEFE {
+    abstract class DomainException <<SharedKernel>> {
+        - errorCode: String
+        + errorCode(): String
+    }
+
+    ' Fila 1: Entidades y Tareas
+    class WorkOrderNotFoundException <<Exception>> {
+        + WorkOrderNotFoundException(id: WorkOrderId)
+    }
+
+    class WorkBayNotFoundException <<Exception>> {
+        + WorkBayNotFoundException(id: WorkBayId)
+    }
+
+    class ServiceNotFoundException <<Exception>> {
+        + ServiceNotFoundException(id: ServiceId)
+    }
+
+    class WorkOrderTaskNotFoundException <<Exception>> {
+        + WorkOrderTaskNotFoundException(taskId: WorkOrderTaskId)
+    }
+
+    ' Fila 2: Bahías, Estados y Propuestas
+    class WorkBayOccupiedException <<Exception>> {
+        + WorkBayOccupiedException(id: WorkBayId)
+    }
+
+    class WorkBayUnderMaintenanceException <<Exception>> {
+        + WorkBayUnderMaintenanceException(id: WorkBayId)
+    }
+
+    class InvalidWorkOrderStatusTransitionException <<Exception>> {
+        + InvalidWorkOrderStatusTransitionException(current: WorkOrderStatus, target: WorkOrderStatus)
+    }
+
+    class TaskProposalNotFoundException <<Exception>> {
+        + TaskProposalNotFoundException(id: UUID)
+    }
+
+    ' Fila 3: Resoluciones, Invariantes y Unicidad
+    class TaskProposalAlreadyProcessedException <<Exception>> {
+        + TaskProposalAlreadyProcessedException(id: UUID)
+    }
+
+    class InvalidMileageException <<Exception>> {
+        + InvalidMileageException(mileage: Integer)
+    }
+
+    class InvalidLaborHoursException <<Exception>> {
+        + InvalidLaborHoursException(hours: BigDecimal)
+    }
+
+    class DuplicateWorkOrderNumberException <<Exception>> {
+        + DuplicateWorkOrderNumberException(number: WorkOrderNumber)
+    }
+}
+
+' ==============================================================================
+' RELACIONES ESTRUCTURALES Y CARDINALIDADES
+' ==============================================================================
+
+' Herencia de Agregados
+AbstractDomainAggregateRoot <|-- WorkOrder
+AbstractDomainAggregateRoot <|-- WorkBay
+AbstractDomainAggregateRoot <|-- Service
+
+' Composiciones y Agregaciones de WorkOrder (Columna 1)
+WorkOrder "1" *-- "0..*" WorkOrderTask : "tareas planificadas >"
+WorkOrder "1" *-- "0..*" TaskProposal : "hallazgos periciales >"
+WorkOrder "1" *-- "0..*" WorkOrderImage : "evidencias recepción >"
+WorkOrder "1" o-- "1" WorkOrderId : "identificada por >"
+
+' Composiciones y Agregaciones de WorkOrderTask (Columna 1)
+WorkOrderTask "1" *-- "0..*" WorkOrderTaskProduct : "repuestos demandados >"
+WorkOrderTask "1" *-- "0..*" WorkOrderTaskImage : "evidencias en foso >"
+WorkOrderTask "1" o-- "1" WorkOrderTaskId : "identificada por >"
+
+' Relaciones de WorkOrderTaskProduct
+WorkOrderTaskProduct "1" o-- "1" WorkOrderTaskProductId : "identificada por >"
+
+' Relaciones de WorkBay (Columna 2)
+WorkBay "1" o-- "1" WorkBayId : "identificada por >"
+WorkBay "1" o-- "0..1" WorkOrderId : "orden ocupante >"
+
+' Relaciones de Service (Columna 3)
+Service "1" o-- "1" ServiceId : "identificado por >"
+
+' Realizaciones de TypedId
+TypedId <|.. WorkOrderId
+TypedId <|.. WorkOrderTaskId
+TypedId <|.. WorkOrderTaskProductId
+TypedId <|.. WorkBayId
+TypedId <|.. ServiceId
+
+' Generalizaciones de Excepciones
+DomainException <|-- WorkOrderNotFoundException
+DomainException <|-- WorkBayNotFoundException
+DomainException <|-- ServiceNotFoundException
+DomainException <|-- WorkOrderTaskNotFoundException
+DomainException <|-- WorkBayOccupiedException
+DomainException <|-- WorkBayUnderMaintenanceException
+DomainException <|-- InvalidWorkOrderStatusTransitionException
+DomainException <|-- TaskProposalNotFoundException
+DomainException <|-- TaskProposalAlreadyProcessedException
+DomainException <|-- InvalidMileageException
+DomainException <|-- InvalidLaborHoursException
+DomainException <|-- DuplicateWorkOrderNumberException
+
+' Enlaces de uso con Repositorios
+WorkOrderRepository ..up> WorkOrder : "persiste"
+WorkBayRepository ..up> WorkBay : "persiste"
+ServiceRepository ..up> Service : "persiste"
+
+' Enlaces de Servicios de Dominio
+WorkOrderCostCalculator ..up> WorkOrder : "totaliza costos"
+WorkOrderTransitionValidator ..up> WorkOrder : "valida estado"
+BayAllocationService ..up> WorkBay : "verifica aforo"
+BayAllocationService ..down> WorkBayRepository : "consulta disponibilidad"
+
+' ==============================================================================
+' CONTROL DE DISPOSICIÓN ESPACIAL (ENLACES OCULTOS ENTRE CLASES)
+' ==============================================================================
+
+' Fila 1: Superclase y Agregados en 3 columnas
+AbstractDomainAggregateRoot -[hidden]down-> WorkOrder
+WorkOrder -[hidden]right-> WorkBay
+WorkBay -[hidden]right-> Service
+
+' Fila 2: Entidades subordinadas a WorkOrder (Columna 1)
+WorkOrder -[hidden]down-> WorkOrderTask
+WorkOrderTask -[hidden]right-> WorkOrderTaskProduct
+WorkOrderTaskProduct -[hidden]right-> TaskProposal
+WorkOrderTask -[hidden]down-> WorkOrderImage
+WorkOrderImage -[hidden]right-> WorkOrderTaskImage
+
+' Fila 3: Servicios de Dominio (Columnas 1 y 2)
+WorkOrderImage -[hidden]down-> WorkOrderCostCalculator
+WorkOrderCostCalculator -[hidden]right-> WorkOrderTransitionValidator
+WorkOrderTransitionValidator -[hidden]right-> BayAllocationService
+WorkBay -[hidden]down-> BayAllocationService
+
+' Fila 4: Puertos de Repositorio (3 columnas)
+WorkOrderCostCalculator -[hidden]down-> WorkOrderRepository
+WorkOrderRepository -[hidden]right-> WorkBayRepository
+WorkBayRepository -[hidden]right-> ServiceRepository
+BayAllocationService -[hidden]down-> WorkBayRepository
+Service -[hidden]down-> ServiceRepository
+
+' Fila 5: IDs (Col. 1), Value Objects (Col. 2), Enums (Col. 3)
+WorkOrderRepository -[hidden]down-> TypedId
+TypedId -[hidden]down-> WorkOrderId
+WorkOrderId -[hidden]right-> WorkOrderTaskId
+WorkOrderTaskId -[hidden]right-> WorkOrderTaskProductId
+WorkOrderTaskProductId -[hidden]right-> WorkBayId
+WorkBayId -[hidden]right-> ServiceId
+
+WorkOrderId -[hidden]down-> TenantId
+TenantId -[hidden]right-> BranchId
+BranchId -[hidden]right-> AppointmentId
+AppointmentId -[hidden]right-> VehicleId
+VehicleId -[hidden]right-> CustomerId
+
+WorkBayRepository -[hidden]down-> WorkOrderNumber
+WorkOrderNumber -[hidden]right-> Mileage
+Mileage -[hidden]right-> DiagnosticSummary
+DiagnosticSummary -[hidden]right-> LaborHours
+
+WorkOrderNumber -[hidden]down-> Quantity
+Quantity -[hidden]right-> StorageUrl
+StorageUrl -[hidden]right-> Money
+
+ServiceRepository -[hidden]down-> WorkOrderStatus
+WorkOrderStatus -[hidden]right-> WorkOrderTaskStatus
+WorkOrderTaskStatus -[hidden]right-> HoldReason
+HoldReason -[hidden]right-> BayType
+
+WorkOrderStatus -[hidden]down-> BayStatus
+BayStatus -[hidden]right-> ProposalSeverity
+ProposalSeverity -[hidden]right-> ProposalStatus
+ProposalStatus -[hidden]right-> EvidenceType
+
+ServiceId -[hidden]right-> WorkOrderNumber
+Money -[hidden]right-> WorkOrderStatus
+
+' Fila 6: Excepciones (centradas en 3 filas de 4 debajo de Value Objects)
+Quantity -[hidden]down-> DomainException
+DomainException -[hidden]down-> WorkOrderNotFoundException
+WorkOrderNotFoundException -[hidden]right-> WorkBayNotFoundException
+WorkBayNotFoundException -[hidden]right-> ServiceNotFoundException
+ServiceNotFoundException -[hidden]right-> WorkOrderTaskNotFoundException
+
+WorkOrderNotFoundException -[hidden]down-> WorkBayOccupiedException
+WorkBayOccupiedException -[hidden]right-> WorkBayUnderMaintenanceException
+WorkBayUnderMaintenanceException -[hidden]right-> InvalidWorkOrderStatusTransitionException
+InvalidWorkOrderStatusTransitionException -[hidden]right-> TaskProposalNotFoundException
+
+WorkBayOccupiedException -[hidden]down-> TaskProposalAlreadyProcessedException
+TaskProposalAlreadyProcessedException -[hidden]right-> InvalidMileageException
+InvalidMileageException -[hidden]right-> InvalidLaborHoursException
+InvalidLaborHoursException -[hidden]right-> DuplicateWorkOrderNumberException
+
+@enduml

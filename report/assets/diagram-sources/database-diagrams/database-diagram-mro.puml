@@ -1,0 +1,553 @@
+@startuml database-diagram-mro
+title <size:16>Diagrama de Base de Datos (ERD) - Bounded Context Workshop Operations (MRO)</size>\n<size:11>Persistencia Relacional Multi-Producto: PostgreSQL 16 (API Application) y SQLite 3 (Mobile Workshop)</size>
+
+' Configuraciones visuales y de diseño profesional
+hide circle
+skinparam monochrome false
+skinparam shadowing false
+skinparam roundcorner 6
+skinparam linetype ortho
+skinparam nodesep 70
+skinparam ranksep 48
+skinparam defaultFontName "Helvetica", "Arial", sans-serif
+skinparam defaultFontSize 11
+skinparam defaultFontColor #2C3E50
+skinparam arrowColor #34495E
+skinparam arrowThickness 1.3
+skinparam packageBorderColor #7F8C8D
+skinparam packageFontSize 12
+skinparam packageFontStyle bold
+
+skinparam entity {
+    BackgroundColor #FFFFFF
+    BorderColor #34495E
+    HeaderBackgroundColor #EAEDED
+}
+
+' ==============================================================================
+' PRODUCTO 1: API APPLICATION (BACKEND CENTRAL - POSTGRESQL 16)
+' ==============================================================================
+package "PostgreSQL 16 (API Application - Backend Central)" as pg_backend #F8F9F9 {
+
+    ' ==========================================================================
+    ' COLUMNA 1: ARQUETIPO JPA, INFRAESTRUCTURA FÍSICA Y CATÁLOGO DE SERVICIOS
+    ' ==========================================================================
+    entity "auditable_abstract_entity" as auditable_abstract_entity <<archetype, JPA>> #E8F8F5 {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Propiedades del Arquetipo JPA:</b>
+        + Clave primaria técnica UUID v4
+        + Aislamiento multi-tenant obligatorio (tenant_id)
+        + Control de concurrencia optimista (version)
+        + Borrado lógico auditable (deleted_at)
+        + Heredado físicamente por entidades de negocio:
+          work_bays, work_orders y services (@MappedSuperclass)
+    }
+
+    entity "tenants" as tenants <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * name : VARCHAR(100)
+        * tax_id : VARCHAR(20) <<UK>>
+        --
+        <b>Contexto Externo (IAM & Tenancy):</b>
+        + Delimita la frontera del taller automotriz
+    }
+
+    entity "branches" as branches <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        * name : VARCHAR(100)
+        --
+        <b>Contexto Externo (IAM & Tenancy):</b>
+        + Sede física del taller para asignación de bahías
+    }
+
+    entity "work_bays" as work_bays <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        * branch_id : UUID <<FK>>
+        * name : VARCHAR(50)
+        * type : VARCHAR(20)
+        * status : VARCHAR(20)
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_work_bays : PRIMARY KEY (id)
+        + fk_work_bays_tenant_id : FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+        + fk_work_bays_branch_id : FOREIGN KEY (branch_id) REFERENCES branches(id)
+        + chk_bay_type : CHECK (type IN ('lift', 'paint_booth', 'washing', 'alignment'))
+        + chk_bay_status : CHECK (status IN ('available', 'occupied', 'maintenance'))
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_work_bays_tenant_branch : (tenant_id, branch_id)
+        + idx_work_bays_status : (tenant_id, status)
+    }
+
+    entity "services" as services <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        * name : VARCHAR(150)
+        * base_price : DECIMAL(10,2)
+        * estimated_time_m : INTEGER
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_services : PRIMARY KEY (id)
+        + fk_services_tenant_id : FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+        + uk_services_tenant_name : UNIQUE (tenant_id, name)
+        + chk_services_base_price : CHECK (base_price >= 0.00)
+        + chk_services_estimated_time : CHECK (estimated_time_m > 0)
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_services_tenant_name : (tenant_id, name)
+    }
+
+    ' ==========================================================================
+    ' COLUMNA 2: NÚCLEO DE ÓRDENES, INGRESO, PERITAJE Y PROPUESTAS
+    ' ==========================================================================
+    entity "customers" as customers <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        first_name : VARCHAR(100)
+        last_name : VARCHAR(100)
+        tax_id : VARCHAR(20)
+        --
+        <b>Contexto Externo (CRM & Fleet):</b>
+        + Propietario o solicitante de la orden
+    }
+
+    entity "vehicles" as vehicles <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * plate : VARCHAR(15) <<UK>>
+        vin : VARCHAR(17)
+        --
+        <b>Contexto Externo (CRM & Fleet):</b>
+        + Activo físico universal sin tenant_id
+    }
+
+    entity "appointments" as appointments <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * scheduled_at : TIMESTAMPTZ
+        * status : VARCHAR(20)
+        --
+        <b>Contexto Externo (CRM & Fleet):</b>
+        + Cita previa de recepción (opcional)
+    }
+
+    entity "work_orders" as work_orders <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        * branch_id : UUID <<FK>>
+        appointment_id : UUID <<FK>>
+        * vehicle_id : UUID <<FK>>
+        * customer_id : UUID <<FK>>
+        * internal_number : INTEGER
+        current_bay_id : UUID <<FK>>
+        * mileage_in : INTEGER
+        * diagnostic_summary : TEXT
+        * subtotal : DECIMAL(10,2)
+        * tax : DECIMAL(10,2)
+        * total_amount : DECIMAL(10,2)
+        * status : VARCHAR(20)
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_work_orders : PRIMARY KEY (id)
+        + fk_work_orders_tenant_id : FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+        + fk_work_orders_branch_id : FOREIGN KEY (branch_id) REFERENCES branches(id)
+        + fk_work_orders_appointment_id : FOREIGN KEY (appointment_id) REFERENCES appointments(id)
+        + fk_work_orders_vehicle_id : FOREIGN KEY (vehicle_id) REFERENCES vehicles(id)
+        + fk_work_orders_customer_id : FOREIGN KEY (customer_id) REFERENCES customers(id)
+        + fk_work_orders_current_bay_id : FOREIGN KEY (current_bay_id) REFERENCES work_bays(id)
+        + uk_work_orders_tenant_number : UNIQUE (tenant_id, internal_number)
+        + chk_work_order_status : CHECK (status IN ('draft', 'in_progress', 'completed', 'paid', 'canceled'))
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_work_orders_tenant_branch_status : (tenant_id, branch_id, status)
+        + idx_work_orders_vehicle : (vehicle_id)
+        + idx_work_orders_customer : (customer_id)
+        + idx_work_orders_current_bay : (current_bay_id) WHERE current_bay_id IS NOT NULL
+    }
+
+    entity "work_order_images" as work_order_images <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * work_order_id : UUID <<FK>>
+        * image_url : VARCHAR(255)
+        description : VARCHAR(200)
+        * uploaded_at : TIMESTAMPTZ
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_work_order_images : PRIMARY KEY (id)
+        + fk_work_order_images_work_order_id : FOREIGN KEY (work_order_id) REFERENCES work_orders(id)
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_images_work_order : (work_order_id)
+    }
+
+    entity "task_proposals" as task_proposals <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * work_order_id : UUID <<FK>>
+        task_id : UUID <<FK>>
+        service_id : UUID <<FK>>
+        * mechanic_id : UUID <<FK>>
+        * description : TEXT
+        * severity : VARCHAR(20)
+        * image_url : VARCHAR(255)
+        * status : VARCHAR(20)
+        customer_notes : VARCHAR(500)
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_task_proposals : PRIMARY KEY (id)
+        + fk_task_proposals_work_order_id : FOREIGN KEY (work_order_id) REFERENCES work_orders(id)
+        + fk_task_proposals_task_id : FOREIGN KEY (task_id) REFERENCES work_order_tasks(id)
+        + fk_task_proposals_service_id : FOREIGN KEY (service_id) REFERENCES services(id)
+        + fk_task_proposals_mechanic_id : FOREIGN KEY (mechanic_id) REFERENCES tenant_memberships(id)
+        + chk_proposal_severity : CHECK (severity IN ('low', 'medium', 'critical'))
+        + chk_proposal_status : CHECK (status IN ('pending_review', 'approved', 'rejected'))
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_proposals_work_order : (work_order_id)
+        + idx_proposals_status : (status)
+    }
+
+    ' ==========================================================================
+    ' COLUMNA 3: EJECUCIÓN OPERATIVA, TAREAS, REPUESTOS Y EVIDENCIAS
+    ' ==========================================================================
+    entity "tenant_memberships" as tenant_memberships <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        * user_id : UUID <<FK>>
+        --
+        <b>Contexto Externo (IAM & Tenancy):</b>
+        + Mecánicos y técnicos de la sede
+    }
+
+    entity "inventory_items" as inventory_items <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        * sku : VARCHAR(50)
+        * name : VARCHAR(150)
+        --
+        <b>Contexto Externo (Inventory & Supply):</b>
+        + Repuestos, insumos y fluidos
+    }
+
+    entity "work_order_tasks" as work_order_tasks <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * work_order_id : UUID <<FK>>
+        * service_id : UUID <<FK>>
+        mechanic_id : UUID <<FK>>
+        * status : VARCHAR(20)
+        * description : TEXT
+        * price : DECIMAL(10,2)
+        * estimated_hours : DECIMAL(4,2)
+        actual_hours : DECIMAL(4,2)
+        hold_reason : VARCHAR(50)
+        missing_item_description : TEXT
+        paused_at : TIMESTAMPTZ
+        * total_paused_seconds : BIGINT DEFAULT 0
+        started_at : TIMESTAMPTZ
+        completed_at : TIMESTAMPTZ
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_work_order_tasks : PRIMARY KEY (id)
+        + fk_work_order_tasks_work_order_id : FOREIGN KEY (work_order_id) REFERENCES work_orders(id)
+        + fk_work_order_tasks_service_id : FOREIGN KEY (service_id) REFERENCES services(id)
+        + fk_work_order_tasks_mechanic_id : FOREIGN KEY (mechanic_id) REFERENCES tenant_memberships(id)
+        + chk_task_status : CHECK (status IN ('pending', 'assigned', 'in_progress', 'on_hold', 'completed', 'cancelled'))
+        + chk_hold_reason : CHECK (hold_reason IS NULL OR hold_reason = 'waiting_parts')
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_tasks_work_order : (work_order_id)
+        + idx_tasks_mechanic_status : (mechanic_id, status)
+    }
+
+    entity "work_order_task_products" as work_order_task_products <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * task_id : UUID <<FK>>
+        * product_id : UUID <<FK>>
+        * quantity : DECIMAL(10,2)
+        * unit_price : DECIMAL(10,2)
+        * total_amount : DECIMAL(10,2)
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_work_order_task_products : PRIMARY KEY (id)
+        + fk_work_order_task_products_task_id : FOREIGN KEY (task_id) REFERENCES work_order_tasks(id)
+        + fk_work_order_task_products_product_id : FOREIGN KEY (product_id) REFERENCES inventory_items(id)
+        + chk_task_products_quantity : CHECK (quantity > 0.00)
+        + chk_task_products_total : CHECK (total_amount >= 0.00)
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_task_products_task : (task_id)
+        + idx_task_products_product : (product_id)
+    }
+
+    entity "work_order_task_images" as work_order_task_images <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * task_id : UUID <<FK>>
+        * image_url : VARCHAR(255)
+        * evidence_type : VARCHAR(30)
+        description : VARCHAR(200)
+        * uploaded_at : TIMESTAMPTZ
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_work_order_task_images : PRIMARY KEY (id)
+        + fk_work_order_task_images_task_id : FOREIGN KEY (task_id) REFERENCES work_order_tasks(id)
+        + chk_evidence_type : CHECK (evidence_type IN ('initial_inspection', 'defect', 'in_progress', 'completed'))
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_task_images_task : (task_id)
+    }
+
+    ' ==========================================================================
+    ' DISPOSICIÓN ESPACIAL EN COLUMNAS (ALINEAMIENTO HORIZONTAL Y VERTICAL)
+    ' ==========================================================================
+    ' Columna 1 (Vertical)
+    auditable_abstract_entity -[hidden]down-> tenants
+    tenants -[hidden]down-> branches
+    branches -[hidden]down-> work_bays
+    work_bays -[hidden]down-> services
+
+    ' Columna 2 (Vertical)
+    customers -[hidden]down-> vehicles
+    vehicles -[hidden]down-> appointments
+    appointments -[hidden]down-> work_orders
+    work_orders -[hidden]down-> work_order_images
+    work_order_images -[hidden]down-> task_proposals
+
+    ' Columna 3 (Vertical)
+    tenant_memberships -[hidden]down-> inventory_items
+    inventory_items -[hidden]down-> work_order_tasks
+    work_order_tasks -[hidden]down-> work_order_task_products
+    work_order_task_products -[hidden]down-> work_order_task_images
+
+    ' Alineamiento horizontal forzado entre columnas
+    tenants -[hidden]right-> customers
+    customers -[hidden]right-> tenant_memberships
+
+    branches -[hidden]right-> vehicles
+    vehicles -[hidden]right-> inventory_items
+
+    work_bays -[hidden]right-> work_orders
+    work_orders -[hidden]right-> work_order_tasks
+
+    services -[hidden]right-> work_order_images
+    work_order_images -[hidden]right-> work_order_task_products
+
+    task_proposals -[hidden]right-> work_order_task_images
+
+    ' ==========================================================================
+    ' HERENCIA JPA Y RELACIONES CARDINALES
+    ' ==========================================================================
+    auditable_abstract_entity <|-- work_bays : "herencia física JPA\n(@MappedSuperclass)"
+    auditable_abstract_entity <|-- work_orders
+    auditable_abstract_entity <|-- services
+
+    tenants "1  " ||--o{ "0..* " work_bays : "bahías del taller"
+    tenants "1  " ||--o{ "0..* " work_orders : "órdenes del taller"
+    tenants "1  " ||--o{ "0..* " services : "catálogo servicios"
+
+    branches "1  " ||--o{ "0..* " work_bays : "sede física"
+    branches "1  " ||--o{ "0..* " work_orders : "sede atención"
+
+    work_bays "0..1" ||--o{ "0..* " work_orders : "estaciona vehículo"
+
+    customers "1  " ||--o{ "0..* " work_orders : "solicitante / titular"
+    vehicles "1  " ||--o{ "0..* " work_orders : "sujeto de servicio"
+    appointments "0..1" ||--o{ "0..* " work_orders : "deriva de cita"
+
+    work_orders "1  " ||--o{ "0..* " work_order_tasks : "desglose técnico"
+    work_orders "1  " ||--o{ "0..* " work_order_images : "peritaje recepción"
+    work_orders "1  " ||--o{ "0..* " task_proposals : "hallazgos periciales"
+
+    services "1  " ||--o{ "0..* " work_order_tasks : "instanciación catálogo"
+    services "0..1" ||--o{ "0..* " task_proposals : "servicio sugerido"
+
+    tenant_memberships "0..1" ||--o{ "0..* " work_order_tasks : "mecánico asignado"
+    tenant_memberships "1  " ||--o{ "0..* " task_proposals : "detectado por"
+
+    work_order_tasks "1  " ||--o{ "0..* " work_order_task_products : "demanda repuestos"
+    work_order_tasks "1  " ||--o{ "0..* " work_order_task_images : "evidencias en foso"
+    work_order_tasks "0..1" ||--o{ "0..* " task_proposals : "tarea asociada"
+
+    inventory_items "1  " ||--o{ "0..* " work_order_task_products : "reserva inventario"
+}
+
+' ==============================================================================
+' PRODUCTO 2: MOBILE WORKSHOP (CLIENTE TÉCNICO OFFLINE - SQLITE 3)
+' ==============================================================================
+package "SQLite 3 (Mobile Workshop - Cliente Técnico Offline)" as sqlite_mobile #FEFDE8 {
+
+    entity "local_bays_cache" as local_bays_cache <<table, SQLite>> #FEF9E7 {
+        * bay_id : TEXT <<PK>>
+        --
+        * tenant_id : TEXT
+        * branch_id : TEXT
+        * name : TEXT
+        * type : TEXT
+        * status : TEXT
+        current_work_order_id : TEXT
+        * synced_at : TEXT (ISO8601)
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_local_bays : PRIMARY KEY (bay_id)
+        --
+        <b>Propósito Operativo:</b>
+        + Mapa local de ocupación de elevadores
+        + Reubicación física en patio de maniobras
+    }
+
+    entity "local_work_orders_cache" as local_work_orders_cache <<table, SQLite>> #FEF9E7 {
+        * order_id : TEXT <<PK>>
+        --
+        * tenant_id : TEXT
+        * branch_id : TEXT
+        * internal_number : TEXT
+        * vehicle_plate : TEXT
+        * vehicle_brand_model : TEXT
+        * customer_name : TEXT
+        current_bay_id : TEXT
+        bay_name : TEXT
+        * status : TEXT
+        diagnostic_summary : TEXT
+        * mileage_in : INTEGER
+        * total_amount : REAL
+        * synced_at : TEXT (ISO8601)
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_local_work_orders : PRIMARY KEY (order_id)
+        --
+        <b>Propósito Operativo:</b>
+        + Réplica local de la orden de trabajo
+        + Consulta en foso sin conexión de red
+    }
+
+    entity "local_tasks_cache" as local_tasks_cache <<table, SQLite>> #FEF9E7 {
+        * task_id : TEXT <<PK>>
+        --
+        * work_order_id : TEXT
+        * service_name : TEXT
+        mechanic_id : TEXT
+        * status : TEXT
+        * description : TEXT
+        * estimated_hours : REAL
+        actual_hours : REAL
+        hold_reason : TEXT
+        missing_item_description : TEXT
+        paused_at : TEXT
+        * total_paused_seconds : INTEGER
+        * synced_at : TEXT (ISO8601)
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_local_tasks : PRIMARY KEY (task_id)
+        --
+        <b>Propósito Operativo:</b>
+        + Ejecución offline de cronómetros y pausas
+        + Tareas asignadas al mecánico en foso
+    }
+
+    entity "offline_pit_mutations" as offline_pit_mutations <<table, SQLite>> #FEF9E7 {
+        * mutation_id : TEXT <<PK>>
+        --
+        * work_order_id : TEXT
+        * task_id : TEXT
+        * action_type : TEXT
+        * payload : TEXT (JSON)
+        * status : TEXT
+        * retry_count : INTEGER
+        * created_at : TEXT (ISO8601)
+        synced_at : TEXT (ISO8601)
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_offline_pit_mutations : PRIMARY KEY (mutation_id)
+        + chk_pit_mutation_status : CHECK (status IN ('PENDING', 'SYNCED', 'FAILED'))
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_pit_mutations_status : (status, created_at)
+        --
+        <b>Propósito Operativo:</b>
+        + Cola transaccional de inicio, pausa y fin
+        + Drenaje asíncrono con reintentos exponenciales
+    }
+
+    entity "offline_pending_evidences" as offline_pending_evidences <<table, SQLite>> #FEF9E7 {
+        * evidence_id : TEXT <<PK>>
+        --
+        * task_id : TEXT
+        * local_file_path : TEXT
+        * target_storage_path : TEXT
+        * evidence_type : TEXT
+        * upload_status : TEXT
+        signed_url : TEXT
+        * created_at : TEXT (ISO8601)
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_offline_pending_evidences : PRIMARY KEY (evidence_id)
+        + chk_evidence_upload_status : CHECK (upload_status IN ('PENDING', 'UPLOADING', 'UPLOADED', 'FAILED'))
+        --
+        <b>Propósito Operativo:</b>
+        + Cola de imágenes pendientes en almacenamiento local
+        + Carga directa a Google Cloud Storage / Firebase
+    }
+
+    ' Disposición vertical en columna SQLite
+    local_bays_cache -[hidden]down-> local_work_orders_cache
+    local_work_orders_cache -[hidden]down-> local_tasks_cache
+    local_tasks_cache -[hidden]down-> offline_pit_mutations
+    offline_pit_mutations -[hidden]down-> offline_pending_evidences
+}
+
+' Disposición horizontal entre paquetes
+tenant_memberships -[hidden]right-> local_bays_cache
+pg_backend -[hidden]right-> sqlite_mobile
+
+' ==============================================================================
+' RELACIONES DE SINCRONIZACIÓN INTER-PRODUCTO
+' ==============================================================================
+local_bays_cache .[#16A085]left.> work_bays : "<b>Disponibilidad de Puestos Físicos</b>\n(GET /api/v1/work-bays)"
+local_work_orders_cache .[#27AE60]left.> work_orders : "<b>Descarga y Refresco de Órdenes</b>\n(GET /api/v1/work-orders)"
+local_tasks_cache .[#8E44AD]left.> work_order_tasks : "<b>Tareas Asignadas al Mecánico</b>\n(GET /api/v1/tasks/assigned)"
+offline_pit_mutations .[#2980B9]left.> work_order_tasks : "<b>Replicación de Faena en Foso</b>\n(POST /api/v1/tasks/{id}/actions)"
+offline_pending_evidences .[#E67E22]left.> work_order_task_images : "<b>Direct-to-Cloud Upload y Notificación</b>\n(POST /api/v1/tasks/{id}/evidences)"
+
+@enduml

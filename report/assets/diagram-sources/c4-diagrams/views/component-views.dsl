@@ -3,6 +3,7 @@ component api "Components-API" "Diagrama de Componentes de la API Central de Ate
     exclude shared_perimeter shared_assemblers shared_cqrs shared_domain shared_persistence shared_outbox shared_openapi
     exclude iam_perimeter iam_controllers iam_app_services iam_security_services iam_domain iam_persistence iam_facade iam_external_gateways
     exclude crm_controllers crm_app_services crm_event_handlers crm_domain crm_persistence crm_facade crm_external_gateways
+    exclude mro_controllers mro_app_services mro_event_handlers mro_domain mro_persistence mro_facade mro_external_gateways
     autoLayout tb 250 200
 }
 
@@ -31,3 +32,11 @@ component api "component-level-diagram-crm" "Diagrama de Componentes C4 (Nivel 3
     include iam_comp mro_comp invoicing_comp billing_comp iot_comp
     autoLayout tb 250 200
 }
+
+component api "component-level-diagram-mro" "Diagrama de Componentes C4 (Nivel 3) para el Bounded Context Workshop Operations (MRO) en API Application" {
+    include mro_controllers mro_app_services mro_event_handlers mro_domain mro_persistence mro_facade mro_external_gateways
+    include webapp workshop_mobile db firebase_storage
+    include customer_fleet_comp iam_comp inventory_comp invoicing_comp iot_comp
+    autoLayout tb 250 200
+}
+

@@ -19,7 +19,7 @@ Para garantizar una precisión milimétrica y cero inconsistencias en los 8 Boun
 | **0** | **Shared** | `com.andeva.atelier.platform.shared` | MappedSuperclass (`AuditableAbstractPersistenceEntity`) | Spring Data Commons, JJWT, i18n |
 | **1** | **IAM & Tenancy Context** | `com.andeva.atelier.platform.iam` | `tenants`, `branches`, `users`, `roles`, `permissions`, `tenant_memberships`, `invitations`, `verification_tokens` (8 tablas) | Resend API (HTTPS 443), JJWT (0.12.6), BCrypt |
 | **2** | **Customer & Fleet Management (CRM)** | `com.andeva.atelier.platform.crm` | `customers`, `vehicles`, `appointments` (3 tablas) | Google Places API, Atelier Driver Sync |
-| **3** | **Workshop Operations (MRO)** | `com.andeva.atelier.platform.operations` | `work_bays`, `work_orders`, `work_order_tasks`, `work_order_task_products`, `work_order_images`, `work_order_task_images`, `services` (7 tablas) | Firebase Storage (Direct-to-Cloud), SQLite Offline |
+| **3** | **Workshop Operations (MRO)** | `com.andeva.atelier.platform.operations` | `work_bays`, `work_orders`, `work_order_tasks`, `work_order_task_products`, `work_order_images`, `work_order_task_images`, `services`, `task_proposals` (8 tablas) | Firebase Storage (Direct-to-Cloud), SQLite Offline |
 | **4** | **Inventory & Supply Chain Context** | `com.andeva.atelier.platform.inventory` | `inventory_items`, `inventory_batches`, `suppliers`, `purchase_orders`, `purchase_order_items` (5 tablas) | FIFO Engine, Image URL de Facturas |
 | **5** | **Human Resources Management (HR)** | `com.andeva.atelier.platform.hr` | `work_shifts`, `attendance_records`, `payroll_payments` (3 tablas) | Fórmula de Haversine (GPS Geofencing), Google Places API |
 | **6** | **Invoicing & Compliance Context** | `com.andeva.atelier.platform.invoicing` | `electronic_vouchers`, `voucher_lines`, `voucher_payments`, `sunat_series_configurations` (4 tablas) | Nubefact API JSON V1 (UBL 2.1 SUNAT), Resend API |
@@ -2320,15 +2320,16 @@ erDiagram
 
 #### 6.1.1. Propósito y Límites de Responsabilidad
 El **Workshop Operations Context (MRO - Maintenance, Repair, and Operations)** es el motor operativo y transaccional central del taller mecánico en Atelier Platform. Su propósito es orquestar todo el flujo físico de reparación automotriz desde que el vehículo ingresa a recepción hasta su entrega final, aislando esta complejidad operativa de los detalles contables de facturación tributaria y de suscripciones SaaS:
-1. **Orquestación del Ciclo de Vida de la Orden de Trabajo (`WorkOrder`):** Modela la orden de servicio automotriz completa (`internal_number`, `mileage_in`, `diagnostic_summary`, `total_amount`), gestionando transiciones estrictas de estado (`PENDING`, `IN_PROGRESS`, `COMPLETED`, `PAID`, `CANCELED`).
+1. **Orquestación del Ciclo de Vida de la Orden de Trabajo (`WorkOrder`):** Modela la orden de servicio automotriz completa (`internal_number`, `mileage_in`, `diagnostic_summary`, `total_amount`), gestionando transiciones estrictas de estado (`DRAFT`, `IN_PROGRESS`, `COMPLETED`, `PAID`, `CANCELED`) bajo la custodia del Asesor de Servicio.
 2. **Control Físico y Capacidad de Bahías de Trabajo (`WorkBay`):** Administra la disponibilidad, ocupación y mantenimiento de los elevadores hidráulicos (`lift`), cabinas de pintura (`paint_booth`), áreas de alineamiento y zonas de lavado en cada sucursal física (`branch_id`).
-3. **Desglose Atómico de Tareas de Mano de Obra (`WorkOrderTask`):** Permite seccionar la reparación en intervenciones puntuales, asociadas a servicios estándar del catálogo (`Service`), asignadas a mecánicos específicos (`mechanic_id` referenciado a `tenant_memberships`) y con registro de tiempos reales de inicio y finalización para métricas de productividad.
-4. **Demanda y Consumo de Repuestos (`WorkOrderTaskProduct`):** Registra los materiales, piezas y lubricantes consumidos por cada tarea. Al agregarse un repuesto, MRO no descuenta directamente los lotes FIFO (responsabilidad de *Inventory & Supply Chain*), sino que emite eventos de dominio para solicitar la reserva y bloqueo de stock dentro de la misma transacción o mediante consistencia eventual.
+3. **Desglose Atómico de Tareas de Mano de Obra (`WorkOrderTask`):** Permite seccionar la reparación en intervenciones puntuales, asociadas a servicios estándar del catálogo (`Service`), asignadas a mecánicos específicos (`mechanic_id` referenciado a `tenant_memberships`) y con registro de tiempos reales de inicio y finalización para métricas de productividad (*Wrench Time* vs. tiempo en pausa *Hold Time*).
+4. **Demanda y Consumo de Repuestos (`WorkOrderTaskProduct`):** Registra los materiales, piezas y lubricantes consumidos por cada tarea. Al agregarse un repuesto, MRO no descuenta directamente los lotes FIFO (responsabilidad de *Inventory & Supply Chain*), sino que emite eventos de dominio para solicitar la reserva lógica inmediata, consolidándose en deducción física al liquidar el pago (`PAID`).
 5. **Auditoría Visual y Evidencias Fotográficas (`WorkOrderImage` y `WorkOrderTaskImage`):** Soporta el peritaje de ingreso (fotos de rayones, abolladuras o estado del odómetro) y evidencias de reparación técnica (repuesto dañado extraído vs. repuesto nuevo instalado).
+6. **Hallazgos Periciales y Propuestas de Tareas Adicionales (`task_proposals`):** Modela averías imprevistas o vicios ocultos detectados por el técnico durante la inspección en elevador/foso. El mecánico reporta la falla técnica objetiva sin calcular montos económicos arbitrarios. Requiere validación y cotización por parte del Asesor de Servicio y diálogo pedagógico humano con el conductor. Si se aprueba, se instancia automáticamente como una tarea formal (`WorkOrderTask`) en estado `ASSIGNED` (o `PENDING` si no se asignó técnico aún); si se desestima, queda archivada como antecedente clínico en el historial vehicular para soporte de mantenimiento predictivo.
 
 #### 6.1.2. Decisiones de Diseño e Integraciones Críticas
 * **Patrón de Almacenamiento *Direct-to-Cloud* (Firebase Cloud Storage):** La carga de imágenes de alta resolución capturadas en patio por la aplicación móvil (Atelier Workshop) no satura el backend de Spring Boot. Los clientes móviles suben los binarios directamente a un bucket de **Google Cloud Storage / Firebase Storage** utilizando credenciales seguras o URLs prefirmadas, y envían únicamente al backend la URL pública inmutable (`image_url`) y la descripción textual para su registro transaccional.
-* **Soporte de Operatividad *Offline-First*:** Dado que las fosas mecánicas y sótanos de talleres sufren de conectividad intermitente, los mecánicos operan contra una base de datos relacional local embebida en sus dispositivos móviles (**SQLite** mediante Room en Kotlin y sqflite en Flutter). Al recuperar conectividad a internet, el cliente móvil sincroniza las tareas y evidencias hacia los endpoints idempotentes de `/api/v1/work-orders/{id}/tasks`.
+* **Soporte de Operatividad *Offline-First* y *Shallow Routing* REST:** Dado que las fosas mecánicas y sótanos de talleres sufren de conectividad intermitente, los mecánicos operan contra una base de datos relacional local embebida en sus dispositivos móviles (**SQLite** mediante Room en Kotlin y sqflite en Flutter). Al recuperar conectividad, el cliente móvil sincroniza consumiendo endpoints planos de segundo nivel (`/api/v1/tasks/{taskId}/products` y `/api/v1/tasks/{taskId}/evidence-images`), erradicando antipatrones de URIs sobre-anidadas.
 * **Cálculo Financiero Centralizado en el Agregado:** El monto total (`total_amount`) de la orden se recalcula de forma puramente determinista y atómica dentro del agregado raíz sumando el costo de mano de obra de todas las tareas activas más el producto de `(quantity * unit_price)` de todos los repuestos solicitados, garantizando coherencia absoluta con el módulo de *Invoicing*.
 
 ---
@@ -2351,27 +2352,31 @@ El **Workshop Operations Context (MRO - Maintenance, Repair, and Operations)** e
   * `mileageIn: Mileage` — Kilometraje del vehículo al momento de ingresar a recepción.
   * `diagnosticSummary: DiagnosticSummary` — Diagnóstico y fallas reportadas (máx. 2000 caracteres).
   * `totalAmount: Money` — Importe total calculado de la orden (mano de obra + repuestos consumidos).
-  * `status: WorkOrderStatus` — Estado operativo (`PENDING`, `IN_PROGRESS`, `COMPLETED`, `PAID`, `CANCELED`).
+  * `status: WorkOrderStatus` — Estado operativo (`DRAFT`, `IN_PROGRESS`, `COMPLETED`, `PAID`, `CANCELED`).
   * `tasks: List<WorkOrderTask>` — Colección interna de tareas de mano de obra.
+  * `proposals: List<TaskProposal>` — Colección interna de hallazgos periciales y propuestas de tareas adicionales detectadas en foso.
   * `intakeImages: List<WorkOrderImage>` — Colección de evidencias fotográficas de recepción.
 * **Invariantes y Reglas de Negocio:**
   * El kilometraje de ingreso `mileageIn` no puede ser negativo (`value >= 0`).
   * No se pueden agregar, modificar ni eliminar tareas o repuestos si la orden está en estado `COMPLETED`, `PAID` o `CANCELED`.
   * Toda mutación en tareas o repuestos recalcula inmediatamente el atributo `totalAmount`.
-  * La orden no puede transicionar a `COMPLETED` si contiene al menos una tarea en estado `PENDING` o `IN_PROGRESS`.
+  * La orden no puede transicionar a `COMPLETED` si contiene al menos una tarea en estado `PENDING`, `ASSIGNED`, `IN_PROGRESS` u `ON_HOLD`.
   * Al completarse la última tarea pendiente, la orden transiciona automáticamente a estado `COMPLETED`.
   * Una orden solo puede marcarse como `PAID` si se encuentra previamente en estado `COMPLETED`.
 * **Métodos:**
-  * `+ static WorkOrder create(TenantId tenantId, AppointmentId appointmentId, VehicleId vehicleId, Integer internalNumber, Mileage mileageIn, DiagnosticSummary diagnosticSummary): WorkOrder`: Factoría de dominio en estado inicial `PENDING`; registra `WorkOrderCreatedEvent`.
-  * `+ void assignBay(WorkBayId bayId): void`: Asigna el vehículo a una bahía física y dispara `WorkBayAssignedEvent`.
+  * `+ static WorkOrder create(TenantId tenantId, AppointmentId appointmentId, VehicleId vehicleId, Integer internalNumber, Mileage mileageIn, DiagnosticSummary diagnosticSummary): WorkOrder`: Factoría de dominio en estado inicial `DRAFT`; registra `WorkOrderCreatedEvent`.
+  * `+ void assignWorkBay(WorkBayId bayId): void`: Asigna el vehículo a una bahía física y dispara `WorkBayAssignedEvent`.
   * `+ void releaseBay(): void`: Libera la bahía física ocupada y registra `WorkBayReleasedEvent`.
-  * `+ WorkOrderTask addTask(ServiceId serviceId, UUID mechanicId, String description, Money price): WorkOrderTask`: Añade una tarea mecánica al plan de trabajo y recalcula el monto total.
+  * `+ WorkOrderTask addTask(ServiceId serviceId, UUID mechanicId, String description, Money price, LaborHours estimatedHours): WorkOrderTask`: Añade una tarea mecánica al plan de trabajo y recalcula el monto total. Si se suministra `mechanicId`, la tarea nace en `ASSIGNED`; de lo contrario, en `PENDING`.
   * `+ void removeTask(WorkOrderTaskId taskId): void`: Remueve una tarea si no ha sido completada, cancela la reserva de sus repuestos asociados y recalcula el total.
-  * `+ void startTask(WorkOrderTaskId taskId): void`: Pone en marcha una tarea (`IN_PROGRESS`), transiciona la orden completa a `IN_PROGRESS` si estaba `PENDING` y dispara `WorkOrderTaskStartedEvent`.
+  * `+ void startTask(WorkOrderTaskId taskId): void`: Pone en marcha una tarea (`IN_PROGRESS`), transiciona la orden completa a `IN_PROGRESS` si estaba `DRAFT` y dispara `WorkOrderTaskStartedEvent`.
   * `+ void completeTask(WorkOrderTaskId taskId): void`: Finaliza la tarea fijando su marca de tiempo de fin y evalúa si todas las tareas han concluido para transicionar la orden a `COMPLETED` (`WorkOrderCompletedEvent`).
+  * `+ TaskProposal submitProposal(UUID mechanicId, String description, ProposalSeverity severity, StorageUrl imageUrl, ServiceId suggestedServiceId): TaskProposal`: Registra un hallazgo pericial técnico (sin montos económicos fijados por el mecánico) y dispara `TaskProposalSubmittedEvent`.
+  * `+ WorkOrderTask approveProposal(UUID proposalId, ServiceId serviceId, Money finalPrice, LaborHours hours, UUID mechanicId, String notes): WorkOrderTask`: Aprueba el hallazgo tras acuerdo y presupuesto con el cliente, genera una `WorkOrderTask` formal en `ASSIGNED` o `PENDING` y emite `TaskProposalApprovedEvent`.
+  * `+ void rejectProposal(UUID proposalId, String customerNotes): void`: Desestima la propuesta y emite `TaskProposalRejectedEvent`.
   * `+ void addProductToTask(WorkOrderTaskId taskId, UUID productId, Quantity quantity, Money unitPrice): void`: Incorpora un repuesto a la tarea, recalcula el `totalAmount` y registra `ProductStockReservationRequestedEvent`.
   * `+ void removeProductFromTask(WorkOrderTaskId taskId, WorkOrderTaskProductId productItemId): void`: Elimina un repuesto de la tarea, recalcula el `totalAmount` y registra `ProductStockReservationCancelledEvent`.
-  * `+ void attachIntakeImage(ImageUrl imageUrl, String description): void`: Registra una evidencia fotográfica del peritaje inicial.
+  * `+ void attachIntakeImage(StorageUrl imageUrl, String description): void`: Registra una evidencia fotográfica del peritaje inicial.
   * `+ void recalculateTotalAmount(): void`: Suma aritmética determinista de la mano de obra de cada tarea activa más `(quantity * unit_price)` de todos los repuestos consumidos.
   * `+ void markPaid(): void`: Registra la cancelación económica de la orden y dispara `WorkOrderPaidEvent`.
   * `+ void cancel(String reason): void`: Anula la orden y libera todas las reservas de repuestos activas.
@@ -2424,22 +2429,28 @@ El **Workshop Operations Context (MRO - Maintenance, Repair, and Operations)** e
   * `workOrderId: WorkOrderId` — Orden de trabajo a la que pertenece.
   * `serviceId: ServiceId` — Servicio de catálogo asociado.
   * `mechanicId: UUID` — Identificador de membresía del mecánico asignado (referencia a `tenant_memberships`, nullable).
-  * `status: WorkOrderTaskStatus` — Estado de la labor (`PENDING`, `IN_PROGRESS`, `COMPLETED`).
+  * `status: WorkOrderTaskStatus` — Estado de la labor (`PENDING`, `ASSIGNED`, `IN_PROGRESS`, `ON_HOLD`, `COMPLETED`, `CANCELLED`).
   * `description: String` — Detalle del procedimiento mecánico o diagnóstico específico.
   * `price: Money` — Costo cobrado por la mano de obra de esta tarea específica.
+  * `holdReason: HoldReason` — Causal objetiva de detención temporal (`WAITING_PARTS`, nullable).
+  * `missingItemDescription: String` — Descripción pericial del repuesto o insumo faltante que motiva la detención (nullable).
+  * `pausedAt: Instant` — Marca temporal exacta en que la labor fue pausada en foso (nullable).
+  * `totalPausedSeconds: Long` — Tiempo acumulado de inactividad técnica en segundos.
   * `startedAt: Instant` — Marca de tiempo en que el mecánico inició la tarea.
   * `completedAt: Instant` — Marca de tiempo en que el mecánico finalizó la labor.
   * `consumedProducts: List<WorkOrderTaskProduct>` — Colección de repuestos utilizados en esta tarea.
   * `taskImages: List<WorkOrderTaskImage>` — Evidencias fotográficas específicas de esta labor.
 * **Métodos:**
-  * `+ void start(): void`: Registra `startedAt = Instant.now()` y fija `status = IN_PROGRESS`.
-  * `+ void complete(): void`: Registra `completedAt = Instant.now()` y fija `status = COMPLETED`.
-  * `+ void reopen(): void`: Retorna a `IN_PROGRESS` y anula `completedAt`.
-  * `+ void assignMechanic(UUID mechanicMembershipId): void`: Asocia el técnico responsable.
-  * `+ void updatePrice(Money newPrice): void`: Actualiza el importe de mano de obra.
-  * `+ void addProduct(WorkOrderTaskProduct product): void`: Agrega un requerimiento de repuesto.
-  * `+ void removeProduct(WorkOrderTaskProductId productId): void`: Elimina un repuesto.
-  * `+ void attachEvidenceImage(ImageUrl url, String description): void`: Adjunta evidencia de trabajo.
+  * `+ void assignMechanic(UUID mechanicMembershipId): void`: Asocia el técnico responsable de la intervención y transiciona a `ASSIGNED`.
+  * `+ void start(): void`: Registra `startedAt = Instant.now()`, fija `status = IN_PROGRESS` y dispara `WorkOrderTaskStartedEvent`.
+  * `+ void holdForWaitingParts(String missingItemDescription): void`: Pausa la intervención técnica por desabastecimiento de repuestos, fija `holdReason = WAITING_PARTS`, `pausedAt = Instant.now()`, conmuta a `ON_HOLD` y dispara `WorkOrderTaskHoldEvent`.
+  * `+ void resume(): void`: Reanuda la labor activa tras la llegada de las piezas, acumula el delta de pausa en `totalPausedSeconds`, anula `pausedAt`, transiciona a `IN_PROGRESS` y emite `WorkOrderTaskResumedEvent`.
+  * `+ void complete(): void`: Registra `completedAt = Instant.now()`, fija `status = COMPLETED` y emite `WorkOrderTaskCompletedEvent`.
+  * `+ void reopen(String reason): void`: Retorna a `IN_PROGRESS` y anula `completedAt` para rectificación o retrabajo.
+  * `+ void updatePrice(Money newPrice): void`: Actualiza el importe de mano de obra presupuestado por el Asesor de Servicio.
+  * `+ void addProduct(WorkOrderTaskProduct product): void`: Agrega un requerimiento de repuesto o lubricante.
+  * `+ void removeProduct(WorkOrderTaskProductId productId): void`: Elimina un repuesto demandado.
+  * `+ void attachEvidenceImage(StorageUrl url, EvidenceType evidenceType, String description): void`: Adjunta evidencia pericial de trabajo.
 
 ##### 2. `WorkOrderTaskProduct` (Entidad Dependiente de `WorkOrderTask`)
 * **Paquete:** `com.andeva.atelier.platform.operations.domain.model.entities`
@@ -2456,23 +2467,44 @@ El **Workshop Operations Context (MRO - Maintenance, Repair, and Operations)** e
 
 ##### 3. `WorkOrderImage` (Entidad Dependiente de `WorkOrder`)
 * **Paquete:** `com.andeva.atelier.platform.operations.domain.model.entities`
-* **Propósito:** Registra evidencias visuales del peritaje de ingreso a recepción del taller.
+* **Propósito:** Registra evidencias visuales del peritaje de ingreso a recepción del taller bajo el patrón Direct-to-Cloud.
 * **Atributos:**
   * `id: UUID` — Identificador del registro fotográfico.
   * `workOrderId: WorkOrderId` — Orden de trabajo vinculada.
-  * `imageUrl: ImageUrl` — URL pública del objeto alojado en Firebase Cloud Storage.
+  * `imageUrl: StorageUrl` — URL pública inmutable del objeto alojado en Firebase Cloud Storage.
   * `description: String` — Nota explicativa del perito (ej. "Abolladura previa en parachoque delantero").
   * `uploadedAt: Instant` — Marca de tiempo de registro.
 
 ##### 4. `WorkOrderTaskImage` (Entidad Dependiente de `WorkOrderTask`)
 * **Paquete:** `com.andeva.atelier.platform.operations.domain.model.entities`
-* **Propósito:** Registra evidencias visuales del procedimiento técnico ejecutado por el mecánico.
+* **Propósito:** Registra evidencias visuales del procedimiento técnico ejecutado por el mecánico en foso.
 * **Atributos:**
   * `id: UUID` — Identificador del registro.
   * `taskId: WorkOrderTaskId` — Tarea mecánica asociada.
-  * `imageUrl: ImageUrl` — URL pública en Firebase Cloud Storage.
+  * `imageUrl: StorageUrl` — URL pública inmutable en Firebase Cloud Storage.
+  * `evidenceType: EvidenceType` — Tipología pericial (`INITIAL_INSPECTION`, `DEFECT`, `IN_PROGRESS`, `COMPLETED`).
   * `description: String` — Descripción técnica (ej. "Disco de freno fisurado vs disco ventilado nuevo").
   * `uploadedAt: Instant` — Marca de tiempo.
+
+##### 5. `TaskProposal` (Entidad Dependiente de `WorkOrder`)
+* **Paquete:** `com.andeva.atelier.platform.operations.domain.model.entities`
+* **Propósito:** Modela hallazgos periciales y averías imprevistas detectadas por el mecánico en foso o elevador. El mecánico reporta la falla técnica objetiva sin calcular montos financieros; el Asesor de Servicio presupuesta y acuerda con el cliente antes de crear la tarea formal.
+* **Atributos:**
+  * `id: UUID` — Identificador del hallazgo / propuesta.
+  * `workOrderId: WorkOrderId` — Orden de trabajo vinculada.
+  * `taskId: WorkOrderTaskId` — Tarea durante la cual se detectó la falla (nullable).
+  * `serviceId: ServiceId` — Servicio de catálogo sugerido (nullable).
+  * `mechanicId: UUID` — Técnico que detectó el hallazgo.
+  * `description: String` — Detalle técnico de la falla.
+  * `severity: ProposalSeverity` — Severidad técnica (`LOW`, `MEDIUM`, `CRITICAL`).
+  * `imageUrl: StorageUrl` — Evidencia fotográfica pericial en Firebase Storage.
+  * `status: ProposalStatus` — Estado (`PENDING_REVIEW`, `APPROVED`, `REJECTED`).
+  * `customerNotes: String` — Motivo de aprobación o rechazo concertado con el cliente.
+  * `createdAt: Instant` — Fecha de detección.
+  * `updatedAt: Instant` — Fecha de resolución por el asesor.
+* **Métodos:**
+  * `+ void approve(String notes): void`: Transiciona a `APPROVED`.
+  * `+ void reject(String reason): void`: Transiciona a `REJECTED`.
 
 ---
 
@@ -2485,10 +2517,14 @@ El **Workshop Operations Context (MRO - Maintenance, Repair, and Operations)** e
 * **`ServiceId(UUID value)`:** Identificador tipado de servicio de catálogo.
 * **`Mileage(Integer value)`:** Kilometraje automotriz entero no negativo (`value >= 0`).
 * **`DiagnosticSummary(String value)`:** Resumen de diagnóstico preliminar (máximo 2000 caracteres, normalizado sin espacios redundantes).
+* **`LaborHours(BigDecimal value)`:** Horas de mano de obra con precisión decimal estricta (`value > 0.00`).
 * **`Quantity(BigDecimal value)`:** Cantidad numérica no negativa para repuestos o litros de lubricante (escala 2).
-* **`ImageUrl(String value)`:** Valida formato URL HTTPS canónico apuntando al storage de la nube (`storage.googleapis.com` o dominio verificado de Firebase).
-* **`WorkOrderStatus` (Enum):** `PENDING`, `IN_PROGRESS`, `COMPLETED`, `PAID`, `CANCELED`.
-* **`WorkOrderTaskStatus` (Enum):** `PENDING`, `IN_PROGRESS`, `COMPLETED`.
+* **`StorageUrl(String value)`:** Valida formato URL HTTPS canónico apuntando al almacenamiento perimetral seguro de Firebase Cloud Storage o Google Cloud Storage.
+* **`WorkOrderStatus` (Enum):** `DRAFT`, `IN_PROGRESS`, `COMPLETED`, `PAID`, `CANCELED`.
+* **`WorkOrderTaskStatus` (Enum):** `PENDING`, `ASSIGNED`, `IN_PROGRESS`, `ON_HOLD`, `COMPLETED`, `CANCELLED`.
+* **`HoldReason` (Enum):** `WAITING_PARTS`.
+* **`ProposalSeverity` (Enum):** `LOW`, `MEDIUM`, `CRITICAL`.
+* **`ProposalStatus` (Enum):** `PENDING_REVIEW`, `APPROVED`, `REJECTED`.
 * **`BayType` (Enum):** `LIFT`, `PAINT_BOOTH`, `WASHING`, `ALIGNMENT`.
 * **`BayStatus` (Enum):** `AVAILABLE`, `OCCUPIED`, `MAINTENANCE`.
 
@@ -2499,13 +2535,21 @@ El **Workshop Operations Context (MRO - Maintenance, Repair, and Operations)** e
 * `CreateWorkOrderCommand(TenantId tenantId, AppointmentId appointmentId, VehicleId vehicleId, Mileage mileageIn, DiagnosticSummary diagnosticSummary)`
 * `AssignWorkBayCommand(WorkOrderId workOrderId, WorkBayId bayId)`
 * `ReleaseWorkBayCommand(WorkOrderId workOrderId)`
-* `AddTaskToWorkOrderCommand(WorkOrderId workOrderId, ServiceId serviceId, UUID mechanicId, String description, BigDecimal price, String currency)`
-* `StartWorkOrderTaskCommand(WorkOrderId workOrderId, WorkOrderTaskId taskId)`
-* `CompleteWorkOrderTaskCommand(WorkOrderId workOrderId, WorkOrderTaskId taskId)`
-* `AddProductToTaskCommand(WorkOrderId workOrderId, WorkOrderTaskId taskId, UUID productId, BigDecimal quantity, BigDecimal unitPrice, String currency)`
-* `RemoveProductFromTaskCommand(WorkOrderId workOrderId, WorkOrderTaskId taskId, WorkOrderTaskProductId productItemId)`
+* `AddTaskToWorkOrderCommand(WorkOrderId workOrderId, ServiceId serviceId, UUID mechanicId, String description, BigDecimal price, String currency, BigDecimal estimatedHours)`
+* `AssignTaskMechanicCommand(WorkOrderId workOrderId, WorkOrderTaskId taskId, UUID mechanicId)`
+* `HoldWorkOrderTaskCommand(WorkOrderTaskId taskId, String missingItemDescription)`
+* `ResumeWorkOrderTaskCommand(WorkOrderTaskId taskId)`
+* `SubmitTaskProposalCommand(WorkOrderId workOrderId, UUID mechanicId, String description, ProposalSeverity severity, String imageUrl, ServiceId suggestedServiceId)`
+* `ApproveTaskProposalCommand(WorkOrderId workOrderId, UUID proposalId, ServiceId serviceId, BigDecimal finalPrice, BigDecimal laborHours, UUID mechanicId, String notes)`
+* `RejectTaskProposalCommand(WorkOrderId workOrderId, UUID proposalId, String customerNotes)`
+* `StartWorkOrderTaskCommand(WorkOrderTaskId taskId)`
+* `CompleteWorkOrderTaskCommand(WorkOrderTaskId taskId)`
+* `ReopenWorkOrderTaskCommand(WorkOrderTaskId taskId)`
+* `AddProductToTaskCommand(WorkOrderTaskId taskId, UUID productId, BigDecimal quantity, BigDecimal unitPrice, String currency)`
+* `UpdateTaskProductQuantityCommand(WorkOrderTaskId taskId, UUID productId, BigDecimal newQuantity)`
+* `RemoveProductFromTaskCommand(WorkOrderTaskId taskId, WorkOrderTaskProductId productItemId)`
 * `AttachIntakeImageCommand(WorkOrderId workOrderId, String imageUrl, String description)`
-* `AttachTaskEvidenceImageCommand(WorkOrderId workOrderId, WorkOrderTaskId taskId, String imageUrl, String description)`
+* `AttachTaskEvidenceImageCommand(WorkOrderTaskId taskId, String imageUrl, String description)`
 * `CreateWorkBayCommand(TenantId tenantId, BranchId branchId, String name, BayType bayType)`
 * `UpdateWorkBayStatusCommand(WorkBayId bayId, BayStatus status, String reason)`
 * `CreateServiceItemCommand(TenantId tenantId, String name, BigDecimal basePrice, String currency, int estimatedMinutes)`
@@ -2521,6 +2565,8 @@ El **Workshop Operations Context (MRO - Maintenance, Repair, and Operations)** e
 * `GetWorkOrdersByBranchIdQuery(TenantId tenantId, BranchId branchId)`
 * `GetWorkOrdersByVehicleIdQuery(VehicleId vehicleId)`
 * `GetWorkOrdersByBayIdQuery(WorkBayId bayId)`
+* `GetTaskProposalsByWorkOrderIdQuery(WorkOrderId workOrderId)`
+* `GetWorkOrderTaskByIdQuery(WorkOrderTaskId taskId)`
 * `GetWorkBaysByBranchIdQuery(TenantId tenantId, BranchId branchId)`
 * `GetAvailableWorkBaysQuery(TenantId tenantId, BranchId branchId, BayType bayType)`
 * `GetServicesByTenantIdQuery(TenantId tenantId)`
@@ -2533,14 +2579,20 @@ El **Workshop Operations Context (MRO - Maintenance, Repair, and Operations)** e
 * `WorkOrderCreatedEvent(WorkOrderId workOrderId, TenantId tenantId, VehicleId vehicleId, Integer internalNumber, Instant occurredOn)`
 * `WorkBayAssignedEvent(WorkOrderId workOrderId, WorkBayId bayId, Instant occurredOn)`
 * `WorkBayReleasedEvent(WorkOrderId workOrderId, WorkBayId bayId, Instant occurredOn)`
+* `WorkOrderTaskAssignedEvent(WorkOrderId workOrderId, WorkOrderTaskId taskId, UUID mechanicId, Instant occurredOn)`
 * `WorkOrderTaskStartedEvent(WorkOrderId workOrderId, WorkOrderTaskId taskId, UUID mechanicId, Instant occurredOn)`
+* `WorkOrderTaskHoldEvent(WorkOrderId workOrderId, WorkOrderTaskId taskId, HoldReason reason, String missingItemDescription, Instant occurredOn)`
+* `WorkOrderTaskResumedEvent(WorkOrderId workOrderId, WorkOrderTaskId taskId, Long pausedDurationSeconds, Instant occurredOn)`
 * `WorkOrderTaskCompletedEvent(WorkOrderId workOrderId, WorkOrderTaskId taskId, UUID mechanicId, Instant occurredOn)`
+* `TaskProposalSubmittedEvent(WorkOrderId workOrderId, UUID proposalId, UUID mechanicId, ProposalSeverity severity, Instant occurredOn)`
+* `TaskProposalApprovedEvent(WorkOrderId workOrderId, UUID proposalId, WorkOrderTaskId createdTaskId, Instant occurredOn)`
+* `TaskProposalRejectedEvent(WorkOrderId workOrderId, UUID proposalId, String customerNotes, Instant occurredOn)`
 * `WorkOrderCompletedEvent(WorkOrderId workOrderId, TenantId tenantId, VehicleId vehicleId, Money totalAmount, Instant occurredOn)`
 * `WorkOrderPaidEvent(WorkOrderId workOrderId, TenantId tenantId, Money totalAmount, Instant occurredOn)`
 * `ProductStockReservationRequestedEvent(WorkOrderId workOrderId, WorkOrderTaskId taskId, UUID productId, Quantity quantity, Instant occurredOn)`
 * `ProductStockReservationCancelledEvent(WorkOrderId workOrderId, WorkOrderTaskId taskId, UUID productId, Quantity quantity, Instant occurredOn)`
-* `WorkOrderIntakeImageAttachedEvent(WorkOrderId workOrderId, UUID imageId, ImageUrl imageUrl, Instant occurredOn)`
-* `WorkOrderTaskEvidenceAttachedEvent(WorkOrderId workOrderId, WorkOrderTaskId taskId, UUID imageId, ImageUrl imageUrl, Instant occurredOn)`
+* `WorkOrderIntakeImageAttachedEvent(WorkOrderId workOrderId, UUID imageId, StorageUrl imageUrl, Instant occurredOn)`
+* `WorkOrderTaskEvidenceAttachedEvent(WorkOrderId workOrderId, WorkOrderTaskId taskId, UUID imageId, StorageUrl imageUrl, Instant occurredOn)`
 
 ---
 
@@ -2571,26 +2623,41 @@ El **Workshop Operations Context (MRO - Maintenance, Repair, and Operations)** e
 
 ##### 1. `WorkOrdersController`
 * **Ruta Base:** `/api/v1/work-orders`
-* **Propósito:** Apertura, supervisión, asignación de bahías y liquidación de órdenes de trabajo.
+* **Propósito:** Apertura de órdenes por el Asesor de Servicio, supervisión de planta, asignación de bahías físicas, incorporación de tareas autorizadas, gestión de propuestas/hallazgos periciales, peritaje fotográfico de recepción y liquidación del ciclo de vida.
 * **Endpoints:**
   * `POST`: Apertura de nueva orden de trabajo. Recibe `CreateWorkOrderResource`, retorna `WorkOrderResource` (HTTP 201 Created).
-  * `GET`: Listado de órdenes filtradas por sucursal, vehículo o estado. Retorna `List<WorkOrderSummaryResource>` (HTTP 200 OK).
-  * `GET /{id}`: Consulta detallada de la orden con sus tareas, repuestos e imágenes de recepción. Retorna `WorkOrderDetailResource` (HTTP 200 OK / 404 Not Found).
+  * `GET`: Listado de órdenes filtradas por sucursal, vehículo o estado. Retorna `PagedModel<WorkOrderSummaryResource>` (HTTP 200 OK).
+  * `GET /{id}`: Consulta detallada de la orden con sus tareas, propuestas, repuestos e imágenes de recepción. Retorna `WorkOrderDetailResource` (HTTP 200 OK / 404 Not Found).
+  * `PUT /{id}`: Actualización de diagnóstico de recepción o kilometraje verificado. Recibe `UpdateWorkOrderResource`, retorna `WorkOrderResource` (HTTP 200 OK).
   * `PUT /{id}/bay`: Asignación o reubicación de bahía de trabajo. Recibe `AssignWorkBayResource`, retorna `WorkOrderResource` (HTTP 200 OK).
   * `DELETE /{id}/bay`: Liberación manual de la bahía de trabajo actual. Retorna HTTP 204 No Content.
-  * `POST /{id}/intake-images`: Registro de imagen de inspección de ingreso. Recibe `AttachImageResource`, retorna `WorkOrderImageResource` (HTTP 201 Created).
-  * `POST /{id}/tasks`: Incorporación de una nueva tarea mecánica al plan de trabajo. Recibe `CreateWorkOrderTaskResource`, retorna `WorkOrderTaskResource` (HTTP 201 Created).
-  * `PUT /{id}/cancel`: Anulación de la orden con liberación de repuestos y bahía. Recibe `CancelWorkOrderResource`, retorna `WorkOrderResource` (HTTP 200 OK).
+  * `POST /{id}/tasks`: Incorporación de una nueva labor formal autorizada por el Asesor de Servicio. Si se incluye mecánico, se crea en `ASSIGNED`; de lo contrario, en `PENDING`. Recibe `CreateWorkOrderTaskResource`, retorna `WorkOrderTaskResource` (HTTP 201 Created).
+  * `POST /{id}/proposals`: Registro de hallazgo pericial o avería oculta detectada por el técnico en foso. Recibe `SubmitTaskProposalResource`, retorna `TaskProposalResource` (HTTP 201 Created).
+  * `GET /{id}/proposals`: Listado de hallazgos periciales y propuestas de la orden. Retorna `List<TaskProposalResource>` (HTTP 200 OK).
+  * `POST /{id}/proposals/{proposalId}/approve`: Aprobación formal del Asesor de Servicio tras concertar y presupuestar con el cliente; instancia una `WorkOrderTask` en `ASSIGNED` o `PENDING`. Recibe `ApproveTaskProposalResource`, retorna `WorkOrderTaskResource` (HTTP 200 OK).
+  * `POST /{id}/proposals/{proposalId}/reject`: Desestimación de la propuesta por el cliente; archivada en el historial clínico vehicular. Recibe `RejectTaskProposalResource`, retorna `TaskProposalResource` (HTTP 200 OK).
+  * `POST /{id}/intake-images`: Registro de imagen de inspección de ingreso (*Direct-to-Cloud*). Recibe `AttachImageResource`, retorna `WorkOrderImageResource` (HTTP 201 Created).
+  * `POST /{id}/start`: Transición formal de la orden al estado en progreso (`IN_PROGRESS`). Retorna `WorkOrderResource` (HTTP 200 OK).
+  * `POST /{id}/complete`: Cierre técnico de la orden tras constatar que todas las tareas mecánicas han finalizado. Retorna `WorkOrderResource` (HTTP 200 OK).
+  * `POST /{id}/mark-as-paid`: Conciliación formal del pago económico de la orden, consolidando reservas en deducción FIFO. Retorna `WorkOrderResource` (HTTP 200 OK).
+  * `POST /{id}/cancel`: Anulación justificada de la orden con liberación de repuestos y bahía. Recibe `CancelWorkOrderResource`, retorna `WorkOrderResource` (HTTP 200 OK).
 
-##### 2. `WorkOrderTasksController`
-* **Ruta Base:** `/api/v1/work-order-tasks`
-* **Propósito:** Operaciones de ejecución mecánica en foso por parte de los técnicos.
+##### 2. `TasksController` (Shallow Routing para Labores en Foso)
+* **Ruta Base:** `/api/v1/tasks`
+* **Propósito:** Operaciones mecánicas desacopladas en foso por parte de los técnicos, gestión de horas hombre, solicitud, ajuste y liberación de repuestos e inspección intermedia.
 * **Endpoints:**
-  * `PUT /{taskId}/start`: El mecánico inicia la intervención técnica. Retorna `WorkOrderTaskResource` (HTTP 200 OK).
-  * `PUT /{taskId}/complete`: El mecánico marca la labor completada. Retorna `WorkOrderTaskResource` (HTTP 200 OK).
-  * `POST /{taskId}/products`: Solicitud de repuesto para la tarea (reserva stock en inventario). Recibe `AddTaskProductResource`, retorna `TaskProductResource` (HTTP 201 Created).
+  * `GET /{taskId}`: Consulta técnica individual de la labor en foso. Retorna `WorkOrderTaskResource` (HTTP 200 OK / 404 Not Found).
+  * `PUT /{taskId}`: Modificación técnica de la tarea (descripción, precio o asignación). Recibe `UpdateWorkOrderTaskResource`, retorna `WorkOrderTaskResource` (HTTP 200 OK).
+  * `POST /{taskId}/assign`: Asignación o reasignación del técnico mecánico responsable de la labor (`ASSIGNED`). Recibe `AssignTaskMechanicResource`, retorna `WorkOrderTaskResource` (HTTP 200 OK).
+  * `POST /{taskId}/start`: El mecánico inicia la intervención técnica (`IN_PROGRESS`). Retorna `WorkOrderTaskResource` (HTTP 200 OK).
+  * `POST /{taskId}/hold`: Pausa técnica de la labor en foso por desabastecimiento de repuestos (`ON_HOLD`), congelando el cómputo de horas activas (*Wrench Time*). Recibe `HoldTaskResource`, retorna `WorkOrderTaskResource` (HTTP 200 OK).
+  * `POST /{taskId}/resume`: Reanudación del trabajo activo tras arribo de los repuestos (`IN_PROGRESS`). Retorna `WorkOrderTaskResource` (HTTP 200 OK).
+  * `POST /{taskId}/complete`: El mecánico marca la labor completada registrando horas hombre reales (`COMPLETED`). Recibe `CompleteTaskResource`, retorna `WorkOrderTaskResource` (HTTP 200 OK).
+  * `POST /{taskId}/reopen`: Reapertura de una labor técnica finalizada. Retorna `WorkOrderTaskResource` (HTTP 200 OK).
+  * `POST /{taskId}/products`: Solicitud de repuesto para la tarea (reserva inmediata FIFO en inventario). Recibe `AddTaskProductResource`, retorna `TaskProductResource` (HTTP 201 Created).
+  * `PUT /{taskId}/products/{productId}`: Ajuste de la cantidad demandada de repuesto consumido. Recibe `UpdateTaskProductResource`, retorna `TaskProductResource` (HTTP 200 OK).
   * `DELETE /{taskId}/products/{productId}`: Remoción de repuesto (libera reserva en inventario). Retorna HTTP 204 No Content.
-  * `POST /{taskId}/evidence-images`: Carga de evidencia fotográfica del trabajo. Recibe `AttachImageResource`, retorna `WorkOrderImageResource` (HTTP 201 Created).
+  * `POST /{taskId}/evidence-images`: Carga de evidencia pericial fotográfica del trabajo (*Direct-to-Cloud*). Recibe `AttachTaskEvidenceResource`, retorna `WorkOrderTaskImageResource` (HTTP 201 Created).
 
 ##### 3. `WorkBaysController`
 * **Ruta Base:** `/api/v1/work-bays`
@@ -2615,10 +2682,20 @@ El **Workshop Operations Context (MRO - Maintenance, Repair, and Operations)** e
 
 * **Peticiones (Requests):**
   * `CreateWorkOrderResource(UUID appointmentId, UUID vehicleId, Integer mileageIn, String diagnosticSummary)`
+  * `UpdateWorkOrderResource(Integer mileageIn, String diagnosticSummary)`
   * `AssignWorkBayResource(UUID bayId)`
-  * `CreateWorkOrderTaskResource(UUID serviceId, UUID mechanicId, String description, BigDecimal price, String currency)`
+  * `CreateWorkOrderTaskResource(UUID serviceId, UUID mechanicId, String description, BigDecimal price, String currency, BigDecimal estimatedHours)`
+  * `UpdateWorkOrderTaskResource(String description, BigDecimal price, UUID mechanicId)`
+  * `AssignTaskMechanicResource(UUID mechanicId)`
+  * `HoldTaskResource(String missingItemDescription, UUID inventoryItemId)`
+  * `SubmitTaskProposalResource(UUID mechanicId, String description, String severity, String imageUrl, UUID suggestedServiceId)`
+  * `ApproveTaskProposalResource(UUID serviceId, BigDecimal finalPrice, BigDecimal laborHours, UUID mechanicId, String notes)`
+  * `RejectTaskProposalResource(String customerNotes)`
+  * `CompleteTaskResource(BigDecimal actualLaborHours, String notes)`
   * `AddTaskProductResource(UUID productId, BigDecimal quantity, BigDecimal unitPrice, String currency)`
+  * `UpdateTaskProductResource(BigDecimal quantity)`
   * `AttachImageResource(String imageUrl, String description)`
+  * `AttachTaskEvidenceResource(String imageUrl, String description)`
   * `CancelWorkOrderResource(String reason)`
   * `CreateWorkBayResource(UUID branchId, String name, String bayType)`
   * `MaintenanceBayResource(String reason)`
@@ -2626,10 +2703,13 @@ El **Workshop Operations Context (MRO - Maintenance, Repair, and Operations)** e
   * `UpdateServiceResource(String name, BigDecimal basePrice, String currency, int estimatedMinutes)`
 * **Respuestas (Responses):**
   * `WorkOrderResource(UUID id, UUID tenantId, Integer internalNumber, UUID vehicleId, UUID currentBayId, Integer mileageIn, String status, BigDecimal totalAmount, String currency)`
-  * `WorkOrderDetailResource(UUID id, UUID tenantId, Integer internalNumber, UUID vehicleId, UUID currentBayId, String bayName, Integer mileageIn, String diagnosticSummary, String status, BigDecimal totalAmount, String currency, List<WorkOrderTaskResource> tasks, List<WorkOrderImageResource> intakeImages)`
-  * `WorkOrderTaskResource(UUID id, UUID workOrderId, UUID serviceId, String serviceName, UUID mechanicId, String mechanicName, String status, String description, BigDecimal price, String currency, Instant startedAt, Instant completedAt, List<TaskProductResource> products, List<WorkOrderImageResource> evidenceImages)`
+  * `WorkOrderSummaryResource(UUID id, UUID tenantId, Integer internalNumber, UUID vehicleId, UUID currentBayId, String bayName, String status, BigDecimal totalAmount, String currency, Instant createdAt)`
+  * `WorkOrderDetailResource(UUID id, UUID tenantId, Integer internalNumber, UUID vehicleId, UUID currentBayId, String bayName, Integer mileageIn, String diagnosticSummary, String status, BigDecimal totalAmount, String currency, List<WorkOrderTaskResource> tasks, List<TaskProposalResource> proposals, List<WorkOrderImageResource> intakeImages, Instant createdAt, Instant updatedAt)`
+  * `WorkOrderTaskResource(UUID id, UUID workOrderId, UUID serviceId, String serviceName, UUID mechanicId, String mechanicName, String status, String description, BigDecimal price, String currency, String holdReason, String missingItemDescription, Long totalPausedSeconds, Instant startedAt, Instant completedAt, List<TaskProductResource> products, List<WorkOrderTaskImageResource> evidenceImages)`
+  * `TaskProposalResource(UUID id, UUID workOrderId, UUID taskId, UUID serviceId, String serviceName, UUID mechanicId, String mechanicName, String description, String severity, String imageUrl, String status, String customerNotes, Instant createdAt, Instant updatedAt)`
   * `TaskProductResource(UUID id, UUID taskId, UUID productId, String productName, BigDecimal quantity, BigDecimal unitPrice, BigDecimal totalAmount, String currency)`
-  * `WorkOrderImageResource(UUID id, String imageUrl, String description, Instant uploadedAt)`
+  * `WorkOrderImageResource(UUID id, UUID workOrderId, String imageUrl, String description, Instant uploadedAt)`
+  * `WorkOrderTaskImageResource(UUID id, UUID taskId, String imageUrl, String description, Instant uploadedAt)`
   * `WorkBayResource(UUID id, UUID tenantId, UUID branchId, String name, String bayType, String status, UUID currentWorkOrderId)`
   * `ServiceResource(UUID id, UUID tenantId, String name, BigDecimal basePrice, String currency, int estimatedMinutes)`
 
@@ -2637,10 +2717,28 @@ El **Workshop Operations Context (MRO - Maintenance, Repair, and Operations)** e
 
 #### 6.3.3. Resource Assemblers
 
-* `WorkOrderResourceAssembler`: Transforma `WorkOrder` a `WorkOrderResource` y `WorkOrderDetailResource`.
-* `WorkOrderTaskResourceAssembler`: Transforma `WorkOrderTask` a `WorkOrderTaskResource`.
-* `WorkBayResourceAssembler`: Transforma `WorkBay` a `WorkBayResource`.
-* `ServiceResourceAssembler`: Transforma `Service` a `ServiceResource`.
+* **Inbound:**
+  * `CreateWorkOrderCommandFromResourceAssembler`: Mapea `CreateWorkOrderResource` a `CreateWorkOrderCommand`.
+  * `AssignWorkBayCommandFromResourceAssembler`: Mapea `AssignWorkBayResource` a `AssignWorkBayCommand`.
+  * `CreateWorkOrderTaskCommandFromResourceAssembler`: Mapea `CreateWorkOrderTaskResource` a `CreateWorkOrderTaskCommand`.
+  * `AssignTaskMechanicCommandFromResourceAssembler`: Mapea `AssignTaskMechanicResource`, `workOrderId` y `taskId` a `AssignTaskMechanicCommand`.
+  * `HoldTaskCommandFromResourceAssembler`: Mapea `HoldTaskResource` y `taskId` a `HoldWorkOrderTaskCommand`.
+  * `ResumeTaskCommandFromResourceAssembler`: Mapea `taskId` a `ResumeWorkOrderTaskCommand`.
+  * `SubmitTaskProposalCommandFromResourceAssembler`: Mapea `SubmitTaskProposalResource` a `SubmitTaskProposalCommand`.
+  * `ApproveTaskProposalCommandFromResourceAssembler`: Mapea `ApproveTaskProposalResource` a `ApproveTaskProposalCommand`.
+  * `RejectTaskProposalCommandFromResourceAssembler`: Mapea `RejectTaskProposalResource` a `RejectTaskProposalCommand`.
+  * `CompleteWorkOrderTaskCommandFromResourceAssembler`: Mapea `CompleteTaskResource` a `CompleteWorkOrderTaskCommand`.
+  * `AddTaskProductCommandFromResourceAssembler`: Mapea `AddTaskProductResource` a `AddProductToTaskCommand`.
+  * `UpdateTaskProductQuantityCommandFromResourceAssembler`: Mapea `UpdateTaskProductResource` a `UpdateTaskProductQuantityCommand`.
+  * `AttachIntakeImageCommandFromResourceAssembler`: Mapea `AttachImageResource` a `AttachIntakeImageCommand`.
+  * `AttachTaskEvidenceCommandFromResourceAssembler`: Mapea `AttachTaskEvidenceResource` a `AttachTaskEvidenceImageCommand`.
+  * `CancelWorkOrderCommandFromResourceAssembler`: Mapea `CancelWorkOrderResource` a `CancelWorkOrderCommand`.
+* **Outbound:**
+  * `WorkOrderResourceAssembler`: Transforma `WorkOrder` a `WorkOrderResource`, `WorkOrderSummaryResource` y `WorkOrderDetailResource`.
+  * `WorkOrderTaskResourceAssembler`: Transforma `WorkOrderTask` a `WorkOrderTaskResource`.
+  * `TaskProposalResourceAssembler`: Transforma `TaskProposal` a `TaskProposalResource`.
+  * `WorkBayResourceAssembler`: Transforma `WorkBay` a `WorkBayResource`.
+  * `ServiceResourceAssembler`: Transforma `Service` a `ServiceResource`.
 
 ---
 
@@ -2675,8 +2773,11 @@ public interface WorkshopOperationsContextFacade {
 #### 6.3.5. Integration Events (Published Language)
 
 * `WorkOrderCreatedIntegrationEvent(UUID workOrderId, UUID tenantId, UUID vehicleId, Integer internalNumber, Instant occurredOn)`: Notifica a la app del conductor que su auto ha sido recibido en el taller.
+* `WorkBayAssignedIntegrationEvent(UUID workOrderId, UUID tenantId, UUID bayId, String bayName, Instant occurredOn)`: Notifica la asignación de bahía física para monitorización de ocupación en planta.
+* `WorkOrderStartedIntegrationEvent(UUID workOrderId, UUID tenantId, UUID vehicleId, Instant occurredOn)`: Notifica el inicio de intervenciones mecánicas activas en foso.
 * `WorkOrderCompletedIntegrationEvent(UUID workOrderId, UUID tenantId, UUID vehicleId, BigDecimal totalAmount, String currency, Instant occurredOn)`: Notifica a *Invoicing* que la orden está lista para liquidación y emisión de comprobante.
 * `WorkOrderPaidIntegrationEvent(UUID workOrderId, UUID tenantId, Instant occurredOn)`: Registra la finalización contable y operativa del servicio.
+* `WorkOrderDeliveredIntegrationEvent(UUID workOrderId, UUID tenantId, UUID vehicleId, Instant occurredOn)`: Notifica el egreso y entrega del vehículo al cliente.
 * `ProductStockReservationRequestedIntegrationEvent(UUID workOrderId, UUID taskId, UUID productId, BigDecimal quantity, Instant occurredOn)`: Solicita al contexto *Inventory & Supply Chain* la reserva física de repuestos mediante costeo FIFO.
 * `ProductStockReservationCancelledIntegrationEvent(UUID workOrderId, UUID taskId, UUID productId, BigDecimal quantity, Instant occurredOn)`: Libera la reserva en el inventario ante retiro o anulación de la tarea.
 
@@ -2690,12 +2791,12 @@ public interface WorkshopOperationsContextFacade {
 * `Result<WorkOrder, ApplicationError> handle(CreateWorkOrderCommand command)`:
   1. Consulta a *CRM* vía `CustomerFleetContextFacade` para validar la existencia del `vehicleId` y la cita asociada.
   2. Obtiene el correlativo secuencial siguiente del taller (`WorkOrderRepository.findNextInternalNumber`).
-  3. Instancia el agregado `WorkOrder` en estado `PENDING`.
+  3. Instancia el agregado `WorkOrder` en estado `DRAFT`.
   4. Persiste la orden y retorna `Result.success(workOrder)`.
 * `Result<WorkOrder, ApplicationError> handle(AssignWorkBayCommand command)`:
   1. Localiza la bahía física por ID (`WorkBayRepository`).
   2. Verifica que la bahía esté en estado `AVAILABLE`.
-  3. Ejecuta `workBay.occupy(workOrderId)` y `workOrder.assignBay(bayId)`.
+  3. Ejecuta `workBay.occupy(workOrderId)` y `workOrder.assignWorkBay(bayId)`.
   4. Persiste ambos agregados en una transacción atómica.
 * `Result<WorkOrder, ApplicationError> handle(AddTaskToWorkOrderCommand command)`:
   1. Valida existencia del servicio en el catálogo (`ServiceRepository`).
@@ -2774,8 +2875,9 @@ Ubicadas en `com.andeva.atelier.platform.operations.infrastructure.persistence.j
 * `@Column(name = "mileage_in", nullable = false)`: Kilometraje de entrada.
 * `@Column(name = "diagnostic_summary", length = 2000, nullable = false)`: Resumen del diagnóstico.
 * `@Column(name = "total_amount", precision = 10, scale = 2, nullable = false)`: Importe total de la orden.
-* `@Column(name = "status", nullable = false, length = 20)`: `pending`, `in_progress`, `completed`, `paid`.
+* `@Column(name = "status", nullable = false, length = 20)`: `draft`, `in_progress`, `completed`, `paid`, `canceled`.
 * `@OneToMany(mappedBy = "workOrder", cascade = CascadeType.ALL, orphanRemoval = true)`: Colección de `WorkOrderTaskPersistenceEntity`.
+* `@OneToMany(mappedBy = "workOrder", cascade = CascadeType.ALL, orphanRemoval = true)`: Colección de `TaskProposalPersistenceEntity`.
 * `@OneToMany(mappedBy = "workOrder", cascade = CascadeType.ALL, orphanRemoval = true)`: Colección de `WorkOrderImagePersistenceEntity`.
 
 ##### 2. `WorkBayPersistenceEntity` (Tabla `work_bays`)
@@ -2792,9 +2894,13 @@ Ubicadas en `com.andeva.atelier.platform.operations.infrastructure.persistence.j
 * `@ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "work_order_id", nullable = false)`: Orden de trabajo padre.
 * `@Column(name = "service_id", nullable = false)`: Servicio de catálogo asociado.
 * `@Column(name = "mechanic_id")`: Membresía del mecánico asignado (nullable).
-* `@Column(name = "status", nullable = false, length = 20)`: `pending`, `in_progress`, `completed`.
+* `@Column(name = "status", nullable = false, length = 20)`: `pending`, `assigned`, `in_progress`, `on_hold`, `completed`, `cancelled`.
 * `@Column(name = "description", nullable = false, columnDefinition = "TEXT")`: Procedimiento detallado.
 * `@Column(name = "price", precision = 10, scale = 2, nullable = false)`: Mano de obra cobrada.
+* `@Column(name = "hold_reason", length = 50)`: Causal objetiva de pausa (`waiting_parts`, nullable).
+* `@Column(name = "missing_item_description", length = 500)`: Detalle del repuesto faltante reportado en foso (nullable).
+* `@Column(name = "paused_at")`: Fecha y hora de suspensión temporal (nullable).
+* `@Column(name = "total_paused_seconds", nullable = false)`: Acumulador de tiempo en pausa en segundos.
 * `@Column(name = "started_at")`: Fecha y hora de inicio real.
 * `@Column(name = "completed_at")`: Fecha y hora de finalización real.
 * `@OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)`: Colección de `WorkOrderTaskProductPersistenceEntity`.
@@ -2829,6 +2935,18 @@ Ubicadas en `com.andeva.atelier.platform.operations.infrastructure.persistence.j
 * `@Column(name = "base_price", precision = 10, scale = 2, nullable = false)`: Tarifa sugerida de mano de obra.
 * `@Column(name = "estimated_time_m", nullable = false)`: Duración estimada en minutos.
 
+##### 8. `TaskProposalPersistenceEntity` (Tabla `task_proposals`)
+* Extiende `AuditableAbstractPersistenceEntity`.
+* `@ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "work_order_id", nullable = false)`: Orden de trabajo padre.
+* `@Column(name = "task_id")`: Tarea durante la cual se detectó la avería (nullable).
+* `@Column(name = "service_id")`: Servicio tarifario sugerido (nullable).
+* `@Column(name = "mechanic_id", nullable = false)`: Membresía del técnico que detectó el hallazgo.
+* `@Column(name = "description", nullable = false, columnDefinition = "TEXT")`: Detalle técnico de la falla.
+* `@Column(name = "severity", nullable = false, length = 20)`: Severidad técnica (`low`, `medium`, `critical`).
+* `@Column(name = "image_url", nullable = false, length = 255)`: Fotografía pericial en Firebase Cloud Storage.
+* `@Column(name = "status", nullable = false, length = 20)`: Estado (`pending_review`, `approved`, `rejected`).
+* `@Column(name = "customer_notes", length = 500)`: Justificación de la decisión del cliente.
+
 ---
 
 #### 6.5.2. JPA Persistence Repositories
@@ -2840,6 +2958,7 @@ Ubicadas en `com.andeva.atelier.platform.operations.infrastructure.persistence.j
 * `WorkOrderImagePersistenceRepository extends JpaRepository<WorkOrderImagePersistenceEntity, UUID>`
 * `WorkOrderTaskImagePersistenceRepository extends JpaRepository<WorkOrderTaskImagePersistenceEntity, UUID>`
 * `ServicePersistenceRepository extends JpaRepository<ServicePersistenceEntity, UUID>`
+* `TaskProposalPersistenceRepository extends JpaRepository<TaskProposalPersistenceEntity, UUID>`
 
 ---
 
@@ -2974,17 +3093,21 @@ classDiagram
         -totalAmount: Money
         -status: WorkOrderStatus
         -tasks: List~WorkOrderTask~
+        -proposals: List~TaskProposal~
         -intakeImages: List~WorkOrderImage~
         +create(tenantId: TenantId, appointmentId: AppointmentId, vehicleId: VehicleId, num: Integer, mileage: Mileage, diag: DiagnosticSummary)$ WorkOrder
-        +assignBay(bayId: WorkBayId) void
+        +assignWorkBay(bayId: WorkBayId) void
         +releaseBay() void
-        +addTask(serviceId: ServiceId, mechanicId: UUID, desc: String, price: Money) WorkOrderTask
+        +addTask(serviceId: ServiceId, mechanicId: UUID, desc: String, price: Money, estHours: LaborHours) WorkOrderTask
         +removeTask(taskId: WorkOrderTaskId) void
         +startTask(taskId: WorkOrderTaskId) void
         +completeTask(taskId: WorkOrderTaskId) void
+        +submitProposal(mechanicId: UUID, desc: String, severity: ProposalSeverity, url: StorageUrl, suggestedServiceId: ServiceId) TaskProposal
+        +approveProposal(proposalId: UUID, serviceId: ServiceId, finalPrice: Money, hours: LaborHours, mechanicId: UUID, notes: String) WorkOrderTask
+        +rejectProposal(proposalId: UUID, customerNotes: String) void
         +addProductToTask(taskId: WorkOrderTaskId, productId: UUID, qty: Quantity, unitPrice: Money) void
         +removeProductFromTask(taskId: WorkOrderTaskId, productItemId: WorkOrderTaskProductId) void
-        +attachIntakeImage(url: ImageUrl, desc: String) void
+        +attachIntakeImage(url: StorageUrl, desc: String) void
         +recalculateTotalAmount() void
         +markPaid() void
         +cancel(reason: String) void
@@ -3030,21 +3153,44 @@ classDiagram
         -status: WorkOrderTaskStatus
         -description: String
         -price: Money
+        -holdReason: HoldReason
+        -missingItemDescription: String
+        -pausedAt: Instant
+        -totalPausedSeconds: Long
         -startedAt: Instant
         -completedAt: Instant
         -consumedProducts: List~WorkOrderTaskProduct~
         -taskImages: List~WorkOrderTaskImage~
         +start() void
+        +holdForWaitingParts(missingItemDescription: String) void
+        +resume() void
         +complete() void
-        +reopen() void
+        +reopen(reason: String) void
         +assignMechanic(mechanicId: UUID) void
         +updatePrice(price: Money) void
         +addProduct(product: WorkOrderTaskProduct) void
         +removeProduct(productId: WorkOrderTaskProductId) void
-        +attachEvidenceImage(url: ImageUrl, desc: String) void
+        +attachEvidenceImage(url: StorageUrl, evidenceType: EvidenceType, desc: String) void
         +getId() WorkOrderTaskId
         +getPrice() Money
         +getStatus() WorkOrderTaskStatus
+    }
+
+    class TaskProposal {
+        -id: UUID
+        -workOrderId: WorkOrderId
+        -taskId: WorkOrderTaskId
+        -serviceId: ServiceId
+        -mechanicId: UUID
+        -description: String
+        -severity: ProposalSeverity
+        -imageUrl: StorageUrl
+        -status: ProposalStatus
+        -customerNotes: String
+        +approve(notes: String) void
+        +reject(reason: String) void
+        +getId() UUID
+        +getStatus() ProposalStatus
     }
 
     class WorkOrderTaskProduct {
@@ -3063,19 +3209,19 @@ classDiagram
     class WorkOrderImage {
         -id: UUID
         -workOrderId: WorkOrderId
-        -imageUrl: ImageUrl
+        -imageUrl: StorageUrl
         -description: String
         -uploadedAt: Instant
-        +getImageUrl() ImageUrl
+        +getImageUrl() StorageUrl
     }
 
     class WorkOrderTaskImage {
         -id: UUID
         -taskId: WorkOrderTaskId
-        -imageUrl: ImageUrl
+        -imageUrl: StorageUrl
         -description: String
         -uploadedAt: Instant
-        +getImageUrl() ImageUrl
+        +getImageUrl() StorageUrl
     }
 
     class WorkOrderId {
@@ -3108,19 +3254,24 @@ classDiagram
         +value: Integer
     }
 
+    class LaborHours {
+        <<record>>
+        +value: BigDecimal
+    }
+
     class Quantity {
         <<record>>
         +value: BigDecimal
     }
 
-    class ImageUrl {
+    class StorageUrl {
         <<record>>
         +value: String
     }
 
     class WorkOrderStatus {
         <<enumeration>>
-        PENDING
+        DRAFT
         IN_PROGRESS
         COMPLETED
         PAID
@@ -3130,8 +3281,30 @@ classDiagram
     class WorkOrderTaskStatus {
         <<enumeration>>
         PENDING
+        ASSIGNED
         IN_PROGRESS
+        ON_HOLD
         COMPLETED
+        CANCELLED
+    }
+
+    class HoldReason {
+        <<enumeration>>
+        WAITING_PARTS
+    }
+
+    class ProposalSeverity {
+        <<enumeration>>
+        LOW
+        MEDIUM
+        CRITICAL
+    }
+
+    class ProposalStatus {
+        <<enumeration>>
+        PENDING_REVIEW
+        APPROVED
+        REJECTED
     }
 
     class BayType {
@@ -3154,6 +3327,7 @@ classDiagram
     AbstractDomainAggregateRoot <|-- Service
 
     WorkOrder "1" *-- "0..*" WorkOrderTask : desglosada en
+    WorkOrder "1" *-- "0..*" TaskProposal : registra hallazgos
     WorkOrder "1" *-- "0..*" WorkOrderImage : evidencias de ingreso
     WorkOrder o-- "1" WorkOrderStatus : estado operativo
     WorkOrder o-- "1" Mileage : odómetro de ingreso
@@ -3162,6 +3336,7 @@ classDiagram
     WorkOrderTask "1" *-- "0..*" WorkOrderTaskProduct : consume repuestos
     WorkOrderTask "1" *-- "0..*" WorkOrderTaskImage : evidencias de labor
     WorkOrderTask o-- "1" WorkOrderTaskStatus : estado técnico
+    WorkOrderTask o-- "0..1" HoldReason : causal de pausa
     WorkOrderTask o-- "1" ServiceId : basada en servicio estándar
 
     WorkBay o-- "1" BayType : tipo de puesto
@@ -3172,7 +3347,7 @@ classDiagram
 
 #### 6.7.2. 2.6.3.6.2. Bounded Context Database Diagram (ERD Relacional)
 
-El siguiente diagrama entidad-relación (**ERD**) especifica las 7 tablas físicas asignadas a **Workshop Operations Context (MRO)** en PostgreSQL, sus tipos de datos exactos, claves primarias (`PK`), claves foráneas (`FK`) y relaciones de integridad:
+El siguiente diagrama entidad-relación (**ERD**) especifica las 8 tablas físicas asignadas a **Workshop Operations Context (MRO)** en PostgreSQL, sus tipos de datos exactos, claves primarias (`PK`), claves foráneas (`FK`) y relaciones de integridad:
 
 ```mermaid
 erDiagram
@@ -3183,6 +3358,7 @@ erDiagram
 
     work_bays ||--o{ work_orders : "estaciona vehículo para reparación"
     work_orders ||--o{ work_order_tasks : "se divide en tareas mecánicas"
+    work_orders ||--o{ task_proposals : "recibe propuestas de foso"
     work_orders ||--o{ work_order_images : "contiene fotos de peritaje ingreso"
 
     work_order_tasks ||--o{ work_order_task_products : "demanda repuestos consumidos"
@@ -3210,7 +3386,7 @@ erDiagram
         int mileage_in "Kilometraje exacto al momento de recepción"
         text diagnostic_summary "Resumen del diagnóstico y fallas reportadas"
         decimal(10_2) total_amount "Subtotal calculado (mano de obra + repuestos)"
-        varchar(20) status "pending | in_progress | completed | paid"
+        varchar(20) status "draft | in_progress | completed | paid | canceled"
         timestamp created_at "Fecha de apertura"
         timestamp updated_at "Última modificación"
     }
@@ -3230,9 +3406,13 @@ erDiagram
         uuid work_order_id FK "Orden de trabajo a la que pertenece"
         uuid service_id FK "Servicio de catálogo instanciado"
         uuid mechanic_id FK "Mecánico asignado (referencia a tenant_memberships, nullable)"
-        varchar(20) status "pending | in_progress | completed"
+        varchar(20) status "pending | assigned | in_progress | on_hold | completed | cancelled"
         text description "Procedimiento o diagnóstico técnico detallado"
         decimal(10_2) price "Costo cobrado por mano de obra de la tarea"
+        varchar(50) hold_reason "waiting_parts (nullable)"
+        text missing_item_description "Repuesto faltante reportado (nullable)"
+        timestamp paused_at "Marca temporal de pausa (nullable)"
+        bigint total_paused_seconds "Tiempo total en pausa (default 0)"
         timestamp started_at "Fecha y hora de inicio real (nullable)"
         timestamp completed_at "Fecha y hora de finalización real (nullable)"
         timestamp created_at "Fecha de asignación"
@@ -3257,6 +3437,21 @@ erDiagram
         varchar(200) description "Nota técnica (ej. Filtro viejo vs nuevo)"
         timestamp uploaded_at "Fecha y hora de subida"
         timestamp created_at "Fecha de registro"
+        timestamp updated_at "Última modificación"
+    }
+
+    task_proposals {
+        uuid id PK "uuid_generate_v4()"
+        uuid work_order_id FK "Orden de trabajo padre"
+        uuid task_id FK "Tarea de origen (nullable)"
+        uuid service_id FK "Servicio de catálogo sugerido (nullable)"
+        uuid mechanic_id FK "Mecánico que reportó el hallazgo"
+        text description "Detalle técnico de la falla o vicio oculto"
+        varchar(20) severity "low | medium | critical"
+        varchar(255) image_url "Evidencia fotográfica en Firebase Cloud Storage"
+        varchar(20) status "pending_review | approved | rejected"
+        varchar(500) customer_notes "Notas de concertación o motivo de rechazo"
+        timestamp created_at "Fecha de reporte"
         timestamp updated_at "Última modificación"
     }
 
