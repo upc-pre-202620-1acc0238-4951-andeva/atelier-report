@@ -89,11 +89,11 @@ A diferencia del modelado de diseño técnico futuro, el taller de *Big Picture 
 
 El resultado de esta exploración integral en la herramienta colaborativa Miro se presenta en dos dimensiones complementarias: la recolección exhaustiva del flujo de eventos (@fig:big-picture-flujo-eventos) y la estructuración por carriles de actores, etapas del proceso y puntos críticos del servicio (@fig:big-picture-actores-puntos-criticos).
 
-![Big Picture EventStorming: Recolección y Flujo de Eventos de Dominio](report/assets/strategic-ddd/big-picture-01-flujo-eventos.png){#fig:big-picture-flujo-eventos}
+![Big Picture EventStorming: Recolección y Flujo de Eventos de Dominio](../../assets/strategic-ddd/big-picture-01-flujo-eventos.png){#fig:big-picture-flujo-eventos}
 
 *Nota.* Vista de la recolección y secuencia de eventos de dominio durante el taller de Big Picture EventStorming en Miro.
 
-![Big Picture EventStorming: Actores, Etapas del Proceso y Puntos Críticos](report/assets/strategic-ddd/big-picture-02-actores-puntos-criticos.png){#fig:big-picture-actores-puntos-criticos}
+![Big Picture EventStorming: Actores, Etapas del Proceso y Puntos Críticos](../../assets/strategic-ddd/big-picture-02-actores-puntos-criticos.png){#fig:big-picture-actores-puntos-criticos}
 
 *Nota.* Vista estructurada por carriles de actores (Conductor, Asesor de Servicio, Mecánico / Jefe de Taller, Administrador), etapas operativas y puntos críticos de decisión en Miro. Se puede acceder al tablero colaborativo interactivo mediante el siguiente enlace: [Tablero de Miro: Big Picture EventStorming](https://miro.com/app/board/uXjVHq7YYWw=/?share_link_id=20364641152).
 
