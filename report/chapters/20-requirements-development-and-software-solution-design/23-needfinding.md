@@ -20,7 +20,53 @@ Por otro lado, el User Persona de Nicolay evidencia la fricción constante entre
 
 ### 2.3.2. *User Task Matrix*
 
+En esta sección se desarrolla el User Task Matrix, en el cual identifica las principales actividades que realizan los User Personas: los Propietarios y Administradores de Talleres y el Personal Operativo integrado por Técnicos y Mecánicos.
 
+Estas tareas corresponden a acciones habituales dentro de su dinámica laboral, necesarias para alcanzar sus objetivos, sin depender necesariamente de una solución digital. Este análisis nos permite comprender cómo trabajan actualmente, así como detectar ineficiencias y oportunidades donde la plataforma puede generar valor.
+
+**Segmento 1**
+
+|                                             Task   | Frequency | Importance |
+|----------------------------------------------------|-----------|------------|
+| Atención, recepción de clientes y diagnóstico      | Daily     | Critical   |
+| Elaboración de presupuestos MRO y cotización       | Daily     | High       |
+| Asignación de vehículos a bahías y tareas          | Daily     | High       |
+| Control de inventario y solicitud de repuestos     | Weekly    | Critical   |
+| Supervisión del estado y avance de reparaciones    | Constant  | High       |
+| Facturación, cobranza y cuadre de caja final       | Daily     | Critical   |
+| Seguimiento a clientes para alertas preventivas    | Occasionally| Medium   |
+
+**Análisis**
+
+- Foco en la Operatividad Centralizada: La alta frecuencia e importancia crítica de tareas como la facturación, los presupuestos y la supervisión del avance confirman que el administrador asume casi la totalidad de la carga administrativa, convirtiéndolo en el principal cuello de botella.
+
+- Conflicto de Eficiencia: Existe una contradicción entre su mayor habilidad (fidelizar al cliente y brindar diagnóstico experto) y la tarea manual de gestionar inventarios o cuadrar caja; estas últimas consumen recursos desproporcionados que lo alejan de la bahía de servicio.
+
+- Prioridad Estratégica: La matriz revela que automatizar el control de repuestos (FIFO) y el cumplimiento tributario (SUNAT) es vital. Delegar esto a un sistema SaaS le liberará horas para enfocarse en el diagnóstico preventivo y la expansión comercial.
+
+**Segmento 2**
+
+|                                             Task   | Frequency | Importance |
+|----------------------------------------------------|-----------|------------|
+| Inspección física y lectura de códigos (OBD-II)    | Daily     | Critical   |
+| Ejecución de reparaciones y tareas mecánicas       | Daily     | Critical   |
+| Solicitud y recojo de repuestos en el almacén      | Constant  | High       |
+| Espera por aprobación de presupuestos de clientes  | Constant  | High       |
+| Registro de evidencia fotográfica de las piezas    | Daily     | Medium     |
+| Apunte manual de horas trabajadas y cierre de OT   | Daily     | High       |
+| Búsqueda de diagramas o manuales en internet       | Occasionally| Medium   |
+
+**Análisis**
+
+- El problema de los "Tiempos Muertos": Las tareas con frecuencia Constante e importancia Alta vinculadas a la logística (solicitar repuestos y esperar aprobaciones) son las que mantienen al técnico inactivo. Automatizar estas aprobaciones y el inventario impactará directamente en su rendimiento diario.
+
+- Desconexión en el Registro Probatorio: El hecho de que la toma de fotos y el registro de horas sean tareas "Altas/Medias" pero se hagan manualmente o con el celular personal revela un vacío tecnológico. Esta es una funcionalidad clave que justificará el uso de la aplicación móvil en la bahía.
+
+- Necesidad de Integración en la Bahía: Las tareas críticas ocurren lejos de un escritorio, muchas veces en zonas de baja cobertura. Esto reafirma la urgencia de proveer una aplicación móvil de uso rudo con arquitectura Offline-First que no interrumpa el flujo del técnico.
+
+**Coincidencias y Diferencias entre Segmentos**
+
+- Al contrastar ambos perfiles, la principal **coincidencia** radica en la gestión de repuestos y tiempos: mientras el Segmento 1 los controla para asegurar la rentabilidad (Weekly/Critical), el Segmento 2 depende de ellos para ejecutar su labor diaria (Constant/High). Por otro lado, la principal **diferencia** es la división operativa: el administrador absorbe el 100% del contacto comercial y facturación, mientras que el mecánico está aislado en la ejecución técnica y el diagnóstico de campo.
 
 ### 2.3.3. *User Journey Mapping*
 
