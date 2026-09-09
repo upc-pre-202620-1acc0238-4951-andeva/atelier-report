@@ -73,7 +73,7 @@ Con el propósito de obtener hallazgos comparables y estructurados, se desarroll
 ### 2.2.2. *Registro de entrevistas*
 En esta sección presentamos los registros de las entrevistas que hicimos para cada segmento objetivo de nuestra aplicación.
 
-[Interviews]()
+![Interviews]()
 
 **Segmento 1:**
 
@@ -152,7 +152,7 @@ En esta sección presentamos los registros de las entrevistas que hicimos para c
   </tr>
   <tr>
     <td>Evidencia</td>
-    <td><div align="center"><img src="../../assets/Interview-Evidence/Interview-of-Cesar-Nikolay.jpeg" alt="Entrevista Cesar Nikolay"></div></td>
+    <td><div align="center"><img src=".../../assets/Interview-Evidence/Interview-of-Cesar-Nikolayjpeg" alt="Entrevista Cesar Nikolay"></div></td>
   </tr>
   <tr>
     <td>Link</td>
@@ -190,11 +190,11 @@ En esta sección presentamos los registros de las entrevistas que hicimos para c
   </tr>
   <tr>
     <td>Edad</td>
-    <td>23 años</td>
+    <td>25 años</td>
   </tr>
   <tr>
     <td>Distrito</td>
-    <td>Surquillo</td>
+    <td>Chorrillos</td>
   </tr>
   <tr>
     <td>Evidencia</td>
