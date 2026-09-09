@@ -74,6 +74,11 @@ Estas tareas corresponden a acciones habituales dentro de su dinámica laboral, 
 
 ### 2.3.4. *Empathy Mapping*
 
+Se ha elaborado el Empathy Map para cada uno de nuestros User Personas con el fin de profundizar en su experiencia diaria, emociones, motivaciones y fricciones reales dentro del taller mecánico. Este análisis nos permite sintetizar la información obtenida en las entrevistas de campo y observar la operación desde la perspectiva de nuestros usuarios clave —administradores y técnicos—, asegurando que el diseño de Atelier responda de manera empática y precisa a sus necesidades de gestión, diagnóstico y comunicación.
+
+![Empathy Mapping: Pedro Suarez - Personal de Gestión y Propietarios de Taller](../../assets/NeedFinding/User-Personas/User-Persona-Pedro-Suárez.png)
+
+![Empathy Mapping: Andres Vilchez - Personal de Gestión y Propietarios de Taller](../../assets/NeedFinding/User-Personas/User-Persona-Andrés-Vílchez.png)
 
 
 ### 2.3.5. *Big Picture EventStorming*
