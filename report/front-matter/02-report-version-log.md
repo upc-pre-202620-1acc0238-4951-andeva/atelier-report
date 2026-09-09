@@ -20,6 +20,6 @@
 |0.24.0|07/09/2026|Sanchez Santin, Adiel Abdiaz|Diseño de ***Candidate Context Discovery*** (pasos 1 al 8) y modelado de ***Domain Message Flows***.|
 |0.24.0|08/09/2026|Sanchez Santin, Adiel Abdiaz|Inserción de ***Bounded Context Canvases*** (8 contextos), elaboración de ***Context Mapping*** y actualización de perfil de integrante.|
 |0.24.0|08/09/2026|Teran Zavala, Mauricio Alejandro|Inserción de la segunda entrevista para el segundo segmento.|
-
+|0.25.0|08/09/2026|Huamani Estefanero, Joel|Añadido de ***Bounded Context: Workshop Operations (MRO)*** y documentación del backend.|
 
 \newpage
