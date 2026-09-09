@@ -264,5 +264,50 @@ En esta sección presentamos los registros de las entrevistas que hicimos para c
 
 ### 2.2.3. *Análisis de entrevistas*
 
+En esta sección se sintetizan y consolidan los hallazgos de las entrevistas en profundidad aplicadas a los segmentos objetivo de Atelier. Mediante un análisis porcentual y paramétrico de las respuestas, se identifican las características objetivas (demografía, herramientas, hábitos digitales) y subjetivas (dolores, motivaciones, dinámicas de trabajo) predominantes. Estos datos sirven como sustento estadístico directo para la validación de hipótesis y la construcción rigurosa de los arquetipos de usuario (*User Personas*).
+
+#### Análisis del Segmento 1: Personal de Gestión y Propietarios del Taller
+
+El análisis de este segmento consolida la información recopilada en la entrevista a **Jorge Aguilar** (Dueño y Administrador), representando la categoría de talleres independientes y servicios mecánicos itinerantes.
+
+**Consolidado Estadístico y Tendencias del Segmento 1**
+
+| Variable / Categoría | Indicador / Característica Dominante | Porcentaje ($N=1$) | Sustento Cualitativo en Entrevistas |
+| :--- | :--- | :---: | :--- |
+| **Rango de Edad** | 50+ años (53 años) | **100%** | Jorge Aguilar registra 53 años de edad. |
+| **Experiencia en el Rubro** | Mayor a 30 años | **100%** | Acumula 35 años de trayectoria operativa y administrativa. |
+| **Modelo Operativo** | Servicio itinerante / Campo (*delivery*) | **100%** | Opera directamente en campo donde se ubican las unidades o máquinas. |
+| **Rol Dual** | Administrador y Técnico a la vez | **100%** | Gestiona los movimientos administrativos y ejecuta la labor operativa. |
+| **Fortaleza Comercial** | Trato directo y recomendación preventiva | **100%** | Asesora de manera honesta para evitar inconvenientes futuros en las unidades. |
+| **Canales Digitales** | Comunicación directa (Llamadas / WhatsApp) | **100%** | Mantiene contacto personalizado con los dueños de las unidades. |
+
+*   **Características Objetivas:** El perfil dominante corresponde a profesionales de madurez avanzada ($100\%$ mayores de 50 años) con amplia trayectoria práctica ($100\%$ con $+30$ años de experiencia). Presentan una estructura organizativa unipersonal o altamente centralizada donde el dueño asume tanto las cobranzas como las reparaciones.
+*   **Características Subjetivas:** Existe un alto sentido de responsabilidad técnica enfocado en la fidelización mediante el diagnóstico transparente. La principal fricción subjetiva es la sobrecarga por la gestión dual y la resistencia de los clientes a aplicar mantenimientos preventivos antes de que ocurra una falla catastrófica.
+
+#### Análisis del Segmento 2: Personal Operativo del Taller
+
+Este análisis consolida los datos de la muestra de técnicos y especialistas entrevistados: **Nicolai** (23 años), **Bruno Pacheco** (25 años) y **Angie** (25 años).
+
+**Consolidado Estadístico y Tendencias del Segmento 2**
+
+| Variable / Categoría | Indicador / Característica Dominante | Porcentaje ($N=3$) | Sustento Cualitativo en Entrevistas |
+| :--- | :--- | :---: | :--- |
+| **Rango de Edad** | 23 a 25 años | **100%** | Muestra joven: Nicolay (23), Bruno (25), Angie (25). |
+| **Estado Civil** | Solteros | **100%** | El 100% de los entrevistados declara estado civil soltero. |
+| **Formación Técnica** | Egresados de Carrera Técnica / Mecatrónica | **100%** | Titulados/egresados en Mecánica Automotriz y Mecatrónica. |
+| **Especialidad Principal** | Diagnóstico Electrónico y Escáner OBD2 | **100%** | Todos señalan la lectura de datos OBD2 e inyección como su fuerte. |
+| **Flujo de Trabajo** | Basado en Orden de Trabajo Física | **100%** | Reciben hoja de papel en recepción antes de evaluar el auto en bahía. |
+| **Frustración Principal** | "Tiempos muertos" y desorganización | **100%** | Inactividad por falta de repuestos o retrasos en aprobación de presupuestos. |
+| **Canal de Coordinación** | WhatsApp informal (Grupos) | **100%** | Uso de chats grupales donde la información técnica suele traspapelarse. |
+| **Respaldos de Trabajo** | Evidencia fotográfica en celular personal | **66.7%** | Nicolay y Bruno toman fotos/videos en su celular como prueba de cumplimiento. |
+| **Infraestructura / Señal** | Pérdida de datos en fosos / zonas cerradas | **66.7%** | Reportan desconexión en fosos de inspección y bahías con estructuras gruesas. |
+| **Sistemas Operativos** | Preferencia/Uso de Android | **100%** | Todos operan con smartphones Android (Xiaomi, Samsung). |
+
+*   **Características Objetivas:** Segmento joven ($100\%$ entre 23 y 25 años) con formación técnica superior o universitaria en mecatrónica. Tienen un dominio fluido de smartphones ($100\%$ Android) y herramientas de diagnóstico computarizado. Su rutina depende obligatoriamente del papel para iniciar una orden y de escáneres multimarca para la lectura de códigos de falla (DTC).
+
+*   **Características Subjetivas:**
+    *   *Actitud ante el estrés ($100\%$):* Buscan mantener la serenidad y actuar de forma metódica/paso a paso para evitar romper componentes o sensores.
+    *   *Puntos de Dolor ($100\%$):* Rechazo absoluto a los "tiempos muertos" (espera de repuestos o aprobación de clientes) porque perjudican directamente la medición de su rendimiento diario.
+    *   *Metas Profesionales ($100\%$):* Deseo de especialización continua (mecatrónica, híbridos/eléctricos) y proyección a futuro hacia la jefatura de taller o administración de un centro de servicio propio.
 
 \newpage
