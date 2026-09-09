@@ -72,6 +72,9 @@ Con el propósito de obtener hallazgos comparables y estructurados, se desarroll
 
 ### 2.2.2. *Registro de entrevistas*
 En esta sección presentamos los registros de las entrevistas que hicimos para cada segmento objetivo de nuestra aplicación.
+
+[Interviews]()
+
 **Segmento 1:**
 
 <table>
@@ -101,7 +104,7 @@ En esta sección presentamos los registros de las entrevistas que hicimos para c
   </tr>
   <tr>
     <td>Evidencia</td>
-    <td><div align="center"><img src="../../assets/Interview-Evidence/Interview-of-Jorge-Aguilar.jpeg.jpeg" alt="Entrevista Jorge Aguilar"></div></td>
+    <td><div align="center"><img src="../../assets/Interview-Evidence/Interview-of-Jorge-Aguilar.jpeg" alt="Entrevista Jorge Aguilar"></div></td>
   </tr>
   <tr>
     <td>Link</td>
@@ -109,13 +112,13 @@ En esta sección presentamos los registros de las entrevistas que hicimos para c
   </tr>
   <tr>
     <td>Duracion<br></td>
-    <td>0:00 min - 13:39 min</td>
+    <td>0:20 min - 13:39 min</td>
   </tr>
   <tr>
     <td>Resumen</td>
-    La entrevista se realizó a Jorge Aguilar, un técnico mecánico de 53 años con aproximadamente 35 años de experiencia en el rubro automotriz. Jorge ejerce como dueño y administrador de su propia empresa, gestionando de manera independiente tanto la parte operativa como la administrativa del negocio. Destaca como su principal habilidad administrativa la captación y fidelización de clientes mediante el buen trato, ofreciendo recomendaciones técnicas honestas sobre mantenimiento preventivo y selección de materiales para evitar inconvenientes futuros en sus unidades. A diferencia de un taller tradicional con sede fija, su rutina actual se centra en el trabajo de campo de manera itinerante (tipo delivery), desplazándose directamente hacia la ubicación de los equipos y maquinaria estacionaria (línea amarilla) para realizar los servicios mecánicos.
     <td>
-</td>
+      La entrevista se realizó a Jorge Aguilar, un técnico mecánico de 53 años con aproximadamente 35 años de experiencia en el rubro automotriz. Jorge ejerce como dueño y administrador de su propia empresa, gestionando de manera independiente tanto la parte operativa como la administrativa del negocio. Destaca como su principal habilidad administrativa la captación y fidelización de clientes mediante el buen trato, ofreciendo recomendaciones técnicas honestas sobre mantenimiento preventivo y selección de materiales para evitar inconvenientes futuros en sus unidades. A diferencia de un taller tradicional con sede fija, su rutina actual se centra en el trabajo de campo de manera itinerante (tipo delivery), desplazándose directamente hacia la ubicación de los equipos y maquinaria estacionaria (línea amarilla) para realizar los servicios mecánicos.
+    </td>
   </tr>
 </tbody>
 </table>
@@ -157,13 +160,59 @@ En esta sección presentamos los registros de las entrevistas que hicimos para c
   </tr>
   <tr>
     <td>Duracion<br></td>
-    <td>0:00 min - 9:57 min</td>
+    <td>0:40 min - 9:57 min</td>
   </tr>
   <tr>
     <td>Resumen</td>
     <td>
-		La entrevista se realizó a Nicolay, un técnico egresado en mecánica automotriz de 23 años, soltero y residente en Surquillo. En el taller desempeña el cargo de Técnico Especialista en Diagnóstico y Mantenimiento, con experiencia destacada en sistemas de inyección electrónica y manejo de escáneres multimarca para lectura de datos OBD2; ante la presión laboral busca mantener la serenidad y priorizar el trato al cliente. Su flujo de trabajo inicia con la recepción de una orden de trabajo física, inspección visual, escaneo del vehículo, solicitud de repuestos, ejecución de la reparación, pruebas de control de calidad y firma del documento de entrega. Su principal frustración operativa son los "tiempos muertos" por demoras en la aprobación de presupuestos o entrega de repuestos, los cuales afectan sus indicadores de rendimiento diario, sumado a la desorganización logística e ineficiencia en la comunicación del equipo. En el ámbito profesional, aspira a obtener certificaciones internacionales en mecatrónica automotriz y, a futuro, dirigir un centro de servicio estandarizado. En cuanto a hábitos tecnológicos, utiliza un smartphone Android (Xiaomi), empleando WhatsApp para coordinar y navegadores web para consultas técnicas y precios; reconoce a marcas japonesas como Honda y Subaru por su alta fiabilidad. Finalmente, en la validación de procesos, señala que el registro de tiempos actual es manual e impreciso, experimenta pérdida de señal móvil en fosos de inspección y bahías con estructuras gruesas, y valida su volumen de trabajo diario entregando las órdenes físicas firmadas junto con evidencias fotográficas registradas desde su celular personal para respaldar su labor. 
-</td>
+		   La entrevista se realizó a Bruno Pacheco, un técnico egresado en mecánica automotriz de 25 años, soltero y residente en el distrito de Chorrillos. Bruno ocupa el cargo oficial de Técnico Mecánico Especialista en Diagnóstico y Mantenimiento; ante situaciones de alta presión laboral procura mantener la calma y actuar de forma metódica para prevenir errores. Destaca como su principal fortaleza el diagnóstico electrónico, la lectura de datos de inyección y el manejo fluido de escáneres multimarca para la interpretación de códigos de falla (DTC). Su proceso operativo inicia con la recepción de la orden de trabajo física, inspección visual, lectura con escáner, solicitud de repuestos al almacén, ejecución de la reparación, prueba de ruta, borrado de códigos y la firma final de la orden. En cuanto a las fricciones del entorno, reporta desorganización en la gestión de repuestos y pérdida de mensajes en grupos informales de WhatsApp, señalando que su mayor frustración son los "tiempos muertos" con vehículos desarmados en el elevador a la espera de aprobaciones de presupuestos o repuestos faltantes, lo cual perjudica directamente su rendimiento diario. En el ámbito profesional, busca llevar cursos de mecatrónica y diagnóstico de vehículos híbridos o eléctricos a corto plazo, con la meta a largo plazo de dirigir un taller o administrar un centro de servicio propio. Finalmente, en el aspecto digital, utiliza un smartphone Android (Samsung), siendo WhatsApp, Google y YouTube sus aplicaciones más consultadas para coordinaciones laborales y búsqueda de diagramas técnicos.
+    </td>
+  </tr>
+</tbody>
+</table>
+
+<table>
+<colgroup>
+</colgroup>
+<thead>
+  <tr>
+    <th colspan="2">Entrevista #2<br></th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>Nombre</td>
+    <td>Bruno Marcelo</td>
+  </tr>
+  <tr>
+    <td>Apellidos</td>
+    <td>Pacheco Díaz</td>
+  </tr>
+  <tr>
+    <td>Edad</td>
+    <td>23 años</td>
+  </tr>
+  <tr>
+    <td>Distrito</td>
+    <td>Surquillo</td>
+  </tr>
+  <tr>
+    <td>Evidencia</td>
+    <td><div align="center"><img src="../../assets/Interview-Evidence/Interview-of-Bruno-Pacheco.jpeg" alt="Entrevista Bruno Pacheco"></div></td>
+  </tr>
+  <tr>
+    <td>Link</td>
+    <td><p><a target="_blank"  href="https://upcedupe-my.sharepoint.com/:v:/g/personal/u202417423_upc_edu_pe/IQBIV6T1U2oZTaq2yZbx-_zkAfIJbJkGq94jHYQDCwA84tc?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=fTgJpb" title="Title">Microsoft Stream</p></td>
+  </tr>
+  <tr>
+    <td>Duracion<br></td>
+    <td>0:14 min - 6:22 min</td>
+  </tr>
+  <tr>
+    <td>Resumen</td>
+    <td>
+      La entrevista se realizó a Bruno Pacheco, un técnico egresado en mecánica automotriz de 25 años, soltero y residente en el distrito de Chorrillos. Bruno ocupa el cargo oficial de Técnico Mecánico Especialista en Diagnóstico y Mantenimiento; ante situaciones de alta presión laboral procura mantener la calma y actuar de forma metódica para prevenir errores. Destaca como su principal fortaleza el diagnóstico electrónico, la lectura de datos de inyección y el manejo fluido de escáneres multimarca para la interpretación de códigos de falla (DTC). Su proceso operativo inicia con la recepción de la orden de trabajo física, inspección visual, lectura con escáner, solicitud de repuestos al almacén, ejecución de la reparación, prueba de ruta, borrado de códigos y la firma final de la orden. En cuanto a las fricciones del entorno, reporta desorganización en la gestión de repuestos y pérdida de mensajes en grupos informales de WhatsApp, señalando que su mayor frustración son los "tiempos muertos" con vehículos desarmados en el elevador a la espera de aprobaciones de presupuestos o repuestos faltantes, lo cual perjudica directamente su rendimiento diario. En el ámbito profesional, busca llevar cursos de mecatrónica y diagnóstico de vehículos híbridos o eléctricos a corto plazo, con la meta a largo plazo de dirigir un taller o administrar un centro de servicio propio. Finalmente, en el aspecto digital, utiliza un smartphone Android (Samsung), siendo WhatsApp, Google y YouTube sus aplicaciones más consultadas para coordinaciones laborales y búsqueda de diagramas técnicos.
+    </td>
   </tr>
 </tbody>
 </table>
