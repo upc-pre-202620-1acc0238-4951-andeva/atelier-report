@@ -1,0 +1,391 @@
+@startuml database-diagram-hr
+title <size:16>Diagrama de Base de Datos (ERD) - Bounded Context Human Resources Management (hr)</size>\n<size:11>Persistencia Relacional Multi-Producto: PostgreSQL 16 (API Application) y SQLite 3 (Mobile Workshop)</size>
+
+' Configuraciones visuales y de diseño profesional
+hide circle
+skinparam monochrome false
+skinparam shadowing false
+skinparam roundcorner 6
+skinparam linetype ortho
+skinparam nodesep 80
+skinparam ranksep 50
+skinparam defaultFontName "Helvetica", "Arial", sans-serif
+skinparam defaultFontSize 11
+skinparam defaultFontColor #2C3E50
+skinparam arrowColor #34495E
+skinparam arrowThickness 1.3
+skinparam packageBorderColor #7F8C8D
+skinparam packageFontSize 12
+skinparam packageFontStyle bold
+
+skinparam entity {
+    BackgroundColor #FFFFFF
+    BorderColor #34495E
+    HeaderBackgroundColor #EAEDED
+}
+
+' ==============================================================================
+' PRODUCTO 1: API APPLICATION (BACKEND CENTRAL - POSTGRESQL 16)
+' ==============================================================================
+package "PostgreSQL 16 (API Application - Backend Central)" as pg_backend #F8F9F9 {
+
+    ' ==========================================================================
+    ' COLUMNA 1: ARQUETIPO JPA, SEDES, TURNOS Y EXPEDIENTES LABORALES
+    ' ==========================================================================
+    entity "auditable_abstract_entity" as auditable_abstract_entity <<archetype, JPA>> #E8F8F5 {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Propiedades del Arquetipo JPA:</b>
+        + Clave primaria técnica UUID v4
+        + Aislamiento multi-tenant obligatorio (tenant_id)
+        + Control de concurrencia optimista (version)
+        + Borrado lógico auditable (deleted_at)
+        + Heredado físicamente por entidades de negocio:
+          work_shifts, attendance_records, payroll_payments
+          y employee_profiles (@MappedSuperclass)
+    }
+
+    entity "tenants" as tenants <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * name : VARCHAR(100)
+        * tax_id : VARCHAR(20) <<UK>>
+        --
+        <b>Contexto Externo (IAM & Tenancy):</b>
+        + Delimita la frontera del taller automotriz
+    }
+
+    entity "branches" as branches <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        * name : VARCHAR(100)
+        * latitude : NUMERIC(10,8)
+        * longitude : NUMERIC(11,8)
+        * geofence_radius_m : INTEGER
+        --
+        <b>Contexto Externo (IAM & Tenancy):</b>
+        + Sede física del taller y centroide geodésico
+    }
+
+    entity "work_shifts" as work_shifts <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        * name : VARCHAR(50)
+        * start_time : TIME
+        * end_time : TIME
+        * grace_period_m : INTEGER
+        * is_active : BOOLEAN
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_work_shifts : PRIMARY KEY (id)
+        + fk_work_shifts_tenant_id : FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+        + uk_work_shifts_tenant_name : UNIQUE (tenant_id, name)
+        + chk_shift_grace_period : CHECK (grace_period_m >= 0 AND grace_period_m <= 60)
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_work_shifts_tenant_name : (tenant_id, name)
+        + idx_work_shifts_active : (tenant_id, is_active)
+    }
+
+    entity "employee_profiles" as employee_profiles <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        * branch_id : UUID <<FK>>
+        * membership_id : UUID <<FK, UK>>
+        assigned_shift_id : UUID <<FK>>
+        * base_salary : NUMERIC(10,2)
+        * currency : VARCHAR(3)
+        * salary_type : VARCHAR(20)
+        * job_title : VARCHAR(100)
+        * employment_status : VARCHAR(20)
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_employee_profiles : PRIMARY KEY (id)
+        + fk_employee_tenant_id : FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+        + fk_employee_branch_id : FOREIGN KEY (branch_id) REFERENCES branches(id)
+        + fk_employee_membership_id : FOREIGN KEY (membership_id) REFERENCES tenant_memberships(id)
+        + fk_employee_shift_id : FOREIGN KEY (assigned_shift_id) REFERENCES work_shifts(id)
+        + uk_employee_profiles_membership : UNIQUE (membership_id)
+        + chk_employee_salary_type : CHECK (salary_type IN ('monthly_fixed', 'hourly_rate'))
+        + chk_employee_employment_status : CHECK (employment_status IN ('active', 'on_leave', 'terminated'))
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_employee_profiles_branch : (branch_id)
+        + idx_employee_profiles_membership : (membership_id)
+        + idx_employee_profiles_tenant_status : (tenant_id, employment_status)
+    }
+
+    ' ==========================================================================
+    ' COLUMNA 2: USUARIOS, MEMBRESÍAS, ASISTENCIA Y NÓMINAS
+    ' ==========================================================================
+    entity "users" as users <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * email : VARCHAR(150) <<UK>>
+        * first_name : VARCHAR(100)
+        * last_name : VARCHAR(100)
+        --
+        <b>Contexto Externo (IAM & Tenancy):</b>
+        + Supervisor de taller que aprueba justificaciones
+    }
+
+    entity "tenant_memberships" as tenant_memberships <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        * user_id : UUID <<FK>>
+        * status : VARCHAR(20)
+        --
+        <b>Contexto Externo (IAM & Tenancy):</b>
+        + Relación contractual formal del colaborador
+    }
+
+    entity "attendance_records" as attendance_records <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        * branch_id : UUID <<FK>>
+        * membership_id : UUID <<FK>>
+        * shift_id : UUID <<FK>>
+        * clock_in : TIMESTAMPTZ
+        clock_out : TIMESTAMPTZ
+        * status : VARCHAR(20)
+        * latitude : NUMERIC(10,8)
+        * longitude : NUMERIC(11,8)
+        * distance_to_branch_m : INTEGER
+        justification_reason : VARCHAR(255)
+        justified_by : UUID <<FK>>
+        justified_at : TIMESTAMPTZ
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_attendance_records : PRIMARY KEY (id)
+        + fk_attendance_tenant_id : FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+        + fk_attendance_branch_id : FOREIGN KEY (branch_id) REFERENCES branches(id)
+        + fk_attendance_membership_id : FOREIGN KEY (membership_id) REFERENCES tenant_memberships(id)
+        + fk_attendance_shift_id : FOREIGN KEY (shift_id) REFERENCES work_shifts(id)
+        + fk_attendance_justified_by : FOREIGN KEY (justified_by) REFERENCES users(id)
+        + chk_attendance_status : CHECK (status IN ('on_time', 'late', 'excused', 'absent'))
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_attendance_membership_date : (membership_id, clock_in)
+        + idx_attendance_branch_date : (branch_id, clock_in)
+        + idx_attendance_status : (tenant_id, status)
+    }
+
+    entity "payroll_payments" as payroll_payments <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        * membership_id : UUID <<FK>>
+        * period_start : DATE
+        * period_end : DATE
+        * base_amount : NUMERIC(10,2)
+        * deductions : NUMERIC(10,2)
+        * bonuses : NUMERIC(10,2)
+        * total_paid : NUMERIC(10,2)
+        * currency : VARCHAR(3)
+        * status : VARCHAR(20)
+        paid_at : TIMESTAMPTZ
+        payment_reference : VARCHAR(100)
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_payroll_payments : PRIMARY KEY (id)
+        + fk_payroll_tenant_id : FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+        + fk_payroll_membership_id : FOREIGN KEY (membership_id) REFERENCES tenant_memberships(id)
+        + uk_payroll_membership_period : UNIQUE (membership_id, period_start, period_end)
+        + chk_payroll_status : CHECK (status IN ('draft', 'approved', 'paid', 'cancelled'))
+        + chk_payroll_total : CHECK (total_paid >= 0.00)
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_payroll_tenant_period : (tenant_id, period_start, period_end)
+        + idx_payroll_membership : (membership_id)
+        + idx_payroll_status : (tenant_id, status)
+    }
+
+    entity "payroll_items" as payroll_items <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * payroll_payment_id : UUID <<FK>>
+        * category : VARCHAR(20)
+        * concept : VARCHAR(200)
+        * amount : NUMERIC(10,2)
+        * type : VARCHAR(50)
+        * date : DATE
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_payroll_items : PRIMARY KEY (id)
+        + fk_payroll_items_payment_id : FOREIGN KEY (payroll_payment_id) REFERENCES payroll_payments(id) ON DELETE CASCADE
+        + chk_payroll_item_category : CHECK (category IN ('deduction', 'bonus', 'base_salary'))
+        + chk_payroll_item_amount : CHECK (amount >= 0.00)
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_payroll_items_payment : (payroll_payment_id)
+        + idx_payroll_items_category : (category)
+    }
+
+    ' ==========================================================================
+    ' DISPOSICIÓN ESPACIAL EN COLUMNAS (ALINEAMIENTO HORIZONTAL Y VERTICAL)
+    ' ==========================================================================
+    ' Columna 1 (Vertical)
+    auditable_abstract_entity -[hidden]down-> tenants
+    tenants -[hidden]down-> branches
+    branches -[hidden]down-> work_shifts
+    work_shifts -[hidden]down-> employee_profiles
+
+    ' Columna 2 (Vertical)
+    users -[hidden]down-> tenant_memberships
+    tenant_memberships -[hidden]down-> attendance_records
+    attendance_records -[hidden]down-> payroll_payments
+    payroll_payments -[hidden]down-> payroll_items
+
+    ' Alineamiento horizontal forzado entre columnas
+    auditable_abstract_entity -[hidden]right-> users
+    tenants -[hidden]right-> tenant_memberships
+    branches -[hidden]right-> attendance_records
+    work_shifts -[hidden]right-> payroll_payments
+    employee_profiles -[hidden]right-> payroll_items
+
+    ' ==========================================================================
+    ' HERENCIA JPA Y RELACIONES CARDINALES
+    ' ==========================================================================
+    auditable_abstract_entity <|-- work_shifts : "herencia física JPA\n(@MappedSuperclass)"
+    auditable_abstract_entity <|-- attendance_records
+    auditable_abstract_entity <|-- payroll_payments
+    auditable_abstract_entity <|-- employee_profiles
+
+    tenants "1  " ||--o{ "0..* " work_shifts : "define franjas horarias"
+    tenants "1  " ||--o{ "0..* " employee_profiles : "mantiene expediente laboral"
+    tenants "1  " ||--o{ "0..* " attendance_records : "supervisa asistencia presencial"
+    tenants "1  " ||--o{ "0..* " payroll_payments : "emite liquidaciones periódicas"
+
+    branches "1  " ||--o{ "0..* " attendance_records : "sede física de marcación"
+    branches "1  " ||--o{ "0..* " employee_profiles : "sede de adscripción"
+
+    users "1  " ||--o{ "0..* " tenant_memberships : "cuenta de usuario"
+    users "0..1" ||--o{ "0..* " attendance_records : "supervisor que justifica"
+
+    tenant_memberships "1  " ||--o{ "0..* " attendance_records : "colaborador que marca"
+    tenant_memberships "1  " ||--|| "0..1 " employee_profiles : "expediente laboral unívoco"
+    tenant_memberships "1  " ||--o{ "0..* " payroll_payments : "beneficiario de liquidación"
+
+    work_shifts "1  " ||--o{ "0..* " attendance_records : "turno programado evaluado"
+    work_shifts "0..1" ||--o{ "0..* " employee_profiles : "turno predeterminado"
+
+    payroll_payments "1  " ||--o{ "0..* " payroll_items : "desglose analítico de nómina"
+}
+
+' ==============================================================================
+' PRODUCTO 2: MOBILE WORKSHOP (CLIENTE TÉCNICO OFFLINE - SQLITE 3)
+' ==============================================================================
+package "SQLite 3 (Mobile Workshop - Cliente Técnico Offline)" as sqlite_mobile #FEFDE8 {
+
+    entity "local_attendance_cache" as local_attendance_cache <<table, SQLite>> #FEF9E7 {
+        * id : TEXT <<PK>>
+        --
+        * tenant_id : TEXT
+        * branch_id : TEXT
+        * membership_id : TEXT
+        * shift_id : TEXT
+        * clock_in : TEXT
+        clock_out : TEXT
+        * status : TEXT
+        * latitude : REAL
+        * longitude : REAL
+        * distance_to_branch_m : INTEGER
+        * synced_at : TEXT (ISO8601)
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_local_attendance : PRIMARY KEY (id)
+        --
+        <b>Propósito Operativo:</b>
+        + Caché local de asistencias del operario
+        + Consulta inmediata de historial de marcaciones
+    }
+
+    entity "local_shift_cache" as local_shift_cache <<table, SQLite>> #FEF9E7 {
+        * id : TEXT <<PK>>
+        --
+        * tenant_id : TEXT
+        * name : TEXT
+        * start_time : TEXT
+        * end_time : TEXT
+        * grace_period_m : INTEGER
+        * synced_at : TEXT (ISO8601)
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_local_shift : PRIMARY KEY (id)
+        --
+        <b>Propósito Operativo:</b>
+        + Caché de turnos y franjas horarias
+        + Validación de jornada laboral en patio
+    }
+
+    entity "offline_attendance_mutations" as offline_attendance_mutations <<table, SQLite>> #FEF9E7 {
+        * mutation_id : TEXT <<PK>>
+        --
+        * membership_id : TEXT
+        * action_type : TEXT
+        * timestamp : TEXT
+        * latitude : REAL
+        * longitude : REAL
+        * status : TEXT
+        * retry_count : INTEGER
+        * created_at : TEXT (ISO8601)
+        synced_at : TEXT (ISO8601)
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_offline_attendance_mutations : PRIMARY KEY (mutation_id)
+        + chk_mutation_status : CHECK (status IN ('PENDING', 'SYNCED', 'FAILED'))
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_mutations_status : (status, created_at)
+        --
+        <b>Propósito Operativo:</b>
+        + Buffer transaccional de marcaciones GPS en patio
+        + Replicación atómica e idempotente hacia la nube
+    }
+
+    ' Disposición vertical en columna SQLite
+    local_attendance_cache -[hidden]down-> local_shift_cache
+    local_shift_cache -[hidden]down-> offline_attendance_mutations
+}
+
+' Disposición horizontal entre paquetes
+users -[hidden]right-> local_attendance_cache
+pg_backend -[hidden]right-> sqlite_mobile
+
+' ==============================================================================
+' RELACIONES DE SINCRONIZACIÓN INTER-PRODUCTO
+' ==============================================================================
+offline_attendance_mutations .[#2980B9]left.> attendance_records : "<b>HTTPS REST Replicación de Marcaciones en Patio</b>\n(POST /api/v1/hr/attendance/clock-in)"
+local_attendance_cache .[#27AE60]left.> attendance_records : "<b>Descarga y Refresco de Asistencias Diarias</b>\n(GET /api/v1/hr/attendance/my-record)"
+local_shift_cache .[#8E44AD]left.> work_shifts : "<b>Caché de Turnos y Franjas Horarias</b>\n(GET /api/v1/hr/work-shifts)"
+
+@enduml

@@ -24,5 +24,6 @@
 |0.25.0|08/09/2026|Teran Zavala, Mauricio Alejandro|Inserción **Empathy Mapping** para ambos user persona.|
 |0.26.0|08/09/2026|Teran Zavala, Mauricio Alejandro|Inserción **Interview Analysis** para ambos segmentos.|
 |0.28.0|10/09/2026|Huamani Estefanero, Joel|Añadido de ***Bounded Context: Inventory & Supply Chain*** y documentación del backend.|
+|0.29.0|10/09/2026|Huamani Estefanero, Joel|Añadido de ***Bounded Context: Human Resources Management (HR)*** y documentación del backend.|
 
 \newpage

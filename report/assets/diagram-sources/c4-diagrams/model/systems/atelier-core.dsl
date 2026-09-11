@@ -13,6 +13,7 @@ group "Andeva" {
             !include ../components/crm-components.dsl
             !include ../components/mro-components.dsl
             !include ../components/inventory-components.dsl
+            !include ../components/hr-components.dsl
         }
         db = container "Database" "Base de datos multi-tenant relacional y de series de tiempo para telemetría vehicular." "PostgreSQL 16, TimescaleDB" "Database"
     }

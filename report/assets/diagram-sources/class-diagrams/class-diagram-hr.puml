@@ -1,0 +1,661 @@
+@startuml class-diagram-hr
+title <size:18>Diagrama de Clases UML - Bounded Context Human Resources Management (Domain Layer)</size>\n<size:12>Paquete Canónico: com.andeva.atelier.platform.hr.domain</size>
+
+scale max 3200 width
+
+' Configuraciones visuales y de diseño profesional
+skinparam classAttributeIconSize 0
+skinparam monochrome false
+skinparam shadowing false
+skinparam roundcorner 6
+skinparam linetype ortho
+skinparam nodesep 26
+skinparam ranksep 30
+skinparam defaultFontName "Helvetica", "Arial", sans-serif
+skinparam defaultFontSize 10
+skinparam defaultFontColor #2C3E50
+skinparam arrowColor #34495E
+skinparam arrowThickness 1.1
+skinparam packageBorderColor #7F8C8D
+skinparam packageFontSize 11
+skinparam packageFontStyle bold
+
+' Estilos específicos por categoría táctica
+skinparam class {
+    BackgroundColor #FFFFFF
+    BorderColor #2C3E50
+    HeaderBackgroundColor #EAEDED
+}
+skinparam class<<AggregateRoot>> {
+    BackgroundColor #E8F8F5
+    BorderColor #16A085
+    HeaderBackgroundColor #A3E4D7
+}
+skinparam class<<Entity>> {
+    BackgroundColor #EBF5FB
+    BorderColor #2980B9
+    HeaderBackgroundColor #AED6F1
+}
+skinparam class<<ValueObject>> {
+    BackgroundColor #FEF9E7
+    BorderColor #D68910
+    HeaderBackgroundColor #FAD7A0
+}
+skinparam class<<TypedId>> {
+    BackgroundColor #EBF5FB
+    BorderColor #2980B9
+    HeaderBackgroundColor #AED6F1
+}
+skinparam class<<Exception>> {
+    BackgroundColor #F4ECF7
+    BorderColor #8E44AD
+    HeaderBackgroundColor #D2B4DE
+}
+skinparam class<<SharedKernel>> {
+    BackgroundColor #F8F9F9
+    BorderColor #BDC3C7
+    HeaderBackgroundColor #EAEDED
+}
+skinparam interface {
+    BackgroundColor #E8F6F3
+    BorderColor #117A65
+    HeaderBackgroundColor #A2D9CE
+}
+skinparam enum {
+    BackgroundColor #FCF3CF
+    BorderColor #B7950B
+    HeaderBackgroundColor #F9E79F
+}
+
+set separator none
+
+' ==============================================================================
+' 1. MODELO DE AGREGADOS (AGGREGATES)
+' ==============================================================================
+package "hr.domain.model.aggregates" as aggregates #FDFEFE {
+
+    abstract class "AbstractDomainAggregateRoot<T>" as AbstractDomainAggregateRoot <<SharedKernel>> {
+        # id: T
+        - domainEvents: List<DomainEvent>
+        --
+        # registerDomainEvent(event: DomainEvent): void
+        + domainEvents(): List<DomainEvent>
+        + clearDomainEvents(): void
+    }
+
+    class WorkShift <<AggregateRoot>> {
+        - id: WorkShiftId
+        - tenantId: TenantId
+        - name: String
+        - schedule: WorkShiftSchedule
+        - gracePeriod: GracePeriod
+        - isActive: boolean
+        --
+        + {static} create(tenantId: TenantId, name: String, startTime: LocalTime, endTime: LocalTime, gracePeriodMinutes: int): WorkShift
+        + updateSchedule(name: String, startTime: LocalTime, endTime: LocalTime, gracePeriodMinutes: int): void
+        + deactivate(): void
+        + activate(): void
+        + isLate(clockInTime: LocalTime): boolean
+        + isWithinWorkingHours(time: LocalTime): boolean
+        + id(): WorkShiftId
+        + tenantId(): TenantId
+        + name(): String
+        + schedule(): WorkShiftSchedule
+        + gracePeriod(): GracePeriod
+        + isActive(): boolean
+    }
+
+    class AttendanceRecord <<AggregateRoot>> {
+        - id: AttendanceRecordId
+        - tenantId: TenantId
+        - branchId: BranchId
+        - membershipId: TenantMembershipId
+        - shiftId: WorkShiftId
+        - clockIn: Instant
+        - clockOut: Instant
+        - status: AttendanceStatus
+        - coordinates: GeoCoordinates
+        - distanceToBranch: HaversineDistance
+        - justification: AttendanceJustification
+        --
+        + {static} recordClockIn(tenantId: TenantId, branchId: BranchId, memberId: TenantMembershipId, shift: WorkShift, loc: GeoCoordinates, svc: HaversineGeofencingService): AttendanceRecord
+        + recordClockOut(clockOutTime: Instant): void
+        + justify(reason: String, supervisorMembershipId: TenantMembershipId): void
+        + {static} recordAbsent(tenantId: TenantId, branchId: BranchId, memberId: TenantMembershipId, shiftId: WorkShiftId, date: LocalDate): AttendanceRecord
+        + id(): AttendanceRecordId
+        + tenantId(): TenantId
+        + branchId(): BranchId
+        + membershipId(): TenantMembershipId
+        + shiftId(): WorkShiftId
+        + clockIn(): Instant
+        + clockOut(): Instant
+        + status(): AttendanceStatus
+        + coordinates(): GeoCoordinates
+        + distanceToBranch(): HaversineDistance
+        + justification(): AttendanceJustification
+    }
+
+    class PayrollPayment <<AggregateRoot>> {
+        - id: PayrollPaymentId
+        - tenantId: TenantId
+        - membershipId: TenantMembershipId
+        - period: PaymentPeriod
+        - baseAmount: Money
+        - deductions: Money
+        - bonuses: Money
+        - totalPaid: Money
+        - status: PayrollStatus
+        - paidAt: Instant
+        - paymentReference: String
+        - items: List<PayrollItem>
+        --
+        + {static} calculate(tenantId: TenantId, memberId: TenantMembershipId, period: PaymentPeriod, baseAmount: Money, items: List<PayrollItem>): PayrollPayment
+        + addDeduction(concept: String, amount: Money, type: DeductionType, date: LocalDate): void
+        + addBonus(concept: String, amount: Money, type: BonusType, date: LocalDate): void
+        + approve(approverMembershipId: TenantMembershipId): void
+        + disburse(paymentReference: String, paidAt: Instant): void
+        + cancel(reason: String): void
+        + id(): PayrollPaymentId
+        + tenantId(): TenantId
+        + membershipId(): TenantMembershipId
+        + period(): PaymentPeriod
+        + baseAmount(): Money
+        + deductions(): Money
+        + bonuses(): Money
+        + totalPaid(): Money
+        + status(): PayrollStatus
+        + items(): List<PayrollItem>
+    }
+
+    class EmployeeProfile <<AggregateRoot>> {
+        - id: EmployeeProfileId
+        - tenantId: TenantId
+        - branchId: BranchId
+        - membershipId: TenantMembershipId
+        - assignedShiftId: WorkShiftId
+        - baseSalary: Money
+        - salaryType: SalaryType
+        - jobTitle: String
+        - specialties: List<String>
+        - employmentStatus: EmploymentStatus
+        --
+        + {static} register(tenantId: TenantId, branchId: BranchId, memberId: TenantMembershipId, shiftId: WorkShiftId, salary: Money, type: SalaryType, title: String): EmployeeProfile
+        + assignShift(newShiftId: WorkShiftId): void
+        + updateSalary(newSalary: Money, newSalaryType: SalaryType): void
+        + changeBranch(newBranchId: BranchId): void
+        + terminateEmployment(): void
+        + id(): EmployeeProfileId
+        + tenantId(): TenantId
+        + branchId(): BranchId
+        + membershipId(): TenantMembershipId
+        + assignedShiftId(): WorkShiftId
+        + baseSalary(): Money
+        + salaryType(): SalaryType
+        + jobTitle(): String
+        + specialties(): List<String>
+        + employmentStatus(): EmploymentStatus
+    }
+}
+
+' ==============================================================================
+' 2. ENTIDADES DEPENDIENTES (ENTITIES)
+' ==============================================================================
+package "hr.domain.model.entities" as entities #FDFEFE {
+
+    class PayrollItem <<Entity>> {
+        - id: PayrollItemId
+        - payrollPaymentId: PayrollPaymentId
+        - category: PayrollItemCategory
+        - concept: String
+        - amount: Money
+        - deductionType: Optional<DeductionType>
+        - bonusType: Optional<BonusType>
+        - date: LocalDate
+        --
+        + {static} deduction(id: PayrollItemId, paymentId: PayrollPaymentId, concept: String, amount: Money, type: DeductionType, date: LocalDate): PayrollItem
+        + {static} bonus(id: PayrollItemId, paymentId: PayrollPaymentId, concept: String, amount: Money, type: BonusType, date: LocalDate): PayrollItem
+        + isDeduction(): boolean
+        + isBonus(): boolean
+        + id(): PayrollItemId
+        + payrollPaymentId(): PayrollPaymentId
+        + category(): PayrollItemCategory
+        + concept(): String
+        + amount(): Money
+        + deductionType(): Optional<DeductionType>
+        + bonusType(): Optional<BonusType>
+        + date(): LocalDate
+    }
+}
+
+' ==============================================================================
+' 3. IDENTIFICADORES TIPADOS (TYPED IDS & SHARED KERNEL IDS)
+' ==============================================================================
+package "hr.domain.model.ids" as ids #FDFEFE {
+
+    interface "TypedId<T>" as TypedId <<SharedKernel>> {
+        + value(): T
+    }
+
+    class WorkShiftId <<TypedId>> {
+        - value: UUID
+        --
+        + {static} generate(): WorkShiftId
+        + {static} from(value: UUID): WorkShiftId
+        + value(): UUID
+    }
+
+    class AttendanceRecordId <<TypedId>> {
+        - value: UUID
+        --
+        + {static} generate(): AttendanceRecordId
+        + {static} from(value: UUID): AttendanceRecordId
+        + value(): UUID
+    }
+
+    class PayrollPaymentId <<TypedId>> {
+        - value: UUID
+        --
+        + {static} generate(): PayrollPaymentId
+        + {static} from(value: UUID): PayrollPaymentId
+        + value(): UUID
+    }
+
+    class PayrollItemId <<TypedId>> {
+        - value: UUID
+        --
+        + {static} generate(): PayrollItemId
+        + {static} from(value: UUID): PayrollItemId
+        + value(): UUID
+    }
+
+    class EmployeeProfileId <<TypedId>> {
+        - value: UUID
+        --
+        + {static} generate(): EmployeeProfileId
+        + {static} from(value: UUID): EmployeeProfileId
+        + value(): UUID
+    }
+
+    class TenantId <<SharedKernel>> {
+        - value: UUID
+        --
+        + {static} from(value: UUID): TenantId
+        + value(): UUID
+    }
+
+    class BranchId <<SharedKernel>> {
+        - value: UUID
+        --
+        + {static} from(value: UUID): BranchId
+        + value(): UUID
+    }
+
+    class TenantMembershipId <<SharedKernel>> {
+        - value: UUID
+        --
+        + {static} from(value: UUID): TenantMembershipId
+        + value(): UUID
+    }
+}
+
+' ==============================================================================
+' 4. OBJETOS DE VALOR (VALUE OBJECTS & SHARED KERNEL)
+' ==============================================================================
+package "hr.domain.model.valueobjects" as valueobjects #FDFEFE {
+
+    class WorkShiftSchedule <<ValueObject>> {
+        - startTime: LocalTime
+        - endTime: LocalTime
+        - spansOverMidnight: boolean
+        --
+        + {static} of(startTime: LocalTime, endTime: LocalTime): WorkShiftSchedule
+        + isWithinWindow(time: LocalTime): boolean
+        + durationMinutes(): long
+        + startTime(): LocalTime
+        + endTime(): LocalTime
+        + spansOverMidnight(): boolean
+    }
+
+    class GracePeriod <<ValueObject>> {
+        - minutes: int
+        --
+        + {static} of(minutes: int): GracePeriod
+        + hasExpired(clockInTime: LocalTime, shiftStart: LocalTime): boolean
+        + minutes(): int
+    }
+
+    class GeoCoordinates <<ValueObject>> {
+        - latitude: double
+        - longitude: double
+        --
+        + {static} of(latitude: double, longitude: double): GeoCoordinates
+        + latitude(): double
+        + longitude(): double
+    }
+
+    class HaversineDistance <<ValueObject>> {
+        - meters: double
+        --
+        + {static} ofMeters(meters: double): HaversineDistance
+        + isWithin(radiusMeters: double): boolean
+        + toKilometers(): double
+        + meters(): double
+    }
+
+    class PaymentPeriod <<ValueObject>> {
+        - startDate: LocalDate
+        - endDate: LocalDate
+        --
+        + {static} of(startDate: LocalDate, endDate: LocalDate): PaymentPeriod
+        + workingDays(): int
+        + contains(date: LocalDate): boolean
+        + startDate(): LocalDate
+        + endDate(): LocalDate
+    }
+
+    class AttendanceJustification <<ValueObject>> {
+        - reason: String
+        - justifiedBy: TenantMembershipId
+        - justifiedAt: Instant
+        --
+        + {static} of(reason: String, justifiedBy: TenantMembershipId, justifiedAt: Instant): AttendanceJustification
+        + reason(): String
+        + justifiedBy(): TenantMembershipId
+        + justifiedAt(): Instant
+    }
+
+    class Money <<SharedKernel>> {
+        - amount: BigDecimal
+        - currency: Currency
+        --
+        + {static} zero(currency: Currency): Money
+        + {static} of(amount: BigDecimal, currency: Currency): Money
+        + add(other: Money): Money
+        + subtract(other: Money): Money
+        + isGreaterThan(other: Money): boolean
+        + amount(): BigDecimal
+        + currency(): Currency
+    }
+}
+
+' ==============================================================================
+' 5. ENUMERACIONES DE DOMINIO (ENUMS)
+' ==============================================================================
+package "hr.domain.model.enums" as enums #FDFEFE {
+
+    enum AttendanceStatus {
+        ON_TIME
+        LATE
+        EXCUSED
+        ABSENT
+    }
+
+    enum PayrollStatus {
+        DRAFT
+        APPROVED
+        PAID
+        CANCELLED
+    }
+
+    enum SalaryType {
+        MONTHLY_FIXED
+        HOURLY_RATE
+    }
+
+    enum EmploymentStatus {
+        ACTIVE
+        ON_LEAVE
+        TERMINATED
+    }
+
+    enum DeductionType {
+        TARDINESS
+        UNJUSTIFIED_ABSENCE
+        EQUIPMENT_DAMAGE
+        LOAN_REPAYMENT
+        OTHER
+    }
+
+    enum BonusType {
+        PRODUCTIVITY
+        OVERTIME_HOURS
+        SPECIAL_MERIT
+        HOLIDAY_ALLOWANCE
+    }
+
+    enum PayrollItemCategory {
+        DEDUCTION
+        BONUS
+        BASE_SALARY
+    }
+}
+
+' ==============================================================================
+' 6. SERVICIOS DE DOMINIO (DOMAIN SERVICES)
+' ==============================================================================
+package "hr.domain.services" as services #FDFEFE {
+
+    class HaversineGeofencingService <<DomainService>> {
+        + calculateDistance(origin: GeoCoordinates, destination: GeoCoordinates): HaversineDistance
+        + isWithinGeofence(employeeLocation: GeoCoordinates, branchCentroid: GeoCoordinates, allowedRadiusMeters: double): boolean
+    }
+
+    class PayrollCalculationEngine <<DomainService>> {
+        + calculatePayroll(tenantId: TenantId, memberId: TenantMembershipId, period: PaymentPeriod, salary: Money, records: List<AttendanceRecord>, commissions: List<MroCommissionDto>): PayrollPayment
+    }
+}
+
+' ==============================================================================
+' 7. PUERTOS DE REPOSITORIO (REPOSITORIES)
+' ==============================================================================
+package "hr.domain.repositories" as repositories #FDFEFE {
+
+    interface WorkShiftRepository <<Repository>> {
+        + save(workShift: WorkShift): WorkShift
+        + findById(id: WorkShiftId): Optional<WorkShift>
+        + findByTenantIdAndName(tenantId: TenantId, name: String): Optional<WorkShift>
+        + findAllByTenantId(tenantId: TenantId): List<WorkShift>
+        + existsByTenantIdAndName(tenantId: TenantId, name: String): boolean
+    }
+
+    interface AttendanceRecordRepository <<Repository>> {
+        + save(record: AttendanceRecord): AttendanceRecord
+        + findById(id: AttendanceRecordId): Optional<AttendanceRecord>
+        + findActiveByMembershipAndDate(memberId: TenantMembershipId, date: LocalDate): Optional<AttendanceRecord>
+        + findAllByBranchIdAndDate(branchId: BranchId, date: LocalDate): List<AttendanceRecord>
+        + findAllByMembershipAndPeriod(memberId: TenantMembershipId, start: Instant, end: Instant): List<AttendanceRecord>
+        + hasActiveClockIn(memberId: TenantMembershipId, date: LocalDate): boolean
+    }
+
+    interface PayrollPaymentRepository <<Repository>> {
+        + save(payment: PayrollPayment): PayrollPayment
+        + findById(id: PayrollPaymentId): Optional<PayrollPayment>
+        + findByMembershipAndPeriod(memberId: TenantMembershipId, period: PaymentPeriod): Optional<PayrollPayment>
+        + findAllByTenantIdAndPeriod(tenantId: TenantId, period: PaymentPeriod): List<PayrollPayment>
+        + findAllByMembershipId(memberId: TenantMembershipId): List<PayrollPayment>
+    }
+
+    interface EmployeeProfileRepository <<Repository>> {
+        + save(profile: EmployeeProfile): EmployeeProfile
+        + findById(id: EmployeeProfileId): Optional<EmployeeProfile>
+        + findByMembershipId(memberId: TenantMembershipId): Optional<EmployeeProfile>
+        + findAllByBranchId(branchId: BranchId): List<EmployeeProfile>
+        + findAllActiveByTenantId(tenantId: TenantId): List<EmployeeProfile>
+    }
+}
+
+' ==============================================================================
+' 8. EXCEPCIONES SEMÁNTICAS (EXCEPTIONS)
+' ==============================================================================
+package "hr.domain.exceptions" as exceptions #FDFEFE {
+
+    abstract class "DomainException" as DomainException <<SharedKernel>> {
+        - errorCode: String
+        - message: String
+        --
+        + errorCode(): String
+        + getMessage(): String
+    }
+
+    class GeofenceViolationException <<Exception>>
+    class DuplicateActiveAttendanceException <<Exception>>
+    class InvalidAttendanceClockOutException <<Exception>>
+    class ShiftConflictException <<Exception>>
+    class AttendanceNotJustifiableException <<Exception>>
+    class InvalidPayrollModificationException <<Exception>>
+    class WorkShiftNotFoundException <<Exception>>
+    class AttendanceRecordNotFoundException <<Exception>>
+    class EmployeeProfileNotFoundException <<Exception>>
+    class PayrollPaymentNotFoundException <<Exception>>
+}
+
+' ==============================================================================
+' RELACIONES ESTRUCTURALES Y CARDINALIDADES
+' ==============================================================================
+
+' Herencia de Agregados
+AbstractDomainAggregateRoot <|-- WorkShift
+AbstractDomainAggregateRoot <|-- AttendanceRecord
+AbstractDomainAggregateRoot <|-- PayrollPayment
+AbstractDomainAggregateRoot <|-- EmployeeProfile
+
+' Composición y Relaciones entre Agregados y Entidades
+PayrollPayment "1" *-- "1..*" PayrollItem : "contiene >"
+AttendanceRecord "1" o-- "1" WorkShiftId : "evaluado contra >"
+EmployeeProfile "1" o-- "1" WorkShiftId : "turno regular >"
+
+' Relaciones de WorkShift
+WorkShift "1" o-- "1" WorkShiftId : "identificado por >"
+WorkShift "1" *-- "1" WorkShiftSchedule : "horario >"
+WorkShift "1" *-- "1" GracePeriod : "tolerancia >"
+
+' Relaciones de AttendanceRecord
+AttendanceRecord "1" o-- "1" AttendanceRecordId : "identificado por >"
+AttendanceRecord "1" o-- "1" AttendanceStatus : "estado >"
+AttendanceRecord "1" *-- "1" GeoCoordinates : "coordenadas >"
+AttendanceRecord "1" *-- "1" HaversineDistance : "distancia >"
+AttendanceRecord "1" *-- "0..1" AttendanceJustification : "justificación >"
+
+' Relaciones de PayrollPayment
+PayrollPayment "1" o-- "1" PayrollPaymentId : "identificado por >"
+PayrollPayment "1" o-- "1" PayrollStatus : "estado >"
+PayrollPayment "1" *-- "1" PaymentPeriod : "periodo >"
+PayrollPayment "1" o-- "1" Money : "monto neto >"
+
+' Relaciones de PayrollItem
+PayrollItem "1" o-- "1" PayrollItemId : "identificado por >"
+PayrollItem "1" o-- "1" PayrollItemCategory : "categoría >"
+PayrollItem "1" o-- "1" Money : "importe >"
+
+' Relaciones de EmployeeProfile
+EmployeeProfile "1" o-- "1" EmployeeProfileId : "identificado por >"
+EmployeeProfile "1" o-- "1" SalaryType : "esquema >"
+EmployeeProfile "1" o-- "1" EmploymentStatus : "situación >"
+EmployeeProfile "1" o-- "1" Money : "salario base >"
+
+' Realizaciones de TypedId
+TypedId <|.. WorkShiftId
+TypedId <|.. AttendanceRecordId
+TypedId <|.. PayrollPaymentId
+TypedId <|.. PayrollItemId
+TypedId <|.. EmployeeProfileId
+TypedId <|.. TenantId
+TypedId <|.. BranchId
+TypedId <|.. TenantMembershipId
+
+' Generalizaciones de Excepciones
+DomainException <|-- GeofenceViolationException
+DomainException <|-- DuplicateActiveAttendanceException
+DomainException <|-- InvalidAttendanceClockOutException
+DomainException <|-- ShiftConflictException
+DomainException <|-- AttendanceNotJustifiableException
+DomainException <|-- InvalidPayrollModificationException
+DomainException <|-- WorkShiftNotFoundException
+DomainException <|-- AttendanceRecordNotFoundException
+DomainException <|-- EmployeeProfileNotFoundException
+DomainException <|-- PayrollPaymentNotFoundException
+
+' Enlaces de uso con Repositorios
+WorkShiftRepository ..up> WorkShift : "persiste"
+AttendanceRecordRepository ..up> AttendanceRecord : "persiste"
+PayrollPaymentRepository ..up> PayrollPayment : "persiste"
+EmployeeProfileRepository ..up> EmployeeProfile : "persiste"
+
+' Enlaces de Servicios de Dominio
+HaversineGeofencingService ..up> AttendanceRecord : "valida presencia"
+HaversineGeofencingService ..> GeoCoordinates : "computa"
+HaversineGeofencingService ..> HaversineDistance : "produce"
+PayrollCalculationEngine ..up> PayrollPayment : "liquida haberes"
+PayrollCalculationEngine ..> AttendanceRecord : "consolida asistencias"
+
+' ==============================================================================
+' CONTROL DE DISPOSICIÓN ESPACIAL (ENLACES OCULTOS ENTRE CLASES)
+' ==============================================================================
+
+' Fila 1: Superclase y Agregados principales
+AbstractDomainAggregateRoot -[hidden]down-> WorkShift
+WorkShift -[hidden]right-> AttendanceRecord
+AttendanceRecord -[hidden]right-> EmployeeProfile
+
+' Fila 2: Liquidación de Nóminas y Servicios de Dominio
+WorkShift -[hidden]down-> HaversineGeofencingService
+AttendanceRecord -[hidden]down-> PayrollPayment
+PayrollPayment -[hidden]right-> PayrollItem
+EmployeeProfile -[hidden]down-> PayrollCalculationEngine
+
+' Fila 3: Puertos de Repositorio (debajo de entidades y servicios)
+HaversineGeofencingService -[hidden]down-> WorkShiftRepository
+PayrollPayment -[hidden]down-> AttendanceRecordRepository
+AttendanceRecordRepository -[hidden]right-> PayrollPaymentRepository
+PayrollCalculationEngine -[hidden]down-> EmployeeProfileRepository
+
+WorkShiftRepository -[hidden]right-> AttendanceRecordRepository
+PayrollPaymentRepository -[hidden]right-> EmployeeProfileRepository
+
+' Fila 4: IDs (Col. 1), Value Objects (Col. 2), Enums (Col. 3)
+WorkShiftRepository -[hidden]down-> TypedId
+TypedId -[hidden]down-> WorkShiftId
+WorkShiftId -[hidden]right-> AttendanceRecordId
+WorkShiftId -[hidden]down-> PayrollPaymentId
+PayrollPaymentId -[hidden]right-> PayrollItemId
+PayrollPaymentId -[hidden]down-> EmployeeProfileId
+EmployeeProfileId -[hidden]right-> TenantId
+EmployeeProfileId -[hidden]down-> BranchId
+BranchId -[hidden]right-> TenantMembershipId
+
+AttendanceRecordRepository -[hidden]down-> WorkShiftSchedule
+WorkShiftSchedule -[hidden]right-> GracePeriod
+GracePeriod -[hidden]right-> GeoCoordinates
+WorkShiftSchedule -[hidden]down-> HaversineDistance
+HaversineDistance -[hidden]right-> PaymentPeriod
+PaymentPeriod -[hidden]right-> AttendanceJustification
+HaversineDistance -[hidden]down-> Money
+
+EmployeeProfileRepository -[hidden]down-> AttendanceStatus
+AttendanceStatus -[hidden]right-> PayrollStatus
+AttendanceStatus -[hidden]down-> SalaryType
+SalaryType -[hidden]right-> EmploymentStatus
+SalaryType -[hidden]down-> DeductionType
+DeductionType -[hidden]right-> BonusType
+DeductionType -[hidden]down-> PayrollItemCategory
+
+AttendanceRecordId -[hidden]right-> WorkShiftSchedule
+GeoCoordinates -[hidden]right-> AttendanceStatus
+
+' Fila 5: Excepciones semánticas (en filas compactas de 3 debajo de Value Objects)
+Money -[hidden]down-> DomainException
+DomainException -[hidden]down-> GeofenceViolationException
+GeofenceViolationException -[hidden]right-> DuplicateActiveAttendanceException
+DuplicateActiveAttendanceException -[hidden]right-> InvalidAttendanceClockOutException
+
+GeofenceViolationException -[hidden]down-> ShiftConflictException
+ShiftConflictException -[hidden]right-> AttendanceNotJustifiableException
+AttendanceNotJustifiableException -[hidden]right-> InvalidPayrollModificationException
+
+ShiftConflictException -[hidden]down-> WorkShiftNotFoundException
+WorkShiftNotFoundException -[hidden]right-> AttendanceRecordNotFoundException
+AttendanceRecordNotFoundException -[hidden]right-> EmployeeProfileNotFoundException
+
+WorkShiftNotFoundException -[hidden]down-> PayrollPaymentNotFoundException
+
+@enduml
