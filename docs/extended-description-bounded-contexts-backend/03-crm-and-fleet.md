@@ -1583,7 +1583,7 @@ En la siguiente tabla se documenta el catálogo exhaustivo de clases, estructura
 
 ##### 3. Especificación del Diagrama de Clases en PlantUML (Diagram-as-Code)
 
-El siguiente bloque de código contiene la especificación formal del Diagrama de Clases de la Capa de Dominio en sintaxis PlantUML DSL, compilado automáticamente mediante la directiva `make diagrams` hacia el archivo `report/assets/class-diagrams/class-diagram-crm.png`:
+El siguiente bloque de código contiene la especificación formal del Diagrama de Clases de la Capa de Dominio en sintaxis PlantUML DSL, compilado automáticamente mediante la directiva `make class-diagrams` hacia el archivo `report/assets/class-diagrams/class-diagram-crm.png`:
 
 ```plantuml
 @startuml class-diagram-crm
