@@ -4,6 +4,7 @@ component api "Components-API" "Diagrama de Componentes de la API Central de Ate
     exclude iam_perimeter iam_controllers iam_app_services iam_security_services iam_domain iam_persistence iam_facade iam_external_gateways
     exclude crm_controllers crm_app_services crm_event_handlers crm_domain crm_persistence crm_facade crm_external_gateways
     exclude mro_controllers mro_app_services mro_event_handlers mro_domain mro_persistence mro_facade mro_external_gateways
+    exclude inventory_controllers inventory_app_services inventory_event_handlers inventory_domain inventory_persistence inventory_facade inventory_external_gateways
     autoLayout tb 250 200
 }
 
@@ -39,4 +40,12 @@ component api "component-level-diagram-mro" "Diagrama de Componentes C4 (Nivel 3
     include customer_fleet_comp iam_comp inventory_comp invoicing_comp iot_comp
     autoLayout tb 250 200
 }
+
+component api "component-level-diagram-inventory" "Diagrama de Componentes C4 (Nivel 3) para el Bounded Context Inventory & Supply Chain en API Application" {
+    include inventory_controllers inventory_app_services inventory_event_handlers inventory_domain inventory_persistence inventory_facade inventory_external_gateways
+    include webapp workshop_mobile db firebase_storage sunat
+    include mro_comp invoicing_comp iam_comp
+    autoLayout tb 250 200
+}
+
 

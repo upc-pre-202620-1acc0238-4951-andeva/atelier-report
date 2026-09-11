@@ -1,0 +1,397 @@
+@startuml database-diagram-inventory
+title <size:16>Diagrama de Base de Datos (ERD) - Bounded Context Inventory & Supply Chain (inventory)</size>\n<size:11>Persistencia Relacional Multi-Producto: PostgreSQL 16 (API Application) y SQLite 3 (Mobile Workshop)</size>
+
+' Configuraciones visuales y de diseño profesional
+hide circle
+skinparam monochrome false
+skinparam shadowing false
+skinparam roundcorner 6
+skinparam linetype ortho
+skinparam nodesep 80
+skinparam ranksep 50
+skinparam defaultFontName "Helvetica", "Arial", sans-serif
+skinparam defaultFontSize 11
+skinparam defaultFontColor #2C3E50
+skinparam arrowColor #34495E
+skinparam arrowThickness 1.3
+skinparam packageBorderColor #7F8C8D
+skinparam packageFontSize 12
+skinparam packageFontStyle bold
+
+skinparam entity {
+    BackgroundColor #FFFFFF
+    BorderColor #34495E
+    HeaderBackgroundColor #EAEDED
+}
+
+' ==============================================================================
+' PRODUCTO 1: API APPLICATION (BACKEND CENTRAL - POSTGRESQL 16)
+' ==============================================================================
+package "PostgreSQL 16 (API Application - Backend Central)" as pg_backend #F8F9F9 {
+
+    ' ==========================================================================
+    ' COLUMNA 1: ARQUETIPO JPA, TENANCY Y COMPRAS / PROVEEDORES
+    ' ==========================================================================
+    entity "auditable_abstract_entity" as auditable_abstract_entity <<archetype, JPA>> #E8F8F5 {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Propiedades del Arquetipo JPA:</b>
+        + Clave primaria técnica UUID v4
+        + Aislamiento multi-tenant obligatorio (tenant_id)
+        + Control de concurrencia optimista (version)
+        + Borrado lógico auditable (deleted_at)
+        + Heredado físicamente por entidades de negocio:
+          inventory_items, suppliers y purchase_orders (@MappedSuperclass)
+    }
+
+    entity "tenants" as tenants <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * name : VARCHAR(100)
+        * tax_id : VARCHAR(20) <<UK>>
+        --
+        <b>Contexto Externo (IAM & Tenancy):</b>
+        + Delimita la frontera del taller automotriz
+    }
+
+    entity "branches" as branches <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        * name : VARCHAR(100)
+        --
+        <b>Contexto Externo (IAM & Tenancy):</b>
+        + Sede física del taller para recepción de compras
+    }
+
+    entity "suppliers" as suppliers <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        * business_name : VARCHAR(150)
+        * tax_id : VARCHAR(20)
+        contact_name : VARCHAR(100)
+        phone : VARCHAR(20)
+        email : VARCHAR(150)
+        address : VARCHAR(200)
+        * is_active : BOOLEAN
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_suppliers : PRIMARY KEY (id)
+        + fk_suppliers_tenant_id : FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+        + uk_suppliers_tenant_tax_id : UNIQUE (tenant_id, tax_id)
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_suppliers_tenant_tax_id : (tenant_id, tax_id)
+        + idx_suppliers_tenant_business_name : (tenant_id, business_name)
+    }
+
+    entity "purchase_orders" as purchase_orders <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        * supplier_id : UUID <<FK>>
+        * branch_id : UUID <<FK>>
+        * order_number : VARCHAR(50)
+        * status : VARCHAR(20)
+        * total_cost : DECIMAL(10,2)
+        receipt_image_url : VARCHAR(255)
+        receipt_number : VARCHAR(50)
+        received_at : TIMESTAMPTZ
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_purchase_orders : PRIMARY KEY (id)
+        + fk_purchase_orders_tenant_id : FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+        + fk_purchase_orders_supplier_id : FOREIGN KEY (supplier_id) REFERENCES suppliers(id)
+        + fk_purchase_orders_branch_id : FOREIGN KEY (branch_id) REFERENCES branches(id)
+        + uk_purchase_orders_tenant_number : UNIQUE (tenant_id, order_number)
+        + chk_purchase_order_status : CHECK (status IN ('draft', 'issued', 'received', 'canceled'))
+        + chk_purchase_order_total : CHECK (total_cost >= 0.00)
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_purchase_orders_tenant_status : (tenant_id, status)
+        + idx_purchase_orders_supplier : (supplier_id)
+        + idx_purchase_orders_branch : (branch_id)
+    }
+
+    entity "purchase_order_items" as purchase_order_items <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * purchase_order_id : UUID <<FK>>
+        * item_id : UUID <<FK>>
+        * quantity : DECIMAL(10,2)
+        * unit_cost : DECIMAL(10,2)
+        * total_cost : DECIMAL(10,2)
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_purchase_order_items : PRIMARY KEY (id)
+        + fk_po_items_order_id : FOREIGN KEY (purchase_order_id) REFERENCES purchase_orders(id)
+        + fk_po_items_item_id : FOREIGN KEY (item_id) REFERENCES inventory_items(id)
+        + chk_po_items_quantity : CHECK (quantity > 0.00)
+        + chk_po_items_unit_cost : CHECK (unit_cost >= 0.00)
+        + chk_po_items_total_cost : CHECK (total_cost >= 0.00)
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_po_items_order : (purchase_order_id)
+        + idx_po_items_item : (item_id)
+    }
+
+    ' ==========================================================================
+    ' COLUMNA 2: CONTEXTO MRO, ARTÍCULOS DE INVENTARIO Y LOTES FIFO
+    ' ==========================================================================
+    entity "work_orders" as work_orders <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        * internal_number : INTEGER
+        * status : VARCHAR(20)
+        --
+        <b>Contexto Externo (Workshop Operations - MRO):</b>
+        + Orden automotriz demandante de repuestos
+    }
+
+    entity "work_order_task_products" as work_order_task_products <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * task_id : UUID <<FK>>
+        * product_id : UUID <<FK>>
+        * quantity : DECIMAL(10,2)
+        * total_amount : DECIMAL(10,2)
+        --
+        <b>Contexto Externo (Workshop Operations - MRO):</b>
+        + Imputación y consumo real de repuestos en faena
+    }
+
+    entity "inventory_items" as inventory_items <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        * name : VARCHAR(150)
+        * sku : VARCHAR(50)
+        * category : VARCHAR(50)
+        * base_price : DECIMAL(10,2)
+        * total_stock : DECIMAL(10,2)
+        * minimum_stock : DECIMAL(10,2)
+        * status : VARCHAR(20)
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_inventory_items : PRIMARY KEY (id)
+        + fk_inventory_items_tenant_id : FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+        + uk_inventory_items_tenant_sku : UNIQUE (tenant_id, sku)
+        + chk_inventory_items_status : CHECK (status IN ('active', 'inactive', 'discontinued'))
+        + chk_inventory_items_stock : CHECK (total_stock >= 0.00)
+        + chk_inventory_items_min_stock : CHECK (minimum_stock >= 0.00)
+        + chk_inventory_items_price : CHECK (base_price >= 0.00)
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_inventory_items_tenant_sku : (tenant_id, sku)
+        + idx_inventory_items_category : (tenant_id, category)
+        + idx_inventory_items_low_stock : (tenant_id, total_stock) WHERE total_stock <= minimum_stock
+    }
+
+    entity "inventory_batches" as inventory_batches <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        * item_id : UUID <<FK>>
+        supplier_id : UUID <<FK>>
+        purchase_order_id : UUID <<FK>>
+        * batch_number : VARCHAR(50)
+        receipt_image_url : VARCHAR(255)
+        * initial_qty : DECIMAL(10,2)
+        * remaining_qty : DECIMAL(10,2)
+        * unit_cost : DECIMAL(10,2)
+        * arrival_date : TIMESTAMPTZ
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_inventory_batches : PRIMARY KEY (id)
+        + fk_inventory_batches_tenant_id : FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+        + fk_inventory_batches_item_id : FOREIGN KEY (item_id) REFERENCES inventory_items(id)
+        + fk_inventory_batches_supplier_id : FOREIGN KEY (supplier_id) REFERENCES suppliers(id)
+        + fk_inventory_batches_purchase_order_id : FOREIGN KEY (purchase_order_id) REFERENCES purchase_orders(id)
+        + chk_batches_remaining_qty : CHECK (remaining_qty >= 0.00)
+        + chk_batches_initial_qty : CHECK (initial_qty > 0.00)
+        + chk_batches_unit_cost : CHECK (unit_cost >= 0.00)
+        + chk_batches_remaining_le_initial : CHECK (remaining_qty <= initial_qty)
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_inventory_batches_item_fifo : (item_id, arrival_date ASC) WHERE remaining_qty > 0.00
+        + idx_inventory_batches_tenant : (tenant_id)
+        + idx_inventory_batches_po : (purchase_order_id)
+        + idx_inventory_batches_supplier : (supplier_id)
+    }
+
+    ' ==========================================================================
+    ' DISPOSICIÓN ESPACIAL EN COLUMNAS (ALINEAMIENTO HORIZONTAL Y VERTICAL)
+    ' ==========================================================================
+    ' Columna 1 (Vertical)
+    auditable_abstract_entity -[hidden]down-> tenants
+    tenants -[hidden]down-> branches
+    branches -[hidden]down-> suppliers
+    suppliers -[hidden]down-> purchase_orders
+    purchase_orders -[hidden]down-> purchase_order_items
+
+    ' Columna 2 (Vertical)
+    work_orders -[hidden]down-> work_order_task_products
+    work_order_task_products -[hidden]down-> inventory_items
+    inventory_items -[hidden]down-> inventory_batches
+
+    ' Alineamiento horizontal forzado entre columnas
+    tenants -[hidden]right-> work_orders
+    branches -[hidden]right-> work_order_task_products
+    suppliers -[hidden]right-> inventory_items
+    purchase_orders -[hidden]right-> inventory_batches
+
+    ' ==========================================================================
+    ' HERENCIA JPA Y RELACIONES CARDINALES
+    ' ==========================================================================
+    auditable_abstract_entity <|-- inventory_items : "herencia física JPA\n(@MappedSuperclass)"
+    auditable_abstract_entity <|-- suppliers
+    auditable_abstract_entity <|-- purchase_orders
+
+    tenants "1  " ||--o{ "0..* " inventory_items : "catálogo repuestos"
+    tenants "1  " ||--o{ "0..* " suppliers : "directorio homologado"
+    tenants "1  " ||--o{ "0..* " purchase_orders : "emite compras"
+    tenants "1  " ||--o{ "0..* " inventory_batches : "lotes del taller"
+
+    branches "1  " ||--o{ "0..* " purchase_orders : "recepción física"
+
+    suppliers "1  " ||--o{ "0..* " purchase_orders : "adjudica pedido"
+    suppliers "0..1" ||--o{ "0..* " inventory_batches : "provee lote"
+
+    inventory_items "1  " ||--o{ "0..* " inventory_batches : "lotes FIFO"
+    inventory_items "1  " ||--o{ "0..* " purchase_order_items : "ítem adquirido"
+    inventory_items "1  " ||--o{ "0..* " work_order_task_products : "repuestos demandados en MRO"
+
+    purchase_orders "1  " ||--o{ "0..* " purchase_order_items : "desglose líneas"
+    purchase_orders "0..1" ||--o{ "0..* " inventory_batches : "origina lotes al recibir"
+
+    work_orders "1  " ||--o{ "0..* " work_order_task_products : "repuestos imputados"
+}
+
+' ==============================================================================
+' PRODUCTO 2: MOBILE WORKSHOP (CLIENTE TÉCNICO OFFLINE - SQLITE 3)
+' ==============================================================================
+package "SQLite 3 (Mobile Workshop - Cliente Técnico Offline)" as sqlite_mobile #FEFDE8 {
+
+    entity "local_inventory_cache" as local_inventory_cache <<table, SQLite>> #FEF9E7 {
+        * item_id : TEXT <<PK>>
+        --
+        * tenant_id : TEXT
+        * name : TEXT
+        * sku : TEXT
+        * category : TEXT
+        * base_price : REAL
+        * total_stock : REAL
+        * minimum_stock : REAL
+        * status : TEXT
+        * synced_at : TEXT (ISO8601)
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_local_inventory : PRIMARY KEY (item_id)
+        --
+        <b>Propósito Operativo:</b>
+        + Catálogo local de repuestos e insumos
+        + Consulta inmediata en foso sin conexión
+    }
+
+    entity "local_batches_cache" as local_batches_cache <<table, SQLite>> #FEF9E7 {
+        * batch_id : TEXT <<PK>>
+        --
+        * item_id : TEXT
+        * batch_number : TEXT
+        * remaining_qty : REAL
+        * unit_cost : REAL
+        * arrival_date : TEXT (ISO8601)
+        * synced_at : TEXT (ISO8601)
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_local_batches : PRIMARY KEY (batch_id)
+        --
+        <b>Propósito Operativo:</b>
+        + Lotes disponibles para validación local
+        + Control de stock remanente en taller
+    }
+
+    entity "local_suppliers_cache" as local_suppliers_cache <<table, SQLite>> #FEF9E7 {
+        * supplier_id : TEXT <<PK>>
+        --
+        * tenant_id : TEXT
+        * business_name : TEXT
+        * tax_id : TEXT
+        phone : TEXT
+        * synced_at : TEXT (ISO8601)
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_local_suppliers : PRIMARY KEY (supplier_id)
+        --
+        <b>Propósito Operativo:</b>
+        + Directorio local de proveedores homologados
+        + Verificación rápida de procedencia de piezas
+    }
+
+    entity "offline_inventory_reservations" as offline_inventory_reservations <<table, SQLite>> #FEF9E7 {
+        * reservation_id : TEXT <<PK>>
+        --
+        * work_order_id : TEXT
+        * task_id : TEXT
+        * item_id : TEXT
+        * requested_quantity : REAL
+        * status : TEXT
+        * retry_count : INTEGER
+        * created_at : TEXT (ISO8601)
+        synced_at : TEXT (ISO8601)
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_offline_inventory_reservations : PRIMARY KEY (reservation_id)
+        + chk_reservation_status : CHECK (status IN ('PENDING', 'SYNCED', 'FAILED'))
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_reservations_status : (status, created_at)
+        --
+        <b>Propósito Operativo:</b>
+        + Cola transaccional de apartados en foso
+        + Drenaje atómico y seguro al recuperar red
+    }
+
+    ' Disposición vertical en columna SQLite
+    local_inventory_cache -[hidden]down-> local_batches_cache
+    local_batches_cache -[hidden]down-> local_suppliers_cache
+    local_suppliers_cache -[hidden]down-> offline_inventory_reservations
+}
+
+' Disposición horizontal entre paquetes
+work_orders -[hidden]right-> local_inventory_cache
+pg_backend -[hidden]right-> sqlite_mobile
+
+' ==============================================================================
+' RELACIONES DE SINCRONIZACIÓN INTER-PRODUCTO
+' ==============================================================================
+local_inventory_cache .[#27AE60]left.> inventory_items : "<b>Descarga y Refresco de Catálogo</b>\n(GET /api/v1/inventory/items)"
+local_batches_cache .[#8E44AD]left.> inventory_batches : "<b>Caché de Lotes Disponibles</b>\n(GET /api/v1/inventory/items/{id}/batches)"
+local_suppliers_cache .[#16A085]left.> suppliers : "<b>Directorio de Proveedores</b>\n(GET /api/v1/inventory/suppliers)"
+offline_inventory_reservations .[#2980B9]left.> inventory_batches : "<b>HTTPS REST Drenaje de Reservas en Foso</b>\n(POST /api/v1/inventory/items/{id}/allocate)"
+
+@enduml

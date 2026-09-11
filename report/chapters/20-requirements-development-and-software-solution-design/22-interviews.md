@@ -313,7 +313,7 @@ En esta sección presentamos los registros de las entrevistas que hicimos para c
 
 En esta sección se sintetizan y consolidan los hallazgos de las entrevistas en profundidad aplicadas a los segmentos objetivo de Atelier. Mediante un análisis porcentual y paramétrico de las respuestas, se identifican las características objetivas (demografía, herramientas, hábitos digitales) y subjetivas (dolores, motivaciones, dinámicas de trabajo) predominantes. Estos datos sirven como sustento estadístico directo para la validación de hipótesis y la construcción rigurosa de los arquetipos de usuario (*User Personas*).
 
-#### Análisis del Segmento 1: Personal de Gestión y Propietarios del Taller
+**Análisis del Segmento 1: Personal de Gestión y Propietarios del Taller**
 
 El análisis de este segmento consolida la información recopilada en la entrevista a **Jorge Aguilar** (Dueño y Administrador), representando la categoría de talleres independientes y servicios mecánicos itinerantes.
 
@@ -331,7 +331,7 @@ El análisis de este segmento consolida la información recopilada en la entrevi
 *   **Características Objetivas:** El perfil dominante corresponde a profesionales de madurez avanzada ($100\%$ mayores de 50 años) con amplia trayectoria práctica ($100\%$ con $+30$ años de experiencia). Presentan una estructura organizativa unipersonal o altamente centralizada donde el dueño asume tanto las cobranzas como las reparaciones.
 *   **Características Subjetivas:** Existe un alto sentido de responsabilidad técnica enfocado en la fidelización mediante el diagnóstico transparente. La principal fricción subjetiva es la sobrecarga por la gestión dual y la resistencia de los clientes a aplicar mantenimientos preventivos antes de que ocurra una falla catastrófica.
 
-#### Análisis del Segmento 2: Personal Operativo del Taller
+**Análisis del Segmento 2: Personal Operativo del Taller**
 
 Este análisis consolida los datos de la muestra de técnicos y especialistas entrevistados: **Nicolai** (23 años), **Bruno Pacheco** (25 años) y **Angie** (25 años).
 

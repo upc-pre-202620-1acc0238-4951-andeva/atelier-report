@@ -1,0 +1,632 @@
+@startuml class-diagram-inventory
+title <size:18>Diagrama de Clases UML - Bounded Context Inventory & Supply Chain (Domain Layer)</size>\n<size:12>Paquete Canónico: com.andeva.atelier.platform.inventory.domain</size>
+
+' Configuraciones visuales y de diseño profesional
+skinparam classAttributeIconSize 0
+skinparam monochrome false
+skinparam shadowing false
+skinparam roundcorner 6
+skinparam linetype ortho
+skinparam nodesep 26
+skinparam ranksep 30
+skinparam defaultFontName "Helvetica", "Arial", sans-serif
+skinparam defaultFontSize 10
+skinparam defaultFontColor #2C3E50
+skinparam arrowColor #34495E
+skinparam arrowThickness 1.1
+skinparam packageBorderColor #7F8C8D
+skinparam packageFontSize 11
+skinparam packageFontStyle bold
+
+' Estilos específicos por categoría táctica
+skinparam class {
+    BackgroundColor #FFFFFF
+    BorderColor #2C3E50
+    HeaderBackgroundColor #EAEDED
+}
+skinparam class<<AggregateRoot>> {
+    BackgroundColor #E8F8F5
+    BorderColor #16A085
+    HeaderBackgroundColor #A3E4D7
+}
+skinparam class<<Entity>> {
+    BackgroundColor #EBF5FB
+    BorderColor #2980B9
+    HeaderBackgroundColor #AED6F1
+}
+skinparam class<<ValueObject>> {
+    BackgroundColor #FEF9E7
+    BorderColor #D68910
+    HeaderBackgroundColor #FAD7A0
+}
+skinparam class<<TypedId>> {
+    BackgroundColor #EBF5FB
+    BorderColor #2980B9
+    HeaderBackgroundColor #AED6F1
+}
+skinparam class<<Exception>> {
+    BackgroundColor #F4ECF7
+    BorderColor #8E44AD
+    HeaderBackgroundColor #D2B4DE
+}
+skinparam class<<SharedKernel>> {
+    BackgroundColor #F8F9F9
+    BorderColor #BDC3C7
+    HeaderBackgroundColor #EAEDED
+}
+skinparam interface {
+    BackgroundColor #E8F6F3
+    BorderColor #117A65
+    HeaderBackgroundColor #A2D9CE
+}
+skinparam enum {
+    BackgroundColor #FCF3CF
+    BorderColor #B7950B
+    HeaderBackgroundColor #F9E79F
+}
+
+set separator none
+
+' ==============================================================================
+' 1. MODELO DE AGREGADOS (AGGREGATES)
+' ==============================================================================
+package "inventory.domain.model.aggregates" as aggregates #FDFEFE {
+
+    abstract class "AbstractDomainAggregateRoot<T>" as AbstractDomainAggregateRoot <<SharedKernel>> {
+        # id: T
+        - domainEvents: List<DomainEvent>
+        --
+        # registerDomainEvent(event: DomainEvent): void
+        + domainEvents(): List<DomainEvent>
+        + clearDomainEvents(): void
+    }
+
+    class InventoryItem <<AggregateRoot>> {
+        - id: InventoryItemId
+        - tenantId: TenantId
+        - name: String
+        - sku: Sku
+        - category: ItemCategory
+        - basePrice: Money
+        - totalStock: Quantity
+        - minimumStock: Quantity
+        - status: InventoryItemStatus
+        - batches: List<InventoryBatch>
+        --
+        + {static} create(tenantId: TenantId, name: String, sku: Sku, category: ItemCategory, basePrice: Money, minimumStock: Quantity): InventoryItem
+        + addBatch(supplierId: SupplierId, batchNumber: String, quantity: Quantity, unitCost: Money, arrivalDate: Instant, receiptImageUrl: StorageUrl): InventoryBatch
+        + allocateStockFifo(requestedQuantity: Quantity): StockAllocation
+        + releaseStockAllocation(allocation: StockAllocation): void
+        + updateDetails(name: String, category: ItemCategory, basePrice: Money, minimumStock: Quantity): void
+        + deactivate(): void
+        + activate(): void
+        + id(): InventoryItemId
+        + sku(): Sku
+        + totalStock(): Quantity
+        + basePrice(): Money
+        + status(): InventoryItemStatus
+    }
+
+    class Supplier <<AggregateRoot>> {
+        - id: SupplierId
+        - tenantId: TenantId
+        - businessName: String
+        - taxId: TaxId
+        - contactName: String
+        - phone: String
+        - email: String
+        - address: String
+        - isActive: boolean
+        --
+        + {static} register(tenantId: TenantId, businessName: String, taxId: TaxId, contactName: String, phone: String, email: String, address: String): Supplier
+        + updateContactInfo(contactName: String, phone: String, email: String, address: String): void
+        + deactivate(): void
+        + activate(): void
+        + id(): SupplierId
+        + businessName(): String
+        + taxId(): TaxId
+        + isActive(): boolean
+    }
+
+    class PurchaseOrder <<AggregateRoot>> {
+        - id: PurchaseOrderId
+        - tenantId: TenantId
+        - supplierId: SupplierId
+        - branchId: BranchId
+        - orderNumber: PurchaseOrderNumber
+        - status: PurchaseOrderStatus
+        - totalCost: Money
+        - receiptImageUrl: StorageUrl
+        - receiptNumber: String
+        - receivedAt: Instant
+        - items: List<PurchaseOrderItem>
+        --
+        + {static} create(tenantId: TenantId, supplierId: SupplierId, branchId: BranchId, orderNumber: PurchaseOrderNumber): PurchaseOrder
+        + addItem(itemId: InventoryItemId, quantity: Quantity, unitCost: Money): void
+        + removeItem(itemId: PurchaseOrderItemId): void
+        + issue(): void
+        + receive(receiptImageUrl: StorageUrl, receiptNumber: String, receivedAt: Instant): void
+        + cancel(reason: String): void
+        + id(): PurchaseOrderId
+        + status(): PurchaseOrderStatus
+        + totalCost(): Money
+        + supplierId(): SupplierId
+    }
+}
+
+' ==============================================================================
+' 2. ENTIDADES DEPENDIENTES (ENTITIES)
+' ==============================================================================
+package "inventory.domain.model.entities" as entities #FDFEFE {
+
+    class InventoryBatch <<Entity>> {
+        - id: InventoryBatchId
+        - tenantId: TenantId
+        - itemId: InventoryItemId
+        - supplierId: SupplierId
+        - batchNumber: String
+        - initialQuantity: Quantity
+        - remainingQuantity: Quantity
+        - unitCost: Money
+        - arrivalDate: Instant
+        - receiptImageUrl: StorageUrl
+        --
+        + hasStock(): boolean
+        + deduct(requestedQuantity: Quantity): Quantity
+        + restore(quantityToRestore: Quantity): void
+        + id(): InventoryBatchId
+        + remainingQuantity(): Quantity
+        + unitCost(): Money
+        + arrivalDate(): Instant
+    }
+
+    class PurchaseOrderItem <<Entity>> {
+        - id: PurchaseOrderItemId
+        - orderId: PurchaseOrderId
+        - itemId: InventoryItemId
+        - quantity: Quantity
+        - unitCost: Money
+        - totalCost: Money
+        --
+        + updateQuantity(newQuantity: Quantity): void
+        + id(): PurchaseOrderItemId
+        + itemId(): InventoryItemId
+        + quantity(): Quantity
+        + unitCost(): Money
+        + totalCost(): Money
+    }
+}
+
+' ==============================================================================
+' 3. SERVICIOS DE DOMINIO (DOMAIN SERVICES)
+' ==============================================================================
+package "inventory.domain.services" as services #FDFEFE {
+
+    class FifoAllocationEngine <<DomainService>> {
+        --
+        + allocate(item: InventoryItem, requestedQuantity: Quantity): StockAllocation
+        + calculateCogs(deductions: List<BatchDeduction>): Money
+    }
+
+    class InventoryValuationService <<DomainService>> {
+        --
+        + calculateTotalValuation(tenantId: TenantId, items: List<InventoryItem>): Money
+        + calculateItemValuation(item: InventoryItem): Money
+    }
+
+    class StockReorderEvaluationService <<DomainService>> {
+        --
+        + evaluateReorder(item: InventoryItem, averageDailyDemand: int, supplierLeadTimeDays: int): boolean
+        + calculateReorderQuantity(item: InventoryItem, averageDailyDemand: int, supplierLeadTimeDays: int): Quantity
+    }
+}
+
+' ==============================================================================
+' 4. PUERTOS DE REPOSITORIO (DOMAIN PORTS)
+' ==============================================================================
+package "inventory.domain.repositories" as repositories #FDFEFE {
+
+    interface InventoryItemRepository <<Repository>> {
+        + save(item: InventoryItem): InventoryItem
+        + findById(id: InventoryItemId): Optional<InventoryItem>
+        + findByTenantIdAndSku(tenantId: TenantId, sku: Sku): Optional<InventoryItem>
+        + findByTenantId(tenantId: TenantId): List<InventoryItem>
+        + findLowStockItems(tenantId: TenantId): List<InventoryItem>
+        + existsByTenantIdAndSku(tenantId: TenantId, sku: Sku): boolean
+    }
+
+    interface InventoryBatchRepository <<Repository>> {
+        + save(batch: InventoryBatch): InventoryBatch
+        + findById(id: InventoryBatchId): Optional<InventoryBatch>
+        + findByItemIdOrderByArrivalDateAsc(itemId: InventoryItemId): List<InventoryBatch>
+        + findActiveBatchesByItemId(itemId: InventoryItemId): List<InventoryBatch>
+    }
+
+    interface SupplierRepository <<Repository>> {
+        + save(supplier: Supplier): Supplier
+        + findById(id: SupplierId): Optional<Supplier>
+        + findByTenantIdAndTaxId(tenantId: TenantId, taxId: TaxId): Optional<Supplier>
+        + findByTenantId(tenantId: TenantId): List<Supplier>
+        + existsByTenantIdAndTaxId(tenantId: TenantId, taxId: TaxId): boolean
+    }
+
+    interface PurchaseOrderRepository <<Repository>> {
+        + save(order: PurchaseOrder): PurchaseOrder
+        + findById(id: PurchaseOrderId): Optional<PurchaseOrder>
+        + findByTenantId(tenantId: TenantId): List<PurchaseOrder>
+        + findBySupplierId(supplierId: SupplierId): List<PurchaseOrder>
+        + findNextOrderNumber(tenantId: TenantId): PurchaseOrderNumber
+    }
+}
+
+' ==============================================================================
+' 5. IDENTIFICADORES TIPADOS (TYPED IDS)
+' ==============================================================================
+package "inventory.domain.model.ids" as ids #FDFEFE {
+
+    interface "TypedId<UUID>" as TypedId <<SharedKernel>> {
+        + value(): UUID
+    }
+
+    class InventoryItemId <<TypedId, record>> {
+        - value: UUID
+        --
+        + {static} of(value: UUID): InventoryItemId
+        + value(): UUID
+    }
+
+    class InventoryBatchId <<TypedId, record>> {
+        - value: UUID
+        --
+        + {static} of(value: UUID): InventoryBatchId
+        + value(): UUID
+    }
+
+    class SupplierId <<TypedId, record>> {
+        - value: UUID
+        --
+        + {static} of(value: UUID): SupplierId
+        + value(): UUID
+    }
+
+    class PurchaseOrderId <<TypedId, record>> {
+        - value: UUID
+        --
+        + {static} of(value: UUID): PurchaseOrderId
+        + value(): UUID
+    }
+
+    class PurchaseOrderItemId <<TypedId, record>> {
+        - value: UUID
+        --
+        + {static} of(value: UUID): PurchaseOrderItemId
+        + value(): UUID
+    }
+
+    class TenantId <<SharedKernel, record>> {
+        - value: UUID
+        --
+        + value(): UUID
+    }
+
+    class BranchId <<SharedKernel, record>> {
+        - value: UUID
+        --
+        + value(): UUID
+    }
+}
+
+' ==============================================================================
+' 6. OBJETOS DE VALOR (VALUE OBJECTS)
+' ==============================================================================
+package "inventory.domain.model.valueobjects" as valueobjects #FDFEFE {
+
+    class Sku <<ValueObject, record>> {
+        - value: String
+        --
+        + {static} of(value: String): Sku
+        + normalized(): String
+        + value(): String
+    }
+
+    class Quantity <<ValueObject, record>> {
+        - value: BigDecimal
+        --
+        + {static} of(value: BigDecimal): Quantity
+        + {static} ZERO: Quantity
+        + add(other: Quantity): Quantity
+        + subtract(other: Quantity): Quantity
+        + isGreaterThan(other: Quantity): boolean
+        + value(): BigDecimal
+    }
+
+    class StockAllocation <<ValueObject, record>> {
+        - allocationId: UUID
+        - allocatedQuantity: Quantity
+        - totalCostOfGoodsSold: Money
+        - deductions: List<BatchDeduction>
+        --
+        + allocationId(): UUID
+        + allocatedQuantity(): Quantity
+        + totalCostOfGoodsSold(): Money
+        + deductions(): List<BatchDeduction>
+    }
+
+    class BatchDeduction <<ValueObject, record>> {
+        - batchId: UUID
+        - quantityDeducted: Quantity
+        - unitCost: Money
+        --
+        + batchId(): UUID
+        + quantityDeducted(): Quantity
+        + unitCost(): Money
+        + subtotal(): Money
+    }
+
+    class PurchaseOrderNumber <<ValueObject, record>> {
+        - value: String
+        --
+        + {static} of(value: String): PurchaseOrderNumber
+        + value(): String
+    }
+
+    class StorageUrl <<ValueObject, record>> {
+        - value: String
+        --
+        + {static} of(value: String): StorageUrl
+        + isValid(): boolean
+        + value(): String
+    }
+
+    class Money <<SharedKernel, record>> {
+        - amount: BigDecimal
+        - currency: Currency
+        --
+        + amount(): BigDecimal
+        + currency(): Currency
+        + add(other: Money): Money
+        + multiply(qty: Quantity): Money
+    }
+
+    class TaxId <<SharedKernel, record>> {
+        - value: String
+        --
+        + value(): String
+        + isValidRuc(): boolean
+    }
+}
+
+' ==============================================================================
+' 7. ENUMERACIONES DE DOMINIO (ENUMS)
+' ==============================================================================
+package "inventory.domain.model.enums" as enums #FDFEFE {
+
+    enum InventoryItemStatus <<Enum>> {
+        ACTIVE
+        INACTIVE
+        DISCONTINUED
+    }
+
+    enum ItemCategory <<Enum>> {
+        LUBRICANTS
+        BRAKES
+        SUSPENSION
+        ENGINE
+        ELECTRICAL
+        TIRES
+        FILTERS
+        BODYWORK
+        ACCESSORIES
+    }
+
+    enum PurchaseOrderStatus <<Enum>> {
+        DRAFT
+        ISSUED
+        RECEIVED
+        CANCELED
+    }
+}
+
+' ==============================================================================
+' 8. JERARQUÍA DE EXCEPCIONES DE DOMINIO
+' ==============================================================================
+package "inventory.domain.exceptions" as exceptions #FDFEFE {
+
+    abstract class DomainException <<SharedKernel>> {
+        - errorCode: String
+        + errorCode(): String
+    }
+
+    class InsufficientStockException <<Exception>> {
+        + InsufficientStockException(itemId: InventoryItemId, requested: Quantity, available: Quantity)
+    }
+
+    class DuplicateSkuException <<Exception>> {
+        + DuplicateSkuException(sku: Sku)
+    }
+
+    class DuplicateSupplierTaxIdException <<Exception>> {
+        + DuplicateSupplierTaxIdException(taxId: TaxId)
+    }
+
+    class InvalidBatchQuantityException <<Exception>> {
+        + InvalidBatchQuantityException(message: String)
+    }
+
+    class InvalidPurchaseOrderTransitionException <<Exception>> {
+        + InvalidPurchaseOrderTransitionException(current: PurchaseOrderStatus, target: PurchaseOrderStatus)
+    }
+
+    class PurchaseOrderEmptyException <<Exception>> {
+        + PurchaseOrderEmptyException(orderId: PurchaseOrderId)
+    }
+
+    class MissingReceiptDocumentationException <<Exception>> {
+        + MissingReceiptDocumentationException(orderId: PurchaseOrderId)
+    }
+
+    class InventoryItemNotFoundException <<Exception>> {
+        + InventoryItemNotFoundException(id: InventoryItemId)
+    }
+
+    class InventoryBatchNotFoundException <<Exception>> {
+        + InventoryBatchNotFoundException(id: InventoryBatchId)
+    }
+
+    class SupplierNotFoundException <<Exception>> {
+        + SupplierNotFoundException(id: SupplierId)
+    }
+
+    class PurchaseOrderNotFoundException <<Exception>> {
+        + PurchaseOrderNotFoundException(id: PurchaseOrderId)
+    }
+}
+
+' ==============================================================================
+' RELACIONES ESTRUCTURALES Y CARDINALIDADES
+' ==============================================================================
+
+' Generalizaciones de Agregados
+AbstractDomainAggregateRoot <|-- InventoryItem
+AbstractDomainAggregateRoot <|-- Supplier
+AbstractDomainAggregateRoot <|-- PurchaseOrder
+
+' Composiciones y Agregaciones de InventoryItem
+InventoryItem "1" *-- "0..*" InventoryBatch : "compuesto por lotes FIFO >"
+InventoryItem "1" o-- "1" InventoryItemId : "identificado por >"
+InventoryItem "1" o-- "1" Sku : "código de parte >"
+InventoryItem "1" o-- "1" ItemCategory : "categoría técnica >"
+InventoryItem "1" o-- "1" InventoryItemStatus : "estado operativo >"
+InventoryItem "1" o-- "1" Quantity : "existencias totales >"
+InventoryItem "1" o-- "1" Money : "precio base venta >"
+
+' Relaciones de InventoryBatch
+InventoryBatch "1" o-- "1" InventoryBatchId : "identificado por >"
+InventoryBatch "1" o-- "1" InventoryItemId : "repuesto asociado >"
+InventoryBatch "1" o-- "0..1" SupplierId : "adquirido de >"
+InventoryBatch "1" o-- "1" Quantity : "saldo remanente >"
+InventoryBatch "1" o-- "1" Money : "costo unitario histórico >"
+InventoryBatch "1" o-- "0..1" StorageUrl : "evidencia factura >"
+
+' Composiciones y Agregaciones de PurchaseOrder
+PurchaseOrder "1" *-- "1..*" PurchaseOrderItem : "contiene líneas de compra >"
+PurchaseOrder "1" o-- "1" PurchaseOrderId : "identificada por >"
+PurchaseOrder "1" o-- "1" SupplierId : "emitida a >"
+PurchaseOrder "1" o-- "1" PurchaseOrderStatus : "estado de compra >"
+PurchaseOrder "1" o-- "1" PurchaseOrderNumber : "código correlativo >"
+PurchaseOrder "1" o-- "1" Money : "costo consolidado >"
+PurchaseOrder "1" o-- "0..1" StorageUrl : "evidencia comprobante >"
+
+' Relaciones de PurchaseOrderItem
+PurchaseOrderItem "1" o-- "1" PurchaseOrderItemId : "identificada por >"
+PurchaseOrderItem "1" o-- "1" InventoryItemId : "repuesto solicitado >"
+PurchaseOrderItem "1" o-- "1" Quantity : "cantidad demandada >"
+PurchaseOrderItem "1" o-- "1" Money : "costo pactado >"
+
+' Relaciones de Supplier
+Supplier "1" o-- "1" SupplierId : "identificado por >"
+Supplier "1" o-- "1" TaxId : "RUC registrado >"
+
+' Relaciones de StockAllocation y BatchDeduction
+StockAllocation "1" o-- "1..*" BatchDeduction : "desglose FIFO >"
+StockAllocation "1" o-- "1" Quantity : "total asignado >"
+StockAllocation "1" o-- "1" Money : "COGS acumulado >"
+BatchDeduction "1" o-- "1" Quantity : "unidades lote >"
+BatchDeduction "1" o-- "1" Money : "costo lote >"
+
+' Realizaciones de TypedId
+TypedId <|.. InventoryItemId
+TypedId <|.. InventoryBatchId
+TypedId <|.. SupplierId
+TypedId <|.. PurchaseOrderId
+TypedId <|.. PurchaseOrderItemId
+
+' Generalizaciones de Excepciones
+DomainException <|-- InsufficientStockException
+DomainException <|-- DuplicateSkuException
+DomainException <|-- DuplicateSupplierTaxIdException
+DomainException <|-- InvalidBatchQuantityException
+DomainException <|-- InvalidPurchaseOrderTransitionException
+DomainException <|-- PurchaseOrderEmptyException
+DomainException <|-- MissingReceiptDocumentationException
+DomainException <|-- InventoryItemNotFoundException
+DomainException <|-- InventoryBatchNotFoundException
+DomainException <|-- SupplierNotFoundException
+DomainException <|-- PurchaseOrderNotFoundException
+
+' Enlaces de uso con Repositorios
+InventoryItemRepository ..up> InventoryItem : "persiste"
+InventoryBatchRepository ..up> InventoryBatch : "persiste"
+SupplierRepository ..up> Supplier : "persiste"
+PurchaseOrderRepository ..up> PurchaseOrder : "persiste"
+
+' Enlaces de Servicios de Dominio
+FifoAllocationEngine ..up> InventoryItem : "deduce existencias"
+FifoAllocationEngine ..up> InventoryBatch : "consume por fecha"
+FifoAllocationEngine ..> StockAllocation : "genera"
+InventoryValuationService ..up> InventoryItem : "valúa inventario"
+StockReorderEvaluationService ..up> InventoryItem : "evalúa reposición"
+
+' ==============================================================================
+' CONTROL DE DISPOSICIÓN ESPACIAL (ENLACES OCULTOS ENTRE CLASES)
+' ==============================================================================
+
+' Fila 1: Superclase y Agregados principales
+AbstractDomainAggregateRoot -[hidden]down-> InventoryItem
+InventoryItem -[hidden]right-> Supplier
+Supplier -[hidden]right-> PurchaseOrder
+
+' Fila 2: Entidades dependientes y Servicios de Dominio
+InventoryItem -[hidden]down-> InventoryBatch
+InventoryBatch -[hidden]right-> PurchaseOrderItem
+PurchaseOrderItem -[hidden]right-> FifoAllocationEngine
+FifoAllocationEngine -[hidden]right-> InventoryValuationService
+InventoryValuationService -[hidden]right-> StockReorderEvaluationService
+
+' Fila 3: Puertos de Repositorio (4 columnas ordenadas)
+InventoryBatch -[hidden]down-> InventoryItemRepository
+InventoryItemRepository -[hidden]right-> InventoryBatchRepository
+InventoryBatchRepository -[hidden]right-> SupplierRepository
+SupplierRepository -[hidden]right-> PurchaseOrderRepository
+
+' Fila 4: Typed IDs
+InventoryItemRepository -[hidden]down-> TypedId
+TypedId -[hidden]down-> InventoryItemId
+InventoryItemId -[hidden]right-> InventoryBatchId
+InventoryBatchId -[hidden]right-> SupplierId
+SupplierId -[hidden]right-> PurchaseOrderId
+PurchaseOrderId -[hidden]right-> PurchaseOrderItemId
+PurchaseOrderItemId -[hidden]right-> TenantId
+TenantId -[hidden]right-> BranchId
+
+' Fila 5: Value Objects y Enumeraciones
+InventoryItemId -[hidden]down-> Sku
+Sku -[hidden]right-> Quantity
+Quantity -[hidden]right-> StockAllocation
+StockAllocation -[hidden]right-> BatchDeduction
+BatchDeduction -[hidden]right-> PurchaseOrderNumber
+PurchaseOrderNumber -[hidden]right-> StorageUrl
+StorageUrl -[hidden]right-> Money
+Money -[hidden]right-> TaxId
+
+InventoryBatchId -[hidden]down-> InventoryItemStatus
+InventoryItemStatus -[hidden]right-> ItemCategory
+ItemCategory -[hidden]right-> PurchaseOrderStatus
+
+' Fila 6: Excepciones semánticas (en 3 filas equilibradas debajo de Value Objects)
+Quantity -[hidden]down-> DomainException
+DomainException -[hidden]down-> InsufficientStockException
+InsufficientStockException -[hidden]right-> DuplicateSkuException
+DuplicateSkuException -[hidden]right-> DuplicateSupplierTaxIdException
+DuplicateSupplierTaxIdException -[hidden]right-> InvalidBatchQuantityException
+
+InsufficientStockException -[hidden]down-> InvalidPurchaseOrderTransitionException
+InvalidPurchaseOrderTransitionException -[hidden]right-> PurchaseOrderEmptyException
+PurchaseOrderEmptyException -[hidden]right-> MissingReceiptDocumentationException
+MissingReceiptDocumentationException -[hidden]right-> InventoryItemNotFoundException
+
+InvalidPurchaseOrderTransitionException -[hidden]down-> InventoryBatchNotFoundException
+InventoryBatchNotFoundException -[hidden]right-> SupplierNotFoundException
+SupplierNotFoundException -[hidden]right-> PurchaseOrderNotFoundException
+
+@enduml
