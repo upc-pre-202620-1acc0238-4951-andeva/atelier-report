@@ -22,4 +22,8 @@ obd2_sim = softwareSystem "Dispositivos OBD2 con SIM" "Equipos telemétricos ind
 google_identity = softwareSystem "Google Identity Services" "Plataforma OAuth2 y OpenID Connect para Single Sign-On y verificación de credenciales federadas." {
     tags "External"
 }
+sunat = softwareSystem "SUNAT" "Servicios web de la administración tributaria peruana para validación de padrón RUC y condición de contribuyentes." {
+    tags "External"
+}
+
 

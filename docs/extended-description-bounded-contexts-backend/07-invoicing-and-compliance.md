@@ -276,6 +276,16 @@ public class PeruvianTaxCalculationEngine {
   * `POST /`: Configura una nueva serie fiscal para una sucursal (`ConfigureSeriesCommand`). Responde `201 Created`.
   * `GET /branch/{branchId}`: Lista las series activas configuradas para la sucursal. Responde `200 OK`.
 
+##### 4. `FinancialReportsController`
+* **Ruta Base:** `/api/v1/invoicing/reports`
+* **Responsabilidad:** Generación de balances de caja y estados de movimientos consolidados del taller (*Cash Flow & Movements Statement*), agregando transaccionalmente los cobros a clientes y los egresos operativos por compras de repuestos y sueldos de colaboradores.
+* **Endpoints:**
+  * `GET /cash-flow`: Consulta el estado de movimientos financieros en formato estructurado JSON (`CashFlowReportResource`) para renderizado interactivo en el Frontend.
+    - Parámetros de consulta: `startDate` (requerido, `LocalDate`), `endDate` (requerido, `LocalDate`), `branchId` (opcional, `UUID`).
+    - Unifica cronológicamente: $(+)$ Pagos cobrados en taller (`voucher_payments`), $(-)$ Facturas de compra de repuestos a proveedores (`purchase_orders` recibidas), y $(-)$ Nóminas desembolsadas a colaboradores (`payroll_payments`).
+    - Retorna el balance de ingresos, egresos y el flujo neto del periodo. Responde `200 OK`.
+  * `GET /cash-flow/pdf`: Genera y descarga el informe oficial en PDF formateado como un estado de cuenta bancario corporativo. Compila la cabecera institucional del taller, el resumen financiero ejecutivo, la tabla cronológica detallada de movimientos (Fecha, Concepto, Categoría, Tipo, Monto, Saldo progresivo) y los totales consolidados. Responde `200 OK` con cabecera `Content-Disposition: attachment; filename="cash-flow-{startDate}-{endDate}.pdf"`.
+
 ---
 
 #### 9.3.2. REST Resources & DTOs (Records)
@@ -371,6 +381,29 @@ public record VoucherPaymentResource(
     String transactionReference,
     String status,
     Instant paidAt
+) {}
+
+public record CashFlowReportResource(
+    UUID tenantId,
+    UUID branchId,
+    LocalDate startDate,
+    LocalDate endDate,
+    BigDecimal totalIncome,
+    BigDecimal totalExpenses,
+    BigDecimal netCashFlow,
+    String currency,
+    List<CashFlowMovementResource> movements
+) {}
+
+public record CashFlowMovementResource(
+    UUID transactionId,
+    Instant movementDate,
+    String type, // INCOME o EXPENSE
+    String category, // CLIENT_PAYMENT, SPARE_PARTS_PURCHASE, STAFF_PAYROLL
+    String concept,
+    String referenceNumber,
+    BigDecimal amount,
+    BigDecimal runningBalance
 ) {}
 ```
 
@@ -494,6 +527,14 @@ public record VoucherSummaryDto(
 
 * **`ElectronicVoucherQueryServiceImpl`:** Resuelve consultas de catálogo de comprobantes, búsquedas por correlativo (`serie-number`), auditoría de ventas mensuales y descargas de activos tributarios.
 * **`VoucherPaymentQueryServiceImpl`:** Consulta los abonos de comprobantes y cuadres de caja diarios por sucursal física.
+* **`CashFlowQueryServiceImpl`:** Orquesta la consolidación analítica del estado de cuenta y flujo de caja del taller (*Cash Flow & Movements Statement*):
+  1. Recupera cronológicamente los ingresos por cobros de órdenes de trabajo asentados en `voucher_payments`.
+  2. Consulta a través de `InventoryContextFacade` las facturas de adquisición de repuestos asentadas en `purchase_orders` en estado `RECEIVED`.
+  3. Consulta a través de `HumanResourcesContextFacade` las nóminas liquidadas y pagadas en `payroll_payments` en estado `PAID`.
+  4. Realiza un `UNION` temporal en memoria ordenando por fecha ascendente (`movementDate ASC`).
+  5. Computa secuencialmente el saldo progresivo acumulado: $\text{Saldo}_i = \text{Saldo}_{i-1} + \text{Ingreso}_i - \text{Egreso}_i$.
+  6. Calcula $\text{Total Ingresos}$, $\text{Total Egresos}$ y $\text{Flujo Neto del Periodo}$.
+  7. Genera la representación documental en PDF con diseño bancario corporativo (cabecera con RUC y taller, resumen ejecutivo y tabla de movimientos), excluyendo costos fijos indirectos ajenos al flujo directo de taller (luz, agua, alquiler).
 
 ---
 

@@ -10,7 +10,7 @@ Este documento define la estructura relacional de la base de datos de Atelier, m
 > * **IAM:** `tenants`, `branches`, `users`, `tenant_memberships`, `invitations`, `roles`. *(Hijos no auditables: `profiles`, intermedia de permisos).*
 > * **CRM:** `customers`, `vehicles`, `appointments`.
 > * **MRO:** `work_orders`, `work_bays`. *(Hijos no auditables: `work_order_images`, `work_order_tasks`, `work_order_task_products`, `work_order_task_images`, `task_proposals`. Estas entidades hijas cambian el `updated_at` y `version` de su padre `work_orders` cuando son modificadas).*
-> * **Inventory:** `inventory_items`, `services`, `suppliers`, `inventory_batches`.
+> * **Inventory:** `inventory_items`, `services`, `suppliers`, `purchase_orders`. *(Hijos no auditables: `inventory_batches`, `purchase_order_items`).*
 > * **HR:** `work_shifts`, `attendance_records`, `payroll_payments`.
 > * **Invoicing:** `electronic_vouchers`. *(Hijos no auditables: `voucher_lines`).*
 > * **SaaS Billing:** `plans`, `subscriptions`, `invoices`, `stripe_events`.
@@ -239,7 +239,7 @@ Es el motor operativo del taller. Orquesta el flujo de reparación, asignación 
 ## 4. Inventory and Supply Chain Context
 **Paquete Backend:** `com.atelier.inventory`
 
-Funciona como un mini-ERP logístico. Asegura la rentabilidad real del negocio aplicando estrictamente el método de costeo FIFO (Primeras Entradas, Primeras Salidas).
+Funciona como un mini-ERP logístico. Asegura la rentabilidad real del negocio aplicando estrictamente el método de costeo FIFO (Primeras Entradas, Primeras Salidas) y gobernando el ciclo formal de compras y reabastecimiento con órdenes de compra multi-ítem (`purchase_orders`, `purchase_order_items`) y comprobantes fiscales escaneados en Firebase Storage.
 
 ### 4.1 `inventory_items` (Catálogo Físico)
 | Atributo | Tipo de Dato | Llave | Req. | Default | Descripción |
@@ -262,31 +262,61 @@ Funciona como un mini-ERP logístico. Asegura la rentabilidad real del negocio a
 | `estimated_time_m` | `INT` | - | No | `60` | Tiempo estimado en minutos |
 
 ### 4.3 `suppliers` (Directorio de Proveedores)
-Directorio interno del taller. Permite vincular rápidamente de quién provienen los lotes sin requerir complejas órdenes de compra en el Frontend.
+Directorio homologado de proveedores comerciales del taller. Custodia la razón social, RUC de 11 dígitos validado ante SUNAT y datos de contacto para la emisión formal de órdenes de compra y el alta de lotes.
 
 | Atributo | Tipo de Dato | Llave | Req. | Default | Descripción |
 |----------|--------------|-------|------|---------|-------------|
 | `id` | `UUID` | PK | Sí | `uuid()`| Identificador del proveedor |
 | `tenant_id` | `UUID` | FK | Sí | - | Taller al que le pertenece el registro |
 | `business_name` | `VARCHAR(150)`| - | Sí | - | Nombre o Razón Social |
-| `tax_id` | `VARCHAR(20)` | - | No | `null` | RUC del proveedor |
+| `tax_id` | `VARCHAR(20)` | - | No | `null` | RUC del proveedor (11 dígitos SUNAT) |
 | `phone` | `VARCHAR(20)` | - | No | `null` | Teléfono de contacto |
 | `email` | `VARCHAR(150)`| - | No | `null` | Correo de contacto |
 
 ### 4.4 `inventory_batches` (Lotes FIFO - El Núcleo Contable)
-El administrador crea un lote directamente en el Frontend indicando costo y cantidad. Al consumir repuestos en MRO, el sistema los descuenta del lote con fecha más antigua, arrastrando este costo exacto.
+Modela el lote físico de adquisición con costo inmutable. Se genera automáticamente al recibir una Orden de Compra (`purchase_orders`) o bien mediante ingreso directo en mostrador para compras menores de emergencia. Al consumir repuestos en MRO, el sistema los descuenta del lote con fecha de arribo más antigua (`arrival_date ASC`), imputando este costo exacto a la orden.
 
 | Atributo | Tipo de Dato | Llave | Req. | Default | Descripción |
 |----------|--------------|-------|------|---------|-------------|
 | `id` | `UUID` | PK | Sí | `uuid()`| Identificador del lote |
 | `tenant_id` | `UUID` | FK | Sí | - | Taller |
-| `item_id` | `UUID` | FK | Sí | - | Producto físico al que suma stock |
-| `supplier_id` | `UUID` | FK | No | `null` | ¿A quién se lo compraron? (Directorio) |
-| `receipt_image_url`| `VARCHAR(255)`| - | No | `null` | **URL de Firebase Storage** con la foto de la factura/boleta |
+| `item_id` | `UUID` | FK | Sí | - | Producto físico al que suma stock (`inventory_items.id`) |
+| `supplier_id` | `UUID` | FK | No | `null` | Proveedor del lote (`suppliers.id`) |
+| `purchase_order_id` | `UUID` | FK | No | `null` | Orden de compra que originó el lote (`purchase_orders.id`, nullable en altas directas) |
+| `batch_number` | `VARCHAR(50)` | - | No | `null` | Código correlativo de lote físico provisto o generado |
+| `receipt_image_url`| `VARCHAR(255)`| - | No | `null` | URL en Firebase Storage con la foto/PDF de la factura o boleta |
 | `initial_qty` | `DECIMAL(10,2)`| - | Sí | - | Cantidad que ingresó originalmente |
 | `remaining_qty`| `DECIMAL(10,2)`| - | Sí | - | Cantidad disponible actual (FIFO) |
 | `unit_cost` | `DECIMAL(10,2)`| - | Sí | - | Costo exacto que se usará para rentabilidad |
 | `arrival_date` | `TIMESTAMP` | - | Sí | `NOW()` | Vital para el ordenamiento cronológico FIFO |
+
+### 4.5 `purchase_orders` (Órdenes de Compra y Recepción Documental)
+Representa la orden formal de adquisición de repuestos y fluidos emitida a un proveedor y su posterior recepción física con comprobante fiscal. Centraliza la factura o boleta del proveedor (escaneo en PDF o imagen) en un único documento probatorio para todos los ítems adquiridos, permitiendo comprar múltiples repuestos diferentes en una sola transacción.
+
+| Atributo | Tipo de Dato | Llave | Req. | Default | Descripción |
+|----------|--------------|-------|------|---------|-------------|
+| `id` | `UUID` | PK | Sí | `uuid()` | Identificador universal de la orden de compra |
+| `tenant_id` | `UUID` | FK | Sí | - | Taller emisor |
+| `supplier_id` | `UUID` | FK | Sí | - | Proveedor adjudicado (`suppliers.id`) |
+| `branch_id` | `UUID` | FK | Sí | - | Sede física que recibirá el pedido (`branches.id`) |
+| `order_number` | `VARCHAR(50)` | - | Sí | - | Correlativo formal único (ej. "OC-2026-0042") |
+| `status` | `VARCHAR(20)` | - | Sí | `'draft'` | Estado (`draft`, `issued`, `received`, `canceled`) |
+| `total_cost` | `DECIMAL(10,2)` | - | Sí | `0.00` | Monto total de adquisición de la orden |
+| `receipt_image_url` | `VARCHAR(255)` | - | No | `null` | URL en Firebase Storage de la factura/boleta escaneada (PDF o imagen) |
+| `receipt_number` | `VARCHAR(50)` | - | No | `null` | Número del comprobante fiscal del proveedor (ej. "F001-004928") |
+| `received_at` | `TIMESTAMP` | - | No | `null` | Fecha y hora exacta de recepción física y conformidad |
+
+### 4.6 `purchase_order_items` (Líneas de Detalle de la Orden de Compra)
+Línea de adquisición que asocia un repuesto específico del catálogo con la cantidad demandada y el costo unitario pactado con el proveedor. Al confirmarse la recepción física de la orden de compra (`purchase_orders`), el sistema genera automáticamente un lote FIFO (`inventory_batches`) para cada ítem de esta colección.
+
+| Atributo | Tipo de Dato | Llave | Req. | Default | Descripción |
+|----------|--------------|-------|------|---------|-------------|
+| `id` | `UUID` | PK | Sí | `uuid()` | Identificador único de la línea de compra |
+| `purchase_order_id` | `UUID` | FK | Sí | - | Orden de compra padre (`purchase_orders.id`) |
+| `item_id` | `UUID` | FK | Sí | - | Repuesto adquirido (`inventory_items.id`) |
+| `quantity` | `DECIMAL(10,2)` | - | Sí | - | Cantidad comprada de este repuesto |
+| `unit_cost` | `DECIMAL(10,2)` | - | Sí | - | Costo unitario acordado con el proveedor |
+| `total_cost` | `DECIMAL(10,2)` | - | Sí | - | Subtotal calculado (`quantity * unit_cost`) |
 
 ## 5. Human Resources Management Context
 **Paquete Backend:** `com.atelier.hr`

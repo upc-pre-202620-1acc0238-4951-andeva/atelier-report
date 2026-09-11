@@ -357,6 +357,7 @@ public class HaversineGeofencingService {
   * `POST /{id}/disburse`: Marca la nómina como efectivamente pagada, asociando el comprobante bancario. Responde `200 OK`.
   * `GET /{id}`: Obtiene la boleta pormenorizada con su desglose de conceptos. Responde `200 OK`.
   * `GET /`: Lista las planillas emitidas en el taller filtradas por periodo contable. Responde `200 OK`.
+  * `GET /export/sunat-rem`: Exporta el archivo estructurado oficial para la Planilla Mensual de Pagos de SUNAT (PLAME) en formato de texto plano (`.rem`). Recibe el parámetro `period` (`YYYY-MM`), valida que la nómina del periodo esté aprobada y genera la trama formateada con delimitadores de barra vertical (`|`) para importación directa en el aplicativo de SUNAT. Responde `200 OK` con cabecera `Content-Disposition: attachment; filename="0601{YYYYMM}{RUC}.rem"`.
 
 ##### 4. `StaffProfilesController`
 * **Ruta Base:** `/api/v1/hr/employees`
@@ -606,7 +607,7 @@ public record AttendanceSummaryDto(
 
 * **`WorkShiftQueryServiceImpl`:** Resuelve consultas de catálogo de turnos con almacenamiento en caché local (`Caffeine Cache`) para mitigar consultas repetitivas de lectura.
 * **`AttendanceQueryServiceImpl`:** Resuelve reportes diarios de puntualidad por sucursal e historial de asistencias de mecánicos.
-* **`PayrollPaymentQueryServiceImpl`:** Resuelve reportes contables de planillas emitidas y boletas individuales de empleados.
+* **`PayrollPaymentQueryServiceImpl`:** Resuelve reportes contables de planillas emitidas, boletas individuales de empleados y la generación algorítmica del archivo de importación oficial para la Planilla Mensual de Pagos de SUNAT (`.rem`), formateando conceptos devengados y pagados con separadores de tubería para carga masiva en PLAME.
 * **`EmployeeProfileQueryServiceImpl`:** Consulta perfiles laborales y disponibilidad física activa para el consumo de fachadas internas.
 
 ---

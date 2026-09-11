@@ -107,7 +107,7 @@ flowchart TD
 * **Casos de Uso:**
   * Registro fotográfico del estado del vehículo al ingresar al taller (`work_order_images`).
   * Evidencia del trabajo mecánico concluido en cada tarea (`work_order_task_images`).
-  * Fotografía de la factura o boleta de compra escaneada al ingresar lotes de repuestos (`inventory_batches.receipt_image_url`).
+  * Fotografía o PDF de la factura o boleta de compra escaneada en órdenes de compra formales (`purchase_orders.receipt_image_url`) y en lotes físicos de adquisición directa (`inventory_batches.receipt_image_url`).
 * **Decisiones Arquitectónicas:**
   * **Patrón Direct-to-Cloud:** La aplicación móvil sube los archivos directamente a los buckets de Google Cloud Storage mediante el SDK nativo de Firebase. La API de Spring Boot recibe únicamente la URL validada, evitando saturar la memoria RAM y el ancho de banda del backend en Render.
 
