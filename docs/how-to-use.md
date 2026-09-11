@@ -199,7 +199,7 @@ El resultado se genera en `build/single-output.pdf`.
 | `make single SRC=<ruta>` | Compila un único archivo Markdown a `build/single-output.pdf` usando `report.yaml`. |
 | `make single-es SRC=<ruta>` | Compila un único archivo Markdown forzando el idioma español (`es-ES`). |
 | `make single-en SRC=<ruta>` | Compila un único archivo Markdown forzando el idioma inglés (`en-US`). |
-| `make diagrams` | Genera imágenes PNG a partir de los diagramas de clases PlantUML. |
+| `make class-diagrams` | Genera imágenes PNG a partir de los diagramas de clases PlantUML. |
 | `make db-diagrams` | Genera imágenes PNG a partir de los diagramas relacionales PlantUML. |
 | `make c4` | Exporta el modelo Structurizr C4 DSL a PlantUML y compila los diagramas PNG. |
 | `make all` | Genera todos los diagramas y compila el informe PDF completo. |
@@ -316,7 +316,7 @@ Al final del documento, la lista de referencias se compilará con el formato de 
 El proyecto integra flujos automatizados de arquitectura como código:
 
 1. **C4 Model con Structurizr:** Modela el sistema en `report/assets/diagram-sources/c4-diagrams/workspace.dsl`. Ejecuta `make c4` para exportar a PlantUML y renderizar los archivos PNG en `report/assets/c4-diagrams/`.
-2. **Diagramas de Clases:** Añade tus archivos `.puml` en `report/assets/diagram-sources/class-diagrams/` y ejecuta `make diagrams`.
+2. **Diagramas de Clases:** Añade tus archivos `.puml` en `report/assets/diagram-sources/class-diagrams/` y ejecuta `make class-diagrams`.
 3. **Diagramas de Base de Datos:** Añade tus archivos `.puml` en `report/assets/diagram-sources/database-diagrams/` y ejecuta `make db-diagrams`.
 
 Para previsualización interactiva en tiempo real de los diagramas C4 en tu navegador mediante Structurizr Lite, consulta [report/assets/diagram-sources/c4-diagrams/c4-guidelines.md](report/assets/diagram-sources/c4-diagrams/c4-guidelines.md).

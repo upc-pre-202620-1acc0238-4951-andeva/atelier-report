@@ -8414,164 +8414,3833 @@ Para transformar esta realidad, el contexto de Recursos Humanos introduce dos ca
 
 #### 2.6.6.1. Domain Layer
 
-La capa de dominio de Human Resources Management encapsula las reglas de jornada laboral, cálculos trigonométricos de proximidad física y liquidación de remuneraciones. En la @tbl:hr-domain-types se presenta el catálogo de los componentes que integran esta capa.
+La Capa de Dominio del Bounded Context Human Resources Management constituye el núcleo laboral, de control de presencia física y de compensación económica de Atelier Platform bajo el paquete canónico **com.andeva.atelier.platform.hr.domain**. Esta capa encapsula las reglas de negocio de la relación de trabajo en el taller mecánico, aislando la lógica operativa de cualquier dependencia con frameworks de persistencia o servicios de transporte perimetral.
 
-| Clase o Tipo | Categoría Táctica | Responsabilidad Principal en el Dominio |
-| :--- | :--- | :--- |
-| `EmployeeProfile` | Raíz de Agregado | Ficha profesional del colaborador; gestiona especialidades mecánicas, certificaciones y fecha de ingreso. |
-| `WorkShift` | Raíz de Agregado | Horario planificado de trabajo asignado a colaboradores en una sucursal; define horas de entrada, salida y tolerancias. |
-| `AttendanceRecord` | Raíz de Agregado | Marcación física de jornada; encapsula coordenadas GPS capturadas, distancia calculada a la sede y estado de validez. |
-| `PayrollPayment` | Raíz de Agregado | Liquidación salarial periódica; consolida sueldo base, bonos por órdenes MRO, deducciones y conceptos desglosados. |
-| `PayrollItem` | Entidad Dependiente | Concepto individual que compone la nómina (bonificación, retención tributaria, compensación por horas extra). |
-| `EmployeeId` | Objeto de Valor | Identificador único universal (`UUID`) fuertemente tipado para expedientes de empleados. |
-| `ShiftId` | Objeto de Valor | Identificador único universal (`UUID`) para turnos laborales. |
-| `AttendanceId` | Objeto de Valor | Identificador único universal (`UUID`) para registros de asistencia. |
-| `PayrollId` | Objeto de Valor | Identificador único universal (`UUID`) para liquidaciones de nómina. |
-| `ShiftSchedule` | Objeto de Valor | Horario regular de inicio y fin de labores con margen de tolerancia en minutos ($[0, 60]$). |
-| `DistanceMeters` | Objeto de Valor | Distancia euclidiana o esférica en metros ($\ge 0.0$) entre el móvil y la sede del taller. |
-| `AttendanceStatus` | Enumeración de Dominio | Estados de la marcación (`VALID`, `LATE`, `REJECTED_OUTSIDE_GEOFENCE`, `MANUAL_OVERRIDE`). |
-| `PayrollPeriod` | Objeto de Valor | Período contable de liquidación mensual o quincenal expresado bajo la convención formal YYYY-MM. |
-| `PayrollItemType` | Enumeración de Dominio | Tipología del concepto salarial (`BASE_SALARY`, `PRODUCTIVITY_BONUS`, `OVERTIME`, `TAX_DEDUCTION`). |
-| `HaversineGeofencingService` | Servicio de Dominio | Motor matemático que evalúa si la coordenada GPS de marcación se ubica dentro del radio perimetral del taller. |
-| `OvertimeAndCommissionCalculator`| Servicio de Dominio | Servicio puro que consolida tiempos de órdenes MRO y turnos para calcular bonificaciones por rendimiento. |
-| `EmployeeProfileRepository` | Puerto de Salida | Contrato de persistencia de dominio para la Raíz de Agregado `EmployeeProfile`. |
-| `WorkShiftRepository` | Puerto de Salida | Contrato de persistencia de dominio para la Raíz de Agregado `WorkShift`. |
-| `AttendanceRecordRepository` | Puerto de Salida | Contrato de persistencia de dominio para la Raíz de Agregado `AttendanceRecord`. |
-| `PayrollPaymentRepository` | Puerto de Salida | Contrato de persistencia de dominio para la Raíz de Agregado `PayrollPayment`. |
-| `ShiftAssignedEvent` | Evento de Dominio | Notifica la asignación de un nuevo horario de trabajo al colaborador. |
-| `AttendanceMarkedEvent` | Evento de Dominio | Notifica la marcación exitosa y conforme de asistencia dentro de la geocerca. |
-| `AttendanceGeofenceBreachedEvent`| Evento de Dominio | Notifica un intento de registro fuera del perímetro físico autorizado de la sucursal. |
-| `PayrollGeneratedEvent` | Evento de Dominio | Notifica el cálculo y emisión del borrador preliminar de planilla de haberes. |
-| `PayrollPaidEvent` | Evento de Dominio | Notifica el desembolso y liquidación definitiva de la nómina al colaborador. |
-: Catálogo de Tipos de Dominio del Bounded Context Human Resources (HR) {#tbl:hr-domain-types}
+Para estructurar una solución resiliente ante los desafíos de informalidad y dispersión operativa en los talleres automotrices, el diseño táctico de Human Resources Management se fundamenta en cuatro pilares:
+- **Control de presencia física in-memory con verificación geodésica:** Validación algorítmica de proximidad espacial contra el centroide satelital de la sucursal mediante la formulación esférica de Haversine en la máquina virtual, impidiendo marcaciones fraudulentas sin incurrir en latencias de red.
+- **Parametrización determinista de turnos de trabajo y puntualidad:** Gestión estricta de franjas horarias ordinarias y de guardia con ventanas de tolerancia parametrizadas, automatizando la clasificación de ingresos puntuales, tardanzas e inasistencias.
+- **Liquidación periódica y meritocrática de nóminas salariales:** Consolidación transparente de haberes que articula el salario contractual con bonificaciones devengadas por órdenes de trabajo cerradas en el taller y deducciones objetivas por incidencias de asistencia.
+- **Aislamiento multi-inquilino y trazabilidad de perfiles operativos:** Gestión de expedientes laborales y especialidades técnicas del personal desacoplada de la identidad perimetral de autenticación, preservando la soberanía de datos de cada taller automotriz.
 
+En la @tbl:hr-domain-types se presenta el catálogo consolidado de los veintiocho componentes tácticos que integran la Capa de Dominio de Human Resources Management.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Catálogo de la Capa de Dominio del Bounded Context Human Resources} \label{tbl:hr-domain-types} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\
+\hline
+\endhead
+WorkShift & Delimita los horarios oficiales de inicio y término de labores y la tolerancia reglamentaria de ingreso por taller. \\*
+\hline
+\textbf{Categoría} & Raíz de Agregado \\*
+\hline
+\textbf{Relaciones} & Generalización de AbstractDomainAggregateRoot<WorkShift>. Asociación con TenantId y ShiftSchedule. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak domain.\allowbreak model.\allowbreak aggregates} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+AttendanceRecord & Modela la evidencia probatoria de marcación de asistencia presencial con coordenadas satelitales y verificación de geocerca. \\*
+\hline
+\textbf{Categoría} & Raíz de Agregado \\*
+\hline
+\textbf{Relaciones} & Generalización de AbstractDomainAggregateRoot<AttendanceRecord>. Referencia a BranchId y TenantMembershipId. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak domain.\allowbreak model.\allowbreak aggregates} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+PayrollPayment & Consolida la liquidación económica periódica del colaborador articulando haberes contractuales, comisiones de MRO y deducciones. \\*
+\hline
+\textbf{Categoría} & Raíz de Agregado \\*
+\hline
+\textbf{Relaciones} & Generalización de AbstractDomainAggregateRoot<PayrollPayment>. Composición 1 a N con PayrollDeductionItem y PayrollBonusItem. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak domain.\allowbreak model.\allowbreak aggregates} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+EmployeeProfile & Custodia el expediente laboral, turno programado, especialidades electromecánicas y esquema de compensación del trabajador. \\*
+\hline
+\textbf{Categoría} & Raíz de Agregado \\*
+\hline
+\textbf{Relaciones} & Generalización de AbstractDomainAggregateRoot<EmployeeProfile>. Referencia a TenantMembershipId, BranchId y ShiftId. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak domain.\allowbreak model.\allowbreak aggregates} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+PayrollDeductionItem & Partida individual de retención monetaria por tardanzas acumuladas, inasistencias o descuentos autorizados. \\*
+\hline
+\textbf{Categoría} & Entidad Dependiente \\*
+\hline
+\textbf{Relaciones} & Dependiente subordinada a PayrollPayment. Asocia concepto, monto y tipología de descuento. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak domain.\allowbreak model.\allowbreak entities} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+PayrollBonusItem & Partida individual de bonificación económica por productividad de patio, horas extraordinarias o méritos técnicos. \\*
+\hline
+\textbf{Categoría} & Entidad Dependiente \\*
+\hline
+\textbf{Relaciones} & Dependiente subordinada a PayrollPayment. Asocia concepto, monto y categoría de incentivo. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak domain.\allowbreak model.\allowbreak entities} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+ShiftId & Identificador unívoco universal fuertemente tipado para turnos de trabajo. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor (ID) \\*
+\hline
+\textbf{Relaciones} & Registro inmutable de identidad basado en UUID. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+AttendanceId & Identificador unívoco universal fuertemente tipado para registros de marcación presencial. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor (ID) \\*
+\hline
+\textbf{Relaciones} & Registro inmutable de identidad basado en UUID. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+PayrollPaymentId & Identificador unívoco universal fuertemente tipado para liquidaciones salariales periódicas. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor (ID) \\*
+\hline
+\textbf{Relaciones} & Registro inmutable de identidad basado en UUID. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+EmployeeProfileId & Identificador unívoco universal fuertemente tipado para expedientes de personal operativo. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor (ID) \\*
+\hline
+\textbf{Relaciones} & Registro inmutable de identidad basado en UUID. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+ShiftSchedule & Delimitación temporal inmutable de horas de inicio y fin de jornada con soporte para turnos que cruzan la medianoche. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor \\*
+\hline
+\textbf{Relaciones} & Encapsula horas locales con método isWithinWindow. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+GracePeriod & Tolerancia temporal reglamentaria de ingreso acotada entre 0 y 60 minutos para cómputo de puntualidad. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor \\*
+\hline
+\textbf{Relaciones} & Registro inmutable con validación de rango no negativo. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+GeoCoordinates & Par ordenado de latitud y longitud en formato WGS84 para posicionamiento geográfico de sedes y terminales móviles. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor \\*
+\hline
+\textbf{Relaciones} & Registro inmutable con validación de rangos esféricos terrestres. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+HaversineDistance & Magnitud métrica escalar no negativa portadora de la separación espacial calculada entre operario y sucursal. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor \\*
+\hline
+\textbf{Relaciones} & Registro inmutable con métodos de comparación de umbral radial. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+PayPeriod & Intervalo cronológico contable que define el periodo de liquidación con fechas de inicio y conclusión consistentes. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor \\*
+\hline
+\textbf{Relaciones} & Registro inmutable con cálculo de días hábiles. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+AttendanceStatus & Clasificación operativa del registro de presencia en patio: ON\_TIME, LATE, EXCUSED y ABSENT. \\*
+\hline
+\textbf{Categoría} & Enumeración de Dominio \\*
+\hline
+\textbf{Relaciones} & Tipología taxativa de estados de asistencia física. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+PayrollStatus & Ciclo de vida de la liquidación salarial: DRAFT, APPROVED, PAID y CANCELLED. \\*
+\hline
+\textbf{Categoría} & Enumeración de Dominio \\*
+\hline
+\textbf{Relaciones} & Máquina de estados determinista de boletas de remuneración. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+SalaryType & Modalidad de compensación contractual del trabajador: MONTHLY\_FIXED u HOURLY\_RATE. \\*
+\hline
+\textbf{Categoría} & Enumeración de Dominio \\*
+\hline
+\textbf{Relaciones} & Define el esquema de cómputo del salario base. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+EmploymentStatus & Estado contractual del empleado en el taller automotriz: ACTIVE, ON\_LEAVE y TERMINATED. \\*
+\hline
+\textbf{Categoría} & Enumeración de Dominio \\*
+\hline
+\textbf{Relaciones} & Condiciona la capacidad operativa y de marcación del personal. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+DeductionType & Clasificación del concepto de retención salarial: TARDINESS, UNJUSTIFIED\_ABSENCE, EQUIPMENT\_DAMAGE, LOAN\_REPAYMENT y OTHER. \\*
+\hline
+\textbf{Categoría} & Enumeración de Dominio \\*
+\hline
+\textbf{Relaciones} & Tipología analítica de descuentos en planilla. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+BonusType & Clasificación del concepto de bonificación económica: PRODUCTIVITY, OVERTIME\_HOURS, SPECIAL\_MERIT y HOLIDAY\_ALLOWANCE. \\*
+\hline
+\textbf{Categoría} & Enumeración de Dominio \\*
+\hline
+\textbf{Relaciones} & Tipología analítica de incentivos en nómina. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+HaversineGeofencingService & Motor matemático in-memory que calcula la distancia ortodrómica esférica entre móvil y sucursal en microsegundos. \\*
+\hline
+\textbf{Categoría} & Servicio de Dominio \\*
+\hline
+\textbf{Relaciones} & Servicio puro sin estado utilizado por AttendanceRecord. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak domain.\allowbreak services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+PayrollCalculationEngine & Motor financiero que liquida remuneraciones computando penalidades por tardanzas y comisiones devengadas de MRO. \\*
+\hline
+\textbf{Categoría} & Servicio de Dominio \\*
+\hline
+\textbf{Relaciones} & Orquesta el cálculo integral de PayrollPayment. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak domain.\allowbreak services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+AttendanceEvaluationService & Servicio que contrasta la marca temporal de ingreso contra la tolerancia reglamentaria del turno programado. \\*
+\hline
+\textbf{Categoría} & Servicio de Dominio \\*
+\hline
+\textbf{Relaciones} & Clasifica la puntualidad operativa en patio. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak domain.\allowbreak services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+WorkShiftRepository & Puerto de persistencia y consulta agnóstica para turnos de trabajo de la empresa automotriz. \\*
+\hline
+\textbf{Categoría} & Puerto de Repositorio \\*
+\hline
+\textbf{Relaciones} & Contrato de salida implementado en la Capa de Infraestructura. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak domain.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+AttendanceRecordRepository & Puerto de persistencia y consulta agnóstica para registros históricos de presencia física de personal. \\*
+\hline
+\textbf{Categoría} & Puerto de Repositorio \\*
+\hline
+\textbf{Relaciones} & Contrato de salida implementado en la Capa de Infraestructura. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak domain.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+PayrollPaymentRepository & Puerto de persistencia y consulta agnóstica para boletas de liquidación salarial por periodo contable. \\*
+\hline
+\textbf{Categoría} & Puerto de Repositorio \\*
+\hline
+\textbf{Relaciones} & Contrato de salida implementado en la Capa de Infraestructura. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak domain.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+EmployeeProfileRepository & Puerto de persistencia y consulta agnóstica para expedientes laborales y perfiles técnicos de operarios. \\*
+\hline
+\textbf{Categoría} & Puerto de Repositorio \\*
+\hline
+\textbf{Relaciones} & Contrato de salida implementado en la Capa de Infraestructura. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak domain.\allowbreak repositories} \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
 *Nota.* Componentes tácticos del paquete canónico com.andeva.atelier.platform.hr.domain.
 
 **Raíces de Agregado y Entidades Dependientes de Human Resources**
 
-1. `EmployeeProfile`: Modela el expediente técnico del trabajador dentro de la plataforma. Vincula al colaborador con su identidad global `UserId` del módulo IAM, almacenando especialidades técnicas automotrices (electricidad, inyección electrónica, motores diésel, transmisiones) y fecha de contratación. Controla el estado laboral del operario impidiendo asignaciones operativas si el perfil se encuentra inactivo.
+El modelo táctico de Human Resources Management se articula a partir de cuatro raíces de agregado autónomas, cada una responsable de gobernar sus propias fronteras de consistencia transaccional e invariantes de negocio:
 
-| Elemento | Tipo o Firma | Ámbito | Descripción y Reglas de Negocio |
-| :--- | :--- | :---: | :--- |
-| `id` | `EmployeeId` | Privado | Identificador universal único del empleado. |
-| `tenantId` | `TenantId` | Privado | Taller empleador. |
-| `userId` | `UserId` | Privado | Identidad de usuario vinculada en el contexto IAM. |
-| `branchId` | `BranchId` | Privado | Sede física principal de adscripción. |
-| `jobTitle` | `String` | Privado | Denominación del puesto de trabajo (ej. "Técnico Mecánico Senior"). |
-| `specialties` | `List<String>` | Privado | Áreas de especialización electromecánica del técnico. |
-| `hireDate` | `LocalDate` | Privado | Fecha formal de ingreso laboral al taller. |
-| `isActive` | `boolean` | Privado | Estado operativo del contrato. |
-| `create` | `static EmployeeProfile create(...)` | Público | Factoría constructora que inicializa el expediente laboral. |
-| `assignBranch` | `void assignBranch(BranchId newBranch)` | Público | Transfiere al técnico a una nueva sede física operativa. |
-| `deactivate` | `void deactivate()` | Público | Inhabilita el expediente ante cese o renuncia del trabajador. |
-: Miembros de la Raíz de Agregado EmployeeProfile {#tbl:hr-employee-members}
+- **WorkShift**: Modela la jornada laboral programada para el personal de una sucursal física. Define la ventana temporal canónica de labores y encapsula la tolerancia en minutos concedida antes de imputar tardanzas. Administra las transiciones de estado operativo de la jornada y ofrece métodos puros para evaluar si un instante determinado se encuentra dentro del turno.
 
-*Nota.* Especificación de miembros de EmployeeProfile del paquete com.andeva.atelier.platform.hr.domain.model.aggregates.
+En la @tbl:hr-workshift-members se detallan los atributos y métodos de la raíz de agregado **WorkShift**.
 
-En cuanto a sus relaciones, `EmployeeProfile` hereda de `AbstractDomainAggregateRoot<EmployeeProfile>` y mantiene referencias por identificador (`UserId`, `BranchId`, `TenantId`) hacia otros contextos.
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Miembros de la Raíz de Agregado WorkShift} \label{tbl:hr-workshift-members} \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Raíz de Agregado:} WorkShift (Frontera de Consistencia de Turnos Laborales)} \\*
+\hline
+id & Identificador unívoco universal del turno de trabajo en el taller automotriz. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{ShiftId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+tenantId & Identificador del taller automotriz propietario y custodio de la configuración horaria. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{TenantId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+name & Denominación formal del turno con longitud máxima de 50 caracteres no vacía. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+schedule & Franja horaria con horas de inicio y fin distintas y soporte para cruce de medianoche. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{ShiftSchedule} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+gracePeriod & Tolerancia reglamentaria de ingreso no negativa acotada a un máximo de 60 minutos. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{GracePeriod} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+isActive & Bandera de disponibilidad operativa que condiciona la asignación del turno a empleados. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{boolean} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+create & Factoría constructora que valida invariantes asigna estado activo y registra WorkShiftCreatedEvent. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{WorkShift create(TenantId tenantId,\allowbreak  String name,\allowbreak  LocalTime startTime,\allowbreak  LocalTime endTime,\allowbreak  int gracePeriodMinutes)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+updateSchedule & Modifica denominación horarios y tolerancia del turno emitiendo WorkShiftUpdatedEvent. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void updateSchedule(String name,\allowbreak  LocalTime startTime,\allowbreak  LocalTime endTime,\allowbreak  int gracePeriodMinutes)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+deactivate & Inhabilita el turno impidiendo asignaciones a nuevos colaboradores. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void deactivate()} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+activate & Restablece la vigencia del turno para su asignación a expedientes de personal. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void activate()} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+isLate & Evalúa si la hora de marcación supera el umbral límite de inicio más minutos de gracia. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{boolean isLate(LocalTime clockInTime)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+isWithinWorkingHours & Evalúa si un instante horario determinado cae dentro de la ventana de ejecución del turno. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{boolean isWithinWorkingHours(LocalTime time)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Especificación de miembros y métodos del agregado WorkShift del paquete com.andeva.atelier.platform.hr.domain.model.aggregates.
 
-2. `AttendanceRecord`: Raíz de agregado que encapsula la marcación de asistencia del operario. Registra la marca de tiempo de lectura, la coordenada satelital WGS84 transmitida por la aplicación móvil `GeoPoint`, la distancia esférica calculada hacia la sucursal `DistanceMeters` y el estado resultante `AttendanceStatus`.
+En cuanto a sus relaciones, **WorkShift** hereda de **AbstractDomainAggregateRoot<WorkShift>** y se encuentra vinculado a **TenantId** y **ShiftSchedule**, sirviendo de base para la asignación de turnos a los perfiles laborales del taller.
 
-| Elemento | Tipo o Firma | Ámbito | Descripción y Reglas de Negocio |
-| :--- | :--- | :---: | :--- |
-| `id` | `AttendanceId` | Privado | Identificador universal único de la marcación. |
-| `tenantId` | `TenantId` | Privado | Taller empleador. |
-| `employeeId` | `EmployeeId` | Privado | Colaborador que efectúa la marcación. |
-| `branchId` | `BranchId` | Privado | Sede física donde se registra la asistencia. |
-| `checkTimestamp`| `Instant` | Privado | Marca de tiempo UTC certificada del registro. |
-| `location` | `GeoPoint` | Privado | Coordenada satelital capturada desde el smartphone. |
-| `distance` | `DistanceMeters` | Privado | Distancia en metros calculada respecto a la sede del taller. |
-| `status` | `AttendanceStatus` | Privado | Clasificación de validez de la marcación (`VALID`, `REJECTED_OUTSIDE_GEOFENCE`, etc.). |
-| `markValid` | `static AttendanceRecord markValid(...)` | Público | Factoría para asistencias dentro de la geocerca que emite `AttendanceMarkedEvent`. |
-| `markBreached` | `static AttendanceRecord markBreached(...)` | Público | Factoría para registros fuera de tolerancia que emite evento de transgresión. |
-: Miembros de la Raíz de Agregado AttendanceRecord {#tbl:hr-attendance-members}
+- **AttendanceRecord**: Modela la evidencia probatoria de asistencia laboral de un colaborador durante una jornada determinada. Encapsula las coordenadas satelitales transmitidas desde el teléfono móvil del trabajador, calcula la distancia física al centroide de la sucursal y dictamina de forma irrevocable la validez del ingreso presencial.
 
-*Nota.* Especificación de miembros del agregado AttendanceRecord del paquete com.andeva.atelier.platform.hr.domain.model.aggregates.
+En la @tbl:hr-attendance-members se especifican los miembros y operaciones de la raíz de agregado **AttendanceRecord**.
 
-3. `PayrollPayment`: Raíz de agregado que liquida la remuneración del colaborador. Agrupa una lista de entidades `PayrollItem` que desglosan el haber básico pactado, las comisiones por órdenes mecánicas culminadas, las horas extraordinarias y las deducciones tributarias o previsionales. Impone la invariante de que el monto neto liquidado no puede ser negativo ($netAmount \ge 0.00$).
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Miembros de la Raíz de Agregado AttendanceRecord} \label{tbl:hr-attendance-members} \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Raíz de Agregado:} AttendanceRecord (Marcación Presencial y Validación Geodésica)} \\*
+\hline
+id & Identificador unívoco universal de la marcación presencial de asistencia. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{AttendanceId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+tenantId & Taller automotriz empleador donde se suscita la jornada de trabajo. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{TenantId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+branchId & Sede física del taller donde el colaborador presta servicios presenciales. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{BranchId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+membershipId & Identificador unívoco del contrato laboral del colaborador con el taller en IAM. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{TenantMembershipId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+shiftId & Turno de trabajo bajo el cual se evalúa la puntualidad y jornada del colaborador. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{ShiftId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+clockIn & Marca temporal certificada UTC del registro presencial de entrada. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Instant} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+clockOut & Marca temporal certificada UTC de salida o nulo mientras la faena permanezca abierta. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Instant} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+status & Clasificación operativa del registro de presencia: ON\_TIME, LATE, EXCUSED o ABSENT. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{AttendanceStatus} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+checkInLocation & Coordenadas GPS satelitales reportadas por el teléfono móvil al momento del ingreso. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{GeoCoordinates} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+distanceToBranch & Separación geodésica en metros calculada matemáticamente frente a la sucursal. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{HaversineDistance} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+justificationReason & Causal explicativa de tardanza o ausencia autorizada por la jefatura del taller. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+justifiedBy & Identificador del supervisor o administrador que autorizó la justificación. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{TenantMembershipId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+justifiedAt & Marca temporal UTC en la que se asentó la regularización administrativa. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Instant} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+recordClockIn & Factoría de marcación que valida geocerca evalúa puntualidad y registra eventos. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{AttendanceRecord recordClockIn(TenantId tenantId,\allowbreak  BranchId branchId,\allowbreak  TenantMembershipId membershipId,\allowbreak  ShiftId shiftId,\allowbreak  WorkShift shift,\allowbreak  GeoCoordinates employeeLocation,\allowbreak  GeoCoordinates branchCentroid,\allowbreak  double maxAllowedRadiusMeters,\allowbreak  HaversineGeofencingService geofencingService)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+recordClockOut & Registra la salida laboral previa validación cronológica y emite EmployeeClockedOutEvent. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void recordClockOut(Instant clockOutTime)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+justify & Transiciona el estado de LATE o ABSENT hacia EXCUSED emitiendo AttendanceJustifiedEvent. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void justify(String reason,\allowbreak  TenantMembershipId supervisorMembershipId)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+recordAbsent & Factoría administrativa que asienta inasistencias injustificadas para el colaborador. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{AttendanceRecord recordAbsent(TenantId tenantId,\allowbreak  BranchId branchId,\allowbreak  TenantMembershipId membershipId,\allowbreak  ShiftId shiftId,\allowbreak  LocalDate date)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Especificación de miembros y métodos del agregado AttendanceRecord del paquete com.andeva.atelier.platform.hr.domain.model.aggregates.
 
-| Elemento | Tipo o Firma | Ámbito | Descripción y Reglas de Negocio |
-| :--- | :--- | :---: | :--- |
-| `id` | `PayrollId` | Privado | Identificador universal único de la liquidación de haberes. |
-| `tenantId` | `TenantId` | Privado | Taller empleador. |
-| `employeeId` | `EmployeeId` | Privado | Colaborador destinatario del pago. |
-| `period` | `PayrollPeriod` | Privado | Mes y año contable liquidado (YYYY-MM). |
-| `items` | `List<PayrollItem>` | Privado | Desglose pormenorizado de conceptos remunerativos y deducciones. |
-| `totalGross` | `Money` | Privado | Monto bruto acumulado antes de descuentos. |
-| `totalDeductions`| `Money` | Privado | Sumatoria de retenciones de ley y adelantos. |
-| `totalNet` | `Money` | Privado | Importe líquido final a pagar al trabajador ($\ge 0.00$). |
-| `isPaid` | `boolean` | Privado | Estado de confirmación del desembolso bancario. |
-| `addItem` | `void addItem(PayrollItem item)` | Público | Incorpora un nuevo concepto y recalcula importes netos. |
-| `markAsPaid` | `void markAsPaid()` | Público | Confirma el pago efectivo y emite `PayrollPaidEvent`. |
-: Miembros de la Raíz de Agregado PayrollPayment {#tbl:hr-payroll-members}
+La raíz **AttendanceRecord** extiende de **AbstractDomainAggregateRoot<AttendanceRecord>** y mantiene referencias por identificador hacia **BranchId**, **TenantMembershipId** y **ShiftId**, registrando eventos de dominio inmutables ante cada marcación exitosa, tardanza o regularización administrativa.
 
-*Nota.* Especificación de miembros de PayrollPayment del paquete com.andeva.atelier.platform.hr.domain.model.aggregates.
+- **PayrollPayment**: Centraliza la liquidación económica periódica del colaborador, garantizando que los desembolsos reflejen con exactitud matemática el salario base pactado, las penalizaciones por inasistencias y los incentivos devengados en el taller mecánico. Gobierna una colección subordinada de partidas de descuento y bonificación bajo un ciclo de vida auditable.
 
-**Objetos de Valor de Human Resources Management**
+En la @tbl:hr-payroll-members se detallan los atributos y operaciones de **PayrollPayment**, conjuntamente con las entidades dependientes **PayrollDeductionItem** y **PayrollBonusItem**.
 
-| Objeto de Valor | Atributos Clave | Restricciones de Validación y Reglas de Negocio |
-| :--- | :--- | :--- |
-| `ShiftSchedule` | `startTime`, `endTime`: `LocalTime`, `toleranceMinutes`: `int` | Invariante cronológica: `startTime < endTime`, tolerancia entre 0 y 60 minutos. |
-| `DistanceMeters` | `value`: `double` | Valor decimal no negativo ($\ge 0.0$) que expresa separación espacial. |
-| `PayrollPeriod` | `value`: `String` | Expresión regular `^[0-9]{4}-(0[1-9]\|1[0-2])$`, validando año y mes gregoriano. |
-: Objetos de Valor del Bounded Context Human Resources {#tbl:hr-value-objects}
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Miembros de la Raíz de Agregado PayrollPayment y Entidades Dependientes PayrollDeductionItem y PayrollBonusItem} \label{tbl:hr-payroll-members} \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Raíz de Agregado:} PayrollPayment (Liquidación Salarial y Compensación de Personal)} \\*
+\hline
+id & Identificador unívoco universal de la boleta de liquidación salarial. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{PayrollPaymentId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+tenantId & Taller automotriz emisor de la liquidación de haberes. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{TenantId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+membershipId & Colaborador o mecánico beneficiario del pago liquidado. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{TenantMembershipId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+period & Intervalo temporal contable de liquidación con fechas de inicio y término consistentes. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{PayPeriod} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+baseAmount & Remuneración ordinaria pactada en el contrato laboral del colaborador. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Money} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+deductions & Sumatoria acumulada de retenciones por tardanzas inasistencias y descuentos de ley. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Money} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+bonuses & Sumatoria acumulada de bonificaciones por productividad de patio y horas extras. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Money} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+totalPaid & Importe neto a desembolsar resultante de la fórmula contractual no menor a cero. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Money} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+status & Estado operativo de la liquidación: DRAFT, APPROVED, PAID o CANCELLED. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{PayrollStatus} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+deductionItems & Colección de partidas individuales de descuento aplicadas en el periodo contable. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{List<PayrollDeductionItem>} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+bonusItems & Colección de partidas individuales de bonificación e incentivos otorgados al técnico. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{List<PayrollBonusItem>} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+paidAt & Marca temporal UTC de ejecución de la transferencia bancaria o desembolso financiero. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Instant} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+paymentReference & Código de operación bancaria o número de comprobante de la transferencia salarial. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+calculate & Factoría constructora que calcula totales en estado borrador y emite PayrollCalculatedEvent. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{PayrollPayment calculate(TenantId tenantId,\allowbreak  TenantMembershipId membershipId,\allowbreak  PayPeriod period,\allowbreak  Money baseAmount,\allowbreak  List<PayrollDeductionItem> deductions,\allowbreak  List<PayrollBonusItem> bonuses)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+addDeduction & Adiciona un ítem de descuento y recalcula el monto neto a pagar bajo estado DRAFT. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void addDeduction(String concept,\allowbreak  Money amount,\allowbreak  DeductionType type,\allowbreak  LocalDate date)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+addBonus & Adiciona un ítem de bonificación y recalcula el monto neto a pagar bajo estado DRAFT. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void addBonus(String concept,\allowbreak  Money amount,\allowbreak  BonusType type,\allowbreak  LocalDate date)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+approve & Transiciona el estado a APPROVED tras revisión gerencial y emite PayrollApprovedEvent. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void approve(TenantMembershipId approverMembershipId)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+markAsPaid & Registra constancia bancaria conmutando a PAID y emite PayrollDisbursedEvent. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void markAsPaid(String paymentReference,\allowbreak  Instant paidAt)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+cancel & Invalida la liquidación salarial devolviendo el periodo a estado no procesado. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void cancel(String reason)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad Dependiente:} PayrollDeductionItem (Partida Individual de Descuento en Planilla)} \\*
+\hline
+id & Identificador unívoco universal de la partida de retención monetaria. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{UUID} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+concept & Detalle descriptivo de la causal que origina la deducción salarial. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+amount & Importe monetario deducido no negativo. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Money} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+deductionType & Clasificación analítica de la retención: TARDINESS, UNJUSTIFIED\_ABSENCE u otras causales. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{DeductionType} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+appliedDate & Fecha calendario en la que se originó la causal de la retención económica. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{LocalDate} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad Dependiente:} PayrollBonusItem (Partida Individual de Bonificación e Incentivo)} \\*
+\hline
+id & Identificador unívoco universal de la partida de bonificación o incentivo económico. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{UUID} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+concept & Detalle descriptivo de la orden mecánica o mérito que sustenta la bonificación. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+amount & Importe monetario asignado como estímulo salarial no negativo. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Money} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+bonusType & Clasificación analítica del incentivo: PRODUCTIVITY, OVERTIME\_HOURS o SPECIAL\_MERIT. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{BonusType} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+awardedDate & Fecha calendario en la que se concedió el incentivo por productividad o mérito. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{LocalDate} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Especificación de miembros de PayrollPayment y entidades dependientes del paquete com.andeva.atelier.platform.hr.domain.model.
 
-*Nota.* Especificación de Objetos de Valor del paquete com.andeva.atelier.platform.hr.domain.model.valueobjects.
+La raíz **PayrollPayment** extiende de **AbstractDomainAggregateRoot<PayrollPayment>** y mantiene relaciones de composición 1 a 0..* con **PayrollDeductionItem** y **PayrollBonusItem**. Una vez aprobada o liquidada la nómina, la entidad bloquea cualquier mutación sobre sus partidas, asegurando inmutabilidad contable ante auditorías tributarias.
+
+- **EmployeeProfile**: Encapsula el expediente laboral y perfil técnico del operario en el taller mecánico. Vincula al colaborador con su membresía del contexto IAM, custodia sus especialidades automotrices y controla su estado contractual, impidiendo asignaciones operativas en bahías de servicio si el trabajador se encuentra inactivo o de baja.
+
+En la @tbl:hr-employee-profile-members se exponen los atributos y métodos de la raíz de agregado **EmployeeProfile**.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Miembros de la Raíz de Agregado EmployeeProfile} \label{tbl:hr-employee-profile-members} \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Raíz de Agregado:} EmployeeProfile (Expediente Técnico y Perfil Laboral)} \\*
+\hline
+id & Identificador unívoco universal del perfil laboral operativo en el taller. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{EmployeeProfileId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+tenantId & Taller automotriz empleador en el cual presta servicios el trabajador. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{TenantId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+branchId & Sede física principal de adscripción operativa del colaborador. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{BranchId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+membershipId & Enlace unívoco con la identidad laboral en el contexto de IAM. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{TenantMembershipId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+assignedShiftId & Turno de trabajo habitual programado para el operario en el taller. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{ShiftId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+baseSalary & Remuneración ordinaria base pactada en el contrato individual de trabajo. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Money} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+salaryType & Modalidad de cómputo salarial contractual: MONTHLY\_FIXED u HOURLY\_RATE. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{SalaryType} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+jobTitle & Denominación del puesto o cargo técnico desempeñado en el taller. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+specialties & Áreas de especialidad técnica automotriz del operario como inyección o transmisiones. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{List<String>} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+employmentStatus & Condición contractual vigente del colaborador: ACTIVE, ON\_LEAVE o TERMINATED. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{EmploymentStatus} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+register & Factoría constructora que inicializa el expediente activo y emite EmployeeProfileRegisteredEvent. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{EmployeeProfile register(TenantId tenantId,\allowbreak  BranchId branchId,\allowbreak  TenantMembershipId membershipId,\allowbreak  ShiftId shiftId,\allowbreak  Money baseSalary,\allowbreak  SalaryType salaryType,\allowbreak  String jobTitle,\allowbreak  List<String> specialties)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+assignShift & Actualiza el turno regular del colaborador registrando EmployeeShiftAssignedEvent. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void assignShift(ShiftId newShiftId)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+updateSalary & Modifica el esquema remunerativo y el monto básico pactado en el contrato. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void updateSalary(Money newSalary,\allowbreak  SalaryType newSalaryType)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+changeBranch & Traslada formalmente al técnico hacia otra sede física operativa del taller. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void changeBranch(BranchId newBranchId)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+terminateEmployment & Concluye la relación contractual del empleado inhabilitando asignaciones de órdenes y marcaciones. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void terminateEmployment()} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Especificación de miembros y métodos del agregado EmployeeProfile del paquete com.andeva.atelier.platform.hr.domain.model.aggregates.
+
+En cuanto a sus relaciones, **EmployeeProfile** hereda de **AbstractDomainAggregateRoot<EmployeeProfile>** y referencia de manera agnóstica a **TenantId**, **BranchId**, **TenantMembershipId** y **ShiftId**, protegiendo la frontera de dominio frente a cambios en la estructura de usuarios de seguridad.
+
+**Objetos de Valor y Enumeraciones de Dominio**
+
+En estricta observancia del principio de inmutabilidad y erradicación de la obsesión por tipos primitivos, los conceptos temporales, espaciales y cuantitativos de Human Resources Management se implementan como registros Java inmutables. Estos componentes validan exhaustivamente sus restricciones en el constructor compacto, imposibilitando coordenadas fuera de rango geográfico o periodos contables invertidos.
+
+En la @tbl:hr-value-objects se especifican los objetos de valor y las enumeraciones taxonómicas propias de este contexto.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Objetos de Valor y Enumeraciones del Bounded Context Human Resources} \label{tbl:hr-value-objects} \\
+\hline
+\thfirst{Componente de Dominio} & \thcell{Especificación Técnica y Reglas de Negocio} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Componente de Dominio} & \thcell{Especificación Técnica y Reglas de Negocio} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} ShiftId} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{value: UUID} \\*
+\hline
+\textbf{Restricciones y Reglas} & Identificador unívoco universal de turnos de trabajo. Inmutable y no nulo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} AttendanceId} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{value: UUID} \\*
+\hline
+\textbf{Restricciones y Reglas} & Identificador unívoco universal de registros de marcación presencial. Inmutable y no nulo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} PayrollPaymentId} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{value: UUID} \\*
+\hline
+\textbf{Restricciones y Reglas} & Identificador unívoco universal de liquidaciones salariales. Inmutable y no nulo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} EmployeeProfileId} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{value: UUID} \\*
+\hline
+\textbf{Restricciones y Reglas} & Identificador unívoco universal del perfil técnico del colaborador. Inmutable y no nulo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} ShiftSchedule} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{startTime: LocalTime}, \texttt{endTime: LocalTime}, \texttt{spansOverMidnight: boolean} \\*
+\hline
+\textbf{Restricciones y Reglas} & Delimitación horaria de la jornada laboral con soporte para turnos que cruzan la medianoche y método isWithinWindow. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} GracePeriod} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{minutes: int} \\*
+\hline
+\textbf{Restricciones y Reglas} & Tolerancia reglamentaria de ingreso acotada entre 0 y 60 minutos con método hasExpired. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} GeoCoordinates} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{latitude: double}, \texttt{longitude: double} \\*
+\hline
+\textbf{Restricciones y Reglas} & Par ordenado de latitud y longitud en el elipsoide WGS84 con validación de latitud entre -90.0 y 90.0 y longitud entre -180.0 y 180.0. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} HaversineDistance} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{meters: double} \\*
+\hline
+\textbf{Restricciones y Reglas} & Magnitud métrica escalar no negativa con métodos de conveniencia isWithin y toKilometers. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} PayPeriod} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{startDate: LocalDate}, \texttt{endDate: LocalDate} \\*
+\hline
+\textbf{Restricciones y Reglas} & Intervalo temporal contable de liquidación con validación de no inversión cronológica y cómputo de días laborables. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Enumeración de Dominio:} AttendanceStatus} \\*
+\hline
+\textbf{Atributos Clave} & Constantes de enumeración \\*
+\hline
+\textbf{Restricciones y Reglas} & Clasificación operativa de presencia: ON\_TIME, LATE, EXCUSED y ABSENT. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Enumeración de Dominio:} PayrollStatus} \\*
+\hline
+\textbf{Atributos Clave} & Constantes de enumeración \\*
+\hline
+\textbf{Restricciones y Reglas} & Ciclo de vida de la liquidación salarial: DRAFT transiciona a APPROVED, luego a PAID o bien a CANCELLED. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Enumeración de Dominio:} SalaryType} \\*
+\hline
+\textbf{Atributos Clave} & Constantes de enumeración \\*
+\hline
+\textbf{Restricciones y Reglas} & Modalidad de remuneración contractual: MONTHLY\_FIXED u HOURLY\_RATE. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Enumeración de Dominio:} EmploymentStatus} \\*
+\hline
+\textbf{Atributos Clave} & Constantes de enumeración \\*
+\hline
+\textbf{Restricciones y Reglas} & Situación contractual del trabajador: ACTIVE, ON\_LEAVE y TERMINATED. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Enumeración de Dominio:} DeductionType} \\*
+\hline
+\textbf{Atributos Clave} & Constantes de enumeración \\*
+\hline
+\textbf{Restricciones y Reglas} & Naturaleza del descuento: TARDINESS, UNJUSTIFIED\_ABSENCE, EQUIPMENT\_DAMAGE, LOAN\_REPAYMENT y OTHER. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Enumeración de Dominio:} BonusType} \\*
+\hline
+\textbf{Atributos Clave} & Constantes de enumeración \\*
+\hline
+\textbf{Restricciones y Reglas} & Naturaleza del incentivo: PRODUCTIVITY, OVERTIME\_HOURS, SPECIAL\_MERIT y HOLIDAY\_ALLOWANCE. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes inmutables y tipos taxonómicos del paquete com.andeva.atelier.platform.hr.domain.model.valueobjects.
 
 **Servicios de Dominio de Human Resources Management**
 
-1. `HaversineGeofencingService`: Encapsula la formulación trigonométrica esférica para determinar la proximidad espacial entre las coordenadas satelitales del técnico mecánico y el centroide de la sucursal física:
-   $$d = 2 R \arcsin\left(\sqrt{\sin^2\left(\frac{\Delta \phi}{2}\right) + \cos(\phi_1)\cos(\phi_2)\sin^2\left(\frac{\Delta \lambda}{2}\right)}\right)$$
-   Donde $R = 6,371,000$ metros representa el radio esférico medio de la Tierra, $\phi_1, \phi_2$ corresponden a las latitudes en radianes y $\Delta \phi, \Delta \lambda$ a los diferenciales angulares. Si la distancia calculada $d$ es menor o igual al radio de geocerca autorizado para la sede ($\le 150.0$ metros), el servicio aprueba la marcación (`VALID`); en caso contrario, rechaza la operación clasificándola como `REJECTED_OUTSIDE_GEOFENCE`.
-2. `OvertimeAndCommissionCalculator`: Consolida las horas efectivamente invertidas por el mecánico en las tareas de órdenes MRO terminadas durante el período de planilla. Multiplica las horas extraordinarias por el factor legal de recargo (25% para las dos primeras horas, 35% para las subsecuentes conforme a la normativa laboral) y añade los porcentajes pactados de comisión por servicios especializados, generando los ítems correspondientes en el agregado `PayrollPayment`.
+Aquellas operaciones algorítmicas de cómputo espacial de alta frecuencia o cálculo financiero transversal que no corresponden conceptualmente a una única entidad se implementan como servicios de dominio sin estado:
+
+- **HaversineGeofencingService**: Resuelve el cálculo geodésico de la distancia esférica ortodrómica entre el teléfono móvil del colaborador y la sucursal del taller. Mediante la ley trigonométrica del semiverseno, computa la separación en metros en menos de un microsegundo en memoria de la máquina virtual, validando la geocerca física autorizada sin realizar peticiones a servicios externos de cartografía.
+- **PayrollCalculationEngine**: Consolida el historial de marcaciones del colaborador en el intervalo contable, liquida descuentos por tardanzas acumuladas o inasistencias injustificadas, y computa las bonificaciones por productividad provenientes de órdenes de trabajo culminadas en MRO.
+- **AttendanceEvaluationService**: Evalúa la puntualidad del registro contrastando la hora local con la ventana del turno y su periodo de gracia reglamentario, determinando de forma automática si la marcación clasifica como puntual o tardía.
+
+La formulación trigonométrica de la ley del semiverseno empleada por **HaversineGeofencingService** se expresa formalmente como:
+
+$$\Delta \phi = \text{radians}(\text{lat}_2 - \text{lat}_1), \quad \Delta \lambda = \text{radians}(\text{lon}_2 - \text{lon}_1)$$
+
+$$a = \sin^2\left(\frac{\Delta \phi}{2}\right) + \cos(\text{radians}(\text{lat}_1)) \cdot \cos(\text{radians}(\text{lat}_2)) \cdot \sin^2\left(\frac{\Delta \lambda}{2}\right)$$
+
+$$c = 2 \cdot \text{atan2}\left(\sqrt{a}, \sqrt{1 - a}\right), \quad d = R \cdot c$$
+
+Donde $R = 6,371,000\text{ m}$ representa el radio esférico medio de la Tierra. Si la distancia calculada $d$ satisface la condición $(d \le r_{\text{autorizado}})$, el servicio dictamina conformidad espacial; en caso contrario, se rechaza la marcación presencial arrojando una violación de geocerca.
+
+En la @tbl:hr-domain-services se detallan las operaciones y responsabilidades de estos servicios de dominio.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Servicios de Dominio del Bounded Context Human Resources} \label{tbl:hr-domain-services} \\
+\hline
+\thfirst{Aspecto de Servicio} & \thcell{Especificación Técnica y Responsabilidad} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Servicio} & \thcell{Especificación Técnica y Responsabilidad} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Dominio:} HaversineGeofencingService} \\*
+\hline
+\textbf{Métodos Principales} & - \texttt{HaversineDistance calculateDistance(GeoCoordinates origin,\allowbreak  GeoCoordinates destination)} \newline - \texttt{boolean isWithinGeofence(GeoCoordinates employeeLocation,\allowbreak  GeoCoordinates branchCentroid,\allowbreak  double allowedRadiusMeters)} \\*
+\hline
+\textbf{Responsabilidad} & Motor matemático in-memory que calcula la distancia ortodrómica geodésica mediante la ley del semiverseno con radio de 6,371,000 metros evaluando la presencia física en la geocerca de la sucursal en microsegundos. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Dominio:} PayrollCalculationEngine} \\*
+\hline
+\textbf{Métodos Principales} & - \texttt{PayrollPayment calculatePayroll(TenantId tenantId,\allowbreak  TenantMembershipId membershipId,\allowbreak  PayPeriod period,\allowbreak  Money baseSalary,\allowbreak  List<AttendanceRecord> attendances,\allowbreak  List<MroCommissionDto> mroCommissions)} \\*
+\hline
+\textbf{Responsabilidad} & Motor financiero que consolida asistencias del periodo calcula penalidades proporcionales por tardanzas e inasistencias agrega comisiones por órdenes mecánicas de MRO y genera la liquidación en borrador. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Dominio:} AttendanceEvaluationService} \\*
+\hline
+\textbf{Métodos Principales} & - \texttt{AttendanceStatus evaluateAttendance(WorkShift shift,\allowbreak  Instant clockInTime,\allowbreak  ZoneId branchZone)} \\*
+\hline
+\textbf{Responsabilidad} & Evalúa la puntualidad de la marcación contrastando la hora local con la ventana del turno y su tolerancia reglamentaria determinando si clasifica como puntual o tardía. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Servicios sin estado ubicados en el paquete com.andeva.atelier.platform.hr.domain.services.
 
 **Puertos de Repositorio de la Capa de Dominio**
 
-| Puerto de Repositorio | Métodos Principales | Responsabilidad de Dominio |
-| :--- | :--- | :--- |
-| `EmployeeProfileRepository` | `save`, `findById`, `findByUserId`, `findByBranchId` | Persistencia y consulta de expedientes de colaboradores. |
-| `WorkShiftRepository` | `save`, `findById`, `findByTenantIdAndActive`, `findByBranchId` | Gestión de turnos y esquemas de jornada laboral. |
-| `AttendanceRecordRepository` | `save`, `findById`, `findByEmployeeIdAndDateRange` | Almacenamiento histórico de marcaciones de asistencia. |
-| `PayrollPaymentRepository` | `save`, `findById`, `findByEmployeeIdAndPeriod`, `findByPeriod` | Control y archivo de liquidaciones de nóminas salariales. |
-: Puertos de Repositorio del Bounded Context Human Resources {#tbl:hr-repository-ports}
+En concordancia con los principios de Clean Architecture, la capa de dominio define contratos de persistencia agnósticos que abstraen las operaciones de almacenamiento y recuperación de agregados sin acoplarse a tecnologías relacionales ni frameworks de infraestructura:
 
-*Nota.* Interfaces de salida del paquete com.andeva.atelier.platform.hr.domain.repositories.
+- **WorkShiftRepository**: Contrato para la persistencia, consulta y verificación de unicidad de turnos de trabajo configurados para el taller automotriz.
+- **AttendanceRecordRepository**: Contrato para el registro histórico de marcaciones, verificación de asistencias abiertas y consultas de presencia física por sucursal.
+- **PayrollPaymentRepository**: Contrato para el control contable y custodia de liquidaciones salariales emitidas por periodo temporal.
+- **EmployeeProfileRepository**: Contrato para la administración de expedientes laborales, asignación de turnos y filtrado de personal activo por sede.
 
-**Eventos de Dominio y Manejo de Errores Semánticos**
+En la @tbl:hr-repository-ports se especifican las operaciones provistas por estos puertos de salida.
 
-Los eventos de dominio de Recursos Humanos coordinan la gestión de personal:
-* `ShiftAssignedEvent`: Notifica al colaborador en su dispositivo móvil sobre su horario programado.
-* `AttendanceMarkedEvent`: Confirma el registro conforme de asistencia en el taller.
-* `AttendanceGeofenceBreachedEvent`: Alerta al administrador sobre un intento de marcación fuera de los límites de la sucursal.
-* `PayrollGeneratedEvent`: Informa la disponibilidad de la boleta de pago preliminar para revisión del trabajador.
-* `PayrollPaidEvent`: Confirma el cierre definitivo y pago de la nómina.
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Puertos de Repositorio de la Capa de Dominio de Human Resources} \label{tbl:hr-repository-ports} \\
+\hline
+\thfirst{Aspecto de Puerto} & \thcell{Especificación Técnica y Responsabilidad} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Puerto} & \thcell{Especificación Técnica y Responsabilidad} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Repositorio:} WorkShiftRepository} \\*
+\hline
+\textbf{Métodos Principales} & - \texttt{WorkShift save(WorkShift workShift)} \newline - \texttt{Optional<WorkShift> findById(ShiftId id)} \newline - \texttt{Optional<WorkShift> findByTenantIdAndName(TenantId tenantId,\allowbreak  String name)} \newline - \texttt{List<WorkShift> findAllByTenantId(TenantId tenantId)} \newline - \texttt{boolean existsByTenantIdAndName(TenantId tenantId,\allowbreak  String name)} \\*
+\hline
+\textbf{Responsabilidad de Dominio} & Persistencia y consulta del catálogo maestro de turnos laborales y validación de unicidad de denominación por taller. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Repositorio:} AttendanceRecordRepository} \\*
+\hline
+\textbf{Métodos Principales} & - \texttt{AttendanceRecord save(AttendanceRecord attendanceRecord)} \newline - \texttt{Optional<AttendanceRecord> findById(AttendanceId id)} \newline - \texttt{Optional<AttendanceRecord> findActiveByMembershipIdAndDate(TenantMembershipId membershipId,\allowbreak  LocalDate date)} \newline - \texttt{List<AttendanceRecord> findAllByBranchIdAndDate(BranchId branchId,\allowbreak  LocalDate date)} \newline - \texttt{List<AttendanceRecord> findAllByMembershipIdAndPeriod(TenantMembershipId membershipId,\allowbreak  Instant start,\allowbreak  Instant end)} \newline - \texttt{boolean hasActiveClockIn(TenantMembershipId membershipId,\allowbreak  LocalDate date)} \\*
+\hline
+\textbf{Responsabilidad de Dominio} & Persistencia y consulta histórica de marcaciones presenciales verificación de registros abiertos y reportes diarios por sede física. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Repositorio:} PayrollPaymentRepository} \\*
+\hline
+\textbf{Métodos Principales} & - \texttt{PayrollPayment save(PayrollPayment payrollPayment)} \newline - \texttt{Optional<PayrollPayment> findById(PayrollPaymentId id)} \newline - \texttt{Optional<PayrollPayment> findByMembershipIdAndPeriod(TenantMembershipId membershipId,\allowbreak  LocalDate startDate,\allowbreak  LocalDate endDate)} \newline - \texttt{List<PayrollPayment> findAllByTenantIdAndPeriod(TenantId tenantId,\allowbreak  LocalDate startDate,\allowbreak  LocalDate endDate)} \newline - \texttt{List<PayrollPayment> findAllByMembershipId(TenantMembershipId membershipId)} \\*
+\hline
+\textbf{Responsabilidad de Dominio} & Persistencia y seguimiento contable de boletas de remuneración salarial con control de unicidad de periodo por colaborador. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Repositorio:} EmployeeProfileRepository} \\*
+\hline
+\textbf{Métodos Principales} & - \texttt{EmployeeProfile save(EmployeeProfile profile)} \newline - \texttt{Optional<EmployeeProfile> findById(EmployeeProfileId id)} \newline - \texttt{Optional<EmployeeProfile> findByMembershipId(TenantMembershipId membershipId)} \newline - \texttt{List<EmployeeProfile> findAllByBranchId(BranchId branchId)} \newline - \texttt{List<EmployeeProfile> findAllActiveByTenantId(TenantId tenantId)} \\*
+\hline
+\textbf{Responsabilidad de Dominio} & Persistencia y consulta de expedientes de personal operativo con filtrado por sucursal física y estado contractual activo. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Contratos de salida agnósticos ubicados en el paquete com.andeva.atelier.platform.hr.domain.repositories.
 
-Las fallas de validación se gestionan mediante `Result<T, ApplicationError>` y excepciones tipadas (`GeofenceValidationException`, `ShiftConflictException`, `AttendanceAlreadyMarkedException`).
+**Taxonomía de Eventos de Dominio de Human Resources Management**
 
+Los eventos de dominio de este contexto representan hechos significativos consumados en la gestión de personal, implementando la interfaz **DomainEvent** provista por el Shared Kernel para su despacho confiable a través del Transactional Outbox:
 
+- **Configuración de jornada laboral**: **WorkShiftCreatedEvent** y **WorkShiftUpdatedEvent** comunican el alta y ajuste de parámetros horarios en las sucursales.
+- **Control presencial y disciplina física**: **EmployeeClockedInEvent**, **EmployeeClockedOutEvent**, **LateAttendanceRecordedEvent**, **GeofenceViolationDetectedEvent** y **AttendanceJustifiedEvent** orquestan el ciclo de presencia física y auditoría de asistencia.
+- **Liquidación económica de haberes**: **PayrollCalculatedEvent**, **PayrollApprovedEvent** y **PayrollDisbursedEvent** gobiernan el flujo financiero de remuneraciones hasta su transferencia bancaria efectiva.
+- **Gestión de talento operativo**: **EmployeeProfileRegisteredEvent** y **EmployeeShiftAssignedEvent** informan la incorporación de personal y la actualización de turnos hacia las aplicaciones cliente.
+
+En la @tbl:hr-domain-events se sintetiza la taxonomía de los doce eventos de dominio inmutables de Human Resources Management.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Taxonomía de Eventos de Dominio del Bounded Context Human Resources} \label{tbl:hr-domain-events} \\
+\hline
+\thfirst{Aspecto del Evento} & \thcell{Especificación de Carga Útil y Efecto} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto del Evento} & \thcell{Especificación de Carga Útil y Efecto} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} WorkShiftCreatedEvent \quad (\textit{Emisor:} WorkShift)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{shiftId}, \texttt{tenantId}, \texttt{name}, \texttt{startTime}, \texttt{endTime}, \texttt{occurredOn} \\*
+\hline
+\textbf{Efecto Intermodular} & Notifica la configuración de un nuevo turno de trabajo habilitando su asignación operativa a colaboradores del taller. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} WorkShiftUpdatedEvent \quad (\textit{Emisor:} WorkShift)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{shiftId}, \texttt{name}, \texttt{startTime}, \texttt{endTime}, \texttt{gracePeriod}, \texttt{occurredOn} \\*
+\hline
+\textbf{Efecto Intermodular} & Difunde la actualización de parámetros horarios para el recálculo automático de tolerancias de ingreso. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} EmployeeClockedInEvent \quad (\textit{Emisor:} AttendanceRecord)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{attendanceId}, \texttt{membershipId}, \texttt{branchId}, \texttt{status}, \texttt{distanceMeters}, \texttt{occurredOn} \\*
+\hline
+\textbf{Efecto Intermodular} & Comunica el ingreso presencial conforme del operario en la sede física actualizando su disponibilidad operativa para labores de taller. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} EmployeeClockedOutEvent \quad (\textit{Emisor:} AttendanceRecord)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{attendanceId}, \texttt{membershipId}, \texttt{totalWorkedMinutes}, \texttt{occurredOn} \\*
+\hline
+\textbf{Efecto Intermodular} & Registra el egreso y conclusión de la faena laboral del colaborador computando el tiempo neto trabajado para fines de nómina. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} LateAttendanceRecordedEvent \quad (\textit{Emisor:} AttendanceRecord)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{attendanceId}, \texttt{membershipId}, \texttt{minutesLate}, \texttt{occurredOn} \\*
+\hline
+\textbf{Efecto Intermodular} & Notifica que el ingreso excedió los minutos de tolerancia reglamentaria programando la imputación de descuentos en la liquidación salarial. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} GeofenceViolationDetectedEvent \quad (\textit{Emisor:} AttendanceRecord)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{membershipId}, \texttt{branchId}, \texttt{attemptedDistanceMeters}, \texttt{maxAllowedRadius}, \texttt{occurredOn} \\*
+\hline
+\textbf{Efecto Intermodular} & Alerta sobre un intento de marcación fuera del radio perimetral autorizado de la sucursal para auditoría administrativa. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} AttendanceJustifiedEvent \quad (\textit{Emisor:} AttendanceRecord)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{attendanceId}, \texttt{membershipId}, \texttt{justifiedBy}, \texttt{reason}, \texttt{occurredOn} \\*
+\hline
+\textbf{Efecto Intermodular} & Comunica la regularización formal de una tardanza o inasistencia por descanso médico o permiso revocando descuentos automáticos. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} PayrollCalculatedEvent \quad (\textit{Emisor:} PayrollPayment)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{payrollId}, \texttt{membershipId}, \texttt{totalPaid}, \texttt{periodStart}, \texttt{periodEnd}, \texttt{occurredOn} \\*
+\hline
+\textbf{Efecto Intermodular} & Emite el borrador proforma de liquidación de haberes para su revisión por parte del administrador del taller. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} PayrollApprovedEvent \quad (\textit{Emisor:} PayrollPayment)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{payrollId}, \texttt{membershipId}, \texttt{approvedBy}, \texttt{totalPaid}, \texttt{occurredOn} \\*
+\hline
+\textbf{Efecto Intermodular} & Notifica la aprobación contable definitiva de la nómina autorizando la programación de la transferencia bancaria. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} PayrollDisbursedEvent \quad (\textit{Emisor:} PayrollPayment)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{payrollId}, \texttt{membershipId}, \texttt{paymentReference}, \texttt{paidAt}, \texttt{occurredOn} \\*
+\hline
+\textbf{Efecto Intermodular} & Confirma la transferencia de fondos al trabajador poniendo a disposición la boleta de pago cancelada. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} EmployeeProfileRegisteredEvent \quad (\textit{Emisor:} EmployeeProfile)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{profileId}, \texttt{tenantId}, \texttt{branchId}, \texttt{membershipId}, \texttt{jobTitle}, \texttt{occurredOn} \\*
+\hline
+\textbf{Efecto Intermodular} & Notifica el alta del expediente laboral y especialidades técnicas del nuevo colaborador en el taller. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} EmployeeShiftAssignedEvent \quad (\textit{Emisor:} EmployeeProfile)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{profileId}, \texttt{membershipId}, \texttt{newShiftId}, \texttt{occurredOn} \\*
+\hline
+\textbf{Efecto Intermodular} & Comunica la reasignación de turno de trabajo del empleado sincronizando su horario con la aplicación móvil. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Eventos de dominio inmutables ubicados bajo el paquete com.andeva.atelier.platform.hr.domain.events.
+
+**Excepciones de Dominio y Manejo de Errores Semánticos**
+
+Las vulneraciones a invariantes de negocio y desvíos operativos se gestionan mediante excepciones semánticas no comprobadas derivadas de **DomainException**. Cada excepción encapsula un código alfanumérico estandarizado bajo la norma RFC 7807 y su estatus HTTP asociado:
+
+- **Infracciones espaciales y de presencia**: **GeofenceViolationException**, **DuplicateActiveAttendanceException** e **InvalidAttendanceClockOutException** ante marcaciones fuera del perímetro o inconsistencias temporales en el registro.
+- **Conflictos de programación y justificación**: **ShiftConflictException** y **AttendanceNotJustifiableException** al detectar solapamientos de turnos o intentos de justificar asistencias que no admiten regularización.
+- **Integridad de nóminas y bloqueos contables**: **InvalidPayrollModificationException** al intentar alterar liquidaciones salariales aprobadas o canceladas.
+- **Entidades no localizadas**: **WorkShiftNotFoundException**, **AttendanceRecordNotFoundException**, **EmployeeProfileNotFoundException** y **PayrollPaymentNotFoundException** frente a búsquedas infructuosas por identificador unívoco.
+
+En la @tbl:hr-domain-exceptions se sintetiza la jerarquía de excepciones de dominio y sus códigos semánticos normalizados.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.8cm} | >{\raggedright\arraybackslash}p{9.6cm} |}
+\caption{Jerarquía de Excepciones Semánticas del Bounded Context Human Resources} \label{tbl:hr-domain-exceptions} \\
+\hline
+\thfirst{Código de Error Semántico} & \thcell{Condición de Lanzamiento en el Modelo} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Código de Error Semántico} & \thcell{Condición de Lanzamiento en el Modelo} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} GeofenceViolationException} \\*
+\hline
+\texttt{ERR\_HR\_GEOFENCE\_\allowbreak BREACH} \newline HTTP 422 Unprocessable Entity & La separación espacial calculada entre el dispositivo móvil del operario y el centroide de la sucursal supera el radio perimetral autorizado de la sede física. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} DuplicateActiveAttendanceException} \\*
+\hline
+\texttt{ERR\_HR\_DUPLICATE\_\allowbreak CLOCK\_IN} \newline HTTP 409 Conflict & Se intenta registrar un nuevo ingreso laboral cuando el colaborador ya cuenta con una marcación abierta sin egreso en la misma jornada. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} InvalidAttendanceClockOutException} \\*
+\hline
+\texttt{ERR\_HR\_INVALID\_\allowbreak CLOCK\_OUT} \newline HTTP 400 Bad Request & Se intenta asentar la salida laboral sin una marcación previa de ingreso o con una marca temporal cronológicamente anterior a la entrada. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} ShiftConflictException} \\*
+\hline
+\texttt{ERR\_HR\_SHIFT\_\allowbreak CONFLICT} \newline HTTP 409 Conflict & Se intenta crear un turno con una denominación duplicada para el mismo taller o con horarios superpuestos de forma conflictiva. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} WorkShiftNotFoundException} \\*
+\hline
+\texttt{ERR\_HR\_SHIFT\_\allowbreak NOT\_FOUND} \newline HTTP 404 Not Found & No se localiza el turno de trabajo consultado en el catálogo del taller automotriz mediante el identificador unívoco provisto. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} AttendanceRecordNotFoundException} \\*
+\hline
+\texttt{ERR\_HR\_ATTENDANCE\_\allowbreak NOT\_FOUND} \newline HTTP 404 Not Found & No se encuentra la marcación de asistencia consultada para operaciones de salida justificación administrativa o auditoría. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} EmployeeProfileNotFoundException} \\*
+\hline
+\texttt{ERR\_HR\_EMPLOYEE\_\allowbreak NOT\_FOUND} \newline HTTP 404 Not Found & No se localiza la ficha laboral del trabajador asociada al identificador de perfil o membresía de usuario suministrado. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} PayrollPaymentNotFoundException} \\*
+\hline
+\texttt{ERR\_HR\_PAYROLL\_\allowbreak NOT\_FOUND} \newline HTTP 404 Not Found & No se encuentra la liquidación salarial requerida para revisión adición de ítems aprobación contable o pago. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} InvalidPayrollModificationException} \\*
+\hline
+\texttt{ERR\_HR\_PAYROLL\_\allowbreak ALREADY\_LOCKED} \newline HTTP 409 Conflict & Se intenta añadir descuentos o bonificaciones a una boleta que ya se encuentra en estado aprobado o pagado. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} AttendanceNotJustifiableException} \\*
+\hline
+\texttt{ERR\_HR\_ATTENDANCE\_\allowbreak NOT\_JUSTIFIABLE} \newline HTTP 400 Bad Request & Se intenta registrar una justificación sobre una asistencia que ya fue calificada como puntual o que no admite regularización. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Jerarquía de excepciones semánticas no comprobadas del paquete com.andeva.atelier.platform.hr.domain.exceptions.
+
+A partir del diseño e implementación táctica de Human Resources Management, se desprenden tres directrices de ingeniería de software que fundamentan la solidez y equidad del modelo de personal automotriz:
+
+El primer fundamento reside en la eficiencia computacional y resiliencia operacional del cálculo geodésico ejecutado localmente en la memoria de la máquina virtual. Al resolver la ley trigonométrica de Haversine mediante operaciones aritméticas puras de punto flotante en lugar de delegar la validación en servicios externos de cartografía como Google Maps Distance Matrix API, el sistema elimina costos recurrentes por consumo de interfaces de programación de aplicaciones y reduce la latencia de verificación a menos de un microsegundo. Esta autonomía computacional garantiza que los picos de concurrencia matutinos en las sucursales no colapsen por congestión de red o cuotas agotadas de proveedores terceros, manteniendo el flujo de ingreso ininterrumpido en el taller mecánico.
+
+El segundo pilar radica en la formalización laboral y la remuneración meritocrática alcanzada mediante la automatización determinista de compensaciones vinculadas a la productividad de patio. En el ecosistema automotriz peruano, caracterizado por una marcada informalidad y discrepancias salariales subjetivas, el motor de liquidación de nóminas erradica la opacidad al integrar directamente las órdenes de trabajo cerradas satisfactoriamente en el contexto de MRO con los baremos de bonificación y comisiones pactadas. De este modo, la plataforma transforma la compensación en un proceso auditable y equitativo que recompensa el rendimiento técnico efectivo y la puntualidad sin requerir intermediación discrecional del empleador.
+
+El tercer fundamento se sustenta en el desacoplamiento arquitectónico riguroso entre la identidad de seguridad y el perfil laboral operativo. Mientras que el contexto de IAM & Tenancy custodia exclusivamente las credenciales de autenticación, llaves criptográficas y privilegios perimetrales del usuario, Human Resources Management encapsula los contratos de trabajo, turnos laborales, registros de asistencia y expedientes remunerativos vinculados únicamente por un identificador de membresía agnóstico. Esta estricta separación de responsabilidades respeta el principio de responsabilidad única (*Single Responsibility Principle*), garantizando que las modificaciones en las políticas laborales o esquemas de nómina evolucionen sin riesgo de degradar el subsistema perimetral de seguridad corporativa.
 
 #### 2.6.6.2. Interface Layer
 
+La Capa de Interfaz del Bounded Context Human Resources Management opera como el adaptador primario perimetral bajo el paquete canónico **com.andeva.atelier.platform.hr.interfaces**. Su propósito arquitectónico consiste en traducir las interacciones externas procedentes de clientes web de administración y dispositivos móviles de técnicos automotrices en invocaciones deterministas hacia los casos de uso transaccionales, garantizando el cumplimiento de los turnos operativos y la rigurosidad en la liquidación de haberes.
 
+Con el fin de resguardar una frontera desacoplada y alineada a las demandas de concurrencia y formalidad laboral del taller, el diseño perimetral de Human Resources Management se estructura sobre cuatro directrices tácticas:
+
+- **Mediación determinista y tipada mediante el contenedor funcional sellado Result<T, ApplicationError>**: La comunicación perimetral con los servicios de aplicación se gobierna estrictamente mediante el tipo sellado **Result<T, ApplicationError>**, traduciendo fallas de validación horaria, solapamientos de turnos o inconsistencias en nómina en respuestas semánticas bajo la norma RFC 7807 sin propagar excepciones no controladas.
+- **Modelado RESTful estricto orientado a recursos y enrutamiento plano**: Las rutas perimetrales se definen mediante sustantivos en plural con granularidad limpia en **/api/v1/hr/work-shifts**, **/api/v1/hr/attendances**, **/api/v1/hr/payrolls** y **/api/v1/hr/employees**, desacoplando jerarquías profundas y validando cargas útiles de transporte con anotaciones estandarizadas de Jakarta Bean Validation sobre registros inmutables.
+- **Trazabilidad geodésica de marcaciones móviles y blindaje perimetral contra fraude**: La admisión perimetral de registros presenciales captura coordenadas satelitales WGS84 transmitidas desde terminales móviles de mecánicos, evaluando en memoria la distancia euclidiana frente a la geocerca de la sede física para rechazar inmediatamente intentos de marcación irregular.
+- **Interoperabilidad reactiva y desacoplamiento mediante fachada OHS y Transactional Outbox**: Para atender las consultas síncronas demandadas desde Workshop Operations se provee la interfaz **HumanResourcesContextFacade** bajo el patrón Open Host Service, coordinando paralelamente la publicación asíncrona de eventos de integración mediante el Transactional Outbox para notificar novedades laborales y desembolsos contables.
+
+En la @tbl:hr-interface-types se presenta el catálogo consolidado de controladores REST, recursos de transporte DTO, ensambladores bidireccionales, componentes de fachada y eventos de integración que componen la Capa de Interfaz de Human Resources Management.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Catálogo Consolidado de la Capa de Interfaz de Human Resources Management} \label{tbl:hr-interface-types} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\
+\hline
+\endhead
+WorkShiftsController & Endpoints REST para configuración de turnos laborales, definición de tolerancias horarias y activación de horarios operativos. \\*
+\hline
+\textbf{Categoría} & Controlador REST \\*
+\hline
+\textbf{Relaciones} & Invoca WorkShiftCommandService y WorkShiftQueryService. Utiliza WorkShiftResourceAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak interfaces.\allowbreak rest.\allowbreak controllers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+AttendanceController & Endpoints REST para control presencial geolocalizado WGS84, registro de egreso, cómputo de horas y justificación de tardanzas. \\*
+\hline
+\textbf{Categoría} & Controlador REST \\*
+\hline
+\textbf{Relaciones} & Invoca AttendanceCommandService y AttendanceQueryService. Utiliza AttendanceResourceAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak interfaces.\allowbreak rest.\allowbreak controllers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+PayrollPaymentsController & Endpoints REST para generación de nómina proforma, adición de bonos o deducciones, aprobación, dispersión bancaria y exportación PLAME. \\*
+\hline
+\textbf{Categoría} & Controlador REST \\*
+\hline
+\textbf{Relaciones} & Invoca PayrollPaymentCommandService y PayrollPaymentQueryService. Utiliza PayrollPaymentResourceAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak interfaces.\allowbreak rest.\allowbreak controllers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+StaffProfilesController & Endpoints REST para alta de expedientes de colaboradores vinculados a IAM, reasignación de turnos, ajustes salariales y estado laboral. \\*
+\hline
+\textbf{Categoría} & Controlador REST \\*
+\hline
+\textbf{Relaciones} & Invoca StaffProfileCommandService y StaffProfileQueryService. Utiliza EmployeeProfileResourceAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak interfaces.\allowbreak rest.\allowbreak controllers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+CreateWorkShiftResource & Carga útil inmutable para creación de turnos con rangos horarios y margen de tolerancia en minutos. \\*
+\hline
+\textbf{Categoría} & Recurso de Petición \\*
+\hline
+\textbf{Relaciones} & Mapeado por WorkShiftResourceAssembler hacia CreateWorkShiftCommand. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+UpdateWorkShiftResource & Carga útil para actualización integral de horarios de jornada y tiempo de gracia de un turno existente. \\*
+\hline
+\textbf{Categoría} & Recurso de Petición \\*
+\hline
+\textbf{Relaciones} & Mapeado por WorkShiftResourceAssembler hacia UpdateWorkShiftCommand. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+ClockInRequest & Carga útil transmitida desde cliente móvil con coordenadas geodésicas para validación contra geocerca de sucursal. \\*
+\hline
+\textbf{Categoría} & Recurso de Petición \\*
+\hline
+\textbf{Relaciones} & Mapeado por AttendanceResourceAssembler hacia ClockInCommand. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+ClockOutRequest & Petición para registrar formalmente la culminación de la jornada laboral y computar el tiempo efectivo de servicio. \\*
+\hline
+\textbf{Categoría} & Recurso de Petición \\*
+\hline
+\textbf{Relaciones} & Mapeado por AttendanceResourceAssembler hacia ClockOutCommand. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+JustifyAttendanceRequest & Petición de regularización administrativa emitida por supervisor para justificar tardanza o inasistencia de personal. \\*
+\hline
+\textbf{Categoría} & Recurso de Petición \\*
+\hline
+\textbf{Relaciones} & Mapeado por AttendanceResourceAssembler hacia JustifyAttendanceCommand. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+GeneratePayrollRequest & Petición de generación de liquidación de haberes proforma para un colaborador y periodo contable específico. \\*
+\hline
+\textbf{Categoría} & Recurso de Petición \\*
+\hline
+\textbf{Relaciones} & Mapeado por PayrollPaymentResourceAssembler hacia GeneratePayrollCommand. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+AddPayrollDeductionRequest & Carga útil para incorporar un descuento específico con categorización legal a una boleta salarial proforma. \\*
+\hline
+\textbf{Categoría} & Recurso de Petición \\*
+\hline
+\textbf{Relaciones} & Mapeado por PayrollPaymentResourceAssembler hacia AddPayrollDeductionCommand. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+AddPayrollBonusRequest & Carga útil para imputar una comisión u orden de trabajo cerrada como bonificación a la boleta proforma. \\*
+\hline
+\textbf{Categoría} & Recurso de Petición \\*
+\hline
+\textbf{Relaciones} & Mapeado por PayrollPaymentResourceAssembler hacia AddPayrollBonusCommand. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+DisbursePayrollRequest & Datos probatorios y referencia bancaria para certificar el desembolso efectivo de la liquidación de haberes. \\*
+\hline
+\textbf{Categoría} & Recurso de Petición \\*
+\hline
+\textbf{Relaciones} & Mapeado por PayrollPaymentResourceAssembler hacia DisbursePayrollCommand. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+RegisterEmployeeProfileRequest & Carga útil para registrar el expediente laboral de un técnico o administrativo vinculándolo a una sede y turno. \\*
+\hline
+\textbf{Categoría} & Recurso de Petición \\*
+\hline
+\textbf{Relaciones} & Mapeado por EmployeeProfileResourceAssembler hacia RegisterEmployeeProfileCommand. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+AssignShiftRequest & Solicitud para modificar el turno laboral operativo asignado a un colaborador en el taller. \\*
+\hline
+\textbf{Categoría} & Recurso de Petición \\*
+\hline
+\textbf{Relaciones} & Mapeado por EmployeeProfileResourceAssembler hacia AssignShiftCommand. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+UpdateSalaryRequest & Petición para reajustar el monto base remunerativo y esquema contractual pactado con el colaborador. \\*
+\hline
+\textbf{Categoría} & Recurso de Petición \\*
+\hline
+\textbf{Relaciones} & Mapeado por EmployeeProfileResourceAssembler hacia UpdateSalaryCommand. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+UpdateEmploymentStatusRequest & Petición para alternar la condición de servicio del empleado entre activo, licencia o cese laboral definitivo. \\*
+\hline
+\textbf{Categoría} & Recurso de Petición \\*
+\hline
+\textbf{Relaciones} & Mapeado por EmployeeProfileResourceAssembler hacia UpdateEmploymentStatusCommand. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+WorkShiftResource & Representación pública inmutable de un turno operativo con especificación horaria y margen de tolerancia. \\*
+\hline
+\textbf{Categoría} & Recurso de Respuesta \\*
+\hline
+\textbf{Relaciones} & Generado por WorkShiftResourceAssembler a partir de la entidad WorkShift. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+AttendanceResource & Ficha pública de marcación presencial con distancia calculada, estado puntual y trazabilidad de justificación. \\*
+\hline
+\textbf{Categoría} & Recurso de Respuesta \\*
+\hline
+\textbf{Relaciones} & Generado por AttendanceResourceAssembler a partir de la entidad AttendanceRecord. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+PayrollPaymentResource & Boleta salarial integral con importes consolidados, partidas detalladas de bonos y retenciones, y estado de pago. \\*
+\hline
+\textbf{Categoría} & Recurso de Respuesta \\*
+\hline
+\textbf{Relaciones} & Generado por PayrollPaymentResourceAssembler a partir del agregado PayrollPayment. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+PayrollPaymentSummaryResource & Proyección resumida de boleta salarial optimizada para consultas masivas de nómina y tableros de control. \\*
+\hline
+\textbf{Categoría} & Recurso de Respuesta \\*
+\hline
+\textbf{Relaciones} & Generado por PayrollPaymentResourceAssembler a partir de proyecciones de nómina. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+PayrollItemResource & Renglón individual de deducción legal o bonificación de productividad adscrito a una boleta de pago. \\*
+\hline
+\textbf{Categoría} & Recurso de Respuesta \\*
+\hline
+\textbf{Relaciones} & Generado por PayrollPaymentResourceAssembler a partir de entidades PayrollItem. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+EmployeeProfileResource & Expediente público del colaborador detallando cargo, turno asignado, remuneración base y estado laboral activo. \\*
+\hline
+\textbf{Categoría} & Recurso de Respuesta \\*
+\hline
+\textbf{Relaciones} & Generado por EmployeeProfileResourceAssembler a partir de la entidad EmployeeProfile. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+WorkShiftResourceAssembler & Transformador bidireccional entre recursos de turno y comandos o representaciones de respuesta. \\*
+\hline
+\textbf{Categoría} & Ensamblador de Recursos \\*
+\hline
+\textbf{Relaciones} & Mapea CreateWorkShiftResource y UpdateWorkShiftResource, e hidrata WorkShiftResource. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak interfaces.\allowbreak rest.\allowbreak assemblers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+AttendanceResourceAssembler & Transformador bidireccional entre solicitudes de asistencia y comandos o fichas de control presencial. \\*
+\hline
+\textbf{Categoría} & Ensamblador de Recursos \\*
+\hline
+\textbf{Relaciones} & Mapea ClockInRequest, ClockOutRequest y justificaciones, e hidrata AttendanceResource. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak interfaces.\allowbreak rest.\allowbreak assemblers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+PayrollPaymentResourceAssembler & Transformador bidireccional entre peticiones de nómina y comandos o boletas desglosadas de respuesta. \\*
+\hline
+\textbf{Categoría} & Ensamblador de Recursos \\*
+\hline
+\textbf{Relaciones} & Mapea operaciones sobre PayrollPayment e hidrata boletas y partidas analíticas. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak interfaces.\allowbreak rest.\allowbreak assemblers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+EmployeeProfileResourceAssembler & Transformador bidireccional entre solicitudes de expediente laboral y comandos o recursos de personal. \\*
+\hline
+\textbf{Categoría} & Ensamblador de Recursos \\*
+\hline
+\textbf{Relaciones} & Mapea registros de colaborador, asignación de turno y salario, e hidrata EmployeeProfileResource. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak interfaces.\allowbreak rest.\allowbreak assemblers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+HumanResourcesContextFacade & Interfaz canónica de interoperabilidad síncrona en memoria para Workshop Operations, Invoicing e IAM. \\*
+\hline
+\textbf{Categoría} & Fachada de Contexto Abierto \\*
+\hline
+\textbf{Relaciones} & Expone comprobación de presencia en patio y cálculo de comisiones sin exponer entidades JPA. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak interfaces.\allowbreak acl} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+MechanicCheckedInIntegrationEvent & Evento emitido al validar marcación presencial para habilitar asignaciones de trabajo en patio. \\*
+\hline
+\textbf{Categoría} & Evento de Integración \\*
+\hline
+\textbf{Relaciones} & Despachado vía Transactional Outbox hacia Workshop Operations (MRO). \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak interfaces.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+MechanicClockedOutIntegrationEvent & Evento emitido al finalizar la jornada para auditar tareas pendientes o inconclusas en foso. \\*
+\hline
+\textbf{Categoría} & Evento de Integración \\*
+\hline
+\textbf{Relaciones} & Despachado vía Transactional Outbox hacia Workshop Operations (MRO). \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak interfaces.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+PayrollDisbursedIntegrationEvent & Evento emitido tras confirmar el desembolso salarial para asentar el egreso contable del taller. \\*
+\hline
+\textbf{Categoría} & Evento de Integración \\*
+\hline
+\textbf{Relaciones} & Despachado vía Transactional Outbox hacia Invoicing y Contabilidad. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak interfaces.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+EmployeeProfileRegisteredIntegrationEvent & Evento emitido al formalizar un legajo de personal para coordinar credenciales y roles operativos. \\*
+\hline
+\textbf{Categoría} & Evento de Integración \\*
+\hline
+\textbf{Relaciones} & Despachado vía Transactional Outbox hacia IAM y Workshop Operations. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak interfaces.\allowbreak events} \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes y artefactos arquitectónicos estructurados en el paquete canónico com.andeva.atelier.platform.hr.interfaces.
+
+**Controladores REST y Endpoints de Comunicación**
+
+La exposición de servicios web en Human Resources Management se distribuye en cuatro controladores especializados que encapsulan áreas funcionales disjuntas: parametrización de turnos laborales, control de asistencia presencial con verificación geodésica, ciclo integral de liquidación salarial con exportación de la planilla oficial de pagos, y gestión de expedientes operativos de personal.
+
+Cada controlador implementa contratos RESTful con verbos HTTP unívocos, códigos de respuesta semánticos que reflejan el resultado de las operaciones y estructuras estandarizadas de detalle de problemas ante eventuales anomalías sintácticas o semánticas.
+
+En la @tbl:hr-controllers-and-endpoints se detallan los controladores REST, rutas perimetrales, verbos HTTP asociados y tipos de respuesta generados.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\raggedright\arraybackslash}p{6.0cm} | >{\raggedright\arraybackslash}p{9.4cm} |}
+\caption{Controladores REST y Endpoints de Comunicación de Human Resources Management} \label{tbl:hr-controllers-and-endpoints} \\
+\hline
+\thfirst{Recurso de Petición} & \thcell{Código y Respuesta HTTP} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Recurso de Petición} & \thcell{Código y Respuesta HTTP} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Controlador REST:} WorkShiftsController} \\*
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak hr/\allowbreak work-shifts}} \\*
+\hline
+\textbf{Petición:} \texttt{CreateWorkShiftResource} & \textbf{Respuesta:} 201 CREATED (\texttt{WorkShiftResource}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak hr/\allowbreak work-shifts}} \\*
+\hline
+\textbf{Petición:} Ninguno & \textbf{Respuesta:} 200 OK (\texttt{List\textless WorkShiftResource\textgreater}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak hr/\allowbreak work-shifts/\allowbreak \{shiftId\}}} \\*
+\hline
+\textbf{Petición:} Ninguno & \textbf{Respuesta:} 200 OK (\texttt{WorkShiftResource}) \newline 404 NOT FOUND (\texttt{ProblemDetail}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{PUT} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak hr/\allowbreak work-shifts/\allowbreak \{shiftId\}}} \\*
+\hline
+\textbf{Petición:} \texttt{UpdateWorkShiftResource} & \textbf{Respuesta:} 200 OK (\texttt{WorkShiftResource}) \newline 404 NOT FOUND (\texttt{ProblemDetail}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{PATCH} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak hr/\allowbreak work-shifts/\allowbreak \{shiftId\}/\allowbreak deactivate}} \\*
+\hline
+\textbf{Petición:} Ninguno & \textbf{Respuesta:} 204 NO CONTENT \newline 404 NOT FOUND (\texttt{ProblemDetail}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{PATCH} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak hr/\allowbreak work-shifts/\allowbreak \{shiftId\}/\allowbreak activate}} \\*
+\hline
+\textbf{Petición:} Ninguno & \textbf{Respuesta:} 204 NO CONTENT \newline 404 NOT FOUND (\texttt{ProblemDetail}) \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Controlador REST:} AttendanceController} \\*
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak hr/\allowbreak attendances/\allowbreak clock-in}} \\*
+\hline
+\textbf{Petición:} \texttt{ClockInRequest} & \textbf{Respuesta:} 201 CREATED (\texttt{AttendanceResource}) \newline 422 UNPROCESSABLE ENTITY (\texttt{ProblemDetail}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak hr/\allowbreak attendances/\allowbreak clock-out}} \\*
+\hline
+\textbf{Petición:} \texttt{ClockOutRequest} & \textbf{Respuesta:} 200 OK (\texttt{AttendanceResource}) \newline 400 BAD REQUEST (\texttt{ProblemDetail}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak hr/\allowbreak attendances/\allowbreak \{attendanceId\}/\allowbreak justify}} \\*
+\hline
+\textbf{Petición:} \texttt{JustifyAttendanceRequest} & \textbf{Respuesta:} 200 OK (\texttt{AttendanceResource}) \newline 400 BAD REQUEST (\texttt{ProblemDetail}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak hr/\allowbreak attendances/\allowbreak branch/\allowbreak \{branchId\}/\allowbreak daily}} \\*
+\hline
+\textbf{Petición:} Parámetro de consulta \texttt{date} & \textbf{Respuesta:} 200 OK (\texttt{List\textless AttendanceResource\textgreater}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak hr/\allowbreak attendances/\allowbreak employee/\allowbreak \{membershipId\}/\allowbreak history}} \\*
+\hline
+\textbf{Petición:} Parámetros \texttt{startDate}, \texttt{endDate} & \textbf{Respuesta:} 200 OK (\texttt{List\textless AttendanceResource\textgreater}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak hr/\allowbreak attendances/\allowbreak employee/\allowbreak \{membershipId\}/\allowbreak status-today}} \\*
+\hline
+\textbf{Petición:} Ninguno & \textbf{Respuesta:} 200 OK (\texttt{AttendanceResource}) \newline 404 NOT FOUND (\texttt{ProblemDetail}) \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Controlador REST:} PayrollPaymentsController} \\*
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak hr/\allowbreak payrolls/\allowbreak generate}} \\*
+\hline
+\textbf{Petición:} \texttt{GeneratePayrollRequest} & \textbf{Respuesta:} 201 CREATED (\texttt{PayrollPaymentResource}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak hr/\allowbreak payrolls}} \\*
+\hline
+\textbf{Petición:} Filtros \texttt{period}, \texttt{status}, paginación & \textbf{Respuesta:} 200 OK (\texttt{PagedModel\textless PayrollPaymentSummaryResource\textgreater}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak hr/\allowbreak payrolls/\allowbreak \{payrollId\}}} \\*
+\hline
+\textbf{Petición:} Ninguno & \textbf{Respuesta:} 200 OK (\texttt{PayrollPaymentResource}) \newline 404 NOT FOUND (\texttt{ProblemDetail}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak hr/\allowbreak payrolls/\allowbreak \{payrollId\}/\allowbreak deductions}} \\*
+\hline
+\textbf{Petición:} \texttt{AddPayrollDeductionRequest} & \textbf{Respuesta:} 200 OK (\texttt{PayrollPaymentResource}) \newline 409 CONFLICT (\texttt{ProblemDetail}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak hr/\allowbreak payrolls/\allowbreak \{payrollId\}/\allowbreak bonuses}} \\*
+\hline
+\textbf{Petición:} \texttt{AddPayrollBonusRequest} & \textbf{Respuesta:} 200 OK (\texttt{PayrollPaymentResource}) \newline 409 CONFLICT (\texttt{ProblemDetail}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak hr/\allowbreak payrolls/\allowbreak \{payrollId\}/\allowbreak approve}} \\*
+\hline
+\textbf{Petición:} Ninguno & \textbf{Respuesta:} 200 OK (\texttt{PayrollPaymentResource}) \newline 409 CONFLICT (\texttt{ProblemDetail}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak hr/\allowbreak payrolls/\allowbreak \{payrollId\}/\allowbreak disburse}} \\*
+\hline
+\textbf{Petición:} \texttt{DisbursePayrollRequest} & \textbf{Respuesta:} 200 OK (\texttt{PayrollPaymentResource}) \newline 409 CONFLICT (\texttt{ProblemDetail}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak hr/\allowbreak payrolls/\allowbreak export/\allowbreak sunat-rem}} \\*
+\hline
+\textbf{Petición:} Parámetro de consulta \texttt{period} & \textbf{Respuesta:} 200 OK (\texttt{text/plain} trama .rem) \newline 400 BAD REQUEST (\texttt{ProblemDetail}) \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Controlador REST:} StaffProfilesController} \\*
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak hr/\allowbreak employees}} \\*
+\hline
+\textbf{Petición:} \texttt{RegisterEmployeeProfileRequest} & \textbf{Respuesta:} 201 CREATED (\texttt{EmployeeProfileResource}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak hr/\allowbreak employees/\allowbreak \{profileId\}}} \\*
+\hline
+\textbf{Petición:} Ninguno & \textbf{Respuesta:} 200 OK (\texttt{EmployeeProfileResource}) \newline 404 NOT FOUND (\texttt{ProblemDetail}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak hr/\allowbreak employees/\allowbreak membership/\allowbreak \{membershipId\}}} \\*
+\hline
+\textbf{Petición:} Ninguno & \textbf{Respuesta:} 200 OK (\texttt{EmployeeProfileResource}) \newline 404 NOT FOUND (\texttt{ProblemDetail}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak hr/\allowbreak employees/\allowbreak branch/\allowbreak \{branchId\}}} \\*
+\hline
+\textbf{Petición:} Ninguno & \textbf{Respuesta:} 200 OK (\texttt{List\textless EmployeeProfileResource\textgreater}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{PUT} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak hr/\allowbreak employees/\allowbreak \{profileId\}/\allowbreak shift}} \\*
+\hline
+\textbf{Petición:} \texttt{AssignShiftRequest} & \textbf{Respuesta:} 200 OK (\texttt{EmployeeProfileResource}) \newline 404 NOT FOUND (\texttt{ProblemDetail}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{PUT} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak hr/\allowbreak employees/\allowbreak \{profileId\}/\allowbreak salary}} \\*
+\hline
+\textbf{Petición:} \texttt{UpdateSalaryRequest} & \textbf{Respuesta:} 200 OK (\texttt{EmployeeProfileResource}) \newline 404 NOT FOUND (\texttt{ProblemDetail}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{PATCH} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak hr/\allowbreak employees/\allowbreak \{profileId\}/\allowbreak status}} \\*
+\hline
+\textbf{Petición:} \texttt{UpdateEmploymentStatusRequest} & \textbf{Respuesta:} 200 OK (\texttt{EmployeeProfileResource}) \newline 404 NOT FOUND (\texttt{ProblemDetail}) \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Controladores REST perimetrales pertenecientes al paquete com.andeva.atelier.platform.hr.interfaces.rest.controllers.
+
+**Recursos DTO y Validación Declarativa de Entrada**
+
+La transferencia de datos a través del perímetro HTTP se modela exclusivamente mediante registros inmutables de Java, garantizando la inalterabilidad de las cargas útiles y la ausencia de efectos colaterales durante su serialización y deserialización.
+
+Las peticiones entrantes integran validaciones declarativas exhaustivas basadas en Jakarta Bean Validation, blindando la frontera del sistema frente a datos vacíos, rangos geográficos inválidos, importes monetarios inconsistentes o estados operativos imprevistos antes de alcanzar la capa de aplicación.
+
+En la @tbl:hr-resources-dtos se especifican los atributos principales y las reglas de validación declarativa asociadas a cada recurso DTO.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Recursos DTO de Entrada y Salida del Bounded Context Human Resources Management} \label{tbl:hr-resources-dtos} \\
+\hline
+\thfirst{Aspecto de Recurso} & \thcell{Especificación de Atributos e Integridad} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Recurso} & \thcell{Especificación de Atributos e Integridad} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} CreateWorkShiftResource \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{name}, \texttt{startTime}, \texttt{endTime}, \texttt{gracePeriodMinutes} \\*
+\hline
+\textbf{Validación de Integridad} & Anotaciones \texttt{@NotBlank}, \texttt{@Size(max = 100)} para nombre de turno, \texttt{@NotNull} para inicio y fin de jornada, y \texttt{@Min(0)}, \texttt{@Max(60)} para tolerancia de ingreso en minutos. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} UpdateWorkShiftResource \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{name}, \texttt{startTime}, \texttt{endTime}, \texttt{gracePeriodMinutes} \\*
+\hline
+\textbf{Validación de Integridad} & Anotaciones \texttt{@NotBlank}, \texttt{@Size(max = 100)}, \texttt{@NotNull} para horas de jornada y \texttt{@Min(0)}, \texttt{@Max(60)} para margen de tolerancia. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} ClockInRequest \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{branchId}, \texttt{shiftId}, \texttt{latitude}, \texttt{longitude} \\*
+\hline
+\textbf{Validación de Integridad} & Anotaciones \texttt{@NotNull} para identificadores de sucursal y turno, \texttt{@NotNull}, \texttt{@DecimalMin("-90.0")}, \texttt{@DecimalMax("90.0")} para latitud y \texttt{@NotNull}, \texttt{@DecimalMin("-180.0")}, \texttt{@DecimalMax("180.0")} para longitud geodésica. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} ClockOutRequest \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{attendanceId}, \texttt{clockOutTime} \\*
+\hline
+\textbf{Validación de Integridad} & Anotaciones \texttt{@NotNull} para identificador de asistencia y marca temporal estandarizada de egreso. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} JustifyAttendanceRequest \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{reason} \\*
+\hline
+\textbf{Validación de Integridad} & Anotaciones \texttt{@NotBlank} y \texttt{@Size(max = 500)} para exposición del motivo de regularización. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} GeneratePayrollRequest \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{membershipId}, \texttt{periodStart}, \texttt{periodEnd} \\*
+\hline
+\textbf{Validación de Integridad} & Anotaciones \texttt{@NotNull} para colaborador y fechas de delimitación del periodo laboral. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} AddPayrollDeductionRequest \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{concept}, \texttt{amount}, \texttt{currency}, \texttt{deductionType}, \texttt{date} \\*
+\hline
+\textbf{Validación de Integridad} & Anotaciones \texttt{@NotBlank}, \texttt{@Size(max = 150)} para concepto, \texttt{@NotNull}, \texttt{@Positive} para monto, \texttt{@Pattern(regexp = "PEN|USD")} para divisa y \texttt{@NotNull} para fecha de imputación. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} AddPayrollBonusRequest \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{concept}, \texttt{amount}, \texttt{currency}, \texttt{bonusType}, \texttt{date} \\*
+\hline
+\textbf{Validación de Integridad} & Anotaciones \texttt{@NotBlank}, \texttt{@Size(max = 150)} para concepto, \texttt{@NotNull}, \texttt{@Positive} para importe, \texttt{@Pattern(regexp = "PEN|USD")} para moneda y \texttt{@NotNull} para fecha contable. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} DisbursePayrollRequest \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{paymentReference}, \texttt{paidAt} \\*
+\hline
+\textbf{Validación de Integridad} & Anotaciones \texttt{@NotBlank}, \texttt{@Size(max = 100)} para comprobante o referencia bancaria y \texttt{@NotNull} para marca temporal de pago. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} RegisterEmployeeProfileRequest \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{branchId}, \texttt{membershipId}, \texttt{shiftId}, \texttt{baseSalary}, \texttt{currency}, \texttt{salaryType}, \texttt{jobTitle} \\*
+\hline
+\textbf{Validación de Integridad} & Anotaciones \texttt{@NotNull} para sucursal, membresía y turno, \texttt{@NotNull}, \texttt{@Positive} para remuneración base, \texttt{@Pattern(regexp = "PEN|USD")} para divisa y \texttt{@NotBlank}, \texttt{@Size(max = 100)} para cargo laboral. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} AssignShiftRequest \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{shiftId} \\*
+\hline
+\textbf{Validación de Integridad} & Anotación \texttt{@NotNull} para identificador único de turno. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} UpdateSalaryRequest \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{baseSalary}, \texttt{currency}, \texttt{salaryType} \\*
+\hline
+\textbf{Validación de Integridad} & Anotaciones \texttt{@NotNull}, \texttt{@Positive} para remuneración base, \texttt{@Pattern(regexp = "PEN|USD")} para moneda y \texttt{@NotBlank} para esquema salarial. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} UpdateEmploymentStatusRequest \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{employmentStatus} \\*
+\hline
+\textbf{Validación de Integridad} & Anotaciones \texttt{@NotBlank} y \texttt{@Pattern(regexp = "ACTIVE|ON\_LEAVE|TERMINATED")} para estado laboral. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} WorkShiftResource \quad (\textit{Categoría:} Respuesta)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{id}, \texttt{name}, \texttt{startTime}, \texttt{endTime}, \texttt{gracePeriodMinutes}, \texttt{isActive} \\*
+\hline
+\textbf{Validación de Integridad} & Ficha inmutable de turno operativo con estado de vigencia y parámetros de tolerancia. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} AttendanceResource \quad (\textit{Categoría:} Respuesta)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{id}, \texttt{branchId}, \texttt{membershipId}, \texttt{shiftId}, \texttt{clockIn}, \texttt{clockOut}, \texttt{status}, \texttt{distanceToBranchMeters} \\*
+\hline
+\textbf{Validación de Integridad} & Registro de marcación presencial con auditoría geodésica, cómputo métrico y justificación administrativa. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} PayrollPaymentResource \quad (\textit{Categoría:} Respuesta)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{id}, \texttt{membershipId}, \texttt{periodStart}, \texttt{periodEnd}, \texttt{baseAmount}, \texttt{totalPaid}, \texttt{currency}, \texttt{status}, \texttt{items} \\*
+\hline
+\textbf{Validación de Integridad} & Boleta de haberes con desglose analítico de partidas, comprobante bancario e importes netos. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} PayrollPaymentSummaryResource \quad (\textit{Categoría:} Respuesta)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{id}, \texttt{membershipId}, \texttt{periodStart}, \texttt{periodEnd}, \texttt{baseAmount}, \texttt{totalPaid}, \texttt{currency}, \texttt{status} \\*
+\hline
+\textbf{Validación de Integridad} & Representación compacta proyectada para listados de nómina y monitoreo administrativo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} PayrollItemResource \quad (\textit{Categoría:} Respuesta)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{id}, \texttt{category}, \texttt{concept}, \texttt{amount}, \texttt{type}, \texttt{date} \\*
+\hline
+\textbf{Validación de Integridad} & Partida individual de bono o retención legal asociada a la liquidación salarial. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} EmployeeProfileResource \quad (\textit{Categoría:} Respuesta)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{id}, \texttt{branchId}, \texttt{membershipId}, \texttt{assignedShiftId}, \texttt{baseSalary}, \texttt{currency}, \texttt{jobTitle}, \texttt{employmentStatus} \\*
+\hline
+\textbf{Validación de Integridad} & Expediente laboral completo del colaborador automotriz con sucursal física y esquema contractual. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes de transporte pertenecientes al paquete com.andeva.atelier.platform.hr.interfaces.rest.resources.
+
+**Ensambladores y Transformadores de Recursos**
+
+El desacoplamiento entre las estructuras de transporte perimetral y los contratos de la Capa de Aplicación se materializa mediante ensambladores bidireccionales de recursos. Los transformadores de entrada reciben los recursos validados y componen comandos de aplicación enriquecidos con identificadores de contexto autenticados.
+
+Por su parte, los ensambladores de salida transforman entidades de dominio y agregados en representaciones DTO preparadas para el consumo por parte de clientes externos, resguardando la encapsulación interna y omitiendo metadatos sensibles de persistencia relacional.
+
+En la @tbl:hr-resource-assemblers se describen las responsabilidades y firmas de transformación tipada provistas por los ensambladores del bounded context.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Ensambladores de Recursos del Bounded Context Human Resources Management} \label{tbl:hr-resource-assemblers} \\
+\hline
+\thfirst{Aspecto del Ensamblador} & \thcell{Firma y Transformación de Tipos} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto del Ensamblador} & \thcell{Firma y Transformación de Tipos} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} WorkShiftResourceAssembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toCommandFromResource} \\*
+\hline
+\textbf{Transformación} & \texttt{CreateWorkShiftResource,\allowbreak  TenantId} $\longrightarrow$ \texttt{CreateWorkShiftCommand} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} WorkShiftResourceAssembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toCommandFromResource} \\*
+\hline
+\textbf{Transformación} & \texttt{UpdateWorkShiftResource,\allowbreak  UUID,\allowbreak  TenantId} $\longrightarrow$ \texttt{UpdateWorkShiftCommand} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} WorkShiftResourceAssembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toResourceFromEntity} \\*
+\hline
+\textbf{Transformación} & \texttt{WorkShift} $\longrightarrow$ \texttt{WorkShiftResource} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} WorkShiftResourceAssembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toResourceListFromEntities} \\*
+\hline
+\textbf{Transformación} & \texttt{List\textless WorkShift\textgreater} $\longrightarrow$ \texttt{List\textless WorkShiftResource\textgreater} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} AttendanceResourceAssembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toCommandFromResource} \\*
+\hline
+\textbf{Transformación} & \texttt{ClockInRequest,\allowbreak  UUID,\allowbreak  TenantId} $\longrightarrow$ \texttt{ClockInCommand} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} AttendanceResourceAssembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toCommandFromResource} \\*
+\hline
+\textbf{Transformación} & \texttt{ClockOutRequest,\allowbreak  UUID,\allowbreak  TenantId} $\longrightarrow$ \texttt{ClockOutCommand} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} AttendanceResourceAssembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toCommandFromResource} \\*
+\hline
+\textbf{Transformación} & \texttt{JustifyAttendanceRequest,\allowbreak  UUID,\allowbreak  UUID,\allowbreak  TenantId} $\longrightarrow$ \texttt{JustifyAttendanceCommand} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} AttendanceResourceAssembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toResourceFromEntity} \\*
+\hline
+\textbf{Transformación} & \texttt{AttendanceRecord} $\longrightarrow$ \texttt{AttendanceResource} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} AttendanceResourceAssembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toResourceListFromEntities} \\*
+\hline
+\textbf{Transformación} & \texttt{List\textless AttendanceRecord\textgreater} $\longrightarrow$ \texttt{List\textless AttendanceResource\textgreater} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} PayrollPaymentResourceAssembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toCommandFromResource} \\*
+\hline
+\textbf{Transformación} & \texttt{GeneratePayrollRequest,\allowbreak  TenantId} $\longrightarrow$ \texttt{GeneratePayrollCommand} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} PayrollPaymentResourceAssembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toCommandFromResource} \\*
+\hline
+\textbf{Transformación} & \texttt{AddPayrollDeductionRequest,\allowbreak  UUID,\allowbreak  TenantId} $\longrightarrow$ \texttt{AddPayrollDeductionCommand} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} PayrollPaymentResourceAssembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toCommandFromResource} \\*
+\hline
+\textbf{Transformación} & \texttt{AddPayrollBonusRequest,\allowbreak  UUID,\allowbreak  TenantId} $\longrightarrow$ \texttt{AddPayrollBonusCommand} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} PayrollPaymentResourceAssembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toCommandFromResource} \\*
+\hline
+\textbf{Transformación} & \texttt{DisbursePayrollRequest,\allowbreak  UUID,\allowbreak  TenantId} $\longrightarrow$ \texttt{DisbursePayrollCommand} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} PayrollPaymentResourceAssembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toResourceFromEntity} \\*
+\hline
+\textbf{Transformación} & \texttt{PayrollPayment} $\longrightarrow$ \texttt{PayrollPaymentResource} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} PayrollPaymentResourceAssembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toSummaryResourceFromEntity} \\*
+\hline
+\textbf{Transformación} & \texttt{PayrollPayment} $\longrightarrow$ \texttt{PayrollPaymentSummaryResource} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} PayrollPaymentResourceAssembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toItemResourceFromEntity} \\*
+\hline
+\textbf{Transformación} & \texttt{PayrollItem} $\longrightarrow$ \texttt{PayrollItemResource} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} EmployeeProfileResourceAssembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toCommandFromResource} \\*
+\hline
+\textbf{Transformación} & \texttt{RegisterEmployeeProfileRequest,\allowbreak  TenantId} $\longrightarrow$ \texttt{RegisterEmployeeProfileCommand} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} EmployeeProfileResourceAssembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toCommandFromResource} \\*
+\hline
+\textbf{Transformación} & \texttt{AssignShiftRequest,\allowbreak  UUID,\allowbreak  TenantId} $\longrightarrow$ \texttt{AssignShiftCommand} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} EmployeeProfileResourceAssembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toCommandFromResource} \\*
+\hline
+\textbf{Transformación} & \texttt{UpdateSalaryRequest,\allowbreak  UUID,\allowbreak  TenantId} $\longrightarrow$ \texttt{UpdateSalaryCommand} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} EmployeeProfileResourceAssembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toCommandFromResource} \\*
+\hline
+\textbf{Transformación} & \texttt{UpdateEmploymentStatusRequest,\allowbreak  UUID,\allowbreak  TenantId} $\longrightarrow$ \texttt{UpdateEmploymentStatusCommand} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} EmployeeProfileResourceAssembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toResourceFromEntity} \\*
+\hline
+\textbf{Transformación} & \texttt{EmployeeProfile} $\longrightarrow$ \texttt{EmployeeProfileResource} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} EmployeeProfileResourceAssembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toResourceListFromEntities} \\*
+\hline
+\textbf{Transformación} & \texttt{List\textless EmployeeProfile\textgreater} $\longrightarrow$ \texttt{List\textless EmployeeProfileResource\textgreater} \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Ensambladores de recursos pertenecientes al paquete com.andeva.atelier.platform.hr.interfaces.rest.assemblers.
+
+**Fachada de Contexto Abierto (Open Host Service / Inbound ACL)**
+
+Para habilitar una colaboración síncrona de alto desempeño entre Human Resources Management y los bounded contexts limítrofes sin generar acoplamientos circulares, se implementa el patrón Open Host Service respaldado por una Capa Anticorrupción de entrada.
+
+La interfaz **HumanResourcesContextFacade**, ubicada en el paquete canónico **com.andeva.atelier.platform.hr.interfaces.acl**, expone operaciones de consulta rápida en memoria que permiten a Workshop Operations verificar la presencia activa de mecánicos en foso y obtener perfiles operativos sin acceder a entidades de persistencia ni repositorios transaccionales.
+
+En la @tbl:hr-context-facade se detallan los métodos del contrato de fachada, sus firmas de parámetros, tipos de retorno y bounded contexts consumidores.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Métodos de la Fachada de Contexto Abierto HumanResourcesContextFacade} \label{tbl:hr-context-facade} \\
+\hline
+\thfirst{Aspecto del Contrato} & \thcell{Firma, Retorno y Consumidores} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto del Contrato} & \thcell{Firma, Retorno y Consumidores} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método de Fachada:} \texttt{isMechanicOnDuty}} \\*
+\hline
+\textbf{Parámetros y Retorno} & \texttt{UUID membershipId} $\longrightarrow$ \texttt{boolean} \\*
+\hline
+\textbf{Módulos Consumidores} & Workshop Operations (MRO) \\*
+\hline
+\textbf{Propósito} & Comprobación síncrona en memoria para verificar si el técnico automotriz registró asistencia válida hoy en patio y no ha efectuado egreso laboral. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método de Fachada:} \texttt{getMechanicActiveBranchId}} \\*
+\hline
+\textbf{Parámetros y Retorno} & \texttt{UUID membershipId} $\longrightarrow$ \texttt{Optional\textless UUID\textgreater} \\*
+\hline
+\textbf{Módulos Consumidores} & Workshop Operations (MRO), Inventory \\*
+\hline
+\textbf{Propósito} & Determinación de la sucursal física operativa donde el colaborador se encuentra activo para despachar piezas y asignar órdenes de trabajo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método de Fachada:} \texttt{getMechanicProfile}} \\*
+\hline
+\textbf{Parámetros y Retorno} & \texttt{UUID membershipId} $\longrightarrow$ \texttt{Optional\textless MechanicDutyProfileDto\textgreater} \\*
+\hline
+\textbf{Módulos Consumidores} & Workshop Operations (MRO), IAM \\*
+\hline
+\textbf{Propósito} & Obtención del perfil de servicio del técnico con cargo laboral, turno activo y estado de disponibilidad en patio automotriz. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método de Fachada:} \texttt{getDailyAttendanceSummary}} \\*
+\hline
+\textbf{Parámetros y Retorno} & \texttt{UUID membershipId,\allowbreak  LocalDate date} $\longrightarrow$ \texttt{Optional\textless AttendanceSummaryDto\textgreater} \\*
+\hline
+\textbf{Módulos Consumidores} & Workshop Operations (MRO), Auditoría Operacional \\*
+\hline
+\textbf{Propósito} & Consulta de estado de asistencia de la jornada con verificación de tardanza o justificaciones administrativas. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método de Fachada:} \texttt{calculateAccruedProductivityBonus}} \\*
+\hline
+\textbf{Parámetros y Retorno} & \texttt{UUID membershipId,\allowbreak  LocalDate periodStart,\allowbreak  LocalDate periodEnd} $\longrightarrow$ \texttt{BigDecimal} \\*
+\hline
+\textbf{Módulos Consumidores} & Invoicing, Reportes Financieros, Liquidación Salarial \\*
+\hline
+\textbf{Propósito} & Cálculo del saldo acumulado por concepto de comisiones y bonificaciones por órdenes de trabajo culminadas en el intervalo seleccionado. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Métodos canónicos de interoperabilidad en memoria del paquete com.andeva.atelier.platform.hr.interfaces.acl.
+
+**Eventos de Integración (Published Language)**
+
+La coordinación asíncrona entre Human Resources Management y el resto de la plataforma se articula a través de un lenguaje publicado compuesto por cuatro eventos de integración inmutables, garantizando consistencia eventual confiable y evitando bloqueos distribuidos.
+
+Estos eventos se persisten atómicamente junto con los cambios de estado en la tabla de mensajería del Transactional Outbox, permitiendo que un despachador en segundo plano los publique hacia el bus de eventos para sincronizar asignaciones de patio en Workshop Operations, emitir comprobantes de egreso en Invoicing y mantener actualizados los directorios de IAM.
+
+En la @tbl:hr-integration-events se sintetiza la estructura de carga útil, módulos receptores y propósito funcional de los eventos de integración emitidos.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Eventos de Integración del Bounded Context Human Resources Management} \label{tbl:hr-integration-events} \\
+\hline
+\thfirst{Aspecto de Integración} & \thcell{Carga Útil y Sincronización Intermodular} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Integración} & \thcell{Carga Útil y Sincronización Intermodular} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Integración:} MechanicCheckedInIntegrationEvent} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{attendanceId}, \texttt{tenantId}, \texttt{branchId}, \texttt{membershipId}, \texttt{clockInTime}, \texttt{occurredOn} \\*
+\hline
+\textbf{Módulos Receptores} & Workshop Operations (MRO) \\*
+\hline
+\textbf{Propósito} & Notificación de ingreso válido en foso tras validar geocerca para habilitar la asignación de órdenes de mantenimiento en patio. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Integración:} MechanicClockedOutIntegrationEvent} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{attendanceId}, \texttt{tenantId}, \texttt{branchId}, \texttt{membershipId}, \texttt{clockOutTime}, \texttt{totalMinutesWorked}, \texttt{occurredOn} \\*
+\hline
+\textbf{Módulos Receptores} & Workshop Operations (MRO) \\*
+\hline
+\textbf{Propósito} & Notificación de cierre de turno laboral para auditar vehículos retenidos en bahías y reasignar faenas pendientes. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Integración:} PayrollDisbursedIntegrationEvent} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{payrollId}, \texttt{tenantId}, \texttt{membershipId}, \texttt{periodStart}, \texttt{periodEnd}, \texttt{totalPaid}, \texttt{currency}, \texttt{paymentReference}, \texttt{paidAt}, \texttt{occurredOn} \\*
+\hline
+\textbf{Módulos Receptores} & Invoicing (Facturación y Contabilidad), Auditoría Financiera \\*
+\hline
+\textbf{Propósito} & Certificación de pago formal de haberes para asentar el egreso en el libro diario contable y conciliar la tesorería del taller. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Integración:} EmployeeProfileRegisteredIntegrationEvent} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{profileId}, \texttt{tenantId}, \texttt{branchId}, \texttt{membershipId}, \texttt{jobTitle}, \texttt{occurredOn} \\*
+\hline
+\textbf{Módulos Receptores} & IAM \& Tenancy, Workshop Operations (MRO) \\*
+\hline
+\textbf{Propósito} & Notificación de alta de expediente laboral para coordinar credenciales de acceso y habilitación operativa en la sede respectiva. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Registros inmutables del lenguaje publicado pertenecientes al paquete com.andeva.atelier.platform.hr.interfaces.events.
+
+El diseño arquitectónico de la Capa de Interfaz de Human Resources Management consolida tres directrices fundamentales de ingeniería de software que respaldan la fiabilidad operacional y la equidad retributiva en el taller:
+
+En primer lugar, la resiliencia perimetral y la mitigación sistemática de suplantación en el control de asistencia se fundamentan en la verificación geodésica ejecutada directamente en memoria. Al confrontar las coordenadas del dispositivo móvil contra la geocerca de la sucursal mediante la formulación trigonométrica de Haversine dentro de la máquina virtual, se valida la presencia física del técnico en microsegundos sin transferir costos a servicios cartográficos externos ni exponer cuellos de botella por congestión de red, rechazando solicitudes ilícitas antes de comprometer recursos de persistencia.
+
+En segundo término, la gestión de nóminas instaura un modelo determinista que asegura exactitud contable y estricta conformidad tributaria frente a la normativa laboral peruana. La inmutabilidad de las boletas en estado cerrado salvaguarda la integridad de las liquidaciones frente a modificaciones extemporáneas, mientras que el endpoint de exportación genera archivos planos estructurados bajo el estándar de la Planilla Mensual de Pagos SUNAT PLAME con validación de cabeceras de descarga, optimizando la conciliación bancaria masiva y protegiendo al taller ante eventuales fiscalizaciones.
+
+Por último, el desacoplamiento intermodular sustentado en la fachada de contexto abierto y la publicación asíncrona vía Transactional Outbox garantiza la máxima autonomía para las operaciones de patio. Workshop Operations consulta la disponibilidad presencial de los mecánicos a través de contratos tipados sin depender de las estructuras internas de nómina ni esquemas salariales, mientras que los eventos de ingreso, egreso y desembolso se propagan reactivamente sin retener bloqueos relacionales transaccionales, afianzando la resiliencia y escalabilidad integral del sistema automotriz.
 
 #### 2.6.6.3. Application Layer
 
+La Capa de Aplicación de Human Resources Management constituye el núcleo orquestador de los flujos laborales, de fiscalización de jornada presencial y de compensación económica en Atelier Platform, coordinando la gestión de turnos de trabajo, la trazabilidad satelital de asistencia y la liquidación contable de haberes periódicos.
 
+Ubicada en el paquete canónico com.andeva.atelier.platform.hr.application, su diseño arquitectónico adopta una segregación rigurosa bajo el patrón CQRS, desacoplando las operaciones mutacionales de escritura de las proyecciones de solo lectura a través de cuatro directrices esenciales de diseño:
+
+- **Orquestación transaccional determinista orientada al flujo de vías (Railway-Oriented Programming):** Retorno estandarizado a través del tipo sellado **Result<T, ApplicationError>**, tratando las anomalías operativas de negocio como valores inmutables y erradicando excepciones en tiempo de ejecución para el control de flujo.
+
+- **Segregación estricta de responsabilidades de mutación y lectura (CQRS):** Servicios de comando configurados bajo transaccionalidad atómica y control de concurrencia optimista, coordinados en paralelo con servicios de consulta de solo lectura acelerados mediante almacenamiento en caché local.
+
+- **Automatización de cálculo retributivo y cumplimiento de interoperabilidad tributaria SUNAT PLAME:** Integración continua entre penalidades de patio, comisiones por órdenes de trabajo culminadas en MRO y estructuración matemática de tramas oficiales de exportación para la autoridad fiscal.
+
+- **Desacoplamiento de dependencias perimetrales mediante puertos de salida ACL y Transactional Outbox:** Aislamiento de subsistemas perimetrales de sucursales físicas, órdenes de trabajo de taller y pasarelas de mensajería mediante contratos agnósticos con entrega garantizada de eventos.
+
+A fin de ofrecer una visión sistemática de estos componentes, en la @tbl:hr-application-types se presenta el catálogo consolidado de las clases, interfaces y registros que estructuran la Capa de Aplicación de Human Resources Management.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Catálogo Consolidado de la Capa de Aplicación de Human Resources Management} \label{tbl:hr-application-types} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\
+\hline
+\endhead
+Work\allowbreak Shift\allowbreak Command\allowbreak Service\allowbreak Impl & Orquesta el ciclo de vida de turnos laborales, definición de tolerancias horarias y control de vigencia operativa. \\*
+\hline
+\textbf{Categoría} & Implementación de Comando \\*
+\hline
+\textbf{Relaciones} & Coordina agregados WorkShift con persistencia transaccional ACID. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak application.\allowbreak services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Attendance\allowbreak Command\allowbreak Service\allowbreak Impl & Orquesta la marcación presencial geocercada, cálculo de minutos efectivos laborados y justificación formal de tardanzas. \\*
+\hline
+\textbf{Categoría} & Implementación de Comando \\*
+\hline
+\textbf{Relaciones} & Coordina agregados AttendanceRecord con TenancyAclGateway y HaversineGeofencingService. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak application.\allowbreak services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Payroll\allowbreak Payment\allowbreak Command\allowbreak Service\allowbreak Impl & Orquesta la proforma retributiva periódica, cómputo de penalidades, adición de bonos de taller y desembolso bancario. \\*
+\hline
+\textbf{Categoría} & Implementación de Comando \\*
+\hline
+\textbf{Relaciones} & Coordina agregados PayrollPayment con OperationsAclGateway y TransactionalEmailGateway. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak application.\allowbreak services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Employee\allowbreak Profile\allowbreak Command\allowbreak Service\allowbreak Impl & Administra expedientes de contratación laboral, asignación de turnos, categorización salarial y vigencia de convenios. \\*
+\hline
+\textbf{Categoría} & Implementación de Comando \\*
+\hline
+\textbf{Relaciones} & Coordina agregados EmployeeProfile con TenancyAclGateway para validación de identidades IAM. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak application.\allowbreak services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Work\allowbreak Shift\allowbreak Query\allowbreak Service\allowbreak Impl & Atiende consultas de solo lectura del catálogo de turnos con aceleración de consultas mediante Caffeine Cache. \\*
+\hline
+\textbf{Categoría} & Implementación de Consulta \\*
+\hline
+\textbf{Relaciones} & Consulta WorkShiftRepository bajo aislamiento de solo lectura. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak application.\allowbreak services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Attendance\allowbreak Query\allowbreak Service\allowbreak Impl & Provee consultas de asistencia diaria por sucursal, historial de puntualidad de mecánicos y estado de jornada en curso. \\*
+\hline
+\textbf{Categoría} & Implementación de Consulta \\*
+\hline
+\textbf{Relaciones} & Consulta AttendanceRecordRepository bajo aislamiento de solo lectura. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak application.\allowbreak services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Payroll\allowbreak Payment\allowbreak Query\allowbreak Service\allowbreak Impl & Recupera boletas salariales individuales, relaciones paginadas de planillas y construye la trama de texto oficial SUNAT PLAME. \\*
+\hline
+\textbf{Categoría} & Implementación de Consulta \\*
+\hline
+\textbf{Relaciones} & Consulta PayrollPaymentRepository bajo aislamiento de solo lectura. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak application.\allowbreak services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Employee\allowbreak Profile\allowbreak Query\allowbreak Service\allowbreak Impl & Resuelve consultas de expedientes de personal, fichas por sucursal y disponibilidad técnica en patio en tiempo real. \\*
+\hline
+\textbf{Categoría} & Implementación de Consulta \\*
+\hline
+\textbf{Relaciones} & Consulta EmployeeProfileRepository bajo aislamiento de solo lectura. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak application.\allowbreak services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Attendance\allowbreak Domain\allowbreak Events\allowbreak Handler & Oyente transaccional que propaga eventos de marcación hacia el Transactional Outbox y audita infracciones de geocerca. \\*
+\hline
+\textbf{Categoría} & Manejador de Eventos \\*
+\hline
+\textbf{Relaciones} & Publica eventos de integración hacia Workshop Operations vía Outbox. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak application.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Payroll\allowbreak Domain\allowbreak Events\allowbreak Handler & Oyente transaccional que despacha comprobantes de pago por correo electrónico y emite eventos de dispersión contable. \\*
+\hline
+\textbf{Categoría} & Manejador de Eventos \\*
+\hline
+\textbf{Relaciones} & Despacha boletas mediante TransactionalEmailGateway y emite eventos Outbox. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak application.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Human\allowbreak Resources\allowbreak External\allowbreak Events\allowbreak Listener & Oyente perimetral que recibe novedades de alta de miembros en IAM y finalización de tareas en MRO. \\*
+\hline
+\textbf{Categoría} & Manejador de Eventos \\*
+\hline
+\textbf{Relaciones} & Actualiza expedientes laborales y acumula comisiones devengadas por técnicos. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak application.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Tenancy\allowbreak Acl\allowbreak Gateway & Contrato de salida perimetral para validar coordenadas geodésicas y membresías de sedes físicas en IAM. \\*
+\hline
+\textbf{Categoría} & Pasarela de Aislamiento \\*
+\hline
+\textbf{Relaciones} & Implementado por TenancyAclGatewayImpl en la capa de infraestructura. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak application.\allowbreak ports} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Operations\allowbreak Acl\allowbreak Gateway & Contrato de salida perimetral para consultar comisiones devengadas por órdenes de trabajo en MRO. \\*
+\hline
+\textbf{Categoría} & Pasarela de Aislamiento \\*
+\hline
+\textbf{Relaciones} & Implementado por OperationsAclGatewayImpl en la capa de infraestructura. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak application.\allowbreak ports} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Transactional\allowbreak Email\allowbreak Gateway & Contrato de salida perimetral para remisión segura de boletas de pago electrónicas por correo corporativo. \\*
+\hline
+\textbf{Categoría} & Pasarela de Notificaciones \\*
+\hline
+\textbf{Relaciones} & Implementado por ResendEmailAdapter en la capa de infraestructura. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak application.\allowbreak ports} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Domain\allowbreak Event\allowbreak Publisher & Contrato de salida para inserción atómica de eventos en la tabla outbox\_messages del Shared Kernel. \\*
+\hline
+\textbf{Categoría} & Puerto de Eventos \\*
+\hline
+\textbf{Relaciones} & Implementado por DomainEventPublisherImpl en la capa de infraestructura. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak application.\allowbreak ports} \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Estructura modular del paquete com.andeva.atelier.platform.hr.application.
+
+**Servicios de Comandos y Orquestación Transaccional**
+
+La ejecución de casos de uso mutacionales y la coordinación del régimen laboral en el taller se centralizan en cuatro implementaciones de servicios de comandos delimitadas por agregados.
+
+El componente **WorkShiftCommandServiceImpl** gobierna la parametrización de horarios de trabajo. Al procesar **CreateWorkShiftCommand**, constata la unicidad de la denominación del turno dentro del taller y genera la entidad en estado activo. Mediante **UpdateWorkShiftCommand**, actualiza franjas horarias y ventanas de tolerancia verificando la coherencia cronológica e incrementando la versión de concurrencia optimista. Asimismo, ejecuta inhabilitaciones con **DeactivateWorkShiftCommand** protegiendo los contratos vigentes y restituye la operatividad con **ActivateWorkShiftCommand**.
+
+Por su parte, **AttendanceCommandServiceImpl** orquesta la comprobación de presencia física en patio. Al recibir **RecordClockInCommand**, consulta la geocerca de la sucursal mediante la pasarela perimetral, constata que no exista marcación abierta previa en la jornada y evalúa la proximidad geodésica del técnico en memoria con el servicio de Haversine, clasificando la puntualidad o tardanza y emitiendo el evento de ingreso. Mediante **RecordClockOutCommand**, computa los minutos efectivos laborados y cierra la jornada, mientras que **JustifyAttendanceCommand** permite regularizar incidencias disciplinarias previa autorización de jefatura.
+
+En cuanto a la compensación económica, **PayrollPaymentCommandServiceImpl** estructura la liquidación salarial periódica. Al ejecutar **GeneratePayrollCommand**, evalúa las penalidades de asistencia del mes, consulta comisiones devengadas en MRO mediante la pasarela perimetral y consolida la nómina proforma en estado borrador. Con **AddPayrollDeductionCommand** y **AddPayrollBonusCommand**, incorpora partidas extraordinarias recalculando el neto. Tras la verificación formal, **ApprovePayrollCommand** bloquea modificaciones y despacha el comprobante por correo, dando paso a **DisbursePayrollPaymentCommand** para registrar la dispersión bancaria y notificar a Contabilidad.
+
+Finalmente, **EmployeeProfileCommandServiceImpl** custodia los expedientes laborales de la organización. Mediante **RegisterEmployeeProfileCommand**, valida la identidad en IAM, corrobora la existencia del turno asignado y genera el expediente en estado activo. Asimismo, gobierna la movilidad interna del personal mediante **AssignShiftToEmployeeCommand**, actualiza el esquema retributivo contractual con **UpdateEmployeeSalaryCommand** y administra el ciclo de vigencia laboral mediante **UpdateEmploymentStatusCommand**.
+
+Para sintetizar los flujos mutacionales, en la @tbl:hr-command-services se detallan las operaciones, comandos de entrada, invariantes de consistencia transaccional y tipos de retorno de los servicios de comandos.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{6.0cm} | >{\raggedright\arraybackslash}p{9.4cm} |}
+\caption{Operaciones Transaccionales de los Servicios de Comandos de Human Resources Management} \label{tbl:hr-command-services} \\
+\hline
+\thfirst{Aspecto de Operación} & \thcell{Especificación de Orquestación y Consistencia} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Operación} & \thcell{Especificación de Orquestación y Consistencia} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} WorkShiftCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{CreateWorkShiftCommand} $\longrightarrow$ \texttt{Result<\allowbreak WorkShift,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Valida unicidad del nombre de turno en el taller. Instancia WorkShift en estado activo con rangos cronológicos coherentes y emite WorkShiftCreatedEvent. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} WorkShiftCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{UpdateWorkShiftCommand} $\longrightarrow$ \texttt{Result<\allowbreak WorkShift,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Verifica existencia del turno. Actualiza horario oficial y ventana de tolerancia horaria e incrementa la versión de concurrencia optimista. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} WorkShiftCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{DeactivateWorkShiftCommand} $\longrightarrow$ \texttt{Result<\allowbreak Void,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Inhabilita el turno de trabajo para nuevas contrataciones preservando la integridad referencial de convenios existentes. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} WorkShiftCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{ActivateWorkShiftCommand} $\longrightarrow$ \texttt{Result<\allowbreak Void,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Restaura la disponibilidad operativa de un turno previamente inhabilitado para futuras programaciones de personal. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} AttendanceCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{RecordClockInCommand} $\longrightarrow$ \texttt{Result<\allowbreak AttendanceRecord,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Consulta coordenadas de sucursal vía TenancyAclGateway. Constata ausencia de marcación abierta previa hoy. Evalúa geocerca mediante HaversineGeofencingService rechazando transgresiones espaciales. Determina puntualidad o tardanza y emite EmployeeClockedInEvent. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} AttendanceCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{RecordClockOutCommand} $\longrightarrow$ \texttt{Result<\allowbreak AttendanceRecord,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Localiza la marcación abierta del colaborador para la fecha en curso. Computa minutos netos laborados. Conmuta estado a completado y emite EmployeeClockedOutEvent. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} AttendanceCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{JustifyAttendanceCommand} $\longrightarrow$ \texttt{Result<\allowbreak AttendanceRecord,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Constata privilegios de supervisión de taller. Registra sustento formal de justificación sobre tardanza o falta. Actualiza el estatus disciplinario y anula penalización retributiva. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} PayrollPaymentCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{GeneratePayrollCommand} $\longrightarrow$ \texttt{Result<\allowbreak PayrollPayment,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Recupera perfil laboral y asistencias del período. Computa deducciones automáticas por tardanzas e inasistencias. Consulta comisiones de MRO vía OperationsAclGateway. Instancia nómina en estado DRAFT y emite PayrollCalculatedEvent. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} PayrollPaymentCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{AddPayrollDeductionCommand} $\longrightarrow$ \texttt{Result<\allowbreak PayrollPayment,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Constata que la boleta se encuentre en estado DRAFT. Incorpora partida de retención monetaria y recalcula el haber neto consolidado. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} PayrollPaymentCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{AddPayrollBonusCommand} $\longrightarrow$ \texttt{Result<\allowbreak PayrollPayment,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Verifica estado DRAFT de la boleta salarial. Agrega bonificación extraordinaria o incentivo técnico y recalcula el importe neto a pagar. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} PayrollPaymentCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{ApprovePayrollCommand} $\longrightarrow$ \texttt{Result<\allowbreak PayrollPayment,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Conmuta estado de DRAFT a APPROVED bloqueando modificaciones de partidas. Remite boleta proforma por correo electrónico vía TransactionalEmailGateway y emite PayrollApprovedEvent. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} PayrollPaymentCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{DisbursePayrollPaymentCommand} $\longrightarrow$ \texttt{Result<\allowbreak PayrollPayment,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Valida estado APPROVED. Asigna código de comprobante bancario. Conmuta a PAID. Emite PayrollDisbursedEvent y deposita PayrollDisbursedIntegrationEvent en el Outbox. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} EmployeeProfileCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{RegisterEmployeeProfileCommand} $\longrightarrow$ \texttt{Result<\allowbreak EmployeeProfile,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Valida existencia de usuario en IAM vía TenancyAclGateway y comprueba turno en sucursal. Crea expediente en estado activo y emite EmployeeProfileRegisteredEvent. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} EmployeeProfileCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{AssignShiftToEmployeeCommand} $\longrightarrow$ \texttt{Result<\allowbreak EmployeeProfile,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Comprueba existencia y estado activo del nuevo turno de trabajo. Actualiza asignación de horario en el expediente laboral. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} EmployeeProfileCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{UpdateEmployeeSalaryCommand} $\longrightarrow$ \texttt{Result<\allowbreak EmployeeProfile,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Actualiza monto base contractual y tipología retributiva registrando motivo formal de alteración salarial. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} EmployeeProfileCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{UpdateEmploymentStatusCommand} $\longrightarrow$ \texttt{Result<\allowbreak EmployeeProfile,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Transiciona estado operativo a activo en permiso o cesado. Ante cese laboral revoca turnos programados e inhabilita acceso a marcación móvil. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Clases ubicadas bajo el paquete com.andeva.atelier.platform.hr.application.services.
+
+**Servicios de Consulta y Proyecciones de Lectura**
+
+La recuperación de información y la alimentación de interfaces de usuario se estructuran mediante servicios de consulta especializados configurados bajo aislamiento transaccional de solo lectura, suprimiendo la sobrecarga de seguimiento de cambios en el motor de persistencia relacional.
+
+El componente **WorkShiftQueryServiceImpl** atiende las consultas del catálogo de turnos laborales. Resuelve la recuperación de turnos individuales (**GetWorkShiftByIdQuery**) acelerada mediante almacenamiento en caché local en memoria para minimizar accesos a base de datos durante los picos de marcación matutina, así como listados consolidados de turnos por taller (**ListWorkShiftsByTenantQuery**). Complementariamente, **AttendanceQueryServiceImpl** canaliza las consultas sobre asistencia presencial, proveyendo detalles individuales (**GetAttendanceRecordByIdQuery**), sábanas diarias de control de personal por sede física (**ListAttendanceByBranchAndDateQuery**), historiales acumulados de puntualidad (**GetEmployeeAttendanceHistoryQuery**) y el estado de marcación de la jornada actual (**GetTodayAttendanceByMembershipQuery**).
+
+Por su parte, **PayrollPaymentQueryServiceImpl** procesa las consultas vinculadas a la compensación económica. Recupera expedientes individuales de boletas salariales (**GetPayrollPaymentByIdQuery**) y relaciones paginadas de nóminas por período mensual (**ListPayrollPaymentsByPeriodQuery**). Asimismo, materializa la exportación fiscal de estructuras retributivas mediante **ExportSunatPlameRemQuery**, construyendo algorítmicamente la trama de texto plano delimitada por tuberías conforme a las especificaciones oficiales del formato 0601 de SUNAT PLAME. Por último, **EmployeeProfileQueryServiceImpl** atiende consultas de expedientes individuales (**GetEmployeeProfileByIdQuery** y **GetEmployeeProfileByMembershipIdQuery**), listados de colaboradores por sede (**ListEmployeeProfilesByBranchQuery**) y verificaciones de disponibilidad en patio en tiempo real (**IsEmployeeOnDutyQuery**).
+
+Con el propósito de consolidar estos contratos de lectura, en la @tbl:hr-query-services se presentan las firmas de los métodos de consulta, sus parámetros y los modelos inmutables proyectados por los servicios de consulta.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Métodos de Consulta de la Capa de Aplicación de Human Resources Management} \label{tbl:hr-query-services} \\
+\hline
+\thfirst{Aspecto de Consulta} & \thcell{Especificación Técnica y Recuperación} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Consulta} & \thcell{Especificación Técnica y Recuperación} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} WorkShiftQueryService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Parámetro y Proyección} & \texttt{GetWorkShiftByIdQuery} $\longrightarrow$ \texttt{Optional<\allowbreak WorkShift>\allowbreak } \\*
+\hline
+\textbf{Propósito de Consulta} & Consulta integral de turno por identificador UUID con aceleración mediante Caffeine Cache en memoria. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} WorkShiftQueryService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Parámetro y Proyección} & \texttt{ListWorkShiftsByTenantQuery} $\longrightarrow$ \texttt{List<\allowbreak WorkShift>\allowbreak } \\*
+\hline
+\textbf{Propósito de Consulta} & Catálogo completo de turnos vigentes adscritos al taller automotriz con ordenamiento alfabético. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} AttendanceQueryService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Parámetro y Proyección} & \texttt{GetAttendanceRecordByIdQuery} $\longrightarrow$ \texttt{Optional<\allowbreak AttendanceRecord>\allowbreak } \\*
+\hline
+\textbf{Propósito de Consulta} & Recuperación de expediente individual de marcación con coordenadas satelitales y marcas de tiempo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} AttendanceQueryService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Parámetro y Proyección} & \texttt{ListAttendanceByBranchAndDateQuery} $\longrightarrow$ \texttt{List<\allowbreak AttendanceResource>\allowbreak } \\*
+\hline
+\textbf{Propósito de Consulta} & Relación consolidada de asistencia por sucursal física con estatus de puntualidad y minutos de tardanza. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} AttendanceQueryService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Parámetro y Proyección} & \texttt{GetEmployeeAttendanceHistoryQuery} $\longrightarrow$ \texttt{List<\allowbreak AttendanceResource>\allowbreak } \\*
+\hline
+\textbf{Propósito de Consulta} & Historial cronológico de marcaciones del colaborador en un rango de fechas con cómputo de horas efectivas. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} AttendanceQueryService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Parámetro y Proyección} & \texttt{GetTodayAttendanceByMembershipQuery} $\longrightarrow$ \texttt{Optional<\allowbreak AttendanceResource>\allowbreak } \\*
+\hline
+\textbf{Propósito de Consulta} & Consulta del estado de marcación de la jornada actual para gobernanza de interfaz en terminales móviles. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} PayrollPaymentQueryService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Parámetro y Proyección} & \texttt{GetPayrollPaymentByIdQuery} $\longrightarrow$ \texttt{Optional<\allowbreak PayrollPayment>\allowbreak } \\*
+\hline
+\textbf{Propósito de Consulta} & Recuperación de boleta de pago individual con desglose íntegro de haberes comisiones de patio y descuentos. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} PayrollPaymentQueryService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Parámetro y Proyección} & \texttt{ListPayrollPaymentsByPeriodQuery} $\longrightarrow$ \texttt{PagedResult<\allowbreak PayrollPayment>\allowbreak } \\*
+\hline
+\textbf{Propósito de Consulta} & Relación paginada de nóminas salariales del taller filtradas por período mensual y estado de ciclo de vida. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} PayrollPaymentQueryService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Parámetro y Proyección} & \texttt{ExportSunatPlameRemQuery} $\longrightarrow$ \texttt{String} \\*
+\hline
+\textbf{Propósito de Consulta} & Construcción determinista del archivo plano punto rem bajo formato oficial 0601 de SUNAT PLAME delimitado por tuberías con conceptos de ley devengados y pagados. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} EmployeeProfileQueryService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Parámetro y Proyección} & \texttt{GetEmployeeProfileByIdQuery} $\longrightarrow$ \texttt{Optional<\allowbreak EmployeeProfile>\allowbreak } \\*
+\hline
+\textbf{Propósito de Consulta} & Recuperación de expediente de contratación laboral del colaborador por identificador primario universal. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} EmployeeProfileQueryService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Parámetro y Proyección} & \texttt{GetEmployeeProfileByMembershipIdQuery} $\longrightarrow$ \texttt{Optional<\allowbreak EmployeeProfile>\allowbreak } \\*
+\hline
+\textbf{Propósito de Consulta} & Proyección de ficha de colaborador vinculada a la cuenta de usuario y membresía del taller en IAM. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} EmployeeProfileQueryService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Parámetro y Proyección} & \texttt{ListEmployeeProfilesByBranchQuery} $\longrightarrow$ \texttt{List<\allowbreak EmployeeProfile>\allowbreak } \\*
+\hline
+\textbf{Propósito de Consulta} & Directorio de colaboradores en servicio activo asignados a una sucursal física del taller mecánico. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} EmployeeProfileQueryService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Parámetro y Proyección} & \texttt{IsEmployeeOnDutyQuery} $\longrightarrow$ \texttt{boolean} \\*
+\hline
+\textbf{Propósito de Consulta} & Comprobación en tiempo real de presencia física en patio con ingreso confirmado y sin egreso registrado. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Clases ubicadas bajo el paquete com.andeva.atelier.platform.hr.application.services.
+
+**Manejadores de Eventos de Dominio e Integración**
+
+La arquitectura reactiva del Bounded Context articula la sincronización intermodular diferenciando las acciones de auditoría interna de las propagaciones transaccionales asíncronas hacia el Transactional Outbox.
+
+El componente **AttendanceDomainEventsHandler** reacciona ante las transiciones del registro de presencia. Al capturar la confirmación de ingreso de un técnico automotriz, despacha un evento de integración hacia el Transactional Outbox para que Workshop Operations actualice el tablero de técnicos disponibles en patio. Asimismo, audita infracciones espaciales cuando se detectan transgresiones de geocerca, registra penalizaciones ante tardanzas confirmadas y emite avisos de egreso laboral para alertar sobre labores pendientes en bahía mecánica.
+
+Por su parte, **PayrollDomainEventsHandler** administra las consecuencias colaterales de la nómina salarial. Al confirmarse el cálculo proforma, genera avisos preventivos para la jefatura de recursos humanos. Asimismo, tras la aprobación formal, orquesta la generación documental de la boleta electrónica remitiéndola por correo al colaborador, y ante la dispersión efectiva emite el evento de integración contable para formalizar la salida de fondos bancarios. Finalmente, **HumanResourcesExternalEventsListener** atiende eventos externos de IAM para aprovisionar expedientes laborales iniciales y de Workshop Operations para acumular comisiones por órdenes cerradas.
+
+A fin de sintetizar la coreografía reactiva, en la @tbl:hr-event-handlers se especifican las responsabilidades, fases transaccionales y destinos de los manejadores de eventos de la capa.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Manejadores de Eventos de Dominio e Integración de Human Resources Management} \label{tbl:hr-event-handlers} \\
+\hline
+\thfirst{Aspecto del Manejador} & \thcell{Orquestación y Efecto Colateral} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto del Manejador} & \thcell{Orquestación y Efecto Colateral} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Manejador:} AttendanceDomainEventsHandler} \\*
+\hline
+\textbf{Evento Capturado} & \texttt{EmployeeClockedInEvent} \quad (\textit{Fase:} Posterior a confirmación) \\*
+\hline
+\textbf{Acción Orquestada} & Captura la marcación presencial válida y despacha MechanicCheckedInIntegrationEvent al Outbox para actualizar disponibilidad de técnicos en MRO. \\*
+\hline
+\textbf{Destino del Efecto} & Transactional Outbox / Workshop Operations \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Manejador:} AttendanceDomainEventsHandler} \\*
+\hline
+\textbf{Evento Capturado} & \texttt{LateAttendanceRecordedEvent} \quad (\textit{Fase:} Posterior a confirmación) \\*
+\hline
+\textbf{Acción Orquestada} & Registra la infracción horaria en el expediente del trabajador y genera una notificación preventiva en el panel de supervisión de taller. \\*
+\hline
+\textbf{Destino del Efecto} & Expediente Laboral / Panel de Taller \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Manejador:} AttendanceDomainEventsHandler} \\*
+\hline
+\textbf{Evento Capturado} & \texttt{GeofenceViolationDetectedEvent} \quad (\textit{Fase:} Posterior a confirmación) \\*
+\hline
+\textbf{Acción Orquestada} & Genera un registro de auditoría de seguridad conteniendo las coordenadas satelitales reportadas fuera del perímetro permitido. \\*
+\hline
+\textbf{Destino del Efecto} & Bitácora de Seguridad / Auditoría \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Manejador:} AttendanceDomainEventsHandler} \\*
+\hline
+\textbf{Evento Capturado} & \texttt{EmployeeClockedOutEvent} \quad (\textit{Fase:} Posterior a confirmación) \\*
+\hline
+\textbf{Acción Orquestada} & Notifica el egreso del trabajador y emite MechanicClockedOutIntegrationEvent hacia MRO alertando sobre tareas inconclusas en foso. \\*
+\hline
+\textbf{Destino del Efecto} & Transactional Outbox / Workshop Operations \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Manejador:} AttendanceDomainEventsHandler} \\*
+\hline
+\textbf{Evento Capturado} & \texttt{AttendanceJustifiedEvent} \quad (\textit{Fase:} Posterior a confirmación) \\*
+\hline
+\textbf{Acción Orquestada} & Actualiza las estadísticas disciplinarias del expediente laboral revocando el descuento salarial automático proforma. \\*
+\hline
+\textbf{Destino del Efecto} & Expediente Laboral / Módulo de Nómina \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Manejador:} PayrollDomainEventsHandler} \\*
+\hline
+\textbf{Evento Capturado} & \texttt{PayrollCalculatedEvent} \quad (\textit{Fase:} Posterior a confirmación) \\*
+\hline
+\textbf{Acción Orquestada} & Emite alerta interna al responsable de administración del taller informando la disponibilidad de la planilla proforma para revisión. \\*
+\hline
+\textbf{Destino del Efecto} & Panel de Gestión / Recursos Humanos \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Manejador:} PayrollDomainEventsHandler} \\*
+\hline
+\textbf{Evento Capturado} & \texttt{PayrollApprovedEvent} \quad (\textit{Fase:} Posterior a confirmación) \\*
+\hline
+\textbf{Acción Orquestada} & Genera la boleta de pago electrónica en formato PDF y la remite al correo del colaborador vía TransactionalEmailGateway. \\*
+\hline
+\textbf{Destino del Efecto} & TransactionalEmailGateway / Correo Electrónico \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Manejador:} PayrollDomainEventsHandler} \\*
+\hline
+\textbf{Evento Capturado} & \texttt{PayrollDisbursedEvent} \quad (\textit{Fase:} Posterior a confirmación) \\*
+\hline
+\textbf{Acción Orquestada} & Serializa y publica PayrollDisbursedIntegrationEvent en outbox\_messages para conciliación financiera en Facturación y Contabilidad. \\*
+\hline
+\textbf{Destino del Efecto} & Transactional Outbox / Contabilidad \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Manejador:} HumanResourcesExternalEventsListener} \\*
+\hline
+\textbf{Evento Capturado} & \texttt{TenantMembershipCreatedIntegrationEvent} \quad (\textit{Fase:} Posterior a confirmación) \\*
+\hline
+\textbf{Acción Orquestada} & Captura el alta de nuevos miembros en IAM y aprovisiona el expediente laboral inicial en estado borrador a la espera de asignación contractual. \\*
+\hline
+\textbf{Destino del Efecto} & EmployeeProfileCommandService / Base de Datos \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Manejador:} HumanResourcesExternalEventsListener} \\*
+\hline
+\textbf{Evento Capturado} & \texttt{WorkOrderCompletedIntegrationEvent} \quad (\textit{Fase:} Posterior a confirmación) \\*
+\hline
+\textbf{Acción Orquestada} & Captura el cierre técnico de órdenes de trabajo en MRO e imputa el importe de comisión devengada al expediente del mecánico asignado. \\*
+\hline
+\textbf{Destino del Efecto} & Expediente Laboral / Liquidación Salarial \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Clases ubicadas bajo el paquete com.andeva.atelier.platform.hr.application.events.
+
+**Puertos de Salida y Pasarelas de Integración**
+
+Para salvaguardar la pureza e independencia de la lógica de aplicación frente a dependencias externas y subsistemas perimetrales, la capa delimita contratos de puertos de salida en su frontera arquitectónica.
+
+El puerto **TenancyAclGateway** abstrae la comunicación con IAM & Tenancy, permitiendo consultar los metadatos geodésicos centroidales y radios perimétricos de las sedes físicas para la validación de presencia, así como certificar la vigencia de membresías de usuario sin exponer los agregados de seguridad. Asimismo, **OperationsAclGateway** canaliza las consultas hacia Workshop Operations para obtener de manera tipada las comisiones devengadas por los técnicos en virtud de trabajos mecánicos culminados en el período.
+
+Por su parte, **TransactionalEmailGateway** proporciona la pasarela de salida para la remisión asíncrona de comprobantes salariales en formato PDF hacia los correos corporativos de los trabajadores mediante proveedores de infraestructura en la nube. Finalmente, **DomainEventPublisher** encapsula la publicación de eventos de dominio e integración hacia la tabla outbox\_messages del Shared Kernel, posibilitando la difusión reactiva y confiable hacia la plataforma distribuida sin acoplamientos a intermediarios tecnológicos específicos.
+
+Con el objeto de sistematizar las dependencias perimetrales, en la @tbl:hr-outbound-ports se describen los métodos y responsabilidades técnicas de estos puertos de salida y pasarelas de integración.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Puertos de Salida y Pasarelas de la Capa de Aplicación de Human Resources Management} \label{tbl:hr-outbound-ports} \\
+\hline
+\thfirst{Aspecto del Componente} & \thcell{Especificación Técnica y Responsabilidad} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto del Componente} & \thcell{Especificación Técnica y Responsabilidad} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} TenancyAclGateway \quad (\textit{Categoría:} Pasarela de Aislamiento)} \\*
+\hline
+\textbf{Métodos Principales} & \texttt{getBranchGeofenceData}, \texttt{isValidMember} \\*
+\hline
+\textbf{Responsabilidad Técnica} & Consulta de coordenadas geodésicas centroidales y radio perimétrico de sucursales físicas y validación de membresías en IAM. \\*
+\hline
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak application.\allowbreak ports} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} OperationsAclGateway \quad (\textit{Categoría:} Pasarela de Aislamiento)} \\*
+\hline
+\textbf{Métodos Principales} & \texttt{getAccruedMechanicCommissions} \\*
+\hline
+\textbf{Responsabilidad Técnica} & Consulta síncrona tipada hacia Workshop Operations para recuperar comisiones devengadas por órdenes de trabajo culminadas en el período. \\*
+\hline
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak application.\allowbreak ports} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} TransactionalEmailGateway \quad (\textit{Categoría:} Pasarela de Notificaciones)} \\*
+\hline
+\textbf{Métodos Principales} & \texttt{sendPayrollVoucher} \\*
+\hline
+\textbf{Responsabilidad Técnica} & Despacho asíncrono y seguro de boletas de pago electrónicas y documentos PDF de compensación mediante servicios de mensajería en la nube. \\*
+\hline
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak application.\allowbreak ports} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} DomainEventPublisher \quad (\textit{Categoría:} Puerto de Eventos)} \\*
+\hline
+\textbf{Métodos Principales} & \texttt{publish}, \texttt{publishAll} \\*
+\hline
+\textbf{Responsabilidad Técnica} & Despacho perimetral de eventos de dominio e integración hacia la tabla outbox\_messages para propagación desacoplada hacia el bus distribuido. \\*
+\hline
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak hr.\allowbreak application.\allowbreak ports} \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Clases ubicadas bajo el paquete com.andeva.atelier.platform.hr.application.ports.
+
+**Análisis Arquitectónico y Rigor Operacional de la Capa de Aplicación**
+
+En primer lugar, la adopción del patrón Railway-Oriented Programming gobernado mediante el tipo sellado **Result<T, ApplicationError>** confiere un determinismo operacional indispensable frente a las vicisitudes del trabajo en patio. Las eventualidades cotidianas del taller automotriz, tales como intentos de doble marcación diaria, discrepancias horarias severas o violaciones de geocerca satelital durante el ingreso, se procesan como bifurcaciones controladas de flujo sin incurrir en el costo computacional de capturar excepciones en tiempo de ejecución, resguardando la estabilidad transaccional del servidor ante picos simultáneos de registro al inicio de cada jornada laboral.
+
+En segundo término, la automatización del cómputo retributivo y la estructuración de la trama oficial SUNAT PLAME erradican la discrecionalidad subjetiva en la administración de personal. Al consolidar algorítmicamente las penalizaciones objetivas por tardanzas e inasistencias con las comisiones devengadas por reparaciones vehiculares culminadas en MRO, el sistema liquida nóminas matemáticamente irreprochables y genera el archivo plano oficial delimitado por tuberías en milisegundos, simplificando la declaración impositiva mensual y blindando a la empresa automotriz frente a contingencias laborales o sanciones fiscales.
+
+Por último, el desacoplamiento intermodular sustentado en puertos de salida ACL y el patrón Transactional Outbox garantiza una consistencia eventual robusta sin degradar la disponibilidad operativa del taller. La comunicación con IAM y Workshop Operations opera bajo contratos de interfaz que aíslan a Human Resources de esquemas ajenos, mientras que la persistencia atómica de eventos en la tabla transaccional del Shared Kernel asegura que las novedades de asistencia y desembolso contable se transmitan al bus de mensajería con semántica de entrega al menos una vez, tolerando desconexiones intermitentes sin retener bloqueos relacionales.
 
 #### 2.6.6.4 Infrastructure Layer
 
+La Capa de Infraestructura del Bounded Context Human Resources Management materializa los adaptadores de persistencia relacional y los componentes de integración perimetral bajo el paquete canónico com.andeva.atelier.platform.hr.infrastructure. Este estrato técnico implementa los puertos de repositorio declarados en el dominio mediante Spring Data JPA y Hibernate 6.5 sobre PostgreSQL 16 alojado en Aiven Cloud, administra la traducción aséptica entre agregados y tablas físicas mediante ensambladores dedicados, canaliza el aislamiento multi-inquilino y la coordinación intermodular a través de clientes de integración in-process, y garantiza el despacho confiable de eventos hacia el bus transaccional.
 
+La arquitectura física y de persistencia de este contexto se fundamenta en cuatro pilares tecnológicos de ingeniería de software:
+
+- **Aislamiento relacional multi-inquilino estricto e indexación B-Tree de alta selectividad:** Toda tabla de persistencia incorpora discriminadores de taller automotriz e índices compuestos sobre marcas temporales y membresías laborales, garantizando consultas sub-milisegundo en la validación de turnos y marcaciones presenciales.
+- **Reconstitución de agregados puros mediante ensambladores desacoplados:** Los agregados de dominio carecen de anotaciones JPA o mutadores públicos anémicos, reconstruyéndose exclusivamente mediante fábricas estáticas de persistencia que preservan las invariantes del negocio sin disparar eventos espurios.
+- **Gestión transaccional en cascada y correspondencia de partidas remunerativas:** La relación de composición entre la boleta salarial y sus líneas de bonificación o retención se gobierna con propagación en cascada total y borrado de huérfanos, garantizando inmutabilidad estricta tras la liquidación contable.
+- **Resiliencia perimetral de clientes remotos y publicación atómica con Transactional Outbox:** La comunicación con pasarelas de correo electrónico y georreferenciación aplica políticas de corte por tiempo límite y respaldo preventivo, mientras que las mutaciones persisten eventos en la tabla compartida outbox_messages dentro de la misma transacción ACID local.
+
+A fin de brindar una visión sistemática y rigurosa de estos componentes, en la @tbl:hr-infrastructure-types se presenta el catálogo consolidado de los tipos técnicos constitutivos de la Capa de Infraestructura de Human Resources Management.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Catálogo Consolidado de la Capa de Infraestructura de Human Resources Management} \label{tbl:hr-infrastructure-types} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\
+\hline
+\endhead
+WorkShift\allowbreak JpaEntity & Mapeo relacional de plantillas de turnos de trabajo a la tabla física work\_shifts. \\*
+\hline
+\textbf{Categoría} & Entidad JPA \\*
+\hline
+\textbf{Relaciones} & Hereda de AuditableAbstractPersistenceEntity. Define tolerancia de tardanza y unicidad por taller. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak entities} \\
+\hline
+AttendanceRecord\allowbreak JpaEntity & Mapeo relacional de marcaciones de asistencia presencial y telemetría móvil a attendance\_records. \\*
+\hline
+\textbf{Categoría} & Entidad JPA \\*
+\hline
+\textbf{Relaciones} & Hereda de AuditableAbstractPersistenceEntity. Clave foránea a turnos, sucursales y colaboradores. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak entities} \\
+\hline
+PayrollPayment\allowbreak JpaEntity & Mapeo relacional de comprobantes de pago de planillas salariales a la tabla payroll\_payments. \\*
+\hline
+\textbf{Categoría} & Entidad JPA \\*
+\hline
+\textbf{Relaciones} & Hereda de AuditableAbstractPersistenceEntity. Composición en cascada con partidas de nómina. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak entities} \\
+\hline
+PayrollItem\allowbreak JpaEntity & Mapeo relacional de conceptos de bonificación o retención a la tabla física payroll\_items. \\*
+\hline
+\textbf{Categoría} & Entidad JPA \\*
+\hline
+\textbf{Relaciones} & Clave foránea hacia la cabecera de la boleta de pago. Borrado automático de registros huérfanos. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak entities} \\
+\hline
+EmployeeProfile\allowbreak JpaEntity & Mapeo relacional del expediente contractual y régimen salarial a la tabla employee\_profiles. \\*
+\hline
+\textbf{Categoría} & Entidad JPA \\*
+\hline
+\textbf{Relaciones} & Hereda de AuditableAbstractPersistenceEntity. Clave foránea a membresías de taller y turnos. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak entities} \\
+\hline
+SpringDataWorkShift\allowbreak Repository & Interfaz Spring Data JPA para administración y verificación de disponibilidad de turnos de trabajo. \\*
+\hline
+\textbf{Categoría} & Repositorio JPA \\*
+\hline
+\textbf{Relaciones} & Extiende JpaRepository. Resuelve turnos laborales activos mediante consultas derivadas por taller. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak repositories} \\
+\hline
+SpringDataAttendance\allowbreak RecordRepository & Interfaz Spring Data JPA para resolución indexada de marcaciones y auditoría presencial. \\*
+\hline
+\textbf{Categoría} & Repositorio JPA \\*
+\hline
+\textbf{Relaciones} & Extiende JpaRepository. Consultas JPQL para detección de ingresos abiertos y reportes por sede. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak repositories} \\
+\hline
+SpringDataPayroll\allowbreak PaymentRepository & Interfaz Spring Data JPA para consulta y archivo histórico de liquidaciones periódicas de haberes. \\*
+\hline
+\textbf{Categoría} & Repositorio JPA \\*
+\hline
+\textbf{Relaciones} & Extiende JpaRepository. Búsquedas por periodo temporal, colaborador y ordenación cronológica. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak repositories} \\
+\hline
+SpringDataEmployee\allowbreak ProfileRepository & Interfaz Spring Data JPA para gestión del padrón laboral y contratos del personal automotriz. \\*
+\hline
+\textbf{Categoría} & Repositorio JPA \\*
+\hline
+\textbf{Relaciones} & Extiende JpaRepository. Recuperación por membresía, sede física y estado de vigencia laboral. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak repositories} \\
+\hline
+WorkShift\allowbreak RepositoryImpl & Adaptador secundario de persistencia que materializa el puerto de dominio WorkShiftRepository. \\*
+\hline
+\textbf{Categoría} & Adaptador de Persistencia \\*
+\hline
+\textbf{Relaciones} & Mapea entidades relacionales, persiste turnos en base de datos y publica eventos de dominio a Outbox. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak adapters} \\
+\hline
+AttendanceRecord\allowbreak RepositoryImpl & Adaptador secundario de persistencia que materializa el contrato AttendanceRecordRepository. \\*
+\hline
+\textbf{Categoría} & Adaptador de Persistencia \\*
+\hline
+\textbf{Relaciones} & Gestiona almacenamiento geolocalizado, extrae eventos de dominio y alimenta outbox\_messages. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak adapters} \\
+\hline
+PayrollPayment\allowbreak RepositoryImpl & Adaptador secundario de persistencia que implementa el puerto PayrollPaymentRepository. \\*
+\hline
+\textbf{Categoría} & Adaptador de Persistencia \\*
+\hline
+\textbf{Relaciones} & Orquesta mutaciones transaccionales en cascada y emite eventos de desembolso contable a Outbox. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak adapters} \\
+\hline
+EmployeeProfile\allowbreak RepositoryImpl & Adaptador secundario de persistencia que implementa el puerto EmployeeProfileRepository. \\*
+\hline
+\textbf{Categoría} & Adaptador de Persistencia \\*
+\hline
+\textbf{Relaciones} & Almacena fichas de colaboradores, coordinando turnos asignados y categorías remunerativas. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak adapters} \\
+\hline
+WorkShift\allowbreak PersistenceAssembler & Reconstitución bidireccional entre el agregado WorkShift y la entidad WorkShiftJpaEntity. \\*
+\hline
+\textbf{Categoría} & Ensamblador de Persistencia \\*
+\hline
+\textbf{Relaciones} & Traduce identificadores fuertemente tipados a UUID sin disparar eventos de dominio espurios. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak transform} \\
+\hline
+AttendanceRecord\allowbreak PersistenceAssembler & Transformación bidireccional entre agregado AttendanceRecord y AttendanceRecordJpaEntity. \\*
+\hline
+\textbf{Categoría} & Ensamblador de Persistencia \\*
+\hline
+\textbf{Relaciones} & Mapea coordenadas geodésicas WGS84, distancias esféricas y causas formales de justificación. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak transform} \\
+\hline
+PayrollPayment\allowbreak PersistenceAssembler & Transformación bidireccional para liquidaciones de nómina y colecciones de partidas contables. \\*
+\hline
+\textbf{Categoría} & Ensamblador de Persistencia \\*
+\hline
+\textbf{Relaciones} & Reconstituye PayrollPayment preservando inmutabilidad en totales salariales y deducciones. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak transform} \\
+\hline
+EmployeeProfile\allowbreak PersistenceAssembler & Transformación bidireccional entre agregados de expediente laboral y entidades relacionales. \\*
+\hline
+\textbf{Categoría} & Ensamblador de Persistencia \\*
+\hline
+\textbf{Relaciones} & Mapea esquemas remunerativos y asignaciones operativas en la estructura de taller. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak transform} \\
+\hline
+AttendanceStatus\allowbreak Converter & Conversión bidireccional entre enumeración AttendanceStatus y columna relacional VARCHAR(20). \\*
+\hline
+\textbf{Categoría} & Convertidor JPA \\*
+\hline
+\textbf{Relaciones} & Normaliza estados de marcación presencial puntual, tardanza, inasistencia o justificado. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak converters} \\
+\hline
+PayrollStatus\allowbreak Converter & Conversión bidireccional entre enumeración PayrollStatus y columna VARCHAR(20). \\*
+\hline
+\textbf{Categoría} & Convertidor JPA \\*
+\hline
+\textbf{Relaciones} & Mapea el ciclo contable de la nómina entre borrador, calculado, aprobado y pagado. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak converters} \\
+\hline
+SalaryType\allowbreak Converter & Conversión bidireccional entre enumeración SalaryType y columna relacional VARCHAR(20). \\*
+\hline
+\textbf{Categoría} & Convertidor JPA \\*
+\hline
+\textbf{Relaciones} & Mapea esquemas de compensación fija mensual, cómputo por horas o comisiones de producción. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak converters} \\
+\hline
+DeductionType\allowbreak Converter & Conversión bidireccional entre objeto DeductionType y columna relacional VARCHAR(50). \\*
+\hline
+\textbf{Categoría} & Convertidor JPA \\*
+\hline
+\textbf{Relaciones} & Normaliza retenciones legales por tardanza, inasistencia, aportes previsionales y seguros. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak converters} \\
+\hline
+BonusType\allowbreak Converter & Conversión bidireccional entre enumeración BonusType y columna relacional VARCHAR(50). \\*
+\hline
+\textbf{Categoría} & Convertidor JPA \\*
+\hline
+\textbf{Relaciones} & Mapea bonificaciones de horas extraordinarias, comisiones de taller y asignaciones familiares. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak converters} \\
+\hline
+EmploymentStatus\allowbreak Converter & Conversión bidireccional entre enumeración EmploymentStatus y columna VARCHAR(20). \\*
+\hline
+\textbf{Categoría} & Convertidor JPA \\*
+\hline
+\textbf{Relaciones} & Normaliza condiciones contractuales activo, en descanso laboral, suspendido o cesado. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak converters} \\
+\hline
+TenancyAcl\allowbreak Adapter & Adaptador anticorrupción de salida hacia el Bounded Context IAM \& Tenancy. \\*
+\hline
+\textbf{Categoría} & Adaptador ACL de Salida \\*
+\hline
+\textbf{Relaciones} & Consulta in-process coordenadas satelitales de sedes físicas para verificación de geocercas. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak infrastructure.\allowbreak gateways} \\
+\hline
+OperationsAcl\allowbreak Adapter & Adaptador anticorrupción de salida hacia el Bounded Context Workshop Operations. \\*
+\hline
+\textbf{Categoría} & Adaptador ACL de Salida \\*
+\hline
+\textbf{Relaciones} & Recupera comisiones devengadas por técnicos en reparaciones automotrices liquidadas. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak infrastructure.\allowbreak gateways} \\
+\hline
+TransactionalEmail\allowbreak GatewayImpl & Pasarela de comunicación externa para emisión asíncrona de boletas salariales. \\*
+\hline
+\textbf{Categoría} & Pasarela de Correo Transaccional \\*
+\hline
+\textbf{Relaciones} & Envío automatizado de comprobantes de pago PDF y notificaciones disciplinarias vía Resend API. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak infrastructure.\allowbreak gateways} \\
+\hline
+GooglePlaces\allowbreak GeoGatewayImpl & Pasarela perimetral externa para geocodificación y verificación de direcciones de sucursales. \\*
+\hline
+\textbf{Categoría} & Pasarela Perimetral Externa \\*
+\hline
+\textbf{Relaciones} & Cliente HTTP REST seguro con tiempo límite de tres segundos y política de degradación suave. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak infrastructure.\allowbreak gateways} \\
+\hline
+DomainEvent\allowbreak PublisherImpl & Publicador transaccional de eventos de dominio hacia la tabla compartida outbox\_messages. \\*
+\hline
+\textbf{Categoría} & Adaptador de Mensajería \\*
+\hline
+\textbf{Relaciones} & Serializa cargas útiles en formato JSON garantizando entrega al menos una vez con Debezium CDC. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak infrastructure.\allowbreak gateways} \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes implementados en Java bajo el paquete canónico com.andeva.atelier.platform.hr.infrastructure.
+
+**Entidades JPA de Persistencia y Modelado Físico Relacional**
+
+El modelado relacional de persistencia confina las dependencias de Hibernate y Jakarta Persistence en cinco entidades dedicadas que reproducen la estructura de base de datos en PostgreSQL 16. La totalidad de las entidades extiende de la clase base abstracta de persistencia auditable del Shared Kernel, incorporando identificadores universales, discriminadores de inquilino y marcas de auditoría temporal con control de concurrencia optimista.
+
+La entidad **WorkShiftJpaEntity** mapea los horarios regulares y tolerancias a la tabla work_shifts, aplicando restricciones de unicidad por taller. En paralelo, **AttendanceRecordJpaEntity** almacena las marcaciones presenciales en attendance_records con precisión geográfica de ocho decimales y marcas temporales de ingreso y salida, sosteniendo índices compuestos que aceleran la auditoría laboral diaria.
+
+Por su parte, la liquidación salarial se distribuye entre **PayrollPaymentJpaEntity** en la tabla payroll_payments y su detalle dependiente **PayrollItemJpaEntity** en payroll_items, gobernado por cascada integral y eliminación de huérfanos. Finalmente, **EmployeeProfileJpaEntity** custodia los datos contractuales y turnos en employee_profiles, asegurando una membresía única por expediente.
+
+A fin de especificar la correspondencia relacional de persistencia, en la @tbl:hr-jpa-entities se detallan las entidades JPA, sus tablas asociadas, columnas estructurales, restricciones de integridad e índices relacionales.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Especificación Relacional de Entidades JPA de Human Resources Management} \label{tbl:hr-jpa-entities} \\
+\hline
+\thfirst{Aspecto de Persistencia} & \thcell{Especificación Físico-Relacional} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Persistencia} & \thcell{Especificación Físico-Relacional} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} WorkShiftJpaEntity \quad (\textit{Tabla:} \texttt{work\_shifts})} \\*
+\hline
+\textbf{Clave Primaria} & \texttt{id (UUID)} \\*
+\hline
+\textbf{Columnas Principales} & \texttt{tenant\_id}, \texttt{name}, \texttt{start\_time}, \texttt{end\_time}, \texttt{grace\_period\_m}, \texttt{is\_active} \\*
+\hline
+\textbf{Restricciones e Índices} & Restricción única uk\_work\_shifts\_tenant\_name sobre tupla (tenant\_id, name). Clave foránea a tenants. Índice compuesto idx\_work\_shifts\_tenant\_name para resolución rápida de turnos. Auditoría auditable heredada. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} AttendanceRecordJpaEntity \quad (\textit{Tabla:} \texttt{attendance\_records})} \\*
+\hline
+\textbf{Clave Primaria} & \texttt{id (UUID)} \\*
+\hline
+\textbf{Columnas Principales} & \texttt{tenant\_id}, \texttt{branch\_id}, \texttt{membership\_id}, \texttt{shift\_id}, \texttt{clock\_in}, \texttt{clock\_out}, \texttt{status}, \texttt{latitude}, \texttt{longitude}, \texttt{distance\_to\_branch\_m}, \texttt{justification\_reason}, \texttt{justified\_by}, \texttt{justified\_at} \\*
+\hline
+\textbf{Restricciones e Índices} & Claves foráneas hacia tenants, branches, tenant\_memberships y work\_shifts. Índice compuesto B-Tree idx\_attendance\_membership\_date sobre (membership\_id, clock\_in) para historial individual. Índice idx\_attendance\_branch\_date sobre (branch\_id, clock\_in) para monitoreo presencial de sede. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} PayrollPaymentJpaEntity \quad (\textit{Tabla:} \texttt{payroll\_payments})} \\*
+\hline
+\textbf{Clave Primaria} & \texttt{id (UUID)} \\*
+\hline
+\textbf{Columnas Principales} & \texttt{tenant\_id}, \texttt{membership\_id}, \texttt{period\_start}, \texttt{period\_end}, \texttt{base\_amount}, \texttt{deductions}, \texttt{bonuses}, \texttt{total\_paid}, \texttt{currency}, \texttt{status}, \texttt{paid\_at}, \texttt{payment\_reference} \\*
+\hline
+\textbf{Restricciones e Índices} & Restricción única uk\_payroll\_membership\_period sobre (membership\_id, period\_start, period\_end). Claves foráneas hacia tenants y tenant\_memberships. Índice idx\_payroll\_tenant\_period sobre (tenant\_id, period\_start, period\_end) para consolidaciones mensuales. Colección en cascada con payroll\_items. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} PayrollItemJpaEntity \quad (\textit{Tabla:} \texttt{payroll\_items})} \\*
+\hline
+\textbf{Clave Primaria} & \texttt{id (UUID)} \\*
+\hline
+\textbf{Columnas Principales} & \texttt{payroll\_payment\_id}, \texttt{category}, \texttt{concept}, \texttt{amount}, \texttt{type}, \texttt{date} \\*
+\hline
+\textbf{Restricciones e Índices} & Clave foránea fk\_payroll\_items\_payment hacia payroll\_payments. Restricción no nula en monto monetario e identificador de boleta. Índice B-Tree idx\_payroll\_items\_payment para proyecciones agregadas de haberes y descuentos. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} EmployeeProfileJpaEntity \quad (\textit{Tabla:} \texttt{employee\_profiles})} \\*
+\hline
+\textbf{Clave Primaria} & \texttt{id (UUID)} \\*
+\hline
+\textbf{Columnas Principales} & \texttt{tenant\_id}, \texttt{branch\_id}, \texttt{membership\_id}, \texttt{assigned\_shift\_id}, \texttt{base\_salary}, \texttt{currency}, \texttt{salary\_type}, \texttt{job\_title}, \texttt{employment\_status} \\*
+\hline
+\textbf{Restricciones e Índices} & Restricción única uk\_employee\_profiles\_membership sobre membership\_id garantizando expediente único por colaborador. Claves foráneas hacia tenants, branches y work\_shifts. Índices idx\_employee\_profiles\_branch e idx\_employee\_profiles\_membership. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Tablas físicas alojadas en el motor PostgreSQL 16 con herencia de auditoría temporal en el esquema central.
+
+**Repositorios Spring Data JPA y Adaptadores de Persistencia**
+
+La interacción técnica con el motor relacional se desacopla rigurosamente mediante el patrón Adaptador de Repositorio. Las interfaces que extienden Spring Data JPA declaran operaciones optimizadas de consulta derivadas y sentencias JPQL parametrizadas, mientras que las clases adaptadoras implementan formalmente los contratos de persistencia definidos en la Capa de Dominio.
+
+Durante las mutaciones de negocio, los adaptadores transforman las raíces de agregado inmutables en entidades relacionales mutables mediante ensambladores dedicados, persisten el estado en PostgreSQL 16 y extraen de forma atómica la colección de eventos de dominio acumulados para canalizarlos al publicador transaccional. Este mecanismo previene fugas de modelos de persistencia hacia el núcleo y asegura consistencia atómica sin dispersión de lógica de infraestructura.
+
+En particular, **AttendanceRecordRepositoryImpl** encapsula la búsqueda de marcaciones activas sin salida registrada para evitar duplicidades de ingreso, mientras que **PayrollPaymentRepositoryImpl** comanda la persistencia atómica de la cabecera salarial y sus partidas dependientes bajo la misma frontera transaccional.
+
+A fin de sintetizar las responsabilidades y contratos de persistencia, en la @tbl:hr-repository-adapters se especifican los adaptadores de repositorio, los puertos de dominio implementados y las operaciones relacionales ejecutadas.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Adaptadores de Persistencia y Puertos de Dominio de Human Resources Management} \label{tbl:hr-repository-adapters} \\
+\hline
+\thfirst{Aspecto de Adaptador} & \thcell{Especificación Técnica y Persistencia} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Adaptador} & \thcell{Especificación Técnica y Persistencia} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} WorkShiftRepositoryImpl} \\*
+\hline
+\textbf{Puerto de Dominio} & \texttt{WorkShiftRepository} \\*
+\hline
+\textbf{Repositorio Inyectado} & \texttt{SpringDataWorkShiftRepository} \\*
+\hline
+\textbf{Operaciones Clave} & Transforma el agregado **WorkShift** a entidad JPA mediante su ensamblador. Persiste en base de datos relacional mediante *save()*. Extrae eventos de dominio con *pullDomainEvents()* y los canaliza al publicador transaccional. Ejecuta *findById()* con verificación de inquilino, *findByTenantIdAndName()* para validación de nombres únicos de jornada y *existsByTenantIdAndName()* para prevenir duplicados. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} AttendanceRecordRepositoryImpl} \\*
+\hline
+\textbf{Puerto de Dominio} & \texttt{AttendanceRecordRepository} \\*
+\hline
+\textbf{Repositorio Inyectado} & \texttt{SpringDataAttendanceRecordRepository} \\*
+\hline
+\textbf{Operaciones Clave} & Mapea **AttendanceRecord** asegurando fidelidad de coordenadas satelitales y distancias de geocerca. Al registrar ingresos o salidas extrae eventos **AttendanceMarkedEvent** hacia outbox\_messages. Ejecuta *findActiveClockIn()* mediante JPQL para validar marcaciones abiertas sin salida, *findAllByBranchAndDay()* para reportes diarios de patio y *findAllByMembershipAndPeriod()* para liquidaciones salariales. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} PayrollPaymentRepositoryImpl} \\*
+\hline
+\textbf{Puerto de Dominio} & \texttt{PayrollPaymentRepository} \\*
+\hline
+\textbf{Repositorio Inyectado} & \texttt{SpringDataPayrollPaymentRepository} \\*
+\hline
+\textbf{Operaciones Clave} & Persiste en cascada la boleta de pago y sus partidas dependientes de bonos y deducciones. Extrae eventos **PayrollCalculatedEvent**, **PayrollApprovedEvent** y **PayrollPaidEvent** despachándolos al bus transaccional. Ejecuta *findById()* con carga de partidas, *findByMembershipIdAndPeriod()* para validación de nómina única mensual y *findAllByTenantIdAndPeriod()* para consolidación de planillas. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} EmployeeProfileRepositoryImpl} \\*
+\hline
+\textbf{Puerto de Dominio} & \texttt{EmployeeProfileRepository} \\*
+\hline
+\textbf{Repositorio Inyectado} & \texttt{SpringDataEmployeeProfileRepository} \\*
+\hline
+\textbf{Operaciones Clave} & Persiste y actualiza expedientes laborales de personal técnico y administrativo. Gestiona la asignación de turnos y condiciones contractuales de salario. Ejecuta *findByMembershipId()* para obtención directa de ficha laboral, *findAllByBranchId()* para nóminas de sede física y *findAllByTenantIdAndEmploymentStatus()* para personal activo en el taller. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Clases ubicadas bajo el paquete canónico com.andeva.atelier.platform.hr.infrastructure.persistence.jpa.adapters.
+
+**Ensambladores de Persistencia y Convertidores JPA**
+
+La correspondencia aséptica entre estructuras puras del dominio y modelos mutables de base de datos se resuelve a través de cuatro ensambladores de persistencia dedicados. Estos componentes extraen los valores escalares de las entidades relacionales y reconstruyen los agregados en memoria invocando métodos estáticos de fábrica controlados, impidiendo que los flujos de lectura activen eventos de dominio accidentales.
+
+De forma complementaria, seis convertidores de atributos normalizan automáticamente enumeraciones y objetos de valor hacia columnas estándar en PostgreSQL 16. Los componentes **AttendanceStatusConverter**, **PayrollStatusConverter** y **SalaryTypeConverter** garantizan la consistencia tipográfica de estados y modalidades de compensación, mientras que los convertidores de deducciones y bonificaciones tipifican las partidas de remuneración en el repositorio relacional.
+
+Con el fin de formalizar estas transformaciones estructurales, en la @tbl:hr-persistence-assemblers se describen los ensambladores de persistencia, los convertidores JPA, los tipos asociados y las reglas de mapeo bidireccional.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Ensambladores de Persistencia y Convertidores JPA de Human Resources Management} \label{tbl:hr-persistence-assemblers} \\
+\hline
+\thfirst{Aspecto de Mapeo} & \thcell{Tipos Relacionados y Transformación} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Mapeo} & \thcell{Tipos Relacionados y Transformación} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} WorkShiftPersistenceAssembler} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{WorkShift} $\longleftrightarrow$ \texttt{WorkShiftJpaEntity} \\*
+\hline
+\textbf{Transformación} & Traduce WorkShiftId y TenantId a identificadores UUID. Mapea horarios de entrada y salida junto con el margen de tolerancia. Invoca la fábrica de reconstitución del dominio sin activar eventos espurios. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} AttendanceRecordPersistenceAssembler} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{AttendanceRecord} $\longleftrightarrow$ \texttt{AttendanceRecordJpaEntity} \\*
+\hline
+\textbf{Transformación} & Traduce AttendanceRecordId a UUID. Mapea coordenadas geodésicas de latitud y longitud, distancias en metros calculadas por Haversine y causas de justificación. Reconstituye el agregado con su estado presencial verificado. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} PayrollPaymentPersistenceAssembler} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{PayrollPayment} $\longleftrightarrow$ \texttt{PayrollPaymentJpaEntity} \\*
+\hline
+\textbf{Transformación} & Traduce PayrollPaymentId a UUID y periodos de pago a fechas locales. Transforma colecciones de partidas hijas preservando consistencia referencial y precisión monetaria de dos decimales. Reconstituye la liquidación contable. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} EmployeeProfilePersistenceAssembler} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{EmployeeProfile} $\longleftrightarrow$ \texttt{EmployeeProfileJpaEntity} \\*
+\hline
+\textbf{Transformación} & Mapea EmployeeProfileId, membresía de usuario y turno laboral asignado a UUID. Traduce salario base y tipo contractual. Restaura el expediente laboral asegurando la consistencia del contrato. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} AttendanceStatusConverter} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{AttendanceStatus} $\longleftrightarrow$ \texttt{VARCHAR(20)} \\*
+\hline
+\textbf{Transformación} & Convierte las constantes de estado de asistencia puntual, tardanza, inasistencia o justificado en cadenas relacionales normalizadas. Reconstituye la enumeración de forma segura. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} PayrollStatusConverter} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{PayrollStatus} $\longleftrightarrow$ \texttt{VARCHAR(20)} \\*
+\hline
+\textbf{Transformación} & Mapea estados contables de borrador, calculado, aprobado, pagado o cancelado a cadenas relacionales. Reconstituye el ciclo de vida contable de la nómina. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} SalaryTypeConverter} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{SalaryType} $\longleftrightarrow$ \texttt{VARCHAR(20)} \\*
+\hline
+\textbf{Transformación} & Convierte modalidades salariales de monto fijo mensual, cómputo por hora o comisiones de producción en cadenas de base de datos. Restaura el tipo salarial inmutable. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} DeductionTypeConverter} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{DeductionType} $\longleftrightarrow$ \texttt{VARCHAR(50)} \\*
+\hline
+\textbf{Transformación} & Mapea conceptos de descuento laboral por tardanzas, inasistencias injustificadas, aportes previsionales AFP u ONP y retenciones tributarias a columnas de texto. Restaura el tipo tipificado. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} BonusTypeConverter} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{BonusType} $\longleftrightarrow$ \texttt{VARCHAR(50)} \\*
+\hline
+\textbf{Transformación} & Serializa bonificaciones por horas extras, comisiones por reparaciones automotrices devengadas y asignaciones familiares a cadenas alfanuméricas. Reconstituye la tipología de abono. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} EmploymentStatusConverter} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{EmploymentStatus} $\longleftrightarrow$ \texttt{VARCHAR(20)} \\*
+\hline
+\textbf{Transformación} & Mapea condiciones laborales de activo, licencia médica, suspensión disciplinaria o cese formal a cadenas relacionales estandarizadas en base de datos. Restaura el estado contractual. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes configurados bajo los paquetes transform y converters de la capa de infraestructura.
+
+**Pasarelas Externas de Infraestructura e Integración de Servicios**
+
+La comunicación con subsistemas adyacentes y plataformas tecnológicas perimetrales se formaliza mediante adaptadores secundarios ubicados en el paquete com.andeva.atelier.platform.hr.infrastructure.gateways. Estos componentes implementan los puertos de salida declarados en el dominio y la aplicación, aislando el motor de gestión de talento de detalles periféricos de red y protocolos remotos.
+
+El adaptador **TenancyAclAdapter** resuelve in-process los datos espaciales de las sedes de taller registrados en IAM & Tenancy para verificar geocercas satelitales en marcaciones móviles, mientras que **OperationsAclAdapter** consulta comisiones devengadas por técnicos en reparaciones vehiculares liquidadas en Workshop Operations. Paralelamente, **TransactionalEmailGatewayImpl** emite boletas firmadas en PDF vía Resend API, y **GooglePlacesGeoGatewayImpl** provee geocodificación de sedes con salvaguardas de tiempo límite.
+
+Finalmente, el componente **DomainEventPublisherImpl** garantiza la publicación atómica de novedades laborales hacia la tabla outbox_messages, permitiendo la sincronización eventual confiable de eventos hacia el bus de mensajería sin incurrir en bloqueos distribuidos.
+
+A fin de sistematizar las tecnologías subyacentes y responsabilidades de estos componentes, en la @tbl:hr-infrastructure-gateways se especifican las pasarelas externas y adaptadores perimetrales de Human Resources Management.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Pasarelas de Infraestructura y Servicios Externos de Human Resources Management} \label{tbl:hr-infrastructure-gateways} \\
+\hline
+\thfirst{Aspecto Técnico} & \thcell{Tecnología y Responsabilidad de Integración} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto Técnico} & \thcell{Tecnología y Responsabilidad de Integración} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Pasarela Externa:} TenancyAclAdapter \quad (\textit{Categoría:} Adaptador ACL Multi-Inquilino)} \\*
+\hline
+\textbf{Tecnología Subyacente} & Fachada en Memoria de Módulo e Invocación In-Process \\*
+\hline
+\textbf{Responsabilidad} & Consulta coordenadas geográficas de latitud y longitud satelital WGS84 y radios de geocerca de sucursales a IAM \& Tenancy. Permite validar presencialidad con Haversine sin dependencias de red distribuidas. Implementa TenancyAclPort. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Pasarela Externa:} OperationsAclAdapter \quad (\textit{Categoría:} Adaptador ACL Taller Mecánico)} \\*
+\hline
+\textbf{Tecnología Subyacente} & Fachada en Memoria de Módulo e Invocación In-Process \\*
+\hline
+\textbf{Responsabilidad} & Recupera importes de comisiones devengadas y horas productivas liquidadas por mecánicos en órdenes de trabajo de Workshop Operations, integrándolas al cálculo mensual de haberes. Implementa OperationsAclPort. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Pasarela Externa:} TransactionalEmailGatewayImpl \quad (\textit{Categoría:} Pasarela de Correo Transaccional)} \\*
+\hline
+\textbf{Tecnología Subyacente} & Spring RestClient sobre HTTPS y API REST de Resend \\*
+\hline
+\textbf{Responsabilidad} & Despacha boletas de pago en formato PDF y notificaciones disciplinarias por tardanzas a las casillas electrónicas de colaboradores automotrices. Gestiona reintentos exponenciales y reporte de entrega. Implementa TransactionalEmailGateway. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Pasarela Externa:} GooglePlacesGeoGatewayImpl \quad (\textit{Categoría:} Pasarela Perimetral Externa)} \\*
+\hline
+\textbf{Tecnología Subyacente} & Google Places API Client con WebClient y Timeout de Conexión \\*
+\hline
+\textbf{Responsabilidad} & Resuelve direcciones postales de nuevas sedes a coordenadas satelitales WGS84 durante la parametrización de talleres. Incorpora tiempo límite de corte de tres segundos y degradación controlada ante latencia externa. Implementa GooglePlacesGeoGateway. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Pasarela Externa:} DomainEventPublisherImpl \quad (\textit{Categoría:} Adaptador de Mensajería Transaccional)} \\*
+\hline
+\textbf{Tecnología Subyacente} & PostgreSQL 16 con Serialización JSON vía Jackson ObjectMapper \\*
+\hline
+\textbf{Responsabilidad} & Persiste eventos de dominio en la tabla outbox\_messages dentro de la misma transacción ACID local del agregado. Asegura entrega al menos una vez hacia el bus de mensajería mediante el motor de captura de datos de cambio Debezium CDC. Implementa DomainEventPublisher. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes configurados bajo el paquete canónico com.andeva.atelier.platform.hr.infrastructure.gateways.
+
+**Análisis Arquitectónico y Rigor Operacional de la Capa de Infraestructura**
+
+En primer lugar, el aislamiento multi-inquilino estricto y la indexación compuesta en PostgreSQL 16 garantizan un rendimiento óptimo en la verificación espacial de marcaciones presenciales. Al indexar de forma combinada la membresía del colaborador, la sucursal y la marca de tiempo de ingreso, las consultas de asistencia activa se resuelven en tiempos sub-milisegundo sin requerir escaneos secuenciales de tabla, blindando la capacidad de respuesta del sistema ante el ingreso concurrente de cientos de técnicos al inicio del turno de taller.
+
+En segundo término, la gestión transaccional en cascada total y la eliminación de huérfanos entre boletas de pago y sus partidas analíticas salvaguardan la consistencia contable del negocio automotriz. La persistencia atómica de la cabecera salarial junto con sus conceptos de deducción y bonificación asegura que ninguna partida quede desvinculada en la base de datos, garantizando la inmutabilidad de los cálculos remunerativos una vez aprobados formalmente y previniendo discrepancias frente a la fiscalización laboral.
+
+Por último, la conjunción del patrón Transactional Outbox con adaptadores perimetrales resilientes consolida un desacoplamiento asíncrono robusto frente a contingencias externas. La inserción de eventos en la tabla compartida outbox_messages dentro de la transacción local de base de datos elimina el riesgo de estados inconsistentes por caídas de red, mientras que los límites estrictos de tiempo en clientes HTTP evitan que la degradación de servicios remotos de geocodificación o mensajería sature los hilos de ejecución de la plataforma.
 
 #### 2.6.6.5. Bounded Context Software Architecture Component Level Diagrams
 
+En esta sección se presenta la descomposición arquitectónica interna del contenedor central **API Application** en relación con el Bounded Context Human Resources Management. Siguiendo el Nivel 3 del Modelo C4, se ilustran los bloques estructurales que constituyen este subsistema de gestión de personal, formalizando sus límites de responsabilidad técnica, interfaces de comunicación y mecanismos de integración con clientes web y móviles, subsistemas adyacentes y servicios externos.
 
+Dentro de la arquitectura de monolito modular de Atelier Platform, el Bounded Context Human Resources Management asume la gobernanza integral de los turnos laborales, el control de asistencia mediante geocercas satelitales en dispositivos móviles, la custodia de expedientes técnicos y la liquidación periódica de planillas salariales con consolidación de comisiones de patio y cumplimiento de la normativa laboral peruana.
+
+En la @tbl:hr-c4-components se expone el catálogo estructurado de los siete componentes constitutivos del Bounded Context Human Resources Management dentro del contenedor anfitrión. Cada bloque encapsula una responsabilidad arquitectónica cohesiva, delimitando con precisión la frontera entre los controladores perimetrales REST, los servicios de aplicación CQRS, el motor matemático de dominio, la persistencia relacional optimizada y las pasarelas externas.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.5cm} | >{\raggedright\arraybackslash}p{10.9cm} |}
+\caption{Catálogo de Componentes de Arquitectura de Software del Bounded Context Human Resources Management} \label{tbl:hr-c4-components} \\
+\hline
+\thfirst{Aspecto Técnico} & \thcell{Especificación de Arquitectura} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto Técnico} & \thcell{Especificación de Arquitectura} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} HR REST Controllers \& Resource Assemblers} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & Spring MVC, SpringDoc OpenAPI, Jakarta Validation \\*
+\hline
+\textbf{Responsabilidad} & Expone endpoints REST perimetrales para programación de turnos, marcación móvil con geolocalización GPS, registro de justificaciones, cálculo de nóminas periódicas y gestión de expedientes laborales. Valida contratos DTO sintácticos y proyecta recursos REST enriquecidos con enlaces hipermediales. \\*
+\hline
+\textbf{Relaciones} & Invocado por WebApp y Mobile Workshop vía HTTPS. Despacha comandos de mutación y consultas de lectura a servicios CQRS. Utiliza ensambladores de recursos REST para proyectar representaciones hipermediales. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} HR CQRS Application Services} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & Spring Service, Transactional, CQRS, Interfaces Funcionales \\*
+\hline
+\textbf{Responsabilidad} & Orquesta los casos de uso de asignación de turnos, registro de asistencia geocercada, liquidación de planillas con integración SUNAT PLAME y gestión de expedientes bajo transacciones ACID, canalizando resultados deterministas mediante estructuras Result. \\*
+\hline
+\textbf{Relaciones} & Implementa contratos de comando y consulta. Invoca reglas de negocio en el núcleo de dominio. Delega en adaptadores de persistencia JPA y pasarelas externas. Emite eventos de dominio hacia oyentes transaccionales. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} HR Event Handlers \& Transactional Dispatcher} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & Spring Events, TransactionalEventListener, Outbox Pattern \\*
+\hline
+\textbf{Responsabilidad} & Captura eventos de dominio locales de asistencia y nómina, canalizando eventos atómicos hacia la tabla outbox\_messages para publicación asíncrona confiable hacia los módulos de Workshop Operations, Invoicing y CRM. \\*
+\hline
+\textbf{Relaciones} & Escucha eventos de dominio de servicios de aplicación. Persiste mensajes transaccionales en base de datos PostgreSQL 16 mediante puertos de repositorio. Notifica a consumidores en módulos adyacentes. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} HR Domain Model \& Geofencing Calculation Engines} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & Java 26 puro, Domain Model, Records, Inmutabilidad \\*
+\hline
+\textbf{Responsabilidad} & Encapsula invariantes de negocio, el motor algorítmico de geocerca esférica basado en la fórmula de Haversine, el cómputo de horas efectivas y deducciones salariales, y las raíces de agregado inmutables. \\*
+\hline
+\textbf{Relaciones} & Contiene raíces de agregado WorkShift, AttendanceRecord, PayrollPayment y EmployeeProfile. Ejecuta algoritmos geodésicos en HaversineGeofencingService y cálculos salariales en PayrollCalculationEngine. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} HR Persistence Repositories \& JPA Adapters} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & Jakarta Persistence 3.1, Spring Data JPA, Hibernate ORM, PostgreSQL 16 \\*
+\hline
+\textbf{Responsabilidad} & Materializa los puertos de repositorio de dominio con Spring Data JPA e Hibernate, implementando índices B-Tree especializados para marcaciones y nóminas, bloqueos de concurrencia optimista y despacho atómico Outbox. \\*
+\hline
+\textbf{Relaciones} & Realiza interfaces WorkShiftRepository, AttendanceRecordRepository, PayrollPaymentRepository y EmployeeProfileRepository. Lee y escribe en las tablas work\_shifts, attendance\_records, payroll\_payments, payroll\_items, employee\_profiles y outbox\_messages. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} Inbound ACL \& Human Resources Open Host Facade} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & Spring Service, In-Memory ACL, Published Language \\*
+\hline
+\textbf{Responsabilidad} & Publica una fachada Open Host Service en memoria que atiende consultas de disponibilidad presencial de mecánicos en patio desde Workshop Operations para asignación de órdenes de trabajo sin acoplamiento interno. \\*
+\hline
+\textbf{Relaciones} & Invocado por Workshop Operations para comprobar presencia activa de técnicos en patio. Delega lecturas optimizadas en adaptadores de persistencia JPA. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} HR External Gateways \& Outbound Integration} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & Spring RestClient, Resend API, Google Places SDK, In-Memory ACL \\*
+\hline
+\textbf{Responsabilidad} & Conecta con Resend API para despacho de boletas electrónicas PDF y notificaciones disciplinarias, resuelve geocodificación de sedes en Google Places, valida membresías en IAM y recupera comisiones de patio en Workshop Operations. \\*
+\hline
+\textbf{Relaciones} & Invocado por servicios de aplicación. Conecta vía HTTPS con Resend API y Google Maps Platform. Consulta en memoria las fachadas de IAM \& Tenancy y Workshop Operations. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes pertenecientes al contenedor API Application en com.andeva.atelier.platform.hr.
+
+En la @fig:c4-component-hr se ilustra el diagrama C4 de componentes para el Bounded Context Human Resources Management, detallando las interacciones entre los controladores REST, los servicios de aplicación CQRS, los manejadores de eventos transaccionales, el núcleo de dominio con motores de geocerca y liquidación, los adaptadores de persistencia relacional, la fachada de contexto abierto y las pasarelas externas.
+
+![Diagrama de Componentes C4 (Nivel 3) para el Bounded Context Human Resources Management en API Application](report/assets/c4-diagrams/component-level-diagram-hr.png){#fig:c4-component-hr}
+
+*Nota.* Elaboración propia en base a la arquitectura táctica del backend y el estándar C4 Model.
+
+**Dinámica de Interacción y Flujos Operativos del Bounded Context Human Resources Management**
+
+Para comprender la colaboración entre los componentes de Human Resources Management y los módulos adyacentes durante la operativa diaria del taller, se analizan a continuación los tres flujos operacionales críticos de la plataforma:
+
+- **Ciclo de Marcación Móvil Geocercada y Validación Haversine Satelital:**
+  Cuando un mecánico o colaborador operativo registra su ingreso matutino desde Mobile Workshop, el aplicativo captura las coordenadas geográficas del dispositivo mediante telemetría satelital WGS84. El componente **HR REST Controllers & Resource Assemblers** recibe la petición HTTP segura y delega en **HR CQRS Application Services**, el cual consulta el centroide y radio de tolerancia de la sede física a través de **HR External Gateways & Outbound Integration** invocando la fachada de IAM.
+
+  El servicio de aplicación delega la verificación espacial en **HR Domain Model & Geofencing Calculation Engines**, donde el servicio **HaversineGeofencingService** calcula la distancia geodésica entre el colaborador y el taller en memoria pura. Verificada la proximidad dentro de la tolerancia estipulada y evaluada la puntualidad frente al horario del turno, **HR Persistence Repositories & JPA Adapters** persiste el nuevo agregado **AttendanceRecord** en PostgreSQL 16 y canaliza el evento **AttendanceClockedInEvent** hacia **outbox_messages** mediante **HR Event Handlers & Transactional Dispatcher** para su publicación desacoplada.
+
+- **Ciclo de Liquidación de Planillas, Consolidación de Comisiones MRO y Emisión SUNAT PLAME:**
+  Al concluir el ciclo mensual de remuneraciones, el administrador del taller inicia el proceso de nómina desde Web Application. El componente **HR CQRS Application Services** recibe la instrucción de liquidación y recupera el expediente del colaborador junto con la totalidad de marcaciones y tardanzas acumuladas a través de **HR Persistence Repositories & JPA Adapters**. Simultáneamente, el servicio consulta a través de **HR External Gateways & Outbound Integration** las comisiones devengadas por órdenes de trabajo culminadas en el módulo Workshop Operations.
+
+  Con la información consolidada, el motor **PayrollCalculationEngine** en **HR Domain Model & Geofencing Calculation Engines** computa de forma determinista los montos por salario base, bonificaciones por eficiencia técnica, retenciones del sistema previsional y descuentos tributarios de quinta categoría. Una vez persistida la boleta salarial y sus partidas analíticas en base de datos, la pasarela externa despacha el comprobante en formato PDF firmado hacia el buzón del empleado mediante Resend API en el puerto seguro 443, generando en paralelo los archivos de exportación en formato .rem requeridos por la plataforma tributaria SUNAT PLAME.
+
+- **Ciclo de Verificación de Disponibilidad Técnica en Patio mediante Fachada OHS:**
+  Durante la dinámica operativa diaria del taller mecánico, el planificador o jefe de taller asigna una nueva orden de mantenimiento automotriz a un especialista calificado desde el módulo Workshop Operations. Previo a consolidar la asignación de la bahía y del vehículo, el servicio de asignación de órdenes invoca síncronamente el método de consulta *isMechanicOnDuty()* expuesto por **Inbound ACL & Human Resources Open Host Facade**.
+
+  La fachada Open Host Service recibe el identificador único del operario y ejecuta una consulta de solo lectura altamente optimizada sobre **HR Persistence Repositories & JPA Adapters**, verificando la existencia de una marcación de ingreso activa sin cierre en la fecha corriente y validando que el colaborador no registre permisos o suspensiones laborales. La fachada retorna una respuesta booleana desacoplada mediante un registro inmutable del lenguaje publicado, permitiendo que el módulo de mantenimiento garantice que las reparaciones críticas se encomienden exclusivamente a personal presente físicamente en las instalaciones.
 
 #### 2.6.6.6. Bounded Context Software Architecture Code Level Diagrams
 
+En esta sección se profundiza en el nivel de mayor detalle técnico para la arquitectura de software del Bounded Context Human Resources Management, trasladando las fronteras conceptuales y las responsabilidades tácticas hacia especificaciones estáticas que orientan la codificación de la plataforma. Mediante esta aproximación, se asegura que la planificación de jornadas laborales, el control de presencia física mediante geocercas y la liquidación meritocrática de salarios se ejecuten bajo tipado estricto y consistencia determinista.
 
+Esta dimensión arquitectónica se estructura en dos perspectivas complementarias: el Diagrama de Clases de la Capa de Dominio, que modela en memoria las raíces de agregado, entidades dependientes, objetos de valor inmutables, motores algorítmicos y contratos secundarios de persistencia; y el Diagrama de Base de Datos, que formaliza la persistencia física en PostgreSQL 16 con aislamiento multi-inquilino estricto, restricciones de verificación e índices optimizados para consultas cronológicas de alta concurrencia.
 
 ##### 2.6.6.6.1. *Bounded Context Domain Layer Class Diagrams*
 
+El modelado estático de la Capa de Dominio del Bounded Context Human Resources Management establece las estructuras de datos y contratos en memoria que gobiernan las relaciones laborales, la disciplina de asistencia presencial y la retribución económica del personal de taller. Su diseño prioriza la encapsulación rigurosa de reglas de negocio en agregados autónomos, erradica la obsesión por tipos primitivos mediante identificadores fuertemente tipados y preserva la pureza conceptual al excluir dependencias de frameworks externos o librerías de persistencia relacional.
 
+En la @fig:class-diagram-hr se expone el Diagrama de Clases UML detallado para la Capa de Dominio del Bounded Context Human Resources Management, modelado conforme al estándar UML y compilado mediante la herramienta PlantUML bajo el enfoque de Diagram-as-Code.
+
+![Diagrama de Clases UML de la Capa de Dominio para el Bounded Context Human Resources Management](report/assets/class-diagrams/class-diagram-hr.png){#fig:class-diagram-hr}
+
+*Nota.* Elaboración propia en base al diseño táctico de dominio y el estándar UML en PlantUML.
+
+La organización interna del diagrama se estructura en ocho paquetes lógicos que agrupan las responsabilidades tácticas del subsistema de gestión de personal:
+
+- **Raíces de Agregado (`hr.domain.model.aggregates`):** Modela las entidades principales que preservan fronteras transaccionales atómicas: **WorkShift** para la configuración de jornadas laborales y tolerancias horarias; **AttendanceRecord** para la captura de marcaciones presenciales con validación geodésica; **PayrollPayment** para la liquidación periódica de remuneraciones con partidas analíticas; y **EmployeeProfile** para la custodia del expediente laboral y perfiles técnicos de taller. Todas las raíces heredan de **AbstractDomainAggregateRoot<T>**.
+- **Entidades Internas (`hr.domain.model.entities`):** Define las entidades subordinadas que carecen de ciclo de vida autónomo fuera de su raíz: **PayrollItem** para individualizar las partidas analíticas de retención económica o bonificación por productividad en el taller automotriz.
+- **Identificadores Fuertemente Tipados (`hr.domain.model.ids`):** Implementa la interfaz **TypedId<UUID>** mediante registros inmutables (**WorkShiftId**, **AttendanceRecordId**, **PayrollPaymentId**, **PayrollItemId**, **EmployeeProfileId**), complementados por las identidades universales provistas por el Shared Kernel (**TenantId**, **BranchId**, **TenantMembershipId**).
+- **Objetos de Valor Temporales y Espaciales (`hr.domain.model.valueobjects`):** Encapsula conceptos inmutables como la franja horaria reglamentaria (**WorkShiftSchedule**), el margen de tolerancia de ingreso (**GracePeriod**), las coordenadas satelitales en WGS84 (**GeoCoordinates**), la separación ortodrómica esférica (**HaversineDistance**), el intervalo temporal contable (**PaymentPeriod**) y la justificación administrativa de incidencias (**AttendanceJustification**), articulados con la cuantía monetaria (**Money**) de soporte transversal.
+- **Enumeraciones de Dominio (`hr.domain.model.enums`):** Define los estados operativos, esquemas contractuales y clasificaciones analíticas del módulo (**AttendanceStatus**, **PayrollStatus**, **SalaryType**, **EmploymentStatus**, **DeductionType**, **BonusType**, **PayrollItemCategory**).
+- **Servicios de Dominio Puro (`hr.domain.services`):** Incorpora lógica de negocio sin estado que opera sobre múltiples componentes: **HaversineGeofencingService** para la comprobación in-memory de proximidad satelital frente al centroide del taller; y **PayrollCalculationEngine** para la liquidación integral de nóminas combinando penalidades de puntualidad con incentivos de productividad en foso.
+- **Puertos de Persistencia (`hr.domain.repositories`):** Establece los contratos de almacenamiento y consulta agnósticos (**WorkShiftRepository**, **AttendanceRecordRepository**, **PayrollPaymentRepository**, **EmployeeProfileRepository**), garantizando total independencia frente a tecnologías ORM o relacionales.
+- **Jerarquía de Excepciones Semánticas (`hr.domain.exceptions`):** Provee clases no comprobadas que heredan de **DomainException**, asignando códigos legibles normalizados bajo RFC 7807 para incidentes de geocerca, solapamiento de turnos, marcaciones duplicadas o bloqueos contables.
+
+En la @tbl:hr-domain-classes-members se detalla la especificación formal de atributos, firmas de métodos, modificadores de acceso y reglas de negocio para cada elemento de la Capa de Dominio.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Catálogo exhaustivo de clases, miembros, ámbitos y relaciones de la Capa de Dominio del Bounded Context Human Resources Management} \label{tbl:hr-domain-classes-members} \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} WorkShift} \\*
+\hline
+Atributos & Raíz de agregado principal. Modela la parametrización de jornadas laborales, franja horaria reglamentaria y margen de tolerancia de ingreso por taller. Generalización de \texttt{AbstractDomainAggregateRoot<\allowbreak WorkShiftId>\allowbreak }. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{WorkShiftId id} \newline - \texttt{TenantId tenantId} \newline - \texttt{String name} \newline - \texttt{WorkShiftSchedule schedule} \newline - \texttt{GracePeriod gracePeriod} \newline - \texttt{boolean isActive} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Métodos factoría y ciclo & Invariantes: estado inicial ACTIVE con denominación no vacía de hasta 50 caracteres. Tolerancia de gracia acotada entre 0 y 60 minutos. Emisión de eventos inmutables ante creación o alternancia de vigencia. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{WorkShift create(...)} \newline - \texttt{void updateSchedule(...)} \newline - \texttt{void deactivate()} \newline - \texttt{void activate()} \newline - \texttt{WorkShiftId id()} \newline - \texttt{TenantId tenantId()} \newline - \texttt{boolean isActive()} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Métodos de consulta horaria & Comprobación inmutable de puntualidad e inclusión temporal. Determina si una marca horaria excede la tolerancia pactada o se sitúa dentro de la franja operativa, soportando jornadas que cruzan la medianoche. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{boolean isLate(LocalTime)} \newline - \texttt{boolean isWithinWorkingHours(LocalTime)} \newline - \texttt{WorkShiftSchedule schedule()} \newline - \texttt{GracePeriod gracePeriod()} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} AttendanceRecord} \\*
+\hline
+Atributos & Raíz de agregado de control de presencia física. Modela la evidencia probatoria de asistencia laboral en sucursal con captura satelital, cómputo geodésico y regularización administrativa. Generalización de \texttt{AbstractDomainAggregateRoot<\allowbreak AttendanceRecordId>\allowbreak }. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{AttendanceRecordId id} \newline - \texttt{TenantId tenantId} \newline - \texttt{BranchId branchId} \newline - \texttt{TenantMembershipId membershipId} \newline - \texttt{WorkShiftId shiftId} \newline - \texttt{Instant clockIn} \newline - \texttt{Instant clockOut} \newline - \texttt{AttendanceStatus status} \newline - \texttt{GeoCoordinates coordinates} \newline - \texttt{HaversineDistance distanceToBranch} \newline - \texttt{AttendanceJustification justification} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Métodos factoría y registro presencial & Invariantes: validación in-memory de geocerca física con radio perimetral autorizado no mayor a 150 metros. Clasificación automática de puntualidad y emisión atómica de eventos hacia Transactional Outbox. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{AttendanceRecord recordClockIn(...)} \newline - \texttt{void recordClockOut(Instant)} \newline - \texttt{AttendanceRecord recordAbsent(...)} \newline - \texttt{AttendanceRecordId id()} \newline - \texttt{AttendanceStatus status()} \newline - \texttt{Instant clockIn()} \newline - \texttt{Instant clockOut()} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Métodos de regularización administrativa & Transición de estado desde LATE o ABSENT hacia EXCUSED mediante justificación asentada por un supervisor autorizado, revocando penalidades salariales y registrando evidencia probatoria. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{void justify(String,\allowbreak  TenantMembershipId)} \newline - \texttt{GeoCoordinates coordinates()} \newline - \texttt{HaversineDistance distanceToBranch()} \newline - \texttt{AttendanceJustification justification()} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} PayrollPayment} \\*
+\hline
+Atributos & Raíz de agregado de liquidación periódica salarial. Centraliza haberes contractuales, deducciones por incidencias y bonificaciones devengadas de patio automotriz. Generalización de \texttt{AbstractDomainAggregateRoot<\allowbreak PayrollPaymentId>\allowbreak }. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{PayrollPaymentId id} \newline - \texttt{TenantId tenantId} \newline - \texttt{TenantMembershipId membershipId} \newline - \texttt{PaymentPeriod period} \newline - \texttt{Money baseAmount} \newline - \texttt{Money deductions} \newline - \texttt{Money bonuses} \newline - \texttt{Money totalPaid} \newline - \texttt{PayrollStatus status} \newline - \texttt{Instant paidAt} \newline - \texttt{String paymentReference} \newline - \texttt{List<\allowbreak PayrollItem>\allowbreak  items} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Métodos factoría y liquidación & Invariantes: importe neto total calculado no menor a cero. Adición controlada de partidas analíticas bajo estado borrador. Emisión de PayrollCalculatedEvent y recálculo automático de subtotales. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{PayrollPayment calculate(...)} \newline - \texttt{void addDeduction(...)} \newline - \texttt{void addBonus(...)} \newline - \texttt{PayrollPaymentId id()} \newline - \texttt{Money totalPaid()} \newline - \texttt{List<\allowbreak PayrollItem>\allowbreak  items()} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Métodos de aprobación y desembolso & Máquina de estados determinista: conmutación de DRAFT a APPROVED mediante autorización gerencial, y de APPROVED a PAID asentando referencia de transferencia bancaria. Bloqueo estricto de mutaciones posteriores. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{void approve(TenantMembershipId)} \newline - \texttt{void disburse(String,\allowbreak  Instant)} \newline - \texttt{void cancel(String)} \newline - \texttt{PayrollStatus status()} \newline - \texttt{Instant paidAt()} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} EmployeeProfile} \\*
+\hline
+Atributos & Raíz de agregado del expediente laboral y perfil técnico. Custodia asignación de turnos, especialidades electromecánicas, esquema de haberes y situación contractual. Generalización de \texttt{AbstractDomainAggregateRoot<\allowbreak EmployeeProfileId>\allowbreak }. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{EmployeeProfileId id} \newline - \texttt{TenantId tenantId} \newline - \texttt{BranchId branchId} \newline - \texttt{TenantMembershipId membershipId} \newline - \texttt{WorkShiftId assignedShiftId} \newline - \texttt{Money baseSalary} \newline - \texttt{SalaryType salaryType} \newline - \texttt{String jobTitle} \newline - \texttt{List<\allowbreak String>\allowbreak  specialties} \newline - \texttt{EmploymentStatus employmentStatus} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Métodos factoría y actualización de expediente & Invariantes: vinculación unívoca con la identidad de IAM y salario base positivo. Actualización de jornada habitual, reconversión salarial y registro de eventos inmutables. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{EmployeeProfile register(...)} \newline - \texttt{void assignShift(WorkShiftId)} \newline - \texttt{void updateSalary(Money,\allowbreak  SalaryType)} \newline - \texttt{EmployeeProfileId id()} \newline - \texttt{Money baseSalary()} \newline - \texttt{WorkShiftId assignedShiftId()} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Métodos de traslado y desvinculación & Reasignación de sede operativa física e inhabilitación laboral por término de contrato, impidiendo asignaciones a órdenes mecánicas en bahía y bloqueando marcaciones presenciales. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{void changeBranch(BranchId)} \newline - \texttt{void terminateEmployment()} \newline - \texttt{EmploymentStatus employmentStatus()} \newline - \texttt{BranchId branchId()} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} PayrollItem} \\*
+\hline
+Atributos y factorías & Entidad dependiente subordinada a PayrollPayment. Modela renglones individuales de descuento por tardanza o inasistencia y bonificaciones por productividad de patio. Composición 1 a 1..*. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{PayrollItemId id} \newline - \texttt{PayrollPaymentId payrollPaymentId} \newline - \texttt{PayrollItemCategory category} \newline - \texttt{String concept} \newline - \texttt{Money amount} \newline - \texttt{Optional<\allowbreak DeductionType>\allowbreak  deductionType} \newline - \texttt{Optional<\allowbreak BonusType>\allowbreak  bonusType} \newline - \texttt{LocalDate date} \newline - \texttt{PayrollItem deduction(...)} \newline - \texttt{PayrollItem bonus(...)} \newline - \texttt{boolean isDeduction()} \newline - \texttt{boolean isBonus()} \\*
+\hline
+\textbf{Ámbito} & Privado / Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} HaversineGeofencingService, PayrollCalculationEngine} \\*
+\hline
+Servicios de dominio & Lógica algorítmica pura sin estado. \textbf{HaversineGeofencingService} calcula la distancia ortodrómica esférica en microsegundos y valida la presencia física en sucursal. \textbf{PayrollCalculationEngine} consolida marcaciones, liquida descuentos proporcionales, acumula bonificaciones de órdenes MRO y genera la proforma de nómina. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{HaversineDistance calculateDistance(GeoCoordinates,\allowbreak  GeoCoordinates)} \newline - \texttt{boolean isWithinGeofence(GeoCoordinates,\allowbreak  GeoCoordinates,\allowbreak  double)} \newline - \texttt{PayrollPayment calculatePayroll(TenantId,\allowbreak  TenantMembershipId,\allowbreak  PaymentPeriod,\allowbreak  Money,\allowbreak  List<\allowbreak AttendanceRecord>\allowbreak ,\allowbreak  List<\allowbreak MroCommissionDto>\allowbreak )} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} WorkShiftRepository, AttendanceRecordRepository, PayrollPaymentRepository, EmployeeProfileRepository} \\*
+\hline
+Puertos de persistencia & Interfaces agnósticas de persistencia en dominio. Abstraen el acceso a datos desacoplándolo de tecnologías relacionales u ORM, proveyendo métodos de consulta temporal, validación de unicidad de denominación y filtros de operarios activos por sede. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{WorkShift save(WorkShift)} \newline - \texttt{Optional<\allowbreak WorkShift>\allowbreak  findByTenantIdAndName(TenantId,\allowbreak  String)} \newline - \texttt{AttendanceRecord save(AttendanceRecord)} \newline - \texttt{Optional<\allowbreak AttendanceRecord>\allowbreak  findActiveByMembershipAndDate(TenantMembershipId,\allowbreak  LocalDate)} \newline - \texttt{PayrollPayment save(PayrollPayment)} \newline - \texttt{Optional<\allowbreak PayrollPayment>\allowbreak  findByMembershipAndPeriod(TenantMembershipId,\allowbreak  PaymentPeriod)} \newline - \texttt{EmployeeProfile save(EmployeeProfile)} \newline - \texttt{Optional<\allowbreak EmployeeProfile>\allowbreak  findByMembershipId(TenantMembershipId)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} WorkShiftId, AttendanceRecordId, PayrollPaymentId, PayrollItemId, EmployeeProfileId} \\*
+\hline
+Atributo value y factorías & Registros inmutables que realizan la interfaz sellada \texttt{TypedId<\allowbreak UUID>\allowbreak }, erradicando la obsesión por tipos primitivos en identidades de gestión laboral, asistencia y nóminas. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{UUID value} \newline - \texttt{generate()} \newline - \texttt{from(UUID)} \newline - \texttt{UUID value()} \\*
+\hline
+\textbf{Ámbito} & Privado / Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} WorkShiftSchedule, GracePeriod, GeoCoordinates, HaversineDistance, PaymentPeriod, AttendanceJustification} \\*
+\hline
+Atributos y validaciones & Objetos de valor inmutables. \textbf{WorkShiftSchedule} delimita horas de jornada y soporte de medianoche. \textbf{GracePeriod} valida tolerancia de 0 a 60 minutos. \textbf{GeoCoordinates} verifica latitud y longitud en WGS84. \textbf{HaversineDistance} encapsula magnitud métrica escalar. \textbf{PaymentPeriod} valida intervalo contable consistente. \textbf{AttendanceJustification} custodia regularización autorizada. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{LocalTime startTime} \newline - \texttt{LocalTime endTime} \newline - \texttt{int minutes} \newline - \texttt{double latitude} \newline - \texttt{double longitude} \newline - \texttt{double meters} \newline - \texttt{LocalDate startDate} \newline - \texttt{LocalDate endDate} \newline - \texttt{boolean isWithinWindow(LocalTime)} \newline - \texttt{boolean hasExpired(LocalTime,\allowbreak  LocalTime)} \newline - \texttt{boolean isWithin(double)} \newline - \texttt{int workingDays()} \\*
+\hline
+\textbf{Ámbito} & Privado / Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} Enumeraciones de Dominio de Human Resources Management} \\*
+\hline
+Valores constantes & Tipos enumerados que gobiernan el ciclo de asistencia (\textbf{AttendanceStatus}: ON\_TIME, LATE, EXCUSED, ABSENT), el estado de liquidación (\textbf{PayrollStatus}: DRAFT, APPROVED, PAID, CANCELLED), la tipología contractual (\textbf{SalaryType}: MONTHLY\_FIXED, HOURLY\_RATE), la condición laboral (\textbf{EmploymentStatus}: ACTIVE, ON\_LEAVE, TERMINATED), los descuentos analíticos (\textbf{DeductionType}: TARDINESS, UNJUSTIFIED\_ABSENCE, EQUIPMENT\_DAMAGE, LOAN\_REPAYMENT, OTHER), los incentivos (\textbf{BonusType}: PRODUCTIVITY, OVERTIME\_HOURS, SPECIAL\_MERIT, HOLIDAY\_ALLOWANCE) y las partidas de planilla (\textbf{PayrollItemCategory}: DEDUCTION, BONUS, BASE\_SALARY). \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{Enumeraciones de dominio} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} Jerarquía de Excepciones de Dominio} \\*
+\hline
+Constructores tipados & Diez excepciones no comprobadas derivadas de \texttt{DomainException} que encapsulan códigos semánticos legibles para respuestas RFC 7807 ante infracciones de geocerca, duplicidad de marcaciones abiertas, conflictos de turnos, boletas salariales bloqueadas o entidades no localizadas. \\*
+\hline
+\textbf{Firma o Tipo} & Subclases de \texttt{DomainException} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Elaboración propia en base al diseño táctico de dominio y la especificación UML de la solución.
+
+A partir del modelo estático ilustrado en la @fig:class-diagram-hr y formalizado en la @tbl:hr-domain-classes-members, se identifican tres fundamentos de ingeniería de software que respaldan la solidez, consistencia y pureza del subsistema de recursos humanos:
+
+- **Eficiencia Computacional y Resiliencia del Cálculo Geodésico Local:**
+  La verificación de proximidad espacial en la máquina virtual mediante **HaversineGeofencingService** elimina dependencias de interfaces de programación de aplicaciones externas de cartografía. Al resolver la trigonometría esférica en tiempo sub-milisegundo, el sistema previene degradaciones de servicio ante saturación de red o consumo de cuotas de proveedores de nube, garantizando que el flujo de marcaciones presenciales de los técnicos en cada sucursal física no experimente interrupciones.
+
+- **Formalización Salarial Determinista y Retribución Meritocrática:**
+  La articulación algorítmica gobernada por **PayrollCalculationEngine** transforma la liquidación de haberes en un proceso matemático transparente y auditable. Al integrar de manera determinista las órdenes de trabajo cerradas en el módulo de operaciones mecánicas con los baremos de productividad y deducir objetivamente penalidades de puntualidad, la plataforma erradica la discrecionalidad patronal y promueve la formalización de la fuerza laboral técnica.
+
+- **Desacoplamiento Arquitectónico entre Identidad y Expediente Laboral:**
+  La segregación entre la identidad perimetral de seguridad en el contexto de gestión de accesos y el expediente laboral en **EmployeeProfile** preserva la soberanía del modelo de recursos humanos. Vinculados exclusivamente mediante el identificador **TenantMembershipId**, las transiciones de turnos, asignaciones de sedes y categorizaciones salariales evolucionan libremente sin inducir modificaciones en los privilegios de autenticación ni en los esquemas criptográficos corporativos.
 
 ##### 2.6.6.6.2. *Bounded Context Database Design Diagram*
+
+La infraestructura de persistencia del Bounded Context Human Resources Management articula un modelo de datos relacional híbrido diseñado para garantizar la integridad contable de las planillas salariales, el registro pericial de presencias físicas en taller y la resiliencia operativa en terminales móviles. Este diseño distribuye sus responsabilidades entre una base de datos central en PostgreSQL 16 de alta consistencia transaccional y un motor local embebido en SQLite 3 para dispositivos de operarios en patio.
+
+En la @fig:database-diagram-hr se presenta el Diagrama Entidad-Relación físico para la persistencia del Bounded Context Human Resources Management en sus dos entornos operativos de despliegue: la base de datos central PostgreSQL 16 de la API de backend y el motor relacional local SQLite 3 de la aplicación móvil de taller.
+
+![Diagrama Entidad-Relación de Base de Datos para el Bounded Context Human Resources Management (PostgreSQL 16 y SQLite 3)](report/assets/database-diagrams/database-diagram-hr.png){#fig:database-diagram-hr}
+
+*Nota.* Elaboración propia en base al diseño físico de persistencia y el estándar PlantUML ERD.
+
+El diseño relacional presentado en la @fig:database-diagram-hr se estructura en cinco subsistemas articulados para satisfacer los requerimientos laborales, operativos y de compensación del taller automotriz:
+
+- **Subsistema de Programación de Turnos y Franjas Horarias (**work_shifts**):**
+  Gobierna la definición formal de los esquemas horarios de la jornada laboral del taller en PostgreSQL 16. Custodia los instantes oficiales de inicio y culminación de labores, junto con el umbral de tolerancia de tardanza en minutos (*grace_period_m* $\ge$ 0 y *grace_period_m* $\le$ 60), garantizando que cada taller administre franjas horarias soberanas mediante la restricción de unicidad compuesta sobre (**tenant_id**, **name**).
+
+- **Subsistema de Control de Asistencia y Geocercas Satelitales (**attendance_records**):**
+  Centraliza el registro probatorio de presencia física de los colaboradores en taller automotriz. Preserva marcas de tiempo de ingreso y salida junto con coordenadas geodésicas satelitales en alta precisión decimal, contrastando la posición del técnico contra la sede física mediante la distancia esférica calculada y asegurando la inalterabilidad de marcaciones o justificaciones autorizadas por supervisores.
+
+- **Subsistema de Liquidación y Desglose Salarial (**payroll_payments**, **payroll_items**):**
+  Orquesta la emisión periódica de nóminas y boletas de pago para la fuerza laboral técnica. Centraliza el monto de salario base, penalidades por tardanzas o inasistencias y bonificaciones de productividad, complementándose mediante partidas analíticas subordinadas bajo eliminación en cascada para salvaguardar la trazabilidad de cada concepto computable.
+
+- **Subsistema de Expedientes y Fichas Laborales de Personal (**employee_profiles**):**
+  Custodia la información contractual y laboral de los colaboradores de taller vinculados a su respectiva membresía institucional. Define la sede física de asignación, el turno predeterminado de trabajo, la modalidad remunerativa pactada y el estado de actividad del personal, garantizando una relación unívoca por técnico que previene duplicidades contractuales.
+
+- **Subsistema de Persistencia Técnica Desconectada en SQLite 3 (**local_attendance_cache**, **local_shift_cache**, **offline_attendance_mutations**):**
+  Garantiza la continuidad operativa en la aplicación móvil del operario ante pérdidas de cobertura inalámbrica en bahías y patios de trabajo. Almacena réplicas locales de consulta inmediata de turnos e historial de marcaciones, encolando eventos de asistencia con coordenadas satelitales para su replicación atómica e idempotente hacia la nube al restablecerse la red.
+
+A partir de la arquitectura relacional definida en el diagrama de persistencia, en la @tbl:hr-database-objects se cataloga la totalidad de las tablas y objetos físicos que conforman el modelo de datos, detallando el producto donde residen, sus atributos cardinales, restricciones de integridad, estrategias de indexación y su contribución al aislamiento de información.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.1cm} | >{\raggedright\arraybackslash}p{10.3cm} |}
+\caption{Catálogo exhaustivo de tablas, objetos de base de datos, restricciones e índices físicos del Bounded Context Human Resources Management} \label{tbl:hr-database-objects} \\
+\hline
+\thfirst{Aspecto de Persistencia} & \thcell{Especificación Físico-Relacional} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Persistencia} & \thcell{Especificación Físico-Relacional} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{work\_shifts}} \\*
+\hline
+\textbf{Motor y Producto} & PostgreSQL 16 (API Application) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Catálogo maestro de turnos y franjas horarias de trabajo en taller. Custodia horas oficiales de inicio y fin, tolerancia de tardanza y vigencia con aislamiento estricto por tenant\_id. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{id (UUID)}, \texttt{tenant\_id (UUID)}, \texttt{name (VARCHAR)}, \texttt{start\_time (TIME)}, \texttt{end\_time (TIME)}, \texttt{grace\_period\_m (INTEGER)}, \texttt{is\_active (BOOLEAN)}, auditoría transversal y control de versiones JPA. \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_work\_shifts (id) \newline - FK: fk\_work\_shifts\_tenant\_id hacia tenants \newline - UK: uk\_work\_shifts\_tenant\_name (tenant\_id, name) \newline - CHECK: chk\_shift\_grace\_period \newline - Índices B-Tree: idx\_work\_shifts\_tenant\_name, idx\_work\_shifts\_active \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{attendance\_records}} \\*
+\hline
+\textbf{Motor y Producto} & PostgreSQL 16 (API Application) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Registro transaccional inmutable de marcaciones de asistencia presencial. Custodia marcas temporales de entrada y salida, coordenadas GPS satelitales, distancia geodésica a la sucursal y aprobaciones de justificaciones. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{id (UUID)}, \texttt{tenant\_id (UUID)}, \texttt{branch\_id (UUID)}, \texttt{membership\_id (UUID)}, \texttt{shift\_id (UUID)}, \texttt{clock\_in (TIMESTAMPTZ)}, \texttt{clock\_out (TIMESTAMPTZ)}, \texttt{status (VARCHAR)}, \texttt{latitude (NUMERIC)}, \texttt{longitude (NUMERIC)}, \texttt{distance\_to\_branch\_m (INTEGER)}, \texttt{justification\_reason (VARCHAR)}, \texttt{justified\_by (UUID)}, \texttt{justified\_at (TIMESTAMPTZ)}, auditoría transversal y control de versiones JPA. \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_attendance\_records (id) \newline - FK: fk\_attendance\_tenant\_id hacia tenants, fk\_attendance\_branch\_id hacia branches, fk\_attendance\_membership\_id hacia tenant\_memberships, fk\_attendance\_shift\_id hacia work\_shifts, fk\_attendance\_justified\_by hacia users \newline - CHECK: chk\_attendance\_status \newline - Índices B-Tree: idx\_attendance\_membership\_date, idx\_attendance\_branch\_date, idx\_attendance\_status \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{payroll\_payments}} \\*
+\hline
+\textbf{Motor y Producto} & PostgreSQL 16 (API Application) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Consolidado periódico de liquidaciones salariales y planillas de colaboradores. Centraliza remuneración base, descuentos por incidencias, bonificaciones meritocráticas por productividad y estado de desembolso con aislamiento por tenant\_id. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{id (UUID)}, \texttt{tenant\_id (UUID)}, \texttt{membership\_id (UUID)}, \texttt{period\_start (DATE)}, \texttt{period\_end (DATE)}, \texttt{base\_amount (NUMERIC)}, \texttt{deductions (NUMERIC)}, \texttt{bonuses (NUMERIC)}, \texttt{total\_paid (NUMERIC)}, \texttt{currency (VARCHAR)}, \texttt{status (VARCHAR)}, \texttt{paid\_at (TIMESTAMPTZ)}, \texttt{payment\_reference (VARCHAR)}, auditoría transversal y control de versiones JPA. \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_payroll\_payments (id) \newline - FK: fk\_payroll\_tenant\_id hacia tenants, fk\_payroll\_membership\_id hacia tenant\_memberships \newline - UK: uk\_payroll\_membership\_period (membership\_id, period\_start, period\_end) \newline - CHECK: chk\_payroll\_status, chk\_payroll\_total \newline - Índices B-Tree: idx\_payroll\_tenant\_period, idx\_payroll\_membership, idx\_payroll\_status \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{payroll\_items}} \\*
+\hline
+\textbf{Motor y Producto} & PostgreSQL 16 (API Application) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Partidas analíticas de detalle subordinadas a la liquidación de planilla. Desglosa individualmente cada concepto computable de bonificación u deducción con fecha generadora y monto monetario. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{id (UUID)}, \texttt{payroll\_payment\_id (UUID)}, \texttt{category (VARCHAR)}, \texttt{concept (VARCHAR)}, \texttt{amount (NUMERIC)}, \texttt{type (VARCHAR)}, \texttt{date (DATE)}, \texttt{created\_at (TIMESTAMPTZ)}, \texttt{updated\_at (TIMESTAMPTZ).} \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_payroll\_items (id) \newline - FK: fk\_payroll\_items\_payment\_id hacia payroll\_payments con ON DELETE CASCADE \newline - CHECK: chk\_payroll\_item\_category, chk\_payroll\_item\_amount \newline - Índices B-Tree: idx\_payroll\_items\_payment, idx\_payroll\_items\_category \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{employee\_profiles}} \\*
+\hline
+\textbf{Motor y Producto} & PostgreSQL 16 (API Application) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Expediente laboral y ficha técnica de personal de taller. Custodia asignación salarial de referencia, sede de adscripción, turno habitual programado y condición laboral con clave unívoca por membresía. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{id (UUID)}, \texttt{tenant\_id (UUID)}, \texttt{branch\_id (UUID)}, \texttt{membership\_id (UUID)}, \texttt{assigned\_shift\_id (UUID)}, \texttt{base\_salary (NUMERIC)}, \texttt{currency (VARCHAR)}, \texttt{salary\_type (VARCHAR)}, \texttt{job\_title (VARCHAR)}, \texttt{employment\_status (VARCHAR)}, auditoría transversal y control de versiones JPA. \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_employee\_profiles (id) \newline - FK: fk\_employee\_tenant\_id hacia tenants, fk\_employee\_branch\_id hacia branches, fk\_employee\_membership\_id hacia tenant\_memberships, fk\_employee\_shift\_id hacia work\_shifts \newline - UK: uk\_employee\_profiles\_membership (membership\_id) \newline - CHECK: chk\_employee\_salary\_type, chk\_employee\_employment\_status \newline - Índices B-Tree: idx\_employee\_profiles\_branch, idx\_employee\_profiles\_membership, idx\_employee\_profiles\_tenant\_status \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{local\_attendance\_cache}} \\*
+\hline
+\textbf{Motor y Producto} & SQLite 3 (Mobile Workshop) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Réplica local de lectura con las asistencias registradas por el operario. Facilita la consulta inmediata de historial y estado de puntualidad en el dispositivo móvil sin conexión de red. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{id (TEXT)}, \texttt{tenant\_id (TEXT)}, \texttt{branch\_id (TEXT)}, \texttt{membership\_id (TEXT)}, \texttt{shift\_id (TEXT)}, \texttt{clock\_in (TEXT)}, \texttt{clock\_out (TEXT)}, \texttt{status (TEXT)}, \texttt{latitude (REAL)}, \texttt{longitude (REAL)}, \texttt{distance\_to\_branch\_m (INTEGER)}, \texttt{synced\_at (TEXT).} \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_local\_attendance (id) \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{local\_shift\_cache}} \\*
+\hline
+\textbf{Motor y Producto} & SQLite 3 (Mobile Workshop) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Caché local de turnos y franjas horarias programadas. Permite al operario consultar sus horarios de entrada, salida y minutos de tolerancia autorizados en patio de trabajo. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{id (TEXT)}, \texttt{tenant\_id (TEXT)}, \texttt{name (TEXT)}, \texttt{start\_time (TEXT)}, \texttt{end\_time (TEXT)}, \texttt{grace\_period\_m (INTEGER)}, \texttt{synced\_at (TEXT).} \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_local\_shift (id) \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{offline\_attendance\_mutations}} \\*
+\hline
+\textbf{Motor y Producto} & SQLite 3 (Mobile Workshop) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Buffer transaccional local de marcaciones presenciales capturadas en patio o foso sin conectividad. Retiene eventos de entrada y salida con coordenadas GPS para su transmisión atómica e idempotente hacia la nube. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{mutation\_id (TEXT)}, \texttt{membership\_id (TEXT)}, \texttt{action\_type (TEXT)}, \texttt{timestamp (TEXT)}, \texttt{latitude (REAL)}, \texttt{longitude (REAL)}, \texttt{status (TEXT)}, \texttt{retry\_count (INTEGER)}, \texttt{created\_at (TEXT)}, \texttt{synced\_at (TEXT).} \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_offline\_mutations (mutation\_id) \newline - CHECK: chk\_mutation\_status \newline - Índice B-Tree: idx\_mutations\_status (status, created\_at) \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{auditable\_abstract\_entity}} \\*
+\hline
+\textbf{Motor y Producto} & PostgreSQL 16 (API Application) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Superclase JPA (@MappedSuperclass) que confiere identificador único técnico UUID v4, particionamiento multi-inquilino mandatorio, control de concurrencia optimista y auditoría temporal a las tablas maestras del módulo. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{id (UUID)}, \texttt{tenant\_id (UUID)}, \texttt{created\_at (TIMESTAMPTZ)}, \texttt{updated\_at (TIMESTAMPTZ)}, \texttt{version (BIGINT)}, \texttt{deleted\_at (TIMESTAMPTZ).} \\*
+\hline
+\textbf{Constraints e Índices} & - PK técnica: pk\_auditable\_entity (id) \newline - FK lógica: tenant\_id. Superclase MappedSuperclass JPA con bloqueo optimista \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Elaboración propia en base al diseño relacional y la especificación física de persistencia.
+
+A partir de la estructura formalizada en la @fig:database-diagram-hr y la @tbl:hr-database-objects, se identifican tres fundamentos de ingeniería de software que respaldan la solidez, consistencia y resiliencia de la persistencia:
+
+- **Aislamiento Multi-Inquilino y Control de Concurrencia Optimista en Recursos Humanos:**
+  La segregación de la información de personal en PostgreSQL 16 se asegura mediante la presencia obligatoria de la clave foránea **tenant_id** en todas las tablas maestras, articulada con la restricción unívoca compuesta sobre (**tenant_id**, **name**). Esta disposición previene interferencias en la denominación de turnos entre talleres independientes, mientras que la columna **version** gestiona el control de concurrencia optimista, asegurando que dos administradores no modifiquen de forma destructiva y concurrente el expediente laboral de un mismo técnico.
+
+- **Precisión Geodésica Satelital e Indexación Cronológica de Asistencia:**
+  La verificación de asistencia se respalda en la persistencia de coordenadas satelitales WGS84 con precisión decimal de alta resolución en **attendance_records**, contrastadas contra la sede mediante la distancia métrica calculada. Los índices compuestos B-Tree sobre (**membership_id**, **clock_in**) y (**branch_id**, **clock_in**) optimizan las consultas cronológicas de puntualidad y cierres de nómina, mientras que la traza inmutable de justificaciones previene adulteraciones en controversias laborales.
+
+- **Resiliencia Operacional en Patio Desconectado y Reconciliación Idempotente:**
+  La coexistencia de la base central con el motor embebido SQLite 3 en la aplicación móvil garantiza continuidad operativa en patios y fosas con blindaje electromagnético [@herrera2026offline]. Mediante la estructura **offline_attendance_mutations**, los operarios registran su asistencia presencial con coordenadas satelitales, encolando eventos que se drenan atómicamente hacia la nube mediante identificadores únicos de mutación para evitar duplicidades al restablecer el enlace de red [@korichi2026dmrp].

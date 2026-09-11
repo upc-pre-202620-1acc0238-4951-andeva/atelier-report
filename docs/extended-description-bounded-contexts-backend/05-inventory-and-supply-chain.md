@@ -1308,7 +1308,7 @@ En la siguiente tabla se documenta el catálogo exhaustivo de clases, estructura
 
 ##### 3. Especificación del Diagrama de Clases en PlantUML (Diagram-as-Code)
 
-A continuación se presenta la especificación canónica en lenguaje PlantUML DSL del Diagrama de Clases de la Capa de Dominio de Inventory & Supply Chain, compilado de manera determinista mediante `make diagrams` hacia `report/assets/class-diagrams/class-diagram-inventory.png`:
+A continuación se presenta la especificación canónica en lenguaje PlantUML DSL del Diagrama de Clases de la Capa de Dominio de Inventory & Supply Chain, compilado de manera determinista mediante `make class-diagrams` hacia `report/assets/class-diagrams/class-diagram-inventory.png`:
 
 ```plantuml
 @startuml class-diagram-inventory
