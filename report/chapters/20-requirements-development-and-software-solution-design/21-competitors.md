@@ -4,8 +4,6 @@
 
 En esta sección se identifican, analizan y comparan las principales soluciones tecnológicas existentes en el mercado frente a nuestra propuesta de valor **Atelier** (específicamente a través de su plataforma SaaS B2B **Atelier Workshop**). Este estudio comparativo permite evaluar las fortalezas, debilidades y modelos operativos de los competidores directos e indirectos, con el objetivo de identificar oportunidades estratégicas y ventajas competitivas que permitan resolver eficientemente las necesidades de nuestros segmentos objetivo en el sector de micro y pequeñas empresas (MYPE) de mantenimiento, reparación y operaciones automotrices (MRO).
 
-\newpage
-
 ### 2.1.1. *Análisis Competitivo*
 
 A continuación, en la Tabla \ref{tbl:analisis-competitivo}, se presenta la matriz de análisis comparativo integral entre Atelier Workshop y tres competidores representativos del mercado: **Mi Taller CRM** (competidor directo local en Perú), **OK CAR** (competidor directo regional en Latinoamérica) y **Taller GP** (competidor indirecto internacional de nivel enterprise).
@@ -13,23 +11,23 @@ A continuación, en la Tabla \ref{tbl:analisis-competitivo}, se presenta la matr
 \small
 \renewcommand{\arraystretch}{1.25}
 \setlength{\tabcolsep}{3.5pt}
-\begin{longtable}{| >{\raggedright\arraybackslash}p{2.3cm} | >{\raggedright\arraybackslash}p{3.3cm} | >{\raggedright\arraybackslash}p{3.3cm} | >{\raggedright\arraybackslash}p{3.3cm} | >{\raggedright\arraybackslash}p{3.3cm} |}
+\begin{longtable}{| >{\raggedright\arraybackslash}p{2.2cm} | >{\raggedright\arraybackslash}p{3.1cm} | >{\raggedright\arraybackslash}p{3.1cm} | >{\raggedright\arraybackslash}p{3.1cm} | >{\raggedright\arraybackslash}p{\dimexpr\textwidth-11.5cm-10\tabcolsep-6\arrayrulewidth\relax} |}
 \caption{Matriz de Análisis Comparativo de Competidores} \label{tbl:analisis-competitivo} \\
 \hline
-\multicolumn{1}{|>{\centering\arraybackslash}p{2.3cm}|}{\textbf{Criterio}} & 
-\multicolumn{1}{>{\centering\arraybackslash}p{3.3cm}|}{\vspace{0.1cm}\includegraphics[width=2.5cm, height=0.9cm, keepaspectratio]{report/assets/logos/imagotipo-atelier.jpg}\vspace{0.05cm}\newline \textbf{Atelier Workshop}} & 
-\multicolumn{1}{>{\centering\arraybackslash}p{3.3cm}|}{\vspace{0.1cm}\includegraphics[width=2.5cm, height=0.9cm, keepaspectratio]{report/assets/competidores/mitaller.png}\vspace{0.05cm}\newline \textbf{Mi Taller CRM}} & 
-\multicolumn{1}{>{\centering\arraybackslash}p{3.3cm}|}{\vspace{0.1cm}\includegraphics[width=2.5cm, height=0.9cm, keepaspectratio]{report/assets/competidores/okcar.jpeg}\vspace{0.05cm}\newline \textbf{OK CAR}} & 
-\multicolumn{1}{>{\centering\arraybackslash}p{3.3cm}|}{\vspace{0.1cm}\includegraphics[width=2.5cm, height=0.9cm, keepaspectratio]{report/assets/competidores/tallergp.png}\vspace{0.05cm}\newline \textbf{Taller GP}} \\
+\multicolumn{1}{|>{\centering\arraybackslash}p{2.2cm}|}{\textbf{Criterio}} & 
+\multicolumn{1}{>{\centering\arraybackslash}p{3.1cm}|}{\vspace{0.1cm}\includegraphics[width=2.4cm, height=0.85cm, keepaspectratio]{report/assets/logos/imagotipo-atelier.jpg}\vspace{0.05cm}\newline \textbf{Atelier Workshop}} & 
+\multicolumn{1}{>{\centering\arraybackslash}p{3.1cm}|}{\vspace{0.1cm}\includegraphics[width=2.4cm, height=0.85cm, keepaspectratio]{report/assets/competidores/mitaller.png}\vspace{0.05cm}\newline \textbf{Mi Taller CRM}} & 
+\multicolumn{1}{>{\centering\arraybackslash}p{3.1cm}|}{\vspace{0.1cm}\includegraphics[width=2.4cm, height=0.85cm, keepaspectratio]{report/assets/competidores/okcar.jpeg}\vspace{0.05cm}\newline \textbf{OK CAR}} & 
+\multicolumn{1}{>{\centering\arraybackslash}p{\dimexpr\textwidth-11.5cm-10\tabcolsep-6\arrayrulewidth\relax}|}{\vspace{0.1cm}\includegraphics[width=2.4cm, height=0.85cm, keepaspectratio]{report/assets/competidores/tallergp.png}\vspace{0.05cm}\newline \textbf{Taller GP}} \\
 \hline
 \endfirsthead
 
 \hline
-\multicolumn{1}{|>{\centering\arraybackslash}p{2.3cm}|}{\textbf{Criterio}} & 
-\multicolumn{1}{>{\centering\arraybackslash}p{3.3cm}|}{\textbf{Atelier Workshop}} & 
-\multicolumn{1}{>{\centering\arraybackslash}p{3.3cm}|}{\textbf{Mi Taller CRM}} & 
-\multicolumn{1}{>{\centering\arraybackslash}p{3.3cm}|}{\textbf{OK CAR}} & 
-\multicolumn{1}{>{\centering\arraybackslash}p{3.3cm}|}{\textbf{Taller GP}} \\
+\multicolumn{1}{|>{\centering\arraybackslash}p{2.2cm}|}{\textbf{Criterio}} & 
+\multicolumn{1}{>{\centering\arraybackslash}p{3.1cm}|}{\textbf{Atelier Workshop}} & 
+\multicolumn{1}{>{\centering\arraybackslash}p{3.1cm}|}{\textbf{Mi Taller CRM}} & 
+\multicolumn{1}{>{\centering\arraybackslash}p{3.1cm}|}{\textbf{OK CAR}} & 
+\multicolumn{1}{>{\centering\arraybackslash}p{\dimexpr\textwidth-11.5cm-10\tabcolsep-6\arrayrulewidth\relax}|}{\textbf{Taller GP}} \\
 \hline
 \endhead
 
@@ -116,8 +114,6 @@ A continuación, en la Tabla \ref{tbl:analisis-competitivo}, se presenta la matr
 
 *Nota.* Elaboración propia basada en la investigación de mercado y análisis de competidores del ecosistema automotriz (2026).
 
-\newpage
-
 ### 2.1.2. *Estrategias y Tácticas frente a Competidores*
 
 En la Tabla \ref{tbl:estrategias-tacticas-competidores} se detallan las tácticas diferenciadoras, las fortalezas que enfrentamos y las debilidades que aprovecharemos de cada competidor evaluado para posicionar estratégicamente a **Atelier Workshop** en el mercado automotriz peruano.
@@ -125,21 +121,21 @@ En la Tabla \ref{tbl:estrategias-tacticas-competidores} se detallan las táctica
 \small
 \renewcommand{\arraystretch}{1.3}
 \setlength{\tabcolsep}{4pt}
-\begin{longtable}{| >{\centering\arraybackslash}p{3.2cm} | >{\raggedright\arraybackslash}p{4.1cm} | >{\raggedright\arraybackslash}p{4.1cm} | >{\raggedright\arraybackslash}p{4.1cm} |}
+\begin{longtable}{| >{\centering\arraybackslash}p{3.0cm} | >{\raggedright\arraybackslash}p{3.9cm} | >{\raggedright\arraybackslash}p{3.9cm} | >{\raggedright\arraybackslash}p{\dimexpr\textwidth-10.8cm-8\tabcolsep-5\arrayrulewidth\relax} |}
 \caption{Matriz de Estrategias y Tácticas frente a Competidores} \label{tbl:estrategias-tacticas-competidores} \\
 \hline
-\multicolumn{1}{|>{\centering\arraybackslash}p{3.2cm}|}{\textbf{Competidores}} & 
-\multicolumn{1}{>{\centering\arraybackslash}p{4.1cm}|}{\textbf{Táctica Diferenciadora}} & 
-\multicolumn{1}{>{\centering\arraybackslash}p{4.1cm}|}{\textbf{Fortalezas Enfrentadas}} & 
-\multicolumn{1}{>{\centering\arraybackslash}p{4.1cm}|}{\textbf{Debilidad Aprovechada}} \\
+\multicolumn{1}{|>{\centering\arraybackslash}p{3.0cm}|}{\textbf{Competidores}} & 
+\multicolumn{1}{>{\centering\arraybackslash}p{3.9cm}|}{\textbf{Táctica Diferenciadora}} & 
+\multicolumn{1}{>{\centering\arraybackslash}p{3.9cm}|}{\textbf{Fortalezas Enfrentadas}} & 
+\multicolumn{1}{>{\centering\arraybackslash}p{\dimexpr\textwidth-10.8cm-8\tabcolsep-5\arrayrulewidth\relax}|}{\textbf{Debilidad Aprovechada}} \\
 \hline
 \endfirsthead
 
 \hline
-\multicolumn{1}{|>{\centering\arraybackslash}p{3.2cm}|}{\textbf{Competidores}} & 
-\multicolumn{1}{>{\centering\arraybackslash}p{4.1cm}|}{\textbf{Táctica Diferenciadora}} & 
-\multicolumn{1}{>{\centering\arraybackslash}p{4.1cm}|}{\textbf{Fortalezas Enfrentadas}} & 
-\multicolumn{1}{>{\centering\arraybackslash}p{4.1cm}|}{\textbf{Debilidad Aprovechada}} \\
+\multicolumn{1}{|>{\centering\arraybackslash}p{3.0cm}|}{\textbf{Competidores}} & 
+\multicolumn{1}{>{\centering\arraybackslash}p{3.9cm}|}{\textbf{Táctica Diferenciadora}} & 
+\multicolumn{1}{>{\centering\arraybackslash}p{3.9cm}|}{\textbf{Fortalezas Enfrentadas}} & 
+\multicolumn{1}{>{\centering\arraybackslash}p{\dimexpr\textwidth-10.8cm-8\tabcolsep-5\arrayrulewidth\relax}|}{\textbf{Debilidad Aprovechada}} \\
 \hline
 \endhead
 

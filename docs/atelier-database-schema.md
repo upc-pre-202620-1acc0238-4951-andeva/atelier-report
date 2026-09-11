@@ -485,7 +485,7 @@ Tabla base de la arquitectura para garantizar la Consistencia Eventual. Los even
 | `retry_count` | `INT` | - | Sí | `0` | Veces que el Worker (`@Scheduled`) re-intentó |
 
 ## 9. Addendum: Modelo de Datos Local Móvil (Offline-First Sync Queue)
-Para soportar el modo offline en ambientes sin cobertura (49.1% de usuarios sin plan de datos constante o mecánicos en fosos), las aplicaciones de Atelier (Workshop y Driver) mantendrán bases de datos locales embebidas fundamentadas en **SQLite como motor relacional transaccional**: implementado mediante **Room Database** (Android Jetpack) en la versión de Kotlin por su validación en tiempo de compilación y reactividad nativa con Coroutines/Flow, y mediante **SQLite (`sqflite`)** en la versión multiplataforma de Flutter.
+Para soportar el modo offline en ambientes sin cobertura (49.1% de usuarios sin plan de datos constante o mecánicos en fosos), las aplicaciones de Atelier (Workshop y Driver) mantendrán bases de datos locales embebidas fundamentadas en **SQLite como motor relacional transaccional**: implementado mediante **Room Database** (Android Jetpack) en la versión de Kotlin por su validación en tiempo de compilación y reactividad nativa con Coroutines/Flow, y mediante **Drift** en la versión multiplataforma de Flutter.
 
 Además de cachear catálogos (`services`, `inventory_items`) para lectura instantánea, la estructura vital para operar de forma desconectada será la cola de sincronización (Sync Queue) o "Transactional Outbox Móvil":
 

@@ -30,15 +30,91 @@ Para materializar la visión de un SaaS automotriz de alta resiliencia y bajo co
 
 A continuación, se detalla la responsabilidad, el stack tecnológico y las decisiones arquitectónicas de cada uno de los contenedores que conforman la solución:
 
-| **Contenedor** | **Tecnología** | \centering \textbf{Responsabilidad y Decisiones de Diseño} |
-| :---: | :---: | :--- |
-| Landing Page | HTML5, CSS3, TypeScript | Sitio web estático público. Comunica la propuesta de valor del ecosistema, planes de suscripción para talleres, catálogo de funcionalidades de telemetría y testimonios, proporcionando llamadas a la acción hacia el registro de talleres en la WebApp. |
-|Web Application | Angular 20, TypeScript, Angular Material | SPA para el Personal de Gestión (dueños y administradores) y recepcionistas. Provee dashboards de rentabilidad, administración multi-tenant, control de membresías del personal, catálogo de inventario bajo costeo FIFO, facturación y gestión de citas. |
-| Mobile Workshop | Kotlin (Room), Flutter (sqflite) | Aplicación móvil para el Personal del Taller (Gestión y Operativo) unificada mediante RBAC. Permite a dueños y administradores supervisar el taller y aprobar presupuestos desde el móvil, y al personal operativo ejecutar tareas MRO, escaneo Bluetooth de OBD2 y registro fotográfico con soporte offline-first. |
-| Mobile Driver | Flutter (sqflite) | Aplicación móvil para los Propietarios de Vehículos (particulares y flotas). Permite el seguimiento del estado de salud vehicular en tiempo real, recepción de alertas predictivas telemétricas, aprobación digital de presupuestos MRO y reserva de citas en el taller. |
-| API Application | Java 24, Spring Boot, Caffeine Cache | Monolito modular centralizado desplegado en Render. Orquesta la lógica de negocio de los Bounded Contexts mediante DDD, Clean Architecture, CQRS, ACL y Outbox Pattern. Expone servicios RESTful, maneja autenticación JWT/OAuth y procesa telemetría. |
-| Database | PostgreSQL 16, TimescaleDB | Almacén central de datos multi-tenant en Aiven Cloud. Combina persistencia relacional transaccional con hipertablas de series de tiempo optimizadas para compresión masiva de telemetría IoT. |
-: Catálogo de Contenedores del Ecosistema Atelier {#tbl:c4-containers-catalog}
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.5cm} | >{\raggedright\arraybackslash}p{10.9cm} |}
+\caption{Catálogo de Contenedores del Ecosistema Atelier} \label{tbl:c4-containers-catalog} \\
+\hline
+\thfirst{Aspecto Arquitectónico} & \thcell{Especificación del Contenedor} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto Arquitectónico} & \thcell{Especificación del Contenedor} \\
+\hline
+\endhead
+
+% ==============================
+% Contenedor 1: Landing Page
+% ==============================
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Contenedor C4:} Landing Page} \\*
+\hline
+\textbf{Tipo de Elemento} & Sitio Web Estático (Público) \\*
+\hline
+\textbf{Stack Tecnológico} & HTML5, CSS3, TypeScript \\*
+\hline
+\textbf{Responsabilidad y Decisiones} & Sitio web estático público. Comunica la propuesta de valor del ecosistema, planes de suscripción para talleres, catálogo de funcionalidades de telemetría y testimonios, proporcionando llamadas a la acción hacia el registro de talleres en la WebApp. \\
+\hline
+
+% ==============================
+% Contenedor 2: Web Application
+% ==============================
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Contenedor C4:} Web Application} \\*
+\hline
+\textbf{Tipo de Elemento} & Single Page Application (SPA) \\*
+\hline
+\textbf{Stack Tecnológico} & Angular 20, TypeScript, Angular Material \\*
+\hline
+\textbf{Responsabilidad y Decisiones} & SPA para el Personal de Gestión (dueños y administradores) y recepcionistas. Provee dashboards de rentabilidad, administración multi-tenant, control de membresías del personal, catálogo de inventario bajo costeo FIFO, facturación y gestión de citas. \\
+\hline
+
+% ==============================
+% Contenedor 3: Mobile Workshop
+% ==============================
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Contenedor C4:} Mobile Workshop} \\*
+\hline
+\textbf{Tipo de Elemento} & Aplicación Móvil Híbrida / Nativa \\*
+\hline
+\textbf{Stack Tecnológico} & Kotlin (Room), Flutter (Drift) \\*
+\hline
+\textbf{Responsabilidad y Decisiones} & Aplicación móvil para el Personal del Taller (Gestión y Operativo) unificada mediante RBAC. Permite a dueños y administradores supervisar el taller y aprobar presupuestos desde el móvil, y al personal operativo ejecutar tareas MRO, escaneo Bluetooth de OBD2 y registro fotográfico con soporte offline-first. \\
+\hline
+
+% ==============================
+% Contenedor 4: Mobile Driver
+% ==============================
+\pagebreak
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Contenedor C4:} Mobile Driver} \\*
+\hline
+\textbf{Tipo de Elemento} & Aplicación Móvil Cross-Platform \\*
+\hline
+\textbf{Stack Tecnológico} & Flutter (Drift) \\*
+\hline
+\textbf{Responsabilidad y Decisiones} & Aplicación móvil para los Propietarios de Vehículos (particulares y flotas). Permite el seguimiento del estado de salud vehicular en tiempo real, recepción de alertas predictivas telemétricas, aprobación digital de presupuestos MRO y reserva de citas en el taller. \\
+\hline
+
+% ==============================
+% Contenedor 5: API Application
+% ==============================
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Contenedor C4:} API Application} \\*
+\hline
+\textbf{Tipo de Elemento} & Monolito Modular Backend \\*
+\hline
+\textbf{Stack Tecnológico} & Java 24, Spring Boot, Caffeine Cache \\*
+\hline
+\textbf{Responsabilidad y Decisiones} & Monolito modular centralizado desplegado en Render. Orquesta la lógica de negocio de los Bounded Contexts mediante DDD, Clean Architecture, CQRS, ACL y Outbox Pattern. Expone servicios RESTful, maneja autenticación JWT/OAuth y procesa telemetría. \\
+\hline
+
+% ==============================
+% Contenedor 6: Database
+% ==============================
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Contenedor C4:} Database} \\*
+\hline
+\textbf{Tipo de Elemento} & Almacén de Persistencia Políglota \\*
+\hline
+\textbf{Stack Tecnológico} & PostgreSQL 16, TimescaleDB \\*
+\hline
+\textbf{Responsabilidad y Decisiones} & Almacén central de datos multi-tenant en Aiven Cloud. Combina persistencia relacional transaccional con hipertablas de series de tiempo optimizadas para compresión masiva de telemetría IoT. \\
+\hline
+\end{longtable}
 
 **Decisiones y Patrones Arquitectónicos del Backend**
 
@@ -58,7 +134,7 @@ El contenedor central **API Application** ha sido diseñado bajo los más riguro
 
 **Estrategia de Conectividad, Resiliencia y Servicios Externos**
 
-* **Estrategia Offline-First en la Aplicación Móvil:** Considerando que el 49.1% de usuarios móviles en el entorno local carece de plan de datos continuo y que los fosos de reparación automotriz presentan nula cobertura de red, la aplicación móvil **Atelier Workshop** almacena catálogos y órdenes de trabajo en una base de datos local relacional SQLite. Las modificaciones se encolan en una cola de eventos pendientes mediante *Sync Queue*. Un *background worker* detecta la reconexión a redes Wi-Fi o datos móviles para enviar los datos en bloque (*Batching*) hacia la API central.
+* **Estrategia Offline-First en la Aplicación Móvil:** Considerando que el 49.1% de usuarios móviles en el entorno local carece de plan de datos continuo [@inei2024internet_rural] y que los fosos de reparación automotriz presentan nula cobertura de red, la aplicación móvil **Atelier Workshop** implementa una arquitectura *Offline-First* con consistencia eventual fuerte y replicación determinista [@herrera2026offline]. El dispositivo almacena catálogos y órdenes de trabajo en una base de datos local relacional SQLite (gestionada mediante Room en Android nativo y Drift en Flutter), encolando las modificaciones en un *Sync Queue* local con políticas de truncamiento de registros por histéresis para evitar desbordamientos de memoria [@korichi2026dmrp]. Un *background worker* detecta la reconexión a redes Wi-Fi o datos móviles para reconciliar y enviar los datos en bloque (*Batching*) hacia la API central.
 
 * **Patrón Direct-to-Cloud para Almacenamiento:** Para evitar cuellos de botella en el servidor backend derivados de la transferencia de archivos multimedia pesados, la aplicación móvil **Atelier Workshop** sube las imágenes directamente a los buckets seguros de **Firebase Cloud Storage**, registrando únicamente las URLs firmadas en la API Application.
 
@@ -78,19 +154,138 @@ El backend de Atelier adopta una arquitectura de monolito modular guiada por los
 
 A continuación, se detalla el catálogo de componentes internos que estructuran el contenedor central:
 
-| **Componente** | **Tipo y Tecnología** | **Dominio** | \centering \textbf{Responsabilidad y Decisiones de Diseño} |
-| :---:| :---: | :---: | :--- |
-| IAM y Tenancy Module | Spring Security, JJWT | Bounded Context: IAM & Tenancy | Control de acceso basado en roles, aislamiento multi-tenant por *tenant_id*, autenticación mediante tokens JWT y orquestación del flujo de onboarding del personal del taller. |
-| Customer y Fleet Module | Spring Service, Spring Data JPA | Bounded Context: Customer & Fleet Management | Administración de fichas de clientes particulares, flotas comerciales, perfiles de vehículos y gestión del ciclo de vida de reservas y citas previas a la orden de trabajo. |
-| Workshop Operations Module | Spring Service, CQRS, JPA | Bounded Context: Workshop Operations | Orquestación del flujo de trabajo automotriz: apertura y cierre de Órdenes de Trabajo, asignación de bahías y mecánicos, desglose de tareas, tramitación de propuestas de averías ocultas y registro pericial de evidencias fotográficas. |
-| Inventory y Supply Chain Module | Spring Service, FIFO Engine, JPA | Bounded Context: Inventory & Supply Chain | Gestión del catálogo de repuestos y fluidos, valuación estricta de salidas mediante costeo FIFO por lotes y directorio ágil de compras a proveedores con registro documental. |
-| Human Resources Module | Spring Service, Haversine Engine | Bounded Context: Human Resources Management | Control de turnos, cálculo de planillas de mecánicos y verificación algorítmica de asistencia mediante geocercas GPS aplicando la fórmula matemática del Haversine. |
-| Invoicing y Compliance Module | Spring Service, ACL Nubefact | Bounded Context: Invoicing & Compliance | Generación y anulación de comprobantes electrónicos con validez tributaria ante SUNAT (estándar UBL 2.1), encapsulado detrás de una Capa Anticorrupción hacia la API de Nubefact. |
-| SaaS Billing Module | Spring Service, Stripe SDK, ACL | Bounded Context: SaaS Billing & Subscriptions | Gestión de suscripciones y planes comerciales del SaaS para talleres, procesamiento de cobros recurrentes y validación de webhooks con idempotencia mediante el SDK de Stripe. |
-| IoT Telemetry Module | Spring Service, Timescale Client | Bounded Context: IoT Telemetry & Predictive Maintenance | Ingesta masiva de telemetría vehicular proveniente de escáneres OBD-II, evaluación analítica de anomalías y disparo de notificaciones push predictivas vía FCM. |
-| Transactional Outbox Worker | Spring Scheduled, Spring Events | Infraestructura Transversal | Procesa asíncronamente los eventos registrados en la tabla *outbox_messages*, garantizando entrega confiable hacia plataformas externas como Nubefact y Resend sin bloqueos distribuidos. |
-| Caffeine Cache Manager | Caffeine Cache, Spring Cache | Infraestructura Transversal | Capa de almacenamiento en memoria dentro del proceso de la JVM para optimizar consultas de alta frecuencia de lectura, minimizando latencia y consultas a la base de datos. |
-: Catálogo de Componentes de la API Application de Atelier {#tbl:c4-api-components-catalog}
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.5cm} | >{\raggedright\arraybackslash}p{10.9cm} |}
+\caption{Catálogo de Componentes de la API Application de Atelier} \label{tbl:c4-api-components-catalog} \\
+\hline
+\thfirst{Aspecto Arquitectónico} & \thcell{Especificación del Componente} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto Arquitectónico} & \thcell{Especificación del Componente} \\
+\hline
+\endhead
+
+% ==============================
+% Componente 1: IAM y Tenancy Module
+% ==============================
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} IAM y Tenancy Module} \\*
+\hline
+\textbf{Dominio / Contexto} & Bounded Context: IAM \& Tenancy \\*
+\hline
+\textbf{Tecnologías y Frameworks} & Spring Security, JJWT \\*
+\hline
+\textbf{Responsabilidad y Decisiones} & Control de acceso basado en roles, aislamiento multi-tenant por \textit{tenant\_id}, autenticación mediante tokens JWT y orquestación del flujo de onboarding del personal del taller. \\
+\hline
+
+% ==============================
+% Componente 2: Customer y Fleet Module
+% ==============================
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} Customer y Fleet Module} \\*
+\hline
+\textbf{Dominio / Contexto} & Bounded Context: Customer \& Fleet Management \\*
+\hline
+\textbf{Tecnologías y Frameworks} & Spring Service, Spring Data JPA \\*
+\hline
+\textbf{Responsabilidad y Decisiones} & Administración de fichas de clientes particulares, flotas comerciales, perfiles de vehículos y gestión del ciclo de vida de reservas y citas previas a la orden de trabajo. \\
+\hline
+
+% ==============================
+% Componente 3: Workshop Operations Module
+% ==============================
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} Workshop Operations Module} \\*
+\hline
+\textbf{Dominio / Contexto} & Bounded Context: Workshop Operations \\*
+\hline
+\textbf{Tecnologías y Frameworks} & Spring Service, CQRS, JPA \\*
+\hline
+\textbf{Responsabilidad y Decisiones} & Orquestación del flujo de trabajo automotriz: apertura y cierre de Órdenes de Trabajo, asignación de bahías y mecánicos, desglose de tareas, tramitación de propuestas de averías ocultas y registro pericial de evidencias fotográficas. \\
+\hline
+
+% ==============================
+% Componente 4: Inventory y Supply Chain Module
+% ==============================
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} Inventory y Supply Chain Module} \\*
+\hline
+\textbf{Dominio / Contexto} & Bounded Context: Inventory \& Supply Chain \\*
+\hline
+\textbf{Tecnologías y Frameworks} & Spring Service, FIFO Engine, JPA \\*
+\hline
+\textbf{Responsabilidad y Decisiones} & Gestión del catálogo de repuestos y fluidos, valuación estricta de salidas mediante costeo FIFO por lotes y directorio ágil de compras a proveedores con registro documental. \\
+\hline
+
+% ==============================
+% Componente 5: Human Resources Module
+% ==============================
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} Human Resources Module} \\*
+\hline
+\textbf{Dominio / Contexto} & Bounded Context: Human Resources Management \\*
+\hline
+\textbf{Tecnologías y Frameworks} & Spring Service, Haversine Engine \\*
+\hline
+\textbf{Responsabilidad y Decisiones} & Control de turnos, cálculo de planillas de mecánicos y verificación algorítmica de asistencia mediante geocercas GPS aplicando la fórmula matemática del Haversine. \\
+\hline
+
+% ==============================
+% Componente 6: Invoicing y Compliance Module
+% ==============================
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} Invoicing y Compliance Module} \\*
+\hline
+\textbf{Dominio / Contexto} & Bounded Context: Invoicing \& Compliance \\*
+\hline
+\textbf{Tecnologías y Frameworks} & Spring Service, ACL Nubefact \\*
+\hline
+\textbf{Responsabilidad y Decisiones} & Generación y anulación de comprobantes electrónicos con validez tributaria ante SUNAT (estándar UBL 2.1), encapsulado detrás de una Capa Anticorrupción hacia la API de Nubefact. \\
+\hline
+
+% ==============================
+% Componente 7: SaaS Billing Module
+% ==============================
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} SaaS Billing Module} \\*
+\hline
+\textbf{Dominio / Contexto} & Bounded Context: SaaS Billing \& Subscriptions \\*
+\hline
+\textbf{Tecnologías y Frameworks} & Spring Service, Stripe SDK, ACL \\*
+\hline
+\textbf{Responsabilidad y Decisiones} & Gestión de suscripciones y planes comerciales del SaaS para talleres, procesamiento de cobros recurrentes y validación de webhooks con idempotencia mediante el SDK de Stripe. \\
+\hline
+
+% ==============================
+% Componente 8: IoT Telemetry Module
+% ==============================
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} IoT Telemetry Module} \\*
+\hline
+\textbf{Dominio / Contexto} & Bounded Context: IoT Telemetry \& Predictive Maintenance \\*
+\hline
+\textbf{Tecnologías y Frameworks} & Spring Service, Timescale Client \\*
+\hline
+\textbf{Responsabilidad y Decisiones} & Ingesta masiva de telemetría vehicular proveniente de escáneres OBD-II, evaluación analítica de anomalías y disparo de notificaciones push predictivas vía FCM. \\
+\hline
+
+% ==============================
+% Componente 9: Transactional Outbox Worker
+% ==============================
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} Transactional Outbox Worker} \\*
+\hline
+\textbf{Dominio / Contexto} & Infraestructura Transversal \\*
+\hline
+\textbf{Tecnologías y Frameworks} & Spring Scheduled, Spring Events \\*
+\hline
+\textbf{Responsabilidad y Decisiones} & Procesa asíncronamente los eventos registrados en la tabla \textit{outbox\_messages}, garantizando entrega confiable hacia plataformas externas como Nubefact y Resend sin bloqueos distribuidos. \\
+\hline
+
+% ==============================
+% Componente 10: Caffeine Cache Manager
+% ==============================
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} Caffeine Cache Manager} \\*
+\hline
+\textbf{Dominio / Contexto} & Infraestructura Transversal \\*
+\hline
+\textbf{Tecnologías y Frameworks} & Caffeine Cache, Spring Cache \\*
+\hline
+\textbf{Responsabilidad y Decisiones} & Capa de almacenamiento en memoria dentro del proceso de la JVM para optimizar consultas de alta frecuencia de lectura, minimizando latencia y consultas a la base de datos. \\
+\hline
+\end{longtable}
 
 **Mecanismos de Comunicación e Integración Intermodular del Backend**
 
@@ -114,19 +309,118 @@ Su diseño interno se basa en una arquitectura modular por características con 
 
 A continuación, se detalla el catálogo de componentes que estructuran la aplicación web:
 
-| **Componente** | **Tipo y Tecnología** | \centering \textbf{Responsabilidad y Decisiones de Diseño} |
-| :---: | :---: | :--- |
-| Auth y Tenancy Guard | Angular Guard, HttpInterceptor | Intercepta peticiones HTTP para inyectar el token JWT y el encabezado *X-Tenant-ID*, valida privilegios de ruta según el rol activo y gestiona el refresco silencioso de sesiones. |
-| Multi-Tenant Shell | Standalone Component, Angular Material | Proporciona la estructura visual principal: navegación lateral responsiva, barra superior de notificaciones y selector dinámico de sucursales para talleres multi-sede. |
-| Executive Dashboard Component | Standalone Component, Charts | Renderiza indicadores clave de rendimiento, gráficas de ingresos, volumen de órdenes MRO y márgenes financieros del taller en tiempo real. |
-| MRO Operations Console | Standalone Component, Drag & Drop | Tablero de control operativo para la supervisión de bahías de trabajo, cambio visual de estados de órdenes mecánicas y asignación de tareas a técnicos. |
-| Inventory y FIFO Manager | Standalone Component, Angular Material | Interfaz para la gestión del catálogo de repuestos y fluidos, trazabilidad visual de lotes según costeo FIFO y registro documental de compras a proveedores. |
-| Invoicing y SUNAT Billing | Standalone Component, Angular Material | Módulo de facturación electrónica: emisión y anulación de facturas o boletas UBL 2.1, consulta de estados tributarios validados ante SUNAT y descarga directa de archivos XML y PDF. |
-| SaaS Subscription y Checkout | Standalone Component, Stripe.js | Panel de administración de suscripciones SaaS del taller e integración con el SDK cliente *Stripe.js* para tokenización directa de tarjetas bancarias conforme al estándar PCI-DSS. |
-| HR y Staff Management | Standalone Component, Google Maps | Gestión de contratos, asignación de turnos laborales, cálculo de nóminas y visualización cartográfica de asistencias validadas mediante geocercas GPS. |
-| Customer y Appointment Manager | Standalone Component, Angular Material | Directorio comercial de clientes y flotas vehiculares, visualización de fichas técnicas de automóviles y calendario interactivo de citas para recepción. |
-| State Store y API Client | Angular Injectable, Signals, RxJS | Capa centralizada de acceso a datos que gestiona el estado reactivo de la UI mediante *Angular Signals*, cachea consultas frecuentes y realiza llamadas RESTful hacia la *API Application*. |
-: Catálogo de Componentes de la Web Application de Atelier {#tbl:c4-webapp-components-catalog}
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.5cm} | >{\raggedright\arraybackslash}p{10.9cm} |}
+\caption{Catálogo de Componentes de la Web Application de Atelier} \label{tbl:c4-webapp-components-catalog} \\
+\hline
+\thfirst{Aspecto Arquitectónico} & \thcell{Especificación del Componente} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto Arquitectónico} & \thcell{Especificación del Componente} \\
+\hline
+\endhead
+
+% ==============================
+% Componente 1: Auth y Tenancy Guard
+% ==============================
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} Auth y Tenancy Guard} \\*
+\hline
+\textbf{Tipo y Tecnología} & Angular Guard, HttpInterceptor \\*
+\hline
+\textbf{Responsabilidad y Decisiones} & Intercepta peticiones HTTP para inyectar el token JWT y el encabezado \textit{X-Tenant-ID}, valida privilegios de ruta según el rol activo y gestiona el refresco silencioso de sesiones. \\
+\hline
+
+% ==============================
+% Componente 2: Multi-Tenant Shell
+% ==============================
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} Multi-Tenant Shell} \\*
+\hline
+\textbf{Tipo y Tecnología} & Standalone Component, Angular Material \\*
+\hline
+\textbf{Responsabilidad y Decisiones} & Proporciona la estructura visual principal: navegación lateral responsiva, barra superior de notificaciones y selector dinámico de sucursales para talleres multi-sede. \\
+\hline
+
+% ==============================
+% Componente 3: Executive Dashboard Component
+% ==============================
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} Executive Dashboard Component} \\*
+\hline
+\textbf{Tipo y Tecnología} & Standalone Component, Charts \\*
+\hline
+\textbf{Responsabilidad y Decisiones} & Renderiza indicadores clave de rendimiento, gráficas de ingresos, volumen de órdenes MRO y márgenes financieros del taller en tiempo real. \\
+\hline
+
+% ==============================
+% Componente 4: MRO Operations Console
+% ==============================
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} MRO Operations Console} \\*
+\hline
+\textbf{Tipo y Tecnología} & Standalone Component, Drag \& Drop \\*
+\hline
+\textbf{Responsabilidad y Decisiones} & Tablero de control operativo para la supervisión de bahías de trabajo, cambio visual de estados de órdenes mecánicas y asignación de tareas a técnicos. \\
+\hline
+
+% ==============================
+% Componente 5: Inventory y FIFO Manager
+% ==============================
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} Inventory y FIFO Manager} \\*
+\hline
+\textbf{Tipo y Tecnología} & Standalone Component, Angular Material \\*
+\hline
+\textbf{Responsabilidad y Decisiones} & Interfaz para la gestión del catálogo de repuestos y fluidos, trazabilidad visual de lotes según costeo FIFO y registro documental de compras a proveedores. \\
+\hline
+
+% ==============================
+% Componente 6: Invoicing y SUNAT Billing
+% ==============================
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} Invoicing y SUNAT Billing} \\*
+\hline
+\textbf{Tipo y Tecnología} & Standalone Component, Angular Material \\*
+\hline
+\textbf{Responsabilidad y Decisiones} & Módulo de facturación electrónica: emisión y anulación de facturas o boletas UBL 2.1, consulta de estados tributarios validados ante SUNAT y descarga directa de archivos XML y PDF. \\
+\hline
+
+% ==============================
+% Componente 7: SaaS Subscription y Checkout
+% ==============================
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} SaaS Subscription y Checkout} \\*
+\hline
+\textbf{Tipo y Tecnología} & Standalone Component, Stripe.js \\*
+\hline
+\textbf{Responsabilidad y Decisiones} & Panel de administración de suscripciones SaaS del taller e integración con el SDK cliente \textit{Stripe.js} para tokenización directa de tarjetas bancarias conforme al estándar PCI-DSS. \\
+\hline
+
+% ==============================
+% Componente 8: HR y Staff Management
+% ==============================
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} HR y Staff Management} \\*
+\hline
+\textbf{Tipo y Tecnología} & Standalone Component, Google Maps \\*
+\hline
+\textbf{Responsabilidad y Decisiones} & Gestión de contratos, asignación de turnos laborales, cálculo de nóminas y visualización cartográfica de asistencias validadas mediante geocercas GPS. \\
+\hline
+
+% ==============================
+% Componente 9: Customer y Appointment Manager
+% ==============================
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} Customer y Appointment Manager} \\*
+\hline
+\textbf{Tipo y Tecnología} & Standalone Component, Angular Material \\*
+\hline
+\textbf{Responsabilidad y Decisiones} & Directorio comercial de clientes y flotas vehiculares, visualización de fichas técnicas de automóviles y calendario interactivo de citas para recepción. \\
+\hline
+
+% ==============================
+% Componente 10: State Store y API Client
+% ==============================
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} State Store y API Client} \\*
+\hline
+\textbf{Tipo y Tecnología} & Angular Injectable, Signals, RxJS \\*
+\hline
+\textbf{Responsabilidad y Decisiones} & Capa centralizada de acceso a datos que gestiona el estado reactivo de la UI mediante \textit{Angular Signals}, cachea consultas frecuentes y realiza llamadas RESTful hacia la \textit{API Application}. \\
+\hline
+\end{longtable}
 
 **Decisiones de Diseño y Patrones Arquitectónicos Frontend**
 
@@ -148,18 +442,144 @@ La infraestructura de Atelier responde a un modelo híbrido optimizado para maxi
 
 A continuación, se detalla el catálogo de nodos físicos, entornos de ejecución y plataformas que conforman el despliegue del ecosistema:
 
-| **Nodo o Entorno de Despliegue** | **Tipo de Hardware o Plataforma** | **Runtime o Sistema Operativo** | **Software o Contenedor Desplegado** | \centering \textbf{Responsabilidad y Decisiones de Diseño} |
-| :---: | :---: | :---: | :---: | :---: |
-| Dispositivo del Personal de Gestión | Estación de trabajo o laptop | Windows, macOS o Linux / Web Browser | Instancia cliente de la Web Application | Acceso al portal administrativo SPA mediante navegadores modernos. Renderiza dashboards ejecutivos, control de inventario FIFO y emisión fiscal. |
-| Dispositivo Móvil del Taller | Tablet o smartphone de uso rudo | Android OS o iOS | Instancia nativa de Mobile Workshop | Herramienta móvil del personal de taller. Ejecuta tareas MRO, captura evidencias fotográficas y se enlaza por Bluetooth BLE a escáneres OBD-II con persistencia local en SQLite. |
-| Dispositivo Móvil del Conductor | Smartphone personal de usuario | Android OS o iOS | Instancia nativa de Mobile Driver | Aplicación del propietario del vehículo. Permite el monitoreo telemático en tiempo real, recepción de alertas predictivas push y aprobación digital de presupuestos mecánicos. |
-| Vehículo del Cliente | Puerto de diagnóstico a bordo | Microcontrolador embebido / BLE o Módem Celular | Scanner OBD2 Bluetooth o Dispositivo Autónomo con SIM | Conexión directa a la ECU vehicular. La variante Bluetooth transmite PIDs y DTCs hacia la app móvil, mientras que la variante celular envía tramas telemétricas autónomamente a la nube. |
-| Vercel Cloud Platform | Red de distribución perimetral | Vercel Edge Server / TLS Termination | Bundles estáticos de Landing Page y Web Application | Distribución global de alta velocidad y baja latencia para los activos web. Maneja redirecciones y certificados SSL/TLS automáticos. |
-| Render Cloud Platform | Plataforma PaaS basada en contenedores Linux | Docker / Eclipse Temurin OpenJDK 24 | Instancia de ejecución de la API Application | Aloja el backend monolítico modular en Spring Boot. Orquesta los 8 Bounded Contexts, expone endpoints RESTful seguros y procesa la ingesta telemétrica masiva. |
-| Aiven Cloud Platform | Clúster gestionado de bases de datos | PostgreSQL 16 con extensión TimescaleDB | Instancia central de la base de datos | Almacén persistente multi-tenant con cifrado en reposo y tránsito. Segrega transacciones relacionales ACID de hipertablas de series de tiempo de telemetría IoT. |
-| Google Cloud Platform | Infraestructura gestionada de almacenamiento y mensajería | Google Cloud Storage Bucket | Firebase Cloud Storage y Firebase Cloud Messaging | Storage: Almacena imágenes de peritaje bajo el patrón *Direct-to-Cloud*.<br>FCM: Encola y despacha notificaciones push predictivas hacia los teléfonos de mecánicos y conductores. |
-| Infraestructura Externa SaaS | Plataformas Cloud de terceros de alta disponibilidad | APIs RESTful seguras vía HTTPS | Stripe, Nubefact, Resend y Google Maps Platform | Proveedores especializados para cobros recurrentes PCI-DSS, facturación electrónica SUNAT UBL 2.1, correos transaccionales y geocercas GPS. |
-: Catálogo de Nodos y Entornos de Despliegue de Atelier {#tbl:c4-deployment-nodes-catalog}
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.5cm} | >{\raggedright\arraybackslash}p{10.9cm} |}
+\caption{Catálogo de Nodos y Entornos de Despliegue de Atelier} \label{tbl:c4-deployment-nodes-catalog} \\
+\hline
+\thfirst{Aspecto de Infraestructura} & \thcell{Especificación de Despliegue} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Infraestructura} & \thcell{Especificación de Despliegue} \\
+\hline
+\endhead
+
+% ==============================
+% Nodo 1: Dispositivo del Personal de Gestión
+% ==============================
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Nodo o Entorno:} Dispositivo del Personal de Gestión} \\*
+\hline
+\textbf{Hardware / Plataforma} & Estación de trabajo o laptop \\*
+\hline
+\textbf{Runtime / Sistema Operativo} & Windows, macOS o Linux / Web Browser \\*
+\hline
+\textbf{Software Desplegado} & Instancia cliente de la Web Application \\*
+\hline
+\textbf{Responsabilidad y Decisiones} & Acceso al portal administrativo SPA mediante navegadores modernos. Renderiza dashboards ejecutivos, control de inventario FIFO y emisión fiscal. \\
+\hline
+
+% ==============================
+% Nodo 2: Dispositivo Móvil del Taller
+% ==============================
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Nodo o Entorno:} Dispositivo Móvil del Taller} \\*
+\hline
+\textbf{Hardware / Plataforma} & Tablet o smartphone de uso rudo \\*
+\hline
+\textbf{Runtime / Sistema Operativo} & Android OS o iOS \\*
+\hline
+\textbf{Software Desplegado} & Instancia nativa de Mobile Workshop \\*
+\hline
+\textbf{Responsabilidad y Decisiones} & Herramienta móvil del personal de taller. Ejecuta tareas MRO, captura evidencias fotográficas y se enlaza por Bluetooth BLE a escáneres OBD-II con persistencia local en SQLite. \\
+\hline
+
+% ==============================
+% Nodo 3: Dispositivo Móvil del Conductor
+% ==============================
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Nodo o Entorno:} Dispositivo Móvil del Conductor} \\*
+\hline
+\textbf{Hardware / Plataforma} & Smartphone personal de usuario \\*
+\hline
+\textbf{Runtime / Sistema Operativo} & Android OS o iOS \\*
+\hline
+\textbf{Software Desplegado} & Instancia nativa de Mobile Driver \\*
+\hline
+\textbf{Responsabilidad y Decisiones} & Aplicación del propietario del vehículo. Permite el monitoreo telemático en tiempo real, recepción de alertas predictivas push y aprobación digital de presupuestos mecánicos. \\
+\hline
+
+% ==============================
+% Nodo 4: Vehículo del Cliente
+% ==============================
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Nodo o Entorno:} Vehículo del Cliente} \\*
+\hline
+\textbf{Hardware / Plataforma} & Puerto de diagnóstico a bordo \\*
+\hline
+\textbf{Runtime / Sistema Operativo} & Microcontrolador embebido / BLE o Módem Celular \\*
+\hline
+\textbf{Software Desplegado} & Scanner OBD2 Bluetooth o Dispositivo Autónomo con SIM \\*
+\hline
+\textbf{Responsabilidad y Decisiones} & Conexión directa a la ECU vehicular. La variante Bluetooth transmite PIDs y DTCs hacia la app móvil, mientras que la variante celular envía tramas telemétricas autónomamente a la nube. \\
+\hline
+
+% ==============================
+% Nodo 5: Vercel Cloud Platform
+% ==============================
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Nodo o Entorno:} Vercel Cloud Platform} \\*
+\hline
+\textbf{Hardware / Plataforma} & Red de distribución perimetral \\*
+\hline
+\textbf{Runtime / Sistema Operativo} & Vercel Edge Server / TLS Termination \\*
+\hline
+\textbf{Software Desplegado} & Bundles estáticos de Landing Page y Web Application \\*
+\hline
+\textbf{Responsabilidad y Decisiones} & Distribución global de alta velocidad y baja latencia para los activos web. Maneja redirecciones y certificados SSL/TLS automáticos. \\
+\hline
+
+% ==============================
+% Nodo 6: Render Cloud Platform
+% ==============================
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Nodo o Entorno:} Render Cloud Platform} \\*
+\hline
+\textbf{Hardware / Plataforma} & Plataforma PaaS basada en contenedores Linux \\*
+\hline
+\textbf{Runtime / Sistema Operativo} & Docker \\*
+\hline
+\textbf{Software Desplegado} & Instancia de ejecución de la API Application \\*
+\hline
+\textbf{Responsabilidad y Decisiones} & Aloja el backend monolítico modular en Spring Boot. Orquesta los 8 Bounded Contexts, expone endpoints RESTful seguros y procesa la ingesta telemétrica masiva. \\
+\hline
+
+% ==============================
+% Nodo 7: Aiven Cloud Platform
+% ==============================
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Nodo o Entorno:} Aiven Cloud Platform} \\*
+\hline
+\textbf{Hardware / Plataforma} & Clúster gestionado de bases de datos \\*
+\hline
+\textbf{Runtime / Sistema Operativo} & PostgreSQL 16 con extensión TimescaleDB \\*
+\hline
+\textbf{Software Desplegado} & Instancia central de la base de datos \\*
+\hline
+\textbf{Responsabilidad y Decisiones} & Almacén persistente multi-tenant con cifrado en reposo y tránsito. Segrega transacciones relacionales ACID de hipertablas de series de tiempo de telemetría IoT. \\
+\hline
+
+% ==============================
+% Nodo 8: Google Cloud Platform
+% ==============================
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Nodo o Entorno:} Google Cloud Platform} \\*
+\hline
+\textbf{Hardware / Plataforma} & Infraestructura gestionada de almacenamiento y mensajería \\*
+\hline
+\textbf{Runtime / Sistema Operativo} & Google Cloud Storage Bucket \\*
+\hline
+\textbf{Software Desplegado} & Firebase Cloud Storage y Firebase Cloud Messaging \\*
+\hline
+\textbf{Responsabilidad y Decisiones} & Storage: Almacena imágenes de peritaje bajo el patrón \textit{Direct-to-Cloud}. \newline FCM: Encola y despacha notificaciones push predictivas hacia los teléfonos de mecánicos y conductores. \\
+\hline
+
+% ==============================
+% Nodo 9: Infraestructura Externa SaaS
+% ==============================
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Nodo o Entorno:} Infraestructura Externa SaaS} \\*
+\hline
+\textbf{Hardware / Plataforma} & Plataformas Cloud de terceros de alta disponibilidad \\*
+\hline
+\textbf{Runtime / Sistema Operativo} & APIs RESTful seguras vía HTTPS \\*
+\hline
+\textbf{Software Desplegado} & Stripe, Nubefact, Resend y Google Maps Platform \\*
+\hline
+\textbf{Responsabilidad y Decisiones} & Proveedores especializados para cobros recurrentes PCI-DSS, facturación electrónica SUNAT UBL 2.1, correos transaccionales y geocercas GPS. \\
+\hline
+\end{longtable}
 
 **Decisiones de Arquitectura de Infraestructura, Redes y Resiliencia**
 

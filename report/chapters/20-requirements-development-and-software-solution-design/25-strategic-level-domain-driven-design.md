@@ -117,7 +117,7 @@ Los flujos de mensajes de dominio modelan la interacción dinámica y asíncrona
 
 A continuación, se documentan los seis escenarios operativos fundamentales del ecosistema Atelier:
 
-##### Escenario 1: Detección de Falla Telemática y Alerta Preventiva
+**Escenario 1: Detección de Falla Telemática y Alerta Preventiva**
 
 Este flujo modela el ciclo de vida del monitoreo telemático vehicular continuo. Cuando el escáner OBD-II emite lecturas de parámetros del motor, el contexto **IoT Telemetry** ingesta los flujos y evalúa posibles desviaciones críticas. Al detectarse una anomalía, se genera el evento `código de falla fue detectado`, desencadenando la emisión de una alerta preventiva hacia **Customer & Fleet** para informar al conductor y coordinar la cita de revisión, y hacia **Workshop Operation** para la apertura de la orden correspondiente.
 
@@ -125,7 +125,7 @@ Este flujo modela el ciclo de vida del monitoreo telemático vehicular continuo.
 
 *Nota.* Diagrama de flujo de mensajes intercontextual para la captura telemática y generación de alertas preventivas.
 
-##### Escenario 2: Recepción del Vehículo y Diagnóstico de Taller
+**Escenario 2: Recepción del Vehículo y Diagnóstico de Taller**
 
 Modela la llegada del vehículo al taller automotriz. El asesor de servicio registra la recepción pericial capturando las evidencias fotográficas de carrocería y kilometraje. Al formalizarse el ingreso, **Workshop Operation** genera la orden de trabajo, vincula la cita confirmada proveniente de **Customer & Fleet**, asigna la bahía correspondiente y encarga al mecánico el diagnóstico computarizado por puerto OBD-II.
 
@@ -133,7 +133,7 @@ Modela la llegada del vehículo al taller automotriz. El asesor de servicio regi
 
 *Nota.* Diagrama de flujo de mensajes intercontextual para la recepción, apertura de orden y asignación diagnóstica.
 
-##### Escenario 3: Preparación y Aprobación de Presupuesto
+**Escenario 3: Preparación y Aprobación de Presupuesto**
 
 Abarca la formulación de la propuesta técnico-económica de reparación (MRO). Concluida la inspección, el personal de taller elabora el presupuesto calculando los costos de mano de obra y consultando la disponibilidad de repuestos en el contexto **Inventory**. Una vez estructurada la cotización, se emite para que el cliente la revise y la autorice digitalmente desde la aplicación móvil *Atelier Driver*.
 
@@ -141,7 +141,7 @@ Abarca la formulación de la propuesta técnico-económica de reparación (MRO).
 
 *Nota.* Diagrama de flujo de mensajes intercontextual para la verificación de insumos y aprobación formal del presupuesto.
 
-##### Escenario 4: Reserva y Despacho de Repuestos por FIFO
+**Escenario 4: Reserva y Despacho de Repuestos por FIFO**
 
 Describe el flujo de piso durante el desensamble y sustitución de piezas. Al autorizarse el trabajo, **Workshop Operation** remite el comando de reserva hacia **Inventory**, contexto que bloquea las unidades requeridas y las descarga contablemente imputando el costo del lote más antiguo disponible bajo el método FIFO. Si el nivel de inventario alcanza el límite de seguridad, el contexto emite automáticamente una alerta de reabastecimiento hacia el módulo de proveedores.
 
@@ -149,7 +149,7 @@ Describe el flujo de piso durante el desensamble y sustitución de piezas. Al au
 
 *Nota.* Diagrama de flujo de mensajes intercontextual para la reserva física y liquidación contable de insumos por FIFO.
 
-##### Escenario 5: Control de Calidad y Finalización de Reparación
+**Escenario 5: Control de Calidad y Finalización de Reparación**
 
 Representa la verificación técnica posterior a la ejecución mecánica. El técnico mecánico reporta el fin de sus tareas asignadas y adjunta la evidencia fotográfica del trabajo realizado. El Jefe de Taller realiza las pruebas de validación técnica (*Quality Gate*); una vez certificada la conformidad del estándar de calidad, se emite el evento de culminación de reparación para habilitar el cierre administrativo.
 
@@ -157,7 +157,7 @@ Representa la verificación técnica posterior a la ejecución mecánica. El té
 
 *Nota.* Diagrama de flujo de mensajes intercontextual para la aprobación pericial y cierre técnico de la orden de trabajo.
 
-##### Escenario 6: Entrega de Vehículo y Facturación Electrónica SUNAT
+**Escenario 6: Entrega de Vehículo y Facturación Electrónica SUNAT**
 
 Comprende el acto formal de liquidación, facturación fiscal y entrega final al cliente. Con la orden cerrada, se envían los conceptos liquidados al contexto **Invoicing**, el cual estructura el comprobante de pago electrónico bajo el estándar UBL 2.1 y lo valida ante la SUNAT mediante la Capa Anticorrupción de Nubefact. Tras la confirmación del pago y la obtención de la Constancia de Recepción (CDR), se efectúa la entrega física de la unidad y se reactiva la monitorización telemática.
 
@@ -171,7 +171,7 @@ El *Bounded Context Canvas* es una herramienta esencial del diseño estratégico
 
 A continuación, se presentan los lienzos detallados para los ocho contextos delimitados del ecosistema Atelier:
 
-##### 1. Bounded Context Canvas: Workshop Operation
+**Bounded Context Canvas: Workshop Operation**
 
 Como núcleo operativo del sistema (*Core Domain*), este contexto gobierna la gestión de citas, órdenes de trabajo (OT), asignación de mecánicos a bahías, registro de evidencias fotográficas en foso y control del ciclo de vida de mantenimiento (MRO).
 
@@ -179,7 +179,7 @@ Como núcleo operativo del sistema (*Core Domain*), este contexto gobierna la ge
 
 *Nota.* Lienzo estratégico del contexto central de operaciones de taller, detallando sus flujos de entrada, salida y raíces de agregado.
 
-##### 2. Bounded Context Canvas: IoT Telemetry
+**Bounded Context Canvas: IoT Telemetry**
 
 Representa el segundo *Core Domain* de Atelier. Administra la ingesta masiva de lecturas de sensores procedentes de escáneres OBD-II (velocidad, RPM, temperatura de refrigerante, códigos DTC), almacenándolos en hipertablas optimizadas de TimescaleDB y evaluando algoritmos predictivos para la detección temprana de fallas.
 
@@ -187,7 +187,7 @@ Representa el segundo *Core Domain* de Atelier. Administra la ingesta masiva de 
 
 *Nota.* Lienzo estratégico del contexto de telemetría IoT, describiendo la arquitectura de procesamiento en tiempo real y disparo de alertas predictivas.
 
-##### 3. Bounded Context Canvas: Customer & Fleet
+**Bounded Context Canvas: Customer & Fleet**
 
 Subdominio de soporte encargado de registrar y gestionar el directorio unificado de conductores particulares, gestores de flotas comerciales y el padrón de vehículos, sirviendo de enlace entre los clientes y el taller automotriz.
 
@@ -195,7 +195,7 @@ Subdominio de soporte encargado de registrar y gestionar el directorio unificado
 
 *Nota.* Lienzo estratégico del contexto de gestión de clientes y flotas vehiculares.
 
-##### 4. Bounded Context Canvas: Inventory
+**Bounded Context Canvas: Inventory**
 
 Subdominio de soporte que controla el aprovisionamiento de repuestos y lubricantes, implementando el algoritmo de costeo FIFO por lotes de adquisición para salvaguardar la rentabilidad contable del taller y gestionar el catálogo de proveedores habituales.
 
@@ -203,7 +203,7 @@ Subdominio de soporte que controla el aprovisionamiento de repuestos y lubricant
 
 *Nota.* Lienzo estratégico del contexto de inventarios y control de compras por lotes bajo valuación FIFO.
 
-##### 5. Bounded Context Canvas: Human Resources
+**Bounded Context Canvas: Human Resources**
 
 Subdominio de soporte orientado a la administración del talento técnico del taller. Incluye el control de asistencia laboral mediante validación georreferenciada con la fórmula del Haversine sobre geocercas circulares y la liquidación periódica de nóminas de sueldos.
 
@@ -211,7 +211,7 @@ Subdominio de soporte orientado a la administración del talento técnico del ta
 
 *Nota.* Lienzo estratégico del contexto de recursos humanos y asistencia geolocalizada de mecánicos.
 
-##### 6. Bounded Context Canvas: Invoicing
+**Bounded Context Canvas: Invoicing**
 
 Subdominio genérico encargado del cumplimiento tributario y fiscal. Transforma las liquidaciones de órdenes de trabajo en comprobantes electrónicos homologados bajo la normativa OASIS UBL 2.1 de SUNAT, interactuando con Nubefact a través de adaptadores desacoplados.
 
@@ -219,7 +219,7 @@ Subdominio genérico encargado del cumplimiento tributario y fiscal. Transforma 
 
 *Nota.* Lienzo estratégico del contexto de facturación electrónica y cumplimiento fiscal.
 
-##### 7. Bounded Context Canvas: SaaS Billing
+**Bounded Context Canvas: SaaS Billing**
 
 Subdominio genérico que gestiona la monetización y el modelo de negocio B2B de Atelier. Administra los planes de suscripción de los talleres mecánicos, facturación recurrente, control de cupos operativos e integración con pasarelas de pago digitales.
 
@@ -227,7 +227,7 @@ Subdominio genérico que gestiona la monetización y el modelo de negocio B2B de
 
 *Nota.* Lienzo estratégico del contexto de monetización y suscripciones B2B del SaaS.
 
-##### 8. Bounded Context Canvas: IAM & Tenancy
+**Bounded Context Canvas: IAM & Tenancy**
 
 Subdominio genérico que provee seguridad, autenticación basada en tokens JWT/OAuth 2.0, autorización por roles (RBAC) y la gestión multi-tenant para garantizar el aislamiento criptográfico y lógico de la información entre talleres mecánicos independientes.
 

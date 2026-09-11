@@ -36,7 +36,7 @@ La aplicación unificará a los dos segmentos objetivo utilizando Control de Acc
 ### A. Implementación en Flutter (Multiplataforma)
 
 - **Alcance:** iOS, Android, y opcionalmente Web (perfecto para que el Manager vea todo en su computadora).
-- **Persistencia Local (Offline-First):** Base de datos relacional embebida **SQLite** mediante el plugin oficial `sqflite`, gestionando tablas locales para catálogos y la cola `pending_sync_events`.
+- **Persistencia Local (Offline-First):** Base de datos relacional embebida **SQLite** mediante **Drift** (sobre SQLite), gestionando tablas locales para catálogos y la cola `pending_sync_events`.
 - **Módulo Bluetooth (Recurso Interno):** Se usarán paquetes como `flutter_bluetooth_serial` o `flutter_blue_plus`. Para efectos de demostración académica (sin un auto real en el salón), la aplicación se conectará a un "simulador OBD2" (que puede ser un script en una laptop o un escáner ELM327 conectado a un simulador de ECU) enviando PIDs falsos.
 - **Procesamiento OBD2:** El código enviará PIDs estándar en hexadecimal (ej. `010C` para RPM) al dispositivo, parseará la respuesta y la enviará al backend Java como JSON.
 
@@ -52,7 +52,7 @@ La aplicación unificará a los dos segmentos objetivo utilizando Control de Acc
 ### Estrategia de Sincronización Móvil (Offline-First)
 
 Tanto la implementación en Flutter como en Kotlin compartirán la misma base arquitectónica para operar en zonas sin internet (fosos de taller y calles sin cobertura, afectando al 49.1% de usuarios móviles sin plan de datos activo):
-1. **Caché Local Relacional (Lectura con SQLite):** Se estandariza el motor relacional embebido **SQLite** para ambas plataformas: implementado mediante **Room Database** en Android (Kotlin) para garantizar consultas verificadas en compilación y reactividad con `Flow`, y mediante **SQLite (`sqflite`)** en Flutter. Almacenarán catálogos estáticos y el historial de órdenes para que la interfaz cargue instantáneamente y sin depender de llamadas directas a red.
+1. **Caché Local Relacional (Lectura con SQLite):** Se estandariza el motor relacional embebido **SQLite** para ambas plataformas: implementado mediante **Room Database** en Android (Kotlin) para garantizar consultas verificadas en compilación y reactividad con `Flow`, y mediante **Drift** en Flutter. Almacenarán catálogos estáticos y el historial de órdenes para que la interfaz cargue instantáneamente y sin depender de llamadas directas a red.
 2. **Sync Queue (Escritura):** Toda interacción de modificación de estado (marcar tarea completada, pedir cita) se registrará como un evento local en la tabla `pending_sync_events`.
 3. **Background Sync:** Al detectar que el dispositivo se conecta a una red Wi-Fi o 4G/5G, un *Worker* procesa en bloque (batch) todos los eventos encolados hacia el servidor en la nube (Spring Boot) asegurando la *Consistencia Eventual*.
 4. **Deferred Uploads:** Toda evidencia visual recolectada offline se guardará primero de forma local y se subirá asíncronamente a Firebase Storage antes de sincronizar la URL a la base de datos relacional.

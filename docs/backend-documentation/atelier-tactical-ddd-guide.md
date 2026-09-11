@@ -37,8 +37,8 @@ Existe una clara distinción entre la arquitectura táctica del backend y de las
 | **Capa de Entrada** | **Interface Layer:** REST Controllers, DTOs (Records), Consumers | **Presentation Layer:** Views, Composables/Widgets, ViewModels |
 | **Capa de Casos de Uso** | **Application Layer:** Command Handlers, Query Handlers, CQRS | **Domain Layer:** UseCases, Interactors, Modelos locales |
 | **Capa de Negocio Puro** | **Domain Layer:** Entities, Value Objects, Aggregates, Domain Events | **Domain Layer:** Entities de cliente, Value Objects ligeros |
-| **Capa de Infraestructura** | **Infrastructure Layer:** Spring Data JPA, Outbox, Clientes HTTP APIs | **Data / Infrastructure Layer:** Local DataSources (Room/sqflite), Remote DataSources (Retrofit/Dio) |
-| **Persistencia** | PostgreSQL 16 relacional y TimescaleDB (Aiven Cloud) | SQLite embebido local (Room Database en Kotlin, sqflite en Flutter) |
+| **Capa de Infraestructura** | **Infrastructure Layer:** Spring Data JPA, Outbox, Clientes HTTP APIs | **Data / Infrastructure Layer:** Local DataSources (Room/Drift), Remote DataSources (Retrofit/Dio) |
+| **Persistencia** | PostgreSQL 16 relacional y TimescaleDB (Aiven Cloud) | SQLite embebido local (Room Database en Kotlin, Drift en Flutter) |
 
 > [!NOTE]
 > **Lineamiento Académico:**  

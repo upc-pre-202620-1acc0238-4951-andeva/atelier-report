@@ -15,9 +15,10 @@ CLAUDE.md
 skills-lock.json
 docs/superpowers
 
-# Local notes and build output
+# Local notes, inputs and build output
 notes/
 build/
+.inputs/
 
 # Heavy binaries
 *.jar

@@ -27,39 +27,39 @@ El impacto económico y operativo es sustancial para ambas partes. Para el condu
 
 **Antecedentes del Dominio del Problema**
 
-La disciplina del mantenimiento automotriz ha transitado históricamente por fases conceptuales diferenciadas: el mantenimiento reactivo y el mantenimiento preventivo basado en umbrales estáticos, como el kilometraje o tiempo. Sin embargo, la creciente complejidad electromecánica exige la transición hacia el **mantenimiento predictivo**. Investigaciones de frontera demuestran que la integración del estándar de diagnóstico a bordo con arquitecturas de aprendizaje automático permite procesar series temporales generadas por sensores vehiculares (RPM, temperatura, presión), logrando clasificar estados de fallo inminentes con precisiones superiores al 95% (Hossain et al., 2024; Michailidis et al., 2025).
+La disciplina del mantenimiento automotriz ha transitado históricamente por fases conceptuales diferenciadas: el mantenimiento reactivo y el mantenimiento preventivo basado en umbrales estáticos, como el kilometraje o tiempo. Sin embargo, la creciente complejidad electromecánica exige la transición hacia el **mantenimiento predictivo**. Investigaciones de frontera demuestran que la integración del estándar de diagnóstico a bordo con arquitecturas de aprendizaje automático permite procesar series temporales generadas por sensores vehiculares (RPM, temperatura, presión), logrando clasificar estados de fallo inminentes con precisiones superiores al 95% [@hossain2024ai; @michailidis2025obd].
 
 ![Estrategias de mantenimiento y arquitectura del mantenimiento predictivo](assets/background-and-problems/maintenance-strategies.png){#fig:maintenance-strategies}
 
-*Nota.* Adaptado de Hossain et al. (2024).
+*Nota.* Adaptado de @hossain2024ai.
 
 ![Métodos de diagnóstico de fallos vehiculares basados en inteligencia artificial](assets/background-and-problems/vehicle-fault-diagnosis.png){#fig:vehicle-fault-diagnosis}
 
-*Nota.* Adaptado de Hossain et al. (2024).
+*Nota.* Adaptado de @hossain2024ai.
 
-A pesar de la madurez de estos modelos, en Perú el sector de reparación automotriz, compuesto en su mayoría por MYPEs, exhibe una inmadurez digital estructural. Aunque el 94% de las pymes declaran haber invertido en tecnología post-pandemia, la digitalización en talleres mecánicos suele limitarse a redes sociales o mensajería. Esto se aclarece mas cuando el 50.19% de las MYPEs utilizan la tecnología para gestionar inventario, cuentas por cobrar y transacciones de manera integral, mientras que un 31.46% lo hace exclusivamente para inventarios básicos (Velásquez Chacón, 2025). Esto deja el núcleo operativo vulnerable y operando de forma empírica.
+A pesar de la madurez de estos modelos, en Perú el sector de reparación automotriz, compuesto en su mayoría por MYPEs, exhibe una inmadurez digital estructural. Aunque el 94% de las pymes declaran haber invertido en tecnología post-pandemia, la digitalización en talleres mecánicos suele limitarse a redes sociales o mensajería. Esto se aclarece mas cuando el 50.19% de las MYPEs utilizan la tecnología para gestionar inventario, cuentas por cobrar y transacciones de manera integral, mientras que un 31.46% lo hace exclusivamente para inventarios básicos [@velasquez2025adopcion]. Esto deja el núcleo operativo vulnerable y operando de forma empírica.
 
 ![Distribución porcentual del uso de tecnología en las microempresas](assets/background-and-problems/technology-mype.png){#fig:technology-mype}
 
-*Nota.* Tomado de Velásquez Chacón (2025).
+*Nota.* Tomado de @velasquez2025adopcion.
 
 Para romper este ciclo, la adopción del Internet de las Cosas aplicado a la telemetría vehicular es el habilitador indispensable. Esto se logra mediante gateways telemétricos: dispositivos OBD-II con tarjetas SIM autónomas, o dispositivos Bluetooth que utilizan el teléfono inteligente del conductor como puente de transmisión de datos hacia la nube, democratizando el acceso a diagnósticos avanzados.
 
 **Problemática Actual e Impacto Socioeconómico**
 
-En el área metropolitana de Lima, esta desconexión tecnológica es crítica. Según los reportes oficiales de la Asociación Automotriz del Perú (AAP), la antigüedad promedio de la flota vehicular en circulación supera los 14 años, representando un riesgo exponencial de fallos y contaminación por gases de escape (AAP, 2025). Operar este parque bajo un modelo reactivo fuerza a los propietarios a asumir gastos de reparación correctiva que son, en promedio, entre el 300% y el 400% superiores a los costos de una intervención preventiva oportuna.
+En el área metropolitana de Lima, esta desconexión tecnológica es crítica. Según los reportes oficiales de la Asociación Automotriz del Perú [@aap2023flota], la antigüedad promedio de la flota vehicular en circulación supera los 14 años, representando un riesgo exponencial de fallos y contaminación por gases de escape. Operar este parque bajo un modelo reactivo fuerza a los propietarios a asumir gastos de reparación correctiva que son, en promedio, entre el 300% y el 400% superiores a los costos de una intervención preventiva oportuna.
 
-El costo de oportunidad por no digitalizar estos procesos es inmenso. El mercado global de aplicaciones de mantenimiento predictivo automotriz alcanzó los $4.8 mil millones de dólares en 2025, con proyecciones de escalar a $14.7 mil millones hacia 2034, y un ingreso promedio estimado de $112 dólares anuales por cada vehículo conectado (Dataintelo, 2025).
+El costo de oportunidad por no digitalizar estos procesos es inmenso. El mercado global de aplicaciones de mantenimiento predictivo automotriz alcanzó los $4.8 mil millones de dólares en 2025, con proyecciones de escalar a $14.7 mil millones hacia 2034, y un ingreso promedio estimado de $112 dólares anuales por cada vehículo conectado [@dataintelo2025predictive].
 
 ![Tamaño del mercado global y proyección de aplicaciones de mantenimiento predictivo automotriz](assets/background-and-problems/predictive-maintenance-market.png){#fig:predictive-maintenance-market}
 
-*Nota.* Tomado de Dataintelo (2025).
+*Nota.* Tomado de @dataintelo2025predictive.
 
-Específicamente, América Latina representó el 6.8% de los ingresos globales en 2025 y se proyecta que crezca a una tasa compuesta anual (CAGR) del 11.1% hasta 2034. En países con flotas vehiculares envejecidas, como Brasil, México y Perú, existe una fuerte demanda de diagnósticos predictivos rentables que puedan extender la vida útil de los vehículos (Dataintelo, 2025). Los talleres que no integren estas capacidades perderán competitividad rápidamente.
+Específicamente, América Latina representó el 6.8% de los ingresos globales en 2025 y se proyecta que crezca a una tasa compuesta anual (CAGR) del 11.1% hasta 2034. En países con flotas vehiculares envejecidas, como Brasil, México y Perú, existe una fuerte demanda de diagnósticos predictivos rentables que puedan extender la vida útil de los vehículos [@dataintelo2025predictive]. Los talleres que no integren estas capacidades perderán competitividad rápidamente.
 
 ![Participación porcentual del mercado de mantenimiento predictivo automotriz por regiones (2025)](assets/background-and-problems/market-by-region.png){#fig:market-by-region}
 
-*Nota.* Tomado de Dataintelo (2025).
+*Nota.* Tomado de @dataintelo2025predictive.
 
 Para transformar este ecosistema obsoleto y revertir las ineficiencias operativas descritas, Atelier ha sido concebido para resolver de manera directa tres fronteras críticas del dominio mediante una arquitectura Monolítica Modular. Cada uno de estos puntos ataca una deficiencia específica que imposibilita la escalabilidad de los talleres mecánicos:
 

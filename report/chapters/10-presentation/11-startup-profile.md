@@ -36,81 +36,85 @@ El ecosistema se divide estratégicamente en dos fases para conectar a todos los
 
 ### 1.1.2. *Perfiles de Integrantes del Equipo*
 
-\begin{table}[htpb]
-    \centering
-    \caption{Startup Working Team Profile Matrix}
-    \label{tbl:startup-working-team-profile-matrix}
-    \renewcommand{\arraystretch}{1.5}
-    \begin{tabularx}{\textwidth}{| m{2.5cm} | X | >{\centering\arraybackslash}m{4.5cm} |}
-        \hline
-        \thfirst{Foto} & \thcell{Nombre} & \thcell{Carrera} \\
-        \hline
-        
-        % ==============================
-        % Alumno 1
-        % ==============================
-        \multirow{5}{2.5cm}{\centering [Foto 1]} 
-        & Alumno 1 & [Carrera] \\
-        \cline{2-3}
-        & \thspan{2}{Descripción} \\
-        \cline{2-3}
-        & \multicolumn{2}{p{\dimexpr\textwidth-2.5cm-4\tabcolsep-3\arrayrulewidth\relax}|}{%
-            [Descripción del Alumno 1...]
-        } \\
-        \hline
-        
-        % ==============================
-        % Alumno 2
-        % ==============================
-        \multirow{5}{2.5cm}{\centering\includegraphics[width=2.2cm, keepaspectratio]{report/assets/startup-team-members/joel.jpg}} 
-        & Huamani Estefanero, Joel – U20241E275 & Ingeniería de Software \\
-        \cline{2-3}
-        & \thspan{2}{Descripción} \\
-        \cline{2-3}
-        & \multicolumn{2}{p{\dimexpr\textwidth-2.5cm-4\tabcolsep-3\arrayrulewidth\relax}|}{%
-            Soy Joel Huamani Estefanero, estudiante de la Universidad Peruana de Ciencias Aplicadas, tengo 20 años y actualmente lidero el ecosistema Atelier como CEO. Me especializo como desarrollador backend y arquitecto de software, con conocimientos técnicos en SQL, C++, Python, C\# y Java, destacando en este último mediante el uso del framework Spring Boot. Aplico arquitecturas como DDD, CQRS y Arquitectura Hexagonal, con el uso de patrones de diseño. Me considero una persona comprensiva con gran disposición para el trabajo en equipo, aparte de buscar mejorar y aprender a diario. Además de mi experiencia técnica, aportaré control, liderazgo y supervisión al grupo para asegurar un trabajo cohesionado y desarrollar productos de la mejor calidad.
-        } \\
-        \hline
-        
-        % ==============================
-        % Alumno 3
-        % ==============================
-        \multirow{5}{2.5cm}{\centering\includegraphics[width=2.2cm, keepaspectratio]{report/assets/startup-team-members/alvaro.jpg}} 
-        & Rocha Cotrina, Alvaro – U202411243 & Ingeniería de Software \\
-        \cline{2-3}
-        & \multicolumn{2}{l|}{\textbf{Descripción}} \\
-        \cline{2-3}
-        & \multicolumn{2}{p{\dimexpr\textwidth-2.5cm-4\tabcolsep-3\arrayrulewidth\relax}|}{%
-            Soy Alvaro Rocha, estudiante de Ingeniería de Software de la Universidad Peruana de Ciencias Aplicadas. Dentro de la startup, mi rol se centra en la integración tecnológica y la arquitectura del ecosistema Atelier, fusionando mis conocimientos en desarrollo de software con mi profunda pasión por el sector automotriz. Me especializo en el diseño de sistemas orientados a la telemetría (IoT) y el procesamiento de datos en tiempo real, asegurando que nuestra plataforma pueda interpretar correctamente los diagnósticos OBD-II. Aporto al equipo un enfoque analítico, capacidad para resolver problemas complejos y una visión técnica que garantiza que nuestro producto no solo sea escalable y robusto, sino que responda con exactitud a las verdaderas necesidades mecánicas y operativas de los usuarios.
-        } \\
-        \hline
-        
-        % ==============================
-        % Alumno 4
-        % ==============================
-        \multirow{5}{2.5cm}{\centering\includegraphics[width=2.2cm, keepaspectratio]{report/assets/startup-team-members/adiel.jpeg}} 
-        & Sanchez Santin, Adiel Abdiaz – U20241E287 & Ingeniería de Software \\
-        \cline{2-3}
-        & \thspan{2}{Descripción} \\
-        \cline{2-3}
-        & \multicolumn{2}{p{\dimexpr\textwidth-2.5cm-4\tabcolsep-3\arrayrulewidth\relax}|}{%
-            Soy Adiel Sanchez Santin, estudiante de Ingeniería de Software de la Universidad Peruana de Ciencias Aplicadas, con un perfil analítico y detallista. Me considero una persona reflexiva y dedicada, lo que me lleva a investigar y comprender en profundidad cómo funcionan las herramientas y tecnologías antes de utilizarlas. Cuento con conocimientos en lenguajes como C++, Python y Java, y disfruto explorar sus librerías y ecosistemas para entender la lógica técnica detrás de cada solución. En el equipo de Atelier, aporto desde el análisis riguroso, el modelado estratégico del dominio y la organización técnica, buscando siempre que las soluciones sean ordenadas, escalables y funcionen correctamente. Mi enfoque se centra en el aprendizaje continuo y en traducir requerimientos complejos en implementaciones técnicas claras, robustas y funcionales.
-        } \\
-        \hline
-        
-        % ==============================
-        % Alumno 5
-        % ==============================
-        \multirow{5}{2.5cm}{\centering\includegraphics[width=2.2cm, keepaspectratio]{report/assets/startup-team-members/Mauricio.jpeg}} 
-        & Teran Zavala, Mauricio – U202417423 & Ingeniería de Software \\
-        \cline{2-3}
-        & \thspan{2}{Descripción} \\
-        \cline{2-3}
-        & \multicolumn{2}{p{\dimexpr\textwidth-2.5cm-4\tabcolsep-3\arrayrulewidth\relax}|}{%
-            Soy Mauricio Teran, estudiante de la Universidad Peruana de Ciencias Aplicadas, con una marcada especialización en el desarrollo backend y una sólida base en lógica de programación. Manejo lenguajes como Java, C++ y Python, y aplico los principios de Domain-Driven Design (DDD) para estructurar dominios complejos, diseñar APIs RESTful escalables y optimizar la gestión de bases de datos. Mi motivación va más allá de lo técnico; busco activamente generar un impacto social positivo a través de mis desarrollos. La disciplina y el compromiso forjados en el deporte me permiten mantener la calma bajo presión y adaptarme con rapidez a los cambios, cualidades que pongo al servicio del equipo. Mi objetivo final es entregar código limpio, mantenible y funcional, promoviendo una comunicación abierta y efectiva. Aportaré mi liderazgo proactivo y mi capacidad de organización para asegurar la cohesión del equipo y el desarrollo de soluciones robustas y significativas.
-        } \\
-        \hline
-    \end{tabularx}
-\end{table}
+\renewcommand{\arraystretch}{1.4}
+\begin{longtable}{| >{\centering\arraybackslash}m{2.5cm} | m{\dimexpr\textwidth-7cm-6\tabcolsep-4\arrayrulewidth\relax} | >{\centering\arraybackslash}m{4.5cm} |}
+    \caption{Startup Working Team Profile Matrix} \label{tbl:startup-working-team-profile-matrix} \\
+    \hline
+    \thfirst{Foto} & \thcell{Nombre} & \thcell{Carrera} \\
+    \hline
+    \endfirsthead
+
+    \hline
+    \thfirst{Foto} & \thcell{Nombre} & \thcell{Carrera} \\
+    \hline
+    \endhead
+    
+    % ==============================
+    % Alumno 1
+    % ==============================
+    \multirow{5}{2.5cm}{\centering [Foto 1]} 
+    & Alumno 1 & [Carrera] \\*
+    \cline{2-3}
+    & \thspan{2}{Descripción} \\*
+    \cline{2-3}
+    & \multicolumn{2}{p{\dimexpr\textwidth-2.5cm-4\tabcolsep-3\arrayrulewidth\relax}|}{%
+        [Descripción del Alumno 1...]
+    } \\
+    \hline
+    
+    % ==============================
+    % Alumno 2
+    % ==============================
+    \multirow{5}{2.5cm}{\centering\includegraphics[width=2.2cm, keepaspectratio]{report/assets/startup-team-members/joel.jpg}} 
+    & Huamani Estefanero, Joel – U20241E275 & Ingeniería de Software \\*
+    \cline{2-3}
+    & \thspan{2}{Descripción} \\*
+    \cline{2-3}
+    & \multicolumn{2}{p{\dimexpr\textwidth-2.5cm-4\tabcolsep-3\arrayrulewidth\relax}|}{%
+        Soy Joel Huamani Estefanero, estudiante de la Universidad Peruana de Ciencias Aplicadas, tengo 20 años y actualmente lidero el ecosistema Atelier como CEO. Me especializo como desarrollador backend y arquitecto de software, con conocimientos técnicos en SQL, C++, Python, C\# y Java, destacando en este último mediante el uso del framework Spring Boot. Aplico arquitecturas como DDD, CQRS y Arquitectura Hexagonal, con el uso de patrones de diseño. Me considero una persona comprensiva con gran disposición para el trabajo en equipo, aparte de buscar mejorar y aprender a diario. Además de mi experiencia técnica, aportaré control, liderazgo y supervisión al grupo para asegurar un trabajo cohesionado y desarrollar productos de la mejor calidad.
+    } \\
+    \hline
+    
+    % ==============================
+    % Alumno 3
+    % ==============================
+    \pagebreak
+    \multirow{5}{2.5cm}{\centering\includegraphics[width=2.2cm, keepaspectratio]{report/assets/startup-team-members/alvaro.jpg}} 
+    & Rocha Cotrina, Alvaro – U202411243 & Ingeniería de Software \\*
+    \cline{2-3}
+    & \thspan{2}{Descripción} \\*
+    \cline{2-3}
+    & \multicolumn{2}{p{\dimexpr\textwidth-2.5cm-4\tabcolsep-3\arrayrulewidth\relax}|}{%
+        Soy Alvaro Rocha, estudiante de Ingeniería de Software de la Universidad Peruana de Ciencias Aplicadas. Dentro de la startup, mi rol se centra en la integración tecnológica y la arquitectura del ecosistema Atelier, fusionando mis conocimientos en desarrollo de software con mi profunda pasión por el sector automotriz. Me especializo en el diseño de sistemas orientados a la telemetría (IoT) y el procesamiento de datos en tiempo real, asegurando que nuestra plataforma pueda interpretar correctamente los diagnósticos OBD-II. Aporto al equipo un enfoque analítico, capacidad para resolver problemas complejos y una visión técnica que garantiza que nuestro producto no solo sea escalable y robusto, sino que responda con exactitud a las verdaderas necesidades mecánicas y operativas de los usuarios.
+    } \\
+    \hline
+    
+    % ==============================
+    % Alumno 4
+    % ==============================
+    \multirow{5}{2.5cm}{\centering\includegraphics[width=2.2cm, keepaspectratio]{report/assets/startup-team-members/adiel.jpeg}} 
+    & Sanchez Santin, Adiel Abdiaz – U20241E287 & Ingeniería de Software \\*
+    \cline{2-3}
+    & \thspan{2}{Descripción} \\*
+    \cline{2-3}
+    & \multicolumn{2}{p{\dimexpr\textwidth-2.5cm-4\tabcolsep-3\arrayrulewidth\relax}|}{%
+        Soy Adiel Sanchez Santin, estudiante de Ingeniería de Software de la Universidad Peruana de Ciencias Aplicadas, con un perfil analítico y detallista. Me considero una persona reflexiva y dedicada, lo que me lleva a investigar y comprender en profundidad cómo funcionan las herramientas y tecnologías antes de utilizarlas. Cuento con conocimientos en lenguajes como C++, Python y Java, y disfruto explorar sus librerías y ecosistemas para entender la lógica técnica detrás de cada solución. En el equipo de Atelier, aporto desde el análisis riguroso, el modelado estratégico del dominio y la organización técnica, buscando siempre que las soluciones sean ordenadas, escalables y funcionen correctamente. Mi enfoque se centra en el aprendizaje continuo y en traducir requerimientos complejos en implementaciones técnicas claras, robustas y funcionales.
+    } \\
+    \hline
+    
+    % ==============================
+    % Alumno 5
+    % ==============================
+    \pagebreak
+    \multirow{5}{2.5cm}{\centering\includegraphics[width=2.2cm, keepaspectratio]{report/assets/startup-team-members/Mauricio.jpeg}} 
+    & Teran Zavala, Mauricio – U202417423 & Ingeniería de Software \\*
+    \cline{2-3}
+    & \thspan{2}{Descripción} \\*
+    \cline{2-3}
+    & \multicolumn{2}{p{\dimexpr\textwidth-2.5cm-4\tabcolsep-3\arrayrulewidth\relax}|}{%
+        Soy Mauricio Teran, estudiante de la Universidad Peruana de Ciencias Aplicadas, con una marcada especialización en el desarrollo backend y una sólida base en lógica de programación. Manejo lenguajes como Java, C++ y Python, y aplico los principios de Domain-Driven Design (DDD) para estructurar dominios complejos, diseñar APIs RESTful escalables y optimizar la gestión de bases de datos. Mi motivación va más allá de lo técnico; busco activamente generar un impacto social positivo a través de mis desarrollos. La disciplina y el compromiso forjados en el deporte me permiten mantener la calma bajo presión y adaptarme con rapidez a los cambios, cualidades que pongo al servicio del equipo. Mi objetivo final es entregar código limpio, mantenible y funcional, promoviendo una comunicación abierta y efectiva. Aportaré mi liderazgo proactivo y mi capacidad de organización para asegurar la cohesión del equipo y el desarrollo de soluciones robustas y significativas.
+    } \\
+    \hline
+\end{longtable}
 
 \newpage
