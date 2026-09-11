@@ -49,11 +49,11 @@ PANDOC_DOCKER = docker run $(DOCKER_PLATFORM) --rm -v "$(abspath .):/workspace" 
 C4_WORKSPACE_FILE = report/assets/diagram-sources/c4-diagrams/workspace.dsl
 C4_EXPORT_DIR = report/assets/diagram-sources/c4-exported
 
-.PHONY: all pdf pdf-es pdf-en clean diagrams db-diagrams c4 single single-es single-en
+.PHONY: all pdf pdf-es pdf-en clean class-diagrams db-diagrams c4 single single-es single-en
 
-all: pdf c4 diagrams db-diagrams
+all: pdf c4 class-diagrams db-diagrams
 
-diagrams:
+class-diagrams:
 	@echo Generating class diagrams from PlantUML sources...
 	$(MKDIR_CLASS_DIAGRAMS)
 	$(DOCKER) ghcr.io/plantuml/plantuml -tpng -o "/app/$(CLASS_DIAGRAM_OUT)" "/app/report/assets/diagram-sources/class-diagrams/*.puml"
