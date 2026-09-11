@@ -1,0 +1,368 @@
+@startuml database-diagram-invoicing
+title <size:16>Diagrama de Base de Datos (ERD) - Bounded Context Invoicing & Compliance</size>\n<size:11>Persistencia Relacional Multi-Producto: PostgreSQL 16 (API Application) y SQLite 3 (Mobile Workshop)</size>
+
+' Configuraciones visuales y de diseño profesional
+hide circle
+skinparam monochrome false
+skinparam shadowing false
+skinparam roundcorner 6
+skinparam linetype ortho
+skinparam nodesep 120
+skinparam ranksep 55
+skinparam defaultFontName "Helvetica", "Arial", sans-serif
+skinparam defaultFontSize 11
+skinparam defaultFontColor #2C3E50
+skinparam arrowColor #34495E
+skinparam arrowThickness 1.3
+skinparam packageBorderColor #7F8C8D
+skinparam packageFontSize 12
+skinparam packageFontStyle bold
+
+skinparam entity {
+    BackgroundColor #FFFFFF
+    BorderColor #34495E
+    HeaderBackgroundColor #EAEDED
+}
+
+' ==============================================================================
+' PRODUCTO 1: API APPLICATION (BACKEND CENTRAL - POSTGRESQL 16)
+' ==============================================================================
+package "PostgreSQL 16 (API Application - Backend Central)" as pg_backend #F8F9F9 {
+
+    ' ==========================================================================
+    ' COLUMNA 1: ARQUETIPO JPA, CONTEXTOS EXTERNOS Y CONTROL DE SERIES FISCALES
+    ' ==========================================================================
+    entity "auditable_abstract_entity" as auditable_abstract_entity <<archetype, JPA>> #E8F8F5 {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Propiedades del Arquetipo JPA:</b>
+        + Clave primaria técnica UUID v4
+        + Aislamiento multi-tenant obligatorio (tenant_id)
+        + Control de concurrencia optimista (version)
+        + Borrado lógico auditable (deleted_at)
+        + Heredado físicamente por entidades de negocio:
+          electronic_vouchers, voucher_payments y
+          sunat_series_configurations (@MappedSuperclass)
+    }
+
+    entity "tenants" as tenants <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * name : VARCHAR(100)
+        * tax_id : VARCHAR(20) <<UK>>
+        --
+        <b>Contexto Externo (IAM & Tenancy):</b>
+        + Delimita la frontera del taller automotriz
+    }
+
+    entity "branches" as branches <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        * name : VARCHAR(100)
+        sunat_code : VARCHAR(10)
+        --
+        <b>Contexto Externo (IAM & Tenancy):</b>
+        + Sede física y domicilio fiscal emisor
+    }
+
+    entity "customers" as customers <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        * type : VARCHAR(20)
+        first_name : VARCHAR(100)
+        last_name : VARCHAR(100)
+        company_name : VARCHAR(150)
+        tax_id : VARCHAR(20)
+        --
+        <b>Contexto Externo (CRM & Fleet):</b>
+        + Cliente receptor del comprobante de pago
+    }
+
+    entity "work_orders" as work_orders <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        * order_number : VARCHAR(50)
+        * status : VARCHAR(30)
+        --
+        <b>Contexto Externo (Workshop Operations - MRO):</b>
+        + Orden de trabajo técnica liquidada
+    }
+
+    entity "sunat_series_configurations" as sunat_series_configurations <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        * branch_id : UUID <<FK>>
+        * voucher_type : VARCHAR(10)
+        * serie : VARCHAR(4)
+        * current_correlative : INTEGER
+        * is_active : BOOLEAN
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_sunat_series : PRIMARY KEY (id)
+        + fk_series_tenant_id : FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+        + fk_series_branch_id : FOREIGN KEY (branch_id) REFERENCES branches(id)
+        + uk_series_branch_type_serie : UNIQUE (branch_id, voucher_type, serie)
+        + chk_series_voucher_type : CHECK (voucher_type IN ('01', '03', '07', '08'))
+        + chk_series_correlative_pos : CHECK (current_correlative >= 0)
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_series_branch_type : (branch_id, voucher_type, is_active)
+        + idx_series_tenant : (tenant_id)
+    }
+
+    ' ==========================================================================
+    ' COLUMNA 2: COMPROBANTES ELECTRÓNICOS, PARTIDAS, COBROS Y EVENTOS OUTBOX
+    ' ==========================================================================
+    entity "electronic_vouchers" as electronic_vouchers <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        * branch_id : UUID <<FK>>
+        * customer_id : UUID <<FK>>
+        work_order_id : UUID <<FK>>
+        * voucher_type : VARCHAR(10)
+        * serie : VARCHAR(4)
+        * number : INTEGER
+        * subtotal : DECIMAL(12,2)
+        * igv_amount : DECIMAL(12,2)
+        * total_amount : DECIMAL(12,2)
+        * currency : VARCHAR(3)
+        * status : VARCHAR(20)
+        * customer_tax_id : VARCHAR(20)
+        * customer_legal_name : VARCHAR(150)
+        customer_fiscal_address : VARCHAR(200)
+        * customer_document_type : VARCHAR(10)
+        sunat_pdf_url : VARCHAR(255)
+        sunat_xml_url : VARCHAR(255)
+        sunat_cdr_url : VARCHAR(255)
+        digital_signature_hash : VARCHAR(100)
+        sunat_response_code : VARCHAR(10)
+        sunat_description : VARCHAR(255)
+        voided_reason : VARCHAR(255)
+        voided_at : TIMESTAMPTZ
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_electronic_vouchers : PRIMARY KEY (id)
+        + fk_vouchers_tenant_id : FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+        + fk_vouchers_branch_id : FOREIGN KEY (branch_id) REFERENCES branches(id)
+        + fk_vouchers_customer_id : FOREIGN KEY (customer_id) REFERENCES customers(id)
+        + fk_vouchers_work_order_id : FOREIGN KEY (work_order_id) REFERENCES work_orders(id)
+        + uk_vouchers_tenant_serie_number : UNIQUE (tenant_id, serie, number)
+        + chk_vouchers_type : CHECK (voucher_type IN ('01', '03', '07', '08'))
+        + chk_vouchers_status : CHECK (status IN ('draft', 'issued', 'accepted_sunat', 'rejected_sunat', 'voided'))
+        + chk_vouchers_currency : CHECK (currency IN ('PEN', 'USD'))
+        + chk_vouchers_amounts : CHECK (total_amount >= 0.00 AND subtotal >= 0.00 AND igv_amount >= 0.00)
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_vouchers_tenant_date : (tenant_id, created_at DESC)
+        + idx_vouchers_lookup_fiscal : (tenant_id, serie, number)
+        + idx_vouchers_work_order : (work_order_id) WHERE work_order_id IS NOT NULL
+        + idx_vouchers_customer : (customer_id)
+        + idx_vouchers_status : (tenant_id, status)
+    }
+
+    entity "voucher_lines" as voucher_lines <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * voucher_id : UUID <<FK>>
+        item_id : UUID
+        * item_type : VARCHAR(20)
+        * description : VARCHAR(200)
+        * quantity : DECIMAL(10,2)
+        * unit_value : DECIMAL(12,2)
+        * unit_price : DECIMAL(12,2)
+        * igv_amount : DECIMAL(12,2)
+        * total_line : DECIMAL(12,2)
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_voucher_lines : PRIMARY KEY (id)
+        + fk_voucher_lines_voucher_id : FOREIGN KEY (voucher_id) REFERENCES electronic_vouchers(id) ON DELETE CASCADE
+        + chk_lines_item_type : CHECK (item_type IN ('PRODUCT', 'SERVICE'))
+        + chk_lines_quantity : CHECK (quantity > 0.00)
+        + chk_lines_total_positive : CHECK (total_line >= 0.00)
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_voucher_lines_voucher_id : (voucher_id)
+        + idx_voucher_lines_item : (item_id) WHERE item_id IS NOT NULL
+    }
+
+    entity "voucher_payments" as voucher_payments <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * voucher_id : UUID <<FK>>
+        * tenant_id : UUID <<FK>>
+        * branch_id : UUID <<FK>>
+        * amount : DECIMAL(12,2)
+        * currency : VARCHAR(3)
+        * payment_method : VARCHAR(30)
+        transaction_reference : VARCHAR(100)
+        * status : VARCHAR(20)
+        * paid_at : TIMESTAMPTZ
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_voucher_payments : PRIMARY KEY (id)
+        + fk_payments_voucher_id : FOREIGN KEY (voucher_id) REFERENCES electronic_vouchers(id) ON DELETE CASCADE
+        + fk_payments_tenant_id : FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+        + fk_payments_branch_id : FOREIGN KEY (branch_id) REFERENCES branches(id)
+        + chk_payments_amount : CHECK (amount > 0.00)
+        + chk_payments_currency : CHECK (currency IN ('PEN', 'USD'))
+        + chk_payments_method : CHECK (payment_method IN ('cash', 'credit_card', 'debit_card', 'bank_transfer', 'yape', 'plin'))
+        + chk_payments_status : CHECK (status IN ('pending', 'completed', 'refunded'))
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_payments_voucher_id : (voucher_id)
+        + idx_payments_branch_paid_at : (branch_id, paid_at DESC)
+        + idx_payments_tenant_method : (tenant_id, payment_method)
+    }
+
+    entity "invoicing_outbox_events" as invoicing_outbox_events <<table, PostgreSQL>> #EBF5FB {
+        * id : UUID <<PK>>
+        --
+        * aggregate_type : VARCHAR(100)
+        * aggregate_id : UUID
+        * event_type : VARCHAR(150)
+        * payload : JSONB
+        * occurred_on : TIMESTAMPTZ
+        * status : VARCHAR(30)
+        * retry_count : INTEGER
+        last_error : TEXT
+        processed_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_invoicing_outbox : PRIMARY KEY (id)
+        + chk_invoicing_outbox_status : CHECK (status IN ('PENDING', 'PROCESSED', 'FAILED'))
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_invoicing_outbox_pending : (status, occurred_on ASC) WHERE status = 'PENDING'
+        + idx_invoicing_outbox_aggregate : (aggregate_type, aggregate_id)
+    }
+
+    ' ==========================================================================
+    ' DISPOSICIÓN ESPACIAL EN COLUMNAS (ALINEAMIENTO HORIZONTAL Y VERTICAL)
+    ' ==========================================================================
+    ' Columna 1 (Vertical)
+    auditable_abstract_entity -[hidden]down-> tenants
+    tenants -[hidden]down-> branches
+    branches -[hidden]down-> sunat_series_configurations
+    sunat_series_configurations -[hidden]down-> customers
+    customers -[hidden]down-> work_orders
+
+    ' Columna 2 (Vertical)
+    electronic_vouchers -[hidden]down-> voucher_lines
+    voucher_lines -[hidden]down-> voucher_payments
+    voucher_payments -[hidden]down-> invoicing_outbox_events
+
+    ' Alineamiento horizontal forzado entre columnas de Backend
+    tenants -[hidden]right-> electronic_vouchers
+    sunat_series_configurations -[hidden]right-> voucher_lines
+    customers -[hidden]right-> voucher_payments
+    work_orders -[hidden]right-> invoicing_outbox_events
+
+    ' Relaciones de Herencia JPA
+    auditable_abstract_entity <|-- electronic_vouchers : "herencia física JPA\n(@MappedSuperclass)"
+    auditable_abstract_entity <|-- voucher_payments
+    auditable_abstract_entity <|-- sunat_series_configurations
+
+    ' Relaciones Cardinales de Integridad Referencial
+    tenants "1  " -right-o{ "0..* " electronic_vouchers : "emite"
+    branches "1  " -right-o{ "0..* " electronic_vouchers : "expide"
+    sunat_series_configurations "1  " -right-o{ "0..* " electronic_vouchers : "asigna correlativo"
+    customers "1  " -right-o{ "0..* " electronic_vouchers : "receptor"
+    work_orders "0..1" -right-o{ "0..* " electronic_vouchers : "liquida servicio"
+
+    electronic_vouchers "1  " ||--|{ "1..* " voucher_lines : "desglosa partidas"
+    electronic_vouchers "1  " ||--o{ "0..* " voucher_payments : "saldado mediante"
+    electronic_vouchers "1  " ||--o{ "0..* " invoicing_outbox_events : "despacha fiscalización\n(Transactional Outbox)"
+}
+
+' ==============================================================================
+' PRODUCTO 2: MOBILE WORKSHOP (CLIENTE TÉCNICO OFFLINE - SQLITE 3)
+' ==============================================================================
+package "SQLite 3 (Mobile Workshop - Cliente Técnico Offline)" as sqlite_mobile #FEFDE8 {
+
+    entity "local_voucher_status_cache" as local_voucher_status_cache <<table, SQLite>> #FEF9E7 {
+        * id : TEXT <<PK>>
+        --
+        * work_order_id : TEXT
+        * voucher_serie : TEXT
+        * voucher_number : INTEGER
+        * voucher_type : TEXT
+        * total_amount : REAL
+        * pending_balance : REAL
+        * status : TEXT
+        pdf_url : TEXT
+        * synced_at : TEXT (ISO8601)
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_local_voucher_status : PRIMARY KEY (id)
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_local_vouchers_wo : (work_order_id)
+        --
+        <b>Propósito Operativo:</b>
+        + Caché local de saldos y comprobantes de la OT
+        + Verificación offline de habilitación de salida en patio
+    }
+
+    entity "offline_payment_collections" as offline_payment_collections <<table, SQLite>> #FEF9E7 {
+        * collection_id : TEXT <<PK>>
+        --
+        voucher_id : TEXT
+        * work_order_id : TEXT
+        * amount : REAL
+        * payment_method : TEXT
+        reference_code : TEXT
+        * status : TEXT
+        * created_at : TEXT (ISO8601)
+        synced_at : TEXT (ISO8601)
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_offline_payment_collections : PRIMARY KEY (collection_id)
+        + chk_offline_payment_status : CHECK (status IN ('PENDING', 'SYNCED', 'FAILED'))
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_offline_payments_status : (status, created_at)
+        + idx_offline_payments_wo : (work_order_id)
+        --
+        <b>Propósito Operativo:</b>
+        + Buffer transaccional de cobros en patio
+        + Replicación atómica e idempotente hacia la nube
+    }
+
+    ' Disposición vertical en columna SQLite con espaciado amplio
+    local_voucher_status_cache -[hidden]down---------> offline_payment_collections
+}
+
+' Disposición horizontal entre paquetes y entidades correspondientes
+pg_backend -[hidden]right-> sqlite_mobile
+electronic_vouchers -[hidden]right-> local_voucher_status_cache
+
+' ==============================================================================
+' RELACIONES DE SINCRONIZACIÓN INTER-PRODUCTO
+' ==============================================================================
+offline_payment_collections .[#2980B9]left.> voucher_payments : "<b>HTTPS REST Replicación de Cobros en Patio</b>\n(POST /api/v1/invoicing/payments/offline-sync)"
+local_voucher_status_cache .[#27AE60]left.> electronic_vouchers : "<b>Descarga y Refresco de Saldos de Facturación</b>\n(GET /api/v1/invoicing/vouchers/work-order/{id})"
+
+@enduml
