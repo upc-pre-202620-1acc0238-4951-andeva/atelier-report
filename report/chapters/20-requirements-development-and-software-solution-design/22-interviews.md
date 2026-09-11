@@ -88,11 +88,11 @@ En esta sección presentamos los registros de las entrevistas que hicimos para c
 <tbody>
   <tr>
     <td>Nombre</td>
-    <td>Jorge Marcelo</td>
+    <td>Jorge Antonio</td>
   </tr>
   <tr>
     <td>Apellidos</td>
-    <td>Aguilar Ramos</td>
+    <td>Aguilar Perez</td>
   </tr>
   <tr>
     <td>Edad</td>
@@ -123,7 +123,54 @@ En esta sección presentamos los registros de las entrevistas que hicimos para c
 </tbody>
 </table>
 
+<table>
+<colgroup>
+</colgroup>
+<thead>
+  <tr>
+    <th colspan="2">Entrevista #2<br></th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>Nombre</td>
+    <td>Marcelo Alejandro</td>
+  </tr>
+  <tr>
+    <td>Apellidos</td>
+    <td>Silva Ramos</td>
+  </tr>
+  <tr>
+    <td>Edad</td>
+    <td>63 años</td>
+  </tr>
+  <tr>
+    <td>Distrito</td>
+    <td>Chorrillos</td>
+  </tr>
+  <tr>
+    <td>Evidencia</td>
+    <td><div align="center"><img src="../../assets/Interview-Evidence/Interview-of-Marcelo-Ramos.jpeg" alt="Entrevista Marcelo Ramos"></div></td>
+  </tr>
+  <tr>
+    <td>Link</td>
+    <td><p><a target="_blank"  href="https://upcedupe-my.sharepoint.com/personal/u20241e287_upc_edu_pe/_layouts/15/stream.aspx?id=%2Fpersonal%2Fu20241e287%5Fupc%5Fedu%5Fpe%2FDocuments%2FVideos%2Fupc%2Dpre%2D202602%2D1acc0238%2D4951%2Dandeva%2Dneedfinding%2Dav1%2Emp4&referrer=StreamWebApp%2EWeb&referrerScenario=AddressBarCopied%2Eview%2Ecb19ca18%2Db619%2D4850%2D984a%2De8207a0cf93b" title="Title">Microsoft Stream</p></td>
+  </tr>
+  <tr>
+    <td>Duracion<br></td>
+    <td>0:10 min - 10:13 min</td>
+  </tr>
+  <tr>
+    <td>Resumen</td>
+    <td>
+      La entrevista se realizó a Marcelo Ramos, un comerciante y propietario de taller de 63 años, divorciado, quien cuenta con más de 30 años de trayectoria en el rubro automotriz. Describe su estilo de gestión comercial bajo los principios de orden, responsabilidad y puntualidad, destacando este último valor como su principal fortaleza administrativa. Su modelo de operación combina la venta directa al público con la atención de taller, trabajando predominantemente con una cartera de clientes frecuentes y pedidos programados. Su rutina se enfoca en mantener estándares de calidad y precisión técnica para minimizar quejas de los usuarios. Respecto a sus fricciones operativas, señala que su mayor causa de estrés ocurre ante fallas en las máquinas o herramientas del taller (como el daño en matrices), lo cual genera retrasos de hasta una semana en la atención y cuellos de botella cuando se acumulan los pedidos. Finalmente, en cuanto a sus proyecciones de crecimiento, menciona su interés en expandir sus operaciones mediante el rubro de importaciones, negocio en el cual también suma años de experiencia.
+    </td>
+  </tr>
+</tbody>
+</table>
+
 **Segmento 2:**
+
 <table>
 <colgroup>
 </colgroup>

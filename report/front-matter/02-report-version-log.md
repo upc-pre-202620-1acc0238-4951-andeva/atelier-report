@@ -22,5 +22,6 @@
 |0.24.0|08/09/2026|Teran Zavala, Mauricio Alejandro|Inserción de la segunda entrevista para el segundo segmento.|
 |0.25.0|08/09/2026|Huamani Estefanero, Joel|Añadido de ***Bounded Context: Workshop Operations (MRO)*** y documentación del backend.|
 |0.25.0|08/09/2026|Teran Zavala, Mauricio Alejandro|Inserción **Empathy Mapping** para ambos user persona.|
+|0.26.0|08/09/2026|Teran Zavala, Mauricio Alejandro|Inserción **Interview Analysis** para ambos segmentos.|
 
 \newpage
