@@ -6,6 +6,7 @@ component api "Components-API" "Diagrama de Componentes de la API Central de Ate
     exclude mro_controllers mro_app_services mro_event_handlers mro_domain mro_persistence mro_facade mro_external_gateways
     exclude inventory_controllers inventory_app_services inventory_event_handlers inventory_domain inventory_persistence inventory_facade inventory_external_gateways
     exclude hr_controllers hr_app_services hr_event_handlers hr_domain hr_persistence hr_facade hr_external_gateways
+    exclude invoicing_controllers invoicing_app_services invoicing_event_handlers invoicing_domain invoicing_persistence invoicing_facade invoicing_external_gateways
     autoLayout tb 250 200
 }
 
@@ -55,5 +56,13 @@ component api "component-level-diagram-hr" "Diagrama de Componentes C4 (Nivel 3)
     include mro_comp iam_comp
     autoLayout tb 250 200
 }
+
+component api "component-level-diagram-invoicing" "Diagrama de Componentes C4 (Nivel 3) para el Bounded Context Invoicing & Compliance en API Application" {
+    include invoicing_controllers invoicing_app_services invoicing_event_handlers invoicing_domain invoicing_persistence invoicing_facade invoicing_external_gateways
+    include webapp workshop_mobile db nubefact resend sunat
+    include mro_comp customer_fleet_comp inventory_comp hr_comp iam_comp
+    autoLayout tb 250 200
+}
+
 
 

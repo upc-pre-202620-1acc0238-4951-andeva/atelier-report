@@ -1,0 +1,792 @@
+@startuml class-diagram-invoicing
+title <size:18>Diagrama de Clases UML - Bounded Context Invoicing & Compliance (Domain Layer)</size>\n<size:12>Paquete Canónico: com.andeva.atelier.platform.invoicing.domain</size>
+
+scale max 3200 width
+
+' Configuraciones visuales y de diseño profesional
+skinparam classAttributeIconSize 0
+skinparam monochrome false
+skinparam shadowing false
+skinparam roundcorner 6
+skinparam linetype ortho
+skinparam nodesep 26
+skinparam ranksep 30
+skinparam defaultFontName "Helvetica", "Arial", sans-serif
+skinparam defaultFontSize 10
+skinparam defaultFontColor #2C3E50
+skinparam arrowColor #34495E
+skinparam arrowThickness 1.1
+skinparam packageBorderColor #7F8C8D
+skinparam packageFontSize 11
+skinparam packageFontStyle bold
+
+' Estilos específicos por categoría táctica
+skinparam class {
+    BackgroundColor #FFFFFF
+    BorderColor #2C3E50
+    HeaderBackgroundColor #EAEDED
+}
+skinparam class<<AggregateRoot>> {
+    BackgroundColor #E8F8F5
+    BorderColor #16A085
+    HeaderBackgroundColor #A3E4D7
+}
+skinparam class<<Entity>> {
+    BackgroundColor #EBF5FB
+    BorderColor #2980B9
+    HeaderBackgroundColor #AED6F1
+}
+skinparam class<<ValueObject>> {
+    BackgroundColor #FEF9E7
+    BorderColor #D68910
+    HeaderBackgroundColor #FAD7A0
+}
+skinparam class<<TypedId>> {
+    BackgroundColor #EBF5FB
+    BorderColor #2980B9
+    HeaderBackgroundColor #AED6F1
+}
+skinparam class<<DomainService>> {
+    BackgroundColor #E8F8F5
+    BorderColor #117A65
+    HeaderBackgroundColor #A2D9CE
+}
+skinparam class<<DomainEvent>> {
+    BackgroundColor #FADBD8
+    BorderColor #C0392B
+    HeaderBackgroundColor #F1948A
+}
+skinparam class<<Exception>> {
+    BackgroundColor #F4ECF7
+    BorderColor #8E44AD
+    HeaderBackgroundColor #D2B4DE
+}
+skinparam class<<SharedKernel>> {
+    BackgroundColor #F8F9F9
+    BorderColor #BDC3C7
+    HeaderBackgroundColor #EAEDED
+}
+skinparam interface {
+    BackgroundColor #E8F6F3
+    BorderColor #117A65
+    HeaderBackgroundColor #A2D9CE
+}
+skinparam enum {
+    BackgroundColor #FCF3CF
+    BorderColor #B7950B
+    HeaderBackgroundColor #F9E79F
+}
+
+set separator none
+
+' ==============================================================================
+' 1. MODELO DE AGREGADOS (AGGREGATES)
+' ==============================================================================
+package "invoicing.domain.model.aggregates" as aggregates #FDFEFE {
+
+    abstract class "AbstractDomainAggregateRoot<T>" as AbstractDomainAggregateRoot <<SharedKernel>> {
+        # id: T
+        - domainEvents: List<DomainEvent>
+        --
+        # registerDomainEvent(event: DomainEvent): void
+        + domainEvents(): List<DomainEvent>
+        + clearDomainEvents(): void
+    }
+
+    class ElectronicVoucher <<AggregateRoot>> {
+        - id: VoucherId
+        - tenantId: TenantId
+        - branchId: BranchId
+        - customerId: CustomerId
+        - workOrderId: Optional<WorkOrderId>
+        - voucherType: VoucherType
+        - serie: VoucherSerie
+        - number: VoucherNumber
+        - taxCalculation: TaxCalculation
+        - currency: Currency
+        - status: VoucherStatus
+        - customerFiscalInfo: CustomerFiscalInfo
+        - digitalReceiptUrls: DigitalReceiptUrls
+        - sunatResponse: Optional<SunatResponse>
+        - voidedInfo: Optional<VoidedInfo>
+        - lines: List<VoucherLine>
+        - payments: List<VoucherPayment>
+        --
+        + {static} issue(tenantId: TenantId, branchId: BranchId, customerId: CustomerId, workOrderId: Optional<WorkOrderId>, voucherType: VoucherType, serie: VoucherSerie, number: VoucherNumber, customerFiscalInfo: CustomerFiscalInfo, currency: Currency, lines: List<VoucherLine>): ElectronicVoucher
+        + markAcceptedBySunat(hash: String, description: String, urls: DigitalReceiptUrls): void
+        + markRejectedBySunat(errorCode: String, errorMessage: String): void
+        + voidVoucher(reason: String, voidedAt: Instant): void
+        + recordPayment(paymentId: PaymentId, amount: Money, method: PaymentMethod, reference: String): VoucherPayment
+        + isFullyPaid(): boolean
+        + getPendingBalance(): Money
+        + id(): VoucherId
+        + status(): VoucherStatus
+        + taxCalculation(): TaxCalculation
+        + lines(): List<VoucherLine>
+        + payments(): List<VoucherPayment>
+    }
+
+    class SeriesConfiguration <<AggregateRoot>> {
+        - id: SeriesConfigurationId
+        - tenantId: TenantId
+        - branchId: BranchId
+        - voucherType: VoucherType
+        - serie: VoucherSerie
+        - currentCorrelative: int
+        - isActive: boolean
+        --
+        + {static} create(tenantId: TenantId, branchId: BranchId, voucherType: VoucherType, serie: VoucherSerie, initialCorrelative: int): SeriesConfiguration
+        + nextCorrelative(): VoucherNumber
+        + deactivate(): void
+        + activate(): void
+        + id(): SeriesConfigurationId
+        + serie(): VoucherSerie
+        + currentCorrelative(): int
+        + isActive(): boolean
+    }
+
+    class VoucherPayment <<AggregateRoot>> {
+        - id: PaymentId
+        - voucherId: VoucherId
+        - tenantId: TenantId
+        - branchId: BranchId
+        - amount: Money
+        - paymentMethod: PaymentMethod
+        - transactionReference: String
+        - status: PaymentStatus
+        - paidAt: Instant
+        --
+        + {static} register(voucherId: VoucherId, tenantId: TenantId, branchId: BranchId, amount: Money, method: PaymentMethod, ref: String): VoucherPayment
+        + markCompleted(): void
+        + refund(): void
+        + id(): PaymentId
+        + amount(): Money
+        + status(): PaymentStatus
+        + paidAt(): Instant
+    }
+}
+
+' ==============================================================================
+' 2. ENTIDADES INTERNAS (ENTITIES)
+' ==============================================================================
+package "invoicing.domain.model.entities" as entities #FDFEFE {
+
+    class VoucherLine <<Entity>> {
+        - id: UUID
+        - voucherId: VoucherId
+        - itemId: Optional<UUID>
+        - itemType: VoucherItemType
+        - description: String
+        - quantity: Quantity
+        - unitValue: Money
+        - unitPrice: Money
+        - igvAmount: Money
+        - totalLine: Money
+        --
+        + {static} create(voucherId: VoucherId, itemId: Optional<UUID>, type: VoucherItemType, desc: String, qty: Quantity, unitValue: Money, igvAmount: Money, totalLine: Money): VoucherLine
+        + calculateLineTotal(): Money
+        + id(): UUID
+        + itemType(): VoucherItemType
+        + quantity(): Quantity
+        + totalLine(): Money
+    }
+}
+
+' ==============================================================================
+' 3. IDENTIFICADORES FUERTEMENTE TIPADOS (TYPED IDS & SHARED KERNEL IDS)
+' ==============================================================================
+package "invoicing.domain.model.ids" as ids #FDFEFE {
+
+    interface "TypedId<T>" as TypedId <<SharedKernel>> {
+        + value(): T
+    }
+
+    class VoucherId <<TypedId>> {
+        - value: UUID
+        --
+        + {static} of(value: UUID): VoucherId
+        + {static} generate(): VoucherId
+        + value(): UUID
+    }
+
+    class SeriesConfigurationId <<TypedId>> {
+        - value: UUID
+        --
+        + {static} of(value: UUID): SeriesConfigurationId
+        + {static} generate(): SeriesConfigurationId
+        + value(): UUID
+    }
+
+    class PaymentId <<TypedId>> {
+        - value: UUID
+        --
+        + {static} of(value: UUID): PaymentId
+        + {static} generate(): PaymentId
+        + value(): UUID
+    }
+
+    class TenantId <<SharedKernel>> {
+        - value: UUID
+        --
+        + {static} from(value: UUID): TenantId
+        + value(): UUID
+    }
+
+    class BranchId <<SharedKernel>> {
+        - value: UUID
+        --
+        + {static} from(value: UUID): BranchId
+        + value(): UUID
+    }
+
+    class CustomerId <<SharedKernel>> {
+        - value: UUID
+        --
+        + {static} from(value: UUID): CustomerId
+        + value(): UUID
+    }
+
+    class WorkOrderId <<SharedKernel>> {
+        - value: UUID
+        --
+        + {static} from(value: UUID): WorkOrderId
+        + value(): UUID
+    }
+}
+
+' ==============================================================================
+' 4. OBJETOS DE VALOR (VALUE OBJECTS & SHARED KERNEL)
+' ==============================================================================
+package "invoicing.domain.model.valueobjects" as valueobjects #FDFEFE {
+
+    class VoucherSerie <<ValueObject>> {
+        - value: String
+        --
+        + {static} of(value: String): VoucherSerie
+        + value(): String
+    }
+
+    class VoucherNumber <<ValueObject>> {
+        - value: int
+        --
+        + {static} of(value: int): VoucherNumber
+        + value(): int
+    }
+
+    class TaxCalculation <<ValueObject>> {
+        - subtotal: Money
+        - igvAmount: Money
+        - totalAmount: Money
+        - igvRate: BigDecimal
+        --
+        + {static} of(subtotal: Money, igvAmount: Money, total: Money, rate: BigDecimal): TaxCalculation
+        + subtotal(): Money
+        + igvAmount(): Money
+        + totalAmount(): Money
+        + igvRate(): BigDecimal
+    }
+
+    class CustomerFiscalInfo <<ValueObject>> {
+        - taxId: TaxId
+        - legalName: String
+        - fiscalAddress: String
+        - documentType: DocumentType
+        --
+        + {static} of(taxId: TaxId, name: String, address: String, docType: DocumentType): CustomerFiscalInfo
+        + taxId(): TaxId
+        + legalName(): String
+        + fiscalAddress(): String
+        + documentType(): DocumentType
+    }
+
+    class DigitalReceiptUrls <<ValueObject>> {
+        - pdfUrl: String
+        - xmlUrl: String
+        - cdrUrl: String
+        --
+        + {static} of(pdfUrl: String, xmlUrl: String, cdrUrl: String): DigitalReceiptUrls
+        + pdfUrl(): String
+        + xmlUrl(): String
+        + cdrUrl(): String
+    }
+
+    class SunatResponse <<ValueObject>> {
+        - responseCode: String
+        - description: String
+        - digitalSignatureHash: String
+        --
+        + {static} of(code: String, desc: String, hash: String): SunatResponse
+        + responseCode(): String
+        + description(): String
+        + digitalSignatureHash(): String
+    }
+
+    class VoidedInfo <<ValueObject>> {
+        - reason: String
+        - voidedAt: Instant
+        --
+        + {static} of(reason: String, voidedAt: Instant): VoidedInfo
+        + reason(): String
+        + voidedAt(): Instant
+    }
+
+    class CashFlowSummary <<ValueObject>> {
+        - grossRevenue: Money
+        - purchaseExpenses: Money
+        - payrollExpenses: Money
+        - netCashFlow: Money
+        --
+        + {static} of(gross: Money, purchases: Money, payroll: Money, net: Money): CashFlowSummary
+        + grossRevenue(): Money
+        + netCashFlow(): Money
+    }
+
+    class TaxId <<SharedKernel>> {
+        - value: String
+        --
+        + {static} of(value: String): TaxId
+        + value(): String
+    }
+
+    class Money <<SharedKernel>> {
+        - amount: BigDecimal
+        - currency: Currency
+        --
+        + {static} of(amount: BigDecimal, currency: Currency): Money
+        + amount(): BigDecimal
+        + currency(): Currency
+    }
+
+    class Currency <<SharedKernel>> {
+        - code: String
+        --
+        + {static} of(code: String): Currency
+        + code(): String
+    }
+
+    class Quantity <<SharedKernel>> {
+        - value: BigDecimal
+        - unit: String
+        --
+        + {static} of(value: BigDecimal, unit: String): Quantity
+        + value(): BigDecimal
+    }
+}
+
+' ==============================================================================
+' 5. ENUMERACIONES DE DOMINIO (ENUMS)
+' ==============================================================================
+package "invoicing.domain.model.enums" as enums #FDFEFE {
+
+    enum VoucherType <<Enum>> {
+        FACTURA
+        BOLETA
+        NOTA_CREDITO
+        NOTA_DEBITO
+    }
+
+    enum VoucherStatus <<Enum>> {
+        DRAFT
+        ISSUED
+        ACCEPTED_SUNAT
+        REJECTED_SUNAT
+        VOIDED
+    }
+
+    enum PaymentMethod <<Enum>> {
+        CASH
+        CREDIT_CARD
+        DEBIT_CARD
+        BANK_TRANSFER
+        YAPE
+        PLIN
+    }
+
+    enum PaymentStatus <<Enum>> {
+        PENDING
+        COMPLETED
+        REFUNDED
+    }
+
+    enum VoucherItemType <<Enum>> {
+        PRODUCT
+        SERVICE
+    }
+
+    enum CreditNoteReason <<Enum>> {
+        ANULACION_DE_LA_OPERACION
+        ANULACION_POR_ERROR_EN_EL_RUC
+        CORRECCION_POR_ERROR_EN_LA_DESCRIPCION
+        DESCUENTO_GLOBAL
+        DEVOLUCION_TOTAL
+    }
+
+    enum DocumentType <<Enum>> {
+        RUC
+        DNI
+        CE
+        PASAPORTE
+    }
+}
+
+' ==============================================================================
+' 6. SERVICIOS DE DOMINIO (DOMAIN SERVICES)
+' ==============================================================================
+package "invoicing.domain.services" as services #FDFEFE {
+
+    class PeruvianTaxCalculationEngine <<DomainService>> {
+        - {static} IGV_RATE: BigDecimal
+        - {static} ONE_PLUS_IGV: BigDecimal
+        --
+        + calculateFromGrossTotal(grossTotal: Money): TaxCalculation
+        + extractUnitValue(unitPriceWithIgv: Money): Money
+        + calculateLine(quantity: Quantity, unitPriceWithIgv: Money): VoucherLine
+    }
+
+    class VoucherValidationService <<DomainService>> {
+        --
+        + validateRuc(ruc: String): boolean
+        + validateBoletaLimit(total: Money, docType: DocumentType): void
+        + validateCreditNoteReference(refVoucher: ElectronicVoucher): void
+    }
+
+    class SeriesCorrelativeService <<DomainService>> {
+        --
+        + validateSeriesFormat(serie: VoucherSerie, type: VoucherType): void
+        + computeNextCorrelative(current: int): VoucherNumber
+    }
+
+    class CashFlowAggregationEngine <<DomainService>> {
+        --
+        + aggregateOperationalCashFlow(payments: List<VoucherPayment>, purchaseExpenses: List<Money>, payrollExpenses: List<Money>): CashFlowSummary
+    }
+}
+
+' ==============================================================================
+' 7. PUERTOS DE REPOSITORIO (REPOSITORY PORTS)
+' ==============================================================================
+package "invoicing.domain.repositories" as repositories #FDFEFE {
+
+    interface ElectronicVoucherRepository <<Interface>> {
+        + save(voucher: ElectronicVoucher): ElectronicVoucher
+        + findById(id: VoucherId): Optional<ElectronicVoucher>
+        + findByTenantIdAndSerieAndNumber(tenantId: TenantId, serie: VoucherSerie, number: VoucherNumber): Optional<ElectronicVoucher>
+        + findAllByWorkOrderId(workOrderId: WorkOrderId): List<ElectronicVoucher>
+    }
+
+    interface SeriesConfigurationRepository <<Interface>> {
+        + save(config: SeriesConfiguration): SeriesConfiguration
+        + findByBranchIdAndVoucherTypeAndActive(branchId: BranchId, type: VoucherType): Optional<SeriesConfiguration>
+        + lockSeriesForNextNumber(id: SeriesConfigurationId): SeriesConfiguration
+    }
+
+    interface VoucherPaymentRepository <<Interface>> {
+        + save(payment: VoucherPayment): VoucherPayment
+        + findAllByVoucherId(voucherId: VoucherId): List<VoucherPayment>
+        + findByBranchIdAndDateRange(branchId: BranchId, from: Instant, to: Instant): List<VoucherPayment>
+    }
+}
+
+' ==============================================================================
+' 8. EVENTOS DE DOMINIO (DOMAIN EVENTS)
+' ==============================================================================
+package "invoicing.domain.events" as events #FDFEFE {
+
+    interface "DomainEvent" as DomainEvent <<SharedKernel>> {
+        + occurredOn(): Instant
+    }
+
+    class ElectronicVoucherIssuedEvent <<DomainEvent>> {
+        - voucherId: VoucherId
+        - tenantId: TenantId
+        - branchId: BranchId
+        - voucherType: VoucherType
+        - serie: VoucherSerie
+        - number: VoucherNumber
+        - totalAmount: Money
+        - occurredOn: Instant
+        --
+        + occurredOn(): Instant
+    }
+
+    class VoucherAcceptedBySunatEvent <<DomainEvent>> {
+        - voucherId: VoucherId
+        - tenantId: TenantId
+        - digitalSignatureHash: String
+        - receiptUrls: DigitalReceiptUrls
+        - occurredOn: Instant
+        --
+        + occurredOn(): Instant
+    }
+
+    class VoucherRejectedBySunatEvent <<DomainEvent>> {
+        - voucherId: VoucherId
+        - tenantId: TenantId
+        - errorCode: String
+        - errorMessage: String
+        - occurredOn: Instant
+        --
+        + occurredOn(): Instant
+    }
+
+    class VoucherVoidedEvent <<DomainEvent>> {
+        - voucherId: VoucherId
+        - tenantId: TenantId
+        - reason: String
+        - voidedAt: Instant
+        - occurredOn: Instant
+        --
+        + occurredOn(): Instant
+    }
+
+    class VoucherPaymentRegisteredEvent <<DomainEvent>> {
+        - paymentId: PaymentId
+        - voucherId: VoucherId
+        - amount: Money
+        - paymentMethod: PaymentMethod
+        - isFullyPaid: boolean
+        - occurredOn: Instant
+        --
+        + occurredOn(): Instant
+    }
+
+    class SeriesConfigurationCreatedEvent <<DomainEvent>> {
+        - seriesId: SeriesConfigurationId
+        - tenantId: TenantId
+        - branchId: BranchId
+        - voucherType: VoucherType
+        - serie: VoucherSerie
+        - initialCorrelative: int
+        - occurredOn: Instant
+        --
+        + occurredOn(): Instant
+    }
+
+    class SeriesCorrelativeIncrementedEvent <<DomainEvent>> {
+        - seriesId: SeriesConfigurationId
+        - serie: VoucherSerie
+        - assignedCorrelative: VoucherNumber
+        - occurredOn: Instant
+        --
+        + occurredOn(): Instant
+    }
+
+    class CreditNoteIssuedEvent <<DomainEvent>> {
+        - creditNoteId: VoucherId
+        - referenceVoucherId: VoucherId
+        - tenantId: TenantId
+        - reason: CreditNoteReason
+        - totalAmount: Money
+        - occurredOn: Instant
+        --
+        + occurredOn(): Instant
+    }
+}
+
+' ==============================================================================
+' 9. JERARQUÍA DE EXCEPCIONES SEMÁNTICAS (DOMAIN EXCEPTIONS)
+' ==============================================================================
+package "invoicing.domain.exceptions" as exceptions #FDFEFE {
+
+    abstract class "DomainException" as DomainException <<SharedKernel>> {
+        # message: String
+        --
+        + message(): String
+    }
+
+    abstract class "InvoicingDomainException" as InvoicingDomainException <<Exception>> {
+        # code: String
+        --
+        + code(): String
+    }
+
+    class InvalidTaxIdException <<Exception>>
+    class CorrelativeExhaustedException <<Exception>>
+    class VoucherAlreadyPaidException <<Exception>>
+    class VoucherImmutableException <<Exception>>
+    class InvalidVoucherAmountException <<Exception>>
+    class CustomerFiscalDataMissingException <<Exception>>
+    class SeriesNotFoundException <<Exception>>
+    class VoucherNotFoundException <<Exception>>
+    class SunatIntegrationException <<Exception>>
+    class CreditNoteReferenceNotFoundException <<Exception>>
+}
+
+' ==============================================================================
+' RELACIONES ESTRUCTURALES Y CARDINALIDADES
+' ==============================================================================
+
+' Herencia de Agregados
+AbstractDomainAggregateRoot <|-- ElectronicVoucher
+AbstractDomainAggregateRoot <|-- SeriesConfiguration
+AbstractDomainAggregateRoot <|-- VoucherPayment
+
+' Composición y Relaciones de ElectronicVoucher
+ElectronicVoucher "1" *-- "1..*" VoucherLine : "compuesto por >"
+ElectronicVoucher "1" o-- "0..*" VoucherPayment : "liquidado mediante >"
+ElectronicVoucher "1" o-- "1" VoucherId : "identificado por >"
+ElectronicVoucher "1" o-- "1" VoucherType : "tipo >"
+ElectronicVoucher "1" *-- "1" VoucherSerie : "serie >"
+ElectronicVoucher "1" *-- "1" VoucherNumber : "número >"
+ElectronicVoucher "1" *-- "1" TaxCalculation : "desglose fiscal >"
+ElectronicVoucher "1" o-- "1" VoucherStatus : "estado >"
+ElectronicVoucher "1" *-- "1" CustomerFiscalInfo : "receptor fiscal >"
+ElectronicVoucher "1" *-- "1" DigitalReceiptUrls : "archivos SUNAT >"
+ElectronicVoucher "1" *-- "0..1" SunatResponse : "respuesta SUNAT >"
+ElectronicVoucher "1" *-- "0..1" VoidedInfo : "anulación >"
+
+' Relaciones de SeriesConfiguration
+SeriesConfiguration "1" o-- "1" SeriesConfigurationId : "identificado por >"
+SeriesConfiguration "1" o-- "1" VoucherType : "tipo >"
+SeriesConfiguration "1" *-- "1" VoucherSerie : "serie autorizada >"
+
+' Relaciones de VoucherPayment
+VoucherPayment "1" o-- "1" PaymentId : "identificado por >"
+VoucherPayment "1" o-- "1" PaymentMethod : "canal >"
+VoucherPayment "1" o-- "1" PaymentStatus : "estado >"
+VoucherPayment "1" o-- "1" Money : "monto abonado >"
+
+' Relaciones de VoucherLine
+VoucherLine "1" o-- "1" VoucherItemType : "categoría >"
+VoucherLine "1" o-- "1" Quantity : "cantidad >"
+VoucherLine "1" o-- "1" Money : "precio unitario >"
+VoucherLine "1" o-- "1" Money : "importe total >"
+
+' Relaciones de CustomerFiscalInfo
+CustomerFiscalInfo "1" o-- "1" DocumentType : "tipo documento >"
+CustomerFiscalInfo "1" o-- "1" TaxId : "número fiscal >"
+
+' Realizaciones de TypedId
+TypedId <|.. VoucherId
+TypedId <|.. SeriesConfigurationId
+TypedId <|.. PaymentId
+TypedId <|.. TenantId
+TypedId <|.. BranchId
+TypedId <|.. CustomerId
+TypedId <|.. WorkOrderId
+
+' Realizaciones de DomainEvent
+DomainEvent <|.. ElectronicVoucherIssuedEvent
+DomainEvent <|.. VoucherAcceptedBySunatEvent
+DomainEvent <|.. VoucherRejectedBySunatEvent
+DomainEvent <|.. VoucherVoidedEvent
+DomainEvent <|.. VoucherPaymentRegisteredEvent
+DomainEvent <|.. SeriesConfigurationCreatedEvent
+DomainEvent <|.. SeriesCorrelativeIncrementedEvent
+DomainEvent <|.. CreditNoteIssuedEvent
+
+' Generalizaciones de Excepciones
+DomainException <|-- InvoicingDomainException
+InvoicingDomainException <|-- InvalidTaxIdException
+InvoicingDomainException <|-- CorrelativeExhaustedException
+InvoicingDomainException <|-- VoucherAlreadyPaidException
+InvoicingDomainException <|-- VoucherImmutableException
+InvoicingDomainException <|-- InvalidVoucherAmountException
+InvoicingDomainException <|-- CustomerFiscalDataMissingException
+InvoicingDomainException <|-- SeriesNotFoundException
+InvoicingDomainException <|-- VoucherNotFoundException
+InvoicingDomainException <|-- SunatIntegrationException
+InvoicingDomainException <|-- CreditNoteReferenceNotFoundException
+
+' Enlaces de uso con Repositorios
+ElectronicVoucherRepository ..up> ElectronicVoucher : "persiste"
+SeriesConfigurationRepository ..up> SeriesConfiguration : "persiste"
+VoucherPaymentRepository ..up> VoucherPayment : "persiste"
+
+' Enlaces de Servicios de Dominio
+PeruvianTaxCalculationEngine ..up> ElectronicVoucher : "calcula IGV"
+PeruvianTaxCalculationEngine ..> TaxCalculation : "produce"
+PeruvianTaxCalculationEngine ..> VoucherLine : "construye"
+VoucherValidationService ..up> ElectronicVoucher : "valida reglas SUNAT"
+SeriesCorrelativeService ..up> SeriesConfiguration : "gestiona numeración"
+CashFlowAggregationEngine ..up> VoucherPayment : "consolida flujos"
+CashFlowAggregationEngine ..> CashFlowSummary : "produce"
+
+' ==============================================================================
+' CONTROL DE DISPOSICIÓN ESPACIAL (ENLACES OCULTOS ENTRE CLASES)
+' ==============================================================================
+
+' Fila 1: Superclase y Agregados en 3 columnas
+AbstractDomainAggregateRoot -[hidden]down-> ElectronicVoucher
+ElectronicVoucher -[hidden]right-> SeriesConfiguration
+SeriesConfiguration -[hidden]right-> VoucherPayment
+
+' Fila 2: Entidad subordinada y Servicios de Dominio
+ElectronicVoucher -[hidden]down-> VoucherLine
+VoucherLine -[hidden]right-> PeruvianTaxCalculationEngine
+PeruvianTaxCalculationEngine -[hidden]right-> VoucherValidationService
+VoucherValidationService -[hidden]right-> SeriesCorrelativeService
+SeriesCorrelativeService -[hidden]right-> CashFlowAggregationEngine
+SeriesConfiguration -[hidden]down-> SeriesCorrelativeService
+VoucherPayment -[hidden]down-> CashFlowAggregationEngine
+
+' Fila 3: Puertos de Repositorio (3 columnas alineadas)
+VoucherLine -[hidden]down-> ElectronicVoucherRepository
+ElectronicVoucherRepository -[hidden]right-> SeriesConfigurationRepository
+SeriesConfigurationRepository -[hidden]right-> VoucherPaymentRepository
+SeriesCorrelativeService -[hidden]down-> SeriesConfigurationRepository
+CashFlowAggregationEngine -[hidden]down-> VoucherPaymentRepository
+
+' Fila 4: IDs (Col. 1), Value Objects (Col. 2), Enums (Col. 3)
+ElectronicVoucherRepository -[hidden]down-> TypedId
+TypedId -[hidden]down-> VoucherId
+VoucherId -[hidden]right-> SeriesConfigurationId
+SeriesConfigurationId -[hidden]right-> PaymentId
+VoucherId -[hidden]down-> TenantId
+TenantId -[hidden]right-> BranchId
+BranchId -[hidden]right-> CustomerId
+CustomerId -[hidden]right-> WorkOrderId
+
+SeriesConfigurationRepository -[hidden]down-> VoucherSerie
+VoucherSerie -[hidden]right-> VoucherNumber
+VoucherNumber -[hidden]right-> TaxCalculation
+TaxCalculation -[hidden]right-> CustomerFiscalInfo
+VoucherSerie -[hidden]down-> DigitalReceiptUrls
+DigitalReceiptUrls -[hidden]right-> SunatResponse
+SunatResponse -[hidden]right-> VoidedInfo
+VoidedInfo -[hidden]right-> CashFlowSummary
+DigitalReceiptUrls -[hidden]down-> TaxId
+TaxId -[hidden]right-> Money
+Money -[hidden]right-> Currency
+Currency -[hidden]right-> Quantity
+
+VoucherPaymentRepository -[hidden]down-> VoucherType
+VoucherType -[hidden]right-> VoucherStatus
+VoucherStatus -[hidden]right-> PaymentMethod
+VoucherType -[hidden]down-> PaymentStatus
+PaymentStatus -[hidden]right-> VoucherItemType
+VoucherItemType -[hidden]right-> CreditNoteReason
+VoucherType -[hidden]down-> DocumentType
+
+PaymentId -[hidden]right-> VoucherSerie
+CustomerFiscalInfo -[hidden]right-> VoucherType
+
+' Fila 5: Eventos de Dominio (centrados bajo IDs y Value Objects)
+TenantId -[hidden]down-> DomainEvent
+DomainEvent -[hidden]down-> ElectronicVoucherIssuedEvent
+ElectronicVoucherIssuedEvent -[hidden]right-> VoucherAcceptedBySunatEvent
+VoucherAcceptedBySunatEvent -[hidden]right-> VoucherRejectedBySunatEvent
+VoucherRejectedBySunatEvent -[hidden]right-> VoucherVoidedEvent
+
+ElectronicVoucherIssuedEvent -[hidden]down-> VoucherPaymentRegisteredEvent
+VoucherPaymentRegisteredEvent -[hidden]right-> SeriesConfigurationCreatedEvent
+SeriesConfigurationCreatedEvent -[hidden]right-> SeriesCorrelativeIncrementedEvent
+SeriesCorrelativeIncrementedEvent -[hidden]right-> CreditNoteIssuedEvent
+
+' Fila 6: Excepciones Semánticas (bajo Enums y alineadas a la derecha)
+DocumentType -[hidden]down-> DomainException
+DomainException -[hidden]down-> InvoicingDomainException
+InvoicingDomainException -[hidden]down-> InvalidTaxIdException
+InvalidTaxIdException -[hidden]right-> CorrelativeExhaustedException
+CorrelativeExhaustedException -[hidden]right-> VoucherAlreadyPaidException
+VoucherAlreadyPaidException -[hidden]right-> VoucherImmutableException
+
+InvalidTaxIdException -[hidden]down-> InvalidVoucherAmountException
+InvalidVoucherAmountException -[hidden]right-> CustomerFiscalDataMissingException
+CustomerFiscalDataMissingException -[hidden]right-> SeriesNotFoundException
+SeriesNotFoundException -[hidden]right-> VoucherNotFoundException
+
+InvalidVoucherAmountException -[hidden]down-> SunatIntegrationException
+SunatIntegrationException -[hidden]right-> CreditNoteReferenceNotFoundException
+
+@enduml
