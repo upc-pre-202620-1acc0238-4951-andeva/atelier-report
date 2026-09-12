@@ -20,9 +20,9 @@
 
 **Sanchez Santin, Adiel Abdiaz**
 
-- 
+- Obtener al menos dos certificaciones internacionales de nivel profesional en Desarrollo de Aplicaciones Móviles Nativas (Google Associate Android Developer) y Arquitectura Cloud (AWS Certified Solutions Architect - Associate) en un plazo máximo de 2 años tras culminar la carrera, con el propósito de consolidar mi especialización en el diseño de soluciones móviles de alto rendimiento, microservicios y sistemas reactivos multiplataforma.
 
-- 
+- Liderar el diseño arquitectónico y desarrollo técnico de una plataforma SaaS B2B enfocada en la automatización de operaciones industriales o gestión logística, alcanzando la validación operativa y comercial con al menos 4 empresas medianas o 1,000 usuarios activos en un periodo máximo de 3 años tras mi graduación, desempeñándome como Líder de Ingeniería de Software o Arquitecto de Soluciones.
 
 **Teran Zavala, Mauricio Alejandro**
 
