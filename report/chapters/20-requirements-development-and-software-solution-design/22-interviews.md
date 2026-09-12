@@ -77,51 +77,41 @@ En esta sección presentamos los registros de las entrevistas que hicimos para c
 
 **Segmento 1:**
 
-<table>
-<colgroup>
-</colgroup>
-<thead>
-  <tr>
-    <th colspan="2">Entrevista #1<br></th>
-  </tr>
-</thead>
-<tbody>
-  <tr>
-    <td>Nombre</td>
-    <td>Jorge Antonio</td>
-  </tr>
-  <tr>
-    <td>Apellidos</td>
-    <td>Aguilar Perez</td>
-  </tr>
-  <tr>
-    <td>Edad</td>
-    <td>53 años</td>
-  </tr>
-  <tr>
-    <td>Distrito</td>
-    <td>Chorrillos</td>
-  </tr>
-  <tr>
-    <td>Evidencia</td>
-    <td><div align="center"><img src="../../assets/Interview-Evidence/Interview-of-Jorge-Aguilar.jpeg" alt="Entrevista Jorge Aguilar"></div></td>
-  </tr>
-  <tr>
-    <td>Link</td>
-    <td><p><a target="_blank"  href="https://upcedupe-my.sharepoint.com/:v:/g/personal/u20241e287_upc_edu_pe/IQBzBV6lfIhFR6y-FD7FV72HAbKSap9KCkiX4idSlbt6zHE?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=rbGLmS" title="Title">Microsoft Stream</p></td>
-  </tr>
-  <tr>
-    <td>Duracion<br></td>
-    <td>0:20 min - 13:39 min</td>
-  </tr>
-  <tr>
-    <td>Resumen</td>
-    <td>
-      La entrevista se realizó a Jorge Aguilar, un técnico mecánico de 53 años con aproximadamente 35 años de experiencia en el rubro automotriz. Jorge ejerce como dueño y administrador de su propia empresa, gestionando de manera independiente tanto la parte operativa como la administrativa del negocio. Destaca como su principal habilidad administrativa la captación y fidelización de clientes mediante el buen trato, ofreciendo recomendaciones técnicas honestas sobre mantenimiento preventivo y selección de materiales para evitar inconvenientes futuros en sus unidades. A diferencia de un taller tradicional con sede fija, su rutina actual se centra en el trabajo de campo de manera itinerante (tipo delivery), desplazándose directamente hacia la ubicación de los equipos y maquinaria estacionaria (línea amarilla) para realizar los servicios mecánicos.
-    </td>
-  </tr>
-</tbody>
-</table>
+\small
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\bfseries\raggedright\arraybackslash}p{2.5cm} | >{\raggedright\arraybackslash}p{\dimexpr\textwidth-2.5cm-4\tabcolsep-3\arrayrulewidth\relax} |}
+\caption{Entrevista \#1 - Jorge Antonio Aguilar Perez} \label{tbl:entrevista-1} \\
+\hline
+\endfirsthead
+\multicolumn{2}{c}%
+{\tablename\ \thetable\ -- \textit{Continuación de la página anterior}} \\
+\hline
+\endhead
+\hline \multicolumn{2}{r}{\textit{Continúa en la siguiente página}} \\
+\endfoot
+\hline
+\endlastfoot
+Nombre & Jorge Antonio \\
+\hline
+Apellidos & Aguilar Perez \\
+\hline
+Edad & 53 años \\
+\hline
+Distrito & Chorrillos \\
+\hline
+Evidencia & \begin{minipage}{\linewidth}
+  \vspace{4pt}
+  \centering
+  \includegraphics[width=0.6\linewidth]{../../assets/Interview-Evidence/Interview-of-Jorge-Aguilar.jpeg}
+  \vspace{4pt}
+\end{minipage} \\
+\hline
+Link & \href{https://upcedupe-my.sharepoint.com/:v:/g/personal/u20241e287_upc_edu_pe/IQBzBV6lfIhFR6y-FD7FV72HAbKSap9KCkiX4idSlbt6zHE?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=rbGLmS}{Microsoft Stream} \\
+\hline
+Duración & 0:20 min - 13:39 min \\
+\hline
+Resumen & La entrevista se realizó a Jorge Aguilar, un técnico mecánico de 53 años con aproximadamente 35 años de experiencia en el rubro automotriz. Jorge ejerce como dueño y administrador de su propia empresa, gestionando de manera independiente tanto la parte operativa como la administrativa del negocio. Destaca como su principal habilidad administrativa la captación y fidelización de clientes mediante el buen trato, ofreciendo recomendaciones técnicas honestas sobre mantenimiento preventivo y selección de materiales para evitar inconvenientes futuros en sus unidades. A diferencia de un taller tradicional con sede fija, su rutina actual se centra en el trabajo de campo de manera itinerante (tipo delivery), desplazándose directamente hacia la ubicación de los equipos y maquinaria estacionaria (línea amarilla) para realizar los servicios mecánicos. \\
+\end{longtable}
 
 <table>
 <colgroup>
