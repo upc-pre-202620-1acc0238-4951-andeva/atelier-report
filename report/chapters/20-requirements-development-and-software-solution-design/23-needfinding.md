@@ -8,13 +8,13 @@ En esta sección se describen dos User Personas que representan los segmentos cl
 
 **Segmento 1**
 
-![User Persona 1: Jorge Aguilar - Personal de Gestión y Propietarios de Taller](../../assets/NeedFinding/User-Personas/User-Persona-Pedro-Suárez.png)
+![User Persona 1: Jorge Aguilar - Personal de Gestión y Propietarios de Taller](report/assets/NeedFinding/User-Personas/User-Persona-Pedro-Suárez.png)
 
 El User Persona de Jorge Aguilar revela la brecha estructural entre una extensa experiencia técnica y la exigencia de coordinar de forma integral las operaciones de un negocio independiente. A pesar de contar con más de 35 años de trayectoria y una alta capacidad para fidelizar clientes mediante el diagnóstico honesto en servicios de campo, su eficiencia operativa se ve limitada por la carga de gestionar la administración en solitario. Para un perfil que valora la transparencia y el mantenimiento preventivo por encima de la reparación reactiva, la falta de herramientas que automaticen el seguimiento a distancia representa un obstáculo directo a su rentabilidad. En última instancia, la sostenibilidad del negocio de Jorge depende de adoptar una plataforma ligera que centralice la comunicación con sus clientes y le brinde visibilidad constante sobre el estado de las unidades sin sobrecargarlo de tareas administrativas.
 
 **Segmento 2**
 
-![User Persona 2: César Nikolay - Personal Operativo del Taller](../../assets/NeedFinding/User-Personas/User-Persona-Andrés-Vílchez.png)
+![User Persona 2: César Nikolay - Personal Operativo del Taller](report/assets/NeedFinding/User-Personas/User-Persona-Andrés-Vílchez.png)
 
 Por otro lado, el User Persona de Nicolay evidencia la fricción constante entre el dominio del diagnóstico computarizado moderno y la presencia de flujos de trabajo tradicionales en la tallería. Aunque posee una sólida formación en sistemas de inyección electrónica y un dominio fluido del entorno digital Android, su productividad diaria se trunca por "tiempos muertos" derivados de la desorganización logística, canales de comunicación informales y registros de tiempos de reparación imprecisos. Para un técnico que busca destacar en mecatrónica automotriz y validar con precisión el volumen de su trabajo diario, depender de órdenes en papel e improvisar respaldos fotográficos en su celular personal genera un desgaste innecesario. Su éxito y crecimiento profesional dependen de integrarse a un entorno digitalizado que funcione sin interrupciones —incluso en fosos sin señal— y que transforme los datos de los escáneres OBD2 en indicadores de rendimiento claros y automatizados.
 
@@ -76,9 +76,9 @@ Estas tareas corresponden a acciones habituales dentro de su dinámica laboral, 
 
 Se ha elaborado el Empathy Map para cada uno de nuestros User Personas con el fin de profundizar en su experiencia diaria, emociones, motivaciones y fricciones reales dentro del taller mecánico. Este análisis nos permite sintetizar la información obtenida en las entrevistas de campo y observar la operación desde la perspectiva de nuestros usuarios clave —administradores y técnicos—, asegurando que el diseño de Atelier responda de manera empática y precisa a sus necesidades de gestión, diagnóstico y comunicación.
 
-![Empathy Mapping: Pedro Suarez - Personal de Gestión y Propietarios de Taller](../../assets/NeedFinding/Empathy-Mapping/Empathy%20Mapping-Pedro-Suarez.png)
+![Empathy Mapping: Pedro Suarez - Personal de Gestión y Propietarios de Taller](report/assets/NeedFinding/Empathy-Mapping/Empathy%20Mapping-Pedro-Suarez.png)
 
-![Empathy Mapping: Andres Vilchez - Personal de Gestión y Propietarios de Taller](../../assets/NeedFinding/Empathy-Mapping/Empathy%20Mapping-Andres-Vilchez.png)
+![Empathy Mapping: Andres Vilchez - Personal de Gestión y Propietarios de Taller](report/assets/NeedFinding/Empathy-Mapping/Empathy%20Mapping-Andres-Vilchez.png)
 
 
 ### 2.3.5. *Big Picture EventStorming*
@@ -89,11 +89,11 @@ A diferencia del modelado de diseño técnico futuro, el taller de *Big Picture 
 
 El resultado de esta exploración integral en la herramienta colaborativa Miro se presenta en dos dimensiones complementarias: la recolección exhaustiva del flujo de eventos (@fig:big-picture-flujo-eventos) y la estructuración por carriles de actores, etapas del proceso y puntos críticos del servicio (@fig:big-picture-actores-puntos-criticos).
 
-![Big Picture EventStorming: Recolección y Flujo de Eventos de Dominio](../../assets/strategic-ddd/big-picture-01-flujo-eventos.png){#fig:big-picture-flujo-eventos}
+![Big Picture EventStorming: Recolección y Flujo de Eventos de Dominio](report/assets/strategic-ddd/big-picture-01-flujo-eventos.png){#fig:big-picture-flujo-eventos}
 
 *Nota.* Vista de la recolección y secuencia de eventos de dominio durante el taller de Big Picture EventStorming en Miro.
 
-![Big Picture EventStorming: Actores, Etapas del Proceso y Puntos Críticos](../../assets/strategic-ddd/big-picture-02-actores-puntos-criticos.png){#fig:big-picture-actores-puntos-criticos}
+![Big Picture EventStorming: Actores, Etapas del Proceso y Puntos Críticos](report/assets/strategic-ddd/big-picture-02-actores-puntos-criticos.png){#fig:big-picture-actores-puntos-criticos}
 
 *Nota.* Vista estructurada por carriles de actores (Conductor, Asesor de Servicio, Mecánico / Jefe de Taller, Administrador), etapas operativas y puntos críticos de decisión en Miro. Se puede acceder al tablero colaborativo interactivo mediante el siguiente enlace: [Tablero de Miro: Big Picture EventStorming](https://miro.com/app/board/uXjVHq7YYWw=/?share_link_id=20364641152).
 

@@ -18,7 +18,7 @@ En esta sección se presenta el **Context Level Diagram** para el ecosistema Ate
 
 Como se puede observar, el sistema se integra de manera estratégica con hardware de telemetría IoT, procesadores de pago, sistemas de facturación electrónica y servicios en la nube clave de Firebase y Google. Esto permite delegar responsabilidades específicas y mantener un *Core Domain* altamente cohesivo.
 
-![System Context Diagram para el ecosistema de Atelier](../../assets/c4-diagrams/context-level-diagram-atelier.png){#fig:context-level-diagram-atelier}
+![System Context Diagram para el ecosistema de Atelier](report/assets/c4-diagrams/context-level-diagram-atelier.png){#fig:context-level-diagram-atelier}
 
 #### 2.5.3.2. Software Architecture Container Level Diagrams
 
@@ -26,7 +26,7 @@ En esta sección, se presenta el **Container Level Diagram** para el ecosistema 
 
 Para materializar la visión de un SaaS automotriz de alta resiliencia y bajo costo operativo, la arquitectura de Atelier adopta un enfoque de monolito en el backend complementado por clientes frontend especializados y una capa de persistencia híbrida.
 
-![Container Level Diagram para el ecosistema Atelier](../../assets/c4-diagrams/container-level-diagram-atelier.png){#fig:container-level-diagram-atelier}
+![Container Level Diagram para el ecosistema Atelier](report/assets/c4-diagrams/container-level-diagram-atelier.png){#fig:container-level-diagram-atelier}
 
 A continuación, se detalla la responsabilidad, el stack tecnológico y las decisiones arquitectónicas de cada uno de los contenedores que conforman la solución:
 
@@ -150,7 +150,7 @@ Para el contenedor principal del backend, la **API Application**, se ilustra la 
 
 El backend de Atelier adopta una arquitectura de monolito modular guiada por los principios de Domain-Driven Design y Clean Architecture. Siguiendo las directrices del modelo C4 en su Nivel 3, el contenedor central **API Application** se descompone internamente en módulos funcionales de negocio, cada uno de los cuales encapsula y materializa uno de los 8 bounded contexts delimitados en la arquitectura estratégica de dominio, complementados por componentes de infraestructura transversal que proveen resiliencia y optimización sin constituir dominios de negocio independientes.
 
-![Component Level Diagram para la API de Atelier](../../assets/c4-diagrams/component-level-diagram-api.png){#fig:component-level-diagram-api}
+![Component Level Diagram para la API de Atelier](report/assets/c4-diagrams/component-level-diagram-api.png){#fig:component-level-diagram-api}
 
 A continuación, se detalla el catálogo de componentes internos que estructuran el contenedor central:
 
@@ -305,7 +305,7 @@ Para el portal administrativo del ecosistema, la **Web Application**, se ilustra
 
 Su diseño interno se basa en una arquitectura modular por características con componentes autónomos, reactividad impulsada por signals y *RxJS*, y una estricta separación de responsabilidades entre presentación, estado y comunicación con el backend.
 
-![Component Level Diagram para la Web Application de Atelier](../../assets/c4-diagrams/component-level-diagram-webapp.png){#fig:component-level-diagram-webapp}
+![Component Level Diagram para la Web Application de Atelier](report/assets/c4-diagrams/component-level-diagram-webapp.png){#fig:component-level-diagram-webapp}
 
 A continuación, se detalla el catálogo de componentes que estructuran la aplicación web:
 
@@ -438,7 +438,7 @@ En esta sección, se presenta el **Software Architecture Deployment Diagram** de
 
 La infraestructura de Atelier responde a un modelo híbrido optimizado para maximizar la disponibilidad y mitigar costos operativos: combina la ejecución en el borde para clientes web y móviles, servicios telemáticos en vehículos mediante escáneres OBD-II, plataformas como servicio contenerizadas en **Render**, bases de datos administradas de alto rendimiento en **Aiven**, y servicios especializados en **Google Cloud Platform** y APIs externas.
 
-![Deployment Diagram de la Infraestructura y Servicios Cloud del Ecosistema Atelier](../../assets/c4-diagrams/deployment-diagram-atelier.png){#fig:deployment-diagram-atelier}
+![Deployment Diagram de la Infraestructura y Servicios Cloud del Ecosistema Atelier](report/assets/c4-diagrams/deployment-diagram-atelier.png){#fig:deployment-diagram-atelier}
 
 A continuación, se detalla el catálogo de nodos físicos, entornos de ejecución y plataformas que conforman el despliegue del ecosistema:
 
