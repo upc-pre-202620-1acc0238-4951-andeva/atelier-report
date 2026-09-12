@@ -25,73 +25,73 @@ El descubrimiento de los contextos candidatos para el ecosistema Atelier se llev
 
 1. **Fase 1: Exploración Caótica de Eventos de Dominio:** Los participantes generaron sin restricciones iniciales todos los eventos concebibles que ocurren a lo largo del ciclo de vida automotriz (@fig:es-step-1).
 
-![EventStorming Paso 1: Recolección de Eventos del Dominio](/assets/strategic-ddd/event-storming-step-1-events.png){#fig:es-step-1}
+![EventStorming Paso 1: Recolección de Eventos del Dominio](report/assets/strategic-ddd/event-storming-step-1-events.png){#fig:es-step-1}
 
 *Nota.* Lluvia de ideas inicial con notas adhesivas naranjas registrando los eventos consumados del dominio automotriz en participio pasado.
 
 2. **Fase 2: Ordenamiento Temporal y Línea de Tiempo:** Se organizaron los eventos en secuencias cronológicas concurrentes para modelar la línea de tiempo principal del taller y los flujos de soporte (@fig:es-step-2-1 y @fig:es-step-2-2).
 
-![EventStorming Paso 2: Línea de Tiempo - Identidad, Clientes, Telemetría y Operaciones](/assets/strategic-ddd/event-storming-step-2-timeline-1.png){#fig:es-step-2-1}
+![EventStorming Paso 2: Línea de Tiempo - Identidad, Clientes, Telemetría y Operaciones](report/assets/strategic-ddd/event-storming-step-2-timeline-1.png){#fig:es-step-2-1}
 
 *Nota.* Secuenciación temporal de eventos para los carriles operativos principales.
 
-![EventStorming Paso 2: Línea de Tiempo - Inventario, Asistencia, Facturación y Suscripción](/assets/strategic-ddd/event-storming-step-2-timeline-2.png){#fig:es-step-2-2}
+![EventStorming Paso 2: Línea de Tiempo - Inventario, Asistencia, Facturación y Suscripción](report/assets/strategic-ddd/event-storming-step-2-timeline-2.png){#fig:es-step-2-2}
 
 *Nota.* Secuenciación temporal de eventos para los carriles de soporte administrativo y financiero.
 
 3. **Fase 3: Identificación de Disparadores y Comandos:** Se identificaron las causas de cada evento de dominio, determinando qué comandos específicos en color azul emitidos por actores o sistemas desencadenaron las transiciones de estado (@fig:es-step-3-1 y @fig:es-step-3-2).
 
-![EventStorming Paso 3: Identificación de Comandos (Parte 1)](/assets/strategic-ddd/event-storming-step-3-commands-1.png){#fig:es-step-3-1}
+![EventStorming Paso 3: Identificación de Comandos (Parte 1)](report/assets/strategic-ddd/event-storming-step-3-commands-1.png){#fig:es-step-3-1}
 
 *Nota.* Inserción de notas azules correspondientes a las intenciones de usuario y directivas del sistema.
 
-![EventStorming Paso 3: Identificación de Comandos (Parte 2)](/assets/strategic-ddd/event-storming-step-3-commands-2.png){#fig:es-step-3-2}
+![EventStorming Paso 3: Identificación de Comandos (Parte 2)](report/assets/strategic-ddd/event-storming-step-3-commands-2.png){#fig:es-step-3-2}
 
 *Nota.* Mapeo de comandos para los flujos de almacén, recursos humanos, facturación y cobros.
 
 4. **Fase 4: Formulación de Políticas Reactivas y Actores:** Se asociaron los roles de usuario (notas amarillas) y las políticas reactivas en color morado que rigen la interacción intermodular sin acoplamiento temporal directo (@fig:es-step-4-1 y @fig:es-step-4-2).
 
-![EventStorming Paso 4: Políticas Reactivas y Actores (Parte 1)](/assets/strategic-ddd/event-storming-step-4-policies-actors-1.png){#fig:es-step-4-1}
+![EventStorming Paso 4: Políticas Reactivas y Actores (Parte 1)](report/assets/strategic-ddd/event-storming-step-4-policies-actors-1.png){#fig:es-step-4-1}
 
 *Nota.* Vinculación de actores operativos y formulación de reglas condicionales "Cuando [Evento], Entonces [Comando]".
 
-![EventStorming Paso 4: Políticas Reactivas y Actores (Parte 2)](/assets/strategic-ddd/event-storming-step-4-policies-actors-2.png){#fig:es-step-4-2}
+![EventStorming Paso 4: Políticas Reactivas y Actores (Parte 2)](report/assets/strategic-ddd/event-storming-step-4-policies-actors-2.png){#fig:es-step-4-2}
 
 *Nota.* Mapeo de políticas para la validación georreferenciada de asistencia y disparo de liquidación contable.
 
 5. **Fase 5: Modelado de Interfaces de Información y Vistas de Lectura:** Se estructuraron los modelos de lectura en notas verdes (*Read Models*) necesarios para que los usuarios tomen decisiones operativas informadas antes de emitir un comando (@fig:es-step-5-1 y @fig:es-step-5-2).
 
-![EventStorming Paso 5: Modelos de Lectura (Read Models) (Parte 1)](/assets/strategic-ddd/event-storming-step-5-read-models-1.png){#fig:es-step-5-1}
+![EventStorming Paso 5: Modelos de Lectura (Read Models) (Parte 1)](report/assets/strategic-ddd/event-storming-step-5-read-models-1.png){#fig:es-step-5-1}
 
 *Nota.* Proyecciones visuales requeridas en la interfaz de usuario para la asignación de bahías y seguimiento de fallas.
 
-![EventStorming Paso 5: Modelos de Lectura (Read Models) (Parte 2)](/assets/strategic-ddd/event-storming-step-5-read-models-2.png){#fig:es-step-5-2}
+![EventStorming Paso 5: Modelos de Lectura (Read Models) (Parte 2)](report/assets/strategic-ddd/event-storming-step-5-read-models-2.png){#fig:es-step-5-2}
 
 *Nota.* Vistas informativas para el control de asistencia, saldos de stock FIFO y tarifas de suscripción.
 
 6. **Fase 6: Detección de Fronteras e Integraciones Externas:** Se aislaron las responsabilidades delegadas a plataformas y servicios externos mediante notas rosas (@fig:es-step-6-1 y @fig:es-step-6-2).
 
-![EventStorming Paso 6: Detección de Sistemas Externos (Parte 1)](/assets/strategic-ddd/event-storming-step-6-external-systems-1.png){#fig:es-step-6-1}
+![EventStorming Paso 6: Detección de Sistemas Externos (Parte 1)](report/assets/strategic-ddd/event-storming-step-6-external-systems-1.png){#fig:es-step-6-1}
 
 *Nota.* Identificación de hardware OBD-II, Firebase Storage y servicios de mensajería externa.
 
-![EventStorming Paso 6: Detección de Sistemas Externos (Parte 2)](/assets/strategic-ddd/event-storming-step-6-external-systems-2.png){#fig:es-step-6-2}
+![EventStorming Paso 6: Detección de Sistemas Externos (Parte 2)](report/assets/strategic-ddd/event-storming-step-6-external-systems-2.png){#fig:es-step-6-2}
 
 *Nota.* Delimitación de fronteras de integración hacia Nubefact (SUNAT), Stripe y Google Maps Geolocation.
 
 7. **Fase 7: Consolidación de Agregados:** Se delimitaron las unidades de consistencia transaccional e invariantes mediante notas amarillo mostaza (*Aggregates*) (@fig:es-step-7-1 y @fig:es-step-7-2).
 
-![EventStorming Paso 7: Consolidación de Agregados (Parte 1)](/assets/strategic-ddd/event-storming-step-7-aggregates-1.png){#fig:es-step-7-1}
+![EventStorming Paso 7: Consolidación de Agregados (Parte 1)](report/assets/strategic-ddd/event-storming-step-7-aggregates-1.png){#fig:es-step-7-1}
 
 *Nota.* Identificación de raíces de agregado clave como `WorkOrder`, `Vehicle`, `Appointment` y `DiagnosticAlert`.
 
-![EventStorming Paso 7: Consolidación de Agregados (Parte 2)](/assets/strategic-ddd/event-storming-step-7-aggregates-2.png){#fig:es-step-7-2}
+![EventStorming Paso 7: Consolidación de Agregados (Parte 2)](report/assets/strategic-ddd/event-storming-step-7-aggregates-2.png){#fig:es-step-7-2}
 
 *Nota.* Identificación de agregados para gestión de lotes FIFO, planillas laborales y comprobantes fiscales.
 
 8. **Fase 8: Delimitación de Bounded Contexts:** A partir de la cohesión semántica y transaccional, se trazaron los límites contextuales definitivos que agrupan los subdominios del sistema (@fig:es-step-8).
 
-![EventStorming Paso 8: Delimitación de Bounded Contexts y Flujos de Mensajes](/assets/strategic-ddd/event-storming-step-8-bounded-contexts.png){#fig:es-step-8}
+![EventStorming Paso 8: Delimitación de Bounded Contexts y Flujos de Mensajes](report/assets/strategic-ddd/event-storming-step-8-bounded-contexts.png){#fig:es-step-8}
 
 *Nota.* Agrupación final de los ocho Bounded Contexts y visualización de los canales de comunicación asíncrona.
 
@@ -121,7 +121,7 @@ A continuación, se documentan los seis escenarios operativos fundamentales del 
 
 Este flujo modela el ciclo de vida del monitoreo telemático vehicular continuo. Cuando el escáner OBD-II emite lecturas de parámetros del motor, el contexto **IoT Telemetry** ingesta los flujos y evalúa posibles desviaciones críticas. Al detectarse una anomalía, se genera el evento `código de falla fue detectado`, desencadenando la emisión de una alerta preventiva hacia **Customer & Fleet** para informar al conductor y coordinar la cita de revisión, y hacia **Workshop Operation** para la apertura de la orden correspondiente.
 
-![Flujo de Mensajes: Escenario 1 - Detección de Falla Telemática y Alerta Preventiva](/assets/strategic-ddd/domain-message-flow-scenario-1.png){#fig:dmf-scenario-1}
+![Flujo de Mensajes: Escenario 1 - Detección de Falla Telemática y Alerta Preventiva](report/assets/strategic-ddd/domain-message-flow-scenario-1.png){#fig:dmf-scenario-1}
 
 *Nota.* Diagrama de flujo de mensajes intercontextual para la captura telemática y generación de alertas preventivas.
 
@@ -129,7 +129,7 @@ Este flujo modela el ciclo de vida del monitoreo telemático vehicular continuo.
 
 Modela la llegada del vehículo al taller automotriz. El asesor de servicio registra la recepción pericial capturando las evidencias fotográficas de carrocería y kilometraje. Al formalizarse el ingreso, **Workshop Operation** genera la orden de trabajo, vincula la cita confirmada proveniente de **Customer & Fleet**, asigna la bahía correspondiente y encarga al mecánico el diagnóstico computarizado por puerto OBD-II.
 
-![Flujo de Mensajes: Escenario 2 - Recepción del Vehículo y Diagnóstico de Taller](/assets/strategic-ddd/domain-message-flow-scenario-2.png){#fig:dmf-scenario-2}
+![Flujo de Mensajes: Escenario 2 - Recepción del Vehículo y Diagnóstico de Taller](report/assets/strategic-ddd/domain-message-flow-scenario-2.png){#fig:dmf-scenario-2}
 
 *Nota.* Diagrama de flujo de mensajes intercontextual para la recepción, apertura de orden y asignación diagnóstica.
 
@@ -137,7 +137,7 @@ Modela la llegada del vehículo al taller automotriz. El asesor de servicio regi
 
 Abarca la formulación de la propuesta técnico-económica de reparación (MRO). Concluida la inspección, el personal de taller elabora el presupuesto calculando los costos de mano de obra y consultando la disponibilidad de repuestos en el contexto **Inventory**. Una vez estructurada la cotización, se emite para que el cliente la revise y la autorice digitalmente desde la aplicación móvil *Atelier Driver*.
 
-![Flujo de Mensajes: Escenario 3 - Preparación y Aprobación de Presupuesto](/assets/strategic-ddd/domain-message-flow-scenario-3.png){#fig:dmf-scenario-3}
+![Flujo de Mensajes: Escenario 3 - Preparación y Aprobación de Presupuesto](report/assets/strategic-ddd/domain-message-flow-scenario-3.png){#fig:dmf-scenario-3}
 
 *Nota.* Diagrama de flujo de mensajes intercontextual para la verificación de insumos y aprobación formal del presupuesto.
 
@@ -145,7 +145,7 @@ Abarca la formulación de la propuesta técnico-económica de reparación (MRO).
 
 Describe el flujo de piso durante el desensamble y sustitución de piezas. Al autorizarse el trabajo, **Workshop Operation** remite el comando de reserva hacia **Inventory**, contexto que bloquea las unidades requeridas y las descarga contablemente imputando el costo del lote más antiguo disponible bajo el método FIFO. Si el nivel de inventario alcanza el límite de seguridad, el contexto emite automáticamente una alerta de reabastecimiento hacia el módulo de proveedores.
 
-![Flujo de Mensajes: Escenario 4 - Reserva y Despacho de Repuestos por FIFO](/assets/strategic-ddd/domain-message-flow-scenario-4.png){#fig:dmf-scenario-4}
+![Flujo de Mensajes: Escenario 4 - Reserva y Despacho de Repuestos por FIFO](report/assets/strategic-ddd/domain-message-flow-scenario-4.png){#fig:dmf-scenario-4}
 
 *Nota.* Diagrama de flujo de mensajes intercontextual para la reserva física y liquidación contable de insumos por FIFO.
 
@@ -153,7 +153,7 @@ Describe el flujo de piso durante el desensamble y sustitución de piezas. Al au
 
 Representa la verificación técnica posterior a la ejecución mecánica. El técnico mecánico reporta el fin de sus tareas asignadas y adjunta la evidencia fotográfica del trabajo realizado. El Jefe de Taller realiza las pruebas de validación técnica (*Quality Gate*); una vez certificada la conformidad del estándar de calidad, se emite el evento de culminación de reparación para habilitar el cierre administrativo.
 
-![Flujo de Mensajes: Escenario 5 - Control de Calidad y Finalización de Reparación](/assets/strategic-ddd/domain-message-flow-scenario-5.png){#fig:dmf-scenario-5}
+![Flujo de Mensajes: Escenario 5 - Control de Calidad y Finalización de Reparación](report/assets/strategic-ddd/domain-message-flow-scenario-5.png){#fig:dmf-scenario-5}
 
 *Nota.* Diagrama de flujo de mensajes intercontextual para la aprobación pericial y cierre técnico de la orden de trabajo.
 
@@ -161,7 +161,7 @@ Representa la verificación técnica posterior a la ejecución mecánica. El té
 
 Comprende el acto formal de liquidación, facturación fiscal y entrega final al cliente. Con la orden cerrada, se envían los conceptos liquidados al contexto **Invoicing**, el cual estructura el comprobante de pago electrónico bajo el estándar UBL 2.1 y lo valida ante la SUNAT mediante la Capa Anticorrupción de Nubefact. Tras la confirmación del pago y la obtención de la Constancia de Recepción (CDR), se efectúa la entrega física de la unidad y se reactiva la monitorización telemática.
 
-![Flujo de Mensajes: Escenario 6 - Entrega de Vehículo y Facturación Electrónica SUNAT](/assets/strategic-ddd/domain-message-flow-scenario-6.png){#fig:dmf-scenario-6}
+![Flujo de Mensajes: Escenario 6 - Entrega de Vehículo y Facturación Electrónica SUNAT](report/assets/strategic-ddd/domain-message-flow-scenario-6.png){#fig:dmf-scenario-6}
 
 *Nota.* Diagrama de flujo de mensajes intercontextual para la liquidación tributaria ante SUNAT y entrega formal del vehículo.
 
@@ -175,7 +175,7 @@ A continuación, se presentan los lienzos detallados para los ocho contextos del
 
 Como núcleo operativo del sistema (*Core Domain*), este contexto gobierna la gestión de citas, órdenes de trabajo (OT), asignación de mecánicos a bahías, registro de evidencias fotográficas en foso y control del ciclo de vida de mantenimiento (MRO).
 
-![Bounded Context Canvas: Workshop Operation](/assets/strategic-ddd/bounded-context-canvas-workshop-operation.png){#fig:bcc-workshop-operation}
+![Bounded Context Canvas: Workshop Operation](report/assets/strategic-ddd/bounded-context-canvas-workshop-operation.png){#fig:bcc-workshop-operation}
 
 *Nota.* Lienzo estratégico del contexto central de operaciones de taller, detallando sus flujos de entrada, salida y raíces de agregado.
 
@@ -183,7 +183,7 @@ Como núcleo operativo del sistema (*Core Domain*), este contexto gobierna la ge
 
 Representa el segundo *Core Domain* de Atelier. Administra la ingesta masiva de lecturas de sensores procedentes de escáneres OBD-II (velocidad, RPM, temperatura de refrigerante, códigos DTC), almacenándolos en hipertablas optimizadas de TimescaleDB y evaluando algoritmos predictivos para la detección temprana de fallas.
 
-![Bounded Context Canvas: IoT Telemetry](/assets/strategic-ddd/bounded-context-canvas-iot-telemetry.png){#fig:bcc-iot-telemetry}
+![Bounded Context Canvas: IoT Telemetry](report/assets/strategic-ddd/bounded-context-canvas-iot-telemetry.png){#fig:bcc-iot-telemetry}
 
 *Nota.* Lienzo estratégico del contexto de telemetría IoT, describiendo la arquitectura de procesamiento en tiempo real y disparo de alertas predictivas.
 
@@ -191,7 +191,7 @@ Representa el segundo *Core Domain* de Atelier. Administra la ingesta masiva de 
 
 Subdominio de soporte encargado de registrar y gestionar el directorio unificado de conductores particulares, gestores de flotas comerciales y el padrón de vehículos, sirviendo de enlace entre los clientes y el taller automotriz.
 
-![Bounded Context Canvas: Customer & Fleet](/assets/strategic-ddd/bounded-context-canvas-customer-fleet.png){#fig:bcc-customer-fleet}
+![Bounded Context Canvas: Customer & Fleet](report/assets/strategic-ddd/bounded-context-canvas-customer-fleet.png){#fig:bcc-customer-fleet}
 
 *Nota.* Lienzo estratégico del contexto de gestión de clientes y flotas vehiculares.
 
@@ -199,7 +199,7 @@ Subdominio de soporte encargado de registrar y gestionar el directorio unificado
 
 Subdominio de soporte que controla el aprovisionamiento de repuestos y lubricantes, implementando el algoritmo de costeo FIFO por lotes de adquisición para salvaguardar la rentabilidad contable del taller y gestionar el catálogo de proveedores habituales.
 
-![Bounded Context Canvas: Inventory](/assets/strategic-ddd/bounded-context-canvas-inventory.png){#fig:bcc-inventory}
+![Bounded Context Canvas: Inventory](report/assets/strategic-ddd/bounded-context-canvas-inventory.png){#fig:bcc-inventory}
 
 *Nota.* Lienzo estratégico del contexto de inventarios y control de compras por lotes bajo valuación FIFO.
 
@@ -207,7 +207,7 @@ Subdominio de soporte que controla el aprovisionamiento de repuestos y lubricant
 
 Subdominio de soporte orientado a la administración del talento técnico del taller. Incluye el control de asistencia laboral mediante validación georreferenciada con la fórmula del Haversine sobre geocercas circulares y la liquidación periódica de nóminas de sueldos.
 
-![Bounded Context Canvas: Human Resources](/assets/strategic-ddd/bounded-context-canvas-human-resources.png){#fig:bcc-human-resources}
+![Bounded Context Canvas: Human Resources](report/assets/strategic-ddd/bounded-context-canvas-human-resources.png){#fig:bcc-human-resources}
 
 *Nota.* Lienzo estratégico del contexto de recursos humanos y asistencia geolocalizada de mecánicos.
 
@@ -215,7 +215,7 @@ Subdominio de soporte orientado a la administración del talento técnico del ta
 
 Subdominio genérico encargado del cumplimiento tributario y fiscal. Transforma las liquidaciones de órdenes de trabajo en comprobantes electrónicos homologados bajo la normativa OASIS UBL 2.1 de SUNAT, interactuando con Nubefact a través de adaptadores desacoplados.
 
-![Bounded Context Canvas: Invoicing](/assets/strategic-ddd/bounded-context-canvas-invoicing.png){#fig:bcc-invoicing}
+![Bounded Context Canvas: Invoicing](report/assets/strategic-ddd/bounded-context-canvas-invoicing.png){#fig:bcc-invoicing}
 
 *Nota.* Lienzo estratégico del contexto de facturación electrónica y cumplimiento fiscal.
 
@@ -223,7 +223,7 @@ Subdominio genérico encargado del cumplimiento tributario y fiscal. Transforma 
 
 Subdominio genérico que gestiona la monetización y el modelo de negocio B2B de Atelier. Administra los planes de suscripción de los talleres mecánicos, facturación recurrente, control de cupos operativos e integración con pasarelas de pago digitales.
 
-![Bounded Context Canvas: SaaS Billing](/assets/strategic-ddd/bounded-context-canvas-saas-billing.png){#fig:bcc-saas-billing}
+![Bounded Context Canvas: SaaS Billing](report/assets/strategic-ddd/bounded-context-canvas-saas-billing.png){#fig:bcc-saas-billing}
 
 *Nota.* Lienzo estratégico del contexto de monetización y suscripciones B2B del SaaS.
 
@@ -231,7 +231,7 @@ Subdominio genérico que gestiona la monetización y el modelo de negocio B2B de
 
 Subdominio genérico que provee seguridad, autenticación basada en tokens JWT/OAuth 2.0, autorización por roles (RBAC) y la gestión multi-tenant para garantizar el aislamiento criptográfico y lógico de la información entre talleres mecánicos independientes.
 
-![Bounded Context Canvas: IAM & Tenancy](/assets/strategic-ddd/bounded-context-canvas-iam-tenancy.png){#fig:bcc-iam-tenancy}
+![Bounded Context Canvas: IAM & Tenancy](report/assets/strategic-ddd/bounded-context-canvas-iam-tenancy.png){#fig:bcc-iam-tenancy}
 
 *Nota.* Lienzo estratégico del contexto de control de accesos, identidades y gobernanza multi-tenant.
 
@@ -248,7 +248,7 @@ Los principales patrones de relación estratégica implementados en la solución
 - **Conformist (CF):** El contexto consumidor acepta y se adapta de manera directa al modelo del contexto proveedor sin intermediar transformaciones semánticas complejas.
 - **Shared Kernel (SK):** Núcleo común compartido estrictamente acotado que contiene Value Objects e interfaces transversales utilizadas por todos los contextos (implementado en el módulo `Shared`).
 
-![Diagrama de Context Mapping del Ecosistema Atelier](/assets/strategic-ddd/context-mapping.png){#fig:context-mapping}
+![Diagrama de Context Mapping del Ecosistema Atelier](report/assets/strategic-ddd/context-mapping.png){#fig:context-mapping}
 
 *Nota.* Mapa integral de contextos estratégicos del ecosistema Atelier, representando los tipos de subdominio (Core, Supporting, Generic), los límites de contexto y los patrones de integración U/D, C/S, ACL, OHS/PL y SK.
 
