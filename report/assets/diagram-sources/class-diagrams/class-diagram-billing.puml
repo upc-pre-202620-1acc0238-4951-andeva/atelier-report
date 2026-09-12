@@ -1,0 +1,803 @@
+@startuml class-diagram-billing
+title <size:18>Diagrama de Clases UML - Bounded Context SaaS Billing & Subscriptions (Domain Layer)</size>\n<size:12>Paquete Canónico: com.andeva.atelier.platform.billing.domain</size>
+
+scale max 3200 width
+
+' Configuraciones visuales y de diseño profesional
+skinparam classAttributeIconSize 0
+skinparam monochrome false
+skinparam shadowing false
+skinparam roundcorner 6
+skinparam linetype ortho
+skinparam nodesep 26
+skinparam ranksep 30
+skinparam defaultFontName "Helvetica", "Arial", sans-serif
+skinparam defaultFontSize 10
+skinparam defaultFontColor #2C3E50
+skinparam arrowColor #34495E
+skinparam arrowThickness 1.1
+skinparam packageBorderColor #7F8C8D
+skinparam packageFontSize 11
+skinparam packageFontStyle bold
+
+' Estilos específicos por categoría táctica
+skinparam class {
+    BackgroundColor #FFFFFF
+    BorderColor #2C3E50
+    HeaderBackgroundColor #EAEDED
+}
+skinparam class<<AggregateRoot>> {
+    BackgroundColor #E8F8F5
+    BorderColor #16A085
+    HeaderBackgroundColor #A3E4D7
+}
+skinparam class<<Entity>> {
+    BackgroundColor #EBF5FB
+    BorderColor #2980B9
+    HeaderBackgroundColor #AED6F1
+}
+skinparam class<<ValueObject>> {
+    BackgroundColor #FEF9E7
+    BorderColor #D68910
+    HeaderBackgroundColor #FAD7A0
+}
+skinparam class<<TypedId>> {
+    BackgroundColor #EBF5FB
+    BorderColor #2980B9
+    HeaderBackgroundColor #AED6F1
+}
+skinparam class<<DomainService>> {
+    BackgroundColor #E8F8F5
+    BorderColor #117A65
+    HeaderBackgroundColor #A2D9CE
+}
+skinparam class<<DomainEvent>> {
+    BackgroundColor #FADBD8
+    BorderColor #C0392B
+    HeaderBackgroundColor #F1948A
+}
+skinparam class<<Exception>> {
+    BackgroundColor #F4ECF7
+    BorderColor #8E44AD
+    HeaderBackgroundColor #D2B4DE
+}
+skinparam class<<SharedKernel>> {
+    BackgroundColor #F8F9F9
+    BorderColor #BDC3C7
+    HeaderBackgroundColor #EAEDED
+}
+skinparam interface {
+    BackgroundColor #E8F6F3
+    BorderColor #117A65
+    HeaderBackgroundColor #A2D9CE
+}
+skinparam enum {
+    BackgroundColor #FCF3CF
+    BorderColor #B7950B
+    HeaderBackgroundColor #F9E79F
+}
+
+set separator none
+
+' ==============================================================================
+' 1. MODELO DE AGREGADOS (AGGREGATES)
+' ==============================================================================
+package "billing.domain.model.aggregates" as aggregates #FDFEFE {
+
+    abstract class "AbstractDomainAggregateRoot<T>" as AbstractDomainAggregateRoot <<SharedKernel>> {
+        # id: T
+        - domainEvents: List<DomainEvent>
+        --
+        # registerDomainEvent(event: DomainEvent): void
+        + domainEvents(): List<DomainEvent>
+        + clearDomainEvents(): void
+    }
+
+    class SubscriptionPlan <<AggregateRoot>> {
+        - id: PlanId
+        - stripePriceId: StripePriceId
+        - name: String
+        - tier: PlanTier
+        - pricing: PlanPricing
+        - quotaLimits: TenantQuotaLimits
+        - features: List<PlanFeature>
+        - isActive: boolean
+        --
+        + {static} create(stripePriceId: StripePriceId, name: String, tier: PlanTier, pricing: PlanPricing, quotaLimits: TenantQuotaLimits, features: List<PlanFeature>): SubscriptionPlan
+        + updateDetails(name: String, pricing: PlanPricing, quotaLimits: TenantQuotaLimits): void
+        + addFeature(feature: PlanFeature): void
+        + removeFeature(featureKey: String): void
+        + hasFeature(featureKey: String): boolean
+        + activate(): void
+        + deactivate(): void
+        + id(): PlanId
+        + stripePriceId(): StripePriceId
+        + tier(): PlanTier
+        + pricing(): PlanPricing
+        + quotaLimits(): TenantQuotaLimits
+        + features(): List<PlanFeature>
+        + isActive(): boolean
+    }
+
+    class TenantSubscription <<AggregateRoot>> {
+        - id: SubscriptionId
+        - tenantId: TenantId
+        - planId: PlanId
+        - stripeCustomerId: StripeCustomerId
+        - stripeSubscriptionId: StripeSubscriptionId
+        - status: SubscriptionStatus
+        - currentPeriod: SubscriptionPeriod
+        - cancelAtPeriodEnd: boolean
+        - canceledAt: Optional<Instant>
+        - trialEndDate: Optional<Instant>
+        --
+        + {static} startTrial(tenantId: TenantId, planId: PlanId, customerId: StripeCustomerId, trialDays: int): TenantSubscription
+        + {static} activate(tenantId: TenantId, planId: PlanId, customerId: StripeCustomerId, subId: StripeSubscriptionId, period: SubscriptionPeriod): TenantSubscription
+        + renewPeriod(newPeriod: SubscriptionPeriod): void
+        + markPastDue(): void
+        + markUnpaid(): void
+        + cancelAtPeriodEnd(): void
+        + cancelImmediately(timestamp: Instant): void
+        + reactivate(): void
+        + changePlan(newPlanId: PlanId, newPriceId: StripePriceId): void
+        + isAccessGranted(): boolean
+        + id(): SubscriptionId
+        + tenantId(): TenantId
+        + planId(): PlanId
+        + stripeCustomerId(): StripeCustomerId
+        + stripeSubscriptionId(): StripeSubscriptionId
+        + status(): SubscriptionStatus
+        + currentPeriod(): SubscriptionPeriod
+        + isCancelAtPeriodEnd(): boolean
+        + canceledAt(): Optional<Instant>
+        + trialEndDate(): Optional<Instant>
+    }
+
+    class SaasInvoice <<AggregateRoot>> {
+        - id: SaasInvoiceId
+        - subscriptionId: SubscriptionId
+        - tenantId: TenantId
+        - stripeInvoiceId: StripeInvoiceId
+        - amountPaid: Money
+        - currency: Currency
+        - status: InvoiceStatus
+        - invoicePdfUrl: String
+        - hostedInvoiceUrl: String
+        - paidAt: Optional<Instant>
+        --
+        + {static} recordPaid(subscriptionId: SubscriptionId, tenantId: TenantId, stripeInvoiceId: StripeInvoiceId, amountPaid: Money, pdfUrl: String, hostedUrl: String, paidAt: Instant): SaasInvoice
+        + markPaymentFailed(reason: String): void
+        + markVoid(): void
+        + id(): SaasInvoiceId
+        + subscriptionId(): SubscriptionId
+        + tenantId(): TenantId
+        + stripeInvoiceId(): StripeInvoiceId
+        + amountPaid(): Money
+        + currency(): Currency
+        + status(): InvoiceStatus
+        + invoicePdfUrl(): String
+        + hostedInvoiceUrl(): String
+        + paidAt(): Optional<Instant>
+    }
+
+    class StripeWebhookEvent <<AggregateRoot>> {
+        - id: UUID
+        - stripeEventId: StripeEventId
+        - eventType: String
+        - eventPayload: String
+        - status: WebhookProcessingStatus
+        - processedAt: Optional<Instant>
+        - errorMessage: Optional<String>
+        --
+        + {static} receive(eventId: StripeEventId, type: String, payload: String): StripeWebhookEvent
+        + markProcessed(timestamp: Instant): void
+        + markFailed(error: String): void
+        + markIgnored(): void
+        + id(): UUID
+        + stripeEventId(): StripeEventId
+        + eventType(): String
+        + eventPayload(): String
+        + status(): WebhookProcessingStatus
+        + processedAt(): Optional<Instant>
+        + errorMessage(): Optional<String>
+    }
+}
+
+' ==============================================================================
+' 2. ENTIDADES INTERNAS (ENTITIES)
+' ==============================================================================
+package "billing.domain.model.entities" as entities #FDFEFE {
+
+    class PlanFeature <<Entity>> {
+        - id: UUID
+        - planId: PlanId
+        - featureKey: String
+        - description: String
+        - isEnabled: boolean
+        --
+        + {static} of(planId: PlanId, featureKey: String, description: String, isEnabled: boolean): PlanFeature
+        + enable(): void
+        + disable(): void
+        + id(): UUID
+        + planId(): PlanId
+        + featureKey(): String
+        + description(): String
+        + isEnabled(): boolean
+    }
+}
+
+' ==============================================================================
+' 3. SERVICIOS DE DOMINIO (DOMAIN SERVICES)
+' ==============================================================================
+package "billing.domain.services" as services #FDFEFE {
+
+    class SubscriptionQuotaEnforcementService <<DomainService>> {
+        --
+        + validateBranchCreationAllowed(subscription: TenantSubscription, plan: SubscriptionPlan, currentBranchCount: int): void
+        + validateStaffAdditionAllowed(subscription: TenantSubscription, plan: SubscriptionPlan, currentStaffCount: int): void
+        + validateWorkOrderCreationAllowed(subscription: TenantSubscription, plan: SubscriptionPlan, currentMonthlyOrders: int): void
+        + isFeatureEnabled(subscription: TenantSubscription, plan: SubscriptionPlan, featureKey: String): boolean
+    }
+
+    class StripeWebhookSignatureVerificationService <<DomainService>> {
+        - {static} SIGNATURE_TOLERANCE_SECONDS: long
+        --
+        + verifySignature(payload: String, signatureHeader: String, endpointSecret: String): boolean
+        + extractTimestamp(signatureHeader: String): long
+    }
+}
+
+' ==============================================================================
+' 4. PUERTOS DE REPOSITORIO (REPOSITORY PORTS)
+' ==============================================================================
+package "billing.domain.repositories" as repositories #FDFEFE {
+
+    interface SubscriptionPlanRepository <<Interface>> {
+        + save(plan: SubscriptionPlan): SubscriptionPlan
+        + findById(id: PlanId): Optional<SubscriptionPlan>
+        + findByStripePriceId(stripePriceId: StripePriceId): Optional<SubscriptionPlan>
+        + findAllActive(): List<SubscriptionPlan>
+    }
+
+    interface TenantSubscriptionRepository <<Interface>> {
+        + save(subscription: TenantSubscription): TenantSubscription
+        + findById(id: SubscriptionId): Optional<TenantSubscription>
+        + findByTenantId(tenantId: TenantId): Optional<TenantSubscription>
+        + findByStripeSubscriptionId(subId: StripeSubscriptionId): Optional<TenantSubscription>
+        + findAllByStatus(status: SubscriptionStatus): List<TenantSubscription>
+    }
+
+    interface SaasInvoiceRepository <<Interface>> {
+        + save(invoice: SaasInvoice): SaasInvoice
+        + findById(id: SaasInvoiceId): Optional<SaasInvoice>
+        + findByStripeInvoiceId(invoiceId: StripeInvoiceId): Optional<SaasInvoice>
+        + findAllByTenantId(tenantId: TenantId): List<SaasInvoice>
+    }
+
+    interface StripeWebhookEventRepository <<Interface>> {
+        + save(event: StripeWebhookEvent): StripeWebhookEvent
+        + findByStripeEventId(eventId: StripeEventId): Optional<StripeWebhookEvent>
+        + existsByStripeEventId(eventId: StripeEventId): boolean
+    }
+}
+
+' ==============================================================================
+' 5. IDENTIFICADORES TIPADOS (TYPED IDS)
+' ==============================================================================
+package "billing.domain.model.ids" as ids #FDFEFE {
+
+    interface "TypedId<T>" as TypedId <<SharedKernel>> {
+        + value(): T
+    }
+
+    class PlanId <<TypedId>> {
+        - value: UUID
+        --
+        + {static} of(value: UUID): PlanId
+        + {static} generate(): PlanId
+        + value(): UUID
+    }
+
+    class SubscriptionId <<TypedId>> {
+        - value: UUID
+        --
+        + {static} of(value: UUID): SubscriptionId
+        + {static} generate(): SubscriptionId
+        + value(): UUID
+    }
+
+    class SaasInvoiceId <<TypedId>> {
+        - value: UUID
+        --
+        + {static} of(value: UUID): SaasInvoiceId
+        + {static} generate(): SaasInvoiceId
+        + value(): UUID
+    }
+
+    class StripeEventId <<TypedId>> {
+        - value: String
+        --
+        + {static} of(value: String): StripeEventId
+        + value(): String
+    }
+
+    class StripeCustomerId <<TypedId>> {
+        - value: String
+        --
+        + {static} of(value: String): StripeCustomerId
+        + value(): String
+    }
+
+    class StripeSubscriptionId <<TypedId>> {
+        - value: String
+        --
+        + {static} of(value: String): StripeSubscriptionId
+        + value(): String
+    }
+
+    class StripePriceId <<TypedId>> {
+        - value: String
+        --
+        + {static} of(value: String): StripePriceId
+        + value(): String
+    }
+
+    class StripeInvoiceId <<TypedId>> {
+        - value: String
+        --
+        + {static} of(value: String): StripeInvoiceId
+        + value(): String
+    }
+
+    class TenantId <<SharedKernel>> {
+        - value: UUID
+        --
+        + {static} of(value: UUID): TenantId
+        + value(): UUID
+    }
+}
+
+' ==============================================================================
+' 6. OBJETOS DE VALOR (VALUE OBJECTS)
+' ==============================================================================
+package "billing.domain.model.valueobjects" as valueobjects #FDFEFE {
+
+    class PlanPricing <<ValueObject>> {
+        - price: Money
+        - billingCycle: BillingCycle
+        --
+        + {static} of(price: Money, cycle: BillingCycle): PlanPricing
+        + price(): Money
+        + billingCycle(): BillingCycle
+    }
+
+    class TenantQuotaLimits <<ValueObject>> {
+        - maxBranches: int
+        - maxActiveStaff: int
+        - iotTelemetryEnabled: boolean
+        - aiDiagnosticsEnabled: boolean
+        - maxMonthlyWorkOrders: int
+        --
+        + {static} of(branches: int, staff: int, iot: boolean, ai: boolean, orders: int): TenantQuotaLimits
+        + canAddBranch(currentCount: int): boolean
+        + canAddStaff(currentCount: int): boolean
+        + canCreateWorkOrder(currentMonthlyCount: int): boolean
+        + maxBranches(): int
+        + maxActiveStaff(): int
+        + iotTelemetryEnabled(): boolean
+        + aiDiagnosticsEnabled(): boolean
+        + maxMonthlyWorkOrders(): int
+    }
+
+    class SubscriptionPeriod <<ValueObject>> {
+        - startDate: Instant
+        - endDate: Instant
+        --
+        + {static} of(start: Instant, end: Instant): SubscriptionPeriod
+        + isActiveAt(timestamp: Instant): boolean
+        + daysRemaining(timestamp: Instant): long
+        + startDate(): Instant
+        + endDate(): Instant
+    }
+
+    class Money <<SharedKernel>> {
+        - amount: BigDecimal
+        - currency: Currency
+        --
+        + {static} of(amount: BigDecimal, currency: Currency): Money
+        + amount(): BigDecimal
+        + currency(): Currency
+    }
+
+    class Currency <<SharedKernel>> {
+        - code: String
+        --
+        + {static} of(code: String): Currency
+        + code(): String
+    }
+}
+
+' ==============================================================================
+' 7. ENUMERACIONES DE DOMINIO (ENUMS)
+' ==============================================================================
+package "billing.domain.model.enums" as enums #FDFEFE {
+
+    enum PlanTier {
+        STARTER
+        PROFESSIONAL
+        ENTERPRISE
+    }
+
+    enum BillingCycle {
+        MONTHLY
+        YEARLY
+    }
+
+    enum SubscriptionStatus {
+        TRIALING
+        ACTIVE
+        PAST_DUE
+        CANCELED
+        UNPAID
+        INCOMPLETE
+    }
+
+    enum InvoiceStatus {
+        PAID
+        OPEN
+        VOID
+        UNCOLLECTIBLE
+    }
+
+    enum WebhookProcessingStatus {
+        PENDING
+        PROCESSED
+        FAILED
+        IGNORED
+    }
+}
+
+' ==============================================================================
+' 8. EVENTOS DE DOMINIO (DOMAIN EVENTS)
+' ==============================================================================
+package "billing.domain.events" as events #FDFEFE {
+
+    interface DomainEvent <<SharedKernel>> {
+        + occurredOn(): Instant
+    }
+
+    class SubscriptionPlanCreatedEvent <<DomainEvent>> {
+        - planId: PlanId
+        - stripePriceId: StripePriceId
+        - occurredOn: Instant
+        --
+        + planId(): PlanId
+        + stripePriceId(): StripePriceId
+        + occurredOn(): Instant
+    }
+
+    class TenantSubscriptionActivatedEvent <<DomainEvent>> {
+        - subscriptionId: SubscriptionId
+        - tenantId: TenantId
+        - planId: PlanId
+        - occurredOn: Instant
+        --
+        + subscriptionId(): SubscriptionId
+        + tenantId(): TenantId
+        + planId(): PlanId
+        + occurredOn(): Instant
+    }
+
+    class TenantSubscriptionRenewedEvent <<DomainEvent>> {
+        - subscriptionId: SubscriptionId
+        - tenantId: TenantId
+        - newPeriod: SubscriptionPeriod
+        - occurredOn: Instant
+        --
+        + subscriptionId(): SubscriptionId
+        + tenantId(): TenantId
+        + newPeriod(): SubscriptionPeriod
+        + occurredOn(): Instant
+    }
+
+    class TenantSubscriptionPastDueEvent <<DomainEvent>> {
+        - subscriptionId: SubscriptionId
+        - tenantId: TenantId
+        - occurredOn: Instant
+        --
+        + subscriptionId(): SubscriptionId
+        + tenantId(): TenantId
+        + occurredOn(): Instant
+    }
+
+    class TenantSubscriptionCanceledEvent <<DomainEvent>> {
+        - subscriptionId: SubscriptionId
+        - tenantId: TenantId
+        - canceledAt: Instant
+        - occurredOn: Instant
+        --
+        + subscriptionId(): SubscriptionId
+        + tenantId(): TenantId
+        + canceledAt(): Instant
+        + occurredOn(): Instant
+    }
+
+    class SaasInvoicePaidEvent <<DomainEvent>> {
+        - invoiceId: SaasInvoiceId
+        - tenantId: TenantId
+        - amountPaid: Money
+        - occurredOn: Instant
+        --
+        + invoiceId(): SaasInvoiceId
+        + tenantId(): TenantId
+        + amountPaid(): Money
+        + occurredOn(): Instant
+    }
+
+    class SaasInvoicePaymentFailedEvent <<DomainEvent>> {
+        - invoiceId: SaasInvoiceId
+        - tenantId: TenantId
+        - failureReason: String
+        - occurredOn: Instant
+        --
+        + invoiceId(): SaasInvoiceId
+        + tenantId(): TenantId
+        + failureReason(): String
+        + occurredOn(): Instant
+    }
+
+    class StripeWebhookProcessedEvent <<DomainEvent>> {
+        - eventId: StripeEventId
+        - eventType: String
+        - occurredOn: Instant
+        --
+        + eventId(): StripeEventId
+        + eventType(): String
+        + occurredOn(): Instant
+    }
+}
+
+' ==============================================================================
+' 9. JERARQUÍA DE EXCEPCIONES (EXCEPTIONS)
+' ==============================================================================
+package "billing.domain.exceptions" as exceptions #FDFEFE {
+
+    abstract class DomainException <<SharedKernel>> {
+        - errorCode: String
+        - message: String
+        --
+        + errorCode(): String
+        + getMessage(): String
+    }
+
+    class BillingDomainException <<Exception>> {
+        --
+        + BillingDomainException(errorCode: String, message: String)
+    }
+
+    class PlanNotFoundException <<Exception>> {
+        --
+        + PlanNotFoundException(planId: PlanId)
+    }
+
+    class SubscriptionNotFoundException <<Exception>> {
+        --
+        + SubscriptionNotFoundException(tenantId: TenantId)
+    }
+
+    class QuotaExceededException <<Exception>> {
+        - resourceName: String
+        - currentUsage: int
+        - maxAllowed: int
+        --
+        + QuotaExceededException(resourceName: String, currentUsage: int, maxAllowed: int)
+        + resourceName(): String
+        + currentUsage(): int
+        + maxAllowed(): int
+    }
+
+    class DuplicateActiveSubscriptionException <<Exception>> {
+        --
+        + DuplicateActiveSubscriptionException(tenantId: TenantId)
+    }
+
+    class InvalidWebhookSignatureException <<Exception>> {
+        --
+        + InvalidWebhookSignatureException(message: String)
+    }
+
+    class StripeWebhookProcessingException <<Exception>> {
+        --
+        + StripeWebhookProcessingException(eventId: StripeEventId, reason: String)
+    }
+
+    class SubscriptionPastDueException <<Exception>> {
+        --
+        + SubscriptionPastDueException(tenantId: TenantId)
+    }
+}
+
+' ==============================================================================
+' RELACIONES ESTRUCTURALES Y DEPENDENCIAS
+' ==============================================================================
+
+' Herencia de Raíces de Agregado
+AbstractDomainAggregateRoot <|-- SubscriptionPlan
+AbstractDomainAggregateRoot <|-- TenantSubscription
+AbstractDomainAggregateRoot <|-- SaasInvoice
+AbstractDomainAggregateRoot <|-- StripeWebhookEvent
+
+' Composición y Asociación de Agregados
+SubscriptionPlan "1" *-- "0..*" PlanFeature : "contiene >"
+SubscriptionPlan "1" *-- "1" PlanPricing : "posee >"
+SubscriptionPlan "1" *-- "1" TenantQuotaLimits : "define >"
+SubscriptionPlan --> PlanId : "identificado por"
+SubscriptionPlan --> StripePriceId : "asociado a precio Stripe"
+SubscriptionPlan --> PlanTier : "categorizado en"
+
+TenantSubscription "1" *-- "1" SubscriptionPeriod : "vigencia >"
+TenantSubscription --> SubscriptionId : "identificado por"
+TenantSubscription --> TenantId : "pertenece a taller"
+TenantSubscription --> PlanId : "contrata"
+TenantSubscription --> StripeCustomerId : "cliente en Stripe"
+TenantSubscription --> StripeSubscriptionId : "suscripción en Stripe"
+TenantSubscription --> SubscriptionStatus : "estado de membresía"
+
+SaasInvoice --> SaasInvoiceId : "identificado por"
+SaasInvoice --> SubscriptionId : "origen"
+SaasInvoice --> TenantId : "taller facturado"
+SaasInvoice --> StripeInvoiceId : "referencia en Stripe"
+SaasInvoice --> Money : "monto cobrado"
+SaasInvoice --> InvoiceStatus : "estado de liquidación"
+
+StripeWebhookEvent --> StripeEventId : "identificador único Stripe"
+StripeWebhookEvent --> WebhookProcessingStatus : "estado de deduplicación"
+
+PlanFeature --> PlanId : "pertenece a"
+
+' Identificadores
+TypedId <|.. PlanId
+TypedId <|.. SubscriptionId
+TypedId <|.. SaasInvoiceId
+TypedId <|.. StripeEventId
+TypedId <|.. StripeCustomerId
+TypedId <|.. StripeSubscriptionId
+TypedId <|.. StripePriceId
+TypedId <|.. StripeInvoiceId
+TypedId <|.. TenantId
+
+' Objetos de Valor
+PlanPricing --> Money : "tarifa"
+PlanPricing --> BillingCycle : "ciclo"
+Money --> Currency : "divisa"
+
+' Realización de Puertos de Repositorio
+SubscriptionPlanRepository ..> SubscriptionPlan : "persiste y recupera"
+SubscriptionPlanRepository ..> PlanId : "busca por"
+SubscriptionPlanRepository ..> StripePriceId : "busca por precio"
+
+TenantSubscriptionRepository ..> TenantSubscription : "persiste y recupera"
+TenantSubscriptionRepository ..> SubscriptionId : "busca por"
+TenantSubscriptionRepository ..> TenantId : "busca por taller"
+TenantSubscriptionRepository ..> StripeSubscriptionId : "busca por Stripe ID"
+
+SaasInvoiceRepository ..> SaasInvoice : "persiste y recupera"
+SaasInvoiceRepository ..> SaasInvoiceId : "busca por"
+SaasInvoiceRepository ..> StripeInvoiceId : "busca por factura Stripe"
+SaasInvoiceRepository ..> TenantId : "lista por taller"
+
+StripeWebhookEventRepository ..> StripeWebhookEvent : "persiste y audita"
+StripeWebhookEventRepository ..> StripeEventId : "comprueba unicidad"
+
+' Servicios de Dominio
+SubscriptionQuotaEnforcementService ..> TenantSubscription : "evalúa vigencia"
+SubscriptionQuotaEnforcementService ..> SubscriptionPlan : "inspecciona cuotas"
+SubscriptionQuotaEnforcementService ..> QuotaExceededException : "emite ante infracción"
+
+StripeWebhookSignatureVerificationService ..> StripeEventId : "autentica"
+StripeWebhookSignatureVerificationService ..> InvalidWebhookSignatureException : "emite si firma inválida"
+
+' Eventos de Dominio
+DomainEvent <|.. SubscriptionPlanCreatedEvent
+DomainEvent <|.. TenantSubscriptionActivatedEvent
+DomainEvent <|.. TenantSubscriptionRenewedEvent
+DomainEvent <|.. TenantSubscriptionPastDueEvent
+DomainEvent <|.. TenantSubscriptionCanceledEvent
+DomainEvent <|.. SaasInvoicePaidEvent
+DomainEvent <|.. SaasInvoicePaymentFailedEvent
+DomainEvent <|.. StripeWebhookProcessedEvent
+
+SubscriptionPlan ..> SubscriptionPlanCreatedEvent : "emite"
+TenantSubscription ..> TenantSubscriptionActivatedEvent : "emite"
+TenantSubscription ..> TenantSubscriptionRenewedEvent : "emite"
+TenantSubscription ..> TenantSubscriptionPastDueEvent : "emite"
+TenantSubscription ..> TenantSubscriptionCanceledEvent : "emite"
+SaasInvoice ..> SaasInvoicePaidEvent : "emite"
+SaasInvoice ..> SaasInvoicePaymentFailedEvent : "emite"
+StripeWebhookEvent ..> StripeWebhookProcessedEvent : "emite"
+
+' Jerarquía de Excepciones
+DomainException <|-- BillingDomainException
+BillingDomainException <|-- PlanNotFoundException
+BillingDomainException <|-- SubscriptionNotFoundException
+BillingDomainException <|-- QuotaExceededException
+BillingDomainException <|-- DuplicateActiveSubscriptionException
+BillingDomainException <|-- InvalidWebhookSignatureException
+BillingDomainException <|-- StripeWebhookProcessingException
+BillingDomainException <|-- SubscriptionPastDueException
+
+' ==============================================================================
+' CONTROL DE DISPOSICIÓN ESPACIAL (ENLACES OCULTOS ENTRE CLASES)
+' ==============================================================================
+
+' Fila 1: Superclase y Agregados en columnas ordenadas
+AbstractDomainAggregateRoot -[hidden]down-> SubscriptionPlan
+SubscriptionPlan -[hidden]right-> TenantSubscription
+TenantSubscription -[hidden]right-> SaasInvoice
+SaasInvoice -[hidden]right-> StripeWebhookEvent
+
+' Fila 2: Entidad dependiente y Servicios de Dominio
+SubscriptionPlan -[hidden]down-> PlanFeature
+PlanFeature -[hidden]right-> SubscriptionQuotaEnforcementService
+SubscriptionQuotaEnforcementService -[hidden]right-> StripeWebhookSignatureVerificationService
+TenantSubscription -[hidden]down-> SubscriptionQuotaEnforcementService
+StripeWebhookEvent -[hidden]down-> StripeWebhookSignatureVerificationService
+
+' Fila 3: Puertos de Repositorio alineados
+PlanFeature -[hidden]down-> SubscriptionPlanRepository
+SubscriptionPlanRepository -[hidden]right-> TenantSubscriptionRepository
+TenantSubscriptionRepository -[hidden]right-> SaasInvoiceRepository
+SaasInvoiceRepository -[hidden]right-> StripeWebhookEventRepository
+
+' Fila 4: IDs (Col. 1), Value Objects (Col. 2), Enums (Col. 3)
+SubscriptionPlanRepository -[hidden]down-> TypedId
+TypedId -[hidden]down-> PlanId
+PlanId -[hidden]right-> SubscriptionId
+SubscriptionId -[hidden]right-> SaasInvoiceId
+SaasInvoiceId -[hidden]right-> StripeEventId
+PlanId -[hidden]down-> StripeCustomerId
+StripeCustomerId -[hidden]right-> StripeSubscriptionId
+StripeSubscriptionId -[hidden]right-> StripePriceId
+StripePriceId -[hidden]right-> StripeInvoiceId
+StripeCustomerId -[hidden]down-> TenantId
+
+TenantSubscriptionRepository -[hidden]down-> PlanPricing
+PlanPricing -[hidden]right-> TenantQuotaLimits
+TenantQuotaLimits -[hidden]right-> SubscriptionPeriod
+PlanPricing -[hidden]down-> Money
+Money -[hidden]right-> Currency
+
+SaasInvoiceRepository -[hidden]down-> PlanTier
+PlanTier -[hidden]right-> BillingCycle
+BillingCycle -[hidden]right-> SubscriptionStatus
+PlanTier -[hidden]down-> InvoiceStatus
+InvoiceStatus -[hidden]right-> WebhookProcessingStatus
+
+StripeEventId -[hidden]right-> PlanPricing
+SubscriptionPeriod -[hidden]right-> PlanTier
+
+' Fila 5: Eventos de Dominio alineados
+TenantId -[hidden]down-> DomainEvent
+DomainEvent -[hidden]down-> SubscriptionPlanCreatedEvent
+SubscriptionPlanCreatedEvent -[hidden]right-> TenantSubscriptionActivatedEvent
+TenantSubscriptionActivatedEvent -[hidden]right-> TenantSubscriptionRenewedEvent
+TenantSubscriptionRenewedEvent -[hidden]right-> TenantSubscriptionPastDueEvent
+
+SubscriptionPlanCreatedEvent -[hidden]down-> TenantSubscriptionCanceledEvent
+TenantSubscriptionCanceledEvent -[hidden]right-> SaasInvoicePaidEvent
+SaasInvoicePaidEvent -[hidden]right-> SaasInvoicePaymentFailedEvent
+SaasInvoicePaymentFailedEvent -[hidden]right-> StripeWebhookProcessedEvent
+
+' Fila 6: Excepciones Semánticas alineadas a la derecha
+InvoiceStatus -[hidden]down-> DomainException
+DomainException -[hidden]down-> BillingDomainException
+BillingDomainException -[hidden]down-> PlanNotFoundException
+PlanNotFoundException -[hidden]right-> SubscriptionNotFoundException
+SubscriptionNotFoundException -[hidden]right-> QuotaExceededException
+QuotaExceededException -[hidden]right-> DuplicateActiveSubscriptionException
+
+PlanNotFoundException -[hidden]down-> InvalidWebhookSignatureException
+InvalidWebhookSignatureException -[hidden]right-> StripeWebhookProcessingException
+StripeWebhookProcessingException -[hidden]right-> SubscriptionPastDueException
+
+@enduml

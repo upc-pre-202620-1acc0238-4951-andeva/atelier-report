@@ -7,6 +7,7 @@ component api "Components-API" "Diagrama de Componentes de la API Central de Ate
     exclude inventory_controllers inventory_app_services inventory_event_handlers inventory_domain inventory_persistence inventory_facade inventory_external_gateways
     exclude hr_controllers hr_app_services hr_event_handlers hr_domain hr_persistence hr_facade hr_external_gateways
     exclude invoicing_controllers invoicing_app_services invoicing_event_handlers invoicing_domain invoicing_persistence invoicing_facade invoicing_external_gateways
+    exclude billing_controllers billing_app_services billing_event_handlers billing_domain billing_persistence billing_facade billing_external_gateways
     autoLayout tb 250 200
 }
 
@@ -63,6 +64,14 @@ component api "component-level-diagram-invoicing" "Diagrama de Componentes C4 (N
     include mro_comp customer_fleet_comp inventory_comp hr_comp iam_comp
     autoLayout tb 250 200
 }
+
+component api "component-level-diagram-billing" "Diagrama de Componentes C4 (Nivel 3) para el Bounded Context SaaS Billing & Subscriptions en API Application" {
+    include billing_controllers billing_app_services billing_event_handlers billing_domain billing_persistence billing_facade billing_external_gateways
+    include webapp workshop_mobile db stripe resend
+    include iam_comp mro_comp
+    autoLayout tb 250 200
+}
+
 
 
 

@@ -1,0 +1,297 @@
+@startuml database-diagram-billing
+title <size:16>Diagrama de Base de Datos (ERD) - Bounded Context SaaS Billing & Subscriptions</size>\n<size:11>Persistencia Relacional Multi-Producto: PostgreSQL 16 (API Application) y SQLite 3 (Mobile Workshop)</size>
+
+' Configuraciones visuales y de diseño profesional
+hide circle
+skinparam monochrome false
+skinparam shadowing false
+skinparam roundcorner 6
+skinparam linetype ortho
+skinparam nodesep 100
+skinparam ranksep 55
+skinparam defaultFontName "Helvetica", "Arial", sans-serif
+skinparam defaultFontSize 11
+skinparam defaultFontColor #2C3E50
+skinparam arrowColor #34495E
+skinparam arrowThickness 1.3
+skinparam packageBorderColor #7F8C8D
+skinparam packageFontSize 12
+skinparam packageFontStyle bold
+
+skinparam entity {
+    BackgroundColor #FFFFFF
+    BorderColor #34495E
+    HeaderBackgroundColor #EAEDED
+}
+
+' ==============================================================================
+' PRODUCTO 1: API APPLICATION (BACKEND CENTRAL - POSTGRESQL 16)
+' ==============================================================================
+package "PostgreSQL 16 (API Application - Backend Central)" as pg_backend #F8F9F9 {
+
+    ' ==========================================================================
+    ' COLUMNA 1: ARQUETIPO JPA, CONTEXTO EXTERNO, PLANES Y CAPACIDADES MODULARES
+    ' ==========================================================================
+    entity "auditable_abstract_entity" as auditable_abstract_entity <<archetype, JPA>> #E8F8F5 {
+        * id : UUID <<PK>>
+        --
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Propiedades del Arquetipo JPA:</b>
+        + Clave primaria técnica UUID v4
+        + Control de concurrencia optimista (version)
+        + Borrado lógico auditable (deleted_at)
+        + Heredado físicamente por entidades de negocio:
+          plans, subscriptions e invoices (@MappedSuperclass)
+    }
+
+    entity "tenants" as tenants <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * name : VARCHAR(100)
+        * legal_name : VARCHAR(150)
+        * tax_id : VARCHAR(20) <<UK>>
+        * status : VARCHAR(20)
+        --
+        <b>Contexto Externo (IAM & Tenancy):</b>
+        + Delimita el taller automotriz titular en la plataforma
+    }
+
+    entity "plans" as plans <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * stripe_price_id : VARCHAR(100) <<UK>>
+        * name : VARCHAR(100)
+        * tier : VARCHAR(20)
+        * price : DECIMAL(10,2)
+        * currency : VARCHAR(3)
+        * billing_cycle : VARCHAR(20)
+        * max_branches : INTEGER
+        * max_active_staff : INTEGER
+        * max_monthly_work_orders : INTEGER
+        * iot_telemetry_enabled : BOOLEAN
+        * ai_diagnostics_enabled : BOOLEAN
+        * is_active : BOOLEAN
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_plans : PRIMARY KEY (id)
+        + uk_plans_stripe_price : UNIQUE (stripe_price_id)
+        + chk_plans_tier : CHECK (tier IN ('COMMUNITY', 'STARTER', 'PROFESSIONAL', 'ENTERPRISE'))
+        + chk_plans_cycle : CHECK (billing_cycle IN ('MONTHLY', 'YEARLY'))
+        + chk_plans_price : CHECK (price >= 0.00)
+        + chk_plans_quotas : CHECK (max_branches > 0 AND max_active_staff > 0 AND max_monthly_work_orders > 0)
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_plans_tier : (tier)
+        + idx_plans_tier_active : (tier, is_active)
+    }
+
+    entity "plan_features" as plan_features <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * plan_id : UUID <<FK>>
+        * feature_key : VARCHAR(50)
+        * description : VARCHAR(255)
+        * is_enabled : BOOLEAN
+        * created_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_plan_features : PRIMARY KEY (id)
+        + fk_plan_features_plan : FOREIGN KEY (plan_id) REFERENCES plans(id) ON DELETE CASCADE
+        + uk_plan_features_plan_key : UNIQUE (plan_id, feature_key)
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_plan_features_plan : (plan_id)
+        + idx_plan_features_lookup : (plan_id, is_enabled)
+    }
+
+    ' ==========================================================================
+    ' COLUMNA 2: CONTRATO DE SUSCRIPCIÓN, FACTURACIÓN Y EVENTOS TELEMÁTICOS
+    ' ==========================================================================
+    entity "subscriptions" as subscriptions <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<UK, FK>>
+        * plan_id : UUID <<FK>>
+        * stripe_customer_id : VARCHAR(100)
+        * stripe_sub_id : VARCHAR(100)
+        * status : VARCHAR(20)
+        * current_period_start : TIMESTAMPTZ
+        * current_period_end : TIMESTAMPTZ
+        * cancel_at_period_end : BOOLEAN
+        canceled_at : TIMESTAMPTZ
+        trial_end_date : TIMESTAMPTZ
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_subscriptions : PRIMARY KEY (id)
+        + uk_subscriptions_tenant : UNIQUE (tenant_id)
+        + fk_subscriptions_tenant : FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+        + fk_subscriptions_plan : FOREIGN KEY (plan_id) REFERENCES plans(id)
+        + chk_subscriptions_status : CHECK (status IN ('trialing', 'active', 'past_due', 'canceled', 'unpaid', 'incomplete'))
+        + chk_subscriptions_period : CHECK (current_period_end >= current_period_start)
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_subscriptions_tenant : (tenant_id)
+        + idx_subscriptions_status : (status)
+        + idx_subscriptions_stripe_sub : (stripe_sub_id)
+        + idx_subscriptions_plan : (plan_id)
+    }
+
+    entity "invoices" as invoices <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * subscription_id : UUID <<FK>>
+        * tenant_id : UUID <<FK>>
+        * stripe_invoice_id : VARCHAR(100) <<UK>>
+        * amount_paid : DECIMAL(10,2)
+        * currency : VARCHAR(3)
+        * status : VARCHAR(20)
+        invoice_pdf_url : VARCHAR(255)
+        hosted_invoice_url : VARCHAR(255)
+        paid_at : TIMESTAMPTZ
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_invoices : PRIMARY KEY (id)
+        + uk_invoices_stripe_invoice : UNIQUE (stripe_invoice_id)
+        + fk_invoices_subscription : FOREIGN KEY (subscription_id) REFERENCES subscriptions(id) ON DELETE CASCADE
+        + fk_invoices_tenant : FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+        + chk_invoices_status : CHECK (status IN ('paid', 'open', 'void', 'uncollectible', 'draft'))
+        + chk_invoices_amount : CHECK (amount_paid >= 0.00)
+        + chk_invoices_currency : CHECK (currency IN ('USD', 'PEN'))
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_invoices_subscription : (subscription_id)
+        + idx_invoices_tenant : (tenant_id)
+        + idx_invoices_tenant_created : (tenant_id, created_at DESC)
+        + idx_invoices_stripe_lookup : (stripe_invoice_id)
+    }
+
+    entity "stripe_events" as stripe_events <<table, PostgreSQL>> #EBF5FB {
+        * id : UUID <<PK>>
+        --
+        * stripe_event_id : VARCHAR(100) <<UK>>
+        * type : VARCHAR(100)
+        * payload : TEXT
+        * status : VARCHAR(20)
+        processed_at : TIMESTAMPTZ
+        error_message : VARCHAR(500)
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_stripe_events : PRIMARY KEY (id)
+        + uk_stripe_events_id : UNIQUE (stripe_event_id)
+        + chk_stripe_events_status : CHECK (status IN ('pending', 'processed', 'failed', 'ignored'))
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_stripe_events_status : (status)
+        + idx_stripe_events_type_status : (type, status, processed_at DESC)
+    }
+
+    ' Disposición vertical en columnas internas
+    auditable_abstract_entity -[hidden]down-> tenants
+    tenants -[hidden]down-> plans
+    plans -[hidden]down-> plan_features
+
+    subscriptions -[hidden]down-> invoices
+    invoices -[hidden]down-> stripe_events
+
+    auditable_abstract_entity -[hidden]right-> subscriptions
+    tenants -[hidden]right-> subscriptions
+    plans -[hidden]right-> invoices
+    plan_features -[hidden]right-> stripe_events
+
+    ' Relaciones de Herencia JPA
+    auditable_abstract_entity <|-- plans : "herencia física JPA\n(@MappedSuperclass)"
+    auditable_abstract_entity <|-- subscriptions
+    auditable_abstract_entity <|-- invoices
+
+    ' Relaciones Cardinales de Integridad Referencial
+    tenants "1  " ||--o| "0..1" subscriptions : "contrata suscripción"
+    tenants "1  " ||--o{ "0..* " invoices : "titular facturación"
+    plans "1  " ||--o{ "0..* " subscriptions : "asigna esquema tarifario"
+    plans "1  " ||--|{ "1..* " plan_features : "desglosa capacidades modulares"
+    subscriptions "1  " ||--o{ "0..* " invoices : "origina cobros recurrentes"
+}
+
+' ==============================================================================
+' PRODUCTO 2: MOBILE WORKSHOP (CLIENTE TÉCNICO OFFLINE - SQLITE 3)
+' ==============================================================================
+package "SQLite 3 (Mobile Workshop - Cliente Técnico Offline)" as sqlite_mobile #FEFDE8 {
+
+    entity "local_subscription_cache" as local_subscription_cache <<table, SQLite>> #FEF9E7 {
+        * id : TEXT <<PK>>
+        --
+        * tenant_id : TEXT <<UK>>
+        * plan_name : TEXT
+        * plan_tier : TEXT
+        * subscription_status : TEXT
+        * max_branches : INTEGER
+        * max_active_staff : INTEGER
+        * max_monthly_work_orders : INTEGER
+        * iot_telemetry_enabled : INTEGER
+        * ai_diagnostics_enabled : INTEGER
+        * current_period_end : TEXT (ISO8601)
+        * synced_at : TEXT (ISO8601)
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_local_subscription_cache : PRIMARY KEY (id)
+        + uk_local_sub_tenant : UNIQUE (tenant_id)
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_local_sub_tenant : (tenant_id)
+        --
+        <b>Propósito Operativo:</b>
+        + Caché local de cuotas, límites y vigencia de la suscripción SaaS
+        + Permite validar en patio desconectado cuotas de órdenes de trabajo y capacidades activas
+    }
+
+    entity "local_plan_features_cache" as local_plan_features_cache <<table, SQLite>> #FEF9E7 {
+        * feature_id : TEXT <<PK>>
+        --
+        * tenant_id : TEXT
+        * feature_key : TEXT
+        * is_enabled : INTEGER
+        * synced_at : TEXT (ISO8601)
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_local_plan_features : PRIMARY KEY (feature_id)
+        + uk_local_features_tenant_key : UNIQUE (tenant_id, feature_key)
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_local_features_tenant : (tenant_id)
+        --
+        <b>Propósito Operativo:</b>
+        + Desglose local de flags de funcionalidad SaaS habilitadas
+        + Verificación offline de módulos permitidos (telemetría, IA, escáner)
+    }
+
+    ' Disposición vertical en columna SQLite
+    local_subscription_cache -[hidden]down---------> local_plan_features_cache
+}
+
+' Disposición horizontal entre paquetes y entidades correspondientes
+pg_backend -[hidden]right-> sqlite_mobile
+subscriptions -[hidden]right-> local_subscription_cache
+plan_features -[hidden]right-> local_plan_features_cache
+
+' ==============================================================================
+' RELACIONES DE SINCRONIZACIÓN INTER-PRODUCTO
+' ==============================================================================
+local_subscription_cache .[#2980B9]left.> subscriptions : "<b>HTTPS REST ETag/If-Modified-Since</b>\n(Refresco de Cuotas de Suscripción)"
+local_plan_features_cache .[#27AE60]left.> plan_features : "<b>Sincronización Incremental</b>\n(Delta de Capacidades Modulares)"
+
+@enduml

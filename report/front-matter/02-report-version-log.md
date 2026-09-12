@@ -26,4 +26,5 @@
 |0.28.0|10/09/2026|Huamani Estefanero, Joel|Añadido de ***Bounded Context: Inventory & Supply Chain*** y documentación del backend.|
 |0.29.0|10/09/2026|Huamani Estefanero, Joel|Añadido de ***Bounded Context: Human Resources Management (HR)*** y documentación del backend.|
 |0.30.0|11/09/2026|Huamani Estefanero, Joel|Añadido de ***Bounded Context: Invoicing & Compliance*** y documentación del backend.|
+|0.31.0|11/09/2026|Huamani Estefanero, Joel|Añadido de ***Bounded Context: SaaS Billing & Subscriptions*** y documentación del backend.|
 \newpage
