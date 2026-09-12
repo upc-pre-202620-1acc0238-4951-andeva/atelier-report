@@ -28,5 +28,8 @@
 |0.30.0|11/09/2026|Huamani Estefanero, Joel|Añadido de ***Bounded Context: Invoicing & Compliance*** y documentación del backend.|
 |0.31.0|11/09/2026|Huamani Estefanero, Joel|Añadido de ***Bounded Context: SaaS Billing & Subscriptions*** y documentación del backend.|
 |0.32.0|11/09/2026|Huamani Estefanero, Joel|Añadido de ***Bounded Context: IoT Telemetry & Predictive Maintenance*** y documentación del backend.|
+|0.33.0|12/09/2026|Granda Ibarra, Luis Daniel|Añadido de competidores.|
+|0.34.0|12/09/2026|Granda Ibarra, Luis Daniel|Añadido de análisis competitivo.|
+|0.35.0|12/09/2026|Granda Ibarra, Luis Daniel|Añadido de estrategias y tácticas frente a competidores.|
 
 \newpage

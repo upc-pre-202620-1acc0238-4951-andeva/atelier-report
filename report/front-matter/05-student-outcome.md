@@ -35,7 +35,7 @@ Actualiza conceptos y conocimientos necesarios para su desarrollo profesional y 
 
 % --- Alumno 2 ---
 \textbf{Granda Ibarra, Luis Daniel} \newline
-\textbf{AV1}: Aquí detallas tu aporte...
+\textbf{AV1}: Aplicación y estructuración de la metodología Lean UX (Problem Statement, Assumptions, Hypothesis) para definir el alcance del proyecto. Asimismo, se realizó un análisis exhaustivo de competidores y el diseño de la estructura para las entrevistas de los segmentos objetivo.
 \vspace{0.4cm}
 
 % --- Alumno 3 ---
@@ -71,7 +71,7 @@ Reconoce la necesidad del aprendizaje permanente para el desempeño profesional 
 
 % --- Alumno 2 ---
 \textbf{Granda Ibarra, Luis Daniel} \newline
-\textbf{AV1}: Aquí detallas tu aporte...
+\textbf{AV1}: Reconocimiento de las necesidades del mercado a través del análisis de competidores directos e indirectos. Adicionalmente, ejecución y análisis de entrevistas a usuarios reales para validar hipótesis y adaptar las funcionalidades del software.
 \vspace{0.4cm}
 
 % --- Alumno 3 ---
