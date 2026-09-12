@@ -31,5 +31,6 @@
 |0.33.0|12/09/2026|Granda Ibarra, Luis Daniel|Añadido de competidores.|
 |0.34.0|12/09/2026|Granda Ibarra, Luis Daniel|Añadido de análisis competitivo.|
 |0.35.0|12/09/2026|Granda Ibarra, Luis Daniel|Añadido de estrategias y tácticas frente a competidores.|
+|0.36.0|12/09/2026|Sanchez Santin, Adiel Abdiaz|Añadido de especificación de requisitos: 10 Épicas y 32 Historias de Usuario bajo formato APA 7 y BDD.|
 
 \newpage
