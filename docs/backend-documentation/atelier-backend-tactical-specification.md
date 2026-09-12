@@ -8461,6 +8461,15 @@ public record AnomalyEvaluationResult(
   * `PATCH /{id}/acknowledge`: Marca la alerta como leída. Responde `200 OK`.
   * `POST /{id}/convert-to-appointment`: Redirige al módulo de CRM/MRO para agendar cita preventiva a partir de la alerta. Responde `200 OK`.
 
+##### 6. `VehicleHealthReportsController`
+* **Ruta Base:** `/api/v1/iot/vehicles/{vehicleId}/health-reports`
+* **Responsabilidad:** Orquestación perimetral del motor de diagnóstico predictivo vehicular con Inteligencia Artificial (Spring AI), consolidación de reportes de salud mecánica y exportación documental en PDF.
+* **Endpoints:**
+  * `POST /generate`: Dispara la evaluación analítica sobre las series temporales de TimescaleDB y averías activas (`GenerateVehicleHealthReportCommand`), persiste alertas predictivas >= 70% y responde `201 Created` con cabecera `Location` y recurso `HealthReportSummaryResource`.
+  * `POST /generate-async`: Encola la generación del informe para flotas masivas o procesamiento en segundo plano (`EnqueueVehicleHealthReportAnalysisCommand`). Responde `202 Accepted`.
+  * `GET /latest`: Consulta en memoria/caché el último informe de salud mecánica calculado (`GetLatestVehicleHealthReportQuery`). Responde `200 OK` con `VehicleHealthReportResource`.
+  * `GET /{reportId}/pdf`: Renderiza y descarga el informe pericial en formato binario PDF mediante el adaptador de maquetación (`ExportVehicleHealthReportPdfQuery`). Responde `200 OK` con `Content-Type: application/pdf` y cabecera `Content-Disposition`.
+
 ---
 
 #### 11.3.2. REST Resources & DTOs (Records)
@@ -9093,6 +9102,42 @@ ALTER TABLE telemetry_logs SET (
 SELECT add_compression_policy('telemetry_logs', INTERVAL '30 days', if_not_exists => TRUE);
 ```
 
+##### 3. `VehicleHealthReportPdfGeneratorAdapter`
+* **Paquete:** `com.andeva.atelier.platform.iot.infrastructure.reporting`
+* **Propósito:** Adaptador de renderizado tipográfico que implementa `VehicleHealthReportPdfGeneratorPort`. Inyecta el modelo analítico estructurado `VehicleHealthReportAiDto` en una plantilla XHTML procesada por Thymeleaf y la compila a binario PDF mediante el motor OpenPDF, formateando el membrete de taller, el semáforo de salud mecánica y los paquetes de servicio preventivo recomendados.
+
+##### 4. `VehicleHealthAiDiagnosticService`
+* **Paquete:** `com.andeva.atelier.platform.iot.infrastructure.ai`
+* **Propósito:** Adaptador perimetral de inteligencia artificial estructurada sustentado en Spring AI (`ChatClient`). Extrae vectores estadísticos de telemetría mediante agregaciones continuas `time_bucket()` en TimescaleDB y el historial de averías de `vehicle_faults`, invocando el modelo fundacional con `BeanOutputConverter` para emitir diagnósticos estructurados y tipados en Java 21 Records (`VehicleHealthReportAiDto`).
+* **Estrategia Multiprovisionador y Neutralidad Tecnológica:**
+  El adaptador implementa neutralidad de proveedor (*Vendor Neutrality*) mediante el contrato desacoplado `ChatClient` y la especificación universal de API REST compatible con OpenAI (`/v1/chat/completions`), admitiendo conmutación por perfiles de Spring Boot sin alterar código Java:
+  1. **Groq Cloud LPU (Proveedor Primario en Producción):**
+     * **Arquitectura:** Unidad de Procesamiento de Lenguaje (LPU™) que alcanza velocidades de ~500 tokens/segundo con latencias totales inferiores a 0.8 segundos.
+     * **Modelo Primario (Diagnóstico Profundo):** `llama-3.3-70b-versatile` (Meta AI, 70B). Máxima capacidad de razonamiento causal automotriz para correlacionar desvíos sensoriales con códigos DTC.
+     * **Modelo Secundario (Flotas Masivas):** `llama-3.1-8b-instant` para encolado asíncrono en batch (`POST /health-reports/generate-async`).
+     * **Esquema de Uso:** Plan permanente de desarrollador gratuito sin caducidad de créditos (14,400 solicitudes/día).
+  2. **NVIDIA NIM API Catalog (Alternativa Cloud):**
+     * **Endpoint:** `https://integrate.api.nvidia.com/v1`
+     * **Modelo:** `meta/llama-3.1-70b-instruct` sobre infraestructura NVIDIA H100 Tensor Core. Respaldo secundario en caso de contingencia.
+  3. **Ollama (Despliegue Soberano On-Premise):**
+     * **Endpoint:** `http://localhost:11434` (Docker o Bare-Metal)
+     * **Modelo:** `llama3.1:8b`
+     * **Propósito:** Talleres mecánicos o concesionarias que operen en modalidad autónoma sin enlace continuo a internet o bajo normativas de estricta soberanía de datos locales.
+
+```yaml
+# Configuración en application.yml para Spring AI con Groq Cloud
+spring:
+  ai:
+    openai:
+      api-key: ${GROQ_API_KEY}
+      base-url: https://api.groq.com/openai
+      chat:
+        options:
+          model: llama-3.3-70b-versatile
+          temperature: 0.1
+          max-tokens: 2500
+```
+
 ---
 
 ### 11.6. 2.6.8.5. Bounded Context Component Level Diagram
@@ -9109,12 +9154,15 @@ C4Component
         Component(install_ctrl, "DeviceInstallationsController", "Spring REST Controller", "Expone emparejamiento físico de escáneres con vehículos")
         Component(fault_ctrl, "VehicleFaultsController", "Spring REST Controller", "Expone diagnóstico de códigos de avería DTC")
         Component(alert_ctrl, "PredictiveAlertsController", "Spring REST Controller", "Expone tablero de alertas predictivas del taller")
+        Component(report_ctrl, "VehicleHealthReportsController", "Spring REST Controller", "Expone endpoints para generación analítica de salud vehicular y descarga pericial PDF")
 
         Component(iot_facade, "IoTTelemetryContextFacade", "Spring Service (OHS)", "Fachada inbound para tacómetro digital y diagnóstico en MRO/CRM")
 
         Component(ingest_cmd, "TelemetryIngestionCommandService", "Application Service", "Orquesta persistencia masiva y evalúa anomalías en tiempo real")
         Component(install_cmd, "DeviceInstallationCommandService", "Application Service", "Administra conexiones y retiros de escáneres")
         Component(alert_cmd, "PredictiveAlertCommandService", "Application Service", "Orquesta generación y despacho push de alertas")
+        Component(report_cmd, "VehicleHealthReportCommandService", "Application Service", "Coordina pipeline analítico de IA y persistencia de alertas >= 70%")
+        Component(report_query, "VehicleHealthReportQueryService", "Application Service", "Genera binario PDF tipográfico y recupera reportes calculados")
 
         Component(anomaly_engine, "PredictiveAnomalyDetectionEngine", "Domain Service", "Infiere sobrecalentamiento y fallas eléctricas en milisegundos")
         Component(dtc_service, "DtcCodeEvaluationService", "Domain Service", "Evalúa severidad de códigos SAE/ISO")
@@ -9127,9 +9175,11 @@ C4Component
         Component(install_repo, "DeviceInstallationRepositoryImpl", "Spring Data JPA Adapter", "Persiste asignaciones en device_installations")
         Component(fault_repo, "VehicleFaultRepositoryImpl", "Spring Data JPA Adapter", "Persiste códigos de error en vehicle_faults")
         Component(alert_repo, "PredictiveAlertRepositoryImpl", "Spring Data JPA Adapter", "Persiste alertas en predictive_alerts")
-        Component(timescale_repo, "TimescaleTelemetryJdbcRepositoryImpl", "Spring JDBC Batch Adapter", "Escritura masiva en hipertabla telemetry_logs")
+        Component(timescale_repo, "TimescaleTelemetryJdbcRepositoryImpl", "Spring JDBC Batch Adapter", "Escritura masiva y agregaciones continuas en telemetry_logs")
 
         Component(fcm_gw, "FirebaseCloudMessagingGatewayImpl", "Firebase Admin SDK Adapter", "Despacha push a la app Atelier Driver")
+        Component(ai_diag_svc, "VehicleHealthAiDiagnosticService", "Spring AI ChatClient Adapter", "Inferencia causal y correlación de averías con Groq Cloud LPU")
+        Component(pdf_gen_adapter, "VehicleHealthReportPdfGeneratorAdapter", "Thymeleaf & OpenPDF Adapter", "Renderiza informe pericial de salud en documento PDF")
     End_Container_Boundary
 
     Container_Boundary(crm_context, "Customer & Fleet Context (CRM)")
@@ -9141,12 +9191,23 @@ C4Component
     End_Container_Boundary
 
     System_Ext(fcm_service, "Firebase Cloud Messaging (FCM)", "Servicio Push de Google Cloud para Android e iOS")
+    System_Ext(groq_service, "Groq Cloud LPU (Llama 3.3 70B)", "Motor de inferencia LLM ultra-rápido para diagnósticos vehiculares")
     ContainerDb(timescale_db, "TimescaleDB Hypertable (telemetry_logs)", "Aiven Cloud", "Particionado temporal de chunks y compresión columnar")
     ContainerDb(postgres_db, "PostgreSQL 16 Relational DB", "Aiven Cloud", "Tablas obd2_devices, device_installations, vehicle_faults, predictive_alerts")
 
     Rel(ingest_ctrl, ingest_cmd, "Delega lote de telemetría", "Java Calls")
     Rel(device_ctrl, install_cmd, "Delega hardware", "Java Calls")
     Rel(alert_ctrl, alert_cmd, "Delega atención de alertas", "Java Calls")
+    Rel(report_ctrl, report_cmd, "Delega generación de informe", "Java Calls")
+    Rel(report_ctrl, report_query, "Delega descarga de PDF pericial", "Java Calls")
+
+    Rel(report_cmd, ai_diag_svc, "Ejecuta diagnóstico predictivo asistido por IA", "Java Calls")
+    Rel(ai_diag_svc, groq_service, "Invocación ChatClient (llama-3.3-70b-versatile)", "HTTPS/API")
+    Rel(ai_diag_svc, timescale_repo, "Recupera agregaciones time_bucket()", "Domain Calls")
+    Rel(ai_diag_svc, fault_repo, "Recupera averías DTC activas", "Domain Calls")
+    Rel(report_cmd, alert_repo, "Persiste alertas predictivas inferidas", "JPA")
+
+    Rel(report_query, pdf_gen_adapter, "Solicita compilación de PDF", "Java Calls")
 
     Rel(ingest_cmd, timescale_repo, "JDBC Batch Insert (50-100 recs)", "SQL Batch")
     Rel(timescale_repo, timescale_db, "Inserta en chunks de 7 días", "JDBC")
