@@ -57,6 +57,7 @@ workspace "Atelier Architecture" "Diagramas de Arquitectura C4 para el Proyecto 
         !include model/components/inventory-relationships.dsl
         !include model/components/hr-relationships.dsl
         !include model/components/invoicing-relationships.dsl
+        !include model/components/billing-relationships.dsl
 
         !include model/deployment/production-environment.dsl
     }

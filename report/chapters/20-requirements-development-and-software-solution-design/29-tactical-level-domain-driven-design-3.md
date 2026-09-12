@@ -1248,8 +1248,6 @@ El segundo pilar se sustenta en la inmutabilidad probatoria, la custodia documen
 
 El tercer fundamento radica en la soberanía fiscal y el blindaje modular respecto a los flujos operativos de taller y abastecimiento. Al modelar la facturación como un contexto autónomo que interactúa mediante eventos asíncronos y contratos agnósticos, la plataforma desacopla la liquidación contable respecto a las órdenes de trabajo mecánicas y el inventario, protegiendo al núcleo del negocio automotriz frente a la volatilidad de las normativas tributarias nacionales.
 
-
-
 #### 2.6.7.2. Interface Layer
 
 La Capa de Interfaz del Bounded Context Invoicing & Compliance actúa como el adaptador primario perimetral bajo el paquete canónico com.andeva.atelier.platform.invoicing.interfaces. Su propósito arquitectónico consiste en traducir las interacciones externas originadas en clientes web administrativos, aplicaciones móviles de mostrador y servicios intermodulares hacia comandos transaccionales y consultas deterministas, blindando la soberanía fiscal y contable del taller frente a solicitudes malformadas o inconsistentes.
@@ -2032,8 +2030,6 @@ En segundo término, la soberanía probatoria y la distribución optimizada de a
 
 Por último, la interoperabilidad híbrida sustentada en la fachada de contexto abierto y la coreografía reactiva mediante Transactional Outbox proporciona un equilibrio óptimo entre inmediatez operativa y resiliencia intermodular. Mientras la fachada síncrona agiliza la verificación en memoria del estado de liquidación de órdenes de trabajo en patio de taller, la publicación asíncrona de eventos de integración garantiza consistencia eventual con módulos como Notificaciones, Inventario y Recursos Humanos, afianzando la continuidad del negocio automotriz frente a fluctuaciones en los servicios telemáticos estatales.
 
-
-
 #### 2.6.7.3. Application Layer
 
 La Capa de Aplicación de Invoicing & Compliance opera como el núcleo de orquestación transaccional bajo el paquete canónico com.andeva.atelier.platform.invoicing.application. Su propósito arquitectónico consiste en gobernar los flujos de emisión y anulación de comprobantes electrónicos bajo el estándar UBL 2.1 ante la SUNAT, gestionar las amortizaciones financieras de cobranza en caja y consolidar el estado de movimientos del taller mecánico, estructurándose rigurosamente bajo el patrón CQRS para desacoplar las mutaciones transaccionales de las proyecciones analíticas.
@@ -2579,8 +2575,6 @@ En segundo término, la soberanía financiera alcanzada mediante la consolidaci�
 
 Por último, el desacoplamiento perimetral y el blindaje del modelo de dominio frente a servicios en la nube y pasarelas telemáticas garantizan alta tolerancia a fallos y portabilidad tecnológica. La interposición de capas anticorrupción y puertos de salida dedicados aísla la lógica transaccional respecto a especificaciones propietarias de proveedores como Nubefact o servicios de mensajería como Resend, asegurando que eventuales intermitencias externas jamás bloqueen los procesos de cobro y entrega vehicular en las bahías de trabajo mecánicas.
 
-
-
 #### 2.6.7.4. Infrastructure Layer
 
 La Capa de Infraestructura del Bounded Context Invoicing & Compliance, materializada bajo el paquete canónico **com.andeva.atelier.platform.invoicing.infrastructure**, provee los mecanismos de persistencia relacional, aislamiento transaccional y comunicación perimetral telemática con las entidades tributarias y servicios externos. Esta capa implementa los contratos de repositorio definidos en el dominio mediante Spring Data JPA e Hibernate sobre PostgreSQL 16 alojado en Aiven Cloud, asegurando la inmutabilidad legal de los comprobantes emitidos, la sincronización atómica de numeraciones correlativas fiscales mediante bloqueo pesimista de fila, y la resiliencia en la emisión electrónica a través de adaptadores telemáticos hacia proveedores de servicios electrónicos homologados.
@@ -3093,8 +3087,6 @@ En segundo término, la resiliencia perimetral y la tolerancia a fallos telemát
 
 Por último, el desacoplamiento transaccional y la garantía de entrega de eventos mediante el Transactional Outbox Pattern consolidan la soberanía modular de la plataforma Atelier. Al insertar atómicamente los eventos de dominio en la tabla de mensajería dentro del mismo límite de transacción relacional donde se almacena el comprobante o cobro, el sistema elimina la necesidad de protocolos de compromiso en dos fases, garantizando que los módulos de Workshop Operations, Inventory y Human Resources reciban notificaciones fidedignas para la liquidación de órdenes, cuadres de inventario y balances de flujo de caja sin riesgo de inconsistencias distribuidas.
 
-
-
 #### 2.6.7.5. Bounded Context Software Architecture Component Level Diagrams
 
 En esta sección se presenta la descomposición arquitectónica interna del contenedor central **API Application** en relación con el Bounded Context **Invoicing & Compliance** (paquete canónico com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak invoicing), dando estricto cumplimiento al Nivel 3 del Modelo C4.
@@ -3226,8 +3218,6 @@ En primer término, la alta cohesión de las responsabilidades funcionales y el 
 En segundo término, la implementación del Transactional Outbox Pattern en el componente de despacho de eventos garantiza la consistencia eventual y la entrega al menos una vez de los sucesos de facturación y cobro sin recurrir a protocolos distribuidos de dos fases. Al persistir los eventos de integración dentro del mismo límite de transacción relacional en que se asienta el comprobante o pago, se erradican las discrepancias contables entre el libro fiscal de facturación y el estado de cierre de las órdenes de trabajo en taller, manteniendo la integridad del sistema ante eventuales interrupciones telemáticas del servidor de aplicaciones.
 
 Por último, el blindaje perimetral conferido por las pasarelas externas y la gestión asíncrona de contingencias aseguran la soberanía fiscal y la continuidad ininterrumpida de las operaciones del taller mecánico. La adopción de patrones de tolerancia a fallos, circuit breakers y almacenamiento de estados contingentes de reintento frente al proveedor de servicios electrónicos evita que las caídas de conectividad hacia la entidad tributaria paralicen la emisión de comprobantes o la recaudación en mostrador, permitiendo regularizar telemáticamente las constancias de recepción dentro de los plazos legales sin perturbar el flujo diario de atención automotriz.
-
-
 
 #### 2.6.7.6. Bounded Context Software Architecture Code Level Diagrams
 
@@ -3655,181 +3645,3282 @@ Asimismo, para garantizar la consistencia en el procesamiento de eventos asíncr
 
 #### 2.6.8.1. Domain Layer
 
-La capa de dominio de SaaS Billing & Subscriptions encapsula las reglas contractuales de licenciamiento de software, las restricciones de cuotas de recursos y el procesamiento seguro de pagos recurrentes. En la @tbl:billing-domain-types se detalla la nómina de componentes que integran este módulo táctico.
+La capa de dominio del Bounded Context SaaS Billing & Subscriptions constituye el núcleo conceptual de monetización recurrente y gobierno contractual del ecosistema Atelier. Su perímetro abarca la administración del catálogo de planes de software comercializados por Andeva, el aprovisionamiento dinámico de cuotas operativas para los talleres mecánicos, el procesamiento asíncrono de recaudaciones mediante la pasarela internacional Stripe y la mitigación rigurosa de fallos de red bajo estándares de idempotencia estricta.
 
-| Clase o Tipo | Categoría Táctica | Responsabilidad Principal en el Dominio |
-| :--- | :--- | :--- |
-| `SubscriptionPlan` | Raíz de Agregado | Define el catálogo comercial de software, tarifas de cobro y límites de recursos paquetizados. |
-| `TenantSubscription` | Raíz de Agregado | Gobierna el contrato de servicio activo del taller, estados de vigencia, renovaciones y suspensiones. |
-| `SaasInvoice` | Raíz de Agregado | Recibo financiero generado por Stripe por el cobro mensual o anual del servicio prestado. |
-| `StripeWebhookEvent` | Raíz de Agregado | Garantiza la idempotencia y auditoría forense de eventos asíncronos emitidos por Stripe. |
-| `PlanFeature` | Entidad Dependiente | Funcionalidad o módulo específico habilitado dentro de la configuración de un plan de software. |
-| `PlanId` | Objeto de Valor | Identificador universal único (`UUID`) fuertemente tipado para planes de suscripción. |
-| `SubscriptionId` | Objeto de Valor | Identificador universal único (`UUID`) para contratos de suscripción de talleres. |
-| `SaasInvoiceId` | Objeto de Valor | Identificador universal único (`UUID`) para recibos de cobro del SaaS. |
-| `StripeEventId` | Objeto de Valor | Identificador unívoco del evento emitido por Stripe (`evt_...`) para deduplicación estricta. |
-| `StripeCustomerId` | Objeto de Valor | Identificador de cliente corporativo registrado en la bóveda de Stripe (`cus_...`). |
-| `StripeSubscriptionId` | Objeto de Valor | Identificador unívoco del contrato de suscripción gestionado por Stripe (`sub_...`). |
-| `StripePriceId` | Objeto de Valor | Identificador del tarifario recurrente configurado en el panel de Stripe (`price_...`). |
-| `BillingCycle` | Enumeración de Dominio | Periodicidad del cobro recurrente pactado (`MONTHLY`, `YEARLY`). |
-| `SubscriptionStatus` | Enumeración de Dominio | Estados de vigencia contractual (`TRIALING`, `ACTIVE`, `PAST_DUE`, `CANCELED`, `UNPAID`). |
-| `InvoiceStatus` | Enumeración de Dominio | Estados de pago del recibo emitido (`PAID`, `OPEN`, `VOID`, `UNCOLLECTIBLE`). |
-| `PlanTier` | Enumeración de Dominio | Segmentación comercial del paquete de software (`STARTER`, `PROFESSIONAL`, `ENTERPRISE`). |
-| `PlanPricing` | Objeto de Valor | Vinculación del importe monetario formal con su periodicidad de recaudación. |
-| `TenantQuotaLimits` | Objeto de Valor | Conjunto inmutable de techos operativos autorizados para el taller (sucursales, personal, módulos). |
-| `SubscriptionPeriod` | Objeto de Valor | Ventana temporal delimitada por fecha de inicio y fin de cobertura pagada del servicio. |
-| `WebhookProcessingStatus`| Enumeración de Dominio | Estado de atención de la notificación asíncrona (`PENDING`, `PROCESSED`, `FAILED`, `IGNORED`). |
-| `SubscriptionQuotaEnforcementService` | Servicio de Dominio | Valida que las operaciones del taller no transgredan las cuotas contratadas en su plan activo. |
-| `SubscriptionPlanRepository` | Puerto de Salida | Contrato de persistencia de dominio para la Raíz de Agregado `SubscriptionPlan`. |
-| `TenantSubscriptionRepository` | Puerto de Salida | Contrato de persistencia de dominio para la Raíz de Agregado `TenantSubscription`. |
-| `SaasInvoiceRepository` | Puerto de Salida | Contrato de persistencia de dominio para la Raíz de Agregado `SaasInvoice`. |
-| `StripeWebhookEventRepository` | Puerto de Salida | Contrato de persistencia de dominio para eventos de webhook e idempotencia. |
-| `SubscriptionPlanCreatedEvent` | Evento de Dominio | Notifica la publicación formal de un nuevo plan en el catálogo comercial de Andeva. |
-| `TenantSubscriptionActivatedEvent` | Evento de Dominio | Notifica la activación de una suscripción o el inicio satisfactorio de una prueba gratuita. |
-| `TenantSubscriptionRenewedEvent` | Evento de Dominio | Notifica la extensión del período de servicio tras la liquidación bancaria del ciclo. |
-| `TenantSubscriptionPastDueEvent` | Evento de Dominio | Notifica el impago de un cargo recurrente, dando inicio al período de tolerancia y gracia. |
-| `TenantSubscriptionCanceledEvent` | Evento de Dominio | Notifica la rescisión del contrato de software y la revocación de accesos al sistema. |
-| `TenantPlanChangedEvent` | Evento de Dominio | Notifica la migración de un taller hacia un plan superior o inferior (*upgrade/downgrade*). |
-| `SaasInvoicePaymentSucceededEvent` | Evento de Dominio | Notifica la recaudación exitosa de un recibo de cobro a través de Stripe. |
-: Catálogo de Tipos de Dominio del Bounded Context SaaS Billing & Subscriptions {#tbl:billing-domain-types}
+Al articular la soberanía de licenciamiento de la plataforma, los componentes tácticos residen bajo el paquete canónico **com.andeva.atelier.platform.billing.domain** y responden a cuatro directrices de diseño arquitectónico:
 
-*Nota.* Componentes tácticos pertenecientes al paquete com.andeva.atelier.platform.billing.domain.
+- **Desacoplamiento estricto frente a comprobantes fiscales locales:** Aislamiento total entre los cobros corporativos B2B que Andeva factura a los talleres automotrices y los comprobantes de pago electrónicos que cada taller emite a conductores o flotas bajo la normativa de SUNAT en Invoicing & Compliance, previniendo la contaminación de modelos contables disímiles.
 
-**Raíces de Agregado y Entidades Dependientes de SaaS Billing**
+- **Mitigación integral de riesgos de seguridad PCI-DSS Nivel 1:** El backend de Atelier delega la captura y transmisión de credenciales bancarias sensibles a componentes oficiales de Stripe Elements en el frontend, custodiando en el dominio únicamente identificadores tokenizados inmutables y prescindiendo del almacenamiento de números de tarjeta de crédito o códigos de verificación.
 
-1. `SubscriptionPlan`: Modela el paquete comercial de software ofrecido por Andeva a los talleres mecánicos automotrices. Define el precio formal de licenciamiento, la frecuencia de facturación y las cuotas de recursos asignadas a cada nivel. Mantiene una relación de composición 1 a 1..* con la entidad `PlanFeature`. Impone como regla de negocio que los límites operativos (sucursales y mecánicos) sean estrictamente mayores o iguales a la unidad, y que el identificador `stripePriceId` cumpla con la convención sintáctica de Stripe.
+- **Idempotencia transaccional y procesamiento exactamente una vez:** Resiliencia determinista ante la entrega duplicada de notificaciones telemáticas de Stripe durante ventanas de reintento de 72 horas mediante restricciones de unicidad sobre identificadores de eventos, neutralizando dobles facturaciones o inconsistencias de estado.
 
-En la @tbl:billing-plan-members se especifican los atributos y operaciones de la raíz de agregado `SubscriptionPlan`.
+- **Gobernanza in-memory de cuotas operativas acelerada con caché:** Fiscalización algorítmica de techos de consumo contratados por cada taller automotriz mediante servicios de dominio puros, complementada con invalidación reactiva ante eventos de ciclo de vida para garantizar autorizaciones en submilisegundos en todos los módulos del ERP.
 
-| Elemento | Tipo o Firma | Ámbito | Descripción y Reglas de Negocio |
-| :--- | :--- | :---: | :--- |
-| `id` | `PlanId` | Privado | Identificador universal único del plan comercial. |
-| `stripePriceId` | `StripePriceId` | Privado | Identificador foráneo del precio en Stripe (`price_...`). |
-| `name` | `String` | Privado | Nombre comercial descriptivo del plan (ej. "Plan Profesional"). |
-| `tier` | `PlanTier` | Privado | Nivel funcional del paquete (`STARTER`, `PROFESSIONAL`, `ENTERPRISE`). |
-| `pricing` | `PlanPricing` | Privado | Objeto de valor con importe monetario y ciclo recurrente pactado. |
-| `quotaLimits` | `TenantQuotaLimits` | Privado | Techos máximos de sucursales, personal y módulos IoT permitidos. |
-| `isActive` | `boolean` | Privado | Bandera de disponibilidad comercial para nuevas afiliaciones. |
-| `create` | `static SubscriptionPlan create(...)` | Público | Factoría de dominio que inicializa el plan y registra `SubscriptionPlanCreatedEvent`. |
-| `updateDetails` | `void updateDetails(...)` | Público | Actualiza precios y cuotas operativas preservando suscripciones en curso. |
-| `deactivate` | `void deactivate()` | Público | Retira el plan del catálogo impidiendo nuevas contrataciones. |
-| `activate` | `void activate()` | Público | Restituye la comercialización del plan en el portal de ventas. |
-: Miembros de la Raíz de Agregado SubscriptionPlan {#tbl:billing-plan-members}
+En la @tbl:billing-domain-types se expone el catálogo taxonómico consolidado de los componentes tácticos que estructuran la Capa de Dominio de SaaS Billing & Subscriptions, clasificando sus responsabilidades, relaciones cardinales y paquetes canónicos.
 
-*Nota.* Especificación de miembros de la clase SubscriptionPlan del paquete com.andeva.atelier.platform.billing.domain.model.aggregates.
+\renewcommand{\arraystretch}{1.25}\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Catálogo de la Capa de Dominio del Bounded Context SaaS Billing \& Subscriptions} \label{tbl:billing-domain-types} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\
+\hline
+\endhead
+Subscription\allowbreak Plan & Raíz de consistencia del catálogo comercial. Define paquetes de licenciamiento, tarifas recurrentes y cuotas de consumo paquetizadas. \\*
+\hline
+\textbf{Categoría} & Raíz de Agregado \\*
+\hline
+\textbf{Relaciones} & Generalización de AbstractDomainAggregateRoot<SubscriptionPlan>. Composición 1 a 0..* con PlanFeature. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak aggregates} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Tenant\allowbreak Subscription & Raíz de consistencia contractual del taller. Gobierna ciclo de vida del servicio, periodos de cobertura pagada y suspensiones. \\*
+\hline
+\textbf{Categoría} & Raíz de Agregado \\*
+\hline
+\textbf{Relaciones} & Generalización de AbstractDomainAggregateRoot<TenantSubscription>. Referencia por identidad a TenantId y PlanId. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak aggregates} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Saas\allowbreak Invoice & Raíz de consistencia contable de recaudación. Custodia el comprobante financiero generado por Stripe por liquidación del servicio. \\*
+\hline
+\textbf{Categoría} & Raíz de Agregado \\*
+\hline
+\textbf{Relaciones} & Generalización de AbstractDomainAggregateRoot<SaasInvoice>. Referencia por identidad a SubscriptionId y TenantId. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak aggregates} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Stripe\allowbreak Webhook\allowbreak Event & Raíz de consistencia para procesamiento exactamente una vez. Garantiza idempotencia estricta y auditoría forense ante notificaciones asíncronas. \\*
+\hline
+\textbf{Categoría} & Raíz de Agregado \\*
+\hline
+\textbf{Relaciones} & Raíz independiente con restricción de unicidad relacional sobre StripeEventId para deduplicación. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak aggregates} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Plan\allowbreak Feature & Módulo funcional empaquetado en un plan comercial. Modela la habilitación o restricción de capacidades avanzadas de la plataforma. \\*
+\hline
+\textbf{Categoría} & Entidad Dependiente \\*
+\hline
+\textbf{Relaciones} & Subordinada a SubscriptionPlan con clave alfanumérica unívoca de funcionalidad. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak entities} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+PlanId & Identificador único universal fuertemente tipado para planes comerciales de software. \\*
+\hline
+\textbf{Categoría} & Identificador de Dominio \\*
+\hline
+\textbf{Relaciones} & Registro inmutable de identidad basado en UUID. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+SubscriptionId & Identificador único universal fuertemente tipado para contratos de suscripción SaaS. \\*
+\hline
+\textbf{Categoría} & Identificador de Dominio \\*
+\hline
+\textbf{Relaciones} & Registro inmutable de identidad basado en UUID. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Saas\allowbreak InvoiceId & Identificador único universal fuertemente tipado para recibos financieros de suscripción. \\*
+\hline
+\textbf{Categoría} & Identificador de Dominio \\*
+\hline
+\textbf{Relaciones} & Registro inmutable de identidad basado en UUID. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Stripe\allowbreak EventId & Identificador unívoco del evento asíncrono emitido por Stripe con prefijo reglamentario evt\_. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor \\*
+\hline
+\textbf{Relaciones} & Registro inmutable con validación de expresión regular de la pasarela de pagos. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Stripe\allowbreak CustomerId & Identificador del cliente corporativo en la bóveda de Stripe con prefijo reglamentario cus\_. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor \\*
+\hline
+\textbf{Relaciones} & Registro inmutable que delega el almacenamiento de datos sensibles bajo estándar PCI-DSS. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Stripe\allowbreak SubscriptionId & Identificador unívoco del contrato de cobro recurrente en Stripe con prefijo reglamentario sub\_. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor \\*
+\hline
+\textbf{Relaciones} & Registro inmutable vinculado al ciclo de facturación externa. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Stripe\allowbreak PriceId & Identificador foráneo del precio recurrente en el catálogo de Stripe con prefijo reglamentario price\_. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor \\*
+\hline
+\textbf{Relaciones} & Registro inmutable que vincula la tarifa configurada en la pasarela externa. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+BillingCycle & Periodicidad pactada para el cobro recurrente del servicio en la plataforma. \\*
+\hline
+\textbf{Categoría} & Enumeración de Dominio \\*
+\hline
+\textbf{Relaciones} & Valores formales MONTHLY y YEARLY consumidos por PlanPricing. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Subscription\allowbreak Status & Estados formales del ciclo de vida contractual de la membresía del taller mecánico. \\*
+\hline
+\textbf{Categoría} & Enumeración de Dominio \\*
+\hline
+\textbf{Relaciones} & Valores TRIALING, ACTIVE, PAST\_DUE, CANCELED, UNPAID e INCOMPLETE. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+InvoiceStatus & Estados formales de liquidación financiera del recibo de suscripción SaaS emitido. \\*
+\hline
+\textbf{Categoría} & Enumeración de Dominio \\*
+\hline
+\textbf{Relaciones} & Valores PAID, OPEN, VOID y UNCOLLECTIBLE gobernados por SaasInvoice. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+PlanTier & Segmentación funcional comercial del paquete de software ofrecido a los talleres. \\*
+\hline
+\textbf{Categoría} & Enumeración de Dominio \\*
+\hline
+\textbf{Relaciones} & Valores STARTER, PROFESSIONAL y ENTERPRISE asociados a SubscriptionPlan. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+PlanPricing & Estructura inmutable que asocia el importe monetario formal con su ciclo de facturación recurrente. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor \\*
+\hline
+\textbf{Relaciones} & Agrupa Money y BillingCycle con validación de precio no negativo. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Tenant\allowbreak Quota\allowbreak Limits & Techos máximos de recursos operativos y banderas de módulos autorizados por plan. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor \\*
+\hline
+\textbf{Relaciones} & Parámetros inmutables maxBranches, maxActiveStaff, iotTelemetryEnabled y aiDiagnosticsEnabled. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Subscription\allowbreak Period & Ventana temporal inmutable que delimita el intervalo formal de vigencia de cobertura pagada. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor \\*
+\hline
+\textbf{Relaciones} & Agrupa marcas temporales startDate y endDate con validación de secuencia cronológica. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Webhook\allowbreak Processing\allowbreak Status & Situación transaccional del procesamiento de eventos asíncronos recibidos por webhook. \\*
+\hline
+\textbf{Categoría} & Enumeración de Dominio \\*
+\hline
+\textbf{Relaciones} & Valores PENDING, PROCESSED, FAILED e IGNORED gestionados por StripeWebhookEvent. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Subscription\allowbreak Quota\allowbreak Enforcement\allowbreak Service & Servicio de dominio que fiscaliza los límites de consumo antes de crear recursos en otros módulos. \\*
+\hline
+\textbf{Categoría} & Servicio de Dominio \\*
+\hline
+\textbf{Relaciones} & Evalúa reglas de negocio sobre TenantSubscription y SubscriptionPlan lanzando QuotaExceededException. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Stripe\allowbreak Webhook\allowbreak Signature\allowbreak Verification\allowbreak Service & Servicio de dominio criptográfico que verifica la autenticidad matemática de los eventos entrantes. \\*
+\hline
+\textbf{Categoría} & Servicio de Dominio \\*
+\hline
+\textbf{Relaciones} & Comprueba la firma HMAC-SHA256 del encabezado Stripe-Signature contra el secreto simétrico. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Subscription\allowbreak Plan\allowbreak Repository & Contrato de persistencia de dominio para el catálogo de planes comerciales. \\*
+\hline
+\textbf{Categoría} & Puerto de Salida \\*
+\hline
+\textbf{Relaciones} & Implementado por adaptadores en Infrastructure Layer para persistencia en PostgreSQL 16. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Tenant\allowbreak Subscription\allowbreak Repository & Contrato de persistencia de dominio para contratos de suscripción activa de talleres mecánicos. \\*
+\hline
+\textbf{Categoría} & Puerto de Salida \\*
+\hline
+\textbf{Relaciones} & Provee consultas de alta velocidad y verificación de unicidad de suscripción activa por taller. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Saas\allowbreak Invoice\allowbreak Repository & Contrato de persistencia de dominio para recibos y comprobantes financieros de membresías. \\*
+\hline
+\textbf{Categoría} & Puerto de Salida \\*
+\hline
+\textbf{Relaciones} & Provee consultas históricas de facturación por taller y búsqueda por identificador de Stripe. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Stripe\allowbreak Webhook\allowbreak Event\allowbreak Repository & Contrato de persistencia de dominio para registro forense y control de deduplicación de eventos. \\*
+\hline
+\textbf{Categoría} & Puerto de Salida \\*
+\hline
+\textbf{Relaciones} & Permite verificar existencia previa por StripeEventId garantizando idempotencia estricta. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Subscription\allowbreak Plan\allowbreak Created\allowbreak Event & Notifica la publicación formal de un nuevo plan comercial en el catálogo de Andeva. \\*
+\hline
+\textbf{Categoría} & Evento de Dominio \\*
+\hline
+\textbf{Relaciones} & Emitido por SubscriptionPlan tras su factoría de creación. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Tenant\allowbreak Subscription\allowbreak Activated\allowbreak Event & Notifica la activación de una membresía o el inicio de una prueba gratuita para un taller. \\*
+\hline
+\textbf{Categoría} & Evento de Dominio \\*
+\hline
+\textbf{Relaciones} & Emitido por TenantSubscription habilitando el acceso a módulos de la plataforma. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Tenant\allowbreak Subscription\allowbreak Renewed\allowbreak Event & Notifica la extensión del periodo pagado tras la liquidación bancaria exitosa de un ciclo. \\*
+\hline
+\textbf{Categoría} & Evento de Dominio \\*
+\hline
+\textbf{Relaciones} & Emitido por TenantSubscription renovando la validez en la capa de caché. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Tenant\allowbreak Subscription\allowbreak PastDue\allowbreak Event & Notifica el rechazo bancario de un cobro recurrente dando inicio al periodo de tolerancia. \\*
+\hline
+\textbf{Categoría} & Evento de Dominio \\*
+\hline
+\textbf{Relaciones} & Emitido por TenantSubscription alertando al administrador del taller. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Tenant\allowbreak Subscription\allowbreak Canceled\allowbreak Event & Notifica la rescisión voluntaria o forzosa de la suscripción SaaS revocando accesos. \\*
+\hline
+\textbf{Categoría} & Evento de Dominio \\*
+\hline
+\textbf{Relaciones} & Emitido por TenantSubscription invalidando de forma inmediata credenciales de sesión en IAM. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Tenant\allowbreak Plan\allowbreak Changed\allowbreak Event & Notifica el cambio de nivel comercial de un taller reajustando sus cuotas de recursos. \\*
+\hline
+\textbf{Categoría} & Evento de Dominio \\*
+\hline
+\textbf{Relaciones} & Emitido por TenantSubscription propagando nuevas capacidades a otros contextos. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Saas\allowbreak Invoice\allowbreak Payment\allowbreak Succeeded\allowbreak Event & Notifica la acreditación bancaria exitosa de un recibo de servicio procesado por Stripe. \\*
+\hline
+\textbf{Categoría} & Evento de Dominio \\*
+\hline
+\textbf{Relaciones} & Emitido por SaasInvoice registrando la liquidación financiera. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Saas\allowbreak Invoice\allowbreak Payment\allowbreak Failed\allowbreak Event & Notifica el fallo del intento de débito bancario asociado a un recibo emitido por la plataforma. \\*
+\hline
+\textbf{Categoría} & Evento de Dominio \\*
+\hline
+\textbf{Relaciones} & Emitido por SaasInvoice iniciando mecanismos de cobranza y notificación de mora. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Billing\allowbreak Domain\allowbreak Exception & Superclase abstracta para contingencias semánticas e infracciones a las reglas de cobro SaaS. \\*
+\hline
+\textbf{Categoría} & Excepción Base de Dominio \\*
+\hline
+\textbf{Relaciones} & Generalización de DomainException con normalización de códigos RFC 7807. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak exceptions} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Quota\allowbreak Exceeded\allowbreak Exception & Señaliza la tentativa de exceder los techos operativos autorizados por el plan de suscripción. \\*
+\hline
+\textbf{Categoría} & Excepción de Dominio \\*
+\hline
+\textbf{Relaciones} & Especialización de BillingDomainException con mapeo HTTP 403 Forbidden o 409 Conflict. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak exceptions} \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Catálogo taxonómico de tipos tácticos del paquete com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak billing.\allowbreak domain.
 
-En cuanto a sus relaciones, `SubscriptionPlan` hereda de `AbstractDomainAggregateRoot<SubscriptionPlan>` y mantiene una relación de composición 1 a 1..* con la entidad dependiente `PlanFeature`.
+**Raíces de Agregado y Entidades Dependientes de SaaS Billing & Subscriptions**
 
-2. `TenantSubscription`: Actúa como la frontera de consistencia contractual entre Andeva y el taller automotriz. Custodia el identificador del taller abonado (`tenantId`), el plan suscrito (`planId`), las credenciales del cliente en la pasarela de pagos (`stripeCustomerId`, `stripeSubscriptionId`), la ventana de cobertura temporal (`currentPeriod: SubscriptionPeriod`) y la situación del servicio (`status: SubscriptionStatus`). Aplica como invariante que un taller mecánico no puede poseer más de una suscripción activa o en período de prueba simultáneamente, y que la fecha de culminación del ciclo debe ser cronológicamente posterior a su inicio.
+El modelo conceptual estructura su consistencia transaccional alrededor de cuatro raíces de agregado independientes y una entidad dependiente, garantizando límites de concurrencia acotados y alta cohesión operativa:
 
-En la @tbl:billing-subscription-members se exponen los miembros y métodos de control de la raíz de agregado `TenantSubscription`.
+- **SubscriptionPlan**: Modela el paquete comercial de software ofrecido a los talleres automotrices abonados. Custodia las tarifas de licenciamiento, la frecuencia de facturación recurrente pactada y las cuotas de consumo paquetizadas. Mantiene una relación de composición 1 a 0..* con la entidad dependiente **PlanFeature** para gobernar la habilitación selectiva de capacidades técnicas avanzadas de la plataforma.
 
-| Elemento | Tipo o Firma | Ámbito | Descripción y Reglas de Negocio |
-| :--- | :--- | :---: | :--- |
-| `id` | `SubscriptionId` | Privado | Identificador universal único del contrato de suscripción. |
-| `tenantId` | `TenantId` | Privado | Taller automotriz titular de la membresía. |
-| `planId` | `PlanId` | Privado | Identificador del plan comercial contratado. |
-| `stripeCustomerId` | `StripeCustomerId` | Privado | Identificador del cliente en Stripe (`cus_...`). |
-| `stripeSubscriptionId`| `StripeSubscriptionId`| Privado | Identificador de suscripción recurrente en Stripe (`sub_...`). |
-| `status` | `SubscriptionStatus` | Privado | Situación de vigencia (`TRIALING`, `ACTIVE`, `PAST_DUE`, `CANCELED`, etc.). |
-| `currentPeriod` | `SubscriptionPeriod` | Privado | Intervalo de tiempo cubierto por la liquidación de pago. |
-| `cancelAtPeriodEnd` | `boolean` | Privado | Indica si la renovación se interrumpirá al concluir el período vigente. |
-| `canceledAt` | `Optional<Instant>` | Privado | Marca de tiempo UTC formal en que se solicitó o ejecutó la baja. |
-| `trialEndDate` | `Optional<Instant>` | Privado | Fecha y hora límite en que expira el acceso en modalidad de prueba. |
-| `startTrial` | `static TenantSubscription startTrial(...)` | Público | Factoría para pruebas gratuitas; registra `TenantSubscriptionActivatedEvent`. |
-| `activate` | `static TenantSubscription activate(...)` | Público | Factoría tras pago formal en Stripe; registra `TenantSubscriptionActivatedEvent`. |
-| `renewPeriod` | `void renewPeriod(SubscriptionPeriod period)` | Público | Extiende el ciclo tras un cobro recurrente exitoso y emite `TenantSubscriptionRenewedEvent`. |
-| `markPastDue` | `void markPastDue()` | Público | Declara la mora tras rechazo bancario e inicia gracia con `TenantSubscriptionPastDueEvent`. |
-| `cancelAtPeriodEnd` | `void cancelAtPeriodEnd()` | Público | Programa la no renovación del servicio al expirar el ciclo pagado. |
-| `cancelImmediately` | `void cancelImmediately(Instant at)` | Público | Revoca el acceso de forma inmediata y emite `TenantSubscriptionCanceledEvent`. |
-| `changePlan` | `void changePlan(PlanId newPlanId, ...)`| Público | Modifica el nivel contratado (*upgrade/downgrade*) y registra `TenantPlanChangedEvent`. |
-| `isAccessGranted` | `boolean isAccessGranted()` | Público | Evalúa si el taller está autorizado a operar en la plataforma en tiempo de ejecución. |
-: Miembros de la Raíz de Agregado TenantSubscription {#tbl:billing-subscription-members}
+La entidad impone como invariantes de negocio que los identificadores de tarifa foránea cumplan con el prefijo oficial de la pasarela de pagos, que el importe monetario sea estrictamente no negativo (*price* ≥ 0.00) y que los techos operativos mínimos amparen sedes físicas o unidades de auxilio móvil en campo (*maxBranches* ≥ 1) y personal activo en terminales web o dispositivos móviles (*maxActiveStaff* ≥ 1). La desactivación del plan comercial inhabilita su contratación para nuevos talleres sin alterar los derechos adquiridos de contratos preexistentes.
 
-*Nota.* Especificación de miembros de la clase TenantSubscription del paquete com.andeva.atelier.platform.billing.domain.model.aggregates.
+En la @tbl:billing-plan-members se especifican los atributos estructurales, métodos de control comercial y reglas de consistencia de la raíz de agregado **SubscriptionPlan**.
 
-Respecto a sus relaciones, `TenantSubscription` hereda de `AbstractDomainAggregateRoot<TenantSubscription>` y se asocia mediante identificadores inmutables con `TenantId` y `PlanId`.
+\renewcommand{\arraystretch}{1.25}\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Miembros de la Raíz de Agregado SubscriptionPlan} \label{tbl:billing-plan-members} \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Raíz de Agregado:} SubscriptionPlan (Catálogo Comercial de Licenciamiento)} \\*
+\hline
+id & Identificador universal único del plan comercial. Inmutable y no nulo. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{PlanId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+stripePriceId & Identificador foráneo de la tarifa configurada en Stripe con prefijo reglamentario price\_. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{StripePriceId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+name & Denominación descriptiva del paquete de software ofrecido a los talleres mecánicos. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+tier & Segmentación funcional comercial del paquete de software con niveles STARTER, PROFESSIONAL o ENTERPRISE. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{PlanTier} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+pricing & Estructura inmutable que asocia el importe monetario formal con su periodicidad de recaudación. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{PlanPricing} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+quotaLimits & Techos máximos de recursos operativos y banderas de módulos de plataforma autorizados. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{TenantQuotaLimits} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+isActive & Bandera booleana que habilita o suspende la oferta del plan para nuevas contrataciones comerciales. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{boolean} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+features & Colección de capacidades modulares paquetizadas dentro de la oferta de licenciamiento. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{List<PlanFeature>} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+create & Factoría de dominio que valida invariantes de precios no negativos y techos unitarios mínimos emitiendo SubscriptionPlanCreatedEvent. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{static SubscriptionPlan create(StripePriceId,\allowbreak  String,\allowbreak  PlanTier,\allowbreak  PlanPricing,\allowbreak  TenantQuotaLimits)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+updateDetails & Actualiza importes tarifarios y techos de cuota preservando intactas las suscripciones previas ya contratadas. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void updateDetails(String,\allowbreak  PlanPricing,\allowbreak  TenantQuotaLimits)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+deactivate & Suspende la disponibilidad comercial del plan impidiendo nuevas adhesiones de talleres sin alterar contratos en curso. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void deactivate()} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+activate & Restituye la oferta del plan en el portal de contratación comercial de la plataforma. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void activate()} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+addFeature & Asocia una nueva capacidad técnica modular al catálogo de funcionalidades del plan de software. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void addFeature(PlanFeature)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Especificación de miembros de la clase SubscriptionPlan del paquete com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak aggregates.
 
-3. `SaasInvoice`: Raíz de agregado que representa el comprobante contable emitido por Andeva hacia el taller mecánico por la prestación del servicio de software. Almacena el identificador foráneo de la factura en Stripe (`stripeInvoiceId`), el importe neto cobrado a la tarjeta (`amountPaid: Money`), la situación de cobro (`status: InvoiceStatus`), la marca de tiempo de acreditación bancaria (`paidAt: Instant`) y las direcciones web de descarga del PDF formal y la pasarela alojada de pago (`hostedInvoiceUrl`).
+- **TenantSubscription**: Representa el contrato de membresía de software suscrito entre Andeva y el taller automotriz. Gobierna la máquina de estados contractual a través de las transiciones entre estados de prueba, vigencia activa, mora transitoria, suspensión y cancelación voluntaria o forzosa. Controla los intervalos temporales de cobertura pagada y concede el acceso operativo al sistema.
 
-4. `StripeWebhookEvent`: Raíz de agregado concebida como escudo de idempotencia frente a la entrega asíncrona de notificaciones por parte de Stripe. Almacena el identificador unívoco del evento (`stripeEventId`), la categoría de suceso reportada (`eventType: String`), el cuerpo JSON íntegro para auditoría forense (`eventPayload: String`), el estado de procesamiento (`status: WebhookProcessingStatus`) y la marca de tiempo de atención. Una restricción de unicidad estricta a nivel de base de datos relacional sobre `stripe_event_id` garantiza que los reintentos automáticos de red no provoquen duplicación en las renovaciones o facturaciones de los talleres.
+Aplica como regla de consistencia estricta que un taller automotriz no puede poseer más de una suscripción en estado activo o en periodo de prueba simultáneamente, impidiendo duplicidades de licenciamiento sobre el mismo espacio de trabajo. Asimismo, demanda que la fecha de inicio del ciclo sea cronológicamente anterior a la fecha de término (*startDate* < *endDate*) y estipula que una membresía formalmente cancelada adquiere carácter terminal, exigiendo una nueva contratación para restablecer el servicio.
 
-**Objetos de Valor de SaaS Billing & Subscriptions**
+En la @tbl:billing-subscription-members se detallan los atributos, signaturas de operaciones y reglas de consistencia interna de la raíz de agregado **TenantSubscription**.
 
-Los conceptos e invariantes del modelo de membresías se plasman en objetos de valor inmutables, resumidos en la @tbl:billing-value-objects.
+\renewcommand{\arraystretch}{1.25}\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Miembros de la Raíz de Agregado TenantSubscription} \label{tbl:billing-subscription-members} \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Raíz de Agregado:} TenantSubscription (Contrato de Membresía del Taller)} \\*
+\hline
+id & Identificador universal único del contrato de membresía SaaS. Inmutable y no nulo. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{SubscriptionId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+tenantId & Taller automotriz titular del contrato de software. Clave de aislamiento multitenant. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{TenantId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+planId & Identificador del paquete comercial contratado por el taller automotriz. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{PlanId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+stripeCustomerId & Identificador del cliente corporativo en la bóveda de Stripe con prefijo cus\_. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{StripeCustomerId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+stripeSubscriptionId & Identificador unívoco del contrato de suscripción gestionado por Stripe con prefijo sub\_. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{StripeSubscriptionId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+status & Situación de vigencia contractual del taller bajo los estados TRIALING, ACTIVE, PAST\_DUE, CANCELED o UNPAID. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{SubscriptionStatus} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+currentPeriod & Ventana temporal de cobertura pagada delimitada por fecha de inicio y finalización formal. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{SubscriptionPeriod} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+cancelAtPeriodEnd & Bandera que programa la no renovación automática al concluir el periodo pagado vigente. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{boolean} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+canceledAt & Marca de tiempo UTC formal en que se ejecutó o solicitó la rescisión del servicio. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Optional<Instant>} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+trialEndDate & Marca de tiempo UTC que delimita la expiración de la modalidad de prueba gratuita. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Optional<Instant>} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+startTrial & Factoría de dominio para periodos de prueba registrando TenantSubscriptionActivatedEvent. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{static TenantSubscription startTrial(TenantId,\allowbreak  PlanId,\allowbreak  StripeCustomerId,\allowbreak  int)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+activate & Factoría tras liquidación exitosa en Stripe registrando TenantSubscriptionActivatedEvent. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{static TenantSubscription activate(TenantId,\allowbreak  PlanId,\allowbreak  StripeCustomerId,\allowbreak  StripeSubscriptionId,\allowbreak  SubscriptionPeriod)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+renewPeriod & Extiende la cobertura pagada tras confirmación bancaria y emite TenantSubscriptionRenewedEvent. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void renewPeriod(SubscriptionPeriod)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+markPastDue & Registra la situación de mora ante cobro bancario fallido e inicia tolerancia con TenantSubscriptionPastDueEvent. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void markPastDue()} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+cancelAtPeriodEnd & Configura la terminación programada del contrato al expirar el ciclo de cobertura liquidado. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void cancelAtPeriodEnd()} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+cancelImmediately & Revoca el acceso de forma inmediata y definitiva emitiendo TenantSubscriptionCanceledEvent. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void cancelImmediately(Instant)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+changePlan & Actualiza el plan comercial emitiendo TenantPlanChangedEvent para reajustar límites de uso. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void changePlan(PlanId,\allowbreak  StripePriceId)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+isAccessGranted & Evalúa si el taller está habilitado para operar bajo estados TRIALING, ACTIVE o periodo de gracia. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{boolean isAccessGranted()} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Especificación de miembros de la clase TenantSubscription del paquete com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak aggregates.
 
-| Objeto de Valor | Atributos Clave | Restricciones de Validación y Reglas de Negocio |
-| :--- | :--- | :--- |
-| `PlanPricing` | `price`: `Money`, `billingCycle`: `BillingCycle` | Monto no negativo ($price \ge 0.00$), moneda fijada según el mercado corporativo (USD/PEN). |
-| `TenantQuotaLimits`| `maxBranches`, `maxActiveStaff`: `int`, `iotTelemetryEnabled`, `aiDiagnosticsEnabled`: `boolean` | `maxBranches >= 1`, `maxActiveStaff >= 1`. Controla acceso modular por licenciamiento. |
-| `SubscriptionPeriod`| `startDate`, `endDate`: `Instant` | Invariante temporal estricta: `startDate.isBefore(endDate)`. |
-| `StripeEventId` | `value`: `String` | Prefijo estricto `^evt_[a-zA-Z0-9]+$`, garantizando formato original de la pasarela. |
-| `StripeSubscriptionId`| `value`: `String` | Prefijo estricto `^sub_[a-zA-Z0-9]+$`, identificando el contrato en Stripe. |
-: Objetos de Valor del Bounded Context SaaS Billing & Subscriptions {#tbl:billing-value-objects}
+- **SaasInvoice**: Modela el comprobante o recibo contable interno generado tras la liquidación de cargos recurrentes ejecutados por Stripe hacia el taller automotriz. Custodia los identificadores foráneos de recaudación, el importe monetario efectivamente amortizado, la marca temporal UTC del débito bancario y los enlaces seguros para la inspección y descarga del comprobante digital.
 
-*Nota.* Especificación de Objetos de Valor del paquete com.andeva.atelier.platform.billing.domain.model.valueobjects.
+El agregado establece que todo recibo en estado liquidado es estrictamente inmutable, prohibiendo modificaciones retroactivas sobre importes o clientes vinculados. Asimismo, ante rechazos en los medios de pago bancarios, transiciona su estado para coordinar de forma determinista la apertura del periodo de tolerancia en el contrato de suscripción.
+
+En la @tbl:billing-invoice-members se exponen los atributos, signaturas operativas y reglas de liquidación financiera de la raíz de agregado **SaasInvoice**.
+
+\renewcommand{\arraystretch}{1.25}\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Miembros de la Raíz de Agregado SaasInvoice} \label{tbl:billing-invoice-members} \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Raíz de Agregado:} SaasInvoice (Recibo de Liquidación Financiera)} \\*
+\hline
+id & Identificador universal único del comprobante financiero interno. Inmutable y no nulo. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{SaasInvoiceId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+subscriptionId & Identificador del contrato de suscripción asociado a la liquidación financiera. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{SubscriptionId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+tenantId & Taller automotriz titular responsable de amortizar el costo del servicio de software. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{TenantId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+stripeInvoiceId & Identificador foráneo unívoco del recibo en Stripe con prefijo reglamentario in\_. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{StripeInvoiceId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+amountPaid & Importe monetario neto debitado de forma efectiva de la tarjeta de crédito o cuenta bancaria. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Money} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+status & Situación de cobro del recibo financiero emitido bajo estados PAID, OPEN, VOID o UNCOLLECTIBLE. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{InvoiceStatus} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+invoicePdfUrl & Enlace seguro HTTPS provisto por Stripe para la descarga documental en formato PDF. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+hostedInvoiceUrl & Enlace interactivo seguro provisto por Stripe para consulta en línea y pago de la factura. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+paidAt & Marca de tiempo UTC que certifica la liquidación y acreditación formal del débito bancario. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Optional<Instant>} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+recordPaid & Factoría que registra el cobro satisfactorio y emite SaasInvoicePaymentSucceededEvent. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{static SaasInvoice recordPaid(SubscriptionId,\allowbreak  TenantId,\allowbreak  StripeInvoiceId,\allowbreak  Money,\allowbreak  String,\allowbreak  String,\allowbreak  Instant)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+markPaymentFailed & Registra el rechazo bancario y emite SaasInvoicePaymentFailedEvent para gestión de mora. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void markPaymentFailed(String)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Especificación de miembros de la clase SaasInvoice del paquete com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak aggregates.
+
+- **StripeWebhookEvent** y **PlanFeature**: La raíz de agregado **StripeWebhookEvent** implementa un escudo de idempotencia estricta frente a la entrega asíncrona de notificaciones por parte de la pasarela de pagos. Almacena la carga útil JSON íntegra para fines de auditoría forense y aprovecha una restricción de unicidad relacional sobre el identificador emitido por Stripe para descartar reintentos espurios de red.
+
+Por su parte, **PlanFeature** estructura las capacidades modulares empaquetadas en un plan comercial, abarcando la ingesta de telemetría vehicular IoT y la emisión de diagnósticos predictivos mediante inteligencia artificial, tipificando claves alfanuméricas inmutables para la verificación dinámica de permisos en tiempo de ejecución.
+
+En la @tbl:billing-webhook-feature-members se detallan los miembros, tipos y responsabilidades de la raíz de agregado **StripeWebhookEvent** y la entidad dependiente **PlanFeature**.
+
+\renewcommand{\arraystretch}{1.25}\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Miembros de StripeWebhookEvent y PlanFeature} \label{tbl:billing-webhook-feature-members} \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Raíz de Agregado:} StripeWebhookEvent (Idempotencia y Auditoría Forense)} \\*
+\hline
+id & Identificador universal único interno de la bitácora de eventos asíncronos. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{UUID} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+stripeEventId & Identificador unívoco del evento emitido por Stripe con restricción relacional UNIQUE. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{StripeEventId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+eventType & Tipificación del suceso asíncrono reportado por Stripe en la pasarela externa. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+eventPayload & Cuerpo íntegro serializado en formato JSON para trazabilidad y auditoría forense. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+status & Situación del procesamiento del mensaje bajo estados PENDING, PROCESSED, FAILED o IGNORED. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{WebhookProcessingStatus} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+processedAt & Marca de tiempo UTC de resolución o atención de la notificación en el backend. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Instant} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+errorMessage & Detalle técnico descriptivo en caso de suscitarse anomalías durante el procesamiento. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Optional<String>} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+receive & Factoría que registra la recepción inicial del evento en estado PENDING. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{static StripeWebhookEvent receive(StripeEventId,\allowbreak  String,\allowbreak  String)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+markProcessed & Transiciona el estado a PROCESSED tras actualizar satisfactoriamente el modelo de negocio. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void markProcessed()} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+markFailed & Transiciona el estado a FAILED registrando la causa técnica del fallo transaccional. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void markFailed(String)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad Dependiente:} PlanFeature (Módulo Funcional Paquetizado)} \\*
+\hline
+id & Identificador universal único de la característica técnica subordinada. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{UUID} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+featureKey & Clave alfanumérica unívoca de la funcionalidad paquetizada en el catálogo de software. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+description & Glosa comercial descriptiva de la capacidad provista para el usuario final. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+isEnabled & Bandera que habilita o inhabilita la disponibilidad del módulo para el plan activo. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{boolean} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Especificación de miembros de StripeWebhookEvent y PlanFeature en los paquetes aggregates y entities de com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak billing.\allowbreak domain.
+
+**Objetos de Valor y Enumeraciones de SaaS Billing & Subscriptions**
+
+Los conceptos e invariantes del modelo contractual se encapsulan en objetos de valor inmutables, modelados como registros de Java 21 con validación de frontera en sus constructores compactos. Erradican la obsesión por tipos primitivos mediante tipos dedicados para montos, techos de recursos, intervalos cronológicos e identificadores externos de Stripe.
+
+En la @tbl:billing-value-objects se especifican los atributos y reglas de validación de los objetos de valor inmutables y las enumeraciones que vertebran este contexto.
+
+\renewcommand{\arraystretch}{1.25}\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Objetos de Valor y Enumeraciones de SaaS Billing \& Subscriptions} \label{tbl:billing-value-objects} \\
+\hline
+\thfirst{Componente Inmutable} & \thcell{Definición de Atributos y Reglas de Validación} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Componente Inmutable} & \thcell{Definición de Atributos y Reglas de Validación} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} PlanId} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{value: UUID} \\*
+\hline
+\textbf{Restricciones y Reglas} & Identificador unívoco universal del plan comercial de software. Inmutable y no nulo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} SubscriptionId} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{value: UUID} \\*
+\hline
+\textbf{Restricciones y Reglas} & Identificador unívoco universal del contrato de suscripción SaaS del taller. Inmutable y no nulo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} SaasInvoiceId} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{value: UUID} \\*
+\hline
+\textbf{Restricciones y Reglas} & Identificador unívoco universal del comprobante contable de suscripción. Inmutable y no nulo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} StripeEventId} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{value: String} \\*
+\hline
+\textbf{Restricciones y Reglas} & Validación de expresión regular con prefijo obligatorio evt\_ garantizando formato original de Stripe. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} StripeCustomerId} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{value: String} \\*
+\hline
+\textbf{Restricciones y Reglas} & Validación con prefijo obligatorio cus\_ identificando al cliente en la bóveda de la pasarela. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} StripeSubscriptionId} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{value: String} \\*
+\hline
+\textbf{Restricciones y Reglas} & Validación con prefijo obligatorio sub\_ identificando la suscripción recurrente en Stripe. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} StripePriceId} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{value: String} \\*
+\hline
+\textbf{Restricciones y Reglas} & Validación con prefijo obligatorio price\_ identificando la tarifa comercial en Stripe. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} PlanPricing} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{price: Money,\allowbreak  billingCycle: BillingCycle} \\*
+\hline
+\textbf{Restricciones y Reglas} & Invariante de importe monetario no negativo (*price* ≥ 0.00) y fijación unívoca del ciclo de cobro. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} TenantQuotaLimits} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{maxBranches: int,\allowbreak  maxActiveStaff: int,\allowbreak  iotTelemetryEnabled: boolean,\allowbreak  aiDiagnosticsEnabled: boolean,\allowbreak  maxMonthlyWorkOrders: int} \\*
+\hline
+\textbf{Restricciones y Reglas} & Invariantes de techos operativos mínimos (*maxBranches* ≥ 1, *maxActiveStaff* ≥ 1) y control de módulos. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} SubscriptionPeriod} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{startDate: Instant,\allowbreak  endDate: Instant} \\*
+\hline
+\textbf{Restricciones y Reglas} & Invariante cronológica estricta que exige que la fecha de inicio preceda a la de culminación. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Enumeración de Dominio:} BillingCycle} \\*
+\hline
+\textbf{Valores Permitidos} & \texttt{MONTHLY}, \texttt{YEARLY} \\*
+\hline
+\textbf{Propósito en el Modelo} & Define la periodicidad de liquidación recurrente de la membresía comercial de software. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Enumeración de Dominio:} SubscriptionStatus} \\*
+\hline
+\textbf{Valores Permitidos} & \texttt{TRIALING}, \texttt{ACTIVE}, \texttt{PAST\_DUE}, \texttt{CANCELED}, \texttt{UNPAID}, \texttt{INCOMPLETE} \\*
+\hline
+\textbf{Propósito en el Modelo} & Rige los estados de vigencia contractual, periodos de gracia y rescisión de la membresía. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Enumeración de Dominio:} InvoiceStatus} \\*
+\hline
+\textbf{Valores Permitidos} & \texttt{PAID}, \texttt{OPEN}, \texttt{VOID}, \texttt{UNCOLLECTIBLE} \\*
+\hline
+\textbf{Propósito en el Modelo} & Modela la situación financiera del comprobante de recaudación emitido hacia el taller. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Enumeración de Dominio:} PlanTier} \\*
+\hline
+\textbf{Valores Permitidos} & \texttt{STARTER}, \texttt{PROFESSIONAL}, \texttt{ENTERPRISE} \\*
+\hline
+\textbf{Propósito en el Modelo} & Clasificación comercial del nivel de servicio y volumen de capacidad paquetizado. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Enumeración de Dominio:} WebhookProcessingStatus} \\*
+\hline
+\textbf{Valores Permitidos} & \texttt{PENDING}, \texttt{PROCESSED}, \texttt{FAILED}, \texttt{IGNORED} \\*
+\hline
+\textbf{Propósito en el Modelo} & Rige la situación transaccional de atención y deduplicación de notificaciones de pasarela. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Objetos de valor inmutables y tipos enumerados del paquete com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects.
 
 **Servicios de Dominio de SaaS Billing & Subscriptions**
 
-1. `SubscriptionQuotaEnforcementService`: Servicio de dominio encargado de salvaguardar las fronteras de consumo del software contratadas por el taller. Intercepta los comandos emitidos en otros contextos de la plataforma antes de que se creen recursos físicos o lógicos:
-   * En IAM & Tenancy: verifica que la cantidad de sucursales activas no supere `maxBranches` antes de dar de alta una nueva sede física.
-   * En Human Resources: verifica que la plantilla de mecánicos y colaboradores en servicio no sobrepase `maxActiveStaff`.
-   * En Workshop Operations (MRO): verifica el volumen mensual de órdenes de trabajo procesadas.
-   * En IoT Telemetry: fiscaliza que la bandera `iotTelemetryEnabled` se encuentre activa antes de admitir la vinculación de escáneres vehiculares OBD-II.
-   Si una operación transgrede el límite estipulado, el servicio lanza de forma síncrona una excepción tipada `QuotaExceededException`, impidiendo la creación del recurso y orientando al usuario a realizar una actualización de plan (*upgrade*).
+Las operaciones que trascienden la frontera de un único agregado o que ejecutan validaciones algorítmicas sin estado se implementan mediante servicios de dominio puros desacoplados de tecnologías de persistencia o transporte HTTP:
+
+- **SubscriptionQuotaEnforcementService**: Intercepta de forma síncrona las solicitudes de alta de recursos físicos y humanos originadas en otros contextos de la plataforma. Verifica en tiempo de ejecución que el volumen acumulado de sucursales físicas y unidades operativas de Mobile Workshop no rebase el límite pactado en el plan contratado antes de autorizar sedes en IAM, supervisa la nómina de personal activo en estaciones web y dispositivos móviles desde Human Resources y certifica la habilitación de módulos especializados, lanzando excepciones tipadas ante desbordamientos de consumo.
+
+- **StripeWebhookSignatureVerificationService**: Ejecuta la comprobación criptográfica rigurosa de los mensajes entrantes en el canal telemático de webhooks. Calcula la firma simétrica HMAC-SHA256 sobre el cuerpo del mensaje empleando el secreto compartido y la compara en tiempo constante contra el encabezado de Stripe, verificando adicionalmente una ventana de tolerancia cronológica de 300 segundos para frustrar ataques de intermediarios y repetición.
+
+En la @tbl:billing-domain-services se presentan los servicios de dominio de este contexto, indicando sus signaturas operativas y responsabilidades técnicas.
+
+\renewcommand{\arraystretch}{1.25}\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Servicios de Dominio del Bounded Context SaaS Billing \& Subscriptions} \label{tbl:billing-domain-services} \\
+\hline
+\thfirst{Aspecto de Servicio} & \thcell{Especificación Técnica y Responsabilidad} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Servicio} & \thcell{Especificación Técnica y Responsabilidad} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Dominio:} SubscriptionQuotaEnforcementService} \\*
+\hline
+\textbf{Métodos Principales} & - \texttt{validateBranchCreationAllowed(TenantSubscription sub,\allowbreak  SubscriptionPlan plan,\allowbreak  int currentBranchCount)} \newline - \texttt{validateStaffAdditionAllowed(TenantSubscription sub,\allowbreak  SubscriptionPlan plan,\allowbreak  int currentStaffCount)} \newline - \texttt{isFeatureEnabled(TenantSubscription sub,\allowbreak  SubscriptionPlan plan,\allowbreak  String featureKey)} \\*
+\hline
+\textbf{Responsabilidad} & Fiscaliza en memoria que las tentativas de creación de sucursales o personal activo no superen los techos estipulados en el plan contratado lanzando QuotaExceededException ante excesos e inspecciona la habilitación de módulos avanzados. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Dominio:} StripeWebhookSignatureVerificationService} \\*
+\hline
+\textbf{Métodos Principales} & - \texttt{verifySignature(String payload,\allowbreak  String signatureHeader,\allowbreak  String secret)} \\*
+\hline
+\textbf{Responsabilidad} & Realiza la validación criptográfica pura de la firma digital HMAC-SHA256 presente en los encabezados HTTP contra el secreto simétrico del webhook asegurando la autenticidad matemática de los eventos de Stripe. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Servicios de dominio sin estado ubicados en el paquete com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak billing.\allowbreak domain.\allowbreak services.
 
 **Puertos de Repositorio de la Capa de Dominio**
 
-En la @tbl:billing-repository-ports se presentan los puertos de persistencia que desacoplan la lógica contractual de la infraestructura relacional.
+El aislamiento del modelo conceptual respecto a los adaptadores de infraestructura se implementa mediante contratos de repositorio agnósticos. Estos puertos definen las operaciones requeridas para recuperar y persistir el estado de los agregados respetando sus invariantes de consistencia:
 
-| Puerto de Repositorio | Métodos Principales | Responsabilidad de Dominio |
-| :--- | :--- | :--- |
-| `SubscriptionPlanRepository` | `save`, `findById`, `findByStripePriceId`, `findAllActive` | Catálogo maestro de planes comerciales y tarifas de suscripción. |
-| `TenantSubscriptionRepository` | `save`, `findById`, `findByTenantId`, `existsActiveByTenantId` | Contratos vigentes de talleres automotrices y consultas de alta velocidad. |
-| `SaasInvoiceRepository` | `save`, `findById`, `findByStripeInvoiceId`, `findAllByTenantId` | Archivo contable de recibos y cobros procesados por Stripe. |
-| `StripeWebhookEventRepository` | `save`, `findByStripeEventId`, `existsByStripeEventId` | Registro de idempotencia y bitácora de auditoría para eventos asíncronos. |
-: Puertos de Repositorio del Bounded Context SaaS Billing & Subscriptions {#tbl:billing-repository-ports}
+En la @tbl:billing-repository-ports se detallan los contratos de repositorio que desacoplan la lógica contractual respecto a los mecanismos de persistencia relacional.
 
-*Nota.* Interfaces de salida del paquete com.andeva.atelier.platform.billing.domain.repositories.
+\renewcommand{\arraystretch}{1.25}\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Puertos de Repositorio del Bounded Context SaaS Billing \& Subscriptions} \label{tbl:billing-repository-ports} \\
+\hline
+\thfirst{Aspecto de Puerto} & \thcell{Especificación Técnica y Responsabilidad} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Puerto} & \thcell{Especificación Técnica y Responsabilidad} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Repositorio:} SubscriptionPlanRepository} \\*
+\hline
+\textbf{Métodos Principales} & - \texttt{save(SubscriptionPlan plan)} \newline - \texttt{findById(PlanId id)} \newline - \texttt{findByStripePriceId(StripePriceId stripePriceId)} \newline - \texttt{findAllActive()} \\*
+\hline
+\textbf{Responsabilidad de Dominio} & Contrato de persistencia agnóstica para el catálogo maestro de planes comerciales y tarifas de suscripción con recuperación optimizada de planes habilitados. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Repositorio:} TenantSubscriptionRepository} \\*
+\hline
+\textbf{Métodos Principales} & - \texttt{save(TenantSubscription subscription)} \newline - \texttt{findById(SubscriptionId id)} \newline - \texttt{findByTenantId(TenantId tenantId)} \newline - \texttt{findByStripeSubscriptionId(StripeSubscriptionId stripeSubId)} \newline - \texttt{existsActiveByTenantId(TenantId tenantId)} \\*
+\hline
+\textbf{Responsabilidad de Dominio} & Contrato de persistencia para los contratos contractuales de membresía activa de talleres mecánicos con soporte de consultas de alta velocidad y verificación de unicidad. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Repositorio:} SaasInvoiceRepository} \\*
+\hline
+\textbf{Métodos Principales} & - \texttt{save(SaasInvoice invoice)} \newline - \texttt{findById(SaasInvoiceId id)} \newline - \texttt{findByStripeInvoiceId(StripeInvoiceId stripeInvoiceId)} \newline - \texttt{findAllByTenantId(TenantId tenantId)} \\*
+\hline
+\textbf{Responsabilidad de Dominio} & Contrato de persistencia para el archivo contable de recibos y facturas de suscripción emitidas hacia los talleres abonados. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Repositorio:} StripeWebhookEventRepository} \\*
+\hline
+\textbf{Métodos Principales} & - \texttt{save(StripeWebhookEvent event)} \newline - \texttt{findByStripeEventId(StripeEventId stripeEventId)} \newline - \texttt{existsByStripeEventId(StripeEventId stripeEventId)} \\*
+\hline
+\textbf{Responsabilidad de Dominio} & Contrato de persistencia para la bitácora forense de notificaciones asíncronas y verificación determinista de existencia previa para garantizar idempotencia estricta. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Interfaces de salida agnósticas ubicadas en el paquete com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak billing.\allowbreak domain.\allowbreak repositories.
 
-**Eventos de Dominio y Notificaciones de Integración**
+**Taxonomía de Eventos de Dominio de SaaS Billing & Subscriptions**
 
-El ciclo de facturación recurrente se comunica mediante eventos de dominio:
-* `TenantSubscriptionActivatedEvent`: Señaliza que el taller cuenta con licencia activa, habilitando sus sedes y usuarios administradores.
-* `TenantSubscriptionRenewedEvent`: Extiende el período de licenciamiento y renueva la memoria en caché de autorizaciones.
-* `TenantSubscriptionPastDueEvent`: Notifica a los administradores del taller sobre cobros bancarios fallidos e inicia el periodo de gracia.
-* `TenantSubscriptionCanceledEvent`: Provoca la invalidación inmediata de sesiones activas en IAM e inhabilita el acceso a la plataforma.
-* `TenantPlanChangedEvent`: Modifica instantáneamente las cuotas de recursos disponibles para el taller.
+La propagación de cambios de estado hacia otros Bounded Contexts y la orquestación asíncrona del ciclo de vida de membresías se articula mediante eventos de dominio inmutables derivados del contrato unificado **DomainEvent**. Estos eventos representan sucesos de negocio consumados y se persisten en la tabla Outbox del contexto para garantizar su publicación confiable:
 
+- **Ciclo de vida y activación contractual**: **SubscriptionPlanCreatedEvent**, **TenantSubscriptionActivatedEvent** y **TenantPlanChangedEvent** comunican la publicación de tarifas comerciales, la habilitación operativa de talleres recién suscritos y el ajuste dinámico de cuotas tras migraciones de plan.
 
+- **Continuidad operativa y contingencias de cobranza**: **TenantSubscriptionRenewedEvent**, **TenantSubscriptionPastDueEvent** y **TenantSubscriptionCanceledEvent** informan la extensión regular de la cobertura pagada, el ingreso en periodo de gracia por rechazos bancarios y la suspensión inmediata de accesos por rescisión del servicio.
+
+- **Conciliación contable y liquidaciones**: **SaasInvoicePaymentSucceededEvent** y **SaasInvoicePaymentFailedEvent** notifican la recaudación monetaria formal o el fracaso transaccional de cobros recurrentes para su registro en los libros financieros de Andeva.
+
+En la @tbl:billing-domain-events se sintetiza la taxonomía de los ocho eventos de dominio de SaaS Billing & Subscriptions con sus respectivas cargas útiles y consecuencias intermodulares.
+
+\renewcommand{\arraystretch}{1.25}\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Taxonomía de Eventos de Dominio de SaaS Billing \& Subscriptions} \label{tbl:billing-domain-events} \\
+\hline
+\thfirst{Aspecto del Evento} & \thcell{Especificación de Carga Útil y Efecto} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto del Evento} & \thcell{Especificación de Carga Útil y Efecto} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} SubscriptionPlanCreatedEvent \quad (\textit{Emisor:} SubscriptionPlan)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{planId}, \texttt{name}, \texttt{tier}, \texttt{price}, \texttt{occurredOn} \\*
+\hline
+\textbf{Efecto Intermodular} & Notifica la publicación formal de un nuevo plan comercial en el catálogo de Andeva para habilitar su venta. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} TenantSubscriptionActivatedEvent \quad (\textit{Emisor:} TenantSubscription)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{subscriptionId}, \texttt{tenantId}, \texttt{planId}, \texttt{expiresAt}, \texttt{occurredOn} \\*
+\hline
+\textbf{Efecto Intermodular} & Notifica el alta formal o inicio de prueba gratuita de un taller habilitando sus accesos operativos y sedes en IAM. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} TenantSubscriptionRenewedEvent \quad (\textit{Emisor:} TenantSubscription)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{subscriptionId}, \texttt{tenantId}, \texttt{newPeriodEnd}, \texttt{occurredOn} \\*
+\hline
+\textbf{Efecto Intermodular} & Notifica la liquidación exitosa de un ciclo de servicio extendiendo la validez del taller e invalidando la caché de autorización. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} TenantSubscriptionPastDueEvent \quad (\textit{Emisor:} TenantSubscription)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{subscriptionId}, \texttt{tenantId}, \texttt{gracePeriodEnd}, \texttt{occurredOn} \\*
+\hline
+\textbf{Efecto Intermodular} & Alerta sobre el impago de un cargo recurrente dando inicio al periodo de tolerancia e instando al taller a regularizar su método de pago. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} TenantSubscriptionCanceledEvent \quad (\textit{Emisor:} TenantSubscription)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{subscriptionId}, \texttt{tenantId}, \texttt{canceledAt}, \texttt{occurredOn} \\*
+\hline
+\textbf{Efecto Intermodular} & Comunica la rescisión formal del contrato provocando la revocación inmediata de sesiones activas en IAM y suspensión de servicios. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} TenantPlanChangedEvent \quad (\textit{Emisor:} TenantSubscription)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{subscriptionId}, \texttt{tenantId}, \texttt{oldPlanId}, \texttt{newPlanId}, \texttt{occurredOn} \\*
+\hline
+\textbf{Efecto Intermodular} & Notifica la migración hacia un nuevo nivel comercial reajustando de forma dinámica las cuotas de sedes y personal en la plataforma. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} SaasInvoicePaymentSucceededEvent \quad (\textit{Emisor:} SaasInvoice)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{invoiceId}, \texttt{tenantId}, \texttt{amount}, \texttt{occurredOn} \\*
+\hline
+\textbf{Efecto Intermodular} & Notifica la liquidación bancaria formal de un recibo de cobro recurrente consolidando el asiento contable en Andeva. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} SaasInvoicePaymentFailedEvent \quad (\textit{Emisor:} SaasInvoice)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{tenantId}, \texttt{failureReason}, \texttt{occurredOn} \\*
+\hline
+\textbf{Efecto Intermodular} & Notifica el rechazo bancario definitivo de un intento de cobro para activar procedimientos de cobranza preventiva. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Taxonomía de eventos de dominio del paquete com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak billing.\allowbreak domain.\allowbreak events.
+
+**Jerarquía de Excepciones Semánticas de Dominio**
+
+Las anomalías operativas y transgresiones a las invariantes de licenciamiento se canalizan mediante excepciones semánticas no comprobadas derivadas de **BillingDomainException**, la cual especializa la clase abstracta **DomainException** provista en el Bounded Context Shared. Cada excepción encapsula un código legible estandarizado bajo la directiva RFC 7807 y se vincula de manera determinista a un código de estado HTTP para su serialización perimetral:
+
+- **Contingencias de catálogo y localización contractual**: **PlanNotFoundException**, **SubscriptionNotFoundException** y **SaasInvoiceNotFoundException** señalan la ausencia de tarifas, contratos o comprobantes solicitados en las operaciones de consulta.
+
+- **Conflictos de cuota y transgresiones de concurrencia**: **QuotaExceededException** y **DuplicateActiveSubscriptionException** alertan sobre intentos de exceder los techos operativos autorizados o registrar contratos concurrentes para un mismo taller.
+
+- **Vulneraciones de seguridad y fallos de formato telemático**: **InvalidWebhookSignatureException** y **StripeWebhookProcessingException** deniegan peticiones con firmas criptográficas inválidas o cuerpos JSON malformados en los puntos de entrada de notificaciones externas.
+
+En la @tbl:billing-domain-exceptions se presenta la jerarquía de excepciones semánticas de dominio, detallando sus códigos de error y condiciones de lanzamiento en el modelo.
+
+\renewcommand{\arraystretch}{1.25}\begin{longtable}{| >{\centering\arraybackslash}p{5.8cm} | >{\raggedright\arraybackslash}p{9.6cm} |}
+\caption{Excepciones de Dominio y Códigos Semánticos de SaaS Billing \& Subscriptions} \label{tbl:billing-domain-exceptions} \\
+\hline
+\thfirst{Código de Error Semántico} & \thcell{Condición de Lanzamiento en el Modelo} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Código de Error Semántico} & \thcell{Condición de Lanzamiento en el Modelo} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} BillingDomainException} \\*
+\hline
+\texttt{ERR\_BILLING\_\allowbreak DOMAIN\_BASE} \newline HTTP 500 Internal Server Error & Superclase abstracta de contingencias semánticas del modelo de suscripciones que centraliza la estructura del protocolo RFC 7807. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} PlanNotFoundException} \\*
+\hline
+\texttt{ERR\_PLAN\_\allowbreak NOT\_FOUND} \newline HTTP 404 Not Found & No se localiza el plan de suscripción solicitado en el catálogo comercial mediante su identificador o código tarifario foráneo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} SubscriptionNotFoundException} \\*
+\hline
+\texttt{ERR\_SUBSCRIPTION\_\allowbreak NOT\_FOUND} \newline HTTP 404 Not Found & No se localiza un contrato de membresía asociado al identificador único o al taller automotriz consultado. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} QuotaExceededException} \\*
+\hline
+\texttt{ERR\_QUOTA\_\allowbreak EXCEEDED} \newline HTTP 403 Forbidden o 409 Conflict & Se intenta crear una nueva sucursal física o registrar personal activo excediendo los techos permitidos por el plan vigente del taller. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} DuplicateActiveSubscriptionException} \\*
+\hline
+\texttt{ERR\_DUPLICATE\_\allowbreak ACTIVE\_SUBSCRIPTION} \newline HTTP 409 Conflict & Se intenta registrar o activar una nueva membresía para un taller que ya dispone de una suscripción activa o en periodo de prueba. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} InvalidWebhookSignatureException} \\*
+\hline
+\texttt{ERR\_INVALID\_\allowbreak WEBHOOK\_SIGNATURE} \newline HTTP 401 Unauthorized & El encabezado Stripe-Signature no coincide con el cálculo matemático HMAC-SHA256 del payload denegando el procesamiento del mensaje. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} SaasInvoiceNotFoundException} \\*
+\hline
+\texttt{ERR\_SAAS\_INVOICE\_\allowbreak NOT\_FOUND} \newline HTTP 404 Not Found & No se localiza el comprobante de cobro recurrente solicitado en el repositorio financiero mediante el identificador provisto. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} StripeWebhookProcessingException} \\*
+\hline
+\texttt{ERR\_STRIPE\_\allowbreak WEBHOOK\_PROCESSING} \newline HTTP 422 Unprocessable Entity & Anomalía sintáctica o estructural durante la deserialización y análisis del cuerpo JSON del evento asíncrono recibido de Stripe. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Excepciones semánticas del paquete com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak exceptions.
+
+El diseño táctico de la capa de dominio de SaaS Billing & Subscriptions garantiza el desacoplamiento estricto entre el modelo de negocio B2B de la compañía Andeva y la operativa tributaria interna de los talleres mecánicos. Al erigir fronteras transaccionales limpias, el sistema evita que las particularidades fiscales peruanas interfieran con las reglas de suscripción internacional, permitiendo escalar el esquema de monetización hacia nuevos mercados sin alterar la lógica de facturación de servicios automotrices.
+
+Asimismo, la estrategia de seguridad adoptada neutraliza las vulnerabilidades asociadas al tratamiento de datos bancarios confidenciales. Al relegar la captura de medios de pago a la infraestructura certificada de Stripe y custodiar exclusivamente identificadores tokenizados inmutables, la plataforma satisface con rigor los estándares de cumplimiento PCI-DSS Nivel 1, reduciendo la superficie de ataque y blindando la confidencialidad financiera de los talleres abonados.
+
+Finalmente, la orquestación entre agregados persistidos en almacenamiento relacional y la aceleración de consultas mediante Caffeine Cache resuelve de manera eficiente el compromiso entre consistencia e inmediatez de respuesta. Las validaciones frecuentes de cuotas operativas se resuelven en memoria local sin penalizar la base de datos, mientras que los eventos de dominio y webhooks garantizan la invalidación reactiva de la memoria volátil ante cualquier alteración en el estado de las membresías.
 
 #### 2.6.8.2. Interface Layer
 
+La Capa de Interfaz del Bounded Context SaaS Billing & Subscriptions actúa como el adaptador primario perimetral bajo el paquete canónico **com.andeva.atelier.platform.billing.interfaces**. Su cometido consiste en canalizar y gobernar las interacciones externas procedentes de portales administrativos web, dispositivos móviles de taller y la pasarela telemática internacional Stripe, traduciendo peticiones HTTP y notificaciones asíncronas en comandos transaccionales y consultas deterministas.
 
+Al situarse en la frontera perimetral de monetización y licenciamiento de la plataforma, los componentes de esta capa responden a cuatro principios rectores de arquitectura:
+
+- **Desacoplamiento perimetral y semántica RESTful estricta:** Exposición de recursos sustentada exclusivamente en sustantivos en plural, aislamiento de detalles de almacenamiento y aplicación rigurosa de verbos HTTP idempotentes para consultas y modificaciones, protegiendo las invariantes del modelo contractual.
+
+- **Mitigación integral de riesgos y blindaje PCI-DSS Nivel 1:** El backend no recopila ni persiste números de tarjetas de crédito o códigos de validación bancarios, delegando la captura de credenciales a componentes certificados de Stripe en el frontend y gestionando exclusivamente identificadores tokenizados inmutables.
+
+- **Ingesta asíncrona de webhooks con firma criptográfica e idempotencia:** Verificación matemática simétrica HMAC-SHA256 sobre las notificaciones telemáticas de Stripe con tolerancia temporal de 300 segundos y deduplicación relacional estricta, descartando reintentos de red durante contingencias de conectividad.
+
+- **Evaluación de cuotas operativas en memoria ultra rápida:** Gobernanza de techos de consumo mediante una Fachada de Contexto Abierto respaldada por memoria volátil Caffeine Cache, resolviendo consultas de autorización intermodular con latencia inferior a 0.05 milisegundos.
+
+En la @tbl:billing-interface-types se presenta el catálogo taxonómico consolidado de los componentes tácticos que integran la Capa de Interfaz de SaaS Billing & Subscriptions, detallando sus categorías, paquetes canónicos y responsabilidades arquitectónicas.
+
+\renewcommand{\arraystretch}{1.25}\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Catálogo Consolidado de la Capa de Interfaz de SaaS Billing \& Subscriptions} \label{tbl:billing-interface-types} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\
+\hline
+\endhead
+Subscription\allowbreak Plans\allowbreak Controller & Endpoints REST para la consulta pública y administración de catálogo de planes comerciales tarifas y cuotas de consumo paquetizadas. \\*
+\hline
+\textbf{Categoría} & Controlador REST \\*
+\hline
+\textbf{Relaciones} & Invoca SubscriptionPlanCommandService y SubscriptionPlanQueryService. Utiliza SubscriptionPlanResourceAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak controllers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Tenant\allowbreak Subscriptions\allowbreak Controller & Endpoints REST para consulta del estado contractual del taller suscrito sesiones de Stripe Checkout Customer Portal y cancelaciones. \\*
+\hline
+\textbf{Categoría} & Controlador REST \\*
+\hline
+\textbf{Relaciones} & Invoca TenantSubscriptionCommandService y TenantSubscriptionQueryService. Utiliza TenantSubscriptionResourceAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak controllers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Saas\allowbreak Invoices\allowbreak Controller & Endpoints REST para consulta histórica de comprobantes de cobro del SaaS y redirección segura hacia facturas alojadas en Stripe. \\*
+\hline
+\textbf{Categoría} & Controlador REST \\*
+\hline
+\textbf{Relaciones} & Invoca SaasInvoiceQueryService. Utiliza SaasInvoiceResourceAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak controllers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Stripe\allowbreak Webhooks\allowbreak Controller & Endpoint perimetral de alta concurrencia receptor de eventos asíncronos emitidos por Stripe con validación HMAC-SHA256 e idempotencia. \\*
+\hline
+\textbf{Categoría} & Controlador REST \\*
+\hline
+\textbf{Relaciones} & Invoca StripeWebhookSignatureVerificationService y ProcessStripeWebhookCommand. Utiliza StripeWebhookEventRepository. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak controllers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Create\allowbreak Subscription\allowbreak Plan\allowbreak Request & Carga útil inmutable para dar de alta un nuevo plan de suscripción en el catálogo comercial de Andeva. \\*
+\hline
+\textbf{Categoría} & Recurso de Petición \\*
+\hline
+\textbf{Relaciones} & Validado mediante Jakarta Bean Validation. Transformado por SubscriptionPlanResourceAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Create\allowbreak Checkout\allowbreak Session\allowbreak Request & Parámetros requeridos para inicializar una sesión de pago alojada en Stripe Checkout para contratación o mejora de plan. \\*
+\hline
+\textbf{Categoría} & Recurso de Petición \\*
+\hline
+\textbf{Relaciones} & Mapeado a comando de checkout por TenantSubscriptionCommandService. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Customer\allowbreak Portal\allowbreak Request & Solicitud de generación de enlace interactivo hacia el portal de autogestión financiera de Stripe. \\*
+\hline
+\textbf{Categoría} & Recurso de Petición \\*
+\hline
+\textbf{Relaciones} & Procesado por TenantSubscriptionCommandService para invocar la API de Stripe. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Subscription\allowbreak Plan\allowbreak Resource & Proyección REST pública y administrativa con los detalles tarifas y cuotas paquetizadas en un plan comercial. \\*
+\hline
+\textbf{Categoría} & Recurso de Respuesta \\*
+\hline
+\textbf{Relaciones} & Producido por SubscriptionPlanResourceAssembler a partir del agregado SubscriptionPlan. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Tenant\allowbreak Subscription\allowbreak Resource & Representación consolidada de la membresía activa del taller con vigencia temporal y cuotas operativas vigentes. \\*
+\hline
+\textbf{Categoría} & Recurso de Respuesta \\*
+\hline
+\textbf{Relaciones} & Producido por TenantSubscriptionResourceAssembler componiendo datos de suscripción y plan. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Saas\allowbreak Invoice\allowbreak Resource & Detalle financiero exhaustivo de comprobante de cobro emitido por el SaaS con enlaces de descarga de Stripe. \\*
+\hline
+\textbf{Categoría} & Recurso de Respuesta \\*
+\hline
+\textbf{Relaciones} & Producido por SaasInvoiceResourceAssembler a partir del agregado SaasInvoice. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Subscription\allowbreak Plan\allowbreak Resource\allowbreak Assembler & Componente de transformación bidireccional entre agregados comandos y recursos DTO de planes comerciales. \\*
+\hline
+\textbf{Categoría} & Ensamblador de Recursos \\*
+\hline
+\textbf{Relaciones} & Depende de PlanFeatureResourceAssembler. Utilizado por SubscriptionPlansController. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak transform} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Subscription\allowbreak Context\allowbreak Facade & Fachada de Contexto Abierto en memoria para validación sub-milisegundo de vigencia y cuotas operativas desde otros contextos. \\*
+\hline
+\textbf{Categoría} & Fachada Inbound ACL \\*
+\hline
+\textbf{Relaciones} & Implementada por SubscriptionContextFacadeImpl. Integrada con Caffeine In-Memory Cache. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak acl} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Billing\allowbreak Exception\allowbreak Handler & Interceptor perimetral que transforma excepciones de dominio en respuestas estandarizadas RFC 7807 Problem Details. \\*
+\hline
+\textbf{Categoría} & Interceptor de Excepciones \\*
+\hline
+\textbf{Relaciones} & Anotado con RestControllerAdvice. Captura BillingDomainException y sus subclases especializadas. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak advice} \\
+\hline
+\end{longtable}
+*Nota.* Catálogo taxonómico de los tipos de interfaz de SaaS Billing \& Subscriptions correspondientes al paquete com.andeva.atelier.platform.billing.interfaces.
+
+**Controladores REST y Endpoints de Comunicación de SaaS Billing & Subscriptions**
+
+El acceso perimetral a las capacidades de suscripción y facturación se estructura a través de cuatro controladores REST especializados, desacoplados según el perfil del consumidor y el canal de comunicación:
+
+- **SubscriptionPlansController**: Gestiona el catálogo de planes comerciales de software comercializados por Andeva. Expone endpoints públicos y administrativos para listar paquetes tarifarios, consultar techos de consumo y dar de alta nuevas opciones comerciales bajo control de acceso estricto para administradores de la plataforma.
+
+- **TenantSubscriptionsController**: Centraliza el ciclo de vida de la membresía activa de cada taller automotriz. Permite inspeccionar el estado contractual vigente, inicializar sesiones de pago seguras en Stripe Checkout para contrataciones o migraciones, generar enlaces interactivos al portal de clientes y tramitar cancelaciones de servicio.
+
+- **SaasInvoicesController**: Provee a los talleres mecánicos acceso auditado a sus comprobantes de facturación corporativa emitida por Andeva, soportando listados paginados históricos y redirecciones temporales seguras hacia los comprobantes PDF oficiales custodiados en la infraestructura de Stripe.
+
+- **StripeWebhooksController**: Punto de entrada de alta disponibilidad para la recepción de eventos telemáticos emitidos por Stripe. Verifica la autenticidad criptográfica del mensaje entrante, salvaguarda la idempotencia transaccional y delega el procesamiento hacia la capa de aplicación sin introducir bloqueos en la comunicación perimetral.
+
+En la @tbl:billing-controllers-and-endpoints se detallan los contratos de comunicación, rutas canónicas, verbos HTTP, códigos de respuesta y restricciones de seguridad de los cuatro controladores perimetrales.
+
+\renewcommand{\arraystretch}{1.25}\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Controladores REST y Endpoints de Comunicación de SaaS Billing \& Subscriptions} \label{tbl:billing-controllers-and-endpoints} \\
+\hline
+\thfirst{Recurso de Petición} & \thcell{Código y Respuesta HTTP} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Recurso de Petición} & \thcell{Código y Respuesta HTTP} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Controlador REST:} Subscription\allowbreak Plans\allowbreak Controller} \\*
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak billing/\allowbreak plans}} \\*
+\hline
+\textbf{Petición:} Ninguna & \textbf{Respuesta:} 200 OK (\texttt{List<Subscription\allowbreak Plan\allowbreak Resource>}) \\*
+\hline
+\textbf{Seguridad y Rol} & Público o Autenticado con \texttt{ROLE\_SUPER\_ADMIN}, \texttt{ROLE\_TENANT\_ADMIN} o \texttt{ROLE\_WORKSHOP\_OWNER} \\*
+\hline
+\textbf{Responsabilidad} & Recupera el catálogo de planes comerciales activos disponibles para suscripción en la plataforma Atelier. \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak billing/\allowbreak plans/\allowbreak \{id\}}} \\*
+\hline
+\textbf{Petición:} Path Variable \texttt{id} & \textbf{Respuesta:} 200 OK (\texttt{Subscription\allowbreak Plan\allowbreak Resource}) \\*
+\hline
+\textbf{Seguridad y Rol} & Público o Autenticado \\*
+\hline
+\textbf{Responsabilidad} & Obtiene la especificación completa de un plan tarifario cuotas paquetizadas y funcionalidades habilitadas. \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak billing/\allowbreak plans}} \\*
+\hline
+\textbf{Petición:} \texttt{Create\allowbreak Subscription\allowbreak Plan\allowbreak Request} & \textbf{Respuesta:} 201 CREATED (\texttt{Subscription\allowbreak Plan\allowbreak Resource}) con cabecera \texttt{Location} \\*
+\hline
+\textbf{Seguridad y Rol} & Autenticación Bearer JWT con rol excluyente \texttt{ROLE\_SUPER\_ADMIN} \\*
+\hline
+\textbf{Responsabilidad} & Alta administrativa de un nuevo paquete comercial vinculado con un identificador de precio en Stripe. \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{PUT} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak billing/\allowbreak plans/\allowbreak \{id\}}} \\*
+\hline
+\textbf{Petición:} \texttt{Update\allowbreak Subscription\allowbreak Plan\allowbreak Request} & \textbf{Respuesta:} 200 OK (\texttt{Subscription\allowbreak Plan\allowbreak Resource}) \\*
+\hline
+\textbf{Seguridad y Rol} & Autenticación Bearer JWT con rol excluyente \texttt{ROLE\_SUPER\_ADMIN} \\*
+\hline
+\textbf{Responsabilidad} & Actualiza cuotas operativas denominación comercial y módulos autorizados preservando suscripciones en curso. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Controlador REST:} Tenant\allowbreak Subscriptions\allowbreak Controller} \\*
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak billing/\allowbreak subscriptions/\allowbreak me}} \\*
+\hline
+\textbf{Petición:} Ninguna (Contexto JWT) & \textbf{Respuesta:} 200 OK (\texttt{Tenant\allowbreak Subscription\allowbreak Resource}) \\*
+\hline
+\textbf{Seguridad y Rol} & Autenticación Bearer JWT con roles \texttt{ROLE\_TENANT\_ADMIN} o \texttt{ROLE\_WORKSHOP\_OWNER} \\*
+\hline
+\textbf{Responsabilidad} & Consulta el contrato activo del taller autenticado estado contable periodo vigente y consumo de cuotas. \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak billing/\allowbreak subscriptions/\allowbreak checkout-session}} \\*
+\hline
+\textbf{Petición:} \texttt{Create\allowbreak Checkout\allowbreak Session\allowbreak Request} & \textbf{Respuesta:} 200 OK (\texttt{Checkout\allowbreak Session\allowbreak Response}) \\*
+\hline
+\textbf{Seguridad y Rol} & Autenticación Bearer JWT con roles \texttt{ROLE\_TENANT\_ADMIN} o \texttt{ROLE\_WORKSHOP\_OWNER} \\*
+\hline
+\textbf{Responsabilidad} & Genera sesión alojada en Stripe Checkout para afiliarse a un plan o formalizar una migración de nivel comercial. \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak billing/\allowbreak subscriptions/\allowbreak customer-portal}} \\*
+\hline
+\textbf{Petición:} \texttt{Customer\allowbreak Portal\allowbreak Request} & \textbf{Respuesta:} 200 OK (\texttt{Customer\allowbreak Portal\allowbreak Response}) \\*
+\hline
+\textbf{Seguridad y Rol} & Autenticación Bearer JWT con roles \texttt{ROLE\_TENANT\_ADMIN} o \texttt{ROLE\_WORKSHOP\_OWNER} \\*
+\hline
+\textbf{Responsabilidad} & Genera sesión interactiva en Stripe Customer Portal para actualizar tarjeta de crédito y consultar facturas. \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak billing/\allowbreak subscriptions/\allowbreak cancel}} \\*
+\hline
+\textbf{Petición:} \texttt{Cancel\allowbreak Subscription\allowbreak Request} & \textbf{Respuesta:} 200 OK (\texttt{Tenant\allowbreak Subscription\allowbreak Resource}) o 204 NO CONTENT \\*
+\hline
+\textbf{Seguridad y Rol} & Autenticación Bearer JWT con roles \texttt{ROLE\_TENANT\_ADMIN} o \texttt{ROLE\_WORKSHOP\_OWNER} \\*
+\hline
+\textbf{Responsabilidad} & Programa la cancelación al expirar el ciclo de cobro vigente o rescinde inmediatamente el servicio. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Controlador REST:} Saas\allowbreak Invoices\allowbreak Controller} \\*
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak billing/\allowbreak invoices}} \\*
+\hline
+\textbf{Petición:} Query Params de paginación & \textbf{Respuesta:} 200 OK (\texttt{List<Saas\allowbreak Invoice\allowbreak Summary\allowbreak Resource>}) \\*
+\hline
+\textbf{Seguridad y Rol} & Autenticación Bearer JWT con roles administrativos y contables del taller \\*
+\hline
+\textbf{Responsabilidad} & Lista el historial cronológico de facturas de suscripción emitidas por Andeva al taller mecánico. \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak billing/\allowbreak invoices/\allowbreak \{id\}/\allowbreak pdf}} \\*
+\hline
+\textbf{Petición:} Path Variable \texttt{id} & \textbf{Respuesta:} 302 FOUND con cabecera \texttt{Location} \\*
+\hline
+\textbf{Seguridad y Rol} & Autenticación Bearer JWT con roles administrativos del taller \\*
+\hline
+\textbf{Responsabilidad} & Redirige hacia el enlace seguro y firmado temporalmente por Stripe para descarga del PDF contable oficial. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Controlador REST:} Stripe\allowbreak Webhooks\allowbreak Controller} \\*
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak billing/\allowbreak webhooks/\allowbreak stripe}} \\*
+\hline
+\textbf{Petición:} Raw JSON en cuerpo & \textbf{Respuesta:} 200 OK (\texttt{Stripe\allowbreak Webhook\allowbreak Acknowledgment\allowbreak Response}) \\*
+\hline
+\textbf{Seguridad y Rol} & Validación criptográfica simétrica HMAC-SHA256 mediante cabecera \texttt{Stripe-Signature} \\*
+\hline
+\textbf{Responsabilidad} & Procesa eventos asíncronos de cobro de facturas y ciclo de vida de Stripe con idempotencia estricta. \\
+\hline
+\end{longtable}
+*Nota.* Especificación perimetral de rutas verbos HTTP códigos de respuesta y seguridad de SaaS Billing \& Subscriptions.
+
+**Recursos DTO de Petición y Respuesta de Facturación y Membresías**
+
+La transferencia de información a través del perímetro HTTP se instrumenta mediante objetos de transferencia de datos inmutables, modelados como registros de Java 21. Esta estrategia erradica la mutabilidad accidental y centraliza las validaciones sintácticas de entrada mediante anotaciones declarativas de Jakarta Bean Validation:
+
+- **Contratos de Petición**: Estructuran las intenciones del usuario validando la presencia obligatoria de identificadores de precio de Stripe, denominaciones comerciales no vacías, importes monetarios no negativos y restricciones de formato sobre direcciones web de retorno seguro.
+
+- **Contratos de Respuesta**: Encapsulan proyecciones optimizadas para clientes web y móviles, denormalizando denominaciones de plan y techos de cuota operativa para evitar viajes de red redundantes y omitiendo campos nulos mediante políticas de serialización selectiva.
+
+En la @tbl:billing-resources-dtos se especifican los atributos estructurales y las reglas de validación declarativa que rigen los recursos DTO de entrada y salida de este contexto.
+
+\renewcommand{\arraystretch}{1.25}\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Recursos DTO de Entrada y Salida del Bounded Context SaaS Billing \& Subscriptions} \label{tbl:billing-resources-dtos} \\
+\hline
+\thfirst{Aspecto de Recurso} & \thcell{Especificación de Atributos e Integridad} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Recurso} & \thcell{Especificación de Atributos e Integridad} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Create\allowbreak Subscription\allowbreak Plan\allowbreak Request \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{stripePriceId}, \texttt{name}, \texttt{tier}, \texttt{price}, \texttt{currency}, \texttt{billingCycle}, \texttt{quotaLimits}, \texttt{features} \\*
+\hline
+\textbf{Validación de Integridad} & Anotación \texttt{@NotBlank} y formato \texttt{@Pattern(regexp = "\textasciicircum price\_[a-zA-Z0-9]+\$")} para stripePriceId, \texttt{@NotBlank} y \texttt{@Size(min = 3, max = 100)} para name, \texttt{@Pattern} con valores STARTER PROFESSIONAL o ENTERPRISE para tier, importe no negativo \texttt{@DecimalMin("0.0")} con precisión \texttt{@Digits(integer = 10, fraction = 2)}, código de moneda ISO \texttt{@Size(min = 3, max = 3)}, ciclo de facturación \texttt{@Pattern} con MONTHLY o YEARLY, cuotas validadas (\texttt{@Valid}) y lista de funcionalidades con validación anidada. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Update\allowbreak Subscription\allowbreak Plan\allowbreak Request \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{name}, \texttt{price}, \texttt{quotaLimits}, \texttt{isActive}, \texttt{features} \\*
+\hline
+\textbf{Validación de Integridad} & \texttt{@NotBlank} y \texttt{@Size(min = 3, max = 100)} para denominación comercial, \texttt{@NotNull} y \texttt{@DecimalMin("0.0")} para precio, objeto de cuotas obligatorias \texttt{@NotNull} con validación anidada (\texttt{@Valid}), bandera booleana para disponibilidad de contratación y lista de características funcionales validadas. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Create\allowbreak Checkout\allowbreak Session\allowbreak Request \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{planId}, \texttt{successUrl}, \texttt{cancelUrl} \\*
+\hline
+\textbf{Validación de Integridad} & Identificador \texttt{@NotNull} de plan comercial UUID, URLs de retorno obligatorias \texttt{@NotBlank} y validadas mediante expresión regular \texttt{@Pattern(regexp = "\textasciicircum https?://.*")} para garantizar protocolo web seguro. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Customer\allowbreak Portal\allowbreak Request \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{returnUrl} \\*
+\hline
+\textbf{Validación de Integridad} & Dirección web obligatoria \texttt{@NotBlank} con patrón \texttt{@Pattern(regexp = "\textasciicircum https?://.*")} que valida destino seguro de redirección al culminar gestiones en Stripe Customer Portal. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Cancel\allowbreak Subscription\allowbreak Request \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{immediately}, \texttt{cancellationReason} \\*
+\hline
+\textbf{Validación de Integridad} & Indicador booleano de cancelación inmediata o al fin de ciclo y texto descriptivo de motivo con límite \texttt{@Size(max = 500)}. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Tenant\allowbreak Quota\allowbreak Limits\allowbreak Dto \quad (\textit{Categoría:} Objeto de Transferencia)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{maxBranches}, \texttt{maxActiveStaff}, \texttt{iotTelemetryEnabled}, \texttt{aiDiagnosticsEnabled}, \texttt{maxMonthlyWorkOrders} \\*
+\hline
+\textbf{Validación de Integridad} & Techo mínimo de sedes físicas o auxilio móvil con \texttt{@Min(1)}, personal activo con \texttt{@Min(1)}, órdenes mensuales con \texttt{@Min(1)} y banderas booleanas de habilitación de telemetría IoT y diagnósticos IA. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Subscription\allowbreak Plan\allowbreak Resource \quad (\textit{Categoría:} Respuesta)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{id}, \texttt{stripePriceId}, \texttt{name}, \texttt{tier}, \texttt{price}, \texttt{currency}, \texttt{billingCycle}, \texttt{quotaLimits}, \texttt{features}, \texttt{isActive} \\*
+\hline
+\textbf{Validación de Integridad} & Registro Java 21 inmutable serializado como JSON excluyendo nulos (\texttt{@JsonInclude(NON\_NULL)}). Proyecta tipos primitivos y listas inmutables de PlanFeatureResource. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Tenant\allowbreak Subscription\allowbreak Resource \quad (\textit{Categoría:} Respuesta)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{id}, \texttt{tenantId}, \texttt{planId}, \texttt{planName}, \texttt{status}, \texttt{currentPeriodStart}, \texttt{currentPeriodEnd}, \texttt{cancelAtPeriodEnd}, \texttt{canceledAt}, \texttt{trialEndDate}, \texttt{quotas} \\*
+\hline
+\textbf{Validación de Integridad} & Registro Java 21 inmutable con marcas temporales UTC Instant identificadores UUID y cuotas operativas consolidadas para gobernanza del taller. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Saas\allowbreak Invoice\allowbreak Resource \quad (\textit{Categoría:} Respuesta)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{id}, \texttt{subscriptionId}, \texttt{tenantId}, \texttt{stripeInvoiceId}, \texttt{amountPaid}, \texttt{currency}, \texttt{status}, \texttt{invoicePdfUrl}, \texttt{hostedInvoiceUrl}, \texttt{paidAt} \\*
+\hline
+\textbf{Validación de Integridad} & Registro inmutable que expone importes monetarios amortizados enlaces directos a activos digitales en Stripe y marca de tiempo de liquidación. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Stripe\allowbreak Webhook\allowbreak Acknowledgment\allowbreak Response \quad (\textit{Categoría:} Respuesta)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{received}, \texttt{eventId}, \texttt{timestamp} \\*
+\hline
+\textbf{Validación de Integridad} & Confirmación ligera serializada de inmediato hacia los servidores de Stripe con acuse booleano identificador y marca de tiempo UTC. \\
+\hline
+\end{longtable}
+*Nota.* Especificación de DTOs inmutables implementados como Java 21 Records con Jakarta Bean Validation.
+
+**Ensambladores de Recursos y Transformación de Tipos**
+
+El desacoplamiento entre el modelo conceptual de dominio y los contratos de transferencia expuestos en el API REST se garantiza mediante ensambladores de recursos dedicados. Estos componentes asumen la responsabilidad bidireccional de convertir agregados y entidades puras en recursos de presentación y traducir peticiones externas en comandos transaccionales:
+
+- **SubscriptionPlanResourceAssembler**: Desempaqueta identificadores tipados hacia tipos universales, extrae importes y divisas desde el objeto de valor de tarificación y delega la proyección de funcionalidades modulares hacia componentes especializados.
+
+- **TenantSubscriptionResourceAssembler**: Amalgama el contrato de membresía con las políticas del catálogo comercial, ofreciendo sobrecargas optimizadas para proyectar el estado contractual a partir de políticas pre-cargadas en memoria sin requerir consultas adicionales hacia la base de datos relacional.
+
+- **SaasInvoiceResourceAssembler**: Traduce recibos de liquidación financiera hacia representaciones detalladas o resumidas, posibilitando la renderización eficiente de grillas contables en los paneles administrativos de los talleres.
+
+- **PlanFeatureResourceAssembler**: Mapea la habilitación de módulos técnicos avanzados hacia listas inmutables de presentación con manejo seguro ante colecciones vacías o nulas.
+
+En la @tbl:billing-resource-assemblers se detallan las signaturas operativas, tipos de entrada y salida, y reglas de transformación aplicadas por los ensambladores de recursos.
+
+\renewcommand{\arraystretch}{1.25}\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Ensambladores de Recursos del Bounded Context SaaS Billing \& Subscriptions} \label{tbl:billing-resource-assemblers} \\
+\hline
+\thfirst{Aspecto Ensamblador} & \thcell{Firma y Transformación de Tipos} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto Ensamblador} & \thcell{Firma y Transformación de Tipos} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} Subscription\allowbreak Plan\allowbreak Resource\allowbreak Assembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toResource} \\*
+\hline
+\textbf{Transformación} & \texttt{SubscriptionPlan} → \texttt{SubscriptionPlanResource} \\*
+\hline
+\textbf{Reglas de Mapeo} & Desempaqueta identificadores tipados PlanId y StripePriceId hacia UUID y String. Extrae precio y moneda desde PlanPricing.price. Convierte cuotas a TenantQuotaLimitsDto y delega el mapeo de PlanFeature a PlanFeatureResourceAssembler.toResourceList. Arroja IllegalArgumentException si el agregado es nulo. \\
+\hline
+\textbf{Método Secundario} & \texttt{toResourceList} \\*
+\hline
+\textbf{Transformación} & \texttt{List<SubscriptionPlan>} → \texttt{List<SubscriptionPlanResource>} \\*
+\hline
+\textbf{Reglas de Mapeo} & Transforma iterables de planes comerciales retornando listas inmutables serializables para los catálogos públicos y de administración. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} Tenant\allowbreak Subscription\allowbreak Resource\allowbreak Assembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toResource} \\*
+\hline
+\textbf{Transformación} & \texttt{TenantSubscription, SubscriptionPlan} → \texttt{TenantSubscriptionResource} \\*
+\hline
+\textbf{Reglas de Mapeo} & Combina la raíz de agregado contractual con los metadatos del catálogo comercial. Desempaqueta identificadores UUID traduce SubscriptionStatus a texto proyecta marcas de tiempo del periodo pagado e incrusta el DTO de cuotas paquetizadas en el plan. \\
+\hline
+\textbf{Método Secundario} & \texttt{toResource (Sobrecarga de Caché)} \\*
+\hline
+\textbf{Transformación} & \texttt{TenantSubscription, String planName, TenantQuotaLimits quotas} → \texttt{TenantSubscriptionResource} \\*
+\hline
+\textbf{Reglas de Mapeo} & Compone el recurso de suscripción a partir de proyecciones cacheadas en memoria RAM sin necesidad de ejecutar lecturas adicionales sobre el catálogo en PostgreSQL. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} Saas\allowbreak Invoice\allowbreak Resource\allowbreak Assembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toResource} \\*
+\hline
+\textbf{Transformación} & \texttt{SaasInvoice} → \texttt{SaasInvoiceResource} \\*
+\hline
+\textbf{Reglas de Mapeo} & Mapea SaasInvoiceId y StripeInvoiceId a cadenas e identificadores UUID. Extrae monto y divisa desde Money. Traduce InvoiceStatus e incrusta enlaces PDF seguros emitidos por Stripe. \\
+\hline
+\textbf{Método Secundario} & \texttt{toSummaryResourceList} \\*
+\hline
+\textbf{Transformación} & \texttt{List<SaasInvoice>} → \texttt{List<SaasInvoiceSummaryResource>} \\*
+\hline
+\textbf{Reglas de Mapeo} & Genera proyecciones livianas de facturas optimizadas para grillas de consulta contable masiva en paneles administrativos del taller. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} Plan\allowbreak Feature\allowbreak Resource\allowbreak Assembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toResource} \\*
+\hline
+\textbf{Transformación} & \texttt{PlanFeature} → \texttt{PlanFeatureResource} \\*
+\hline
+\textbf{Reglas de Mapeo} & Mapea el identificador universal clave de funcionalidad alfanumérica descripción textual y bandera booleana de habilitación modular. \\
+\hline
+\textbf{Método Secundario} & \texttt{toResourceList} \\*
+\hline
+\textbf{Transformación} & \texttt{List<PlanFeature>} → \texttt{List<PlanFeatureResource>} \\*
+\hline
+\textbf{Reglas de Mapeo} & Transforma colecciones de funcionalidades empaquetadas. Si la colección de entrada es nula o vacía retorna de forma segura una lista inmutable vacía. \\
+\hline
+\end{longtable}
+*Nota.* Especificación de firmas y reglas de conversión de los componentes de transformación REST de SaaS Billing \& Subscriptions.
+
+**Fachada de Contexto Abierto y Gobernanza de Cuotas en Memoria**
+
+La interacción sincrónica de alta frecuencia entre SaaS Billing & Subscriptions y los restantes Bounded Contexts de Atelier Platform se canaliza a través de la interfaz **SubscriptionContextFacade**, configurada bajo el patrón de Fachada de Contexto Abierto. Esta frontera abstracta permite a módulos como IAM, Human Resources, Workshop Operations e IoT Telemetry consultar la vigencia de licencias y comprobar límites de capacidad sin acoplarse a los agregados transaccionales del contexto:
+
+- **Aceleración en memoria volátil**: La implementación perimetral respalda la evaluación de cuotas operativas mediante una estructura de almacenamiento temporal de ultra alta velocidad implementada con Caffeine Cache, logrando latencias de resolución inferiores a 0.05 milisegundos en pruebas de carga.
+
+- **Invalidación reactiva**: Ante eventos de cambio de estado de membresía o migraciones de plan comercial, la memoria volátil expulsa de forma determinista la política almacenada para el taller, garantizando consistencia eventual estricta en todo el clúster de la plataforma.
+
+En la @tbl:billing-facade-methods se exponen los métodos de la fachada de contexto abierto, indicando sus tipos de retorno, módulos consumidores y estrategias de aceleración en memoria.
+
+\renewcommand{\arraystretch}{1.25}\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Métodos de la Fachada de Contexto Abierto SubscriptionContextFacade} \label{tbl:billing-facade-methods} \\
+\hline
+\thfirst{Aspecto del Contrato} & \thcell{Firma, Retorno y Consumidores} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto del Contrato} & \thcell{Firma, Retorno y Consumidores} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método de Fachada:} \texttt{isTenantSubscriptionActive}} \\*
+\hline
+\textbf{Parámetros y Retorno} & \texttt{UUID tenantId} → \texttt{boolean} \\*
+\hline
+\textbf{Módulos Consumidores} & IAM \& Tenancy, Workshop Operations (MRO), Human Resources, IoT Telemetry \\*
+\hline
+\textbf{Estrategia de Caché} & Resuelto en memoria RAM mediante Caffeine In-Memory Cache con latencia menor a 0.05 ms. Invalida de forma reactiva ante cambios contractuales. \\*
+\hline
+\textbf{Propósito Intermodular} & Verifica si el taller automotriz posee un contrato vigente en estado TRIALING o ACTIVE o si se encuentra dentro del periodo de gracia transitoria. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método de Fachada:} \texttt{getTenantQuotaLimits}} \\*
+\hline
+\textbf{Parámetros y Retorno} & \texttt{UUID tenantId} → \texttt{TenantQuotaLimitsDto} \\*
+\hline
+\textbf{Módulos Consumidores} & Paneles de administración de IAM y tableros de gestión de recursos de plataforma \\*
+\hline
+\textbf{Estrategia de Caché} & Almacenado en política inmutable en Caffeine Cache con tiempo de vida de 30 minutos y desalojo reactivo por eventos de migración. \\*
+\hline
+\textbf{Propósito Intermodular} & Provee la nómina completa de techos operativos autorizados para el taller incluyendo sedes colaboradores órdenes mecánicas y módulos IoT. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método de Fachada:} \texttt{canAddBranch}} \\*
+\hline
+\textbf{Parámetros y Retorno} & \texttt{UUID tenantId, int currentBranchCount} → \texttt{boolean} \\*
+\hline
+\textbf{Módulos Consumidores} & IAM \& Tenancy (Comando de creación de sedes y auxilio móvil) \\*
+\hline
+\textbf{Estrategia de Caché} & Comparación aritmética pura en memoria volátil contra el atributo maxBranches pre-cargado en memoria lock-free. \\*
+\hline
+\textbf{Propósito Intermodular} & Valida si el taller automotriz cuenta con cupo disponible para inaugurar una nueva sucursal física o unidad móvil de auxilio mecánico. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método de Fachada:} \texttt{canAddStaffMember}} \\*
+\hline
+\textbf{Parámetros y Retorno} & \texttt{UUID tenantId, int currentStaffCount} → \texttt{boolean} \\*
+\hline
+\textbf{Módulos Consumidores} & Human Resources (Comando de contratación de personal operativo) \\*
+\hline
+\textbf{Estrategia de Caché} & Validación aritmética instantánea en RAM contra el valor inmutable maxActiveStaff de la suscripción. \\*
+\hline
+\textbf{Propósito Intermodular} & Impide la contratación de colaboradores asesores o mecánicos si la plantilla en servicio iguala el techo del plan contratado. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método de Fachada:} \texttt{canCreateWorkOrder}} \\*
+\hline
+\textbf{Parámetros y Retorno} & \texttt{UUID tenantId, int currentMonthlyWorkOrders} → \texttt{boolean} \\*
+\hline
+\textbf{Módulos Consumidores} & Workshop Operations (MRO) (Apertura de órdenes de reparación y mantenimiento) \\*
+\hline
+\textbf{Estrategia de Caché} & Evaluación en memoria ultra rápida mitigando sobrecarga transaccional sobre PostgreSQL en el flujo de recepción vehicular. \\*
+\hline
+\textbf{Propósito Intermodular} & Fiscaliza que el volumen mensual de órdenes mecánicas creadas no rebase la cuota paquetizada en el nivel de software contratado. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método de Fachada:} \texttt{isFeatureAllowed}} \\*
+\hline
+\textbf{Parámetros y Retorno} & \texttt{UUID tenantId, String featureKey} → \texttt{boolean} \\*
+\hline
+\textbf{Módulos Consumidores} & IoT Telemetry \& Predictive Maintenance, Módulos de Diagnóstico IA \\*
+\hline
+\textbf{Estrategia de Caché} & Consulta de pertenencia en Set inmutable de cadenas alfanuméricas pre-compilado en RAM con complejidad algorítmica O(1). \\*
+\hline
+\textbf{Propósito Intermodular} & Determina en tiempo de ejecución si el plan comercial contratado ampara la ingesta de telemetría OBD-II o diagnósticos avanzados de falla. \\
+\hline
+\end{longtable}
+*Nota.* Especificación de contratos de interoperabilidad en memoria de SubscriptionContextFacade con aceleración mediante Caffeine Cache.
+
+**Eventos de Integración y Coordinación Asíncrona Intermodular**
+
+La coordinación reactiva entre SaaS Billing & Subscriptions y los demás módulos de la plataforma se fundamenta en eventos de integración asíncronos. Estos mensajes inmutables representan hechos consumados y se distribuyen mediante el patrón Outbox transaccional para garantizar entrega confiable y desacoplamiento temporal:
+
+- **Eventos Publicados**: Notifican a la plataforma alteraciones en la vigencia de membresías, reajustes de cuotas operativas por migración de paquete comercial o suspensiones preventivas por impago bancario tras vencer el periodo de gracia.
+
+- **Eventos Consumidos**: La recepción de eventos de alta de talleres desde IAM gatilla de forma desatendida el aprovisionamiento de identidades corporativas en Stripe y la activación automática de licencias de prueba gratuita sin fricción operativa.
+
+En la @tbl:billing-integration-events se sintetiza la taxonomía de los eventos de integración de este contexto, describiendo sus atributos transportados y consecuencias arquitectónicas.
+
+\renewcommand{\arraystretch}{1.25}\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Eventos de Integración del Bounded Context SaaS Billing \& Subscriptions} \label{tbl:billing-integration-events} \\
+\hline
+\thfirst{Aspecto de Integración} & \thcell{Carga Útil y Sincronización Intermodular} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Integración} & \thcell{Carga Útil y Sincronización Intermodular} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Integración:} Tenant\allowbreak Subscription\allowbreak Status\allowbreak Changed\allowbreak Integration\allowbreak Event \quad (\textit{Tipo:} Publicado)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{subscriptionId}, \texttt{tenantId}, \texttt{planId}, \texttt{previousStatus}, \texttt{newStatus}, \texttt{periodEnd}, \texttt{occurredOn} \\*
+\hline
+\textbf{Módulos Receptores} & IAM \& Tenancy, API Gateway, Instancias de SubscriptionContextFacade \\*
+\hline
+\textbf{Efecto Arquitectónico} & Invalida de forma reactiva la caché en memoria RAM de Caffeine en todas las instancias del clúster y sincroniza permisos de acceso al ERP. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Integración:} Tenant\allowbreak Plan\allowbreak Upgraded\allowbreak Integration\allowbreak Event \quad (\textit{Tipo:} Publicado)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{subscriptionId}, \texttt{tenantId}, \texttt{oldPlanId}, \texttt{newPlanId}, \texttt{newQuotas}, \texttt{occurredOn} \\*
+\hline
+\textbf{Módulos Receptores} & IAM \& Tenancy, Human Resources, Workshop Operations (MRO), IoT Telemetry \\*
+\hline
+\textbf{Efecto Arquitectónico} & Expande de inmediato los techos autorizados de sedes colaboradores y órdenes de trabajo habilitando módulos técnicos avanzados. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Integración:} Tenant\allowbreak Subscription\allowbreak Suspended\allowbreak Integration\allowbreak Event \quad (\textit{Tipo:} Publicado)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{subscriptionId}, \texttt{tenantId}, \texttt{suspensionReason}, \texttt{suspendedAt}, \texttt{occurredOn} \\*
+\hline
+\textbf{Módulos Receptores} & API Gateway, IAM \& Tenancy \\*
+\hline
+\textbf{Efecto Arquitectónico} & Revoca de manera forzosa sesiones activas y deniega el paso en los filtros perimetrales a todas las peticiones operativas del taller. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Integración:} Tenant\allowbreak Registered\allowbreak Integration\allowbreak Event \quad (\textit{Tipo:} Consumido)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{tenantId}, \texttt{legalName}, \texttt{adminEmail}, \texttt{country}, \texttt{registeredAt} \\*
+\hline
+\textbf{Módulo Emisor} & IAM \& Tenancy (Flujo de alta y registro inicial del taller) \\*
+\hline
+\textbf{Efecto Arquitectónico} & Gatilla el aprovisionamiento asíncrono de un cliente corporativo en Stripe y activa una membresía de prueba gratuita de 14 días. \\
+\hline
+\end{longtable}
+*Nota.* Taxonomía de eventos de integración asíncronos publicados y consumidos por SaaS Billing \& Subscriptions.
+
+El diseño perimetral de la Capa de Interfaz de SaaS Billing & Subscriptions garantiza el aislamiento absoluto entre las reglas de monetización de Andeva y la operativa tributaria interna de los talleres mecánicos. Al erigir controladores REST y contratos de transferencia independientes, el sistema impide que las regulaciones tributarias de SUNAT modeladas en Invoicing interfieran con el esquema de licenciamiento recurrente, preservando la portabilidad del modelo de negocio hacia nuevos países.
+
+Asimismo, la arquitectura perimetral satisface con rigor los requisitos de seguridad y cumplimiento estipulados por el estándar PCI-DSS Nivel 1. Al derivar la recolección de credenciales financieras hacia interfaces certificadas de Stripe y custodiar exclusivamente identificadores tokenizados inmutables, la plataforma suprime vectores críticos de vulnerabilidad y garantiza la privacidad bancaria de los talleres asociados.
+
+Finalmente, la articulación de la Fachada de Contexto Abierto con la aceleración en memoria provista por Caffeine Cache resuelve eficientemente la disyuntiva entre fiscalización de cuotas y rendimiento operativo. Los procesos cotidianos de taller mecánico validan límites de sucursales, mecánicos y órdenes de trabajo en submilisegundos, asegurando una experiencia fluida tanto en estaciones web de mostrador como en aplicaciones móviles de auxilio en campo sin penalizar el almacenamiento relacional de la plataforma.
 
 #### 2.6.8.3. Application Layer
 
+La Capa de Aplicación del Bounded Context SaaS Billing & Subscriptions constituye el orquestador de los procesos de monetización y licenciamiento de la plataforma Atelier, residiendo bajo el paquete canónico **com.andeva.atelier.platform.billing.application**. Su responsabilidad radica en coordinar la ejecución transaccional de los casos de uso comerciales, mediar entre los adaptadores perimetrales y el modelo de dominio mediante el patrón CQRS, y asegurar la sincronización asíncrona con infraestructuras financieras externas.
 
+Para preservar la cohesión y el rendimiento en el tratamiento de membresías corporativas, el diseño arquitectónico de esta capa se fundamenta en cuatro directrices tácticas:
 
-#### 2.6.8.4 Infrastructure Layer
+- **Segregación estricta entre mutaciones y lecturas mediante CQRS:** Aislamiento formal entre los servicios de comandos que modifican el estado de contratos o tarifarios en PostgreSQL y los servicios de consultas que proyectan vistas optimizadas para el portal web y las aplicaciones cliente.
 
+- **Orquestación transaccional e integración segura con Stripe:** Coordinación de flujos de pago complejos delegando la recolección de credenciales financieras a sesiones alojadas en Stripe Checkout y Stripe Customer Portal, salvaguardando el cumplimiento PCI-DSS Nivel 1.
 
+- **Idempotencia determinista y procesamiento exactamente una vez:** Resiliencia ante la entrega duplicada de eventos asíncronos mediante deduplicación en la base de datos relacional y comprobación criptográfica previa de firmas HMAC-SHA256, previniendo alteraciones contables ante reintentos de red.
+
+- **Optimización de consultas perimetrales con almacenamiento en memoria volátil:** Resolución de comprobaciones frecuentes de cuotas operativas mediante Caffeine Cache con tiempos de respuesta sub-milisegundos, acompañada de invalidación reactiva ante eventos de ciclo de vida.
+
+En la @tbl:billing-application-types se expone el catálogo taxonómico consolidado de los componentes tácticos que estructuran la Capa de Aplicación de SaaS Billing & Subscriptions, clasificando sus responsabilidades, relaciones y paquetes canónicos.
+
+\renewcommand{\arraystretch}{1.25}\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Catálogo Consolidado de la Capa de Aplicación de SaaS Billing \& Subscriptions} \label{tbl:billing-application-types} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\
+\hline
+\endhead
+Tenant\allowbreak Subscription\allowbreak Command\allowbreak Service\allowbreak Impl & Orquesta los flujos transaccionales de contratación de planes generación de sesiones de pago Stripe Checkout portal de clientes renovaciones y cancelaciones. \\*
+\hline
+\textbf{Categoría} & Servicio de Comandos \\*
+\hline
+\textbf{Relaciones} & Implementa TenantSubscriptionCommandService. Invoca StripeGateway y TenantSubscriptionRepository. Publica eventos de dominio y de integración. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak application.\allowbreak internal.\allowbreak commandservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Stripe\allowbreak Webhook\allowbreak Command\allowbreak Service\allowbreak Impl & Procesa notificaciones asíncronas telemáticas de Stripe con verificación criptográfica HMAC-SHA256 e idempotencia estricta en base de datos. \\*
+\hline
+\textbf{Categoría} & Servicio de Comandos \\*
+\hline
+\textbf{Relaciones} & Implementa StripeWebhookCommandService. Invoca StripeWebhookSignatureVerificationService y StripeWebhookEventRepository. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak application.\allowbreak internal.\allowbreak commandservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Subscription\allowbreak Plan\allowbreak Command\allowbreak Service\allowbreak Impl & Gobierna el ciclo de vida del catálogo comercial de software alta de tarifas paquetizadas y desactivación administrativa. \\*
+\hline
+\textbf{Categoría} & Servicio de Comandos \\*
+\hline
+\textbf{Relaciones} & Implementa SubscriptionPlanCommandService. Invoca SubscriptionPlanRepository y valida identificadores foráneos de precio en Stripe. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak application.\allowbreak internal.\allowbreak commandservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Saas\allowbreak Invoice\allowbreak Command\allowbreak Service\allowbreak Impl & Asienta de forma inmutable los comprobantes de recaudación del SaaS y preserva los enlaces oficiales a los recibos custodiados en Stripe. \\*
+\hline
+\textbf{Categoría} & Servicio de Comandos \\*
+\hline
+\textbf{Relaciones} & Implementa SaasInvoiceCommandService. Invoca SaasInvoiceRepository y emite SaasInvoicePaymentSucceededEvent. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak application.\allowbreak internal.\allowbreak commandservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Tenant\allowbreak Subscription\allowbreak Query\allowbreak Service\allowbreak Impl & Resuelve consultas de situación contractual cuotas operativas vigentes y validez de membresías con aceleración en Caffeine Cache. \\*
+\hline
+\textbf{Categoría} & Servicio de Consultas \\*
+\hline
+\textbf{Relaciones} & Implementa TenantSubscriptionQueryService. Utiliza anotaciones Spring Cache y consulta TenantSubscriptionRepository. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak application.\allowbreak internal.\allowbreak queryservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Subscription\allowbreak Plan\allowbreak Query\allowbreak Service\allowbreak Impl & Provee lecturas optimizadas del catálogo público y corporativo de planes de software tarifas y funcionalidades autorizadas. \\*
+\hline
+\textbf{Categoría} & Servicio de Consultas \\*
+\hline
+\textbf{Relaciones} & Implementa SubscriptionPlanQueryService. Emplea almacenamiento temporal en memoria volátil de alta velocidad. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak application.\allowbreak internal.\allowbreak queryservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Saas\allowbreak Invoice\allowbreak Query\allowbreak Service\allowbreak Impl & Proyecta resúmenes históricos de comprobantes de cobro y detalles contables paginados para los administradores de los talleres. \\*
+\hline
+\textbf{Categoría} & Servicio de Consultas \\*
+\hline
+\textbf{Relaciones} & Implementa SaasInvoiceQueryService. Invoca SaasInvoiceRepository para recuperar registros financieros. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak application.\allowbreak internal.\allowbreak queryservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Subscription\allowbreak Domain\allowbreak Event\allowbreak Handler & Escucha eventos del ciclo de vida contractual para ejecutar la purga reactiva de caché en memoria y enviar notificaciones por correo. \\*
+\hline
+\textbf{Categoría} & Manejador de Eventos de Dominio \\*
+\hline
+\textbf{Relaciones} & Anotado con TransactionalEventListener. Invoca EmailGateway y expulsa políticas cacheadas en Caffeine. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak application.\allowbreak internal.\allowbreak eventhandlers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Tenant\allowbreak Lifecycle\allowbreak Integration\allowbreak Event\allowbreak Handler & Procesa el registro de nuevos talleres mecánicos aprovisionando el cliente en Stripe y activando la prueba gratuita de catorce días. \\*
+\hline
+\textbf{Categoría} & Manejador de Eventos de Integración \\*
+\hline
+\textbf{Relaciones} & Escucha TenantRegisteredIntegrationEvent desde IAM. Invoca TenantSubscriptionCommandService y StripeGateway. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak application.\allowbreak internal.\allowbreak eventhandlers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Stripe\allowbreak Gateway & Puerto de salida agnóstico que encapsula y aísla las interacciones con el SDK de Stripe protegiendo al dominio de dependencias externas. \\*
+\hline
+\textbf{Categoría} & Puerto de Salida \\*
+\hline
+\textbf{Relaciones} & Implementado en la capa de infraestructura por StripeGatewayAdapter. Utilizado por los servicios de comandos. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak application.\allowbreak outboundservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Email\allowbreak Gateway & Puerto de salida para la transmisión telemática de correos electrónicos transaccionales confirmaciones y alertas financieras. \\*
+\hline
+\textbf{Categoría} & Puerto de Salida \\*
+\hline
+\textbf{Relaciones} & Implementado en infraestructura por ResendEmailAdapter. Utilizado por los manejadores de eventos. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak application.\allowbreak outboundservices} \\
+\hline
+\end{longtable}
+*Nota.* Catálogo taxonómico de clases de la Capa de Aplicación del Bounded Context SaaS Billing \& Subscriptions.
+
+**Servicios de Comandos de la Capa de Aplicación**
+
+La modificación transaccional del estado de licenciamiento y facturación se gestiona mediante cuatro servicios de comandos especializados, alineados a las raíces de agregado del contexto:
+
+- **TenantSubscriptionCommandServiceImpl**: Orquesta la activación de membresías, la generación de sesiones de pago con Stripe, renovaciones de periodos contables, conmutaciones a mora transitoria y cancelaciones, asegurando límites transaccionales acotados.
+
+- **StripeWebhookCommandServiceImpl**: Centraliza la ingesta telemática de notificaciones de Stripe, validando firmas criptográficas y asegurando un procesamiento exactamente una vez antes de disparar actualizaciones de ciclo de vida o registrar facturas.
+
+- **SubscriptionPlanCommandServiceImpl**: Administra el catálogo comercial de planes de software comercializados por Andeva, sincronizando precios y cuotas paquetizadas con el tarifario de Stripe y garantizando techos operativos mínimos.
+
+- **SaasInvoiceCommandServiceImpl**: Concreta el asentamiento inmutable de comprobantes de cobro corporativos tras débitos bancarios exitosos, vinculando identificadores foráneos y enlaces seguros al documento digital.
+
+En la @tbl:billing-command-services se detallan las operaciones transaccionales, signaturas, parámetros y reglas de negocio aplicadas por los servicios de comandos de este contexto.
+
+\renewcommand{\arraystretch}{1.25}\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Operaciones Transaccionales de los Servicios de Comandos de SaaS Billing \& Subscriptions} \label{tbl:billing-command-services} \\
+\hline
+\thfirst{Comando de Entrada} & \thcell{Firma, Retorno y Reglas de Negocio} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Comando de Entrada} & \thcell{Firma, Retorno y Reglas de Negocio} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Comandos:} Tenant\allowbreak Subscription\allowbreak Command\allowbreak Service\allowbreak Impl} \\*
+\hline
+\textbf{Comando:} \texttt{Create\allowbreak Checkout\allowbreak Session\allowbreak Command} & \texttt{handle(CreateCheckoutSessionCommand)} → \texttt{CheckoutSessionDto} \\*
+\hline
+\textbf{Parámetros Principales} & \texttt{TenantId tenantId, PlanId planId, String successUrl, String cancelUrl} \\*
+\hline
+\textbf{Reglas y Transaccionalidad} & Verifica que el taller no cuente con una membresía activa idéntica en curso. Invoca StripeGateway para crear la sesión de checkout adjuntando identificadores en los metadatos y retorna la URL segura para redirección. Anotado con \texttt{@Transactional}. \\
+\hline
+\textbf{Comando:} \texttt{Create\allowbreak Customer\allowbreak Portal\allowbreak Session\allowbreak Command} & \texttt{handle(CreateCustomerPortalSessionCommand)} → \texttt{CustomerPortalSessionDto} \\*
+\hline
+\textbf{Parámetros Principales} & \texttt{TenantId tenantId, String returnUrl} \\*
+\hline
+\textbf{Reglas y Transaccionalidad} & Recupera el identificador StripeCustomerId asociado al taller y solicita a StripeGateway la emisión de una sesión interactiva del portal de facturación. Valida que la URL de retorno pertenezca a dominios autorizados. \\
+\hline
+\textbf{Comando:} \texttt{Activate\allowbreak Tenant\allowbreak Subscription\allowbreak Command} & \texttt{handle(ActivateTenantSubscriptionCommand)} → \texttt{SubscriptionId} \\*
+\hline
+\textbf{Parámetros Principales} & \texttt{TenantId tenantId, PlanId planId, StripeCustomerId customerId, StripeSubscriptionId subId, SubscriptionPeriod period} \\*
+\hline
+\textbf{Reglas y Transaccionalidad} & Inicializa el contrato en estado ACTIVE o TRIALING según corresponda. Persiste el agregado TenantSubscription emite TenantSubscriptionActivatedEvent y publica TenantSubscriptionStatusChangedIntegrationEvent. \\
+\hline
+\textbf{Comando:} \texttt{Renew\allowbreak Tenant\allowbreak Subscription\allowbreak Command} & \texttt{handle(RenewTenantSubscriptionCommand)} → \texttt{void} \\*
+\hline
+\textbf{Parámetros Principales} & \texttt{StripeSubscriptionId stripeSubId, SubscriptionPeriod newPeriod} \\*
+\hline
+\textbf{Reglas y Transaccionalidad} & Localiza la suscripción por su identificador foráneo extiende la ventana cronológica de cobertura actualiza el estado a ACTIVE emite TenantSubscriptionRenewedEvent y purga la memoria volátil en Caffeine. \\
+\hline
+\textbf{Comando:} \texttt{Mark\allowbreak Tenant\allowbreak Subscription\allowbreak PastDue\allowbreak Command} & \texttt{handle(MarkTenantSubscriptionPastDueCommand)} → \texttt{void} \\*
+\hline
+\textbf{Parámetros Principales} & \texttt{StripeSubscriptionId stripeSubId} \\*
+\hline
+\textbf{Reglas y Transaccionalidad} & Transiciona el contrato a estado PAST\_DUE tras confirmarse un fallo bancario en Stripe. Abre el periodo de gracia de catorce días y emite TenantSubscriptionPastDueEvent para despacho de alertas financieras urgentes. \\
+\hline
+\textbf{Comando:} \texttt{Cancel\allowbreak Tenant\allowbreak Subscription\allowbreak Command} & \texttt{handle(CancelTenantSubscriptionCommand)} → \texttt{void} \\*
+\hline
+\textbf{Parámetros Principales} & \texttt{TenantId tenantId, boolean immediately, String cancellationReason} \\*
+\hline
+\textbf{Reglas y Transaccionalidad} & Si la cancelación es inmediata rescinde el contrato en Stripe revoca accesos de inmediato y transiciona a CANCELED. Si es al fin de ciclo programa cancelAtPeriodEnd en true. Emite TenantSubscriptionCanceledEvent. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Comandos:} Stripe\allowbreak Webhook\allowbreak Command\allowbreak Service\allowbreak Impl} \\*
+\hline
+\textbf{Comando:} \texttt{Process\allowbreak Stripe\allowbreak Webhook\allowbreak Command} & \texttt{handle(ProcessStripeWebhookCommand)} → \texttt{void} \\*
+\hline
+\textbf{Parámetros Principales} & \texttt{String rawPayload, String signatureHeader} \\*
+\hline
+\textbf{Reglas y Transaccionalidad} & Valida firma criptográfica HMAC-SHA256 con ventana de tolerancia de 300 segundos. Verifica idempotencia estricta en stripe\_events descartando eventos ya procesados. Enruta de forma polimórfica según la tipología del suceso hacia suscripciones o facturas. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Comandos:} Subscription\allowbreak Plan\allowbreak Command\allowbreak Service\allowbreak Impl} \\*
+\hline
+\textbf{Comando:} \texttt{Create\allowbreak Subscription\allowbreak Plan\allowbreak Command} & \texttt{handle(CreateSubscriptionPlanCommand)} → \texttt{PlanId} \\*
+\hline
+\textbf{Parámetros Principales} & \texttt{String stripePriceId, String name, PlanTier tier, PlanPricing pricing, TenantQuotaLimits limits} \\*
+\hline
+\textbf{Reglas y Transaccionalidad} & Valida unicidad del identificador foráneo y denominación comercial. Fiscaliza invariantes de cuotas mínimas permitidas. Persiste el agregado SubscriptionPlan y registra SubscriptionPlanCreatedEvent. \\
+\hline
+\textbf{Comando:} \texttt{Update\allowbreak Subscription\allowbreak Plan\allowbreak Details\allowbreak Command} & \texttt{handle(UpdateSubscriptionPlanDetailsCommand)} → \texttt{void} \\*
+\hline
+\textbf{Parámetros Principales} & \texttt{PlanId planId, String name, TenantQuotaLimits quotaLimits, boolean isActive} \\*
+\hline
+\textbf{Reglas y Transaccionalidad} & Actualiza techos operativos y estado comercial del plan. Respeta los contratos vigentes de talleres ya abonados preservando sus derechos adquiridos. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Comandos:} Saas\allowbreak Invoice\allowbreak Command\allowbreak Service\allowbreak Impl} \\*
+\hline
+\textbf{Comando:} \texttt{Record\allowbreak Saas\allowbreak Invoice\allowbreak Payment\allowbreak Command} & \texttt{handle(RecordSaasInvoicePaymentCommand)} → \texttt{SaasInvoiceId} \\*
+\hline
+\textbf{Parámetros Principales} & \texttt{StripeInvoiceId stripeInvoiceId, SubscriptionId subId, TenantId tenantId, Money amount, String pdfUrl} \\*
+\hline
+\textbf{Reglas y Transaccionalidad} & Asienta de forma inmutable el comprobante financiero en la base de datos relacional. Registra la marca temporal UTC de recaudación formal y emite SaasInvoicePaymentSucceededEvent. \\
+\hline
+\end{longtable}
+*Nota.* Especificación de firmas parámetros y reglas de consistencia de los comandos de la Capa de Aplicación.
+
+**Servicios de Consulta y Proyección Acelerada de Datos**
+
+Las necesidades de lectura de los paneles administrativos y de los demás módulos de la plataforma se resuelven mediante servicios de consulta dedicados, desacoplados del modelo transaccional y optimizados con memoria volátil:
+
+- **TenantSubscriptionQueryServiceImpl**: Proyecta la situación contractual activa del taller automotriz y provee verificación instantánea de cuotas de recursos mediante Caffeine Cache, eliminando la contención sobre el motor relacional.
+
+- **SubscriptionPlanQueryServiceImpl**: Provee acceso de alta velocidad al catálogo público y comercial de planes de suscripción, facilitando la visualización transparente de tarifas y módulos autorizados.
+
+- **SaasInvoiceQueryServiceImpl**: Proyecta historiales contables paginados y detalles financieros individuales para su inspección y auditoría por parte del personal administrativo del taller.
+
+En la @tbl:billing-query-services se presentan los métodos de consulta de la capa de aplicación, indicando sus tipos de retorno, parámetros y estrategias de aceleración en memoria.
+
+\renewcommand{\arraystretch}{1.25}\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Métodos de Consulta de la Capa de Aplicación de SaaS Billing \& Subscriptions} \label{tbl:billing-query-services} \\
+\hline
+\thfirst{Consulta de Entrada} & \thcell{Firma, Retorno y Estrategia de Caché} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Consulta de Entrada} & \thcell{Firma, Retorno y Estrategia de Caché} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Consultas:} Tenant\allowbreak Subscription\allowbreak Query\allowbreak Service\allowbreak Impl} \\*
+\hline
+\textbf{Consulta:} \texttt{Get\allowbreak Tenant\allowbreak Subscription\allowbreak By\allowbreak Tenant\allowbreak Id\allowbreak Query} & \texttt{handle(GetTenantSubscriptionByTenantIdQuery)} → \texttt{Optional<TenantSubscription>} \\*
+\hline
+\textbf{Parámetros} & \texttt{TenantId tenantId} \\*
+\hline
+\textbf{Estrategia de Caché} & Almacenado en Caffeine Cache bajo la región tenantSubscriptionStatus. Resuelve consultas frecuentes de situación contractual en tiempo inferior a 0.05 ms. Transaccionalidad de solo lectura (\texttt{@Transactional(readOnly = true)}). \\
+\hline
+\textbf{Consulta:} \texttt{Get\allowbreak Tenant\allowbreak Subscription\allowbreak By\allowbreak Id\allowbreak Query} & \texttt{handle(GetTenantSubscriptionByIdQuery)} → \texttt{Optional<TenantSubscription>} \\*
+\hline
+\textbf{Parámetros} & \texttt{SubscriptionId subscriptionId} \\*
+\hline
+\textbf{Estrategia de Caché} & Búsqueda directa por clave primaria universal UUID en base de datos relacional. Empleada en flujos de conciliación y sincronización de webhooks. \\
+\hline
+\textbf{Consulta:} \texttt{Is\allowbreak Tenant\allowbreak Subscription\allowbreak Active\allowbreak Query} & \texttt{handle(IsTenantSubscriptionActiveQuery)} → \texttt{boolean} \\*
+\hline
+\textbf{Parámetros} & \texttt{TenantId tenantId} \\*
+\hline
+\textbf{Estrategia de Caché} & Proyección booleana ligera acelerada en RAM. Evalúa si el contrato se encuentra en ACTIVE TRIALING o periodo de gracia transitoria. \\
+\hline
+\textbf{Consulta:} \texttt{Get\allowbreak Tenant\allowbreak Quota\allowbreak Limits\allowbreak Query} & \texttt{handle(GetTenantQuotaLimitsQuery)} → \texttt{TenantQuotaLimitsDto} \\*
+\hline
+\textbf{Parámetros} & \texttt{TenantId tenantId} \\*
+\hline
+\textbf{Estrategia de Caché} & Consulta de la política inmutable pre-compilada en memoria RAM. Evita accesos a PostgreSQL en las comprobaciones de cuotas de sedes y personal. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Consultas:} Subscription\allowbreak Plan\allowbreak Query\allowbreak Service\allowbreak Impl} \\*
+\hline
+\textbf{Consulta:} \texttt{Get\allowbreak All\allowbreak Active\allowbreak Subscription\allowbreak Plans\allowbreak Query} & \texttt{handle(GetAllActiveSubscriptionPlansQuery)} → \texttt{List<SubscriptionPlan>} \\*
+\hline
+\textbf{Parámetros} & Ninguno \\*
+\hline
+\textbf{Estrategia de Caché} & Caché global en memoria volátil de alta duración bajo la clave activePlans con desalojo reactivo ante modificaciones en el catálogo. \\
+\hline
+\textbf{Consulta:} \texttt{Get\allowbreak Subscription\allowbreak Plan\allowbreak By\allowbreak Id\allowbreak Query} & \texttt{handle(GetSubscriptionPlanByIdQuery)} → \texttt{Optional<SubscriptionPlan>} \\*
+\hline
+\textbf{Parámetros} & \texttt{PlanId planId} \\*
+\hline
+\textbf{Estrategia de Caché} & Recuperación de la especificación técnica completa y funcionalidades hijas PlanFeature por identificador UUID. \\
+\hline
+\textbf{Consulta:} \texttt{Get\allowbreak Subscription\allowbreak Plan\allowbreak By\allowbreak Stripe\allowbreak Price\allowbreak Id\allowbreak Query} & \texttt{handle(GetSubscriptionPlanByStripePriceIdQuery)} → \texttt{Optional<SubscriptionPlan>} \\*
+\hline
+\textbf{Parámetros} & \texttt{StripePriceId stripePriceId} \\*
+\hline
+\textbf{Estrategia de Caché} & Consulta indexada en base de datos relacional para asociar notificaciones de Stripe con el catálogo interno de Andeva. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Consultas:} Saas\allowbreak Invoice\allowbreak Query\allowbreak Service\allowbreak Impl} \\*
+\hline
+\textbf{Consulta:} \texttt{Get\allowbreak Invoices\allowbreak By\allowbreak Tenant\allowbreak Id\allowbreak Query} & \texttt{handle(GetInvoicesByTenantIdQuery)} → \texttt{List<SaasInvoice>} \\*
+\hline
+\textbf{Parámetros} & \texttt{TenantId tenantId, int page, int size, InvoiceStatus status} \\*
+\hline
+\textbf{Estrategia de Caché} & Consulta paginada y filtrada directamente en PostgreSQL optimizada mediante índice idx\_invoices\_tenant para generación de historiales contables. \\
+\hline
+\textbf{Consulta:} \texttt{Get\allowbreak Saas\allowbreak Invoice\allowbreak By\allowbreak Id\allowbreak Query} & \texttt{handle(GetSaasInvoiceByIdQuery)} → \texttt{Optional<SaasInvoice>} \\*
+\hline
+\textbf{Parámetros} & \texttt{SaasInvoiceId invoiceId} \\*
+\hline
+\textbf{Estrategia de Caché} & Recuperación del detalle contable individual y verificación de pertenencia del comprobante respecto al taller solicitante. \\
+\hline
+\end{longtable}
+*Nota.* Especificación de consultas y esquemas de aceleración en memoria volátil de la Capa de Aplicación.
+
+**Manejadores de Eventos de Dominio y de Integración**
+
+La reactividad interna del contexto y su coordinación con otros Bounded Contexts se canaliza mediante manejadores de eventos desacoplados, ejecutados de forma transaccional o asíncrona:
+
+- **SubscriptionDomainEventHandler**: Escucha eventos de dominio de activaciones, renovaciones periódicas o rechazos bancarios, ejecutando en fase posterior al commit la invalidación de memorias volátiles y el despacho de correos transaccionales.
+
+- **TenantLifecycleIntegrationEventHandler**: Consume el evento de integración de registro emitido por IAM & Tenancy, gatillando automáticamente la creación del cliente en la bóveda de Stripe y activando una membresía de prueba gratuita de catorce días.
+
+En la @tbl:billing-event-handlers se especifican los eventos interceptados por los manejadores, detallando sus fases de ejecución, orígenes y consecuencias arquitectónicas.
+
+\renewcommand{\arraystretch}{1.25}\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Manejadores de Eventos de Dominio y de Integración de SaaS Billing \& Subscriptions} \label{tbl:billing-event-handlers} \\
+\hline
+\thfirst{Evento Interceptado} & \thcell{Fase de Ejecución y Efectos del Manejador} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Evento Interceptado} & \thcell{Fase de Ejecución y Efectos del Manejador} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Manejador de Eventos de Dominio:} Subscription\allowbreak Domain\allowbreak Event\allowbreak Handler} \\*
+\hline
+\textbf{Evento:} \texttt{Tenant\allowbreak Subscription\allowbreak Activated\allowbreak Event} & Ejecución en fase \texttt{AFTER\_COMMIT} mediante \texttt{@TransactionalEventListener} \\*
+\hline
+\textbf{Origen del Suceso} & Raíz de Agregado TenantSubscription ante activación de plan o inicio de prueba \\*
+\hline
+\textbf{Efectos del Manejador} & Purga la caché en memoria volátil de Caffeine para el taller y solicita a EmailGateway el envío del mensaje formal de bienvenida y confirmación de activación. \\
+\hline
+\textbf{Evento:} \texttt{Tenant\allowbreak Subscription\allowbreak Renewed\allowbreak Event} & Ejecución en fase \texttt{AFTER\_COMMIT} mediante \texttt{@TransactionalEventListener} \\*
+\hline
+\textbf{Origen del Suceso} & Raíz de Agregado TenantSubscription ante recaudación periódica exitosa \\*
+\hline
+\textbf{Efectos del Manejador} & Invalida y refresca la política contractual en Caffeine Cache garantizando que los módulos del ERP reconozcan de inmediato la extensión del periodo pagado. \\
+\hline
+\textbf{Evento:} \texttt{Tenant\allowbreak Subscription\allowbreak Past\allowbreak Due\allowbreak Event} & Ejecución en fase \texttt{AFTER\_COMMIT} mediante \texttt{@TransactionalEventListener} \\*
+\hline
+\textbf{Origen del Suceso} & Raíz de Agregado TenantSubscription ante débito bancario fallido en Stripe \\*
+\hline
+\textbf{Efectos del Manejador} & Despacha una notificación electrónica prioritaria al administrador del taller con enlace interactivo al Stripe Customer Portal para regularizar su tarjeta bancaria antes de la suspensión forzosa. \\
+\hline
+\textbf{Evento:} \texttt{Tenant\allowbreak Subscription\allowbreak Canceled\allowbreak Event} & Ejecución en fase \texttt{AFTER\_COMMIT} mediante \texttt{@TransactionalEventListener} \\*
+\hline
+\textbf{Origen del Suceso} & Raíz de Agregado TenantSubscription ante rescisión voluntaria o forzosa \\*
+\hline
+\textbf{Efectos del Manejador} & Purga la caché local de autorizaciones publica el evento TenantSubscriptionSuspendedIntegrationEvent hacia el bus de mensajería y emite correo de notificación de cese de servicio. \\
+\hline
+\textbf{Evento:} \texttt{Saas\allowbreak Invoice\allowbreak Payment\allowbreak Succeeded\allowbreak Event} & Ejecución en fase \texttt{AFTER\_COMMIT} mediante \texttt{@TransactionalEventListener} \\*
+\hline
+\textbf{Origen del Suceso} & Raíz de Agregado SaasInvoice ante asentamiento de cobro formal \\*
+\hline
+\textbf{Efectos del Manejador} & Genera y despacha el comprobante contable digital al correo electrónico del área financiera del taller mecánico incorporando el enlace oficial de descarga del PDF. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Manejador de Eventos de Integración:} Tenant\allowbreak Lifecycle\allowbreak Integration\allowbreak Event\allowbreak Handler} \\*
+\hline
+\textbf{Evento:} \texttt{Tenant\allowbreak Registered\allowbreak Integration\allowbreak Event} & Ejecución asíncrona desacoplada mediante consumidor del bus de eventos \\*
+\hline
+\textbf{Origen del Suceso} & Bounded Context IAM \& Tenancy ante alta y registro corporativo de nuevo taller \\*
+\hline
+\textbf{Efectos del Manejador} & Aprovisiona de forma desatendida un cliente en Stripe mediante StripeGateway vincula una suscripción de prueba gratuita de 14 días bajo el nivel comercial PROFESSIONAL y activa la cuenta sin fricción para el usuario. \\
+\hline
+\end{longtable}
+*Nota.* Especificación de manejadores de eventos y orquestación reactiva de la Capa de Aplicación.
+
+**Puertos de Salida, Pasarelas y Adaptadores Anticorrupción**
+
+La comunicación hacia proveedores externos y servicios auxiliares se aísla rigurosamente mediante puertos de salida agnósticos situados en el perímetro de aplicación:
+
+- **StripeGateway**: Encapsula las operaciones remotas hacia la infraestructura de Stripe, protegiendo al núcleo del software frente a dependencias directas del SDK de la pasarela y traduciendo anomalías telemáticas a excepciones semánticas.
+
+- **EmailGateway**: Desacopla la lógica de negocio respecto a los mecanismos de transporte SMTP o HTTP para el envío de alertas de cobranza y confirmaciones de pago hacia los usuarios administradores.
+
+- **IamClientPort**: Provee acceso seguro a los metadatos de identidad y perfiles de los talleres automotrices, salvaguardando la autonomía de datos de SaaS Billing & Subscriptions.
+
+En la @tbl:billing-outbound-ports se detallan los puertos de salida de la capa de aplicación, sus signaturas de métodos y sus adaptadores concretos de infraestructura.
+
+\renewcommand{\arraystretch}{1.25}\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Puertos de Salida, Pasarelas y Adaptadores de la Capa de Aplicación de SaaS Billing \& Subscriptions} \label{tbl:billing-outbound-ports} \\
+\hline
+\thfirst{Puerto de Salida} & \thcell{Firma de Operaciones y Adaptador de Infraestructura} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Puerto de Salida} & \thcell{Firma de Operaciones y Adaptador de Infraestructura} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} Stripe\allowbreak Gateway} \\*
+\hline
+\textbf{Operación Principal} & \texttt{createCustomer(TenantId, String email, String name)} → \texttt{StripeCustomerId} \\*
+\hline
+\textbf{Operaciones Secundarias} & - \texttt{createCheckoutSession(CheckoutSessionParams)} → \texttt{CheckoutSessionDto} \newline - \texttt{createCustomerPortalSession(StripeCustomerId, String returnUrl)} → \texttt{String} \newline - \texttt{cancelSubscription(StripeSubscriptionId, boolean immediately)} → \texttt{void} \newline - \texttt{retrieveInvoice(StripeInvoiceId)} → \texttt{StripeInvoiceDto} \\*
+\hline
+\textbf{Adaptador Concreto} & StripeGatewayAdapter en la capa de infraestructura mediante el SDK oficial stripe-java \\*
+\hline
+\textbf{Propósito Arquitectónico} & Aislar por completo las dependencias y tipos foráneos de la pasarela Stripe del núcleo del software Atelier traduciendo anomalías externas a excepciones de dominio. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} Email\allowbreak Gateway} \\*
+\hline
+\textbf{Operación Principal} & \texttt{sendSubscriptionActivatedEmail(TenantId, String recipient, String planName)} → \texttt{void} \\*
+\hline
+\textbf{Operaciones Secundarias} & - \texttt{sendPaymentFailedAlertEmail(TenantId, String recipient, String portalUrl)} → \texttt{void} \newline - \texttt{sendSubscriptionCanceledEmail(TenantId, String recipient, Instant effectiveDate)} → \texttt{void} \newline - \texttt{sendInvoiceReceiptEmail(TenantId, String recipient, String invoicePdfUrl)} → \texttt{void} \\*
+\hline
+\textbf{Adaptador Concreto} & ResendEmailAdapter en la capa de infraestructura consumiendo el servicio Resend \\*
+\hline
+\textbf{Propósito Arquitectónico} & Desacoplar la lógica de notificaciones financieras respecto a proveedores concretos de transporte SMTP o HTTP de correo electrónico. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} Iam\allowbreak Client\allowbreak Port} \\*
+\hline
+\textbf{Operación Principal} & \texttt{getTenantProfile(TenantId)} → \texttt{Optional<TenantProfileDto>} \\*
+\hline
+\textbf{Operaciones Secundarias} & - \texttt{validateTenantExistence(TenantId)} → \texttt{boolean} \newline - \texttt{getTenantAdminEmail(TenantId)} → \texttt{Optional<String>} \\*
+\hline
+\textbf{Adaptador Concreto} & IamClientAdapter en la capa de infraestructura invocando la fachada de IAM \& Tenancy \\*
+\hline
+\textbf{Propósito Arquitectónico} & Proveer acceso a metadatos de identidad del taller automotriz sin acoplar la capa de aplicación de Billing a las entidades relacionales de IAM. \\
+\hline
+\end{longtable}
+*Nota.* Especificación de puertos de salida y adaptadores de infraestructura para integración externa.
+
+La arquitectura implementada en la Capa de Aplicación de SaaS Billing & Subscriptions consolida una frontera transaccional limpia que preserva la consistencia de los contratos corporativos sin comprometer la agilidad operativa del taller. Al articular los casos de uso bajo el patrón CQRS, el sistema asegura que las mutaciones financieras se ejecuten con aislamiento riguroso y auditoría completa, mientras que las consultas intensivas de licenciamiento se atienden con máxima concurrencia y mínima latencia.
+
+Asimismo, la integración desacoplada con la pasarela Stripe resuelve eficazmente los desafíos inherentes a la comunicación asíncrona y la resiliencia de red. El procesamiento idempotente basado en la tabla de eventos mitiga de raíz el riesgo de facturaciones duplicadas o inconsistencias de estado ante reintentos automáticos, blindando la integridad financiera de Andeva y la confianza de los talleres asociados.
+
+Por último, la sincronización armónica entre los eventos de dominio y la memoria en caché de Caffeine materializa un balance óptimo entre inmediatez y frescura de datos. Las consultas frecuentes de autorización de cuotas operativas se resuelven en memoria local sin penalizar la base de datos relacional, garantizando que tanto las estaciones fijas de trabajo como las unidades de auxilio mecánico en campo operen con fluidez continua.
+
+#### 2.6.8.4. Infrastructure Layer
+
+La Capa de Infraestructura del Bounded Context SaaS Billing & Subscriptions, materializada bajo el paquete canónico **com.andeva.atelier.platform.billing.infrastructure**, provee los mecanismos de persistencia relacional física, integración telemática con pasarelas de pago internacionales y comunicación perimetral desacoplada con el ecosistema de microservicios y servicios en la nube. Esta capa implementa los contratos de repositorio y puertos de salida definidos en el dominio y la aplicación mediante Spring Data JPA e Hibernate sobre PostgreSQL 16 alojado en Aiven Cloud, asegurando la consistencia transaccional de los ciclos de cobro, el aislamiento multi-inquilino de los registros de suscripción, la inmutabilidad y trazabilidad de los recibos emitidos, y la estricta idempotencia de eventos asíncronos recibidos mediante webhooks.
+
+Las directrices técnicas fundamentales que rigen el diseño de la Capa de Infraestructura abarcan los siguientes pilares de arquitectura:
+
+- **Persistencia físico-relacional auditada y modelado de cuotas comerciales:** Mapeo de agregados de dominio a tablas relacionales normalizadas en PostgreSQL 16, extendiendo de entidades abstractas de auditoría temporal para preservar marcas de creación y modificación en UTC sin intervención manual.
+- **Garantía de idempotencia transaccional y protección contra eventos duplicados:** Registro atómico y verificación previa de identificadores de evento de Stripe en la tabla de auditoría con restricción de unicidad estricta, previniendo el procesamiento redundante de transacciones financieras ante reintentos de red.
+- **Reconstitución pura del modelo de dominio y transformación desacoplada:** Ensambladores de persistencia dedicados que hidratan agregados y objetos de valor sin generar emisiones espurias de eventos de dominio durante operaciones de consulta, complementados con convertidores JPA para tipos enumerados y estructuras escalares.
+- **Aislamiento perimetral y resiliencia de integración en la nube:** Adaptadores salientes que encapsulan el SDK oficial de Stripe con manejo seguro de credenciales, traducción de excepciones técnicas a excepciones semánticas de dominio, despacho de notificaciones transaccionales vía Resend y almacenamiento en memoria de validaciones de cuota mediante Caffeine Cache para garantizar tiempos de respuesta sub-milisegundo.
+
+En la @tbl:billing-infrastructure-types se sintetiza el catálogo consolidado de clases, entidades de persistencia, adaptadores de repositorio, ensambladores, convertidores y pasarelas de infraestructura que configuran este perímetro.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Catálogo Consolidado de la Capa de Infraestructura de SaaS Billing \& Subscriptions} \label{tbl:billing-infrastructure-types} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\
+\hline
+\endhead
+Subscription\allowbreak Plan\allowbreak JpaEntity & Mapeo relacional de planes comerciales y cuotas operativas hacia la tabla física plans. \\*
+\hline
+\textbf{Categoría} & Entidad JPA \\*
+\hline
+\textbf{Relaciones} & Hereda de AuditableAbstractPersistenceEntity. Raíz de persistencia con colección en cascada hacia PlanFeatureJpaEntity. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak entities} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Plan\allowbreak Feature\allowbreak JpaEntity & Mapeo relacional de módulos funcionales y banderas de activación hacia la tabla plan\_features. \\*
+\hline
+\textbf{Categoría} & Entidad JPA \\*
+\hline
+\textbf{Relaciones} & Clave foránea hacia SubscriptionPlanJpaEntity. Restricción de unicidad compuesta sobre identificador de plan y clave funcional. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak entities} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Tenant\allowbreak Subscription\allowbreak JpaEntity & Mapeo relacional del ciclo de vida de membresías de talleres hacia la tabla física subscriptions. \\*
+\hline
+\textbf{Categoría} & Entidad JPA \\*
+\hline
+\textbf{Relaciones} & Hereda de AuditableAbstractPersistenceEntity. Clave foránea lógica hacia tenants y plans. Índices por estado y suscripción de Stripe. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak entities} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Saas\allowbreak Invoice\allowbreak JpaEntity & Mapeo relacional de comprobantes contables y recibos de cobro hacia la tabla física invoices. \\*
+\hline
+\textbf{Categoría} & Entidad JPA \\*
+\hline
+\textbf{Relaciones} & Hereda de AuditableAbstractPersistenceEntity. Clave foránea hacia subscriptions y tenants. Custodia enlaces seguros a facturas en Stripe. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak entities} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Stripe\allowbreak Webhook\allowbreak Event\allowbreak JpaEntity & Mapeo de auditoría forense y control estricto de idempotencia hacia la tabla física stripe\_events. \\*
+\hline
+\textbf{Categoría} & Entidad JPA \\*
+\hline
+\textbf{Relaciones} & Restricción de unicidad estricta sobre el identificador nativo de Stripe impidiendo doble procesamiento transaccional. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak entities} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+SpringData\allowbreak Subscription\allowbreak Plan\allowbreak Repository & Interfaz de persistencia Spring Data JPA para administración del catálogo de planes y precios en Stripe. \\*
+\hline
+\textbf{Categoría} & Repositorio JPA \\*
+\hline
+\textbf{Relaciones} & Extiende JpaRepository. Consultas unívocas por identificador de precio en Stripe y listado de planes activos en plataforma. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+SpringData\allowbreak Tenant\allowbreak Subscription\allowbreak Repository & Interfaz de persistencia Spring Data JPA para administración relacional de suscripciones de talleres. \\*
+\hline
+\textbf{Categoría} & Repositorio JPA \\*
+\hline
+\textbf{Relaciones} & Extiende JpaRepository. Búsqueda por identificador de taller, identificador de suscripción de Stripe y verificación booleana de estado. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+SpringData\allowbreak Saas\allowbreak Invoice\allowbreak Repository & Interfaz de persistencia Spring Data JPA para consultas de facturas de plataforma e historial de cobros. \\*
+\hline
+\textbf{Categoría} & Repositorio JPA \\*
+\hline
+\textbf{Relaciones} & Extiende JpaRepository. Búsqueda unívoca por factura de Stripe y recuperación cronológica paginada por taller. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+SpringData\allowbreak Stripe\allowbreak Webhook\allowbreak Event\allowbreak Repository & Interfaz de persistencia Spring Data JPA para trazabilidad e idempotencia de notificaciones de eventos externos. \\*
+\hline
+\textbf{Categoría} & Repositorio JPA \\*
+\hline
+\textbf{Relaciones} & Extiende JpaRepository. Verificación booleana ultra rápida de existencia y recuperación de eventos para auditoría de errores. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Subscription\allowbreak Plan\allowbreak Repository\allowbreak Impl & Adaptador secundario de salida que implementa el puerto de dominio SubscriptionPlanRepository. \\*
+\hline
+\textbf{Categoría} & Adaptador de Persistencia \\*
+\hline
+\textbf{Relaciones} & Implementa SubscriptionPlanRepository delegando en SpringDataSubscriptionPlanRepository y ensamblador bidireccional. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Tenant\allowbreak Subscription\allowbreak Repository\allowbreak Impl & Adaptador secundario de salida que implementa el puerto de dominio TenantSubscriptionRepository. \\*
+\hline
+\textbf{Categoría} & Adaptador de Persistencia \\*
+\hline
+\textbf{Relaciones} & Implementa TenantSubscriptionRepository gestionando transaccionalidad atómica y sincronización de estados operativos. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Saas\allowbreak Invoice\allowbreak Repository\allowbreak Impl & Adaptador secundario de salida que implementa el puerto de dominio SaasInvoiceRepository. \\*
+\hline
+\textbf{Categoría} & Adaptador de Persistencia \\*
+\hline
+\textbf{Relaciones} & Implementa SaasInvoiceRepository persistiendo facturas emitidas y facilitando consultas históricas paginadas. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Stripe\allowbreak Webhook\allowbreak Event\allowbreak Repository\allowbreak Impl & Adaptador secundario de salida que implementa el puerto de dominio StripeWebhookEventRepository. \\*
+\hline
+\textbf{Categoría} & Adaptador de Persistencia \\*
+\hline
+\textbf{Relaciones} & Implementa StripeWebhookEventRepository garantizando inserción atómica y detección de eventos duplicados en base de datos. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Subscription\allowbreak Plan\allowbreak Persistence\allowbreak Assembler & Ensamblador de datos para transformación bidireccional entre el agregado SubscriptionPlan y su entidad JPA. \\*
+\hline
+\textbf{Categoría} & Ensamblador de Persistencia \\*
+\hline
+\textbf{Relaciones} & Convierte cuotas comerciales en columnas escalares y mapea entidades de funcionalidad sin emitir eventos espurios. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak transform} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Tenant\allowbreak Subscription\allowbreak Persistence\allowbreak Assembler & Ensamblador de datos para transformación bidireccional entre el agregado TenantSubscription y su entidad JPA. \\*
+\hline
+\textbf{Categoría} & Ensamblador de Persistencia \\*
+\hline
+\textbf{Relaciones} & Reconstituye agregados de suscripción vinculando identificadores foráneos y fechas de período de facturación en UTC. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak transform} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Saas\allowbreak Invoice\allowbreak Persistence\allowbreak Assembler & Ensamblador de datos para transformación bidireccional entre el agregado SaasInvoice y su entidad JPA. \\*
+\hline
+\textbf{Categoría} & Ensamblador de Persistencia \\*
+\hline
+\textbf{Relaciones} & Mapea montos facturados, referencias de pago en Stripe, URLs de descarga de comprobantes y marcas temporales. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak transform} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Stripe\allowbreak Webhook\allowbreak Event\allowbreak Persistence\allowbreak Assembler & Ensamblador de datos para transformación bidireccional entre la entidad StripeWebhookEvent y su entidad JPA. \\*
+\hline
+\textbf{Categoría} & Ensamblador de Persistencia \\*
+\hline
+\textbf{Relaciones} & Reconstituye registros de auditoría de webhooks preservando la carga JSON original para análisis forense de fallos. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak transform} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Plan\allowbreak Tier\allowbreak Converter & Convertidor JPA para serialización del tipo enumerado PlanTier a columna relacional VARCHAR(20). \\*
+\hline
+\textbf{Categoría} & Convertidor JPA \\*
+\hline
+\textbf{Relaciones} & Mapea los niveles comerciales COMMUNITY, STARTER, PROFESSIONAL y ENTERPRISE. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak converters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Subscription\allowbreak Status\allowbreak Converter & Convertidor JPA para serialización del estado de suscripción SubscriptionStatus a columna VARCHAR(20). \\*
+\hline
+\textbf{Categoría} & Convertidor JPA \\*
+\hline
+\textbf{Relaciones} & Normaliza estados operativos INCOMPLETE, TRIALING, ACTIVE, PAST\_DUE, CANCELED y UNPAID. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak converters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Invoice\allowbreak Status\allowbreak Converter & Convertidor JPA para mapeo del ciclo de cobro InvoiceStatus a columna relacional VARCHAR(20). \\*
+\hline
+\textbf{Categoría} & Convertidor JPA \\*
+\hline
+\textbf{Relaciones} & Normaliza estados financieros DRAFT, OPEN, PAID, VOID y UNCOLLECTIBLE. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak converters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Billing\allowbreak Cycle\allowbreak Converter & Convertidor JPA para mapeo de periodicidad de facturación BillingCycle a columna VARCHAR(20). \\*
+\hline
+\textbf{Categoría} & Convertidor JPA \\*
+\hline
+\textbf{Relaciones} & Mapea frecuencias periódicas MONTHLY y ANNUAL. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak converters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Stripe\allowbreak Gateway\allowbreak Adapter & Adaptador de salida perimetral que interactúa con los servicios de pasarela de pago internacional Stripe. \\*
+\hline
+\textbf{Categoría} & Pasarela Perimetral de Pagos \\*
+\hline
+\textbf{Relaciones} & Implementa el puerto StripeGateway utilizando el cliente oficial StripeClient y encapsulando credenciales seguras. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak infrastructure.\allowbreak gateways} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Resend\allowbreak Email\allowbreak Adapter & Pasarela de notificaciones transaccionales para despacho de correos electrónicos vía API REST de Resend. \\*
+\hline
+\textbf{Categoría} & Pasarela Cloud de Notificaciones \\*
+\hline
+\textbf{Relaciones} & Implementa EmailGateway enviando recibos de pago, confirmaciones de alta y notificaciones de regularización de cobros. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak infrastructure.\allowbreak gateways} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Iam\allowbreak Client\allowbreak Adapter & Adaptador de integración intermodular para consulta en memoria de información corporativa de talleres. \\*
+\hline
+\textbf{Categoría} & Adaptador de Integración Intermodular \\*
+\hline
+\textbf{Relaciones} & Implementa IamClientPort consumiendo TenancyContextFacade sin generar acoplamiento físico a nivel de base de datos. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak infrastructure.\allowbreak gateways} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Caffeine\allowbreak Cache\allowbreak Config & Clase de configuración de infraestructura de almacenamiento en caché en memoria de alto rendimiento. \\*
+\hline
+\textbf{Categoría} & Configuración de Caché en Memoria \\*
+\hline
+\textbf{Relaciones} & Configura BillingCacheManager gestionando cachés tenantSubscriptionStatus y activePlans con latencia sub-milisegundo. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak infrastructure.\allowbreak cache} \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes pertenecientes al paquete canónico com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak billing.\allowbreak infrastructure.
+
+**Entidades de Persistencia JPA y Modelado Relacional Físico**
+
+El modelado relacional de persistencia reproduce fielmente la topología comercial y de cuotas del dominio SaaS mediante cinco entidades JPA mapeadas a sus respectivas tablas físicas en PostgreSQL 16. La entidad **SubscriptionPlanJpaEntity** se vincula a la tabla **plans**, encapsulando el identificador del plan tarifario en Stripe, precios monetarios, periodicidad de facturación, cuotas de sucursales y personal, y banderas booleanas de acceso a telemetría IoT y diagnóstico predictivo. A su vez, la entidad **PlanFeatureJpaEntity** mapea las características funcionales específicas a la tabla **plan_features**, manteniendo integridad referencial en cascada total.
+
+Por su parte, la entidad **TenantSubscriptionJpaEntity** custodia el ciclo de vida de membresía de cada taller en la tabla **subscriptions**, vinculando el cliente y la suscripción remota de Stripe con estados formales y fechas límite de cobertura. La entidad **SaasInvoiceJpaEntity** estructura los comprobantes contables en la tabla **invoices**, almacenando montos devengados, fechas de pago y enlaces a documentos probatorios. Finalmente, la entidad **StripeWebhookEventJpaEntity** opera sobre la tabla **stripe_events** para blindar la plataforma ante eventuales reintentos de red de la pasarela. En la @tbl:billing-jpa-entities se detallan los esquemas relacionales, claves primarias, índices B-Tree y restricciones de verificación de estas entidades.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Especificación Relacional de Entidades JPA de SaaS Billing \& Subscriptions} \label{tbl:billing-jpa-entities} \\
+\hline
+\thfirst{Aspecto de Persistencia} & \thcell{Especificación Físico-Relacional} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Persistencia} & \thcell{Especificación Físico-Relacional} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} SubscriptionPlanJpaEntity \quad (\textit{Tabla:} \texttt{plans})} \\*
+\hline
+\textbf{Clave Primaria} & \texttt{id (UUID)} \\*
+\hline
+\textbf{Columnas Principales} & \texttt{stripe\_price\_id}, \texttt{name}, \texttt{tier}, \texttt{price}, \texttt{currency}, \texttt{billing\_cycle}, \texttt{max\_branches}, \texttt{max\_active\_staff}, \texttt{iot\_telemetry\_enabled}, \texttt{ai\_diagnostics\_enabled}, \texttt{is\_active}, \texttt{created\_at}, \texttt{updated\_at} \\*
+\hline
+\textbf{Restricciones e Índices} & Restricción de unicidad uk\_plans\_stripe\_price sobre stripe\_price\_id. Restricciones de verificación chk\_plans\_price\_positive sobre price no negativo y chk\_plans\_quotas\_positive sobre max\_branches y max\_active\_staff mayores a cero. Índice B-Tree idx\_plans\_tier\_active sobre (tier, is\_active) para consulta acelerada de planes comerciales activos. Relación de cascada total con eliminación de huérfanos hacia plan\_features. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} PlanFeatureJpaEntity \quad (\textit{Tabla:} \texttt{plan\_features})} \\*
+\hline
+\textbf{Clave Primaria} & \texttt{id (UUID)} \\*
+\hline
+\textbf{Columnas Principales} & \texttt{plan\_id}, \texttt{feature\_key}, \texttt{name}, \texttt{description}, \texttt{is\_enabled} \\*
+\hline
+\textbf{Restricciones e Índices} & Clave foránea fk\_plan\_features\_plan hacia plans con eliminación en cascada. Restricción de unicidad compuesta uk\_plan\_features\_plan\_key sobre la tupla (plan\_id, feature\_key). Índice B-Tree idx\_plan\_features\_lookup sobre (plan\_id, is\_enabled) para evaluación inmediata de funcionalidades durante verificaciones de cuota. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} TenantSubscriptionJpaEntity \quad (\textit{Tabla:} \texttt{subscriptions})} \\*
+\hline
+\textbf{Clave Primaria} & \texttt{id (UUID)} \\*
+\hline
+\textbf{Columnas Principales} & \texttt{tenant\_id}, \texttt{plan\_id}, \texttt{stripe\_customer\_id}, \texttt{stripe\_sub\_id}, \texttt{status}, \texttt{current\_period\_start}, \texttt{current\_period\_end}, \texttt{cancel\_at\_period\_end}, \texttt{canceled\_at}, \texttt{trial\_end\_date}, \texttt{created\_at}, \texttt{updated\_at} \\*
+\hline
+\textbf{Restricciones e Índices} & Restricción de unicidad uk\_subscriptions\_tenant sobre tenant\_id garantizando una única suscripción por taller. Clave foránea fk\_subscriptions\_plan hacia plans. Restricción de verificación chk\_subscription\_periods para asegurar que current\_period\_end sea posterior a current\_period\_start. Índices B-Tree idx\_subscriptions\_stripe\_sub sobre stripe\_sub\_id e idx\_subscriptions\_status sobre status. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} SaasInvoiceJpaEntity \quad (\textit{Tabla:} \texttt{invoices})} \\*
+\hline
+\textbf{Clave Primaria} & \texttt{id (UUID)} \\*
+\hline
+\textbf{Columnas Principales} & \texttt{subscription\_id}, \texttt{tenant\_id}, \texttt{stripe\_invoice\_id}, \texttt{amount\_paid}, \texttt{currency}, \texttt{status}, \texttt{invoice\_pdf\_url}, \texttt{hosted\_invoice\_url}, \texttt{paid\_at}, \texttt{created\_at}, \texttt{updated\_at} \\*
+\hline
+\textbf{Restricciones e Índices} & Claves foráneas fk\_invoices\_subscription hacia subscriptions y fk\_invoices\_tenant hacia tenants. Restricción de unicidad uk\_invoices\_stripe\_inv sobre stripe\_invoice\_id. Restricción de verificación chk\_invoice\_amount\_non\_negative para importe monetario no negativo. Índices B-Tree idx\_invoices\_tenant\_created sobre (tenant\_id, created\_at DESC) e idx\_invoices\_stripe\_lookup sobre stripe\_invoice\_id. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} StripeWebhookEventJpaEntity \quad (\textit{Tabla:} \texttt{stripe\_events})} \\*
+\hline
+\textbf{Clave Primaria} & \texttt{id (UUID)} \\*
+\hline
+\textbf{Columnas Principales} & \texttt{stripe\_event\_id}, \texttt{type}, \texttt{payload}, \texttt{status}, \texttt{processed\_at}, \texttt{error\_message} \\*
+\hline
+\textbf{Restricciones e Índices} & Restricción de unicidad estricta uk\_stripe\_events\_event\_id sobre stripe\_event\_id que actúa como cerrojo de concurrencia para evitar doble ejecución de webhooks. Índice B-Tree idx\_stripe\_events\_type\_status sobre (type, status, processed\_at DESC) para auditoría operativa y depuración de eventos fallidos. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Especificación relacional en PostgreSQL 16 con esquema multi-inquilino bajo Aiven Cloud.
+
+**Repositorios Spring Data JPA y Adaptadores de Persistencia**
+
+La mediación entre las invariantes del modelo de dominio y las operaciones físicas de base de datos se articula mediante interfaces Spring Data JPA y sus correspondientes adaptadores secundarios de persistencia. El adaptador **SubscriptionPlanRepositoryImpl** implementa el puerto de dominio **SubscriptionPlanRepository**, orquestando la persistencia de planes comerciales y su recuperación ágil por identificador de precio de Stripe. Por su parte, el adaptador **TenantSubscriptionRepositoryImpl** materializa las operaciones de **TenantSubscriptionRepository**, sincronizando de forma atómica las transiciones de estado de los talleres tras confirmaciones de pago o solicitudes de cancelación.
+
+Asimismo, el adaptador **SaasInvoiceRepositoryImpl** gestiona el archivo inmutable de recibos en la tabla de facturación mediante el puerto **SaasInvoiceRepository**, ofreciendo consultas paginadas que alimentan el panel de administración contable del taller sin penalizar la memoria de trabajo. Finalmente, el adaptador **StripeWebhookEventRepositoryImpl** resguarda la integridad del sistema al verificar la existencia previa de cada identificador de notificación en la tabla de eventos de Stripe antes de delegar la ejecución a los servicios de comando. En la @tbl:billing-repository-adapters se detallan los puertos de dominio, repositorios Spring Data inyectados, contratos transaccionales y operaciones provistas por estos componentes.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Adaptadores de Persistencia y Puertos de Dominio de SaaS Billing \& Subscriptions} \label{tbl:billing-repository-adapters} \\
+\hline
+\thfirst{Aspecto de Adaptador} & \thcell{Especificación Técnica y Persistencia} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Adaptador} & \thcell{Especificación Técnica y Persistencia} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} SubscriptionPlanRepositoryImpl} \\*
+\hline
+\textbf{Puerto de Dominio} & \texttt{SubscriptionPlanRepository} \\*
+\hline
+\textbf{Repositorio Inyectado} & \texttt{SpringDataSubscriptionPlanRepository} \\*
+\hline
+\textbf{Operaciones Clave} & Transforma agregados SubscriptionPlan hacia SubscriptionPlanJpaEntity mediante SubscriptionPlanPersistenceAssembler. Coordina la persistencia relacional en la tabla plans sincronizando en cascada sus características en plan\_features. Provee métodos *save()* bajo transacción de escritura, *findById()* para hidratación de cuotas comerciales, *findByStripePriceId()* para mapear identificadores de precio en Stripe y *findAllActive()* optimizado para la exposición del catálogo comercial. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} TenantSubscriptionRepositoryImpl} \\*
+\hline
+\textbf{Puerto de Dominio} & \texttt{TenantSubscriptionRepository} \\*
+\hline
+\textbf{Repositorio Inyectado} & \texttt{SpringDataTenantSubscriptionRepository} \\*
+\hline
+\textbf{Operaciones Clave} & Administra la persistencia del ciclo de vida de membresías de talleres en la tabla subscriptions. Reconstituye agregados puros TenantSubscription vinculando sus estados de vigencia. Provee *save()* con bloqueo a nivel de fila para cambios de estado, *findByTenantId()* para consulta de suscripción activa de taller, *findByStripeSubscriptionId()* para sincronización reactiva desde webhooks y *existsActiveByTenantId()* para validaciones rápidas de membresía. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} SaasInvoiceRepositoryImpl} \\*
+\hline
+\textbf{Puerto de Dominio} & \texttt{SaasInvoiceRepository} \\*
+\hline
+\textbf{Repositorio Inyectado} & \texttt{SpringDataSaasInvoiceRepository} \\*
+\hline
+\textbf{Operaciones Clave} & Persiste el historial de comprobantes de cobro y recibos contables emitidos por la plataforma en la tabla invoices. Provee *save()* para registrar facturas generadas tras pagos exitosos, *findById()* para auditoría individual, *findByStripeInvoiceId()* para conciliación bancaria y *findAllByTenantId()* con soporte nativo de paginación para alimentar la vista histórica del panel del taller. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} StripeWebhookEventRepositoryImpl} \\*
+\hline
+\textbf{Puerto de Dominio} & \texttt{StripeWebhookEventRepository} \\*
+\hline
+\textbf{Repositorio Inyectado} & \texttt{SpringDataStripeWebhookEventRepository} \\*
+\hline
+\textbf{Operaciones Clave} & Implementa el cerrojo de persistencia para el procesamiento seguro de webhooks asíncronos en la tabla stripe\_events. Provee *existsByStripeEventId()* para descartar en tiempo constante notificaciones duplicadas emitidas por Stripe ante demoras de confirmación, *save()* para persistir la traza de auditoría con la carga JSON íntegra y *markAsFailed()* para documentar el motivo de excepción en caso de errores en consumidores. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Clases ubicadas bajo el paquete canónico com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak billing.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak repositories.
+
+**Ensambladores de Persistencia y Convertidores de Atributos JPA**
+
+El desacoplamiento estricto entre el esquema físico relacional y los tipos puros del dominio se materializa mediante ensambladores de persistencia y convertidores de atributos JPA. El ensamblador **SubscriptionPlanPersistenceAssembler** traduce bidireccionalmente planes comerciales, proyectando las cuotas operativas de sucursales y mecánicos hacia columnas escalares y reconstruyendo el agregado puro mediante su método estático de fábrica sin disparar eventos de dominio espurios durante consultas. De modo semejante, los ensambladores **TenantSubscriptionPersistenceAssembler**, **SaasInvoicePersistenceAssembler** y **StripeWebhookEventPersistenceAssembler** restauran el estado interno de membresías, recibos y trazas de auditoría preservando la inmutabilidad de sus identificadores y marcas temporales en UTC.
+
+Este esquema de transformación se complementa con cuatro convertidores de atributos JPA que serializan enumeraciones de dominio hacia tipos columnares estándar de SQL. En particular, **PlanTierConverter** serializa los niveles de suscripción, **SubscriptionStatusConverter** sincroniza los estados de vigencia con la terminología de Stripe, **InvoiceStatusConverter** asegura la validez de los recibos de cobro y **BillingCycleConverter** estandariza la periodicidad mensual y anual. En la @tbl:billing-persistence-assemblers se describen las transformaciones y mapeos de tipos implementados por estos componentes.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Ensambladores de Persistencia y Convertidores JPA de SaaS Billing \& Subscriptions} \label{tbl:billing-persistence-assemblers} \\
+\hline
+\thfirst{Aspecto de Mapeo} & \thcell{Tipos Relacionados y Transformación} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Mapeo} & \thcell{Tipos Relacionados y Transformación} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} SubscriptionPlanPersistenceAssembler} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{SubscriptionPlan} $\longleftrightarrow$ \texttt{SubscriptionPlanJpaEntity} \\*
+\hline
+\textbf{Transformación} & Mapea identificadores PlanId y campos comerciales name, price y currency. Descompone el objeto de valor PlanLimits en columnas escalares max\_branches, max\_active\_staff, iot\_telemetry\_enabled y ai\_diagnostics\_enabled. Transforma la colección de entidades hijas PlanFeature hacia PlanFeatureJpaEntity. Reconstituye el agregado puro mediante método estático *reconstitute()* sin disparar eventos de dominio espurios durante consultas. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} TenantSubscriptionPersistenceAssembler} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{TenantSubscription} $\longleftrightarrow$ \texttt{TenantSubscriptionJpaEntity} \\*
+\hline
+\textbf{Transformación} & Mapea SubscriptionId, TenantId y PlanId a identificadores UUID planos. Vincula los identificadores de cliente y suscripción en Stripe. Convierte marcas temporales de inicio y término de ciclo a marcas Instant en UTC. Reconstituye el agregado puro restaurando su estado de vigencia mediante *reconstitute()* para asegurar invariantes de ciclo de vida sin generar eventos duplicados en base de datos. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} SaasInvoicePersistenceAssembler} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{SaasInvoice} $\longleftrightarrow$ \texttt{SaasInvoiceJpaEntity} \\*
+\hline
+\textbf{Transformación} & Mapea InvoiceId, SubscriptionId y TenantId a claves UUID relacionales. Traduce el monto monetario a escala BigDecimal en dos decimales con redondeo contable. Asocia las URLs seguras de descarga de PDF y vista web hospedada de Stripe. Invoca *reconstitute()* restaurando el estado inmutable del recibo de suscripción. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} StripeWebhookEventPersistenceAssembler} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{StripeWebhookEvent} $\longleftrightarrow$ \texttt{StripeWebhookEventJpaEntity} \\*
+\hline
+\textbf{Transformación} & Transforma el identificador de evento nativo de Stripe, el tipo de notificación estructurado y la carga útil en formato JSON crudo hacia columnas de texto plano. Reconstituye la entidad de auditoría con su fecha de recepción y resultado de procesamiento. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} PlanTierConverter} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{PlanTier} $\longleftrightarrow$ \texttt{VARCHAR(20)} \\*
+\hline
+\textbf{Transformación} & Implementa AttributeConverter mapeando los valores enumerados COMMUNITY, STARTER, PROFESSIONAL y ENTERPRISE a cadenas alfanuméricas estándar en PostgreSQL. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} SubscriptionStatusConverter} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{SubscriptionStatus} $\longleftrightarrow$ \texttt{VARCHAR(20)} \\*
+\hline
+\textbf{Transformación} & Serializa y deserializa los estados de suscripción INCOMPLETE, TRIALING, ACTIVE, PAST\_DUE, CANCELED y UNPAID asegurando coherencia semántica con el ciclo de vida de cobros de Stripe. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} InvoiceStatusConverter} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{InvoiceStatus} $\longleftrightarrow$ \texttt{VARCHAR(20)} \\*
+\hline
+\textbf{Transformación} & Mapea el estado de recibos DRAFT, OPEN, PAID, VOID y UNCOLLECTIBLE hacia columnas relacionales de texto garantizando la consistencia financiera de los comprobantes. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} BillingCycleConverter} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{BillingCycle} $\longleftrightarrow$ \texttt{VARCHAR(20)} \\*
+\hline
+\textbf{Transformación} & Mapea la periodicidad comercial de facturación MONTHLY y ANNUAL hacia la base de datos permitiendo configuraciones tarifarias flexibles para talleres automotrices. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes ubicados bajo com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak billing.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.
+
+**Pasarelas Externas de Pago, Notificaciones y Caché en Memoria**
+
+La interacción con los servicios perimetrales de nube y las dependencias intermodulares se articula mediante adaptadores especializados que implementan los puertos salientes de la capa de aplicación. El adaptador **StripeGatewayAdapter** encapsula las llamadas remotas hacia la API de Stripe mediante el cliente oficial, gestionando la generación de sesiones de cobro hospedadas y enlaces al portal de autoservicio de clientes con credenciales aisladas del código fuente. Por su parte, el adaptador **ResendEmailAdapter** conecta con la infraestructura de mensajería RESTful de Resend para emitir confirmaciones de pago, recibos contables y alertas preventivas de regularización financiera.
+
+Asimismo, el adaptador **IamClientAdapter** resuelve los datos de razón social, documento de identidad fiscal y correo electrónico del titular del taller consumiendo la fachada en memoria del contexto IAM & Tenancy bajo el patrón Open Host Service, eliminando dependencias de red o acoplamientos relacionales entre esquemas de base de datos. Para garantizar la evaluación inmediata de cuotas operativas en las estaciones de trabajo de taller y en terminales de taller móvil, la configuración **CaffeineCacheConfig** define políticas de retención temporal en memoria RAM con latencia de resolución sub-milisegundo. En la @tbl:billing-external-infrastructure se resumen los puertos implementados, componentes tecnológicos y mecanismos de resiliencia adoptados por estas pasarelas.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Pasarelas Externas de Pago, Notificaciones y Caché de SaaS Billing \& Subscriptions} \label{tbl:billing-external-infrastructure} \\
+\hline
+\thfirst{Componente de Integración} & \thcell{Especificación Técnica y Resiliencia} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Componente de Integración} & \thcell{Especificación Técnica y Resiliencia} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} StripeGatewayAdapter} \\*
+\hline
+\textbf{Puerto Implementado} & \texttt{StripeGateway} \\*
+\hline
+\textbf{Tecnología y Cliente} & SDK oficial stripe-java v24+ mediante instancia inyectada com.stripe.StripeClient. \\*
+\hline
+\textbf{Operaciones y Resiliencia} & Gestiona la creación de sesiones seguras Stripe Checkout mediante *createCheckoutSession()*, redirección hacia Stripe Customer Portal mediante *createCustomerPortalSession()* y cancelación de membresías mediante *cancelSubscription()*. Encapsula credenciales secretas mediante inyección externa de propiedades. Traduce excepciones nativas de pasarela CardException, RateLimitException e InvalidRequestException en excepciones semánticas de dominio BillingDomainException para proteger las capas internas. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} ResendEmailAdapter} \\*
+\hline
+\textbf{Puerto Implementado} & \texttt{EmailGateway} \\*
+\hline
+\textbf{Tecnología y Cliente} & Cliente HTTP RESTful de Resend con plantillas responsivas HTML5 parametrizadas. \\*
+\hline
+\textbf{Operaciones y Resiliencia} & Despacha notificaciones transaccionales para bienvenida de suscripciones activadas, confirmación de abono periódico con recibo descargable y avisos preventivos de regularización bancaria ante cobros rechazados. Implementa reintentos exponenciales automáticos y tolerancia a fallos transitorios de red para asegurar entrega de avisos críticos. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} IamClientAdapter} \\*
+\hline
+\textbf{Puerto Implementado} & \texttt{IamClientPort} \\*
+\hline
+\textbf{Tecnología y Cliente} & Fachada pública de contexto TenancyContextFacade consumida en memoria bajo patrón Open Host Service. \\*
+\hline
+\textbf{Operaciones y Resiliencia} & Resuelve la razón social del taller, documento tributario de identidad, correo del propietario y sucursales activas invocando métodos de la fachada en memoria. Garantiza desacoplamiento físico entre esquemas de base de datos y provee validaciones atómicas de existencia de taller previas a la creación de sesiones de cobro. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Configuración:} CaffeineCacheConfig} \\*
+\hline
+\textbf{Puerto Implementado} & \texttt{org.springframework.cache.CacheManager} \\*
+\hline
+\textbf{Tecnología y Cliente} & Librería Caffeine Cache v3.x integrada en el ecosistema Spring Cache. \\*
+\hline
+\textbf{Operaciones y Resiliencia} & Configura BillingCacheManager gestionando cachés dedicados tenantSubscriptionStatus y activePlans con directiva de expiración *expireAfterWrite* de 5 minutos y capacidad máxima de 10,000 entradas. Provee evaluación de membresía y cuotas operativas con latencia sub-milisegundo (< 0.05 ms) para interacciones concurrentes desde estaciones web y talleres móviles. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Adaptadores de infraestructura perimetral bajo com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak billing.\allowbreak infrastructure.
+
+El diseño de la Capa de Infraestructura de SaaS Billing & Subscriptions garantiza el aislamiento físico y lógico entre los datos de facturación de la plataforma y los esquemas operativos de los talleres automotrices abonados. Al centralizar la persistencia relacional en tablas normalizadas con claves foráneas e índices B-Tree optimizados en PostgreSQL 16, el sistema asegura tiempos de consulta deterministas y previene degradaciones de rendimiento durante picos de recaudación mensual o auditorías impositivas.
+
+Asimismo, la delegación completa de la captura de instrumentos financieros hacia las interfaces certificadas de Stripe Checkout y Customer Portal reduce al mínimo absoluto el perímetro de cumplimiento normativo PCI-DSS Nivel 1. La plataforma Atelier nunca almacena, procesa ni transmite números de tarjetas de crédito o credenciales bancarias sensibles, reteniendo únicamente identificadores opacos de cliente y suscripción que vinculan las cuentas de taller con el registro contable en la nube.
+
+Finalmente, el mecanismo de persistencia atómica de webhooks y el registro previo en la tabla de auditoría confieren una tolerancia absoluta a fallas transitorias de red y reintentos repetidos por parte de la pasarela de pagos. Cada evento recibido es evaluado contra restricciones únicas de clave antes de disparar cualquier transición de estado en las suscripciones, asegurando que los talleres gocen de continuidad operativa ininterrumpida y que los pagos queden asentados con exactitud contable e inmutabilidad legal.
 
 #### 2.6.8.5. Bounded Context Software Architecture Component Level Diagrams
 
+En esta sección se presenta la descomposición arquitectónica interna del contenedor central **API Application** en relación con el Bounded Context **SaaS Billing & Subscriptions** (paquete canónico com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak billing), dando estricto cumplimiento al Nivel 3 del Modelo C4.
 
+Dentro de la arquitectura de monolito modular de Atelier Platform, el Bounded Context SaaS Billing & Subscriptions opera como el núcleo de soberanía financiera, monetización periódica, gobierno estricto de cuotas operativas y licenciamiento multi-inquilino. Su diseño táctico garantiza transacciones atómicas para el ciclo de suscripciones, previene fallos transaccionales y cobros redundantes mediante el procesamiento idempotente de notificaciones asíncronas, y aísla la lógica de negocio interna del perímetro normativo de tarjetas de crédito mediante la delegación hacia pasarelas certificadas bajo el estándar PCI-DSS Nivel 1.
+
+Todos los controladores perimetrales, servicios de aplicación de comando y consulta, motores criptográficos de verificación de firmas, repositorios relacionales y fachadas en memoria se articulan armónicamente para asegurar una experiencia transaccional fluida y predecible tanto para los propietarios de talleres automotrices como para las estaciones de trabajo de taller y unidades mecánicas móviles en campo.
+
+En la @tbl:billing-c4-components se presenta el catálogo estructurado de los siete componentes de software constitutivos del Bounded Context SaaS Billing & Subscriptions dentro del contenedor central de la aplicación.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.5cm} | >{\raggedright\arraybackslash}p{10.9cm} |}
+\caption{Catálogo de Componentes de Arquitectura de Software del Bounded Context SaaS Billing \& Subscriptions} \label{tbl:billing-c4-components} \\
+\hline
+\thfirst{Aspecto Técnico} & \thcell{Especificación de Arquitectura} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto Técnico} & \thcell{Especificación de Arquitectura} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} Billing REST Controllers \& Resource Assemblers} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & Spring MVC, SpringDoc OpenAPI, Jakarta Validation, Spring HATEOAS \\*
+\hline
+\textbf{Responsabilidad} & Expone endpoints REST perimetrales para el catálogo comercial de planes, inicialización de sesiones de pago Stripe Checkout, redirección hacia Stripe Customer Portal, consulta histórica de recibos contables y recepción de webhooks asíncronos. Valida contratos DTO, gestiona excepciones con RFC 7807 y proyecta representaciones hipermedia estructuradas. \\*
+\hline
+\textbf{Relaciones} & Invocado por WebApp y Mobile Workshop mediante peticiones HTTPS seguras. Recibe webhooks desde Stripe Platform. Despacha comandos transaccionales y consultas hacia los servicios de aplicación CQRS. Emplea ensambladores de recursos REST para transformar modelos de dominio en DTOs. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} Billing CQRS Application Services} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & Spring Service, Transactional, CQRS, Interfaces Funcionales \\*
+\hline
+\textbf{Responsabilidad} & Orquesta los casos de uso transaccionales de planes comerciales, contratación de membresías, transiciones de estado operativo, cancelaciones inmediatas o a término de ciclo y archivo contable de comprobantes de cobro bajo transacciones ACID, canalizando resultados mediante tipos Result. \\*
+\hline
+\textbf{Relaciones} & Implementa contratos de casos de uso de comando y consulta. Invoca reglas de gobernanza y validación de cuotas en el modelo de dominio. Delega la persistencia relacional en repositorios JPA. Coordina con pasarelas externas para sesiones de pago en Stripe y despacho de recibos por correo vía Resend. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} Billing Event Handlers \& Webhook Processing} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & Spring Events, TransactionalEventListener, Webhook Processor, Outbox Pattern \\*
+\hline
+\textbf{Responsabilidad} & Procesa notificaciones asíncronas de eventos emitidos por Stripe garantizando estricta idempotencia transaccional mediante verificación previa en la tabla stripe\_events. Despacha eventos de dominio internos de activación y morosidad de suscripciones, e invalida reactivamente las entradas de memoria en caché. \\*
+\hline
+\textbf{Relaciones} & Recibe cargas de eventos de Stripe desde los controladores perimetrales. Verifica y registra identificadores únicos en stripe\_events mediante adaptadores de persistencia. Notifica a la fachada Open Host Service para invalidar la memoria en caché y publica eventos hacia contextos hermanos. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} Billing Domain Model \& Quota Governance Engines} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & Java 24 puro, Domain Model, Records, Inmutabilidad, Criptografía HMAC-SHA256 \\*
+\hline
+\textbf{Responsabilidad} & Encapsula las invariantes de negocio de licenciamiento SaaS, las raíces de agregado SubscriptionPlan, TenantSubscription, SaasInvoice y StripeWebhookEvent, el motor de gobernanza de cuotas operativas SubscriptionQuotaEnforcementService y el servicio criptográfico de verificación de firmas HMAC-SHA256. \\*
+\hline
+\textbf{Relaciones} & Contiene las entidades maestras y dependientes PlanFeature. Evalúa invariantes de cuota para creación de sucursales, vinculación de mecánicos y acceso a telemetría IoT. Provee contratos criptográficos consumidos por el procesador de webhooks y emite eventos de dominio inmutables. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} Billing Persistence Repositories \& JPA Adapters} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & Jakarta Persistence 3.1, Spring Data JPA, Hibernate ORM, PostgreSQL 16 \\*
+\hline
+\textbf{Responsabilidad} & Materializa los puertos de repositorio del dominio mediante adaptadores secundarios JPA, administrando la persistencia relacional normalizada, restricciones de unicidad de suscripción por taller, índices B-Tree de alto rendimiento y cerrojo de auditoría contra eventos duplicados de Stripe. \\*
+\hline
+\textbf{Relaciones} & Realiza los contratos SubscriptionPlanRepository, TenantSubscriptionRepository, SaasInvoiceRepository y StripeWebhookEventRepository. Lee y escribe en las tablas plans, plan\_features, subscriptions, invoices y stripe\_events en PostgreSQL 16. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} Billing Open Host Facade \& Quota Evaluation ACL} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & Spring Service, Open Host Service, In-Memory ACL, Caffeine Cache \\*
+\hline
+\textbf{Responsabilidad} & Publica una fachada Open Host Service en memoria que permite a los Bounded Contexts IAM \& Tenancy y Workshop Operations verificar la vigencia de membresía, cuotas de sucursales, personal activo y permisos de telemetría IoT con latencia sub-milisegundo (< 0.05 ms) respaldada en memoria RAM. \\*
+\hline
+\textbf{Relaciones} & Invocado en memoria por IAM \& Tenancy y Workshop Operations. Consulta la vigencia de suscripciones y límites en repositorios JPA o en memoria en caché mediante Caffeine Cache. Invalida entradas de caché ante eventos de actualización emitidos por el procesador de webhooks. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} Billing External Gateways \& Cloud Integration} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & Stripe Java SDK v24+, Spring WebClient, Resend Cloud API, Caffeine Cache Manager \\*
+\hline
+\textbf{Responsabilidad} & Encapsula la comunicación perimetral con la API de Stripe mediante el SDK oficial stripe-java para crear sesiones de pago hospedadas y enlaces al portal de autoservicio de clientes. Despacha confirmaciones y recibos contables por correo vía Resend y resuelve datos corporativos del taller en IAM. \\*
+\hline
+\textbf{Relaciones} & Invocado por los servicios de aplicación CQRS. Conecta vía HTTPS REST con la plataforma Stripe y con la API de Resend. Consume en memoria la fachada de IAM \& Tenancy para validar la existencia del taller sin acoplamientos relacionales. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes pertenecientes al contenedor API Application en com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak billing.
+
+En la @fig:c4-component-billing se ilustra el diagrama C4 de componentes para el Bounded Context SaaS Billing & Subscriptions, detallando las interacciones entre los componentes internos del módulo, los clientes perimetrales, los bounded contexts adyacentes de la plataforma y los servicios de infraestructura externa de pasarela de pagos y mensajería transaccional.
+
+![Diagrama de Componentes C4 (Nivel 3) para el Bounded Context SaaS Billing & Subscriptions en API Application](report/assets/c4-diagrams/component-level-diagram-billing.png){#fig:c4-component-billing}
+
+*Nota.* Elaboración propia en base a la arquitectura táctica del backend y el estándar C4 Model.
+
+**Dinámica de Interacción y Flujos Operativos del Bounded Context SaaS Billing & Subscriptions**
+
+Para formalizar la colaboración sincronizada entre los componentes internos del módulo de suscripciones y los sistemas externos durante el ciclo de vida comercial del taller mecánico, se analizan a continuación los tres ciclos operacionales más representativos de la solución:
+
+- **Ciclo de Inicialización de Checkout y Activación de Suscripción con Pasarela Externa (Stripe):**
+  El proceso se desencadena cuando el administrador de un taller mecánico decide contratar un nuevo plan tarifario o actualizar su nivel de suscripción desde el portal web. La solicitud es recibida por el componente **Billing REST Controllers & Resource Assemblers**, el cual valida las restricciones de entrada y delega la ejecución en **Billing CQRS Application Services** mediante el comando **CreateCheckoutSessionCommand**.
+
+  El servicio de aplicación coordina la consulta de datos del taller invocando a **Billing External Gateways & Cloud Integration**, la cual interactúa en memoria con la fachada de **IAM & Tenancy Context** para verificar la razón social y el correo electrónico del titular. A continuación, la pasarela solicita a la API de Stripe la apertura de una sesión de pago hospedada utilizando el cliente oficial stripe-java, configurando las direcciones seguras de redirección ante éxito o cancelación. El controlador retorna la URL generada a la aplicación web para redirigir al usuario hacia la pasarela protegida de Stripe, garantizando que los datos confidenciales de tarjetas de crédito nunca toquen la infraestructura de Atelier.
+
+  Una vez completado el pago de manera exitosa en Stripe, su infraestructura emite el webhook asíncrono checkout.session.completed hacia el endpoint perimetral de Atelier. El componente **Billing Event Handlers & Webhook Processing** verifica la firma digital HMAC-SHA256 en **Billing Domain Model & Quota Governance Engines**, comprueba la no duplicidad del evento contra la tabla **stripe_events** en **Billing Persistence Repositories & JPA Adapters**, activa formalmente la entidad **TenantSubscription**, asienta el comprobante inicial en **invoices**, notifica la confirmación de alta por correo mediante Resend e invalida de forma reactiva la memoria en caché en **Billing Open Host Facade & Quota Evaluation ACL**.
+
+- **Ciclo de Notificación Asíncrona, Conciliación de Pagos e Idempotencia vía Webhooks:**
+  Este flujo gobierna la consistencia financiera del sistema frente a cobros recurrentes periódicos mensuales o anuales ejecutados de manera desatendida por Stripe. Al cumplirse el ciclo de facturación, la pasarela intenta efectuar el cobro automático sobre la tarjeta registrada del taller, generando eventos asíncronos invoice.payment_succeeded o invoice.payment_failed que se envían hacia el endpoint perimetral de webhooks de Stripe.
+
+  El componente **Billing REST Controllers & Resource Assemblers** intercepta la petición HTTP y traslada la carga útil y la cabecera Stripe-Signature hacia **Billing CQRS Application Services**. El servicio de aplicación delega la autenticación criptográfica en **Billing Domain Model & Quota Governance Engines**, donde **StripeWebhookSignatureVerificationService** computa la firma HMAC-SHA256 empleando la clave secreta institucional para rechazar intentos maliciosos de falsificación o repetición.
+
+  Seguidamente, el componente **Billing Event Handlers & Webhook Processing** comprueba la existencia previa del identificador en **Billing Persistence Repositories & JPA Adapters**. Si el evento ya fue procesado con anterioridad, se descarta inmediatamente retornando un código de confirmación para neutralizar reintentos repetidos de red. Si es inédito, se registra en la tabla **stripe_events**, se actualiza el estado de la membresía del taller a vigencia plena o mora controlada, se almacena el recibo con enlaces de auditoría en la tabla **invoices**, se emite el evento de dominio correspondiente y se purga reactivamente la entrada de membresía en la memoria en caché.
+
+- **Ciclo de Verificación y Aplicación de Cuotas Operativas con Memoria en Caché (Caffeine):**
+  Para garantizar la integridad operativa de la plataforma sin introducir latencias perjudiciales en los flujos diarios de trabajo, este ciclo se ejecuta de manera continua cada vez que un taller intenta registrar una nueva sede, afiliar personal técnico o aperturar órdenes de trabajo. El módulo solicitante de **IAM & Tenancy** o **Workshop Operations** invoca en memoria los métodos de consulta expuestos por **Billing Open Host Facade & Quota Evaluation ACL**.
+
+  El componente de fachada evalúa en primer término el estado de suscripción y límites de cuota almacenados en la memoria RAM mediante **Caffeine Cache Manager**. Si la entrada se encuentra vigente en caché, la validación se resuelve de inmediato con una latencia sub-milisegundo (< 0.05 ms), permitiendo que las estaciones de trabajo fijas y terminales móviles en campo operen con total fluidez.
+
+  En situaciones de fallo de caché, la fachada recupera la suscripción activa del taller y su agregado **SubscriptionPlan** desde **Billing Persistence Repositories & JPA Adapters**, delegando en **Billing Domain Model & Quota Governance Engines** la evaluación del límite contratado de sucursales o personal frente al consumo acumulado. Si la capacidad ha alcanzado su techo máximo, el motor de cuotas emite la excepción semántica de negocio **QuotaExceededException**, impidiendo la creación del recurso y orientando al usuario hacia el módulo de mejora de plan. El resultado válido se almacena en la memoria en caché con directiva de expiración de cinco minutos tras escritura.
+
+En primer término, la estricta segregación de responsabilidades y la delegación de captura de instrumentos financieros hacia Stripe Checkout y Customer Portal reducen de forma determinante el perímetro de cumplimiento normativo PCI-DSS Nivel 1. Al no almacenar, procesar ni transmitir números de tarjeta de crédito en los servidores de Atelier, el sistema elimina riesgos de filtración de información bancaria sensible, conservando únicamente tokens opacos de cliente y suscripción vinculados a los registros corporativos en PostgreSQL 16.
+
+En segundo término, la implementación del cerrojo de persistencia para eventos asíncronos en el componente de procesamiento de webhooks confiere una tolerancia absoluta a fallas de red y reintentos repetidos por parte de la pasarela de pagos. La restricción de unicidad sobre la tabla de eventos garantiza que cada abono periódico o transición de estado se asiente una única vez con exactitud contable, erradicando duplicidades de cobro o inconsistencias en los recibos emitidos ante eventuales intermitencias en la infraestructura de nube.
+
+Por último, la articulación de la fachada Open Host Service respaldada en almacenamiento en caché con Caffeine Cache resuelve eficazmente la concurrencia masiva de consultas de licenciamiento. Al absorber las verificaciones intensivas de cuota y vigencia en memoria local con tiempos de respuesta sub-milisegundo, el sistema descarga de trabajo al motor de base de datos relacional y garantiza que tanto las terminales administrativas de mostrador como los asesores en bahía y mecánicos en auxilio vial dispongan de autorización inmediata para el desempeño de sus labores automotrices.
 
 #### 2.6.8.6. Bounded Context Software Architecture Code Level Diagrams
 
+En esta sección se desarrolla la especificación técnica de menor nivel de abstracción para la arquitectura de software del Bounded Context SaaS Billing & Subscriptions, trasladando las fronteras conceptuales y las responsabilidades tácticas hacia contratos estáticos de código ejecutable. Mediante esta formalización, se asegura que las reglas comerciales de licenciamiento recurrente, los controles de consumo multi-inquilino y las garantías de seguridad financiera se materialicen con estricta seguridad de tipos y determinismo computacional.
 
+Esta perspectiva de diseño abarca dos representaciones arquitectónicas complementarias: el Diagrama de Clases de la Capa de Dominio, que modela en memoria las raíces de agregado, entidades subordinadas, objetos de valor inmutables, motores algorítmicos de gobernanza de cuotas y puertos de persistencia, y el Diagrama de Base de Datos, que formaliza el esquema físico relacional en PostgreSQL 16 con restricciones de unicidad, índices de alta velocidad y aislamiento multi-inquilino.
 
 ##### 2.6.8.6.1. *Bounded Context Domain Layer Class Diagrams*
 
+El modelado estático de la Capa de Dominio del Bounded Context SaaS Billing & Subscriptions establece las estructuras operativas que gobiernan el catálogo comercial de planes, el ciclo de vida contractual de las membresías de los talleres mecánicos y la conciliación asíncrona de recaudaciones. Su diseño táctico prioriza la pureza algorítmica sin dependencias de frameworks tecnológicos, erradica la obsesión por tipos primitivos mediante identificadores fuertemente tipados y garantiza la mitigación integral de riesgos normativos bancarios bajo el estándar PCI-DSS Nivel 1.
 
+En la @fig:class-diagram-billing se expone el Diagrama de Clases UML detallado para la Capa de Dominio de SaaS Billing & Subscriptions, diseñado conforme a la notación formal UML y compilado mediante la herramienta PlantUML bajo el enfoque de Diagram-as-Code.
+
+![Diagrama de Clases UML de la Capa de Dominio para el Bounded Context SaaS Billing & Subscriptions](report/assets/class-diagrams/class-diagram-billing.png){#fig:class-diagram-billing}
+
+*Nota.* Elaboración propia en base al diseño táctico de dominio y el estándar UML en PlantUML.
+
+La organización interna del modelo estático se estructura en ocho paquetes cohesivos que encapsulan las responsabilidades del dominio de monetización y licenciamiento:
+
+- **Raíces de Agregado (billing.domain.model.aggregates):** Gobierna las entidades maestras que delimitan las fronteras de consistencia transaccional: **SubscriptionPlan** para la gobernanza del catálogo de tarifas y cuotas, **TenantSubscription** para el ciclo contractual y periodos de vigencia del taller mecánico, **SaasInvoice** para el registro contable inmutable de recaudación, y **StripeWebhookEvent** para la deduplicación telemática estricta. Todas las raíces extienden de **AbstractDomainAggregateRoot<T>**.
+- **Entidades Internas (billing.domain.model.entities):** Modela las partes dependientes subordinadas al ciclo de vida del plan: **PlanFeature** para la especificación modular de capacidades avanzadas habilitadas, tales como telemetría OBD-II o diagnósticos predictivos con inteligencia artificial.
+- **Identificadores Fuertemente Tipados (billing.domain.model.ids):** Implementa el contrato **TypedId<UUID>** mediante registros inmutables (**PlanId**, **SubscriptionId**, **SaasInvoiceId**), asociando identidades transversales del Shared Kernel (**TenantId**) y envoltorios alfanuméricos con validación reglamentaria de prefijos oficiales de pasarela (**StripeEventId**, **StripeCustomerId**, **StripeSubscriptionId**, **StripePriceId**, **StripeInvoiceId**).
+- **Objetos de Valor de Licenciamiento y Cuotas (billing.domain.model.valueobjects):** Encapsula estructuras inmutables con validación de invariantes: **PlanPricing** para asociar tarifas monetarias con ciclos de facturación, **TenantQuotaLimits** para cuantificar techos máximos de sedes físicas, mecánicos en plantilla y órdenes mensuales de trabajo, y **SubscriptionPeriod** para delimitar el intervalo temporal de cobertura pagada, enlazando tipos universales (**Money**, **Currency**).
+- **Enumeraciones de Dominio (billing.domain.model.enums):** Normaliza el vocabulario operativo y comercial (**PlanTier**, **BillingCycle**, **SubscriptionStatus**, **InvoiceStatus**, **WebhookProcessingStatus**).
+- **Servicios de Dominio de Gobernanza y Criptografía (billing.domain.services):** Provee motores algorítmicos puros sin acoplamiento a infraestructura: **SubscriptionQuotaEnforcementService** para la verificación determinista de techos de consumo contratados frente a los recursos acumulados, y **StripeWebhookSignatureVerificationService** para la autenticación criptográfica de firmas digitales HMAC-SHA256 y control de tolerancia temporal de marcas de tiempo.
+- **Puertos de Repositorio (billing.domain.repositories):** Define los contratos abstractos de almacenamiento y consulta (**SubscriptionPlanRepository**, **TenantSubscriptionRepository**, **SaasInvoiceRepository**, **StripeWebhookEventRepository**) desacoplados de motores relacionales o tecnologías de persistencia.
+- **Eventos de Dominio y Excepciones Semánticas (billing.domain.events y billing.domain.exceptions):** Formaliza mutaciones del estado comercial y contractual para el Transactional Outbox (**SubscriptionPlanCreatedEvent**, **TenantSubscriptionActivatedEvent**, **TenantSubscriptionPastDueEvent**, **SaasInvoicePaidEvent**, **StripeWebhookProcessedEvent**) y jerarquiza excepciones no comprobadas derivadas de **DomainException** bajo la norma RFC 7807 (**QuotaExceededException**, **SubscriptionNotFoundException**, **DuplicateActiveSubscriptionException**, **InvalidWebhookSignatureException**).
+
+En la @tbl:billing-domain-classes-members se detalla la especificación formal de atributos, firmas de métodos, modificadores de acceso y reglas de negocio para cada componente de la Capa de Dominio.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Catálogo exhaustivo de clases, miembros, ámbitos y relaciones de la Capa de Dominio del Bounded Context SaaS Billing \& Subscriptions} \label{tbl:billing-domain-classes-members} \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} Subscription\allowbreak Plan \quad (\textit{Aggregate Root})} \\*
+\hline
+Atributos y composición & Raíz de agregado del catálogo de planes comerciales. Custodia la soberanía tarifaria, niveles de servicio, límites operativos y capacidades modulares empaquetadas. Generalización de \texttt{AbstractDomainAggregateRoot<\allowbreak PlanId>\allowbreak }. Composición 1 a 1 con \textbf{PlanPricing} y \textbf{TenantQuotaLimits}, y 1 a 0..* con \textbf{PlanFeature}. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{PlanId id} \newline - \texttt{StripePriceId stripePriceId} \newline - \texttt{String name} \newline - \texttt{PlanTier tier} \newline - \texttt{PlanPricing pricing} \newline - \texttt{TenantQuotaLimits quotaLimits} \newline - \texttt{List<\allowbreak PlanFeature>\allowbreak  features} \newline - \texttt{boolean isActive} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Factoría y gestión comercial & Invariantes: el plan nace en estado comercialmente activo. El precio base y el ciclo tarifario deben ser consistentes. El identificador de Stripe Price es inmutable tras su asignación. Emite Subscription\allowbreak Plan\allowbreak Created\allowbreak Event. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{Subscription\allowbreak Plan create(StripePriceId,\allowbreak  String,\allowbreak  PlanTier,\allowbreak  PlanPricing,\allowbreak  TenantQuotaLimits,\allowbreak  List<\allowbreak PlanFeature>\allowbreak )} \newline - \texttt{void updateDetails(String,\allowbreak  PlanPricing,\allowbreak  TenantQuotaLimits)} \newline - \texttt{void addFeature(PlanFeature)} \newline - \texttt{void removeFeature(String)} \newline - \texttt{boolean hasFeature(String)} \newline - \texttt{void activate()} \newline - \texttt{void deactivate()} \newline - \texttt{PlanId id()} \newline - \texttt{StripePriceId stripePriceId()} \newline - \texttt{PlanTier tier()} \newline - \texttt{PlanPricing pricing()} \newline - \texttt{TenantQuotaLimits quotaLimits()} \newline - \texttt{List<\allowbreak PlanFeature>\allowbreak  features()} \newline - \texttt{boolean isActive()} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} Tenant\allowbreak Subscription \quad (\textit{Aggregate Root})} \\*
+\hline
+Atributos y vigencia & Raíz de agregado que gobierna el contrato de servicio SaaS del taller mecánico. Controla transiciones operativas de membresía, periodos de cobertura pagada, suspensiones por impago y desafiliaciones. Generalización de \texttt{AbstractDomainAggregateRoot<\allowbreak SubscriptionId>\allowbreak }. Composición 1 a 1 con \textbf{SubscriptionPeriod}. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{SubscriptionId id} \newline - \texttt{TenantId tenantId} \newline - \texttt{PlanId planId} \newline - \texttt{StripeCustomerId stripeCustomerId} \newline - \texttt{StripeSubscriptionId stripeSubscriptionId} \newline - \texttt{SubscriptionStatus status} \newline - \texttt{SubscriptionPeriod currentPeriod} \newline - \texttt{boolean cancelAtPeriodEnd} \newline - \texttt{Optional<\allowbreak Instant>\allowbreak  canceledAt} \newline - \texttt{Optional<\allowbreak Instant>\allowbreak  trialEndDate} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Ciclo de vida y transiciones & Invariantes: un taller solo puede mantener una suscripción activa de forma concurrente. La activación formal conmuta a ACTIVE y emite Tenant\allowbreak Subscription\allowbreak Activated\allowbreak Event. La renovación extiende el periodo y emite Tenant\allowbreak Subscription\allowbreak Renewed\allowbreak Event. El impago transiciona a PAST\_DUE emitiendo Tenant\allowbreak Subscription\allowbreak PastDue\allowbreak Event. La desafiliación programa la baja o la ejecuta inmediatamente emitiendo Tenant\allowbreak Subscription\allowbreak Canceled\allowbreak Event. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{Tenant\allowbreak Subscription startTrial(TenantId,\allowbreak  PlanId,\allowbreak  StripeCustomerId,\allowbreak  int)} \newline - \texttt{Tenant\allowbreak Subscription activate(TenantId,\allowbreak  PlanId,\allowbreak  StripeCustomerId,\allowbreak  StripeSubscriptionId,\allowbreak  SubscriptionPeriod)} \newline - \texttt{void renewPeriod(SubscriptionPeriod)} \newline - \texttt{void markPastDue()} \newline - \texttt{void markUnpaid()} \newline - \texttt{void cancelAtPeriodEnd()} \newline - \texttt{void cancelImmediately(Instant)} \newline - \texttt{void reactivate()} \newline - \texttt{void changePlan(PlanId,\allowbreak  StripePriceId)} \newline - \texttt{boolean isAccessGranted()} \newline - \texttt{SubscriptionId id()} \newline - \texttt{TenantId tenantId()} \newline - \texttt{PlanId planId()} \newline - \texttt{StripeCustomerId stripeCustomerId()} \newline - \texttt{StripeSubscriptionId stripeSubscriptionId()} \newline - \texttt{SubscriptionStatus status()} \newline - \texttt{SubscriptionPeriod currentPeriod()} \newline - \texttt{boolean isCancelAtPeriodEnd()} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} Saas\allowbreak Invoice \quad (\textit{Aggregate Root})} \\*
+\hline
+Atributos y recaudación & Raíz de agregado contable de liquidación SaaS. Custodia los comprobantes de cobro emitidos por Stripe hacia el taller abonado, montos recaudados, divisa pactada y enlaces a comprobantes fiscales hospedados. Generalización de \texttt{AbstractDomainAggregateRoot<\allowbreak SaasInvoiceId>\allowbreak }. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{SaasInvoiceId id} \newline - \texttt{SubscriptionId subscriptionId} \newline - \texttt{TenantId tenantId} \newline - \texttt{StripeInvoiceId stripeInvoiceId} \newline - \texttt{Money amountPaid} \newline - \texttt{Currency currency} \newline - \texttt{InvoiceStatus status} \newline - \texttt{String invoicePdfUrl} \newline - \texttt{String hostedInvoiceUrl} \newline - \texttt{Optional<\allowbreak Instant>\allowbreak  paidAt} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Liquidación y auditoría contable & Invariantes: el monto saldado debe ser estrictamente positivo. La confirmación de pago conmuta el estado a PAID y emite Saas\allowbreak Invoice\allowbreak Paid\allowbreak Event. El fallo en la transacción bancaria conmuta a OPEN o UNCOLLECTIBLE registrando el motivo y emite Saas\allowbreak Invoice\allowbreak PaymentFailed\allowbreak Event. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{Saas\allowbreak Invoice recordPaid(SubscriptionId,\allowbreak  TenantId,\allowbreak  StripeInvoiceId,\allowbreak  Money,\allowbreak  String,\allowbreak  String,\allowbreak  Instant)} \newline - \texttt{void markPaymentFailed(String)} \newline - \texttt{void markVoid()} \newline - \texttt{SaasInvoiceId id()} \newline - \texttt{SubscriptionId subscriptionId()} \newline - \texttt{TenantId tenantId()} \newline - \texttt{StripeInvoiceId stripeInvoiceId()} \newline - \texttt{Money amountPaid()} \newline - \texttt{Currency currency()} \newline - \texttt{InvoiceStatus status()} \newline - \texttt{String invoicePdfUrl()} \newline - \texttt{String hostedInvoiceUrl()} \newline - \texttt{Optional<\allowbreak Instant>\allowbreak  paidAt()} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} Stripe\allowbreak Webhook\allowbreak Event \quad (\textit{Aggregate Root})} \\*
+\hline
+Atributos e idempotencia & Raíz de agregado de auditoría telemática e idempotencia estricta. Custodia el identificador del evento de Stripe, tipo de notificación, carga JSON inmutable y estado de deduplicación relacional. Generalización de \texttt{AbstractDomainAggregateRoot<\allowbreak UUID>\allowbreak }. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{UUID id} \newline - \texttt{StripeEventId stripeEventId} \newline - \texttt{String eventType} \newline - \texttt{String eventPayload} \newline - \texttt{WebhookProcessingStatus status} \newline - \texttt{Optional<\allowbreak Instant>\allowbreak  processedAt} \newline - \texttt{Optional<\allowbreak String>\allowbreak  errorMessage} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Deduplicación y procesamiento & Invariantes: el identificador de evento de Stripe es unívoco en toda la plataforma. La recepción inicial establece estado PENDING. El procesamiento exitoso sella con marca de tiempo UTC y emite Stripe\allowbreak Webhook\allowbreak Processed\allowbreak Event. El fallo registra la causa sin alterar la carga original. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{Stripe\allowbreak Webhook\allowbreak Event receive(StripeEventId,\allowbreak  String,\allowbreak  String)} \newline - \texttt{void markProcessed(Instant)} \newline - \texttt{void markFailed(String)} \newline - \texttt{void markIgnored()} \newline - \texttt{UUID id()} \newline - \texttt{StripeEventId stripeEventId()} \newline - \texttt{String eventType()} \newline - \texttt{String eventPayload()} \newline - \texttt{WebhookProcessingStatus status()} \newline - \texttt{Optional<\allowbreak Instant>\allowbreak  processedAt()} \newline - \texttt{Optional<\allowbreak String>\allowbreak  errorMessage()} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} Plan\allowbreak Feature \quad (\textit{Entity})} \\*
+\hline
+Atributos y capacidad & Entidad dependiente subordinada a \textbf{SubscriptionPlan}. Modela una característica funcional paquetizada en el licenciamiento SaaS, tal como telemetría OBD-II en tiempo real o diagnósticos predictivos mediante inteligencia artificial. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{UUID id} \newline - \texttt{PlanId planId} \newline - \texttt{String featureKey} \newline - \texttt{String description} \newline - \texttt{boolean isEnabled} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Operaciones de habilitación & Invariantes: la clave de funcionalidad es alfanumérica y unívoca dentro del plan. Permite activar o suspender el acceso a módulos tecnológicos especializados de Atelier. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{PlanFeature of(PlanId,\allowbreak  String,\allowbreak  String,\allowbreak  boolean)} \newline - \texttt{void enable()} \newline - \texttt{void disable()} \newline - \texttt{UUID id()} \newline - \texttt{PlanId planId()} \newline - \texttt{String featureKey()} \newline - \texttt{String description()} \newline - \texttt{boolean isEnabled()} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Dominio:} Subscription\allowbreak Quota\allowbreak Enforcement\allowbreak Service} \\*
+\hline
+Fiscalización de cuotas & Servicio de dominio puro sin estado. Aplica algoritmos deterministas para contrastar el consumo acumulado de sedes físicas, mecánicos en plantilla y órdenes de trabajo mensuales contra las cuotas pactadas en el plan activo. Emite \textbf{QuotaExceededException} ante sobregiros. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{void validateBranchCreationAllowed(TenantSubscription,\allowbreak  SubscriptionPlan,\allowbreak  int)} \newline - \texttt{void validateStaffAdditionAllowed(TenantSubscription,\allowbreak  SubscriptionPlan,\allowbreak  int)} \newline - \texttt{void validateWorkOrderCreationAllowed(TenantSubscription,\allowbreak  SubscriptionPlan,\allowbreak  int)} \newline - \texttt{boolean isFeatureEnabled(TenantSubscription,\allowbreak  SubscriptionPlan,\allowbreak  String)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Dominio:} Stripe\allowbreak Webhook\allowbreak Signature\allowbreak Verification\allowbreak Service} \\*
+\hline
+Autenticación criptográfica & Servicio criptográfico sin estado. Computa firmas digitales HMAC-SHA256 sobre el cuerpo sin procesar de los webhooks utilizando la clave institucional secreta de endpoint, verificando marcas temporales contra ataques de repetición. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{boolean verifySignature(String,\allowbreak  String,\allowbreak  String)} \newline - \texttt{long extractTimestamp(String)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puertos de Repositorio:} Repositorios de Persistencia de Dominio} \\*
+\hline
+Subscription\allowbreak Plan\allowbreak Repository & Contrato agnóstico de persistencia para el catálogo comercial de planes de software. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{SubscriptionPlan save(SubscriptionPlan)} \newline - \texttt{Optional<\allowbreak SubscriptionPlan>\allowbreak  findById(PlanId)} \newline - \texttt{Optional<\allowbreak SubscriptionPlan>\allowbreak  findByStripePriceId(StripePriceId)} \newline - \texttt{List<\allowbreak SubscriptionPlan>\allowbreak  findAllActive()} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+Tenant\allowbreak Subscription\allowbreak Repository & Contrato de persistencia para las membresías de talleres mecánicos con búsqueda por taller y estado. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{TenantSubscription save(TenantSubscription)} \newline - \texttt{Optional<\allowbreak TenantSubscription>\allowbreak  findById(SubscriptionId)} \newline - \texttt{Optional<\allowbreak TenantSubscription>\allowbreak  findByTenantId(TenantId)} \newline - \texttt{Optional<\allowbreak TenantSubscription>\allowbreak  findByStripeSubscriptionId(StripeSubscriptionId)} \newline - \texttt{List<\allowbreak TenantSubscription>\allowbreak  findAllByStatus(SubscriptionStatus)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+Saas\allowbreak Invoice\allowbreak Repository & Contrato de persistencia para los recibos contables generados por liquidación recurrente. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{SaasInvoice save(SaasInvoice)} \newline - \texttt{Optional<\allowbreak SaasInvoice>\allowbreak  findById(SaasInvoiceId)} \newline - \texttt{Optional<\allowbreak SaasInvoice>\allowbreak  findByStripeInvoiceId(StripeInvoiceId)} \newline - \texttt{List<\allowbreak SaasInvoice>\allowbreak  findAllByTenantId(TenantId)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+Stripe\allowbreak Webhook\allowbreak Event\allowbreak Repository & Contrato de persistencia para la tabla de eventos con verificación de unicidad atómica. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{StripeWebhookEvent save(StripeWebhookEvent)} \newline - \texttt{Optional<\allowbreak StripeWebhookEvent>\allowbreak  findByStripeEventId(StripeEventId)} \newline - \texttt{boolean existsByStripeEventId(StripeEventId)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Identificadores Fuertemente Tipados y Objetos de Valor:} Estructuras Inmutables} \\*
+\hline
+Identificadores tipados & Registros inmutables que realizan \texttt{TypedId} para erradicar la obsesión por tipos primitivos y validar prefijos reglamentarios de pasarela. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{PlanId} \newline - \texttt{SubscriptionId} \newline - \texttt{SaasInvoiceId} \newline - \texttt{StripeEventId} \newline - \texttt{StripeCustomerId} \newline - \texttt{StripeSubscriptionId} \newline - \texttt{StripePriceId} \newline - \texttt{StripeInvoiceId} \newline - \texttt{TenantId} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+Plan\allowbreak Pricing & Registro inmutable que empaqueta la cuantía monetaria y la cadencia recurrente de cobro. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{Money price} \newline - \texttt{BillingCycle billingCycle} \newline - \texttt{PlanPricing of(Money,\allowbreak  BillingCycle)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+Tenant\allowbreak Quota\allowbreak Limits & Registro inmutable que cuantifica las capacidades máximas autorizadas por taller mecánico. Métodos: \texttt{canAddBranch(int)}, \texttt{canAddStaff(int)} y \texttt{canCreateWorkOrder(int)}. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{int maxBranches} \newline - \texttt{int maxActiveStaff} \newline - \texttt{boolean iotTelemetryEnabled} \newline - \texttt{boolean aiDiagnosticsEnabled} \newline - \texttt{int maxMonthlyWorkOrders} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+Subscription\allowbreak Period & Registro inmutable que delimita el intervalo temporal de cobertura pagada. Métodos: \texttt{isActiveAt(Instant)} y \texttt{daysRemaining(Instant)}. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{Instant startDate} \newline - \texttt{Instant endDate} \newline - \texttt{SubscriptionPeriod of(Instant,\allowbreak  Instant)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Enumeraciones y Jerarquía de Excepciones:} Tipos de Dominio y Errores RFC 7807} \\*
+\hline
+Enumeraciones de Dominio & Vocabularios controlados inmutables que tipifican niveles comerciales, periodicidades, estados contractuales, liquidaciones y deduplicación de eventos. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{PlanTier (STARTER,\allowbreak  PROFESSIONAL,\allowbreak  ENTERPRISE)} \newline - \texttt{BillingCycle (MONTHLY,\allowbreak  YEARLY)} \newline - \texttt{SubscriptionStatus (TRIALING,\allowbreak  ACTIVE,\allowbreak  PAST\_DUE,\allowbreak  CANCELED,\allowbreak  UNPAID,\allowbreak  INCOMPLETE)} \newline - \texttt{InvoiceStatus (PAID,\allowbreak  OPEN,\allowbreak  VOID,\allowbreak  UNCOLLECTIBLE)} \newline - \texttt{WebhookProcessingStatus (PENDING,\allowbreak  PROCESSED,\allowbreak  FAILED,\allowbreak  IGNORED)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+Excepciones RFC 7807 & Excepciones semánticas no comprobadas derivadas de \texttt{DomainException}. Portan códigos canónicos normalizados bajo RFC 7807 para mapeo HTTP 4xx en la capa perimetral ante infracciones de cuotas, planes inexistentes, suscripciones duplicadas o firmas ilegítimas. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{BillingDomainException} \newline - \texttt{PlanNotFoundException} \newline - \texttt{SubscriptionNotFoundException} \newline - \texttt{QuotaExceededException} \newline - \texttt{DuplicateActiveSubscriptionException} \newline - \texttt{InvalidWebhookSignatureException} \newline - \texttt{StripeWebhookProcessingException} \newline - \texttt{SubscriptionPastDueException} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Especificación formal de miembros, modificadores de acceso, tipos de retorno y relaciones de la Capa de Dominio en com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak billing.\allowbreak domain.
+
+A partir del modelo estático ilustrado en la @fig:class-diagram-billing y desglosado en la @tbl:billing-domain-classes-members, se identifican tres fundamentos de ingeniería de software que respaldan la solidez y soberanía financiera de la plataforma:
+
+- **Aislamiento Normativo PCI-DSS Nivel 1 y Desacoplamiento de Modelos Contables:**
+  El diseño arquitectónico impone una separación radical entre los cobros comerciales corporativos que Andeva factura a los talleres automotrices y los comprobantes fiscales que cada taller emite a conductores particulares bajo normativa de SUNAT en Invoicing & Compliance. Al delegar completamente la captura de números de tarjeta de crédito e instrumentos bancarios hacia Stripe Checkout y Stripe Customer Portal, el backend de Atelier prescinde de almacenar credenciales financieras sensibles, reteniendo únicamente tokens opacos de cliente y suscripción en **TenantSubscription**, erradicando riesgos de vulneración de datos bancarios.
+
+- **Criptografía Simétrica HMAC-SHA256, Idempotencia y Resiliencia en Notificaciones:**
+  La recepción de eventos asíncronos de facturación recurrente se salvaguarda mediante autenticación criptográfica obligatoria en **StripeWebhookSignatureVerificationService**, neutralizando intentos de suplantación mediante la verificación del hash simétrico HMAC-SHA256. Asimismo, la raíz **StripeWebhookEvent** actúa como cerrojo de persistencia relacional frente a la tabla **stripe_events**, garantizando que las confirmaciones de abono o alertas de morosidad se procesen exactamente una vez y descartando de manera inocua las transmisiones duplicadas originadas por reintentos de red.
+
+- **Fiscalización Determinista de Cuotas Operativas y Aceleración en Memoria RAM:**
+  La gobernanza de capacidades de plataforma se aísla en el motor algorítmico **SubscriptionQuotaEnforcementService**, el cual valida en tiempo de ejecución que ningún taller sobrepase el techo contratado de sucursales activas, mecánicos en nómina u órdenes mensuales de servicio. Al articularse con una fachada Open Host Service respaldada en memoria mediante Caffeine Cache, el sistema resuelve verificaciones de cuota con latencia sub-milisegundo (< 0.05 ms), asegurando que tanto las estaciones web de administración como los asesores en bahía y mecánicos en campo gocen de una respuesta inmediata sin penalizar a la base de datos relacional.
 
 ##### 2.6.8.6.2. *Bounded Context Database Design Diagram*
 
+El diseño de persistencia del Bounded Context SaaS Billing & Subscriptions materializa el modelo de dominio en un esquema relacional enfocado en garantizar aislamiento estricto de datos por inquilino, integridad contable y disponibilidad ininterrumpida. La persistencia se distribuye en dos componentes físicos complementarios: la base de datos central PostgreSQL 16 para el backend de la plataforma (**API Application**) y el motor relacional embebido SQLite 3 para la aplicación técnica móvil de taller (**Mobile Workshop**).
 
+En la @fig:database-diagram-billing se presenta el Diagrama Entidad-Relación físico para la persistencia del Bounded Context SaaS Billing & Subscriptions en sus dos entornos operativos de despliegue: la base de datos central PostgreSQL 16 de la API de backend y el motor relacional local SQLite 3 de la aplicación móvil de taller.
+
+![Diagrama Entidad-Relación de Base de Datos para el Bounded Context SaaS Billing & Subscriptions (PostgreSQL 16 y SQLite 3)](report/assets/database-diagrams/database-diagram-billing.png){#fig:database-diagram-billing}
+
+*Nota.* Elaboración propia en base al diseño físico de persistencia y el estándar PlantUML ERD.
+
+- **Subsistema de Catálogo Comercial y Capacidades Granulares:**
+  Gobierna la definición jerárquica de planes comerciales y capacidades modulares mediante las tablas **plans** y **plan_features**. La tabla **plans** custodia las tarifas monetarias recurrentes, ciclos contables e hitos cuantitativos de plataforma, como sucursales autorizadas y técnicos en plantilla. A su vez, la tabla **plan_features** normaliza en una relación de composición uno a muchos las banderas booleanas de activación funcional para características avanzadas, tales como telemetría vehicular OBD-II continua o algoritmos de diagnóstico predictivo.
+
+- **Subsistema de Membresías Contractuales y Ciclos de Facturación:**
+  Administra el ciclo de vida ontológico del contrato de suscripción del taller automotriz mediante la tabla **subscriptions**. Esta entidad vincula directamente al inquilino con su plan vigente y preserva los identificadores remotos en Stripe. Asimismo, gobierna de forma determinista los estados de vigencia operativa, períodos de gracia de prueba, cancelaciones diferidas a fin de ciclo y marcas temporales de corte para renovación automática.
+
+- **Subsistema de Recaudación Periódica y Trazabilidad de Pagos:**
+  Registra la bitácora contable de cobros recurrentes de software mediante la tabla **invoices**. Esta tabla sincroniza los cobros bancarios procesados por Stripe Invoices, resguardando el monto exacto debitado, la divisa de transacción, el estado de liquidación y los enlaces seguros hacia los comprobantes en formato PDF y páginas de pago hospedadas, garantizando una auditoría financiera inmutable para los administradores del taller.
+
+- **Subsistema de Auditoría Transaccional e Idempotencia de Webhooks:**
+  Proporciona un cerrojo criptográfico y de concurrencia contra entregas duplicadas de Stripe Webhooks mediante la tabla **stripe_events**. Al imponer una restricción de unicidad estricta sobre el identificador único del evento y custodiar la carga útil completa en formato de texto, el sistema garantiza procesamiento *exactly-once*, descartando automáticamente reintentos de red sin degradar la consistencia de las membresías.
+
+- **Persistencia Técnica Desconectada en SQLite 3:**
+  Otorga soberanía operacional al cliente móvil de taller mediante las tablas locales **local_subscription_cache** y **local_plan_features_cache**. La tabla **local_subscription_cache** resguarda en el dispositivo del técnico una réplica ligera de las cuotas operativas vigentes y el estado de la suscripción, facultando la evaluación de límites en foso o patio sin depender de conectividad celular. De forma análoga, la tabla **local_plan_features_cache** mantiene las autorizaciones modulares para habilitar o restringir componentes de la interfaz de usuario en movilidad.
+
+A partir de la arquitectura relacional definida en el diagrama de persistencia, en la @tbl:billing-database-tables-schema se cataloga la totalidad de las tablas y objetos físicos que conforman el modelo de datos, detallando el producto donde residen, sus atributos cardinales, restricciones de integridad, estrategias de indexación y su contribución al aislamiento de información.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.1cm} | >{\raggedright\arraybackslash}p{10.3cm} |}
+\caption{Catálogo exhaustivo de tablas, objetos de base de datos, restricciones e índices físicos del Bounded Context SaaS Billing \& Subscriptions} \label{tbl:billing-database-tables-schema} \\
+\hline
+\thfirst{Aspecto de Persistencia} & \thcell{Especificación Físico-Relacional} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Persistencia} & \thcell{Especificación Físico-Relacional} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{plans}} \\*
+\hline
+\textbf{Motor y Producto} & PostgreSQL 16 (API Application) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Catálogo maestro de planes comerciales de suscripción SaaS ofertados por Andeva a los talleres mecánicos en los niveles Starter, Professional y Enterprise. Define el precio recurrente, divisa, periodicidad contable y los techos de cuotas operativas para sucursales, mecánicos activos y órdenes de trabajo mensuales permitidas, así como el acceso a funciones avanzadas de telemetría IoT y diagnóstico predictivo con IA. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{id (UUID PK)}, \texttt{stripe\_price\_id (VARCHAR(100) UK)}, \texttt{name (VARCHAR(100))}, \texttt{tier (VARCHAR(20))}, \texttt{price (DECIMAL(10,2))}, \texttt{currency (VARCHAR(3))}, \texttt{billing\_cycle (VARCHAR(20))}, \texttt{max\_branches (INTEGER)}, \texttt{max\_active\_staff (INTEGER)}, \texttt{max\_monthly\_work\_orders (INTEGER)}, \texttt{iot\_telemetry\_enabled (BOOLEAN)}, \texttt{ai\_diagnostics\_enabled (BOOLEAN)}, \texttt{is\_active (BOOLEAN)}, \texttt{created\_at (TIMESTAMPTZ)}, \texttt{updated\_at (TIMESTAMPTZ)}, \texttt{version (BIGINT)}, \texttt{deleted\_at (TIMESTAMPTZ)}. \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_\allowbreak plans (id) \newline - UK: uk\_\allowbreak plans\_\allowbreak stripe\_\allowbreak price\_\allowbreak id (stripe\_price\_id) \newline - CHECK: chk\_\allowbreak plans\_\allowbreak tier (tier IN ('STARTER', 'PROFESSIONAL', 'ENTERPRISE')), chk\_\allowbreak plans\_\allowbreak cycle (billing\_cycle IN ('MONTHLY', 'YEARLY')), chk\_\allowbreak plans\_\allowbreak price (price >= 0.00), chk\_\allowbreak plans\_\allowbreak max\_\allowbreak branches (max\_branches > 0), chk\_\allowbreak plans\_\allowbreak max\_\allowbreak staff (max\_active\_staff > 0), chk\_\allowbreak plans\_\allowbreak max\_\allowbreak orders (max\_monthly\_work\_orders > 0) \newline - Índices B-Tree: idx\_\allowbreak plans\_\allowbreak tier (tier), idx\_\allowbreak plans\_\allowbreak active (is\_active), idx\_\allowbreak plans\_\allowbreak stripe\_\allowbreak price (stripe\_price\_id) \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{plan\allowbreak \_features}} \\*
+\hline
+\textbf{Motor y Producto} & PostgreSQL 16 (API Application) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Desglose granular de funcionalidades, módulos de software y capacidades técnicas habilitadas o restringidas por plan comercial. Permite el control modular de acceso a características como telemetría OBD-II continua, gestión multialmacén, alertas predictivas por algoritmos analíticos y facturación electrónica ilimitada. Integridad referencial en cascada asociada al ciclo de vida del plan maestro. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{id (UUID PK)}, \texttt{plan\_id (UUID FK)}, \texttt{feature\_key (VARCHAR(50))}, \texttt{description (VARCHAR(255))}, \texttt{is\_enabled (BOOLEAN)}, \texttt{created\_at (TIMESTAMPTZ)}. \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_\allowbreak plan\_\allowbreak features (id) \newline - FK: fk\_\allowbreak plan\_\allowbreak features\_\allowbreak plan\_\allowbreak id hacia plans(id) con ON DELETE CASCADE \newline - UK: uk\_\allowbreak plan\_\allowbreak features\_\allowbreak key (plan\_id, feature\_key) \newline - CHECK: chk\_\allowbreak feature\_\allowbreak key\_\allowbreak not\_\allowbreak empty (LENGTH(feature\_key) > 0) \newline - Índices B-Tree: idx\_\allowbreak plan\_\allowbreak features\_\allowbreak plan (plan\_id), idx\_\allowbreak plan\_\allowbreak features\_\allowbreak lookup (plan\_id, feature\_key, is\_enabled) \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{subscriptions}} \\*
+\hline
+\textbf{Motor y Producto} & PostgreSQL 16 (API Application) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Membresía contractual y estado de afiliación comercial del taller automotriz cliente con la plataforma Atelier. Vincula al inquilino con su plan comercial contratado y custodia los identificadores externos del cliente y suscripción recurrente en Stripe. Gobierna las fechas de inicio y corte del período contable, la programación de cancelaciones a término de ciclo y las fechas de expiración de periodos de prueba gratuita. Aislamiento multi-inquilino estricto con restricción de unicidad por taller. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{id (UUID PK)}, \texttt{tenant\_id (UUID UK FK)}, \texttt{plan\_id (UUID FK)}, \texttt{stripe\_customer\_id (VARCHAR(100))}, \texttt{stripe\_sub\_id (VARCHAR(100))}, \texttt{status (VARCHAR(20))}, \texttt{current\_period\_start (TIMESTAMPTZ)}, \texttt{current\_period\_end (TIMESTAMPTZ)}, \texttt{cancel\_at\_period\_end (BOOLEAN)}, \texttt{canceled\_at (TIMESTAMPTZ)}, \texttt{trial\_end\_date (TIMESTAMPTZ)}, \texttt{created\_at (TIMESTAMPTZ)}, \texttt{updated\_at (TIMESTAMPTZ)}, \texttt{version (BIGINT)}, \texttt{deleted\_at (TIMESTAMPTZ)}. \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_\allowbreak subscriptions (id) \newline - FK: fk\_\allowbreak subscriptions\_\allowbreak tenant\_\allowbreak id hacia tenants(id), fk\_\allowbreak subscriptions\_\allowbreak plan\_\allowbreak id hacia plans(id) \newline - UK: uk\_\allowbreak subscriptions\_\allowbreak tenant\_\allowbreak id (tenant\_id) \newline - CHECK: chk\_\allowbreak subscription\_\allowbreak status (status IN ('TRIALING', 'ACTIVE', 'PAST\_DUE', 'CANCELED', 'UNPAID', 'INCOMPLETE')) \newline - Índices B-Tree: idx\_\allowbreak subscriptions\_\allowbreak tenant (tenant\_id), idx\_\allowbreak subscriptions\_\allowbreak status (status), idx\_\allowbreak subscriptions\_\allowbreak stripe\_\allowbreak sub (stripe\_sub\_id), idx\_\allowbreak subscriptions\_\allowbreak period\_\allowbreak end (current\_period\_end) \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{invoices}} \\*
+\hline
+\textbf{Motor y Producto} & PostgreSQL 16 (API Application) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Registro histórico y comprobante contable de recaudación recurrente emitido por Andeva al taller automotriz por el uso del software SaaS. Sincronizado bidireccionalmente con los cobros exitosos procesados en Stripe Invoices. Custodia el importe debitado en tarjeta, la moneda del cobro, el estado de liquidación, la marca temporal del pago y los enlaces seguros para la descarga del recibo en formato PDF o visualización en Stripe Hosted Invoice. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{id (UUID PK)}, \texttt{subscription\_id (UUID FK)}, \texttt{tenant\_id (UUID FK)}, \texttt{stripe\_invoice\_id (VARCHAR(100) UK)}, \texttt{amount\_paid (DECIMAL(10,2))}, \texttt{currency (VARCHAR(3))}, \texttt{status (VARCHAR(20))}, \texttt{invoice\_pdf\_url (VARCHAR(255))}, \texttt{hosted\_invoice\_url (VARCHAR(255))}, \texttt{paid\_at (TIMESTAMPTZ)}, \texttt{created\_at (TIMESTAMPTZ)}, \texttt{updated\_at (TIMESTAMPTZ)}, \texttt{version (BIGINT)}, \texttt{deleted\_at (TIMESTAMPTZ)}. \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_\allowbreak invoices (id) \newline - FK: fk\_\allowbreak invoices\_\allowbreak subscription\_\allowbreak id hacia subscriptions(id), fk\_\allowbreak invoices\_\allowbreak tenant\_\allowbreak id hacia tenants(id) \newline - UK: uk\_\allowbreak invoices\_\allowbreak stripe\_\allowbreak invoice\_\allowbreak id (stripe\_invoice\_id) \newline - CHECK: chk\_\allowbreak invoice\_\allowbreak status (status IN ('DRAFT', 'OPEN', 'PAID', 'UNCOLLECTIBLE', 'VOID')), chk\_\allowbreak invoice\_\allowbreak amount\_\allowbreak paid (amount\_paid >= 0.00) \newline - Índices B-Tree: idx\_\allowbreak invoices\_\allowbreak subscription (subscription\_id), idx\_\allowbreak invoices\_\allowbreak tenant\_\allowbreak paid (tenant\_id, paid\_at), idx\_\allowbreak invoices\_\allowbreak status (status) \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{stripe\allowbreak \_events}} \\*
+\hline
+\textbf{Motor y Producto} & PostgreSQL 16 (API Application) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Registro transaccional de auditoría y cerrojo de concurrencia e idempotencia para notificaciones asíncronas transmitidas por Stripe Webhooks. Resguarda el identificador único del evento emitido por Stripe, la tipología semántica de notificación, la carga útil JSON inmutable, el estado de procesamiento en la plataforma Atelier y los diagnósticos de excepción en caso de error. Previene el doble procesamiento ante reintentos automáticos de red de Stripe. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{id (UUID PK)}, \texttt{stripe\_event\_id (VARCHAR(100) UK)}, \texttt{type (VARCHAR(50))}, \texttt{payload (TEXT)}, \texttt{status (VARCHAR(20))}, \texttt{processed\_at (TIMESTAMPTZ)}, \texttt{error\_message (VARCHAR(500))}. \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_\allowbreak stripe\_\allowbreak events (id) \newline - UK: uk\_\allowbreak stripe\_\allowbreak events\_\allowbreak event\_\allowbreak id (stripe\_event\_id) \newline - CHECK: chk\_\allowbreak stripe\_\allowbreak event\_\allowbreak status (status IN ('PENDING', 'PROCESSED', 'FAILED', 'IGNORED')) \newline - Índices B-Tree: idx\_\allowbreak stripe\_\allowbreak events\_\allowbreak status (status, processed\_at), idx\_\allowbreak stripe\_\allowbreak events\_\allowbreak type (type) \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{auditable\allowbreak \_abstract\allowbreak \_entity}} \\*
+\hline
+\textbf{Motor y Producto} & PostgreSQL 16 (API Application) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Superclase base y arquetipo técnico JPA (@MappedSuperclass) heredado por las entidades del backend de SaaS Billing \& Subscriptions. Provee identificador universal primario id, marcas temporales de auditoría inmutable created\_at y updated\_at, control de concurrencia optimista version y soporte de borrado lógico transversal mediante deleted\_at. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{id (UUID)}, \texttt{created\_at (TIMESTAMPTZ)}, \texttt{updated\_at (TIMESTAMPTZ)}, \texttt{version (BIGINT)}, \texttt{deleted\_at (TIMESTAMPTZ)}. \\*
+\hline
+\textbf{Constraints e Índices} & - PK técnica: pk\_entity (id) \newline - Bloqueo optimista: columna version administrada por Hibernate JPA (@Version) \newline - Filtro de exclusión: deleted\_at IS NULL para soporte de borrado lógico transversal. Superclase @MappedSuperclass JPA \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{local\allowbreak \_subscription\allowbreak \_cache}} \\*
+\hline
+\textbf{Motor y Producto} & SQLite 3 (Mobile Workshop) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Caché relacional local de solo lectura en el dispositivo móvil del técnico o asesor de patio. Almacena una copia sincronizada de la membresía del taller y sus cuotas operativas vigentes respecto al número máximo de sucursales, mecánicos activos permitidos, órdenes de trabajo mensuales autorizadas y habilitación de telemetría IoT o diagnóstico predictivo. Permite la evaluación inmediata en frío de capacidades en fosos y bahías sin depender de conectividad telemática. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{id (TEXT PK)}, \texttt{tenant\_id (TEXT)}, \texttt{plan\_name (TEXT)}, \texttt{plan\_tier (TEXT)}, \texttt{subscription\_status (TEXT)}, \texttt{max\_branches (INTEGER)}, \texttt{max\_active\_staff (INTEGER)}, \texttt{max\_monthly\_work\_orders (INTEGER)}, \texttt{iot\_telemetry\_enabled (INTEGER)}, \texttt{ai\_diagnostics\_enabled (INTEGER)}, \texttt{current\_period\_end (TEXT)}, \texttt{synced\_at (TEXT)}. \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_\allowbreak local\_\allowbreak subscription\_\allowbreak cache (id) \newline - UK: uk\_\allowbreak local\_\allowbreak subscription\_\allowbreak tenant (tenant\_id) \newline - Índices B-Tree: idx\_\allowbreak local\_\allowbreak subscription\_\allowbreak status (subscription\_status), idx\_\allowbreak local\_\allowbreak subscription\_\allowbreak tenant (tenant\_id) \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{local\allowbreak \_plan\allowbreak \_features\allowbreak \_cache}} \\*
+\hline
+\textbf{Motor y Producto} & SQLite 3 (Mobile Workshop) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Réplica local de banderas y permisos modulares habilitados para el taller automotriz en su aplicación móvil. Faculta la activación o bloqueo reactivo de componentes de la interfaz de usuario en el cliente técnico de patio de forma determinista y sin latencia, manteniendo una réplica sincronizada incrementalmente con el backend central. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{feature\_id (TEXT PK)}, \texttt{tenant\_id (TEXT)}, \texttt{feature\_key (TEXT)}, \texttt{is\_enabled (INTEGER)}, \texttt{synced\_at (TEXT)}. \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_\allowbreak local\_\allowbreak plan\_\allowbreak features\_\allowbreak cache (feature\_id) \newline - UK: uk\_\allowbreak local\_\allowbreak features\_\allowbreak tenant\_\allowbreak key (tenant\_id, feature\_key) \newline - Índices B-Tree: idx\_\allowbreak local\_\allowbreak features\_\allowbreak lookup (tenant\_id, feature\_key, is\_enabled) \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Elaboración propia en base al diseño relacional y la especificación física de persistencia.
+
+A partir de la estructura formalizada en la @fig:database-diagram-billing y la @tbl:billing-database-tables-schema, se identifican tres fundamentos de ingeniería de software que respaldan la solidez, seguridad y resiliencia de la persistencia:
+
+- **Aislamiento Multi-Inquilino y Gobernanza de Planes Comerciales en PostgreSQL 16:**
+  El particionamiento lógico de los datos de suscripción se salvaguarda a través de la restricción foránea única en la columna **tenant_id** de la tabla **subscriptions**, garantizando que cada taller cuente exactamente con una única membresía operativa asociada. Dicha segregación se complementa con el arquetipo técnico **auditable_abstract_entity**, el cual inyecta mecanismos universales de control de concurrencia optimista mediante marcas de versión y borrado lógico, previniendo sobreescrituras accidentales entre administradores concurrentes.
+
+- **Criptografía, Resiliencia e Idempotencia Estricta en la Ingestión de Webhooks:**
+  La persistencia física en la tabla **stripe_events** constituye una barrera transaccional que neutraliza las contingencias de red inherentes a los pagos electrónicos en la nube. Al sincronizar las transiciones de estado de cobro en **invoices** y renovaciones de ciclo en **subscriptions** dentro de la misma frontera transaccional ACID donde se inserta el evento de Stripe, se asegura que anomalías en las comunicaciones HTTP nunca originen cobros duplicados o desincronizaciones contractuales.
+
+- **Evaluación de Cuotas Operativas en Frío y Sincronización Reactiva hacia Clientes Móviles:**
+  La inclusión de las tablas de caché en SQLite 3 responde al requerimiento operacional de movilidad en talleres automotrices, donde la recepción de vehículos y asignación de órdenes de trabajo puede ejecutarse en sótanos o zonas sin cobertura inalámbrica. Mediante un protocolo de refresco incremental basado en marcas temporales y cabeceras de validación condicional ETag, la aplicación móvil actualiza sus techos de capacidad sin generar sobrecarga en el backend central, garantizando fluidez en la atención al cliente.
 
 ### 2.6.9. *Bounded Context: IoT Telemetry & Predictive Maintenance*
 
