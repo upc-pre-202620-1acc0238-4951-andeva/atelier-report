@@ -52,13 +52,13 @@ El ecosistema se divide estratégicamente en dos fases para conectar a todos los
     % ==============================
     % Alumno 1
     % ==============================
-    \multirow{5}{2.5cm}{\centering [Foto 1]} 
-    & Alumno 1 & [Carrera] \\*
+    \multirow{5}{2.5cm}{\centering\includegraphics[width=2.2cm, keepaspectratio]{report/assets/startup-team-members/daniel.jpg}} 
+    & Granda Ibarra, Luis Daniel – U20241E401 & Ingeniería de Software \\*
     \cline{2-3}
     & \thspan{2}{Descripción} \\*
     \cline{2-3}
     & \multicolumn{2}{p{\dimexpr\textwidth-2.5cm-4\tabcolsep-3\arrayrulewidth\relax}|}{%
-        [Descripción del Alumno 1...]
+        Soy estudiante de 6.° ciclo de Ingeniería de Software en la UPC, enfocado en el desarrollo de soluciones tecnológicas de alto impacto y el análisis avanzado de datos. Mi formación técnica se respalda en el dominio de Python, C++, Java y C\# para el desarrollo de algoritmos eficientes, así como en el manejo estratégico de SQL para la gestión de bases de datos y Excel para el modelado de información. Me apasiona la Ciencia de Datos y el Machine Learning, áreas donde busco transformar la complejidad técnica en herramientas de decisión para las empresas líderes del mercado. Me considero un perfil dinámico, responsable y con una alta capacidad de adaptabilidad, cualidades que potencio fuera del entorno académico a través de la disciplina del deporte y la música. La constancia que aplico en la calistenia, la natación y el gimnasio, sumada a la creatividad que desarrollo con la guitarra, me permiten abordar los retos de ingeniería con una mentalidad resiliente y un pensamiento lateral. Mi meta es consolidarme como un profesional indispensable en el ecosistema tecnológico, aportando valor real a través de la innovación y la ingeniería de calidad.
     } \\
     \hline
     
