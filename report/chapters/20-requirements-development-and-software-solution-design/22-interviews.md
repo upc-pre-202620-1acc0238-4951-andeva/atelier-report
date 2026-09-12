@@ -91,161 +91,161 @@ interacción, browser, dispositivos, etc. deben estar incluidas como parte de lo
 resúmenes para cada entrevista. Debe ser evidente que cada característica de los
 arquetipos que se construirán en base a esta información provienen de la información
 recolectada.
-\begin{longtable}{>{\bfseries\raggedright\arraybackslash}p{2.5cm} p{\dimexpr\textwidth-2.5cm-4\tabcolsep\relax}}
+\begin{longtable}{|p{\dimexpr0.5\textwidth-2\tabcolsep-1.5\arrayrulewidth\relax}|p{\dimexpr0.5\textwidth-2\tabcolsep-1.5\arrayrulewidth\relax}|}
 \caption{Entrevista \#1 - Jorge Antonio Aguilar Perez} \label{tbl:entrevista-s1-1} \\
 \hline
-\textbf{Atributo} & \textbf{Detalle} \\
-\hline
-\endfirsthead
-\multicolumn{2}{c}%
-{\tablename\ \thetable\ -- \textit{Continuación de la página anterior}} \\
-\hline
-\textbf{Atributo} & \textbf{Detalle} \\
-\hline
-\endhead
-\hline \multicolumn{2}{r}{\textit{Continúa en la siguiente página}} \\
-\endfoot
-\hline
-\endlastfoot
-Nombre & Jorge Antonio \\
-Apellidos & Aguilar Perez \\
-Edad & 53 años \\
-Distrito & Chorrillos \\
-Evidencia & \begin{minipage}{\linewidth}
-  \vspace{4pt}
-  \centering
-  \includegraphics[width=0.6\linewidth]{report/assets/Interview-Evidence/Interview-of-Jorge-Aguilar.jpeg}
-  \vspace{4pt}
+\begin{minipage}[t]{\linewidth}
+\vspace{2pt}
+\begin{center}\textbf{Datos del Entrevistado}\end{center}
+\hrule
+\vspace{4pt}
+\raggedright
+Nombre: Jorge Antonio \\
+Apellidos: Aguilar Perez \\
+Edad: 53 años \\
+Distrito: Chorrillos \\
+Link: \href{https://upcedupe-my.sharepoint.com/:v:/g/personal/u20241e287_upc_edu_pe/IQBzBV6lfIhFR6y-FD7FV72HAbKSap9KCkiX4idSlbt6zHE?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=rbGLmS}{Microsoft Stream} \\
+Duración: 0:20 min - 13:39 min
+\vspace{4pt}
+\end{minipage}
+&
+\begin{minipage}[t]{\linewidth}
+\vspace{4pt}
+\centering
+\includegraphics[width=0.95\linewidth]{report/assets/Interview-Evidence/Interview-of-Jorge-Aguilar.jpeg}
+\vspace{4pt}
 \end{minipage} \\
-Link & \href{https://upcedupe-my.sharepoint.com/:v:/g/personal/u20241e287_upc_edu_pe/IQBzBV6lfIhFR6y-FD7FV72HAbKSap9KCkiX4idSlbt6zHE?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=rbGLmS}{Microsoft Stream} \\
-Duración & 0:20 min - 13:39 min \\
-Resumen & La entrevista se realizó a Jorge Aguilar, un técnico mecánico de 53 años con aproximadamente 35 años de experiencia en el rubro automotriz. Jorge ejerce como dueño y administrador de su propia empresa, gestionando de manera independiente tanto la parte operativa como la administrativa del negocio. Destaca como su principal habilidad administrativa la captación y fidelización de clientes mediante el buen trato, ofreciendo recomendaciones técnicas honestas sobre mantenimiento preventivo y selección de materiales para evitar inconvenientes futuros en sus unidades. A diferencia de un taller tradicional con sede fija, su rutina actual se centra en el trabajo de campo de manera itinerante (tipo delivery), desplazándose directamente hacia la ubicación de los equipos y maquinaria estacionaria (línea amarilla) para realizar los servicios mecánicos. \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Resumen}} \\
+\hline
+\multicolumn{2}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{La entrevista se realizó a Jorge Aguilar, un técnico mecánico de 53 años con aproximadamente 35 años de experiencia en el rubro automotriz. Jorge ejerce como dueño y administrador de su propia empresa, gestionando de manera independiente tanto la parte operativa como la administrativa del negocio. Destaca como su principal habilidad administrativa la captación y fidelización de clientes mediante el buen trato, ofreciendo recomendaciones técnicas honestas sobre mantenimiento preventivo y selección de materiales para evitar inconvenientes futuros en sus unidades. A diferencia de un taller tradicional con sede fija, su rutina actual se centra en el trabajo de campo de manera itinerante (tipo delivery), desplazándose directamente hacia la ubicación de los equipos y maquinaria estacionaria (línea amarilla) para realizar los servicios mecánicos.} \\
+\hline
 \end{longtable}
 
-\begin{longtable}{>{\bfseries\raggedright\arraybackslash}p{2.5cm} p{\dimexpr\textwidth-2.5cm-4\tabcolsep\relax}}
+\begin{longtable}{|p{\dimexpr0.5\textwidth-2\tabcolsep-1.5\arrayrulewidth\relax}|p{\dimexpr0.5\textwidth-2\tabcolsep-1.5\arrayrulewidth\relax}|}
 \caption{Entrevista \#2 - Marcelo Alejandro Silva Ramos} \label{tbl:entrevista-s1-2} \\
 \hline
-\textbf{Atributo} & \textbf{Detalle} \\
-\hline
-\endfirsthead
-\multicolumn{2}{c}%
-{\tablename\ \thetable\ -- \textit{Continuación de la página anterior}} \\
-\hline
-\textbf{Atributo} & \textbf{Detalle} \\
-\hline
-\endhead
-\hline \multicolumn{2}{r}{\textit{Continúa en la siguiente página}} \\
-\endfoot
-\hline
-\endlastfoot
-Nombre & Marcelo Alejandro \\
-Apellidos & Silva Ramos \\
-Edad & 63 años \\
-Distrito & Chorrillos \\
-Evidencia & \begin{minipage}{\linewidth}
-  \vspace{4pt}
-  \centering
-  \includegraphics[width=0.6\linewidth]{report/assets/Interview-Evidence/Interview-of-Marcelo-Ramos.jpeg}
-  \vspace{4pt}
+\begin{minipage}[t]{\linewidth}
+\vspace{2pt}
+\begin{center}\textbf{Datos del Entrevistado}\end{center}
+\hrule
+\vspace{4pt}
+\raggedright
+Nombre: Marcelo Alejandro \\
+Apellidos: Silva Ramos \\
+Edad: 63 años \\
+Distrito: Chorrillos \\
+Link: \href{https://upcedupe-my.sharepoint.com/personal/u20241e287_upc_edu_pe/_layouts/15/stream.aspx?id=%2Fpersonal%2Fu20241e287%5Fupc%5Fedu%5Fpe%2FDocuments%2FVideos%2Fupc%2Dpre%2D202602%2D1acc0238%2D4951%2Dandeva%2Dneedfinding%2Dav1%2Emp4&referrer=StreamWebApp%2EWeb&referrerScenario=AddressBarCopied%2Eview%2Ecb19ca18%2Db619%2D4850%2D984a%2De8207a0cf93b}{Microsoft Stream} \\
+Duración: 0:10 min - 10:13 min
+\vspace{4pt}
+\end{minipage}
+&
+\begin{minipage}[t]{\linewidth}
+\vspace{4pt}
+\centering
+\includegraphics[width=0.95\linewidth]{report/assets/Interview-Evidence/Interview-of-Marcelo-Ramos.jpeg}
+\vspace{4pt}
 \end{minipage} \\
-Link & \href{https://upcedupe-my.sharepoint.com/personal/u20241e287_upc_edu_pe/_layouts/15/stream.aspx?id=%2Fpersonal%2Fu20241e287%5Fupc%5Fedu%5Fpe%2FDocuments%2FVideos%2Fupc%2Dpre%2D202602%2D1acc0238%2D4951%2Dandeva%2Dneedfinding%2Dav1%2Emp4&referrer=StreamWebApp%2EWeb&referrerScenario=AddressBarCopied%2Eview%2Ecb19ca18%2Db619%2D4850%2D984a%2De8207a0cf93b}{Microsoft Stream} \\
-Duración & 0:10 min - 10:13 min \\
-Resumen & La entrevista se realizó a Marcelo Ramos, un comerciante y propietario de taller de 63 años, divorciado, quien cuenta con más de 30 años de trayectoria en el rubro automotriz. Describe su estilo de gestión comercial bajo los principios de orden, responsabilidad y puntualidad, destacando este último valor como su principal fortaleza administrativa. Su modelo de operación combina la venta directa al público con la atención de taller, trabajando predominantemente con una cartera de clientes frecuentes y pedidos programados. Su rutina se enfoca en mantener estándares de calidad y precisión técnica para minimizar quejas de los usuarios. Respecto a sus fricciones operativas, señala que su mayor causa de estrés ocurre ante fallas en las máquinas o herramientas del taller (como el daño en matrices), lo cual genera retrasos de hasta una semana en la atención y cuellos de botella cuando se acumulan los pedidos. Finalmente, en cuanto a sus proyecciones de crecimiento, menciona su interés en expandir sus operaciones mediante el rubro de importaciones, negocio en el cual también suma años de experiencia. \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Resumen}} \\
+\hline
+\multicolumn{2}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{La entrevista se realizó a Marcelo Ramos, un comerciante y propietario de taller de 63 años, divorciado, quien cuenta con más de 30 años de trayectoria en el rubro automotriz. Describe su estilo de gestión comercial bajo los principios de orden, responsabilidad y puntualidad, destacando este último valor como su principal fortaleza administrativa. Su modelo de operación combina la venta directa al público con la atención de taller, trabajando predominantemente con una cartera de clientes frecuentes y pedidos programados. Su rutina se enfoca en mantener estándares de calidad y precisión técnica para minimizar quejas de los usuarios. Respecto a sus fricciones operativas, señala que su mayor causa de estrés ocurre ante fallas en las máquinas o herramientas del taller (como el daño en matrices), lo cual genera retrasos de hasta una semana en la atención y cuellos de botella cuando se acumulan los pedidos. Finalmente, en cuanto a sus proyecciones de crecimiento, menciona su interés en expandir sus operaciones mediante el rubro de importaciones, negocio en el cual también suma años de experiencia.} \\
+\hline
 \end{longtable}
 
 **Segmento 2:**
 
-\begin{longtable}{>{\bfseries\raggedright\arraybackslash}p{2.5cm} p{\dimexpr\textwidth-2.5cm-4\tabcolsep\relax}}
+\begin{longtable}{|p{\dimexpr0.5\textwidth-2\tabcolsep-1.5\arrayrulewidth\relax}|p{\dimexpr0.5\textwidth-2\tabcolsep-1.5\arrayrulewidth\relax}|}
 \caption{Entrevista \#1 - César Nikolay Montero Vega} \label{tbl:entrevista-s2-1} \\
 \hline
-\textbf{Atributo} & \textbf{Detalle} \\
-\hline
-\endfirsthead
-\multicolumn{2}{c}%
-{\tablename\ \thetable\ -- \textit{Continuación de la página anterior}} \\
-\hline
-\textbf{Atributo} & \textbf{Detalle} \\
-\hline
-\endhead
-\hline \multicolumn{2}{r}{\textit{Continúa en la siguiente página}} \\
-\endfoot
-\hline
-\endlastfoot
-Nombre & César Nikolay \\
-Apellidos & Montero Vega \\
-Edad & 23 años \\
-Distrito & Chorrillos \\
-Evidencia & \begin{minipage}{\linewidth}
-  \vspace{4pt}
-  \centering
-  \includegraphics[width=0.6\linewidth]{report/assets/Interview-Evidence/Interview-of-Cesar-Nikolay.jpeg}
-  \vspace{4pt}
+\begin{minipage}[t]{\linewidth}
+\vspace{2pt}
+\begin{center}\textbf{Datos del Entrevistado}\end{center}
+\hrule
+\vspace{4pt}
+\raggedright
+Nombre: César Nikolay \\
+Apellidos: Montero Vega \\
+Edad: 23 años \\
+Distrito: Chorrillos \\
+Link: \href{https://upcedupe-my.sharepoint.com/:v:/g/personal/u202411243_upc_edu_pe/IQDDZApqCDKDTrWGYH8oHZyrARNQnI4CuM2GNhY4k2TQz9s?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=yP3vPg}{Microsoft Stream} \\
+Duración: 0:40 min - 9:57 min
+\vspace{4pt}
+\end{minipage}
+&
+\begin{minipage}[t]{\linewidth}
+\vspace{4pt}
+\centering
+\includegraphics[width=0.95\linewidth]{report/assets/Interview-Evidence/Interview-of-Cesar-Nikolay.jpeg}
+\vspace{4pt}
 \end{minipage} \\
-Link & \href{https://upcedupe-my.sharepoint.com/:v:/g/personal/u202411243_upc_edu_pe/IQDDZApqCDKDTrWGYH8oHZyrARNQnI4CuM2GNhY4k2TQz9s?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=yP3vPg}{Microsoft Stream} \\
-Duración & 0:40 min - 9:57 min \\
-Resumen & La entrevista se realizó a César Nikolay, un técnico egresado en mecánica automotriz de 23 años, soltero y residente en Surquillo. En el taller desempeña el cargo de Técnico Especialista en Diagnóstico y Mantenimiento, con experiencia destacada en sistemas de inyección electrónica y manejo de escáneres multimarca para lectura de datos OBD2; ante la presión laboral busca mantener la serenidad y priorizar el trato al cliente. Su flujo de trabajo inicia con la recepción de una orden de trabajo física, inspección visual, escaneo del vehículo, solicitud de repuestos, ejecución de la reparación, pruebas de control de calidad y firma del documento de entrega. Su principal frustración operativa son los "tiempos muertos" por demoras en la aprobación de presupuestos o entrega de repuestos, los cuales afectan sus indicadores de rendimiento diario, sumado a la desorganización logística e ineficiencia en la comunicación del equipo. En el ámbito profesional, aspira a obtener certificaciones internacionales en mecatrónica automotriz y, a futuro, dirigir un centro de servicio estandarizado. En cuanto a hábitos tecnológicos, utiliza un smartphone Android (Xiaomi), empleando WhatsApp para coordinar y navegadores web para consultas técnicas y precios; reconoce a marcas japonesas como Honda y Subaru por su alta fiabilidad. Finalmente, en la validación de procesos, señala que el registro de tiempos actual es manual e impreciso, experimenta pérdida de señal móvil en fosos de inspección y bahías con estructuras gruesas, y valida su volumen de trabajo diario entregando las órdenes físicas firmadas junto con evidencias fotográficas registradas desde su celular personal para respaldar su labor. \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Resumen}} \\
+\hline
+\multicolumn{2}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{La entrevista se realizó a César Nikolay, un técnico egresado en mecánica automotriz de 23 años, soltero y residente en Surquillo. En el taller desempeña el cargo de Técnico Especialista en Diagnóstico y Mantenimiento, con experiencia destacada en sistemas de inyección electrónica y manejo de escáneres multimarca para lectura de datos OBD2; ante la presión laboral busca mantener la serenidad y priorizar el trato al cliente. Su flujo de trabajo inicia con la recepción de una orden de trabajo física, inspección visual, escaneo del vehículo, solicitud de repuestos, ejecución de la reparación, pruebas de control de calidad y firma del documento de entrega. Su principal frustración operativa son los "tiempos muertos" por demoras en la aprobación de presupuestos o entrega de repuestos, los cuales afectan sus indicadores de rendimiento diario, sumado a la desorganización logística e ineficiencia en la comunicación del equipo. En el ámbito profesional, aspira a obtener certificaciones internacionales en mecatrónica automotriz y, a futuro, dirigir un centro de servicio estandarizado. En cuanto a hábitos tecnológicos, utiliza un smartphone Android (Xiaomi), empleando WhatsApp para coordinar y navegadores web para consultas técnicas y precios; reconoce a marcas japonesas como Honda y Subaru por su alta fiabilidad. Finalmente, en la validación de procesos, señala que el registro de tiempos actual es manual e impreciso, experimenta pérdida de señal móvil en fosos de inspección y bahías con estructuras gruesas, y valida su volumen de trabajo diario entregando las órdenes físicas firmadas junto con evidencias fotográficas registradas desde su celular personal para respaldar su labor.} \\
+\hline
 \end{longtable}
 
-\begin{longtable}{>{\bfseries\raggedright\arraybackslash}p{2.5cm} p{\dimexpr\textwidth-2.5cm-4\tabcolsep\relax}}
+\begin{longtable}{|p{\dimexpr0.5\textwidth-2\tabcolsep-1.5\arrayrulewidth\relax}|p{\dimexpr0.5\textwidth-2\tabcolsep-1.5\arrayrulewidth\relax}|}
 \caption{Entrevista \#2 - Bruno Marcelo Pacheco Díaz} \label{tbl:entrevista-s2-2} \\
 \hline
-\textbf{Atributo} & \textbf{Detalle} \\
-\hline
-\endfirsthead
-\multicolumn{2}{c}%
-{\tablename\ \thetable\ -- \textit{Continuación de la página anterior}} \\
-\hline
-\textbf{Atributo} & \textbf{Detalle} \\
-\hline
-\endhead
-\hline \multicolumn{2}{r}{\textit{Continúa en la siguiente página}} \\
-\endfoot
-\hline
-\endlastfoot
-Nombre & Bruno Marcelo \\
-Apellidos & Pacheco Díaz \\
-Edad & 25 años \\
-Distrito & Chorrillos \\
-Evidencia & \begin{minipage}{\linewidth}
-  \vspace{4pt}
-  \centering
-  \includegraphics[width=0.6\linewidth]{report/assets/Interview-Evidence/Interview-of-Bruno-Pacheco.jpeg}
-  \vspace{4pt}
+\begin{minipage}[t]{\linewidth}
+\vspace{2pt}
+\begin{center}\textbf{Datos del Entrevistado}\end{center}
+\hrule
+\vspace{4pt}
+\raggedright
+Nombre: Bruno Marcelo \\
+Apellidos: Pacheco Díaz \\
+Edad: 25 años \\
+Distrito: Chorrillos \\
+Link: \href{https://upcedupe-my.sharepoint.com/:v:/g/personal/u202417423_upc_edu_pe/IQBIV6T1U2oZTaq2yZbx-_zkAfIJbJkGq94jHYQDCwA84tc?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=fTgJpb}{Microsoft Stream} \\
+Duración: 0:14 min - 6:22 min
+\vspace{4pt}
+\end{minipage}
+&
+\begin{minipage}[t]{\linewidth}
+\vspace{4pt}
+\centering
+\includegraphics[width=0.95\linewidth]{report/assets/Interview-Evidence/Interview-of-Bruno-Pacheco.jpeg}
+\vspace{4pt}
 \end{minipage} \\
-Link & \href{https://upcedupe-my.sharepoint.com/:v:/g/personal/u202417423_upc_edu_pe/IQBIV6T1U2oZTaq2yZbx-_zkAfIJbJkGq94jHYQDCwA84tc?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=fTgJpb}{Microsoft Stream} \\
-Duración & 0:14 min - 6:22 min \\
-Resumen & La entrevista se realizó a Bruno Pacheco, un técnico egresado en mecánica automotriz de 25 años, soltero y residente en el distrito de Chorrillos. Bruno ocupa el cargo oficial de Técnico Mecánico Especialista en Diagnóstico y Mantenimiento; ante situaciones de alta presión laboral procura mantener la calma y actuar de forma metódica para prevenir errores. Destaca como su principal fortaleza el diagnóstico electrónico, la lectura de datos de inyección y el manejo fluido de escáneres multimarca para la interpretación de códigos de falla (DTC). Su proceso operativo inicia con la recepción de la orden de trabajo física, inspección visual, lectura con escáner, solicitud de repuestos al almacén, ejecución de la reparación, prueba de ruta, borrado de códigos y la firma final de la orden. En cuanto a las fricciones del entorno, reporta desorganización en la gestión de repuestos y pérdida de mensajes en grupos informales de WhatsApp, señalando que su mayor frustración son los "tiempos muertos" con vehículos desarmados en el elevador a la espera de aprobaciones de presupuestos o repuestos faltantes, lo cual perjudica directamente su rendimiento diario. En el ámbito profesional, busca llevar cursos de mecatrónica y diagnóstico de vehículos híbridos o eléctricos a corto plazo, con la meta a largo plazo de dirigir un taller o administrar un centro de servicio propio. Finalmente, en el aspecto digital, utiliza un smartphone Android (Samsung), siendo WhatsApp, Google y YouTube sus aplicaciones más consultadas para coordinaciones laborales y búsqueda de diagramas técnicos. \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Resumen}} \\
+\hline
+\multicolumn{2}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{La entrevista se realizó a Bruno Pacheco, un técnico egresado en mecánica automotriz de 25 años, soltero y residente en el distrito de Chorrillos. Bruno ocupa el cargo oficial de Técnico Mecánico Especialista en Diagnóstico y Mantenimiento; ante situaciones de alta presión laboral procura mantener la calma y actuar de forma metódica para prevenir errores. Destaca como su principal fortaleza el diagnóstico electrónico, la lectura de datos de inyección y el manejo fluido de escáneres multimarca para la interpretación de códigos de falla (DTC). Su proceso operativo inicia con la recepción de la orden de trabajo física, inspección visual, lectura con escáner, solicitud de repuestos al almacén, ejecución de la reparación, prueba de ruta, borrado de códigos y la firma final de la orden. En cuanto a las fricciones del entorno, reporta desorganización en la gestión de repuestos y pérdida de mensajes en grupos informales de WhatsApp, señalando que su mayor frustración son los "tiempos muertos" con vehículos desarmados en el elevador a la espera de aprobaciones de presupuestos o repuestos faltantes, lo cual perjudica directamente su rendimiento diario. En el ámbito profesional, busca llevar cursos de mecatrónica y diagnóstico de vehículos híbridos o eléctricos a corto plazo, con la meta a largo plazo de dirigir un taller o administrar un centro de servicio propio. Finalmente, en el aspecto digital, utiliza un smartphone Android (Samsung), siendo WhatsApp, Google y YouTube sus aplicaciones más consultadas para coordinaciones laborales y búsqueda de diagramas técnicos.} \\
+\hline
 \end{longtable}
 
-\begin{longtable}{>{\bfseries\raggedright\arraybackslash}p{2.5cm} p{\dimexpr\textwidth-2.5cm-4\tabcolsep\relax}}
+\begin{longtable}{|p{\dimexpr0.5\textwidth-2\tabcolsep-1.5\arrayrulewidth\relax}|p{\dimexpr0.5\textwidth-2\tabcolsep-1.5\arrayrulewidth\relax}|}
 \caption{Entrevista \#3 - Angie Karol Choque Pura} \label{tbl:entrevista-s2-3} \\
 \hline
-\textbf{Atributo} & \textbf{Detalle} \\
-\hline
-\endfirsthead
-\multicolumn{2}{c}%
-{\tablename\ \thetable\ -- \textit{Continuación de la página anterior}} \\
-\hline
-\textbf{Atributo} & \textbf{Detalle} \\
-\hline
-\endhead
-\hline \multicolumn{2}{r}{\textit{Continúa en la siguiente página}} \\
-\endfoot
-\hline
-\endlastfoot
-Nombre & Angie Karol \\
-Apellidos & Choque Pura \\
-Edad & 25 años \\
-Distrito & Santiago de Surco \\
-Evidencia & \begin{minipage}{\linewidth}
-  \vspace{4pt}
-  \centering
-  \includegraphics[width=0.6\linewidth]{report/assets/Interview-Evidence/Interview-of-Angie-Choque.jpeg}
-  \vspace{4pt}
+\begin{minipage}[t]{\linewidth}
+\vspace{2pt}
+\begin{center}\textbf{Datos del Entrevistado}\end{center}
+\hrule
+\vspace{4pt}
+\raggedright
+Nombre: Angie Karol \\
+Apellidos: Choque Pura \\
+Edad: 25 años \\
+Distrito: Santiago de Surco \\
+Link: \href{https://upcedupe-my.sharepoint.com/:v:/g/personal/u202417423_upc_edu_pe/IQAQzuYv24YaQ4rr3KBVy_h9ATiqMfjgKCKbJEliJxw2-3A?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=mQzfFd}{Microsoft Stream} \\
+Duración: 0:30 min - 14:56 min
+\vspace{4pt}
+\end{minipage}
+&
+\begin{minipage}[t]{\linewidth}
+\vspace{4pt}
+\centering
+\includegraphics[width=0.95\linewidth]{report/assets/Interview-Evidence/Interview-of-Angie-Choque.jpeg}
+\vspace{4pt}
 \end{minipage} \\
-Link & \href{https://upcedupe-my.sharepoint.com/:v:/g/personal/u202417423_upc_edu_pe/IQAQzuYv24YaQ4rr3KBVy_h9ATiqMfjgKCKbJEliJxw2-3A?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=mQzfFd}{Microsoft Stream} \\
-Duración & 0:30 min - 14:56 min \\
-Resumen & La entrevista se realizó a Angie, una ingeniera mecatrónica de 25 años, soltera y residente en el distrito de Santiago de Surco. Cuenta con 2 años de experiencia laboral desempeñándose en el cargo técnico de Diagnóstico y Mantenimiento Automotriz; ante momentos de alta carga de trabajo destaca por ser una persona tranquila, enfocada en resolver las fallas paso a paso para evitar errores operativos como la rotura de sensores o un mal ensamblaje de componentes. Cuenta con especialización en mecánica automotriz y vehículos autónomos, orientando sus conocimientos hacia el diagnóstico electrónico, la lectura e interpretación de códigos de falla (DTC), inyección electrónica y el manejo de escáneres multimarca. Su flujo de trabajo inicia cuando el jefe de taller le entrega la orden de trabajo física con las observaciones del cliente, tras lo cual traslada el vehículo a la zona de mantenimiento, conecta el escáner para evaluar las computadoras del auto y efectúa la inspección visual correspondiente. \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Resumen}} \\
+\hline
+\multicolumn{2}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{La entrevista se realizó a Angie, una ingeniera mecatrónica de 25 años, soltera y residente en el distrito de Santiago de Surco. Cuenta con 2 años de experiencia laboral desempeñándose en el cargo técnico de Diagnóstico y Mantenimiento Automotriz; ante momentos de alta carga de trabajo destaca por ser una persona tranquila, enfocada en resolver las fallas paso a paso para evitar errores operativos como la rotura de sensores o un mal ensamblaje de componentes. Cuenta con especialización en mecánica automotriz y vehículos autónomos, orientando sus conocimientos hacia el diagnóstico electrónico, la lectura e interpretación de códigos de falla (DTC), inyección electrónica y el manejo de escáneres multimarca. Su flujo de trabajo inicia cuando el jefe de taller le entrega la orden de trabajo física con las observaciones del cliente, tras lo cual traslada el vehículo a la zona de mantenimiento, conecta el escáner para evaluar las computadoras del auto y efectúa la inspección visual correspondiente.} \\
+\hline
 \end{longtable}
 
 ### 2.2.3. *Análisis de entrevistas*
