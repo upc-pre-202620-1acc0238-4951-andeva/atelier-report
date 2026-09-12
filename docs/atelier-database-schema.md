@@ -18,9 +18,9 @@ Este documento define la estructura relacional de la base de datos de Atelier, m
 > * **Workshop Operations (MRO):** `work_bays`, `services`, `work_orders`. *(Entidades hijas y dependientes operativas: `work_order_images`, `work_order_tasks`, `work_order_task_products`, `work_order_task_images`, `task_proposals`. Estas entidades actualizan el `updated_at` y `version` de su agregado padre `work_orders`)*.
 > * **Inventory & Supply Chain:** `inventory_items`, `suppliers`, `purchase_orders`. *(Entidades dependientes y operativas: `inventory_batches`, `purchase_order_items`)*.
 > * **Human Resources Management (HR):** `work_shifts`, `attendance_records`, `payroll_payments`, `employee_profiles`. *(Entidad dependiente: `payroll_items`)*.
-> * **Invoicing & Compliance:** `electronic_vouchers`. *(Entidad hija: `voucher_lines`)*.
-> * **SaaS Billing & Subscriptions:** `plans`, `subscriptions`, `invoices`, `stripe_events`.
-> * **IoT Telemetry & Predictive Maintenance:** `obd2_devices`, `device_installations`, `vehicle_faults`, `predictive_alerts`. *(Excepción: `telemetry_logs` es una hypertable append-only en TimescaleDB sin borrado lógico)*.
+> * **Invoicing & Compliance:** `sunat_series_configurations`, `electronic_vouchers`, `voucher_payments`. *(Entidad dependiente: `voucher_lines`)*.
+> * **SaaS Billing & Subscriptions:** `plans`, `subscriptions`, `invoices`, `stripe_events`. *(Entidad dependiente: `plan_features`)*.
+> * **IoT Telemetry & Predictive Maintenance:** `obd2_devices`, `device_installations`, `vehicle_faults`, `predictive_alerts`, `dtc_catalog`. *(Excepción: `telemetry_logs` es una hypertable append-only en TimescaleDB sin borrado lógico)*.
 
 ---
 
@@ -1074,159 +1074,555 @@ Desglosa individualmente cada concepto computable que compone la boleta de pago 
 ---
 
 ## 6. Invoicing and Compliance Context
-**Paquete Backend:** `com.atelier.invoicing`
+**Paquete Backend:** `com.andeva.atelier.platform.invoicing`
 
-Encapsula la complejidad tributaria (Impuestos, SUNAT) lejos del MRO y del Inventario, operando de manera segura detrás de una Capa Anticorrupción (ACL) hacia Nubefact.
+Encapsula la complejidad tributaria, la emisión de comprobantes electrónicos de pago con valor legal y el cumplimiento normativo ante la SUNAT bajo el estándar internacional UBL 2.1 (mediante la integración con el Proveedor de Servicios Electrónicos - PSE Nubefact). Gobierna el avance correlativo estricto por serie y sede física, la liquidación y amortización de pagos de taller en mostrador y patio, y la conciliación contable de órdenes de trabajo de MRO.
 
-### 6.1 `electronic_vouchers` (Comprobantes de Pago Electrónicos)
-| Atributo | Tipo de Dato | Llave | Req. | Default | Descripción |
-|----------|--------------|-------|------|---------|-------------|
-| `id` | `UUID` | PK | Sí | `uuid()`| Identificador interno |
-| `tenant_id` | `UUID` | FK | Sí | - | Taller emisor (RUC) |
-| `customer_id`| `UUID` | FK | Sí | - | Cliente receptor (DNI/RUC) |
-| `work_order_id`| `UUID`| FK | No | `null` | OT que originó el cobro (si aplica) |
-| `type` | `VARCHAR(10)` | - | Sí | - | `01` (Factura), `03` (Boleta) según SUNAT |
-| `serie` | `VARCHAR(4)` | - | Sí | - | Ej. `F001`, `B001` |
-| `number` | `INT` | - | Sí | - | Correlativo autoincremental (Ej. 142) |
-| `subtotal` | `DECIMAL(10,2)`| - | Sí | - | Suma sin IGV |
-| `igv_amount` | `DECIMAL(10,2)`| - | Sí | - | Monto del IGV (18%) |
-| `total_amount`| `DECIMAL(10,2)`| - | Sí | - | `subtotal + igv_amount` |
-| `sunat_pdf_url`| `VARCHAR(255)`| - | No | `null` | URL pública devuelta por Nubefact (PDF) |
-| `sunat_xml_url`| `VARCHAR(255)`| - | No | `null` | URL pública devuelta por Nubefact (XML UBL 2.1) |
-| `status` | `VARCHAR(20)` | - | Sí | `'draft'`| `draft`, `accepted`, `rejected_sunat` |
-
-### 6.2 `voucher_lines` (Detalle del Comprobante)
-Nubefact exige que los precios unitarios se envíen desglosados lógicamente (con y sin IGV).
+### 6.1 `sunat_series_configurations` (Control de Series y Correlativos Fiscales por Sede)
+Gobierna la parametrización formal de series alfanuméricas autorizadas por SUNAT para cada sede física del taller, custodiando el avance correlativo secuencial estricto y previniendo saltos o colisiones de numeración tributaria.
 
 | Atributo | Tipo de Dato | Llave | Req. | Default | Descripción |
-|----------|--------------|-------|------|---------|-------------|
-| `id` | `UUID` | PK | Sí | `uuid()`| ID de la línea |
-| `voucher_id` | `UUID` | FK | Sí | - | Comprobante al que pertenece |
-| `description`| `VARCHAR(200)`| - | Sí | - | Nombre exacto del repuesto o servicio |
-| `quantity` | `DECIMAL(10,2)`| - | Sí | - | Cantidad vendida |
-| `unit_value` | `DECIMAL(10,2)`| - | Sí | - | Precio unitario SIN IGV (Requerido por Nubefact) |
-| `unit_price` | `DECIMAL(10,2)`| - | Sí | - | Precio unitario CON IGV |
-| `total_line` | `DECIMAL(10,2)`| - | Sí | - | Subtotal de esta línea |
+|---|---|---|---|---|---|
+| `id` | `UUID` | PK | Sí | `uuid()` | Identificador único universal de la configuración de serie fiscal |
+| `tenant_id` | `UUID` | FK | Sí | - | Taller automotriz titular (`FK -> tenants(id)`) |
+| `branch_id` | `UUID` | FK | Sí | - | Sede física titular autorizada para emitir la serie (`FK -> branches(id)`) |
+| `voucher_type` | `VARCHAR(10)` | - | Sí | - | Tipo de comprobante SUNAT (`01` = Factura, `03` = Boleta, `07` = NC, `08` = ND) |
+| `serie` | `VARCHAR(4)` | - | Sí | - | Código alfanumérico formal de 4 caracteres (ej. `F001`, `B001`, `FC01`) |
+| `current_correlative` | `INTEGER` | - | Sí | `0` | Último correlativo numérico emitido ($current\_correlative \ge 0$) |
+| `is_active` | `BOOLEAN` | - | Sí | `true` | Bandera de vigencia y disponibilidad operativa de la serie |
+| `created_at` | `TIMESTAMPTZ` | - | Sí | `NOW()` | Marca temporal de alta en plataforma |
+| `updated_at` | `TIMESTAMPTZ` | - | Sí | `NOW()` | Marca temporal de última modificación |
+| `version` | `BIGINT` | - | Sí | `0` | Versión para control de concurrencia optimista JPA |
+| `deleted_at` | `TIMESTAMPTZ` | - | No | `null` | Marca temporal para borrado lógico (*Soft Delete*) |
 
-## 7. SaaS Billing and Subscriptions Context
-**Paquete Backend:** `com.atelier.subscriptions`
+* **Relaciones (Integridad Referencial):**
+  * `N:1` hacia `tenants` (`tenant_id` referencia a `tenants.id`).
+  * `N:1` hacia `branches` (`branch_id` referencia a `branches.id`).
+  * `1:N` hacia `electronic_vouchers` (Una configuración emite múltiples comprobantes correlativos).
+* **Restricciones (Constraints):**
+  * `pk_sunat_series`: `PRIMARY KEY (id)`
+  * `fk_series_tenant_id`: `FOREIGN KEY (tenant_id) REFERENCES tenants(id)`
+  * `fk_series_branch_id`: `FOREIGN KEY (branch_id) REFERENCES branches(id)`
+  * `uk_series_branch_type_serie`: `UNIQUE (branch_id, voucher_type, serie)`
+  * `chk_series_voucher_type`: `CHECK (voucher_type IN ('01', '03', '07', '08'))`
+  * `chk_series_correlative_pos`: `CHECK (current_correlative >= 0)`
+* **Índices Físicos (B-Tree):**
+  * `idx_series_branch_type`: B-Tree compuesto sobre `(branch_id, voucher_type, is_active)`
+  * `idx_series_tenant`: B-Tree sobre `(tenant_id)`
 
-Administra los ingresos B2B de la startup Andeva (el pago que hacen los talleres mensualmente por usar el software). Completamente integrado con **Stripe**.
-
-### 7.1 `plans` (Planes de Suscripción)
-| Atributo | Tipo de Dato | Llave | Req. | Default | Descripción |
-|----------|--------------|-------|------|---------|-------------|
-| `id` | `UUID` | PK | Sí | `uuid()`| Identificador del plan |
-| `stripe_price_id`| `VARCHAR(100)`| - | Sí | - | ID oficial en Stripe (Ej. `price_1N2M...`) |
-| `name` | `VARCHAR(100)`| - | Sí | - | Ej. "Plan Pro (Hasta 5 sucursales)" |
-| `price` | `DECIMAL(10,2)`| - | Sí | - | Precio mensual (USD o PEN) |
-| `billing_cycle`| `VARCHAR(20)` | - | Sí | `'monthly'`| `monthly`, `yearly` |
-
-### 7.2 `subscriptions` (Suscripciones Activas)
-| Atributo | Tipo de Dato | Llave | Req. | Default | Descripción |
-|----------|--------------|-------|------|---------|-------------|
-| `id` | `UUID` | PK | Sí | `uuid()`| ID interno de la suscripción |
-| `tenant_id` | `UUID` | FK | Sí | - | Taller que contrató el plan |
-| `plan_id` | `UUID` | FK | Sí | - | Plan contratado |
-| `stripe_sub_id`| `VARCHAR(100)`| - | Sí | - | ID recurrente en Stripe (`sub_...`) |
-| `status` | `VARCHAR(20)` | - | Sí | `'active'` | `active`, `past_due`, `canceled` |
-| `current_period_end`| `TIMESTAMP` | - | Sí | - | Fecha del próximo corte/cobro |
-
-### 7.3 `invoices` (Facturas SaaS - Andeva al Taller)
-*Nota: No confundir con el Invoicing SUNAT (que es del taller hacia sus clientes). Estas son facturas internas de uso de plataforma.*
+### 6.2 `electronic_vouchers` (Comprobantes de Pago Electrónicos UBL 2.1)
+Entidad raíz del agregado de facturación. Modela el comprobante fiscal emitido con valor tributario (Factura, Boleta de Venta, Nota de Crédito o Débito), custodiando la representación impresa (PDF), el archivo firmado digitalmente (XML) y la Constancia de Recepción (CDR) validada por SUNAT.
 
 | Atributo | Tipo de Dato | Llave | Req. | Default | Descripción |
-|----------|--------------|-------|------|---------|-------------|
-| `id` | `UUID` | PK | Sí | `uuid()`| Identificador de la factura SaaS |
-| `subscription_id`| `UUID` | FK | Sí | - | Suscripción que generó el cobro |
-| `stripe_invoice_id`| `VARCHAR(100)`| - | Sí | - | ID de factura de Stripe (`in_...`) |
-| `amount_paid` | `DECIMAL(10,2)`| - | Sí | - | Monto exacto cobrado a la tarjeta |
-| `status` | `VARCHAR(20)` | - | Sí | `'paid'` | `draft`, `paid`, `void` |
-| `paid_at` | `TIMESTAMP` | - | Sí | `NOW()` | Fecha del cobro exitoso |
+|---|---|---|---|---|---|
+| `id` | `UUID` | PK | Sí | `uuid()` | Identificador único universal del comprobante fiscal |
+| `tenant_id` | `UUID` | FK | Sí | - | Taller automotriz emisor (`FK -> tenants(id)`) |
+| `branch_id` | `UUID` | FK | Sí | - | Sede física y domicilio fiscal emisor (`FK -> branches(id)`) |
+| `customer_id` | `UUID` | FK | Sí | - | Cliente receptor del comprobante (`FK -> customers(id)`) |
+| `work_order_id` | `UUID` | FK | No | `null` | Orden de trabajo origen de la liquidación (`FK -> work_orders(id)`) |
+| `voucher_type` | `VARCHAR(10)` | - | Sí | - | Tipo fiscal (`01` = Factura, `03` = Boleta, `07` = NC, `08` = ND) |
+| `serie` | `VARCHAR(4)` | - | Sí | - | Serie fiscal autorizada de 4 caracteres alfanuméricos |
+| `number` | `INTEGER` | - | Sí | - | Número correlativo secuencial estricto autoincremental por serie |
+| `subtotal` | `DECIMAL(12,2)` | - | Sí | - | Base imponible o valor de venta gravado sin IGV |
+| `igv_amount` | `DECIMAL(12,2)` | - | Sí | - | Importe liquidado del Impuesto General a las Ventas (18%) |
+| `total_amount` | `DECIMAL(12,2)` | - | Sí | - | Monto total general facturado (`subtotal + igv_amount`) |
+| `currency` | `VARCHAR(3)` | - | Sí | `'PEN'` | Código ISO 4217 de moneda formal (`PEN`, `USD`) |
+| `status` | `VARCHAR(20)` | - | Sí | `'draft'` | Estado (`draft`, `issued`, `accepted_sunat`, `rejected_sunat`, `voided`) |
+| `customer_tax_id` | `VARCHAR(20)` | - | Sí | - | Documento de identidad fiscal del receptor (RUC o DNI) |
+| `customer_legal_name` | `VARCHAR(150)` | - | Sí | - | Razón social o nombres y apellidos del cliente receptor |
+| `customer_fiscal_address` | `VARCHAR(200)` | - | No | `null` | Dirección fiscal formal declarada ante SUNAT |
+| `customer_document_type` | `VARCHAR(10)` | - | Sí | - | Tipo de documento SUNAT (`6` = RUC, `1` = DNI, `4` = CE, `7` = Pasaporte) |
+| `sunat_pdf_url` | `VARCHAR(255)` | - | No | `null` | Enlace seguro de descarga de la representación impresa oficial en PDF |
+| `sunat_xml_url` | `VARCHAR(255)` | - | No | `null` | Enlace seguro al archivo XML firmado digitalmente bajo UBL 2.1 |
+| `sunat_cdr_url` | `VARCHAR(255)` | - | No | `null` | Enlace a la Constancia de Recepción formal devuelta por SUNAT |
+| `digital_signature_hash` | `VARCHAR(100)` | - | No | `null` | Valor del resumen hash criptográfico SHA-256 de la firma digital |
+| `sunat_response_code` | `VARCHAR(10)` | - | No | `null` | Código numérico oficial de respuesta de SUNAT (`0` = Aceptado) |
+| `sunat_description` | `VARCHAR(255)` | - | No | `null` | Glosa descriptiva oficial de respuesta emitida por SUNAT |
+| `voided_reason` | `VARCHAR(255)` | - | No | `null` | Motivo formal documentado de la anulación o comunicación de baja |
+| `voided_at` | `TIMESTAMPTZ` | - | No | `null` | Marca temporal UTC de formalización de la baja fiscal |
+| `created_at` | `TIMESTAMPTZ` | - | Sí | `NOW()` | Marca temporal de creación |
+| `updated_at` | `TIMESTAMPTZ` | - | Sí | `NOW()` | Marca temporal de última modificación |
+| `version` | `BIGINT` | - | Sí | `0` | Versión para control de concurrencia optimista JPA |
+| `deleted_at` | `TIMESTAMPTZ` | - | No | `null` | Marca temporal para borrado lógico (*Soft Delete*) |
 
-### 7.4 `stripe_events` (Webhook Idempotency)
-Tabla crítica arquitectónicamente. Cuando Stripe cobra, envía un evento asíncrono (Webhook) a nuestro servidor. Si la red falla y Stripe manda el mismo evento 2 veces, esta tabla lo rechaza (restricción `UNIQUE`) para no procesarlo de nuevo.
+* **Relaciones (Integridad Referencial):**
+  * `N:1` hacia `tenants` (`tenant_id` referencia a `tenants.id`).
+  * `N:1` hacia `branches` (`branch_id` referencia a `branches.id`).
+  * `N:1` hacia `customers` (`customer_id` referencia a `customers.id`).
+  * `N:1` hacia `work_orders` (`work_order_id` referencia a `work_orders.id`).
+  * `1:N` hacia `voucher_lines` (Un comprobante desglosa una o múltiples partidas con eliminación en cascada).
+  * `1:N` hacia `voucher_payments` (Un comprobante amortiza cobros con eliminación en cascada).
+* **Restricciones (Constraints):**
+  * `pk_electronic_vouchers`: `PRIMARY KEY (id)`
+  * `fk_vouchers_tenant_id`: `FOREIGN KEY (tenant_id) REFERENCES tenants(id)`
+  * `fk_vouchers_branch_id`: `FOREIGN KEY (branch_id) REFERENCES branches(id)`
+  * `fk_vouchers_customer_id`: `FOREIGN KEY (customer_id) REFERENCES customers(id)`
+  * `fk_vouchers_work_order_id`: `FOREIGN KEY (work_order_id) REFERENCES work_orders(id)`
+  * `uk_vouchers_tenant_serie_number`: `UNIQUE (tenant_id, serie, number)`
+  * `chk_vouchers_type`: `CHECK (voucher_type IN ('01', '03', '07', '08'))`
+  * `chk_vouchers_status`: `CHECK (status IN ('draft', 'issued', 'accepted_sunat', 'rejected_sunat', 'voided'))`
+  * `chk_vouchers_currency`: `CHECK (currency IN ('PEN', 'USD'))`
+  * `chk_vouchers_amounts`: `CHECK (total_amount >= 0.00 AND subtotal >= 0.00 AND igv_amount >= 0.00)`
+* **Índices Físicos (B-Tree):**
+  * `idx_vouchers_tenant_date`: B-Tree compuesto sobre `(tenant_id, created_at DESC)`
+  * `idx_vouchers_lookup_fiscal`: B-Tree compuesto sobre `(tenant_id, serie, number)`
+  * `idx_vouchers_work_order`: B-Tree parcial sobre `(work_order_id) WHERE work_order_id IS NOT NULL`
+  * `idx_vouchers_customer`: B-Tree sobre `(customer_id)`
+  * `idx_vouchers_status`: B-Tree compuesto sobre `(tenant_id, status)`
+
+### 6.3 `voucher_lines` (Partidas Detalladas de Bienes y Servicios)
+Desglosa cada ítem de producto o servicio contenido en el comprobante fiscal, computando el valor unitario (sin IGV), precio unitario (con IGV) e importe tributario de acuerdo con las especificaciones técnicas de SUNAT UBL 2.1.
 
 | Atributo | Tipo de Dato | Llave | Req. | Default | Descripción |
-|----------|--------------|-------|------|---------|-------------|
-| `id` | `UUID` | PK | Sí | `uuid()`| ID interno de base de datos |
-| `stripe_event_id`| `VARCHAR(100)`| - | Sí | - | ID del evento Stripe (Ej. `evt_...`) **[UNIQUE]** |
-| `type` | `VARCHAR(50)` | - | Sí | - | Ej. `invoice.payment_succeeded` |
-| `processed_at` | `TIMESTAMP` | - | Sí | `NOW()` | Cuando el sistema de Atelier procesó el evento |
+|---|---|---|---|---|---|
+| `id` | `UUID` | PK | Sí | `uuid()` | Identificador único universal de la partida de detalle |
+| `voucher_id` | `UUID` | FK | Sí | - | Comprobante de pago contenedor (`FK -> electronic_vouchers(id) ON DELETE CASCADE`) |
+| `item_id` | `UUID` | - | No | `null` | Identificador del repuesto o servicio liquidado (nullable para glosas libres) |
+| `item_type` | `VARCHAR(20)` | - | Sí | - | Clasificación del concepto facturado (`PRODUCT`, `SERVICE`) |
+| `description` | `VARCHAR(200)` | - | Sí | - | Glosa descriptiva detallada del repuesto o mano de obra ejecutada |
+| `quantity` | `DECIMAL(10,2)` | - | Sí | - | Cantidad facturada de unidades o labores ($quantity > 0.00$) |
+| `unit_value` | `DECIMAL(12,2)` | - | Sí | - | Valor unitario neto sin IGV exigido por la normativa fiscal |
+| `unit_price` | `DECIMAL(12,2)` | - | Sí | - | Precio unitario bruto con IGV incluido facturado al cliente |
+| `igv_amount` | `DECIMAL(12,2)` | - | Sí | - | Importe del IGV atribuible a esta partida (`(unit_price - unit_value) * quantity`) |
+| `total_line` | `DECIMAL(12,2)` | - | Sí | - | Importe total liquidado de la partida ($total\_line \ge 0.00$) |
 
-## 8. IoT Telemetry and Predictive Maintenance Context
-**Paquete Backend:** `com.atelier.iot`
+* **Relaciones (Integridad Referencial):**
+  * `N:1` hacia `electronic_vouchers` (`voucher_id` referencia a `electronic_vouchers.id` con eliminación en cascada).
+* **Restricciones (Constraints):**
+  * `pk_voucher_lines`: `PRIMARY KEY (id)`
+  * `fk_voucher_lines_voucher_id`: `FOREIGN KEY (voucher_id) REFERENCES electronic_vouchers(id) ON DELETE CASCADE`
+  * `chk_lines_item_type`: `CHECK (item_type IN ('PRODUCT', 'SERVICE'))`
+  * `chk_lines_quantity`: `CHECK (quantity > 0.00)`
+  * `chk_lines_total_positive`: `CHECK (total_line >= 0.00)`
+* **Índices Físicos (B-Tree):**
+  * `idx_voucher_lines_voucher_id`: B-Tree sobre `(voucher_id)`
+  * `idx_voucher_lines_item`: B-Tree parcial sobre `(item_id) WHERE item_id IS NOT NULL`
 
-El núcleo diferenciador del negocio. Ingesta, procesa y evalúa los millones de registros de telemetría vehicular enviados a través de las apps *Gateway*.
-
-### 8.1 `obd2_devices` (Hardware del Taller)
-| Atributo | Tipo de Dato | Llave | Req. | Default | Descripción |
-|----------|--------------|-------|------|---------|-------------|
-| `id` | `UUID` | PK | Sí | `uuid()`| Identificador de base de datos |
-| `tenant_id` | `UUID` | FK | Sí | - | Taller dueño del equipo (BYOD) |
-| `device_identifier`| `VARCHAR(100)`| - | Sí | - | MAC Address (BLE) o IMEI (SIM) **[UNIQUE]** |
-| `connection_type`| `VARCHAR(20)` | - | Sí | - | `bluetooth`, `sim_cellular`, `wifi` |
-| `status` | `VARCHAR(20)` | - | Sí | `'active'`| `active`, `lost`, `broken` |
-
-### 8.2 `device_installations` (Asignación al Vehículo)
-Conecta físicamente el escáner del taller al auto del cliente por un periodo de tiempo.
-
-| Atributo | Tipo de Dato | Llave | Req. | Default | Descripción |
-|----------|--------------|-------|------|---------|-------------|
-| `id` | `UUID` | PK | Sí | `uuid()`| ID de instalación |
-| `device_id` | `UUID` | FK | Sí | - | Escáner OBD2 usado |
-| `vehicle_id` | `UUID` | FK | Sí | - | Vehículo receptor |
-| `installed_at`| `TIMESTAMP` | - | Sí | `NOW()` | Fecha que inició el servicio VIP |
-| `uninstalled_at`|`TIMESTAMP` | - | No | `null` | Fecha fin (null si sigue activo) |
-
-### 8.3 `telemetry_logs` (TimescaleDB Hypertable)
-*Nota Arquitectónica: Optimizada masivamente para particionamiento por tiempo.*
+### 6.4 `voucher_payments` (Liquidaciones de Pagos y Cobranzas de Taller)
+Custodia los cobros dinerarios recaudados en mostrador o patio para cancelar o amortizar el saldo del comprobante fiscal, vinculando el medio de pago, divisa y referencia financiera.
 
 | Atributo | Tipo de Dato | Llave | Req. | Default | Descripción |
-|----------|--------------|-------|------|---------|-------------|
-| `timestamp` | `TIMESTAMP` | PK | Sí | `NOW()` | **Clave de partición (Time chunk)** |
-| `vehicle_id` | `UUID` | PK,FK | Sí | - | Vehículo que emite (PK compuesta) |
-| `tenant_id` | `UUID` | FK | Sí | - | Desnormalizado para reportes rápidos del taller|
-| `latitude` | `DECIMAL(10,8)`| - | No | `null` | Coordenada GPS Y (Si el gateway la provee) |
-| `longitude` | `DECIMAL(11,8)`| - | No | `null` | Coordenada GPS X (Si el gateway la provee) |
-| `speed` | `INT` | - | No | `null` | Velocidad actual reportada por la ECU |
-| `engine_temp_c`| `DECIMAL(5,2)` | - | No | `null` | Temperatura del motor en grados Celcius |
-| `rpm` | `INT` | - | No | `null` | Revoluciones del motor |
+|---|---|---|---|---|---|
+| `id` | `UUID` | PK | Sí | `uuid()` | Identificador único universal de la transacción de pago |
+| `voucher_id` | `UUID` | FK | Sí | - | Comprobante electrónico amortizado (`FK -> electronic_vouchers(id) ON DELETE CASCADE`) |
+| `tenant_id` | `UUID` | FK | Sí | - | Taller automotriz recaudador (`FK -> tenants(id)`) |
+| `branch_id` | `UUID` | FK | Sí | - | Sede física donde se percibe el fondo dinerario (`FK -> branches(id)`) |
+| `amount` | `DECIMAL(12,2)` | - | Sí | - | Monto monetario del abono recibido ($amount > 0.00$) |
+| `currency` | `VARCHAR(3)` | - | Sí | `'PEN'` | Divisa de cobro (`PEN`, `USD`) |
+| `payment_method` | `VARCHAR(30)` | - | Sí | - | Medio (`cash`, `credit_card`, `debit_card`, `bank_transfer`, `yape`, `plin`) |
+| `transaction_reference` | `VARCHAR(100)` | - | No | `null` | Código de voucher POS, número de depósito bancario o billetera móvil |
+| `status` | `VARCHAR(20)` | - | Sí | `'completed'` | Estado del abono (`pending`, `completed`, `refunded`) |
+| `paid_at` | `TIMESTAMPTZ` | - | Sí | `NOW()` | Marca temporal UTC en la que se percibió efectivamente el pago |
+| `created_at` | `TIMESTAMPTZ` | - | Sí | `NOW()` | Marca temporal de creación |
+| `updated_at` | `TIMESTAMPTZ` | - | Sí | `NOW()` | Marca temporal de última modificación |
+| `version` | `BIGINT` | - | Sí | `0` | Versión para control de concurrencia optimista JPA |
+| `deleted_at` | `TIMESTAMPTZ` | - | No | `null` | Marca temporal para borrado lógico (*Soft Delete*) |
 
-### 8.4 `vehicle_faults` (Códigos de Error - DTC)
-| Atributo | Tipo de Dato | Llave | Req. | Default | Descripción |
-|----------|--------------|-------|------|---------|-------------|
-| `id` | `UUID` | PK | Sí | `uuid()`| ID del registro |
-| `vehicle_id` | `UUID` | FK | Sí | - | Vehículo que sufre el fallo |
-| `dtc_code` | `VARCHAR(10)` | - | Sí | - | Ej. `P0420` (Catalizador) |
-| `severity` | `VARCHAR(20)` | - | Sí | `'low'` | `low`, `medium`, `critical` |
-| `detected_at` | `TIMESTAMP` | - | Sí | `NOW()` | Cuando el OBD2 arrojó la alerta |
-
-### 8.5 `predictive_alerts` (Notificaciones Push)
-| Atributo | Tipo de Dato | Llave | Req. | Default | Descripción |
-|----------|--------------|-------|------|---------|-------------|
-| `id` | `UUID` | PK | Sí | `uuid()`| ID de alerta predictiva |
-| `vehicle_id` | `UUID` | FK | Sí | - | Vehículo evaluado por el modelo |
-| `recommended_service_id`| `UUID` | FK| Sí | - | Enlace con Módulo Inventory (Venta Cruzada) |
-| `confidence_score`| `DECIMAL(5,2)`| - | Sí | - | % de probabilidad de fallo real (Ej. `88.50`) |
-| `status` | `VARCHAR(20)` | - | Sí | `'sent'`| `sent`, `resolved`, `ignored` |
-| `created_at` | `TIMESTAMP` | - | Sí | `NOW()` | Dispara el Firebase Admin SDK |
-
+* **Relaciones (Integridad Referencial):**
+  * `N:1` hacia `electronic_vouchers` (`voucher_id` referencia a `electronic_vouchers.id` con eliminación en cascada).
+  * `N:1` hacia `tenants` (`tenant_id` referencia a `tenants.id`).
+  * `N:1` hacia `branches` (`branch_id` referencia a `branches.id`).
+* **Restricciones (Constraints):**
+  * `pk_voucher_payments`: `PRIMARY KEY (id)`
+  * `fk_payments_voucher_id`: `FOREIGN KEY (voucher_id) REFERENCES electronic_vouchers(id) ON DELETE CASCADE`
+  * `fk_payments_tenant_id`: `FOREIGN KEY (tenant_id) REFERENCES tenants(id)`
+  * `fk_payments_branch_id`: `FOREIGN KEY (branch_id) REFERENCES branches(id)`
+  * `chk_payments_amount`: `CHECK (amount > 0.00)`
+  * `chk_payments_currency`: `CHECK (currency IN ('PEN', 'USD'))`
+  * `chk_payments_method`: `CHECK (payment_method IN ('cash', 'credit_card', 'debit_card', 'bank_transfer', 'yape', 'plin'))`
+  * `chk_payments_status`: `CHECK (status IN ('pending', 'completed', 'refunded'))`
+* **Índices Físicos (B-Tree):**
+  * `idx_payments_voucher_id`: B-Tree sobre `(voucher_id)`
+  * `idx_payments_branch_paid_at`: B-Tree compuesto sobre `(branch_id, paid_at DESC)`
+  * `idx_payments_tenant_method`: B-Tree compuesto sobre `(tenant_id, payment_method)`
 
 ---
 
-## Infraestructura y Patrones Globales
+## 7. SaaS Billing and Subscriptions Context
+**Paquete Backend:** `com.andeva.atelier.platform.billing`
+
+Administra los ingresos B2B de la plataforma SaaS (la facturación recurrente que los talleres abonan por la licencia de software), el catálogo de planes comerciales, el gobierno estricto de cuotas operativas (número de sedes, mecánicos activos, órdenes de trabajo mensuales, telemetría IoT e IA diagnóstica) y la integración asíncrona resiliente con Stripe Billing bajo cumplimiento PCI-DSS Nivel 1.
+
+### 7.1 `plans` (Catálogo Comercial de Planes Tarifarios y Cuotas)
+Entidad maestra global de plataforma. Define la oferta comercial de planes SaaS, tarifas recurrentes, periocidad de facturación y límites máximos cuantitativos y cualitativos permitidos para los talleres mecánicos.
+
+| Atributo | Tipo de Dato | Llave | Req. | Default | Descripción |
+|---|---|---|---|---|---|
+| `id` | `UUID` | PK | Sí | `uuid()` | Identificador único universal del plan comercial |
+| `stripe_price_id` | `VARCHAR(100)` | UK | Sí | - | Identificador oficial del precio en Stripe (ej. `price_...`) |
+| `name` | `VARCHAR(100)` | - | Sí | - | Nombre comercial formal (ej. "Starter", "Professional", "Enterprise") |
+| `tier` | `VARCHAR(20)` | - | Sí | - | Nivel (`COMMUNITY`, `STARTER`, `PROFESSIONAL`, `ENTERPRISE`) |
+| `price` | `DECIMAL(10,2)` | - | Sí | - | Tarifa monetaria recurrente ($price \ge 0.00$) |
+| `currency` | `VARCHAR(3)` | - | Sí | `'USD'` | Divisa formal ISO 4217 (`USD`, `PEN`) |
+| `billing_cycle` | `VARCHAR(20)` | - | Sí | - | Frecuencia de cobro (`MONTHLY`, `YEARLY`) |
+| `max_branches` | `INTEGER` | - | Sí | - | Techo máximo de sedes físicas permitidas por taller ($max > 0$) |
+| `max_active_staff` | `INTEGER` | - | Sí | - | Límite de colaboradores activos simultáneos ($max > 0$) |
+| `max_monthly_work_orders` | `INTEGER` | - | Sí | - | Techo mensual de órdenes de trabajo permitidas ($max > 0$) |
+| `iot_telemetry_enabled` | `BOOLEAN` | - | Sí | `false` | Autorización de acceso a telemetría OBD-II en tiempo real |
+| `ai_diagnostics_enabled` | `BOOLEAN` | - | Sí | `false` | Autorización de acceso a diagnósticos asistidos por IA |
+| `is_active` | `BOOLEAN` | - | Sí | `true` | Bandera de disponibilidad comercial del plan para contratación |
+| `created_at` | `TIMESTAMPTZ` | - | Sí | `NOW()` | Marca temporal de alta |
+| `updated_at` | `TIMESTAMPTZ` | - | Sí | `NOW()` | Marca temporal de última modificación |
+| `version` | `BIGINT` | - | Sí | `0` | Versión para control de concurrencia optimista JPA |
+| `deleted_at` | `TIMESTAMPTZ` | - | No | `null` | Marca temporal para inhabilitación lógica (*Soft Delete*) |
+
+* **Relaciones (Integridad Referencial):**
+  * `1:N` hacia `plan_features` (Un plan desglosa múltiples características con eliminación en cascada).
+  * `1:N` hacia `subscriptions` (Un plan es contratado por múltiples talleres clientes).
+* **Restricciones (Constraints):**
+  * `pk_plans`: `PRIMARY KEY (id)`
+  * `uk_plans_stripe_price`: `UNIQUE (stripe_price_id)`
+  * `chk_plans_tier`: `CHECK (tier IN ('COMMUNITY', 'STARTER', 'PROFESSIONAL', 'ENTERPRISE'))`
+  * `chk_plans_cycle`: `CHECK (billing_cycle IN ('MONTHLY', 'YEARLY'))`
+  * `chk_plans_currency`: `CHECK (currency IN ('USD', 'PEN'))`
+  * `chk_plans_price`: `CHECK (price >= 0.00)`
+  * `chk_plans_quotas`: `CHECK (max_branches > 0 AND max_active_staff > 0 AND max_monthly_work_orders > 0)`
+* **Índices Físicos (B-Tree):**
+  * `idx_plans_tier`: B-Tree sobre `(tier)`
+  * `idx_plans_tier_active`: B-Tree compuesto sobre `(tier, is_active)`
+
+### 7.2 `plan_features` (Desglose de Capacidades Modulares Paquetizadas)
+Modela el conjunto granular de funcionalidades tecnológicas incluidas o restringidas en cada nivel comercial de suscripción, gobernando de manera determinista la activación de módulos en la plataforma web y móvil.
+
+| Atributo | Tipo de Dato | Llave | Req. | Default | Descripción |
+|---|---|---|---|---|---|
+| `id` | `UUID` | PK | Sí | `uuid()` | Identificador único universal de la característica funcional |
+| `plan_id` | `UUID` | FK | Sí | - | Plan tarifario contenedor (`FK -> plans(id) ON DELETE CASCADE`) |
+| `feature_key` | `VARCHAR(50)` | - | Sí | - | Clave alfanumérica canónica (ej. `OBD2_TELEMETRY`, `AI_DIAGNOSTICS`) |
+| `description` | `VARCHAR(255)` | - | Sí | - | Glosa explicativa de la funcionalidad empaquetada |
+| `is_enabled` | `BOOLEAN` | - | Sí | `true` | Indicador de disponibilidad operativa en el plan |
+| `created_at` | `TIMESTAMPTZ` | - | Sí | `NOW()` | Marca temporal de asignación al plan |
+
+* **Relaciones (Integridad Referencial):**
+  * `N:1` hacia `plans` (`plan_id` referencia a `plans.id` con eliminación en cascada).
+* **Restricciones (Constraints):**
+  * `pk_plan_features`: `PRIMARY KEY (id)`
+  * `fk_plan_features_plan`: `FOREIGN KEY (plan_id) REFERENCES plans(id) ON DELETE CASCADE`
+  * `uk_plan_features_plan_key`: `UNIQUE (plan_id, feature_key)`
+* **Índices Físicos (B-Tree):**
+  * `idx_plan_features_plan`: B-Tree sobre `(plan_id)`
+  * `idx_plan_features_lookup`: B-Tree compuesto sobre `(plan_id, is_enabled)`
+
+### 7.3 `subscriptions` (Ciclo Contractual de Membresías por Taller)
+Entidad raíz del agregado de suscripción. Custodia el estado contractual y operativo del taller automotriz en la plataforma SaaS, el identificador de cliente y contrato en Stripe Billing, y las fechas de corte y vigencia del servicio.
+
+| Atributo | Tipo de Dato | Llave | Req. | Default | Descripción |
+|---|---|---|---|---|---|
+| `id` | `UUID` | PK | Sí | `uuid()` | Identificador técnico único del contrato de suscripción SaaS |
+| `tenant_id` | `UUID` | UK, FK | Sí | - | Taller titular abonado (`FK, UK -> tenants(id)`). Regla de una sola suscripción |
+| `plan_id` | `UUID` | FK | Sí | - | Plan comercial contratado (`FK -> plans(id)`) |
+| `stripe_customer_id` | `VARCHAR(100)` | - | Sí | - | Identificador de cliente en Stripe Billing (`cus_...`) |
+| `stripe_sub_id` | `VARCHAR(100)` | - | Sí | - | Identificador de suscripción recurrente en Stripe (`sub_...`) |
+| `status` | `VARCHAR(20)` | - | Sí | `'trialing'` | Estado (`trialing`, `active`, `past_due`, `canceled`, `unpaid`, `incomplete`) |
+| `current_period_start` | `TIMESTAMPTZ` | - | Sí | - | Marca temporal UTC de inicio del ciclo de cobertura pagado |
+| `current_period_end` | `TIMESTAMPTZ` | - | Sí | - | Marca temporal UTC de vencimiento del ciclo actual ($end \ge start$) |
+| `cancel_at_period_end` | `BOOLEAN` | - | Sí | `false` | Indicador de cancelación voluntaria al culminar el ciclo corriente |
+| `canceled_at` | `TIMESTAMPTZ` | - | No | `null` | Marca temporal UTC de rescisión anticipada de la suscripción |
+| `trial_end_date` | `TIMESTAMPTZ` | - | No | `null` | Marca temporal UTC de finalización del periodo de prueba |
+| `created_at` | `TIMESTAMPTZ` | - | Sí | `NOW()` | Marca temporal de alta del contrato |
+| `updated_at` | `TIMESTAMPTZ` | - | Sí | `NOW()` | Marca temporal de última modificación |
+| `version` | `BIGINT` | - | Sí | `0` | Versión para control de concurrencia optimista JPA |
+| `deleted_at` | `TIMESTAMPTZ` | - | No | `null` | Marca temporal de baja lógica (*Soft Delete*) |
+
+* **Relaciones (Integridad Referencial):**
+  * `1:1` hacia `tenants` (`tenant_id` referencia unívocamente a `tenants.id`).
+  * `N:1` hacia `plans` (`plan_id` referencia a `plans.id`).
+  * `1:N` hacia `invoices` (Una suscripción genera múltiples recibos periódicos con eliminación en cascada).
+* **Restricciones (Constraints):**
+  * `pk_subscriptions`: `PRIMARY KEY (id)`
+  * `uk_subscriptions_tenant`: `UNIQUE (tenant_id)`
+  * `fk_subscriptions_tenant`: `FOREIGN KEY (tenant_id) REFERENCES tenants(id)`
+  * `fk_subscriptions_plan`: `FOREIGN KEY (plan_id) REFERENCES plans(id)`
+  * `chk_subscriptions_status`: `CHECK (status IN ('trialing', 'active', 'past_due', 'canceled', 'unpaid', 'incomplete'))`
+  * `chk_subscriptions_period`: `CHECK (current_period_end >= current_period_start)`
+* **Índices Físicos (B-Tree):**
+  * `idx_subscriptions_tenant`: B-Tree sobre `(tenant_id)`
+  * `idx_subscriptions_status`: B-Tree sobre `(status)`
+  * `idx_subscriptions_stripe_sub`: B-Tree sobre `(stripe_sub_id)`
+  * `idx_subscriptions_plan`: B-Tree sobre `(plan_id)`
+
+### 7.4 `invoices` (Liquidaciones y Comprobantes Contables de Suscripción SaaS)
+*Nota Arquitectónica: Corresponde a los comprobantes de cobro B2B emitidos por la plataforma Andeva hacia los talleres mecánicos por el uso del software (no confundir con los comprobantes tributarios SUNAT emitidos por el taller hacia sus clientes finales en Invoicing & Compliance).*
+
+| Atributo | Tipo de Dato | Llave | Req. | Default | Descripción |
+|---|---|---|---|---|---|
+| `id` | `UUID` | PK | Sí | `uuid()` | Identificador técnico del recibo de servicio SaaS |
+| `subscription_id` | `UUID` | FK | Sí | - | Suscripción titular (`FK -> subscriptions(id) ON DELETE CASCADE`) |
+| `tenant_id` | `UUID` | FK | Sí | - | Taller automotriz titular del cobro (`FK -> tenants(id)`) |
+| `stripe_invoice_id` | `VARCHAR(100)` | UK | Sí | - | Identificador oficial del recibo en Stripe (`in_...`) |
+| `amount_paid` | `DECIMAL(10,2)` | - | Sí | - | Monto exacto liquidado ($amount\_paid \ge 0.00$) |
+| `currency` | `VARCHAR(3)` | - | Sí | `'USD'` | Divisa formal del cobro (`USD`, `PEN`) |
+| `status` | `VARCHAR(20)` | - | Sí | - | Estado (`paid`, `open`, `void`, `uncollectible`, `draft`) |
+| `invoice_pdf_url` | `VARCHAR(255)` | - | No | `null` | Enlace oficial de descarga del comprobante en PDF emitido por Stripe |
+| `hosted_invoice_url` | `VARCHAR(255)` | - | No | `null` | URL del portal alojado de pago y recibo digital en Stripe |
+| `paid_at` | `TIMESTAMPTZ` | - | No | `null` | Marca temporal UTC en la que se debitó exitosamente el fondo bancario |
+| `created_at` | `TIMESTAMPTZ` | - | Sí | `NOW()` | Marca temporal de creación |
+| `updated_at` | `TIMESTAMPTZ` | - | Sí | `NOW()` | Marca temporal de última modificación |
+| `version` | `BIGINT` | - | Sí | `0` | Versión para control de concurrencia optimista JPA |
+| `deleted_at` | `TIMESTAMPTZ` | - | No | `null` | Marca temporal para borrado lógico (*Soft Delete*) |
+
+* **Relaciones (Integridad Referencial):**
+  * `N:1` hacia `subscriptions` (`subscription_id` referencia a `subscriptions.id` con eliminación en cascada).
+  * `N:1` hacia `tenants` (`tenant_id` referencia a `tenants.id`).
+* **Restricciones (Constraints):**
+  * `pk_invoices`: `PRIMARY KEY (id)`
+  * `uk_invoices_stripe_invoice`: `UNIQUE (stripe_invoice_id)`
+  * `fk_invoices_subscription`: `FOREIGN KEY (subscription_id) REFERENCES subscriptions(id) ON DELETE CASCADE`
+  * `fk_invoices_tenant`: `FOREIGN KEY (tenant_id) REFERENCES tenants(id)`
+  * `chk_invoices_status`: `CHECK (status IN ('paid', 'open', 'void', 'uncollectible', 'draft'))`
+  * `chk_invoices_amount`: `CHECK (amount_paid >= 0.00)`
+  * `chk_invoices_currency`: `CHECK (currency IN ('USD', 'PEN'))`
+* **Índices Físicos (B-Tree):**
+  * `idx_invoices_subscription`: B-Tree sobre `(subscription_id)`
+  * `idx_invoices_tenant`: B-Tree sobre `(tenant_id)`
+  * `idx_invoices_tenant_created`: B-Tree compuesto sobre `(tenant_id, created_at DESC)`
+  * `idx_invoices_stripe_lookup`: B-Tree sobre `(stripe_invoice_id)`
+
+### 7.5 `stripe_events` (Auditoría Telemática y Deduplicación Idempotente de Webhooks)
+Tabla cardinal de resiliencia e idempotencia. Cuando Stripe procesa cobros recurrentes o cancelaciones, transmite webhooks asíncronos hacia la API de Atelier. La restricción de unicidad estricta sobre `stripe_event_id` garantiza que reintentos por latencia de red sean interceptados e ignorados sin alterar el estado contractual del taller.
+
+| Atributo | Tipo de Dato | Llave | Req. | Default | Descripción |
+|---|---|---|---|---|---|
+| `id` | `UUID` | PK | Sí | `uuid()` | Identificador técnico del registro de evento webhook |
+| `stripe_event_id` | `VARCHAR(100)` | UK | Sí | - | Identificador unívoco del evento en Stripe (ej. `evt_...`). Cerrojo de idempotencia |
+| `type` | `VARCHAR(100)` | - | Sí | - | Nombre canónico del evento (ej. `invoice.payment_succeeded`, `customer.subscription.deleted`) |
+| `payload` | `TEXT` | - | Sí | - | Carga útil completa serializada en formato JSON para auditoría forense |
+| `status` | `VARCHAR(20)` | - | Sí | `'pending'` | Estado del ciclo de procesamiento (`pending`, `processed`, `failed`, `ignored`) |
+| `processed_at` | `TIMESTAMPTZ` | - | No | `null` | Marca temporal UTC de culminación del procesamiento local |
+| `error_message` | `VARCHAR(500)` | - | No | `null` | Traza explicativa en caso de inconsistencia o excepción transaccional |
+
+* **Restricciones (Constraints):**
+  * `pk_stripe_events`: `PRIMARY KEY (id)`
+  * `uk_stripe_events_id`: `UNIQUE (stripe_event_id)`
+  * `chk_stripe_events_status`: `CHECK (status IN ('pending', 'processed', 'failed', 'ignored'))`
+* **Índices Físicos (B-Tree):**
+  * `idx_stripe_events_status`: B-Tree sobre `(status)`
+  * `idx_stripe_events_type_status`: B-Tree compuesto sobre `(type, status, processed_at DESC)`
+
+---
+
+## 8. IoT Telemetry and Predictive Maintenance Context
+**Paquete Backend:** `com.andeva.atelier.platform.iot`
+
+El núcleo tecnológico diferenciador de Atelier. Modela el ciclo de vida del equipamiento telemático (adaptadores OBD-II BLE y módems celulares), la ingesta masiva de parámetros operacionales del motor (PIDs) en series temporales de alto rendimiento mediante TimescaleDB, el registro de fallas diagnósticas normalizadas bajo el estándar SAE J2012 / ISO 15031-6, la orquestación analítica asistida por Inteligencia Artificial (Spring AI sobre Groq Cloud LPU `llama-3.3-70b-versatile`) y el despacho de alertas preventivas en tiempo real mediante Firebase Cloud Messaging.
+
+### 8.1 `obd2_devices` (Inventario de Adaptadores y Escáneres Telemáticos)
+Registro maestro de dispositivos telemáticos homologados propiedad del taller automotriz (BYOD - Bring Your Own Device), controlando su dirección física MAC o IMEI y su compatibilidad de protocolos de bajo nivel.
+
+| Atributo | Tipo de Dato | Llave | Req. | Default | Descripción |
+|---|---|---|---|---|---|
+| `id` | `UUID` | PK | Sí | `uuid()` | Identificador único universal del adaptador telemático |
+| `tenant_id` | `UUID` | FK | Sí | - | Taller automotriz propietario del equipamiento (`FK -> tenants(id)`) |
+| `device_identifier` | `VARCHAR(100)` | UK | Sí | - | Dirección física MAC (BLE) o código IMEI celular de 15 dígitos |
+| `connection_type` | `VARCHAR(20)` | - | Sí | - | Protocolo de transporte físico (`bluetooth`, `sim_cellular`, `wifi`) |
+| `protocol_type` | `VARCHAR(20)` | - | Sí | - | Familia de comunicación (`elm327`, `custom_telematics`) |
+| `status` | `VARCHAR(20)` | - | Sí | `'active'` | Estado operativo del hardware (`active`, `inactive`, `lost`, `broken`) |
+| `hardware_model` | `VARCHAR(100)` | - | No | `null` | Modelo comercial del chipset y microcontrolador embebido |
+| `firmware_version` | `VARCHAR(50)` | - | No | `null` | Versión del firmware instalado en el dispositivo |
+| `created_at` | `TIMESTAMPTZ` | - | Sí | `NOW()` | Marca temporal de alta del hardware |
+| `updated_at` | `TIMESTAMPTZ` | - | Sí | `NOW()` | Marca temporal de última modificación |
+| `version` | `BIGINT` | - | Sí | `0` | Versión para control de concurrencia optimista JPA |
+| `deleted_at` | `TIMESTAMPTZ` | - | No | `null` | Marca temporal para borrado lógico (*Soft Delete*) |
+
+* **Relaciones (Integridad Referencial):**
+  * `N:1` hacia `tenants` (`tenant_id` referencia a `tenants.id`).
+  * `1:N` hacia `device_installations` (Un escáner es acoplado en múltiples sesiones vehiculares).
+* **Restricciones (Constraints):**
+  * `pk_obd2_devices`: `PRIMARY KEY (id)`
+  * `uk_obd2_identifier`: `UNIQUE (device_identifier)`
+  * `fk_obd2_tenant`: `FOREIGN KEY (tenant_id) REFERENCES tenants(id)`
+  * `chk_obd2_conn`: `CHECK (connection_type IN ('bluetooth', 'sim_cellular', 'wifi'))`
+  * `chk_obd2_protocol`: `CHECK (protocol_type IN ('elm327', 'custom_telematics'))`
+  * `chk_obd2_status`: `CHECK (status IN ('active', 'inactive', 'lost', 'broken'))`
+* **Índices Físicos (B-Tree):**
+  * `idx_obd2_tenant`: B-Tree sobre `(tenant_id)`
+  * `idx_obd2_identifier`: B-Tree sobre `(device_identifier)`
+  * `idx_obd2_status`: B-Tree compuesto sobre `(tenant_id, status)`
+
+### 8.2 `device_installations` (Sesiones Físicas de Montaje en Vehículos)
+Modela el acoplamiento físico temporal o permanente de un escáner OBD-II en el conector de diagnóstico de un vehículo específico del cliente, delimitando el odómetro inicial y final de la sesión de monitoreo VIP.
+
+| Atributo | Tipo de Dato | Llave | Req. | Default | Descripción |
+|---|---|---|---|---|---|
+| `id` | `UUID` | PK | Sí | `uuid()` | Identificador único universal de la sesión de instalación |
+| `tenant_id` | `UUID` | FK | Sí | - | Taller automotriz que supervisa la instalación (`FK -> tenants(id)`) |
+| `device_id` | `UUID` | FK | Sí | - | Escáner telemático asignado (`FK -> obd2_devices(id)`) |
+| `vehicle_id` | `UUID` | FK | Sí | - | Automotor receptor monitoreado (`FK -> vehicles(id)`) |
+| `installed_at` | `TIMESTAMPTZ` | - | Sí | `NOW()` | Fecha y hora de conexión física al puerto de diagnóstico |
+| `uninstalled_at` | `TIMESTAMPTZ` | - | No | `null` | Fecha y hora de desacople físico (null mientras permanezca activo) |
+| `initial_odometer_km` | `INTEGER` | - | Sí | - | Odómetro registrado al acoplar el equipo ($initial \ge 0$) |
+| `final_odometer_km` | `INTEGER` | - | No | `null` | Odómetro registrado al retirar el equipo ($final \ge initial$) |
+| `status` | `VARCHAR(20)` | - | Sí | `'active'` | Estado ontológico de la instalación (`active`, `completed`) |
+| `installation_notes` | `VARCHAR(500)` | - | No | `null` | Observaciones periciales del técnico sobre el conector o foso |
+| `created_at` | `TIMESTAMPTZ` | - | Sí | `NOW()` | Marca temporal de creación |
+| `updated_at` | `TIMESTAMPTZ` | - | Sí | `NOW()` | Marca temporal de última modificación |
+| `version` | `BIGINT` | - | Sí | `0` | Versión para control de concurrencia optimista JPA |
+| `deleted_at` | `TIMESTAMPTZ` | - | No | `null` | Marca temporal para borrado lógico (*Soft Delete*) |
+
+* **Relaciones (Integridad Referencial):**
+  * `N:1` hacia `tenants` (`tenant_id` referencia a `tenants.id`).
+  * `N:1` hacia `obd2_devices` (`device_id` referencia a `obd2_devices.id`).
+  * `N:1` hacia `vehicles` (`vehicle_id` referencia a `vehicles.id`).
+* **Restricciones (Constraints):**
+  * `pk_device_installations`: `PRIMARY KEY (id)`
+  * `fk_inst_tenant`: `FOREIGN KEY (tenant_id) REFERENCES tenants(id)`
+  * `fk_inst_device`: `FOREIGN KEY (device_id) REFERENCES obd2_devices(id)`
+  * `fk_inst_vehicle`: `FOREIGN KEY (vehicle_id) REFERENCES vehicles(id)`
+  * `chk_inst_status`: `CHECK (status IN ('active', 'completed'))`
+  * `chk_inst_initial_odometer`: `CHECK (initial_odometer_km >= 0)`
+  * `chk_inst_odometer`: `CHECK (final_odometer_km IS NULL OR final_odometer_km >= initial_odometer_km)`
+* **Índices Físicos (B-Tree):**
+  * `idx_inst_vehicle_status`: B-Tree compuesto sobre `(vehicle_id, status)`
+  * `idx_inst_device_status`: B-Tree compuesto sobre `(device_id, status)`
+  * `idx_inst_tenant`: B-Tree sobre `(tenant_id)`
+
+### 8.3 `telemetry_logs` (Hipertabla TimescaleDB de Señales Sensoriales y PIDs)
+*Nota de Arquitectura de Series Temporales:* Representa el repositorio masivo de magnitudes sensoriales continuas emitidas por la computadora del vehículo (ECU). Opera como una **Hipertabla particionada automáticamente por bloques de tiempo (time chunks) de 7 días** mediante la extensión TimescaleDB en Aiven Cloud. Carece de borrado lógico y de claves foráneas restrictivas en runtime, optimizada exclusivamente para inserción masiva en ráfaga (*Append-Only*) y compresión columnar transparente tras 30 días (`timescaledb.compress_segmentby = 'vehicle_id'`, `timescaledb.compress_orderby = 'timestamp DESC'`), alcanzando reducciones de almacenamiento superiores al 90%.
+
+| Atributo | Tipo de Dato | Llave | Req. | Default | Descripción |
+|---|---|---|---|---|---|
+| `timestamp` | `TIMESTAMPTZ` | PK | Sí | `NOW()` | **Dimensión temporal de particionamiento (Time Chunk Key)** |
+| `vehicle_id` | `UUID` | PK, FK | Sí | - | Automotor emisor de la telemetría (`FK -> vehicles(id)`) |
+| `tenant_id` | `UUID` | FK | Sí | - | Taller titular desnormalizado para consultas sin JOINs |
+| `device_id` | `UUID` | FK | Sí | - | Escáner OBD-II que capturó la trama (`FK -> obd2_devices(id)`) |
+| `speed` | `INTEGER` | - | No | `null` | Velocidad instantánea del vehículo en km/h ($speed \ge 0$) |
+| `rpm` | `INTEGER` | - | No | `null` | Revoluciones por minuto del cigüeñal ($rpm \ge 0$) |
+| `engine_temp_c` | `DECIMAL(5,2)` | - | No | `null` | Temperatura del líquido refrigerante del motor en °C |
+| `battery_voltage` | `DECIMAL(4,2)` | - | No | `null` | Tensión eléctrica en bornes de batería en voltios |
+| `fuel_level` | `DECIMAL(5,2)` | - | No | `null` | Nivel relativo de combustible en tanque ($0.00 \le level \le 100.00$) |
+| `throttle_position` | `DECIMAL(5,2)` | - | No | `null` | Posición angular de la mariposa de aceleración ($0.00 \le pos \le 100.00$) |
+| `engine_load` | `DECIMAL(5,2)` | - | No | `null` | Porcentaje de carga absoluta calculada del motor ($0.00 \le load \le 100.00$) |
+| `latitude` | `DECIMAL(10,8)` | - | No | `null` | Coordenada geográfica de latitud WGS84 provista por el gateway |
+| `longitude` | `DECIMAL(11,8)` | - | No | `null` | Coordenada geográfica de longitud WGS84 provista por el gateway |
+
+* **Relaciones (Integridad Referencial):**
+  * `N:1` hacia `vehicles` (`vehicle_id` referencia a `vehicles.id`).
+  * `N:1` hacia `tenants` (`tenant_id` referencia a `tenants.id`).
+  * `N:1` hacia `obd2_devices` (`device_id` referencia a `obd2_devices.id`).
+* **Restricciones (Constraints):**
+  * `pk_telemetry_logs`: `PRIMARY KEY (timestamp, vehicle_id)` (Clave compuesta exigida por TimescaleDB)
+  * `fk_telemetry_vehicle`: `FOREIGN KEY (vehicle_id) REFERENCES vehicles(id)`
+  * `fk_telemetry_tenant`: `FOREIGN KEY (tenant_id) REFERENCES tenants(id)`
+  * `fk_telemetry_device`: `FOREIGN KEY (device_id) REFERENCES obd2_devices(id)`
+  * `chk_telemetry_speed`: `CHECK (speed IS NULL OR speed >= 0)`
+  * `chk_telemetry_rpm`: `CHECK (rpm IS NULL OR rpm >= 0)`
+  * `chk_telemetry_fuel`: `CHECK (fuel_level IS NULL OR (fuel_level >= 0.00 AND fuel_level <= 100.00))`
+* **Políticas de Almacenamiento TimescaleDB:**
+  * Chunk Interval: `7 days` (`SELECT create_hypertable('telemetry_logs', 'timestamp', chunk_time_interval => INTERVAL '7 days');`)
+  * Compresión Columnar: Segmentado por `vehicle_id` y ordenado por `timestamp DESC` tras 30 días de antigüedad.
+* **Índices Físicos (B-Tree):**
+  * `idx_telemetry_veh_time`: B-Tree compuesto sobre `(vehicle_id, timestamp DESC)`
+  * `idx_telemetry_tenant_time`: B-Tree compuesto sobre `(tenant_id, timestamp DESC)`
+
+### 8.4 `vehicle_faults` (Registro de Averías y Fallas DTC Detectadas)
+Almacena las anomalías y fallas de diagnóstico extraídas de la memoria no volátil de la computadora del vehículo (DTC - Diagnostic Trouble Codes), clasificadas por severidad y asociadas a su ciclo de inspección y corrección física en taller.
+
+| Atributo | Tipo de Dato | Llave | Req. | Default | Descripción |
+|---|---|---|---|---|---|
+| `id` | `UUID` | PK | Sí | `uuid()` | Identificador único universal del fallo diagnosticado |
+| `tenant_id` | `UUID` | FK | Sí | - | Taller automotriz responsable del seguimiento (`FK -> tenants(id)`) |
+| `vehicle_id` | `UUID` | FK | Sí | - | Automotor diagnosticado (`FK -> vehicles(id)`) |
+| `dtc_code` | `VARCHAR(10)` | - | Sí | - | Código alfanumérico SAE J2012 (ej. `P0300`, `P0420`, `C0035`, `U0100`) |
+| `severity` | `VARCHAR(20)` | - | Sí | `'low'` | Criticidad técnica de la avería (`low`, `medium`, `critical`) |
+| `status` | `VARCHAR(20)` | - | Sí | `'active'` | Ciclo de resolución (`active`, `pending_review`, `resolved`, `cleared`) |
+| `description` | `VARCHAR(255)` | - | Sí | - | Glosa técnica explicativa de la falla |
+| `detected_at` | `TIMESTAMPTZ` | - | Sí | `NOW()` | Marca temporal de captura de la trama por el escáner |
+| `resolved_at` | `TIMESTAMPTZ` | - | No | `null` | Marca temporal de subsanación técnica o reseteo en taller |
+| `resolution_notes` | `VARCHAR(500)` | - | No | `null` | Detalle pericial de la intervención ejecutada en orden de trabajo |
+| `created_at` | `TIMESTAMPTZ` | - | Sí | `NOW()` | Marca temporal de creación |
+| `updated_at` | `TIMESTAMPTZ` | - | Sí | `NOW()` | Marca temporal de última modificación |
+| `version` | `BIGINT` | - | Sí | `0` | Versión para control de concurrencia optimista JPA |
+| `deleted_at` | `TIMESTAMPTZ` | - | No | `null` | Marca temporal para borrado lógico (*Soft Delete*) |
+
+* **Relaciones (Integridad Referencial):**
+  * `N:1` hacia `tenants` (`tenant_id` referencia a `tenants.id`).
+  * `N:1` hacia `vehicles` (`vehicle_id` referencia a `vehicles.id`).
+* **Restricciones (Constraints):**
+  * `pk_vehicle_faults`: `PRIMARY KEY (id)`
+  * `fk_faults_tenant`: `FOREIGN KEY (tenant_id) REFERENCES tenants(id)`
+  * `fk_faults_vehicle`: `FOREIGN KEY (vehicle_id) REFERENCES vehicles(id)`
+  * `chk_faults_severity`: `CHECK (severity IN ('low', 'medium', 'critical'))`
+  * `chk_faults_status`: `CHECK (status IN ('active', 'pending_review', 'resolved', 'cleared'))`
+* **Índices Físicos (B-Tree):**
+  * `idx_faults_vehicle_status`: B-Tree compuesto sobre `(vehicle_id, status)`
+  * `idx_faults_tenant_severity`: B-Tree compuesto sobre `(tenant_id, severity)`
+  * `idx_faults_dtc_code`: B-Tree sobre `(dtc_code)`
+
+### 8.5 `predictive_alerts` (Advertencias Preventivas y Diagnóstico Predictivo por IA)
+Registra las advertencias de degradación mecánica anticipada inferidas por el motor analítico `PredictiveAnomalyDetectionEngine` y enriquecidas mediante Spring AI con Groq Cloud LPU (`llama-3.3-70b-versatile`). Dispara notificaciones push inmediatas al conductor a través de Firebase Cloud Messaging y propone servicios de mantenimiento en MRO.
+
+| Atributo | Tipo de Dato | Llave | Req. | Default | Descripción |
+|---|---|---|---|---|---|
+| `id` | `UUID` | PK | Sí | `uuid()` | Identificador único universal de la alerta preventiva generada |
+| `tenant_id` | `UUID` | FK | Sí | - | Taller automotriz que gestiona la prevención (`FK -> tenants(id)`) |
+| `vehicle_id` | `UUID` | FK | Sí | - | Automotor evaluado por el modelo inferencial (`FK -> vehicles(id)`) |
+| `recommended_service_id` | `UUID` | FK | No | `null` | Servicio preventivo sugerido en el catálogo de MRO (`FK -> services(id)`) |
+| `alert_type` | `VARCHAR(50)` | - | Sí | - | Patrón inferido (`overheating_risk`, `battery_drain`, `alternator_failure`, `misfire`, `emissions_degradation`) |
+| `confidence_score` | `DECIMAL(5,2)` | - | Sí | - | Certeza estadística calculada en porcentaje ($75.00 \le score \le 100.00$) |
+| `message` | `VARCHAR(255)` | - | Sí | - | Glosa preventiva orientada al cliente propietario del vehículo |
+| `status` | `VARCHAR(20)` | - | Sí | `'dispatched'` | Estado (`dispatched`, `acknowledged`, `resolved`, `dismissed`) |
+| `fcm_message_id` | `VARCHAR(100)` | - | No | `null` | Identificador de entrega devuelto por Firebase Cloud Messaging |
+| `created_at` | `TIMESTAMPTZ` | - | Sí | `NOW()` | Marca temporal UTC de emisión de la alerta |
+| `updated_at` | `TIMESTAMPTZ` | - | Sí | `NOW()` | Marca temporal de última modificación |
+| `version` | `BIGINT` | - | Sí | `0` | Versión para control de concurrencia optimista JPA |
+| `deleted_at` | `TIMESTAMPTZ` | - | No | `null` | Marca temporal para borrado lógico (*Soft Delete*) |
+
+* **Relaciones (Integridad Referencial):**
+  * `N:1` hacia `tenants` (`tenant_id` referencia a `tenants.id`).
+  * `N:1` hacia `vehicles` (`vehicle_id` referencia a `vehicles.id`).
+  * `N:1` hacia `services` en MRO (`recommended_service_id` referencia a `services.id`).
+* **Restricciones (Constraints):**
+  * `pk_predictive_alerts`: `PRIMARY KEY (id)`
+  * `fk_alerts_tenant`: `FOREIGN KEY (tenant_id) REFERENCES tenants(id)`
+  * `fk_alerts_vehicle`: `FOREIGN KEY (vehicle_id) REFERENCES vehicles(id)`
+  * `fk_alerts_service`: `FOREIGN KEY (recommended_service_id) REFERENCES services(id)`
+  * `chk_alerts_status`: `CHECK (status IN ('dispatched', 'acknowledged', 'resolved', 'dismissed'))`
+  * `chk_alerts_confidence`: `CHECK (confidence_score >= 0.00 AND confidence_score <= 100.00)`
+* **Índices Físicos (B-Tree):**
+  * `idx_alerts_status_date`: B-Tree compuesto sobre `(status, created_at DESC)`
+  * `idx_alerts_vehicle`: B-Tree sobre `(vehicle_id)`
+  * `idx_alerts_tenant`: B-Tree sobre `(tenant_id)`
+
+### 8.6 `dtc_catalog` (Catálogo Estandarizado de Códigos de Falla SAE J2012 / ISO 15031-6)
+Diccionario maestro universal de códigos de falla automotriz para el enriquecimiento semántico automático de las lecturas OBD-II, mapeando el subsistema mecánico o electrónico y suministrando pautas técnicas oficiales de diagnóstico.
+
+| Atributo | Tipo de Dato | Llave | Req. | Default | Descripción |
+|---|---|---|---|---|---|
+| `id` | `UUID` | PK | Sí | `uuid()` | Identificador técnico del registro en el catálogo universal |
+| `code` | `VARCHAR(10)` | UK | Sí | - | Código canónico estandarizado (ej. `P0128`, `B0001`, `U0401`) |
+| `standard` | `VARCHAR(20)` | - | Sí | - | Norma técnica rectora (`sae_j2012`, `iso_15031`) |
+| `system_category` | `VARCHAR(30)` | - | Sí | - | Subsistema vehicular (`powertrain`, `chassis`, `body`, `network`) |
+| `description_es` | `VARCHAR(500)` | - | Sí | - | Definición técnica formal en español para el mecánico y asesor |
+| `severity` | `VARCHAR(20)` | - | Sí | - | Nivel normativo de severidad (`low`, `medium`, `critical`) |
+| `recommended_action` | `VARCHAR(500)` | - | No | `null` | Protocolo técnico o procedimiento de intervención sugerido |
+| `is_emissions_related` | `BOOLEAN` | - | Sí | `false` | Indicador de afectación a la inspección ambiental de emisiones |
+| `created_at` | `TIMESTAMPTZ` | - | Sí | `NOW()` | Marca temporal de registro en catálogo |
+| `updated_at` | `TIMESTAMPTZ` | - | Sí | `NOW()` | Marca temporal de última modificación |
+
+* **Restricciones (Constraints):**
+  * `pk_dtc_catalog`: `PRIMARY KEY (id)`
+  * `uk_dtc_code`: `UNIQUE (code)`
+  * `chk_dtc_standard`: `CHECK (standard IN ('sae_j2012', 'iso_15031'))`
+  * `chk_dtc_category`: `CHECK (system_category IN ('powertrain', 'chassis', 'body', 'network'))`
+  * `chk_dtc_severity`: `CHECK (severity IN ('low', 'medium', 'critical'))`
+* **Índices Físicos (B-Tree):**
+  * `idx_dtc_code`: B-Tree sobre `(code)`
+  * `idx_dtc_category`: B-Tree sobre `(system_category)`
+
+---
+
+## Infraestructura Transversal y Shared Kernel
 **Paquete Backend:** `com.andeva.atelier.platform.shared`
 
 Contiene los artefactos de infraestructura y mensajería transaccional transversales a todos los Bounded Contexts de la plataforma central en PostgreSQL 16.
 
-### 8.6 `outbox_messages` (Transactional Outbox)
+### `outbox_messages` (Transactional Outbox Universal)
 Tabla cardinal del patrón Transactional Outbox. Garantiza la consistencia eventual y la entrega at-least-once de eventos de dominio e integración entre módulos y hacia agentes externos (SUNAT Nubefact, Stripe, Firebase Cloud Messaging, Resend) dentro de la misma transacción relacional de base de datos.
 
 | Atributo | Tipo de Dato | Llave | Req. | Default | Descripción |
 |---|---|---|---|---|---|
 | `id` | `UUID` | PK | Sí | `uuid()` | Identificador único del mensaje encolado |
-| `aggregate_type` | `VARCHAR(100)` | - | Sí | - | Tipo de agregado emisor (ej. `WorkOrder`, `InventoryItem`, `Attendance`) |
+| `aggregate_type` | `VARCHAR(100)` | - | Sí | - | Tipo de agregado emisor (ej. `WorkOrder`, `ElectronicVoucher`, `Subscription`, `Attendance`) |
 | `aggregate_id` | `UUID` | - | Sí | - | Identificador unívoco de la entidad raíz afectada |
 | `event_type` | `VARCHAR(100)` | - | Sí | - | Nombre de la clase del evento emitido |
 | `payload` | `JSONB` | - | Sí | - | Representación serializada en JSON de los datos del evento |
@@ -1695,3 +2091,175 @@ Buffer transaccional para la captura y encolado de marcaciones de ingreso y sali
   * `idx_mutations_status`: B-Tree sobre `(status, created_at)`
 * **Mecanismo de Sincronización:**
   * Drenaje idempotente mediante `POST /api/v1/hr/attendance/clock-in` o `POST /api/v1/hr/attendance/clock-out` enviando el `mutation_id` como clave de idempotencia.
+---
+
+### 9.7 Persistencia Local de Invoicing & Compliance Context
+
+#### 9.7.1 `local_voucher_status_cache` (Caché Local de Saldos y Comprobantes por Orden de Trabajo)
+Almacena réplicas indexadas de comprobantes fiscales emitidos y saldos pendientes de pago asociados a órdenes de trabajo, permitiendo a los recepcionistas y jefes de patio verificar en frío y en milisegundos si un vehículo cuenta con autorización económica de salida sin requerir conectividad a Internet.
+
+| Atributo | Tipo de Dato | Llave | Req. | Default | Descripción |
+|---|---|---|---|---|---|
+| `id` | `TEXT` | PK | Sí | - | Identificador unívoco del comprobante fiscal (UUID texto) |
+| `work_order_id` | `TEXT` | - | Sí | - | Orden de trabajo vinculada para resolución local en patio |
+| `voucher_serie` | `TEXT` | - | Sí | - | Serie formal del comprobante (ej. `F001`, `B001`) |
+| `voucher_number` | `INTEGER` | - | Sí | - | Número correlativo formal del comprobante emitido |
+| `voucher_type` | `TEXT` | - | Sí | - | Código fiscal SUNAT (`01`, `03`, `07`, `08`) |
+| `total_amount` | `REAL` | - | Sí | - | Importe total liquidado facturado al cliente |
+| `pending_balance` | `REAL` | - | Sí | - | Saldo pendiente por amortizar ($0.0$ = Pagado) |
+| `status` | `TEXT` | - | Sí | - | Estado de liquidación (`draft`, `issued`, `accepted_sunat`, `voided`) |
+| `pdf_url` | `TEXT` | - | No | `null` | Enlace local o remoto a la representación impresa en PDF |
+| `synced_at` | `TEXT` | - | Sí | - | Marca temporal de sincronización con la nube (ISO-8601) |
+
+* **Restricciones (Constraints):**
+  * `pk_local_voucher_status`: `PRIMARY KEY (id)`
+* **Índices Físicos (B-Tree):**
+  * `idx_local_vouchers_wo`: B-Tree sobre `(work_order_id)`
+* **Mecanismo de Sincronización:**
+  * Consulta periódica y refresco bajo demanda mediante `GET /api/v1/invoicing/vouchers/work-order/{id}`.
+
+#### 9.7.2 `offline_payment_collections` (Buffer Transaccional de Cobros en Patio)
+Búfer transaccional local que captura los cobros percibidos en efectivo o POS móvil en patio o foso mecánico mientras el dispositivo permanece desconectado, dotado de un identificador de idempotencia universal para garantizar entrega exactamente una vez (*Exactly-Once Delivery*).
+
+| Atributo | Tipo de Dato | Llave | Req. | Default | Descripción |
+|---|---|---|---|---|---|
+| `collection_id` | `TEXT` | PK | Sí | - | UUID autogenerado localmente para garantizar idempotencia en la replicación |
+| `voucher_id` | `TEXT` | - | No | `null` | Comprobante amortizado (si ya fue emitido previamente) |
+| `work_order_id` | `TEXT` | - | Sí | - | Orden de trabajo cobrada en patio |
+| `amount` | `REAL` | - | Sí | - | Monto dinerario recibido ($amount > 0.0$) |
+| `payment_method` | `TEXT` | - | Sí | - | Medio de cobro (`cash`, `pos_card`, `mobile_wallet`) |
+| `reference_code` | `TEXT` | - | No | `null` | Código de operación POS o número de voucher bancario |
+| `status` | `TEXT` | - | Sí | `'PENDING'` | Estado de sincronización (`PENDING`, `SYNCED`, `FAILED`) |
+| `created_at` | `TEXT` | - | Sí | - | Marca temporal de captura en el dispositivo móvil (ISO-8601) |
+| `synced_at` | `TEXT` | - | No | `null` | Marca temporal de confirmación 200 OK del backend central (ISO-8601) |
+
+* **Restricciones (Constraints):**
+  * `pk_offline_payment_collections`: `PRIMARY KEY (collection_id)`
+  * `chk_offline_payment_status`: `CHECK (status IN ('PENDING', 'SYNCED', 'FAILED'))`
+* **Índices Físicos (B-Tree):**
+  * `idx_offline_payments_status`: B-Tree sobre `(status, created_at)`
+  * `idx_offline_payments_wo`: B-Tree sobre `(work_order_id)`
+* **Mecanismo de Sincronización:**
+  * Drenaje idempotente mediante `POST /api/v1/invoicing/payments/offline-sync` transmitiendo el `collection_id` como clave de idempotencia al restablecerse la conexión de red.
+
+---
+
+### 9.8 Persistencia Local de SaaS Billing & Subscriptions Context
+
+#### 9.8.1 `local_subscription_cache` (Caché Local de Cuotas y Vigencia de Suscripción por Taller)
+Almacena una réplica local compacta de los límites cuantitativos autorizados del plan contratado y la fecha de expiración de cobertura, permitiendo al dispositivo evaluar instantáneamente y sin latencia si el taller dispone de margen para crear nuevas órdenes de trabajo, registrar técnicos o acceder a módulos avanzados.
+
+| Atributo | Tipo de Dato | Llave | Req. | Default | Descripción |
+|---|---|---|---|---|---|
+| `id` | `TEXT` | PK | Sí | - | Identificador único canónico de la suscripción (UUID texto) |
+| `tenant_id` | `TEXT` | UK | Sí | - | Taller titular para resolución unívoca |
+| `plan_name` | `TEXT` | - | Sí | - | Nombre comercial del plan contratado (ej. "Professional") |
+| `plan_tier` | `TEXT` | - | Sí | - | Nivel comercial (`COMMUNITY`, `STARTER`, `PROFESSIONAL`, `ENTERPRISE`) |
+| `subscription_status` | `TEXT` | - | Sí | - | Estado contractual vigente (`active`, `trialing`, `past_due`, `canceled`) |
+| `max_branches` | `INTEGER` | - | Sí | - | Cuota local máxima autorizada de sedes físicas |
+| `max_active_staff` | `INTEGER` | - | Sí | - | Límite local de colaboradores activos simultáneos |
+| `max_monthly_work_orders` | `INTEGER` | - | Sí | - | Techo mensual de órdenes de trabajo permitidas |
+| `iot_telemetry_enabled` | `INTEGER` | - | Sí | `0` | Flag numérico SQLite (`1` = Habilitado, `0` = Bloqueado) para telemetría |
+| `ai_diagnostics_enabled` | `INTEGER` | - | Sí | `0` | Flag numérico SQLite (`1` = Habilitado, `0` = Bloqueado) para IA diagnóstica |
+| `current_period_end` | `TEXT` | - | Sí | - | Marca temporal UTC en formato ISO-8601 de expiración de cobertura |
+| `synced_at` | `TEXT` | - | Sí | - | Marca temporal ISO-8601 del último refresco ETag con el servidor |
+
+* **Restricciones (Constraints):**
+  * `pk_local_subscription_cache`: `PRIMARY KEY (id)`
+  * `uk_local_sub_tenant`: `UNIQUE (tenant_id)`
+* **Índices Físicos (B-Tree):**
+  * `idx_local_sub_tenant`: B-Tree sobre `(tenant_id)`
+* **Mecanismo de Sincronización:**
+  * Refresco condicional eficiente mediante `GET /api/v1/billing/subscriptions/tenant-quota` con encabezado HTTP `If-None-Match` (ETag), respondiendo HTTP 304 Not Modified cuando no existan modificaciones.
+
+#### 9.8.2 `local_plan_features_cache` (Caché Local de Capacidades Modulares Habilitadas)
+Mantiene el desglose de flags booleanos correspondientes a los módulos tecnológicos avanzados autorizados para el taller, gobernando de manera determinista la visibilidad de componentes en la interfaz de la aplicación móvil.
+
+| Atributo | Tipo de Dato | Llave | Req. | Default | Descripción |
+|---|---|---|---|---|---|
+| `feature_id` | `TEXT` | PK | Sí | - | Identificador canónico de la característica modular en texto |
+| `tenant_id` | `TEXT` | - | Sí | - | Taller titular al cual se asocia la funcionalidad |
+| `feature_key` | `TEXT` | UK | Sí | - | Clave alfanumérica de la funcionalidad (ej. `OBD2_TELEMETRY`) |
+| `is_enabled` | `INTEGER` | - | Sí | `1` | Flag numérico SQLite (`1` = Activa, `0` = Inactiva) |
+| `synced_at` | `TEXT` | - | Sí | - | Marca temporal ISO-8601 de sincronización con el backend central |
+
+* **Restricciones (Constraints):**
+  * `pk_local_plan_features`: `PRIMARY KEY (feature_id)`
+  * `uk_local_features_tenant_key`: `UNIQUE (tenant_id, feature_key)`
+* **Índices Físicos (B-Tree):**
+  * `idx_local_features_tenant`: B-Tree sobre `(tenant_id)`
+* **Mecanismo de Sincronización:**
+  * Descarga incremental delta conjunta con la actualización de cuotas del plan de suscripción.
+
+---
+
+### 9.9 Persistencia Local de IoT Telemetry & Predictive Maintenance Context
+
+#### 9.9.1 `local_telemetry_buffer` (Buffer Transaccional Desconectado de Tramas Sensoriales BLE)
+Amortiguador transaccional local en terminales móviles para la captura e ingesta en frío de lecturas sensoriales de la ECU vehicular (PIDs OBD-II vía ELM327 Bluetooth LE) ante pérdidas de conectividad en carretera, sótano o foso de inspección.
+
+| Atributo | Tipo de Dato | Llave | Req. | Default | Descripción |
+|---|---|---|---|---|---|
+| `id` | `TEXT` | PK | Sí | - | Identificador técnico único de la lectura telemática (UUID texto) |
+| `vehicle_id` | `TEXT` | - | Sí | - | Identificador del automotor que emite las señales |
+| `timestamp` | `TEXT` | - | Sí | - | Marca temporal de captura por el adaptador OBD-II (ISO-8601) |
+| `speed` | `INTEGER` | - | No | `null` | Velocidad reportada en km/h |
+| `rpm` | `INTEGER` | - | No | `null` | Revoluciones por minuto del motor |
+| `engine_temp_c` | `REAL` | - | No | `null` | Temperatura del refrigerante de motor en °C |
+| `battery_voltage` | `REAL` | - | No | `null` | Voltaje medido en bornes de batería |
+| `fuel_level` | `REAL` | - | No | `null` | Nivel relativo de combustible en porcentaje ($0.0 - 100.0$) |
+| `latitude` | `REAL` | - | No | `null` | Coordenada satelital de latitud al momento de la muestra |
+| `longitude` | `REAL` | - | No | `null` | Coordenada satelital de longitud al momento de la muestra |
+| `sync_status` | `TEXT` | - | Sí | `'PENDING'` | Estado en cola local (`PENDING`, `SYNCED`, `FAILED`) |
+| `created_at` | `TEXT` | - | Sí | - | Marca temporal de persistencia en SQLite (ISO-8601) |
+
+* **Restricciones (Constraints):**
+  * `pk_local_telem`: `PRIMARY KEY (id)`
+  * `chk_local_telem_sync`: `CHECK (sync_status IN ('PENDING', 'SYNCED', 'FAILED'))`
+* **Índices Físicos (B-Tree):**
+  * `idx_local_telem_status`: B-Tree sobre `(sync_status, timestamp)`
+  * `idx_local_telem_vehicle`: B-Tree sobre `(vehicle_id)`
+* **Mecanismo de Sincronización:**
+  * Drenaje transaccional por lotes (*Batch Ingestion*) mediante `POST /api/v1/iot/telemetry/ingest/batch` al reestablecer enlace de red móvil o Wi-Fi.
+
+#### 9.9.2 `local_vehicle_faults_cache` (Caché Móvil de Averías y Códigos DTC)
+Caché local de averías y códigos de falla leídos desde la ECU, permitiendo a mecánicos en foso y conductores en ruta auditar de inmediato la severidad y descripción de anomalías sin latencia ni dependencia de servidores remotos.
+
+| Atributo | Tipo de Dato | Llave | Req. | Default | Descripción |
+|---|---|---|---|---|---|
+| `fault_id` | `TEXT` | PK | Sí | - | Identificador técnico del fallo diagnosticado (UUID texto) |
+| `vehicle_id` | `TEXT` | - | Sí | - | Automotor diagnosticado |
+| `dtc_code` | `TEXT` | - | Sí | - | Código alfanumérico normativo SAE J2012 (ej. `P0300`, `P0420`) |
+| `severity` | `TEXT` | - | Sí | - | Criticidad operativa (`low`, `medium`, `critical`) |
+| `description` | `TEXT` | - | Sí | - | Glosa técnica explicativa del subsistema afectado |
+| `detected_at` | `TEXT` | - | Sí | - | Marca temporal de lectura por el escáner (ISO-8601) |
+| `synced_at` | `TEXT` | - | Sí | - | Marca temporal de sincronización con la nube (ISO-8601) |
+
+* **Restricciones (Constraints):**
+  * `pk_local_faults`: `PRIMARY KEY (fault_id)`
+* **Índices Físicos (B-Tree):**
+  * `idx_local_faults_vehicle`: B-Tree sobre `(vehicle_id)`
+  * `idx_local_faults_code`: B-Tree sobre `(dtc_code)`
+* **Mecanismo de Sincronización:**
+  * Consulta periódica y descarga de fallas activas mediante `GET /api/v1/iot/faults/vehicle/{vehicleId}`.
+
+#### 9.9.3 `local_predictive_alerts_cache` (Historial Móvil de Alertas Preventivas y Notificaciones Push)
+Registro local de advertencias preventivas recibidas desde la nube o inferidas por el dispositivo móvil, resguardando el historial para visualización reactiva en la interfaz de usuario de Atelier Driver y Atelier Workshop Mobile.
+
+| Atributo | Tipo de Dato | Llave | Req. | Default | Descripción |
+|---|---|---|---|---|---|
+| `alert_id` | `TEXT` | PK | Sí | - | Identificador de la alerta preventiva (UUID texto) |
+| `vehicle_id` | `TEXT` | - | Sí | - | Automotor evaluado por el modelo inferencial |
+| `alert_type` | `TEXT` | - | Sí | - | Tipo de anomalía (`overheating_risk`, `battery_drain`, etc.) |
+| `confidence_score` | `REAL` | - | Sí | - | Certeza estadística calculada en porcentaje ($75.0 - 100.0$) |
+| `message` | `TEXT` | - | Sí | - | Mensaje preventivo comprensible orientado al conductor |
+| `status` | `TEXT` | - | Sí | - | Estado de la alerta (`dispatched`, `acknowledged`, `resolved`) |
+| `created_at` | `TEXT` | - | Sí | - | Marca temporal de emisión de la alerta (ISO-8601) |
+| `synced_at` | `TEXT` | - | Sí | - | Marca temporal de confirmación o recepción local (ISO-8601) |
+
+* **Restricciones (Constraints):**
+  * `pk_local_alerts`: `PRIMARY KEY (alert_id)`
+* **Índices Físicos (B-Tree):**
+  * `idx_local_alerts_vehicle`: B-Tree sobre `(vehicle_id, created_at)`
+* **Mecanismo de Sincronización:**
+  * Ingesta automática mediante notificaciones push de datos de Firebase Cloud Messaging (FCM) y refresco periódico desde `GET /api/v1/iot/alerts/vehicle/{vehicleId}`.

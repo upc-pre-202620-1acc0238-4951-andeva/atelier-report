@@ -6936,209 +6936,3297 @@ Sobre esta telemetría continua, el motor de inferencia `PredictiveAnomalyDetect
 
 #### 2.6.9.1. Domain Layer
 
-La capa de dominio de IoT Telemetry & Predictive Maintenance contiene los modelos de representación de hardware telemático, la ingestión de series temporales de alta velocidad, la clasificación taxonómica de fallas vehiculares y los motores analíticos predictivos. En la @tbl:iot-domain-types se detalla el conjunto de componentes tácticos de este paquete.
+La capa de dominio de IoT Telemetry \& Predictive Maintenance concentra los modelos ontológicos, agregados de series temporales, reglas de inferencia analítica y contratos asíncronos que permiten transformar los datos brutos del computador de a bordo en servicios preventivos de taller. Todos sus tipos residen bajo el paquete raíz **com.andeva.atelier.platform.iot.domain** y se articulan sobre cuatro fundamentos tácticos de ingeniería:
 
-| Clase o Tipo | Categoría Táctica | Responsabilidad Principal en el Dominio |
-| :--- | :--- | :--- |
-| `Obd2Device` | Raíz de Agregado | Custodia el inventario de escáneres OBD-II, canales físicos de enlace y estado operativo. |
-| `DeviceInstallation` | Raíz de Agregado | Gobierna el ciclo de vinculación física temporal del escáner en el puerto de un automóvil. |
-| `TelemetryRecord` | Agregado de Serie Temporal | Representación inmutable de una lectura instantánea de sensores vehiculares en la hipertabla. |
-| `VehicleFault` | Raíz de Agregado | Modela un código de avería DTC activo o histórico emitido por la computadora del vehículo. |
-| `PredictiveAlert` | Raíz de Agregado | Alerta de mantenimiento proactivo formulada por el motor analítico ante anomalías inminentes. |
-| `DtcCatalogEntry` | Entidad Dependiente | Registro estandarizado del catálogo internacional SAE/ISO de códigos de falla automotriz. |
-| `DeviceId` | Objeto de Valor | Identificador universal único (`UUID`) fuertemente tipado para escáneres OBD-II. |
-| `InstallationId` | Objeto de Valor | Identificador universal único (`UUID`) para sesiones de instalación en vehículos. |
-| `FaultId` | Objeto de Valor | Identificador universal único (`UUID`) para diagnósticos de falla vehicular. |
-| `AlertId` | Objeto de Valor | Identificador universal único (`UUID`) para advertencias de mantenimiento predictivo. |
-| `DeviceIdentifier` | Objeto de Valor | Dirección física MAC Bluetooth o código IMEI de 15 dígitos validado sintácticamente. |
-| `ConnectionType` | Enumeración de Dominio | Canal de comunicación telemática (`BLUETOOTH_BLE`, `SIM_CELLULAR`, `WIFI`). |
-| `DeviceStatus` | Enumeración de Dominio | Estado operativo del dispositivo (`ACTIVE`, `INACTIVE`, `LOST`, `BROKEN`). |
-| `DtcCode` | Objeto de Valor | Código alfanumérico normalizado SAE J2012 (ej. `P0300`, `P0420`, `B0001`). |
-| `FaultSeverity` | Enumeración de Dominio | Gravedad del desperfecto detectado (`LOW`, `MEDIUM`, `CRITICAL`). |
-| `ConfidenceScore` | Objeto de Valor | Probabilidad porcentual estimada del fallo inminente ($0.00\% \le p \le 100.00\%$). |
-| `EngineTemperature` | Objeto de Valor | Temperatura del refrigerante del motor en grados Celsius con lógica de sobrecalentamiento. |
-| `EngineRpm` | Objeto de Valor | Revoluciones por minuto del cigüeñal con métodos de detección de sobre-revolución. |
-| `VehicleSpeed` | Objeto de Valor | Velocidad instantánea de desplazamiento del automóvil en kilómetros por hora. |
-| `BatteryVoltage` | Objeto de Valor | Tensión eléctrica del sistema de carga en voltios con alerta de degradación de batería. |
-| `FuelLevel` | Objeto de Valor | Porcentaje del tanque de combustible remanente ($0.0\% \le f \le 100.0\%$). |
-| `AlertType` | Enumeración de Dominio | Clasificación analítica de la amenaza (`ENGINE_OVERHEATING_RISK`, `BATTERY_FAILURE_RISK`, etc.). |
-| `AlertStatus` | Enumeración de Dominio | Situación operativa de la alerta (`DISPATCHED`, `ACKNOWLEDGED`, `RESOLVED`, `DISMISSED`). |
-| `PredictiveAnomalyDetectionEngine` | Servicio de Dominio | Motor analítico que procesa telemetría en tiempo real y calcula riesgos de rotura mecánica. |
-| `DtcCodeEvaluationService` | Servicio de Dominio | Mapea la gravedad y subsistema vehicular afectado a partir del código alfanumérico DTC. |
-| `Obd2DeviceRepository` | Puerto de Salida | Contrato de persistencia de dominio para la Raíz de Agregado `Obd2Device`. |
-| `DeviceInstallationRepository` | Puerto de Salida | Contrato de persistencia de dominio para la Raíz de Agregado `DeviceInstallation`. |
-| `TelemetryLogRepository` | Puerto de Salida | Contrato de persistencia e inserción masiva JDBC en hipertablas TimescaleDB. |
-| `VehicleFaultRepository` | Puerto de Salida | Contrato de persistencia de dominio para la Raíz de Agregado `VehicleFault`. |
-| `PredictiveAlertRepository` | Puerto de Salida | Contrato de persistencia de dominio para la Raíz de Agregado `PredictiveAlert`. |
-| `Obd2DeviceRegisteredEvent` | Evento de Dominio | Notifica el alta y catalogación de un nuevo escáner en el parque de hardware del taller. |
-| `DeviceInstalledOnVehicleEvent` | Evento de Dominio | Notifica el acople físico de un escáner en el puerto OBD-II de un automóvil. |
-| `DeviceUninstalledFromVehicleEvent` | Evento de Dominio | Notifica la desconexión del escáner y el asentamiento del kilometraje final. |
-| `TelemetryBatchIngestedEvent` | Evento de Dominio | Notifica el procesamiento satisfactorio de una ráfaga masiva de telemetría. |
-| `CriticalEngineAnomalyDetectedEvent` | Evento de Dominio | Notifica que los sensores del motor han traspasado umbrales mecánicos de peligro crítico. |
-| `VehicleFaultDetectedEvent` | Evento de Dominio | Notifica la captura de un código de avería DTC emitido por la computadora a bordo. |
-| `PredictiveAlertDispatchedEvent` | Evento de Dominio | Notifica la distribución exitosa de la alerta push a través de Firebase Cloud Messaging. |
-: Catálogo de Tipos de Dominio del Bounded Context IoT Telemetry & Predictive Maintenance {#tbl:iot-domain-types}
+- **Ingesta masiva append-only y particionamiento temporal:** Desacoplamiento de lecturas sensoriales de alta frecuencia hacia hipertablas optimizadas en TimescaleDB, suprimiendo bloqueos de contención y sobrecarga transaccional sobre la base de datos relacional del ERP.
+- **Topología híbrida de conectividad de hardware y gateways móviles:** Admisión coordinada de escáneres con módem celular directo y enlaces Bluetooth de baja energía asistidos por dispositivos móviles, asegurando almacenamiento intermedio en Room SQLite ante pérdidas de cobertura.
+- **Motor determinista de mantenimiento predictivo y termodinámica:** Detección algorítmica de anomalías críticas sustentada en leyes físicas de combustión, gradientes térmicos de refrigerante y curvas de descarga de batería para anticipar averías catastróficas.
+- **Notificación push multicanal instantánea de alta prioridad:** Despacho automatizado de alertas preventivas en tiempo real hacia las aplicaciones móviles del conductor y del asesor de servicio mediante la pasarela de Google Firebase Cloud Messaging.
 
-*Nota.* Componentes tácticos pertenecientes al paquete com.andeva.atelier.platform.iot.domain.
+En la @tbl:iot-domain-types se presenta la clasificación formal de los componentes que integran el núcleo del dominio telemático, detallando sus categorías tácticas, relaciones cardinales y paquetes canónicos.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Catálogo de la Capa de Dominio de IoT Telemetry \& Predictive Maintenance} \label{tbl:iot-domain-types} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\
+\hline
+\endhead
+Obd2Device & Modela el hardware físico de escaneo a bordo custodiando su identificación unívoca y canal de transmisión. \\*
+\hline
+\textbf{Categoría} & Raíz de Agregado \\*
+\hline
+\textbf{Relaciones} & Vinculado al taller titular TenantId y referenciado en DeviceInstallation. \\*
+\hline
+\textbf{Paquete} & \texttt{...iot.domain.model.aggregates} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+DeviceInstallation & Gobierna la sesión física temporal de acople de un escáner en el puerto de diagnóstico del vehículo. \\*
+\hline
+\textbf{Categoría} & Raíz de Agregado \\*
+\hline
+\textbf{Relaciones} & Mantiene referencias foráneas con DeviceId, VehicleId y TenantId. \\*
+\hline
+\textbf{Paquete} & \texttt{...iot.domain.model.aggregates} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+TelemetryRecord & Registro inmutable de parámetros de sensores vehiculares persistido en la hipertabla de TimescaleDB. \\*
+\hline
+\textbf{Categoría} & Agregado de Serie Temporal \\*
+\hline
+\textbf{Relaciones} & Clave compuesta por marca temporal y VehicleId con desnormalización de TenantId. \\*
+\hline
+\textbf{Paquete} & \texttt{...iot.domain.model.aggregates} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+VehicleFault & Modela un código de avería electrónica diagnosticado por la computadora del vehículo. \\*
+\hline
+\textbf{Categoría} & Raíz de Agregado \\*
+\hline
+\textbf{Relaciones} & Asociado a VehicleId y TenantId con clasificación estandarizada mediante DtcCode. \\*
+\hline
+\textbf{Paquete} & \texttt{...iot.domain.model.aggregates} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+PredictiveAlert & Advertencia de mantenimiento proactivo formulada algorítmicamente ante riesgo inminente de fallo. \\*
+\hline
+\textbf{Categoría} & Raíz de Agregado \\*
+\hline
+\textbf{Relaciones} & Vinculada a VehicleId, TenantId y opcionalmente a un servicio preventivo de MRO. \\*
+\hline
+\textbf{Paquete} & \texttt{...iot.domain.model.aggregates} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+DtcCatalogEntry & Registro maestro del catálogo internacional de códigos de avería automotriz SAE J2012 e ISO 15031. \\*
+\hline
+\textbf{Categoría} & Entidad Dependiente \\*
+\hline
+\textbf{Relaciones} & Utilizada por el servicio de dominio para clasificación taxonómica de fallas. \\*
+\hline
+\textbf{Paquete} & \texttt{...iot.domain.model.entities} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+PredictiveAnomalyDetectionEngine & Motor analítico que procesa lecturas en tiempo real y calcula probabilidades de avería crítica. \\*
+\hline
+\textbf{Categoría} & Servicio de Dominio \\*
+\hline
+\textbf{Relaciones} & Invocado durante la ingesta masiva de telemetría para evaluar desviaciones térmicas y eléctricas. \\*
+\hline
+\textbf{Paquete} & \texttt{...iot.domain.services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+DtcCodeEvaluationService & Clasifica la severidad reglamentaria y el subsistema automotriz afectado según el código leído. \\*
+\hline
+\textbf{Categoría} & Servicio de Dominio \\*
+\hline
+\textbf{Relaciones} & Invocado al detectar códigos de diagnóstico para sugerir servicios correctivos en taller. \\*
+\hline
+\textbf{Paquete} & \texttt{...iot.domain.services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Obd2DeviceRepository & Contrato de persistencia para el inventario de hardware telemático y validación de unicidad. \\*
+\hline
+\textbf{Categoría} & Puerto de Salida \\*
+\hline
+\textbf{Relaciones} & Implementado por adaptadores de persistencia relacional en infraestructura. \\*
+\hline
+\textbf{Paquete} & \texttt{...iot.domain.repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+DeviceInstallationRepository & Contrato de persistencia para auditar las sesiones de montaje y vigencia de monitoreo. \\*
+\hline
+\textbf{Categoría} & Puerto de Salida \\*
+\hline
+\textbf{Relaciones} & Implementado por adaptadores de persistencia relacional en infraestructura. \\*
+\hline
+\textbf{Paquete} & \texttt{...iot.domain.repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+TelemetryLogRepository & Contrato de persistencia para inserción masiva JDBC en hipertablas y agregación temporal. \\*
+\hline
+\textbf{Categoría} & Puerto de Salida \\*
+\hline
+\textbf{Relaciones} & Implementado por adaptadores optimizados para TimescaleDB en infraestructura. \\*
+\hline
+\textbf{Paquete} & \texttt{...iot.domain.repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+VehicleFaultRepository & Contrato de persistencia para el historial patológico de anomalías electrónicas de la unidad. \\*
+\hline
+\textbf{Categoría} & Puerto de Salida \\*
+\hline
+\textbf{Relaciones} & Implementado por adaptadores de persistencia relacional en infraestructura. \\*
+\hline
+\textbf{Paquete} & \texttt{...iot.domain.repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+PredictiveAlertRepository & Contrato de persistencia para la gestión del ciclo de vida y despacho de advertencias predictivas. \\*
+\hline
+\textbf{Categoría} & Puerto de Salida \\*
+\hline
+\textbf{Relaciones} & Implementado por adaptadores de persistencia relacional en infraestructura. \\*
+\hline
+\textbf{Paquete} & \texttt{...iot.domain.repositories} \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Catálogo taxonómico de los tipos tácticos fundamentales del paquete com.andeva.atelier.platform.iot.domain.
 
 **Raíces de Agregado y Entidades Dependientes de IoT Telemetry**
 
-1. `Obd2Device`: Modela el equipo físico de diagnóstico a bordo propiedad del taller o adquirido bajo modalidad BYOD (*Bring Your Own Device*). Custodia su identificación física inmutable (`deviceIdentifier`), su estándar de transmisión de datos (`connectionType`), su situación física (`status`) y los metadatos de firmware del fabricante. Asegura como regla de negocio que la dirección MAC o el código IMEI sean sintácticamente válidos y únicos en toda la infraestructura de la plataforma.
+El núcleo transaccional del dominio organiza sus fronteras de consistencia en cinco agregados y una entidad dependiente especializada:
 
-En la @tbl:iot-device-members se detallan los atributos y métodos de la raíz de agregado `Obd2Device`.
+- **Obd2Device:** Raíz de agregado que custodia el inventario físico de hardware de diagnóstico adquirido por el taller o provisto por la plataforma. Administra su identificación unívoca por dirección MAC o número IMEI bajo restricción de unicidad global, su tecnología de enlace y su situación operativa. Asegura que ningún escáner extraviado o averiado admita la recepción de tramas telemáticas.
 
-| Elemento | Tipo o Firma | Ámbito | Descripción y Reglas de Negocio |
-| :--- | :--- | :---: | :--- |
-| `id` | `DeviceId` | Privado | Identificador universal único del hardware. |
-| `tenantId` | `TenantId` | Privado | Taller propietario o administrador del escáner. |
-| `deviceIdentifier` | `DeviceIdentifier` | Privado | Dirección MAC Bluetooth o código IMEI celular validado unívocamente. |
-| `connectionType` | `ConnectionType` | Privado | Canal de enlace físico (`BLUETOOTH_BLE`, `SIM_CELLULAR`, `WIFI`). |
-| `status` | `DeviceStatus` | Privado | Estado operativo (`ACTIVE`, `INACTIVE`, `LOST`, `BROKEN`). |
-| `hardwareModel` | `String` | Privado | Modelo del dispositivo provisto por el fabricante (ej. "ELM327 v2.1"). |
-| `firmwareVersion` | `String` | Privado | Versión del software embebido instalado en el escáner. |
-| `register` | `static Obd2Device register(...)` | Público | Factoría de dominio que valida el identificador y emite `Obd2DeviceRegisteredEvent`. |
-| `markLost` | `void markLost()` | Público | Inhabilita el escáner por extravío, bloqueando la recepción de telemetría futura. |
-| `markBroken` | `void markBroken()` | Público | Asienta la inoperatividad por daño físico en patio o manipulación indebida. |
-| `updateFirmware` | `void updateFirmware(String version)`| Público | Registra la actualización de la versión de software embebido. |
-: Miembros de la Raíz de Agregado Obd2Device {#tbl:iot-device-members}
+En la @tbl:iot-device-members se especifican los atributos estructurales, métodos de mutación protegida y reglas de invariante de la raíz de agregado **Obd2Device**.
 
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Miembros de la Raíz de Agregado Obd2Device} \label{tbl:iot-device-members} \\
+\hline
+\thfirst{Elemento o Atributo} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Elemento o Atributo} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endhead
+id & Identificador universal único e inmutable del hardware telemático. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{DeviceId (UUID)} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+tenantId & Identificador del taller automotriz propietario o custodio del dispositivo. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{TenantId (UUID)} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+deviceIdentifier & Dirección física MAC Bluetooth o código IMEI celular validado bajo restricción única global. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{DeviceIdentifier} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+connectionType & Canal físico de transmisión de datos configurado en el equipo. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{ConnectionType (BLUETOOTH\_BLE, SIM\_CELLULAR, WIFI)} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+status & Situación operativa del dispositivo que condiciona la admisión de tramas de telemetría. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{DeviceStatus (ACTIVE, INACTIVE, LOST, BROKEN)} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+hardwareModel & Denominación técnica y fabricante del modelo comercial homologado. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{String} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+firmwareVersion & Versión de software embebido instalado en el microcontrolador del escáner. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{String} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+\thfirst{Método u Operación} & \thcell{Comportamiento y Reglas de Dominio} \\*
+\hline
+register & Factoría de dominio que valida la sintaxis del identificador e inicializa el equipo en estado activo. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{static Obd2Device register(...)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+markLost & Inhabilita el escáner por extravío y bloquea la ingesta de telemetría proveniente de este identificador. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{void markLost()} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+markBroken & Registra inoperatividad irreversible por daño físico en patio o manipulación indebida. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{void markBroken()} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+updateFirmware & Actualiza la versión de software embebido tras procedimientos de mantenimiento técnico. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{void updateFirmware(String newVersion)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
 *Nota.* Especificación de miembros de la clase Obd2Device del paquete com.andeva.atelier.platform.iot.domain.model.aggregates.
 
-En cuanto a sus relaciones, `Obd2Device` hereda de `AbstractDomainAggregateRoot<Obd2Device>` y se asocia mediante identificador inmutable con el taller propietario `TenantId`.
+- **DeviceInstallation:** Raíz de agregado que gobierna la sesión física de monitoreo y vinculación operativa entre un escáner telemático y un vehículo automotriz. Controla los sellos cronológicos de conexión y desconexión, y registra el odómetro inicial y final en kilómetros. Impone como regla de negocio que un escáner solo puede estar instalado en un vehículo a la vez y que ningún vehículo puede mantener múltiples sesiones activas simultáneamente.
 
-2. `DeviceInstallation`: Gobierna la sesión física de monitoreo telemático entre un dispositivo `Obd2Device` y un vehículo `Vehicle`. Controla las marcas temporales de inicio (`installedAt`) y conclusión (`uninstalledAt`), así como el odómetro de entrada y salida (`initialOdometerKm`, `finalOdometerKm`). Aplica como invariante que un dispositivo no puede estar instalado simultáneamente en más de un automóvil, ni un vehículo puede tener asignados múltiples escáneres activos en el mismo intervalo de tiempo.
+En la @tbl:iot-installation-members se detallan los miembros, métodos y restricciones de consistencia temporal de la raíz de agregado **DeviceInstallation**.
 
-En la @tbl:iot-installation-members se especifican los componentes de la raíz de agregado `DeviceInstallation`.
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Miembros de la Raíz de Agregado DeviceInstallation} \label{tbl:iot-installation-members} \\
+\hline
+\thfirst{Elemento o Atributo} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Elemento o Atributo} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endhead
+id & Identificador universal único de la sesión de montaje telemático. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{InstallationId (UUID)} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+deviceId & Referencia al hardware físico OBD-II instalado en el puerto de diagnóstico. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{DeviceId (UUID)} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+vehicleId & Vehículo automotriz intervenido y objeto del monitoreo preventivo. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{VehicleId (UUID)} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+tenantId & Taller automotriz prestador y responsable del servicio de telemetría. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{TenantId (UUID)} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+installedAt & Marca de tiempo UTC en que se efectúa el acople físico e inicia la transmisión. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{Instant} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+uninstalledAt & Marca de tiempo UTC de desconexión física y cierre formal de la sesión de monitoreo. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{Optional<Instant>} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+initialOdometerKm & Kilometraje registrado en el odómetro al momento de la instalación con valor mayor o igual a cero. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{int} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+finalOdometerKm & Kilometraje verificado al retirar el escáner con valor mayor o igual al kilometraje inicial. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{Optional<Integer>} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+\thfirst{Método u Operación} & \thcell{Comportamiento y Reglas de Dominio} \\*
+\hline
+install & Factoría de dominio que vincula el escáner al vehículo y emite DeviceInstalledOnVehicleEvent. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{static DeviceInstallation install(...)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+uninstall & Concluye la sesión de monitoreo validando el odómetro final y emite DeviceUninstalledFromVehicleEvent. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{void uninstall(int finalKm, Instant at)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+isActive & Evalúa si la sesión continúa transmitiendo activamente comprobando la ausencia de fecha de retiro. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{boolean isActive()} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Especificación de miembros de la clase DeviceInstallation del paquete com.andeva.atelier.platform.iot.domain.model.aggregates.
 
-| Elemento | Tipo o Firma | Ámbito | Descripción y Reglas de Negocio |
-| :--- | :--- | :---: | :--- |
-| `id` | `InstallationId` | Privado | Identificador universal único de la instalación. |
-| `deviceId` | `DeviceId` | Privado | Escáner físico conectado al vehículo. |
-| `vehicleId` | `VehicleId` | Privado | Automóvil intervenido y monitoreado. |
-| `tenantId` | `TenantId` | Privado | Taller responsable del servicio de telemetría. |
-| `installedAt` | `Instant` | Privado | Marca de tiempo UTC de inicio del monitoreo en foso. |
-| `uninstalledAt` | `Optional<Instant>` | Privado | Marca de tiempo UTC de desconexión (nula mientras siga activo). |
-| `initialOdometerKm`| `int` | Privado | Kilometraje del vehículo al momento de la instalación ($\ge 0$). |
-| `finalOdometerKm` | `Optional<Integer>` | Privado | Kilometraje verificado al momento del retiro ($\ge initialOdometerKm$). |
-| `install` | `static DeviceInstallation install(...)` | Público | Factoría que vincula el hardware y emite `DeviceInstalledOnVehicleEvent`. |
-| `uninstall` | `void uninstall(int finalKm, ...)`| Público | Concluye la sesión telemática y emite `DeviceUninstalledFromVehicleEvent`. |
-| `isActive` | `boolean isActive()` | Público | Determina si la sesión de telemetría continúa transmitiendo activamente. |
-: Miembros de la Raíz de Agregado DeviceInstallation {#tbl:iot-installation-members}
+- **TelemetryRecord:** Agregado inmutable de serie temporal que modela una lectura instantánea capturada por los sensores vehiculares y almacenada en la hipertabla de TimescaleDB. Contiene magnitudes cinemáticas y termodinámicas de la unidad automotriz, incluyendo velocidad, régimen de revoluciones, temperatura de refrigerante, tensión eléctrica y nivel de combustible. Su diseño de solo inserción garantiza inmutabilidad absoluta y máxima velocidad de procesamiento analítico.
 
-*Nota.* Especificación de miembros de DeviceInstallation del paquete com.andeva.atelier.platform.iot.domain.model.aggregates.
+En la @tbl:iot-telemetry-record-members se desglosan los atributos cinemáticos y sensoriales que estructuran el agregado inmutable **TelemetryRecord**.
 
-Respecto a sus relaciones, `DeviceInstallation` hereda de `AbstractDomainAggregateRoot<DeviceInstallation>`, manteniendo asociaciones por clave foránea de dominio con `DeviceId`, `VehicleId` y `TenantId`.
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Miembros del Agregado de Serie Temporal TelemetryRecord} \label{tbl:iot-telemetry-record-members} \\
+\hline
+\thfirst{Elemento o Atributo} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Elemento o Atributo} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endhead
+timestamp & Marca de tiempo UTC de captura sensorial que actúa como clave de partición en TimescaleDB. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{Instant} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+vehicleId & Vehículo emisor que conforma la clave primaria compuesta relacional de la hipertabla. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{VehicleId (UUID)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+tenantId & Taller automotriz desnormalizado para acelerar agregaciones analíticas multi-inquilino. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{TenantId (UUID)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+location & Coordenadas geodésicas GPS emitidas por el gateway móvil o módem celular con enlace satelital. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{Optional<GeoCoordinates>} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+speed & Velocidad instantánea en kilómetros por hora leída desde la unidad de control del motor. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{VehicleSpeed} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+engineTemperature & Temperatura del refrigerante de motor en grados Celsius restringida a rangos termodinámicos plausibles. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{EngineTemperature} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+engineRpm & Revoluciones por minuto del cigüeñal con validación física entre cero y doce mil revoluciones. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{EngineRpm} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+fuelLevel & Porcentaje de combustible remanente en el tanque con escala porcentual de cero a cien. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{Optional<FuelLevel>} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+batteryVoltage & Tensión eléctrica del sistema de carga en voltios leída en terminales de batería o alternador. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{Optional<BatteryVoltage>} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\thfirst{Método u Operación} & \thcell{Comportamiento y Reglas de Dominio} \\*
+\hline
+of & Factoría inmutable que valida rangos físicos antes de admitir la inserción masiva en hipertablas. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{static TelemetryRecord of(...)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Especificación de miembros de TelemetryRecord del paquete com.andeva.atelier.platform.iot.domain.model.aggregates.
 
-3. `TelemetryRecord`: Modela una lectura instantánea e inmutable de parámetros de sensores del automóvil persistida en la hipertabla particionada de TimescaleDB. Contiene atributos clave como `timestamp`, `vehicleId`, `tenantId`, `location: Optional<GeoCoordinates>`, `speed: VehicleSpeed`, `engineTemperature: EngineTemperature`, `engineRpm: EngineRpm`, `fuelLevel: Optional<FuelLevel>` y `batteryVoltage: Optional<BatteryVoltage>`. Carece deliberadamente de estado mutable y de lógica de borrado; su integridad física se fundamenta en su inserción secuencial y agregación estadística por cubos de tiempo (*time_buckets*).
+- **VehicleFault:** Raíz de agregado que representa un código de diagnóstico de avería emitido por la computadora de a bordo y detectado por el escáner. Almacena el código alfanumérico estandarizado, el nivel de severidad asignado, la descripción del subsistema comprometido y el estado de reparación en foso. Preserva el expediente técnico y patológico del vehículo para su consulta en intervenciones futuras.
 
-4. `VehicleFault`: Representa un código de error de diagnóstico (**DTC**) emitido formalmente por la unidad de control del motor (ECU) o computadora de transmisión del automóvil. Almacena el código estandarizado (`dtcCode: DtcCode`), el nivel de severidad asignado (`severity: FaultSeverity`), la glosa técnica oficial que identifica el subsistema comprometido (`description`), la marca temporal de detección (`detectedAt`) y el estado de reparación en taller (`isResolved: boolean`). Permite trazar el historial patológico del automóvil a lo largo de su vida útil.
+- **PredictiveAlert:** Raíz de agregado que materializa una advertencia preventiva de avería inminente generada por el motor analítico. Asocia la amenaza detectada con un servicio del catálogo maestro de operaciones de taller, calculando la certeza probabilística del fallo y gestionando el ciclo de vida de la alerta desde su despacho por notificación push hasta su resolución o descarte en el taller.
 
-5. `PredictiveAlert`: Raíz de agregado que materializa una recomendación de intervención mecánica preventiva formulada por el motor de inferencia. En la @tbl:iot-alert-members se detallan los elementos que estructuran esta raíz de agregado.
+- **DtcCatalogEntry:** Entidad dependiente que representa el catálogo maestro internacional de códigos de avería automotriz regulado por las normas SAE J2012 e ISO 15031. Permite que el sistema traduzca códigos alfanuméricos en definiciones comprensibles y determine su severidad reglamentaria.
 
-| Elemento | Tipo o Firma | Ámbito | Descripción y Reglas de Negocio |
-| :--- | :--- | :---: | :--- |
-| `id` | `AlertId` | Privado | Identificador universal único de la alerta generada. |
-| `vehicleId` | `VehicleId` | Privado | Automóvil en riesgo inminente de avería. |
-| `tenantId` | `TenantId` | Privado | Taller automotriz que asiste la unidad. |
-| `recommendedServiceId`| `Optional<ServiceId>`| Privado | Servicio preventivo sugerido del catálogo de MRO para solucionar la causa raíz. |
-| `alertType` | `AlertType` | Privado | Clasificación del riesgo (`ENGINE_OVERHEATING_RISK`, `BATTERY_FAILURE_RISK`, etc.). |
-| `confidenceScore` | `ConfidenceScore` | Privado | Probabilidad porcentual matemática calculada por el motor algorítmico. |
-| `message` | `String` | Privado | Glosa redactada en lenguaje comprensible y no técnico orientada al conductor. |
-| `status` | `AlertStatus` | Privado | Estado operativo de la notificación (`DISPATCHED`, `ACKNOWLEDGED`, `RESOLVED`). |
-| `fcmMessageId` | `Optional<String>` | Privado | Identificador de entrega devuelto por la API de Firebase Cloud Messaging. |
-| `createdAt` | `Instant` | Privado | Marca de tiempo UTC en que se detectó la anomalía y formuló la alerta. |
-| `generate` | `static PredictiveAlert generate(...)` | Público | Factoría de dominio que asienta la alerta y emite `PredictiveAlertDispatchedEvent`. |
-| `markDispatched` | `void markDispatched(String fcmId)` | Público | Registra el identificador de entrega push tras su envío por FCM. |
-| `acknowledge` | `void acknowledge()` | Público | Registra la confirmación de lectura por parte del conductor en la app móvil. |
-| `resolve` | `void resolve()` | Público | Cierra la alerta tras ejecutarse la reparación correspondiente en el taller. |
-| `dismiss` | `void dismiss()` | Público | Descarta la alerta por considerarse una falsa alarma o descarte del usuario. |
-: Miembros de la Raíz de Agregado PredictiveAlert {#tbl:iot-alert-members}
+En la @tbl:iot-fault-alert-members se describen los miembros, métodos e invariantes que rigen el ciclo de vida de **VehicleFault**, **PredictiveAlert** y la entidad **DtcCatalogEntry**.
 
-*Nota.* Especificación de miembros de PredictiveAlert del paquete com.andeva.atelier.platform.iot.domain.model.aggregates.
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Miembros de VehicleFault, PredictiveAlert y DtcCatalogEntry} \label{tbl:iot-fault-alert-members} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Raíz de Agregado:} VehicleFault} \\*
+\hline
+\thfirst{Elemento o Método} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endfirsthead
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Raíz de Agregado:} VehicleFault (Continuación)} \\*
+\hline
+\thfirst{Elemento o Método} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endhead
+id & Identificador universal único del desperfecto electrónico vehicular (\texttt{FaultId}). \\*
+\hline
+vehicleId \textbar\ tenantId & Identificadores de la unidad automotriz afectada y del taller a cargo del diagnóstico. \\*
+\hline
+dtcCode \textbar\ severity & Código alfanumérico SAE J2012 y severidad asignada (\texttt{LOW}, \texttt{MEDIUM}, \texttt{CRITICAL}). \\*
+\hline
+description \textbar\ detectedAt & Glosa técnica descriptiva y marca temporal de captura sensorial por el escáner. \\*
+\hline
+isResolved \textbar\ resolvedAt & Bandera que certifica subsanación técnica y fecha de reparación mecánica en foso. \\*
+\hline
+detect & Factoría de dominio que asienta la avería y emite \texttt{VehicleFaultDetectedEvent}. \\*
+\hline
+resolve & Conmuta el estado a subsanado tras la intervención mecánica en el taller. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Raíz de Agregado:} PredictiveAlert} \\*
+\hline
+id & Identificador universal único de la advertencia preventiva formulada (\texttt{AlertId}). \\*
+\hline
+vehicleId \textbar\ tenantId & Identificadores del vehículo en riesgo inminente y del taller responsable de la atención. \\*
+\hline
+recommendedServiceId & Servicio preventivo sugerido del catálogo de MRO para solucionar la causa raíz. \\*
+\hline
+alertType \textbar\ confidenceScore & Tipo de riesgo mecánico y probabilidad porcentual estimada por el motor algorítmico. \\*
+\hline
+message \textbar\ status & Advertencia en lenguaje comprensible y estado (\texttt{DISPATCHED}, \texttt{ACKNOWLEDGED}, \texttt{RESOLVED}). \\*
+\hline
+fcmMessageId & Identificador de entrega push retornado por Firebase Cloud Messaging. \\*
+\hline
+generate & Factoría de dominio que inicializa la alerta y emite \texttt{PredictiveAlertDispatchedEvent}. \\*
+\hline
+markDispatched \textbar\ acknowledge & Registra el identificador de despacho FCM y asienta la lectura por parte del conductor. \\*
+\hline
+resolve \textbar\ dismiss & Cierra la alerta tras la reparación en taller o la descarta por decisión de usuario. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad Dependiente:} DtcCatalogEntry} \\*
+\hline
+code \textbar\ category & Código SAE J2012 y categoría funcional (\texttt{POWERTRAIN\_P}, \texttt{CHASSIS\_C}, \texttt{BODY\_B}, \texttt{NETWORK\_U}). \\*
+\hline
+standardDescription & Glosa canónica oficial estandarizada que define la anomalía técnica detectada. \\*
+\hline
+defaultSeverity & Gravedad predeterminada por la taxonomía internacional para enriquecer alertas. \\*
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Especificación de componentes de diagnóstico y mantenimiento predictivo en com.andeva.atelier.platform.iot.domain.
 
-En cuanto a sus relaciones, `PredictiveAlert` hereda de `AbstractDomainAggregateRoot<PredictiveAlert>` y mantiene referencias por identificador con `VehicleId`, `TenantId` y de forma opcional con `ServiceId` del catálogo de servicios de MRO.
+**Objetos de Valor y Enumeraciones de IoT Telemetry**
 
-**Objetos de Valor de IoT Telemetry & Predictive Maintenance**
+La consistencia y tipado estricto del dominio se garantizan mediante objetos de valor inmutables implementados como registros de Java. Cada registro encapsula validaciones sintácticas en su constructor compacto para erradicar el antipatrón de obsesión por tipos primitivos, asegurando que magnitudes físicas como temperatura, velocidad, revoluciones o coordenadas geodésicas se mantengan dentro de rangos mecánicamente admisibles.
 
-En la @tbl:iot-value-objects se especifican los objetos de valor inmutables y las reglas de validación física que aseguran la consistencia de los datos telemáticos.
+En la @tbl:iot-value-objects se detallan los objetos de valor inmutables y los tipos enumerados que salvaguardan la integridad de los datos telemáticos.
 
-| Objeto de Valor | Atributos Clave | Restricciones de Validación y Reglas de Negocio |
-| :--- | :--- | :--- |
-| `DeviceIdentifier` | `value`: `String` | Expresión regular para MAC (`^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$`) o IMEI (`^[0-9]{15}$`). |
-| `DtcCode` | `value`: `String` | Patrón SAE J2012 `^[P|C|B|U][0-9]{4}$`. Prefijo: `P` (tren motriz), `C` (chasis), `B` (carrocería), `U` (red). |
-| `ConfidenceScore` | `value`: `BigDecimal` | Rango de certeza probabilística: $0.00 \le value \le 100.00$, formateado a dos decimales. |
-| `EngineTemperature`| `celsius`: `double` | Rango admisible: $-40.0^\circ\text{C} \le celsius \le 200.0^\circ\text{C}$. Método `isCriticalOverheating()` si $> 105.0^\circ\text{C}$. |
-| `EngineRpm` | `rpm`: `int` | Rango de giro: $0 \le rpm \le 12000$. Método `isExcessiveRpm()` si $rpm > 6000$. |
-| `VehicleSpeed` | `kmh`: `int` | Velocidad de avance: $0 \le kmh \le 350$. |
-| `BatteryVoltage` | `volts`: `double` | Tensión de circuito: $0.0\text{V} \le volts \le 30.0\text{V}$. Método `isLowBattery()` si $volts < 11.8\text{V}$. |
-: Objetos de Valor del Bounded Context IoT Telemetry & Predictive Maintenance {#tbl:iot-value-objects}
-
-*Nota.* Especificación de Objetos de Valor del paquete com.andeva.atelier.platform.iot.domain.model.valueobjects.
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Objetos de Valor y Enumeraciones de IoT Telemetry \& Predictive Maintenance} \label{tbl:iot-value-objects} \\
+\hline
+\thfirst{Objeto o Enumeración} & \thcell{Estructura y Reglas de Invariante de Dominio} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Objeto o Enumeración} & \thcell{Estructura y Reglas de Invariante de Dominio} \\
+\hline
+\endhead
+DeviceId & Registro inmutable para el identificador único del hardware (\texttt{record DeviceId(UUID value)}). \\*
+\hline
+InstallationId & Registro inmutable para la sesión de vinculación vehicular (\texttt{record InstallationId(UUID value)}). \\*
+\hline
+FaultId & Registro inmutable para el reporte de avería diagnosticada (\texttt{record FaultId(UUID value)}). \\*
+\hline
+AlertId & Registro inmutable para la advertencia predictiva (\texttt{record AlertId(UUID value)}). \\*
+\hline
+DeviceIdentifier & Valida dirección MAC de seis pares hexadecimales o identificador IMEI de quince dígitos numéricos. \\*
+\hline
+DtcCode & Valida formato alfanumérico SAE J2012 con letra inicial P, C, B o U seguida de cuatro dígitos numéricos. \\*
+\hline
+ConfidenceScore & Probabilidad matemática de fallo inminente expresada como decimal entre cero y cien por ciento. \\*
+\hline
+EngineTemperature & Temperatura del refrigerante en Celsius. Define método \textit{isCriticalOverheating()} para valores mayores a 105.0°C. \\*
+\hline
+EngineRpm & Revoluciones por minuto del motor. Define método \textit{isExcessiveRpm()} para valores superiores a 6000 RPM. \\*
+\hline
+VehicleSpeed & Velocidad instantánea en kilómetros por hora validada en rango no negativo de cero a trescientos cincuenta. \\*
+\hline
+BatteryVoltage & Tensión eléctrica en voltios. Define método \textit{isLowBattery()} para mediciones inferiores a 11.8V en reposo. \\*
+\hline
+FuelLevel & Porcentaje de combustible remanente en el tanque acotado estrictamente entre cero y cien por ciento. \\*
+\hline
+GeoCoordinates & Registro inmutable de coordenadas geodésicas compuesto por latitud y longitud en formato decimal. \\*
+\hline
+ConnectionType & Enumeración del canal físico de transmisión (\texttt{BLUETOOTH\_BLE}, \texttt{SIM\_CELLULAR}, \texttt{WIFI}). \\*
+\hline
+DeviceStatus & Enumeración de la situación del hardware (\texttt{ACTIVE}, \texttt{INACTIVE}, \texttt{LOST}, \texttt{BROKEN}). \\*
+\hline
+FaultSeverity & Nivel de criticidad asignado al código de avería (\texttt{LOW}, \texttt{MEDIUM}, \texttt{CRITICAL}). \\*
+\hline
+DtcCategory & Categoría funcional del subsistema (\texttt{POWERTRAIN\_P}, \texttt{CHASSIS\_C}, \texttt{BODY\_B}, \texttt{NETWORK\_U}). \\*
+\hline
+AlertType & Clasificación analítica de la amenaza mecánica formulada por el motor predictivo. \\*
+\hline
+AlertStatus & Estados del ciclo de vida de la alerta (\texttt{DISPATCHED}, \texttt{ACKNOWLEDGED}, \texttt{RESOLVED}, \texttt{DISMISSED}). \\*
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Diccionario de objetos de valor inmutables y tipos enumerados en com.andeva.atelier.platform.iot.domain.model.valueobjects.
 
 **Servicios de Dominio de IoT Telemetry & Predictive Maintenance**
 
-1. `PredictiveAnomalyDetectionEngine`: Motor analítico de inferencia en tiempo real que examina cada lote de lecturas de telemetría ingestadas. Evalúa reglas heurísticas fundamentadas en termodinámica automotriz y degradación de componentes electromecánicos:
-   * **Sobrecalentamiento Crítico de Refrigerante:** Si la temperatura del refrigerante $T$ supera el umbral crítico ($T > 105.0^\circ\text{C}$) mientras el vehículo está en marcha, evalúa el gradiente térmico. Si $T \ge 115.0^\circ\text{C}$, asigna una certidumbre de avería inminente del $98.50\%$; en caso contrario ($105.0^\circ\text{C} < T < 115.0^\circ\text{C}$), asigna un puntaje del $88.00\%$, formulando una alerta de tipo `ENGINE_OVERHEATING_RISK` para evitar el soplado del empaque de culata o la deformación del bloque de motor.
-   * **Degradación Severa de Batería y Sistema de Carga:** Si la tensión eléctrica en reposo $V$ (con velocidad $0\text{ km/h}$) decae por debajo de $11.80\text{ V}$, el motor diagnostica una probabilidad del $91.20\%$ de fallo en el encendido subsecuente, formulando una alerta `BATTERY_FAILURE_RISK`.
-   * **Fallas de Combustión en Cilindros:** Ante la captura de ráfagas de códigos DTC en el rango `P0300` a `P0304` asociados con fluctuaciones erráticas de RPM en ralentí, genera una alerta `CYLINDER_MISFIRE_HAZARD` con $95.00\%$ de confianza por riesgo de contaminación y fundición del convertidor catalítico.
+Aquellas operaciones algorítmicas que involucran transformaciones complejas o evaluación de reglas de negocio multidisciplinarias se delegan en servicios de dominio puros:
 
-2. `DtcCodeEvaluationService`: Servicio de enriquecimiento taxonómico de fallas vehiculares. Clasifica los códigos leídos según el estándar SAE J2012 / ISO 15031, asociando su categoría funcional (Tren motriz, Chasis, Carrocería o Comunicaciones de Red) con su nivel de gravedad predeterminado y sugiriendo la vinculación automática con los paquetes correctivos del catálogo de MRO.
+- **PredictiveAnomalyDetectionEngine:** Motor analítico de inferencia que evalúa en tiempo real cada registro telemático recién arribado. Aplica heurísticas fundadas en la termodinámica vehicular para advertir sobrecalentamientos de refrigerante superiores a 105.0°C o 115.0°C, caídas de tensión de acumulador por debajo de 11.80V en ralentí y combustiones defectuosas en cilindros asociadas a fluctuaciones erráticas de RPM.
+
+- **DtcCodeEvaluationService:** Servicio taxonómico que interpreta la nomenclatura alfanumérica de códigos de falla según estándares internacionales, clasificando su impacto en tren motriz, chasis, carrocería o redes de comunicación y proponiendo paquetes de servicio correctivo en el taller.
+
+En la @tbl:iot-domain-services se formalizan las responsabilidades algorítmicas y los contratos públicos de los servicios de dominio telemáticos.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Servicios de Dominio de IoT Telemetry \& Predictive Maintenance} \label{tbl:iot-domain-services} \\
+\hline
+\thfirst{Servicio de Dominio} & \thcell{Responsabilidad y Lógica Algorítmica} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Servicio de Dominio} & \thcell{Responsabilidad y Lógica Algorítmica} \\
+\hline
+\endhead
+PredictiveAnomaly\allowbreak DetectionEngine & Motor analítico de inferencia en tiempo real que evalúa las lecturas de telemetría recién ingestadas. \newline
+- Sobrecalentamiento crítico de refrigerante: temperatura superior a 105.0°C genera alerta con 88.00\% de certeza, incrementándose a 98.50\% si supera 115.0°C para mitigar deformación del bloque de motor. \newline
+- Degradación severa de acumulador: voltaje inferior a 11.80V con vehículo en reposo genera alerta con 91.20\% de certeza ante riesgo inminente de arranque fallido. \newline
+- Combustión anómala de cilindros: presencia de códigos en rango P0300 a P0304 junto a fluctuaciones de RPM genera alerta con 95.00\% de certeza para prevenir fundición de catalizador. \\*
+\hline
+\textbf{Métodos Clave} & \texttt{Optional<AnomalyEvaluationResult> evaluateTelemetryRecord(TelemetryRecord record)} \\*
+\hline
+\textbf{Paquete} & \texttt{...iot.domain.services} \\
+\hline
+DtcCodeEvaluation\allowbreak Service & Servicio de enriquecimiento taxonómico de códigos de diagnóstico conforme a SAE J2012 e ISO 15031. \newline
+- Extrae la letra inicial del código alfanumérico para determinar la categoría funcional del subsistema automotriz afectado. \newline
+- Asigna la severidad reglamentaria predeterminada evaluando si el código compromete la seguridad de marcha, emisiones o confort. \newline
+- Sugiere el enlace paramétrico hacia paquetes de mantenimiento preventivo y correctivo del catálogo maestro de MRO. \\*
+\hline
+\textbf{Métodos Clave} & \texttt{DtcEvaluationResult evaluateDtcCode(DtcCode dtcCode)} \\*
+\hline
+\textbf{Paquete} & \texttt{...iot.domain.services} \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Especificación de servicios de dominio analíticos del paquete com.andeva.atelier.platform.iot.domain.services.
 
 **Puertos de Repositorio de la Capa de Dominio**
 
-En la @tbl:iot-repository-ports se definen las interfaces de salida que gobiernan el acceso a los datos de telemetría y diagnóstico.
+El aislamiento de la lógica de negocio frente a los motores de almacenamiento se consolida mediante interfaces de repositorio que definen operaciones atómicas de consulta e inserción por lotes.
 
-| Puerto de Repositorio | Métodos Principales | Responsabilidad de Dominio |
-| :--- | :--- | :--- |
-| `Obd2DeviceRepository` | `save`, `findById`, `findByIdentifier`, `findAllByTenantId` | Persistencia y gestión del catálogo de hardware telemático. |
-| `DeviceInstallationRepository` | `save`, `findById`, `findActiveByVehicleId`, `findActiveByDeviceId` | Trazabilidad de sesiones de montaje y acople de escáneres en autos. |
-| `TelemetryLogRepository` | `saveAllBatch`, `findLatestByVehicleId`, `findHistoryAggregated` | Inserción JDBC de alta velocidad y agregación temporal en TimescaleDB. |
-| `VehicleFaultRepository` | `save`, `findById`, `findActiveByVehicleId`, `findAllByVehicleId` | Almacenamiento histórico de códigos de error y diagnósticos técnicos. |
-| `PredictiveAlertRepository` | `save`, `findById`, `findAllByVehicleId`, `findAllByTenantIdAndStatus`| Gestión del ciclo de vida y despacho de alertas predictivas de avería. |
-: Puertos de Repositorio del Bounded Context IoT Telemetry & Predictive Maintenance {#tbl:iot-repository-ports}
+En la @tbl:iot-repository-ports se detallan los contratos de persistencia del dominio y sus métodos de acceso especializados.
 
-*Nota.* Interfaces de salida del paquete com.andeva.atelier.platform.iot.domain.repositories.
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Puertos de Repositorio de la Capa de Dominio de IoT Telemetry} \label{tbl:iot-repository-ports} \\
+\hline
+\thfirst{Puerto de Repositorio} & \thcell{Operaciones y Responsabilidad de Dominio} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Puerto de Repositorio} & \thcell{Operaciones y Responsabilidad de Dominio} \\
+\hline
+\endhead
+Obd2DeviceRepository & Contrato de persistencia para el inventario de escáneres OBD-II y verificación de identificadores. \newline
+\textit{save(Obd2Device device): Obd2Device} \newline
+\textit{findById(DeviceId id): Optional<Obd2Device>} \newline
+\textit{findByIdentifier(DeviceIdentifier id): Optional<Obd2Device>} \newline
+\textit{findAllByTenantId(TenantId tenantId): List<Obd2Device>} \newline
+\textit{existsByIdentifier(DeviceIdentifier id): boolean} \\*
+\hline
+\textbf{Paquete} & \texttt{...iot.domain.repositories} \\
+\hline
+DeviceInstallation\allowbreak Repository & Contrato para auditar las sesiones de montaje físico y vigencia temporal de escáneres. \newline
+\textit{save(DeviceInstallation inst): DeviceInstallation} \newline
+\textit{findById(InstallationId id): Optional<DeviceInstallation>} \newline
+\textit{findActiveByVehicleId(VehicleId id): Optional<DeviceInstallation>} \newline
+\textit{findActiveByDeviceId(DeviceId id): Optional<DeviceInstallation>} \newline
+\textit{findAllHistoryByVehicleId(VehicleId id): List<DeviceInstallation>} \\*
+\hline
+\textbf{Paquete} & \texttt{...iot.domain.repositories} \\
+\hline
+TelemetryLogRepository & Contrato de persistencia de alto rendimiento para inserción por lotes y agregación en TimescaleDB. \newline
+\textit{saveAllBatch(List<TelemetryRecord> records): void} \newline
+\textit{findLatestByVehicleId(VehicleId id): Optional<TelemetryRecord>} \newline
+\textit{findHistoryAggregated(VehicleId id, Instant from, Instant to, String bucket): List<TelemetryRecord>} \\*
+\hline
+\textbf{Paquete} & \texttt{...iot.domain.repositories} \\
+\hline
+VehicleFaultRepository & Contrato para gestionar el registro histórico y estado de códigos de avería por vehículo. \newline
+\textit{save(VehicleFault fault): VehicleFault} \newline
+\textit{findById(FaultId id): Optional<VehicleFault>} \newline
+\textit{findActiveByVehicleId(VehicleId id): List<VehicleFault>} \newline
+\textit{findAllByVehicleId(VehicleId id): List<VehicleFault>} \\*
+\hline
+\textbf{Paquete} & \texttt{...iot.domain.repositories} \\
+\hline
+PredictiveAlert\allowbreak Repository & Contrato para almacenar y monitorear las alertas predictivas formuladas para conductores y talleres. \newline
+\textit{save(PredictiveAlert alert): PredictiveAlert} \newline
+\textit{findById(AlertId id): Optional<PredictiveAlert>} \newline
+\textit{findAllByVehicleId(VehicleId id): List<PredictiveAlert>} \newline
+\textit{findAllByTenantIdAndStatus(TenantId id, AlertStatus st): List<PredictiveAlert>} \\*
+\hline
+\textbf{Paquete} & \texttt{...iot.domain.repositories} \\
+\hline
+DtcCatalogRepository & Contrato de consulta sobre el catálogo maestro internacional de fallas SAE J2012 e ISO 15031. \newline
+\textit{findByCode(DtcCode code): Optional<DtcCatalogEntry>} \newline
+\textit{findAllByCategory(DtcCategory category): List<DtcCatalogEntry>} \\*
+\hline
+\textbf{Paquete} & \texttt{...iot.domain.repositories} \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Interfaces de repositorios del dominio en el paquete com.andeva.atelier.platform.iot.domain.repositories.
 
-**Eventos de Dominio y Manejo de Errores Semánticos**
+**Taxonomía de Eventos de Dominio de IoT Telemetry**
 
-El subsistema de telemetría orquesta su comportamiento asíncrono a través de eventos de dominio especializados:
-* `Obd2DeviceRegisteredEvent`: Notifica la incorporación de un nuevo dispositivo al stock del taller.
-* `DeviceInstalledOnVehicleEvent`: Inicia formalmente el monitoreo proactivo del automóvil en la aplicación del conductor.
-* `DeviceUninstalledFromVehicleEvent`: Concluye el período de servicio telemático y actualiza el odómetro final del vehículo en CRM.
-* `TelemetryBatchIngestedEvent`: Notifica a los motores de suscripción y cuotas la actividad periódica del vehículo.
-* `CriticalEngineAnomalyDetectedEvent`: Desencadena de forma inmediata la formulación de la alerta predictiva y el aviso al asesor del taller.
-* `PredictiveAlertDispatchedEvent`: Comunica al gateway de Firebase la necesidad de emitir la notificación push a los smartphones vinculados.
+La comunicación asíncrona y la propagación de cambios de estado hacia otros límites del sistema se orquestan mediante eventos de dominio inmutables. Estos eventos informan el alta de hardware, el inicio de sesiones de monitoreo, la inserción masiva de lecturas y la formulación de alertas predictivas.
 
-Los errores semánticos y anomalías en las tramas telemáticas son gestionados mediante el tipo `Result<T, ApplicationError>` y excepciones tipadas (`DeviceAlreadyAssignedException`, `InvalidDtcCodeException`, `DeviceNotFoundException`, `TelemetryIngestionException`).
+En la @tbl:iot-domain-events se sintetiza la taxonomía de eventos de dominio generados en el subsistema de telemetría y mantenimiento predictivo.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Taxonomía de Eventos de Dominio de IoT Telemetry \& Predictive Maintenance} \label{tbl:iot-domain-events} \\
+\hline
+\thfirst{Evento de Dominio} & \thcell{Causa de Emisión y Carga Útil del Contrato} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Evento de Dominio} & \thcell{Causa de Emisión y Carga Útil del Contrato} \\
+\hline
+\endhead
+Obd2DeviceRegistered\allowbreak Event & Emitido al incorporar y catalogar un nuevo hardware en el inventario del taller automotriz. \newline
+\textbf{Carga útil:} DeviceId deviceId, TenantId tenantId, DeviceIdentifier identifier, Instant occurredOn. \\*
+\hline
+DeviceInstalledOn\allowbreak VehicleEvent & Emitido al acoplar un escáner en el puerto OBD-II del vehículo iniciando el monitoreo continuo. \newline
+\textbf{Carga útil:} InstallationId installationId, DeviceId deviceId, VehicleId vehicleId, Instant timestamp. \\*
+\hline
+DeviceUninstalledFrom\allowbreak VehicleEvent & Emitido al desconectar el hardware en foso asentando el odómetro final para su sincronización con CRM. \newline
+\textbf{Carga útil:} InstallationId installationId, VehicleId vehicleId, int finalOdometerKm, Instant timestamp. \\*
+\hline
+TelemetryBatchIngested\allowbreak Event & Emitido tras insertar exitosamente una ráfaga masiva de lecturas temporales en TimescaleDB. \newline
+\textbf{Carga útil:} VehicleId vehicleId, TenantId tenantId, int recordsCount, Instant latestTimestamp. \\*
+\hline
+CriticalEngineAnomaly\allowbreak DetectedEvent & Emitido por el motor de inferencia cuando los sensores rebasan umbrales termodinámicos de peligro. \newline
+\textbf{Carga útil:} VehicleId vehicleId, TenantId tenantId, AlertType type, ConfidenceScore score, String message. \\*
+\hline
+VehicleFaultDetected\allowbreak Event & Emitido al capturar un código de avería DTC emitido por la computadora de a bordo del automóvil. \newline
+\textbf{Carga útil:} FaultId faultId, VehicleId vehicleId, TenantId tenantId, DtcCode dtcCode, FaultSeverity severity. \\*
+\hline
+PredictiveAlert\allowbreak DispatchedEvent & Emitido al despachar la notificación push a las aplicaciones móviles mediante Firebase Cloud Messaging. \newline
+\textbf{Carga útil:} AlertId alertId, VehicleId vehicleId, TenantId tenantId, String fcmMessageId, Instant dispatchedAt. \\*
+\hline
+PredictiveAlert\allowbreak AcknowledgedEvent & Emitido cuando el conductor o el asesor de servicio confirma la lectura de la alerta predictiva. \newline
+\textbf{Carga útil:} AlertId alertId, VehicleId vehicleId, Instant acknowledgedAt. \\*
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Taxonomía de eventos de dominio inmutables del paquete com.andeva.atelier.platform.iot.domain.events.
+
+**Excepciones de Dominio y Manejo de Errores Semánticos**
+
+Las transgresiones a las invariantes de negocio y anomalías en las tramas sensoriales se gestionan mediante excepciones semánticas no comprobadas derivadas de **IoTDomainException**. Cada excepción porta un código de error normalizado bajo la norma RFC 7807 que permite proyectar fallos claros hacia las interfaces de usuario.
+
+En la @tbl:iot-domain-exceptions se catalogan las excepciones semánticas del dominio y sus condiciones de activación en el sistema.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.8cm} | >{\raggedright\arraybackslash}p{9.6cm} |}
+\caption{Excepciones de Dominio y Códigos Semánticos de IoT Telemetry} \label{tbl:iot-domain-exceptions} \\
+\hline
+\thfirst{Código de Error Semántico} & \thcell{Condición de Lanzamiento en el Modelo} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Código de Error Semántico} & \thcell{Condición de Lanzamiento en el Modelo} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} DeviceAlreadyAssignedException} \\*
+\hline
+\texttt{ERR\_DEVICE\_ALREADY\_ASSIGNED} & El escáner OBD-II ya cuenta con una instalación activa en otra unidad sin concluir previamente. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} ActiveInstallationConflictException} \\*
+\hline
+\texttt{ERR\_ACTIVE\_INSTALLATION\_CONFLICT} & El vehículo ya tiene asignado otro escáner físico transmitiendo telemetría en paralelo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} DeviceNotFoundException} \\*
+\hline
+\texttt{ERR\_DEVICE\_NOT\_FOUND} & No se localiza el escáner en el inventario mediante el identificador suministrado. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} InstallationNotFoundException} \\*
+\hline
+\texttt{ERR\_INSTALLATION\_NOT\_FOUND} & La sesión de montaje telemático consultada no existe en el registro del taller. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} InvalidDeviceIdentifierException} \\*
+\hline
+\texttt{ERR\_INVALID\_DEVICE\_IDENTIFIER} & La dirección física incumple el formato estricto de MAC Address o código IMEI celular. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} InvalidDtcCodeException} \\*
+\hline
+\texttt{ERR\_INVALID\_DTC\_CODE} & El código alfanumérico transgrede la nomenclatura formal de la norma SAE J2012. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} TelemetryIngestionException} \\*
+\hline
+\texttt{ERR\_TELEMETRY\_INGESTION\_FAILED} & Las lecturas sensoriales contienen magnitudes incompatibles con las leyes físicas del automotor. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} AlertNotFoundException} \\*
+\hline
+\texttt{ERR\_ALERT\_NOT\_FOUND} & No se localiza la alerta predictiva consultada para su confirmación o resolución en taller. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} UnsupportedPidException} \\*
+\hline
+\texttt{ERR\_UNSUPPORTED\_PID} & La trama recibida contiene identificadores de parámetros no admitidos por el decodificador telemático. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Jerarquía de excepciones semánticas no comprobadas del paquete com.andeva.atelier.platform.iot.domain.exceptions.
+
+A partir de la formalización táctica de IoT Telemetry \& Predictive Maintenance, se identifican tres fundamentos de ingeniería de software que consolidan la robustez del subsistema de diagnóstico automotriz:
+
+- **Aislamiento Físico y Desacoplamiento de Cargas de Series Temporales:**
+  El diseño separa tajantemente el almacenamiento de telemetría de alta frecuencia respecto a las tablas transaccionales del ERP del taller. Al confinar las millones de lecturas sensoriales de motor en hipertablas particionadas por tiempo en TimescaleDB, la solución neutraliza cualquier riesgo de saturación de memoria, contención de bloqueos relacionales o degradación en el rendimiento de órdenes de trabajo y facturación.
+
+- **Resiliencia de Conectividad en el Borde mediante Almacenamiento Intermedio Local:**
+  La arquitectura reconoce la volatilidad de cobertura en carreteras y fosos mecánicos. Al equipar las aplicaciones móviles con capacidades de pasarela Bluetooth y persistencia local en Room SQLite, el sistema recolecta datos de forma ininterrumpida sin requerir conexión a internet perpetua, consolidando ráfagas masivas hacia el servidor central en cuanto se restablece el enlace de datos.
+
+- **Sinergia Comercial Ética y Transformación Predictiva del Mantenimiento:**
+  La articulación entre el motor analítico de anomalías, el catálogo de servicios de mantenimiento y la pasarela de notificaciones push de Firebase redefine el modelo operativo del taller mecánico. La detección matemática anticipada de fallas críticas evita averías catastróficas al propietario del vehículo y proporciona al taller un canal proactivo y justificado de venta cruzada preventiva con cotizaciones preconcebidas.
 
 
 
 #### 2.6.9.2. Interface Layer
 
+La Capa de Interfaz del Bounded Context IoT Telemetry & Predictive Maintenance opera como el adaptador primario perimetral bajo el paquete canónico **com.andeva.atelier.platform.iot.interfaces**. Su responsabilidad consiste en gobernar el flujo de comunicación proveniente de módems telemáticos vehiculares, teléfonos móviles de conductores y mecánicos en calidad de pasarelas Bluetooth, y estaciones web de taller, traduciendo tramas binarias u objetos JSON en comandos y consultas de aplicación con estricto aislamiento respecto a la persistencia interna.
+
+Al ubicarse en la frontera perimetral del ecosistema telemático vehicular, los componentes tácticos de esta capa responden a cuatro principios arquitectónicos fundamentales:
+
+- **Desacoplamiento perimetral y semántica RESTful orientada a recursos:** Exposición de servicios sustentada en sustantivos en plural y rutas superficiales de máximo dos niveles de profundidad, aislando la estructura interna de hipertablas de TimescaleDB y aplicando códigos HTTP semánticos para reflejar fielmente el resultado de cada transacción.
+
+- **Ingestión asíncrona por ráfagas de alto rendimiento:** Recepción de lotes telemáticos masivos con persistencia por bloques y respuesta inmediata con código HTTP 202 Accepted, desacoplando el transporte de enlace de la ejecución del motor analítico de anomalías para sostener picos de tráfico sin degradación.
+
+- **Validación defensiva perimetral fuertemente tipada:** Aplicación sistemática de reglas declarativas de Bean Validation sobre registros inmutables de Java, descartando tramas corruptas, códigos DTC anómalos o rangos físicos inverosímiles antes de que alcancen el modelo de dominio.
+
+- **Fachada de Contexto Abierto con desacoplamiento intermodular:** Exposición controlada de contratos de lectura de telemetría, códigos de avería y cálculo de puntuación de salud mecánica hacia los contextos de CRM y MRO, garantizando interoperabilidad limpia sin dependencias bidireccionales.
+
+En la @tbl:iot-interface-types se expone el catálogo taxonómico consolidado de los componentes tácticos que integran la Capa de Interfaz de IoT Telemetry & Predictive Maintenance, detallando sus categorías, paquetes canónicos y responsabilidades arquitectónicas.
+
+\renewcommand{\arraystretch}{1.25}\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Catálogo Consolidado de la Capa de Interfaz de IoT Telemetry \& Predictive Maintenance} \label{tbl:iot-interface-types} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\
+\hline
+\endhead
+Obd2\allowbreak Devices\allowbreak Controller & Endpoints REST para el registro inventario y fiscalización del estado operativo de escáneres telemáticos del taller. \\*
+\hline
+\textbf{Categoría} & Controlador REST \\*
+\hline
+\textbf{Relaciones} & Invoca Obd2DeviceCommandService y Obd2DeviceQueryService. Utiliza Obd2DeviceResourceAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak controllers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Device\allowbreak Installations\allowbreak Controller & Endpoints REST para orquestar la vinculación física montaje y desmonte de dispositivos OBD-II en vehículos automotrices. \\*
+\hline
+\textbf{Categoría} & Controlador REST \\*
+\hline
+\textbf{Relaciones} & Invoca DeviceInstallationCommandService y DeviceInstallationQueryService. Utiliza DeviceInstallationResourceAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak controllers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Telemetry\allowbreak Ingestion\allowbreak Controller & Punto perimetral de alta frecuencia para ingestión de ráfagas temporales lecturas de tacómetro y métricas analíticas. \\*
+\hline
+\textbf{Categoría} & Controlador REST \\*
+\hline
+\textbf{Relaciones} & Invoca TelemetryIngestionCommandService y TelemetryLogQueryService. Utiliza TelemetryResourceAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak controllers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Vehicle\allowbreak Faults\allowbreak Controller & Endpoints REST para registro consulta diagnóstica y resolución formal de códigos de avería electrónica vehicular DTC. \\*
+\hline
+\textbf{Categoría} & Controlador REST \\*
+\hline
+\textbf{Relaciones} & Invoca VehicleFaultCommandService y VehicleFaultQueryService. Utiliza VehicleFaultResourceAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak controllers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Predictive\allowbreak Alerts\allowbreak Controller & Endpoints REST para gestión de advertencias predictivas confirmación de lectura y descarte justificado de recomendaciones. \\*
+\hline
+\textbf{Categoría} & Controlador REST \\*
+\hline
+\textbf{Relaciones} & Invoca PredictiveAlertCommandService y PredictiveAlertQueryService. Utiliza PredictiveAlertResourceAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak controllers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Vehicle\allowbreak Health\allowbreak Reports\allowbreak Controller & Endpoints REST para generación asistida por inteligencia artificial de diagnósticos globales, consulta y descarga documental PDF. \\*
+\hline
+\textbf{Categoría} & Controlador REST \\*
+\hline
+\textbf{Relaciones} & Invoca VehicleHealthReportCommandService y VehicleHealthReportQueryService. Utiliza VehicleHealthReportResourceAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak controllers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Register\allowbreak Device\allowbreak Request & Carga útil inmutable para dar de alta un nuevo escáner telemático en el inventario del taller mecánico. \\*
+\hline
+\textbf{Categoría} & Recurso DTO (Petición) \\*
+\hline
+\textbf{Relaciones} & Mapeado a RegisterObd2DeviceCommand con validación perimetral de dirección física MAC o código IMEI celular. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Install\allowbreak Device\allowbreak Request & Carga útil inmutable para acoplar un escáner telemático a una unidad automotriz registrando odómetro inicial. \\*
+\hline
+\textbf{Categoría} & Recurso DTO (Petición) \\*
+\hline
+\textbf{Relaciones} & Mapeado a InstallDeviceOnVehicleCommand validando identificadores UUID y lectura kilométrica no negativa. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Uninstall\allowbreak Device\allowbreak Request & Carga útil inmutable para registrar el desmonte físico de un dispositivo con odómetro final e instante de retiro. \\*
+\hline
+\textbf{Categoría} & Recurso DTO (Petición) \\*
+\hline
+\textbf{Relaciones} & Mapeado a UninstallDeviceCommand validando odómetro acumulado superior al inicial. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Telemetry\allowbreak Batch\allowbreak Request & Lote inmutable de hasta cien lecturas cinemáticas y térmicas emitidas por gateways móviles o módems vehiculares. \\*
+\hline
+\textbf{Categoría} & Recurso DTO (Petición) \\*
+\hline
+\textbf{Relaciones} & Mapeado a IngestTelemetryBatchCommand conteniendo una colección validada de TelemetryReadingItemDto. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Register\allowbreak Vehicle\allowbreak Fault\allowbreak Request & Carga útil inmutable para registrar una anomalía electrónica detectada en la computadora vehicular. \\*
+\hline
+\textbf{Categoría} & Recurso DTO (Petición) \\*
+\hline
+\textbf{Relaciones} & Mapeado a RegisterVehicleFaultCommand con validación estricta de formato de código DTC según norma SAE J2012. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Resolve\allowbreak Vehicle\allowbreak Fault\allowbreak Request & Carga útil inmutable para asentar la resolución técnica de una falla con notas de servicio de taller mecánico. \\*
+\hline
+\textbf{Categoría} & Recurso DTO (Petición) \\*
+\hline
+\textbf{Relaciones} & Mapeado a ResolveVehicleFaultCommand con asociación opcional a una orden de trabajo de mantenimiento. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Dismiss\allowbreak Alert\allowbreak Request & Carga útil inmutable para desestimar una alerta predictiva requiriendo justificación técnica obligatoria. \\*
+\hline
+\textbf{Categoría} & Recurso DTO (Petición) \\*
+\hline
+\textbf{Relaciones} & Mapeado a DismissPredictiveAlertCommand auditando el colaborador responsable del descarte. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Generate\allowbreak Health\allowbreak Report\allowbreak Request & Carga útil inmutable para solicitar la generación pericial de un diagnóstico de salud vehicular parametrizando la ventana temporal. \\*
+\hline
+\textbf{Categoría} & Recurso DTO (Petición) \\*
+\hline
+\textbf{Relaciones} & Mapeado a GenerateVehicleHealthReportCommand con validación perimetral de ventana de análisis entre siete y noventa días. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Obd2\allowbreak Device\allowbreak Resource & Representación pública estandarizada de un escáner telemático con especificaciones de enlace y estado. \\*
+\hline
+\textbf{Categoría} & Recurso DTO (Respuesta) \\*
+\hline
+\textbf{Relaciones} & Proyectado desde el agregado Obd2Device por Obd2DeviceResourceAssembler para clientes web y móviles. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Device\allowbreak Installation\allowbreak Resource & Representación pública de una sesión de vinculación entre escáner y vehículo con marcas de odómetro. \\*
+\hline
+\textbf{Categoría} & Recurso DTO (Respuesta) \\*
+\hline
+\textbf{Relaciones} & Proyectado desde el agregado DeviceInstallation por DeviceInstallationResourceAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Telemetry\allowbreak Ingestion\allowbreak Ack\allowbreak Resource & Acuse de recibo perimetral tras la persistencia en lote indicando cantidad procesada y anomalías detectadas. \\*
+\hline
+\textbf{Categoría} & Recurso DTO (Respuesta) \\*
+\hline
+\textbf{Relaciones} & Retornado inmediatamente con código HTTP 202 Accepted hacia gateways vehiculares y móviles. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Vehicle\allowbreak Latest\allowbreak Telemetry\allowbreak Resource & Tacómetro digital en tiempo real con lecturas instantáneas de cinemática motorización y batería. \\*
+\hline
+\textbf{Categoría} & Recurso DTO (Respuesta) \\*
+\hline
+\textbf{Relaciones} & Construido por TelemetryResourceAssembler a partir de la última lectura sensorial registrada. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Telemetry\allowbreak Aggregate\allowbreak Resource & Proyección temporal analítica calculada mediante cubos temporales con promedios y máximos de motor. \\*
+\hline
+\textbf{Categoría} & Recurso DTO (Respuesta) \\*
+\hline
+\textbf{Relaciones} & Construido por TelemetryResourceAssembler desde proyecciones analíticas de TimescaleDB. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Vehicle\allowbreak Fault\allowbreak Resource & Representación de falla electrónica vehicular enriquecida con código severidad y catálogo oficial. \\*
+\hline
+\textbf{Categoría} & Recurso DTO (Respuesta) \\*
+\hline
+\textbf{Relaciones} & Proyectado desde el agregado VehicleFault por VehicleFaultResourceAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Predictive\allowbreak Alert\allowbreak Resource & Representación de recomendación preventiva de taller con índice de confianza y servicio correctivo sugerido. \\*
+\hline
+\textbf{Categoría} & Recurso DTO (Respuesta) \\*
+\hline
+\textbf{Relaciones} & Proyectado desde el agregado PredictiveAlert por PredictiveAlertResourceAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Health\allowbreak Report\allowbreak Created\allowbreak Response & Carga útil de confirmación de reporte generado con resumen ejecutivo, métrica global de salud y enlaces REST de descarga. \\*
+\hline
+\textbf{Categoría} & Recurso DTO (Respuesta) \\*
+\hline
+\textbf{Relaciones} & Proyectado tras la ejecución exitosa de inferencia por VehicleHealthReportResourceAssembler con enlaces al recurso JSON y binario PDF. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Vehicle\allowbreak Health\allowbreak Report\allowbreak Resource & Representación integral del informe de salud mecánica con evaluación de subsistemas, riesgos predictivos y acciones sugeridas. \\*
+\hline
+\textbf{Categoría} & Recurso DTO (Respuesta) \\*
+\hline
+\textbf{Relaciones} & Proyectado desde el modelo analítico consolidado por VehicleHealthReportResourceAssembler para cuadros de mando web y móviles. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+IoT\allowbreak Telemetry\allowbreak Context\allowbreak Facade & Fachada de Contexto Abierto que expone lecturas fallas y puntaje de salud mecánica a otros módulos. \\*
+\hline
+\textbf{Categoría} & Fachada Inbound OHS (ACL) \\*
+\hline
+\textbf{Relaciones} & Consumida en memoria por Customer and Fleet Management y Workshop Operations MRO. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak acl} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+IoT\allowbreak Exception\allowbreak Handler & Controlador de asesoría REST que normaliza excepciones de dominio hacia especificación RFC 7807 Problem Details. \\*
+\hline
+\textbf{Categoría} & Manejador Global de Excepciones \\*
+\hline
+\textbf{Relaciones} & Intercepta excepciones de dominio mapeando códigos semánticos 400, 404, 409 y 422 hacia respuestas JSON estandarizadas. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak exceptions} \\
+\hline
+\end{longtable}
+*Nota.* Catálogo consolidado de componentes de la Capa de Interfaz de IoT Telemetry \& Predictive Maintenance.
+
+Los controladores REST de la capa perimetral delimitan formalmente los puntos de entrada para la gestión de dispositivos, el montaje vehicular, la ingestión de métricas, el diagnóstico electrónico, las alertas preventivas y la evaluación pericial de salud automotriz:
+
+- **Obd2DevicesController**: Provee endpoints administrativos para la catalogación física, auditoría de número de serie o dirección MAC y alternancia de estados de disponibilidad operativa del inventario de escáneres del taller.
+
+- **DeviceInstallationsController**: Orquesta las operaciones de instalación y desinstalación física de escáneres en automóviles, verificando la unicidad de sesiones activas y preservando la trazabilidad de kilometrajes de montaje y desmontaje.
+
+- **TelemetryIngestionController**: Endpoint perimetral de máxima concurrencia optimizado para procesar ráfagas sensoriales emitidas por pasarelas vehiculares, proveyendo lecturas instantáneas para tacómetros digitales y agregaciones analíticas de series temporales.
+
+- **VehicleFaultsController**: Canaliza el reporte de averías electrónicas capturadas desde la unidad de control del motor, facilitando la consulta de anomalías no resueltas y el asentamiento formal de su subsanación en foso.
+
+- **PredictiveAlertsController**: Administra el ciclo de vida de las advertencias comerciales y técnicas generadas por el motor analítico, permitiendo la confirmación de lectura por el personal o su descarte justificado.
+
+- **VehicleHealthReportsController**: Expone puntos de acceso perimetrales para la generación asistida por inteligencia artificial de diagnósticos globales del estado del vehículo, consulta del dictamen pericial más reciente y compilación descargable en documento PDF institucional.
+
+En la @tbl:iot-controllers-and-endpoints se detallan los contratos de comunicación, rutas canónicas, verbos HTTP, códigos de respuesta y restricciones de seguridad de los seis controladores perimetrales.
+
+\renewcommand{\arraystretch}{1.25}\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Controladores REST y Endpoints de Comunicación de IoT Telemetry \& Predictive Maintenance} \label{tbl:iot-controllers-and-endpoints} \\
+\hline
+\thfirst{Recurso de Petición} & \thcell{Código y Respuesta HTTP} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Recurso de Petición} & \thcell{Código y Respuesta HTTP} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Controlador REST:} Obd2\allowbreak Devices\allowbreak Controller} \\*
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak devices}} \\*
+\hline
+\textbf{Petición:} Ninguna o Paginación & \textbf{Respuesta:} 200 OK (\texttt{PagedModel<Obd2\allowbreak Device\allowbreak Resource>}) \\*
+\hline
+\textbf{Seguridad y Rol} & Autenticación Bearer JWT con roles de personal de taller mecánico \\*
+\hline
+\textbf{Responsabilidad} & Recupera el catálogo de escáneres telemáticos registrados y disponibles en el taller autenticado. \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak devices/\allowbreak \{id\}}} \\*
+\hline
+\textbf{Petición:} Path Variable \texttt{id} & \textbf{Respuesta:} 200 OK (\texttt{Obd2\allowbreak Device\allowbreak Resource}) \\*
+\hline
+\textbf{Seguridad y Rol} & Autenticación Bearer JWT con \texttt{ROLE\_WORKSHOP\_ADMIN} o \texttt{ROLE\_WORKSHOP\_TECHNICIAN} \\*
+\hline
+\textbf{Responsabilidad} & Obtiene la especificación detallada de un dispositivo identificador físico protocolo y estado de inventario. \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak devices}} \\*
+\hline
+\textbf{Petición:} \texttt{Register\allowbreak Device\allowbreak Request} & \textbf{Respuesta:} 201 CREATED (\texttt{Obd2\allowbreak Device\allowbreak Resource}) con cabecera \texttt{Location} \\*
+\hline
+\textbf{Seguridad y Rol} & Autenticación Bearer JWT con rol directivo \texttt{ROLE\_WORKSHOP\_ADMIN} \\*
+\hline
+\textbf{Responsabilidad} & Registra un nuevo escáner en el inventario del taller validando la unicidad del identificador físico. \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{PATCH} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak devices/\allowbreak \{id\}/\allowbreak status}} \\*
+\hline
+\textbf{Petición:} \texttt{Update\allowbreak Device\allowbreak Status\allowbreak Request} & \textbf{Respuesta:} 200 OK (\texttt{Obd2\allowbreak Device\allowbreak Resource}) \\*
+\hline
+\textbf{Seguridad y Rol} & Autenticación Bearer JWT con rol directivo \texttt{ROLE\_WORKSHOP\_ADMIN} \\*
+\hline
+\textbf{Responsabilidad} & Actualiza la condición operativa del dispositivo permitiendo marcarlo como activo en mantenimiento o extraviado. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Controlador REST:} Device\allowbreak Installations\allowbreak Controller} \\*
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak installations/\allowbreak install}} \\*
+\hline
+\textbf{Petición:} \texttt{Install\allowbreak Device\allowbreak Request} & \textbf{Respuesta:} 201 CREATED (\texttt{Device\allowbreak Installation\allowbreak Resource}) con cabecera \texttt{Location} \\*
+\hline
+\textbf{Seguridad y Rol} & Autenticación Bearer JWT con \texttt{ROLE\_WORKSHOP\_TECHNICIAN} o \texttt{ROLE\_WORKSHOP\_ADMIN} \\*
+\hline
+\textbf{Responsabilidad} & Asocia físicamente un escáner a un automóvil validando que ni el dispositivo ni el vehículo tengan sesiones activas. \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak installations/\allowbreak \{id\}/\allowbreak uninstall}} \\*
+\hline
+\textbf{Petición:} \texttt{Uninstall\allowbreak Device\allowbreak Request} & \textbf{Respuesta:} 200 OK (\texttt{Device\allowbreak Installation\allowbreak Resource}) \\*
+\hline
+\textbf{Seguridad y Rol} & Autenticación Bearer JWT con \texttt{ROLE\_WORKSHOP\_TECHNICIAN} o \texttt{ROLE\_WORKSHOP\_ADMIN} \\*
+\hline
+\textbf{Responsabilidad} & Registra el retiro físico del escáner asentando kilometraje final e instante formal de conclusión de sesión. \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak installations/\allowbreak vehicle/\allowbreak \{vehicleId\}/\allowbreak active}} \\*
+\hline
+\textbf{Petición:} Path Variable \texttt{vehicleId} & \textbf{Respuesta:} 200 OK (\texttt{Device\allowbreak Installation\allowbreak Resource}) \\*
+\hline
+\textbf{Seguridad y Rol} & Autenticación Bearer JWT con rol de conductor o personal de taller mecánico \\*
+\hline
+\textbf{Responsabilidad} & Consulta el escáner telemático actualmente montado y transmitiendo en la unidad vehicular. \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak installations/\allowbreak vehicle/\allowbreak \{vehicleId\}/\allowbreak history}} \\*
+\hline
+\textbf{Petición:} Path Variable \texttt{vehicleId} & \textbf{Respuesta:} 200 OK (\texttt{List<Device\allowbreak Installation\allowbreak Resource>}) \\*
+\hline
+\textbf{Seguridad y Rol} & Autenticación Bearer JWT con rol técnico de taller mecánico \\*
+\hline
+\textbf{Responsabilidad} & Provee la trazabilidad histórica de dispositivos instalados en el vehículo durante su ciclo de mantenimiento. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Controlador REST:} Telemetry\allowbreak Ingestion\allowbreak Controller} \\*
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak telemetry/\allowbreak batch}} \\*
+\hline
+\textbf{Petición:} \texttt{Telemetry\allowbreak Batch\allowbreak Request} & \textbf{Respuesta:} 202 ACCEPTED (\texttt{Telemetry\allowbreak Ingestion\allowbreak Ack\allowbreak Resource}) \\*
+\hline
+\textbf{Seguridad y Rol} & Token de Dispositivo o Autenticación Bearer JWT de conductor en ruta \\*
+\hline
+\textbf{Responsabilidad} & Ingesta ráfagas de 1 a 100 lecturas temporales persistiendo en TimescaleDB y evaluando anomalías predictivas. \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak telemetry/\allowbreak vehicle/\allowbreak \{vehicleId\}/\allowbreak latest}} \\*
+\hline
+\textbf{Petición:} Path Variable \texttt{vehicleId} & \textbf{Respuesta:} 200 OK (\texttt{Vehicle\allowbreak Latest\allowbreak Telemetry\allowbreak Resource}) \\*
+\hline
+\textbf{Seguridad y Rol} & Autenticación Bearer JWT con rol de conductor o personal de taller \\*
+\hline
+\textbf{Responsabilidad} & Retorna la última instantánea sensorial registrada operando como tacómetro digital en tiempo real. \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak telemetry/\allowbreak vehicle/\allowbreak \{vehicleId\}/\allowbreak history}} \\*
+\hline
+\textbf{Petición:} Parámetros \texttt{from}, \texttt{to}, \texttt{interval} & \textbf{Respuesta:} 200 OK (\texttt{List<Telemetry\allowbreak Aggregate\allowbreak Resource>}) \\*
+\hline
+\textbf{Seguridad y Rol} & Autenticación Bearer JWT con rol técnico o directivo de taller \\*
+\hline
+\textbf{Responsabilidad} & Consulta series temporales agregadas por intervalos mediante funciones nativas de hipertabla de TimescaleDB. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Controlador REST:} Vehicle\allowbreak Faults\allowbreak Controller} \\*
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak faults}} \\*
+\hline
+\textbf{Petición:} \texttt{Register\allowbreak Vehicle\allowbreak Fault\allowbreak Request} & \textbf{Respuesta:} 201 CREATED (\texttt{Vehicle\allowbreak Fault\allowbreak Resource}) \\*
+\hline
+\textbf{Seguridad y Rol} & Token de Dispositivo o Autenticación Bearer JWT técnica \\*
+\hline
+\textbf{Responsabilidad} & Asienta un código de avería electrónica DTC detectado en la ECU del automóvil clasificando su severidad. \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak faults/\allowbreak vehicle/\allowbreak \{vehicleId\}/\allowbreak active}} \\*
+\hline
+\textbf{Petición:} Path Variable \texttt{vehicleId} & \textbf{Respuesta:} 200 OK (\texttt{List<Vehicle\allowbreak Fault\allowbreak Resource>}) \\*
+\hline
+\textbf{Seguridad y Rol} & Autenticación Bearer JWT con rol de conductor o mecánico de taller \\*
+\hline
+\textbf{Responsabilidad} & Lista las anomalías electrónicas no resueltas registradas en la unidad automotriz para diagnóstico en foso. \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{PATCH} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak faults/\allowbreak \{id\}/\allowbreak resolve}} \\*
+\hline
+\textbf{Petición:} \texttt{Resolve\allowbreak Vehicle\allowbreak Fault\allowbreak Request} & \textbf{Respuesta:} 200 OK (\texttt{Vehicle\allowbreak Fault\allowbreak Resource}) \\*
+\hline
+\textbf{Seguridad y Rol} & Autenticación Bearer JWT con rol técnico \texttt{ROLE\_WORKSHOP\_TECHNICIAN} \\*
+\hline
+\textbf{Responsabilidad} & Marca una avería electrónica como resuelta vinculando la orden de trabajo de mantenimiento efectuada. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Controlador REST:} Predictive\allowbreak Alerts\allowbreak Controller} \\*
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak alerts/\allowbreak tenant}} \\*
+\hline
+\textbf{Petición:} Parámetros \texttt{severity}, \texttt{status} & \textbf{Respuesta:} 200 OK (\texttt{List<Predictive\allowbreak Alert\allowbreak Resource>}) \\*
+\hline
+\textbf{Seguridad y Rol} & Autenticación Bearer JWT con \texttt{ROLE\_WORKSHOP\_MANAGER} o \texttt{ROLE\_WORKSHOP\_ADMIN} \\*
+\hline
+\textbf{Responsabilidad} & Despliega el tablero de advertencias predictivas y oportunidades de servicio preventivo del taller mecánico. \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak alerts/\allowbreak vehicle/\allowbreak \{vehicleId\}}} \\*
+\hline
+\textbf{Petición:} Path Variable \texttt{vehicleId} & \textbf{Respuesta:} 200 OK (\texttt{List<Predictive\allowbreak Alert\allowbreak Resource>}) \\*
+\hline
+\textbf{Seguridad y Rol} & Autenticación Bearer JWT con rol de conductor o asesor de taller \\*
+\hline
+\textbf{Responsabilidad} & Recupera el historial de alertas predictivas generadas por el motor analítico para una unidad automotriz. \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{PATCH} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak alerts/\allowbreak \{id\}/\allowbreak acknowledge}} \\*
+\hline
+\textbf{Petición:} Path Variable \texttt{id} & \textbf{Respuesta:} 200 OK (\texttt{Predictive\allowbreak Alert\allowbreak Resource}) \\*
+\hline
+\textbf{Seguridad y Rol} & Autenticación Bearer JWT con rol de personal técnico o asesor \\*
+\hline
+\textbf{Responsabilidad} & Registra el acuse de recibo de la alerta predictiva confirmando que el personal del taller ha tomado conocimiento. \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak alerts/\allowbreak \{id\}/\allowbreak dismiss}} \\*
+\hline
+\textbf{Petición:} \texttt{Dismiss\allowbreak Alert\allowbreak Request} & \textbf{Respuesta:} 200 OK (\texttt{Predictive\allowbreak Alert\allowbreak Resource}) \\*
+\hline
+\textbf{Seguridad y Rol} & Autenticación Bearer JWT con rol directivo \texttt{ROLE\_WORKSHOP\_MANAGER} \\*
+\hline
+\textbf{Responsabilidad} & Desestima una sugerencia de mantenimiento registrando la justificación técnica que sustenta el descarte. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Controlador REST:} Vehicle\allowbreak Health\allowbreak Reports\allowbreak Controller} \\*
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak vehicles/\allowbreak \{vehicleId\}/\allowbreak health-reports/\allowbreak generate}} \\*
+\hline
+\textbf{Petición:} \texttt{Generate\allowbreak Health\allowbreak Report\allowbreak Request}, Path \texttt{vehicleId} & \textbf{Respuesta:} 201 CREATED (\texttt{Health\allowbreak Report\allowbreak Created\allowbreak Response}) con cabecera \texttt{Location} \\*
+\hline
+\textbf{Seguridad y Rol} & Autenticación Bearer JWT con rol técnico, asesor de servicio o administrador de taller \\*
+\hline
+\textbf{Responsabilidad} & Coordina la extracción de telemetría y averías electrónicas, invoca la inferencia de inteligencia artificial estructurada y persiste alertas preventivas de alta certeza. \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak vehicles/\allowbreak \{vehicleId\}/\allowbreak health-reports/\allowbreak generate-async}} \\*
+\hline
+\textbf{Petición:} \texttt{Generate\allowbreak Health\allowbreak Report\allowbreak Request}, Path \texttt{vehicleId} & \textbf{Respuesta:} 202 ACCEPTED (\texttt{Void}) \\*
+\hline
+\textbf{Seguridad y Rol} & Autenticación Bearer JWT con rol directivo de taller o gestor de flota \\*
+\hline
+\textbf{Responsabilidad} & Encola el análisis pericial en segundo plano para evaluación de flotas vehiculares masivas sin bloquear la interfaz de usuario. \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak vehicles/\allowbreak \{vehicleId\}/\allowbreak health-reports/\allowbreak latest}} \\*
+\hline
+\textbf{Petición:} Path Variable \texttt{vehicleId} & \textbf{Respuesta:} 200 OK (\texttt{Vehicle\allowbreak Health\allowbreak Report\allowbreak Resource}) \\*
+\hline
+\textbf{Seguridad y Rol} & Autenticación Bearer JWT con rol técnico, asesor de servicio o conductor \\*
+\hline
+\textbf{Responsabilidad} & Recupera el último dictamen consolidado de salud automotriz con desglose por subsistemas, riesgos mecánicos y acciones de mantenimiento sugeridas. \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak vehicles/\allowbreak \{vehicleId\}/\allowbreak health-reports/\allowbreak \{reportId\}/\allowbreak pdf}} \\*
+\hline
+\textbf{Petición:} Path Variables \texttt{vehicleId}, \texttt{reportId} & \textbf{Respuesta:} 200 OK (\texttt{application/pdf}) con \texttt{Content-Disposition} \\*
+\hline
+\textbf{Seguridad y Rol} & Autenticación Bearer JWT con rol técnico, asesor de servicio o conductor \\*
+\hline
+\textbf{Responsabilidad} & Compila tipográficamente y transmite el informe pericial en formato binario PDF aplicando maquetación institucional con membrete corporativo y semáforos de estado. \\
+\hline
+\end{longtable}
+*Nota.* Especificación formal de controladores REST y endpoints de comunicación del Bounded Context IoT Telemetry \& Predictive Maintenance.
+
+La transferencia de información a través del perímetro del sistema se estructura mediante contratos de datos inmutables modelados como registros de Java:
+
+- **Contratos de Solicitud**: Capturan las intenciones del cliente incorporando validaciones declarativas perimetrales que garantizan la integridad de identificadores físicos, cotas cinemáticas y formatos normalizados de diagnóstico vehicular.
+
+- **Contratos de Respuesta**: Encapsulan proyecciones de información optimizadas para visualización en tableros de control web y cuadros de mando en dispositivos móviles, omitiendo metadatos irrelevantes y calculando agregados analíticos para minimizar el consumo de ancho de banda celular.
+
+En la @tbl:iot-resources-dtos se especifican los atributos estructurales y las reglas de validación declarativa que rigen los recursos DTO de entrada y salida de este contexto.
+
+\renewcommand{\arraystretch}{1.25}\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Recursos DTO de Entrada y Salida del Bounded Context IoT Telemetry \& Predictive Maintenance} \label{tbl:iot-resources-dtos} \\
+\hline
+\thfirst{Aspecto de Recurso} & \thcell{Especificación de Atributos e Integridad} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Recurso} & \thcell{Especificación de Atributos e Integridad} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Register\allowbreak Device\allowbreak Request \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{deviceIdentifier}, \texttt{connectionType}, \texttt{hardwareModel}, \texttt{firmwareVersion} \\*
+\hline
+\textbf{Validación de Integridad} & Anotación \texttt{@NotBlank} para deviceIdentifier con validación de formato MAC Address o IMEI, \texttt{@NotBlank} con patrón \texttt{@Pattern(regexp = "\textasciicircum (BLUETOOTH\_BLE|SIM\_CELLULAR|WIFI)\$")} para connectionType y restricciones de longitud máxima de cien caracteres para modelo y versión. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Install\allowbreak Device\allowbreak Request \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{deviceId}, \texttt{vehicleId}, \texttt{currentOdometerKm} \\*
+\hline
+\textbf{Validación de Integridad} & Identificadores obligatorios \texttt{@NotNull} en formato UUID para dispositivo y vehículo, y lectura de odómetro no negativa validada con \texttt{@Min(0)}. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Uninstall\allowbreak Device\allowbreak Request \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{finalOdometerKm}, \texttt{uninstalledTimestamp} \\*
+\hline
+\textbf{Validación de Integridad} & Odómetro final validado con \texttt{@Min(0)} verificando coherencia de avance respecto a la lectura de inicio, y marca temporal obligatoria \texttt{@NotNull} no posterior al instante de recepción. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Telemetry\allowbreak Batch\allowbreak Request \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{vehicleId}, \texttt{readings} \\*
+\hline
+\textbf{Validación de Integridad} & Identificador vehicular obligatorio \texttt{@NotNull}, y colección no vacía \texttt{@NotEmpty} con límite superior de cien elementos \texttt{@Size(min = 1, max = 100)} validando cada lectura individual en cascada (\texttt{@Valid}). \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Telemetry\allowbreak Reading\allowbreak Item\allowbreak Dto \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{timestamp}, \texttt{latitude}, \texttt{longitude}, \texttt{speedKmh}, \texttt{engineTempCelsius}, \texttt{engineRpm}, \texttt{fuelPercentage}, \texttt{batteryVoltage} \\*
+\hline
+\textbf{Validación de Integridad} & Marca temporal obligatoria \texttt{@NotNull}, velocidad no negativa con cota física \texttt{@Min(0) @Max(350)}, temperatura de motor obligatoria \texttt{@NotNull} entre -40 y 150 grados Celsius, régimen de giro \texttt{@Min(0) @Max(12000)} y niveles porcentuales y de tensión en rangos verosímiles. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Register\allowbreak Vehicle\allowbreak Fault\allowbreak Request \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{vehicleId}, \texttt{dtcCode} \\*
+\hline
+\textbf{Validación de Integridad} & Identificador vehicular obligatorio \texttt{@NotNull}, y código de avería \texttt{@NotBlank} validado mediante expresión regular \texttt{@Pattern(regexp = "\textasciicircum [PCBU][0-9]\{4\}\$")} según la norma internacional SAE J2012. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Resolve\allowbreak Vehicle\allowbreak Fault\allowbreak Request \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{resolutionNotes}, \texttt{workOrderId} \\*
+\hline
+\textbf{Validación de Integridad} & Notas técnicas descriptivas obligatorias \texttt{@NotBlank} con longitud mínima de cinco caracteres y referencia opcional a orden de trabajo en formato UUID. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Dismiss\allowbreak Alert\allowbreak Request \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{dismissalReason} \\*
+\hline
+\textbf{Validación de Integridad} & Justificación de descarte obligatoria \texttt{@NotBlank} con restricción de longitud entre diez y quinientos caracteres \texttt{@Size(min = 10, max = 500)}. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Generate\allowbreak Health\allowbreak Report\allowbreak Request \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{daysToAnalyze}, \texttt{includeResolvedDtcHistory}, \texttt{triggerReason} \\*
+\hline
+\textbf{Validación de Integridad} & Parámetro de días de análisis restringido entre siete y noventa con anotaciones \texttt{@Min(7)} y \texttt{@Max(90)}, indicador booleano de historial y motivo de activación contextual. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Obd2\allowbreak Device\allowbreak Resource \quad (\textit{Categoría:} Respuesta)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{id}, \texttt{tenantId}, \texttt{deviceIdentifier}, \texttt{connectionType}, \texttt{hardwareModel}, \texttt{firmwareVersion}, \texttt{status}, \texttt{registeredAt} \\*
+\hline
+\textbf{Estructura y Serialización} & Encapsula los metadatos completos del hardware telemático denormalizando denominaciones de conectividad y estado para clientes web y móviles. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Device\allowbreak Installation\allowbreak Resource \quad (\textit{Categoría:} Respuesta)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{id}, \texttt{deviceId}, \texttt{vehicleId}, \texttt{installedAt}, \texttt{uninstalledAt}, \texttt{startOdometerKm}, \texttt{endOdometerKm}, \texttt{isActive} \\*
+\hline
+\textbf{Estructura y Serialización} & Proyección inmutable de la sesión de montaje con marcas temporales odómetros y bandera de vigencia para control de flotas. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Telemetry\allowbreak Ingestion\allowbreak Ack\allowbreak Resource \quad (\textit{Categoría:} Respuesta)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{vehicleId}, \texttt{ingestedCount}, \texttt{anomalyDetected}, \texttt{alertMessage}, \texttt{processedAt} \\*
+\hline
+\textbf{Estructura y Serialización} & Confirmación perimetral expedita que notifica la recepción persistente del lote y si se gatillaron alertas preventivas. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Vehicle\allowbreak Latest\allowbreak Telemetry\allowbreak Resource \quad (\textit{Categoría:} Respuesta)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{vehicleId}, \texttt{timestamp}, \texttt{latitude}, \texttt{longitude}, \texttt{speedKmh}, \texttt{engineTempCelsius}, \texttt{engineRpm}, \texttt{batteryVoltage}, \texttt{fuelPercentage} \\*
+\hline
+\textbf{Estructura y Serialización} & Tacómetro digital proyectado para cuadros de instrumentos en tiempo real omitiendo campos nulos y optimizando el ancho de banda móvil. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Telemetry\allowbreak Aggregate\allowbreak Resource \quad (\textit{Categoría:} Respuesta)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{vehicleId}, \texttt{bucketStart}, \texttt{avgSpeedKmh}, \texttt{maxSpeedKmh}, \texttt{avgEngineTempCelsius}, \texttt{maxEngineTempCelsius}, \texttt{avgEngineRpm}, \texttt{samplesCount} \\*
+\hline
+\textbf{Estructura y Serialización} & Agregación estadística computada mediante funciones nativas de TimescaleDB para gráficas históricas de rendimiento y desgaste. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Vehicle\allowbreak Fault\allowbreak Resource \quad (\textit{Categoría:} Respuesta)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{id}, \texttt{vehicleId}, \texttt{dtcCode}, \texttt{severity}, \texttt{description}, \texttt{detectedAt}, \texttt{isResolved}, \texttt{resolvedAt} \\*
+\hline
+\textbf{Estructura y Serialización} & Diagnóstico electrónico enriquecido con catálogo oficial SAE J2012 para orientación mecánica precisa en el taller. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Predictive\allowbreak Alert\allowbreak Resource \quad (\textit{Categoría:} Respuesta)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{id}, \texttt{vehicleId}, \texttt{recommendedServiceId}, \texttt{alertType}, \texttt{confidenceScore}, \texttt{message}, \texttt{status}, \texttt{createdAt} \\*
+\hline
+\textbf{Estructura y Serialización} & Advertencia predictiva con índice de confianza algorítmico y servicio de mantenimiento recomendado para presupuestación proactiva. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Health\allowbreak Report\allowbreak Created\allowbreak Response \quad (\textit{Categoría:} Respuesta)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{reportId}, \texttt{vehicleId}, \texttt{overallHealthScore}, \texttt{executiveSummary}, \texttt{totalRisksDetected}, \texttt{generatedAt}, \texttt{jsonResourceUrl}, \texttt{pdfDownloadUrl} \\*
+\hline
+\textbf{Estructura y Serialización} & Confirmación de dictamen pericial generado con puntuación global de salud, resumen ejecutivo y enlaces canónicos de acceso REST y descarga documental PDF. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Vehicle\allowbreak Health\allowbreak Report\allowbreak Resource \quad (\textit{Categoría:} Respuesta)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{reportId}, \texttt{vehicleId}, \texttt{overallHealthScore}, \texttt{executiveSummary}, \texttt{subsystemEvaluations}, \texttt{predictiveRisks}, \texttt{recommendedActions}, \texttt{dtcCorrelations}, \texttt{generatedAt} \\*
+\hline
+\textbf{Estructura y Serialización} & Representación estructurada completa del informe de salud mecánica para cuadros de mando web y aplicaciones móviles, conteniendo evaluaciones tipadas por subsistema, correlaciones de averías y acciones preventivas. \\
+\hline
+\end{longtable}
+*Nota.* Recursos DTO inmutables de entrada y salida con validación declarativa perimetral del Bounded Context IoT Telemetry \& Predictive Maintenance.
+
+Para asegurar un desacoplamiento riguroso entre las estructuras de transferencia y el modelo táctico de dominio, la capa incorpora ensambladores dedicados de recursos:
+
+- **Obd2DeviceResourceAssembler**: Transforma agregados de hardware hacia recursos de presentación e interpreta peticiones de alta para formular comandos transaccionales inyectando el taller correspondiente.
+
+- **DeviceInstallationResourceAssembler**: Traduce el estado de las sesiones de montaje físico hacia contratos enriquecidos con métricas de kilometraje y gestiona la conversión de comandos de instalación y desinstalación.
+
+- **TelemetryResourceAssembler**: Proyecta registros individuales hacia tacómetros en tiempo real, convierte proyecciones nativas de cubos temporales en agregaciones analíticas y formula comandos de ingestión en lote.
+
+- **VehicleFaultResourceAssembler**: Cruza las fallas registradas con el catálogo estándar de diagnóstico automotriz para entregar recursos comprensibles para los técnicos de taller.
+
+- **PredictiveAlertResourceAssembler**: Modela advertencias algorítmicas en recursos claros con índices de confianza y servicios recomendados para la toma de decisiones preventivas.
+
+- **VehicleHealthReportResourceAssembler**: Transforma los dictámenes periciales generados por el motor de inteligencia artificial hacia contratos de respuesta enriquecidos con enlaces HATEOAS, y mapea peticiones perimetrales en comandos de generación analítica.
+
+En la @tbl:iot-resource-assemblers se describen los ensambladores de recursos REST y los métodos de transformación bidireccional entre la capa perimetral y el dominio.
+
+\renewcommand{\arraystretch}{1.25}\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Ensambladores de Recursos REST de IoT Telemetry \& Predictive Maintenance} \label{tbl:iot-resource-assemblers} \\
+\hline
+\thfirst{Ensamblador y Tipo} & \thcell{Método de Transformación y Flujo de Datos} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Ensamblador y Tipo} & \thcell{Método de Transformación y Flujo de Datos} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador de Recursos:} Obd2\allowbreak Device\allowbreak Resource\allowbreak Assembler} \\*
+\hline
+\textbf{toModel(Obd2Device)} & Transforma el agregado Obd2Device en la representación de salida Obd2DeviceResource. Desempaqueta identificadores tipados y serializa estados operativos para consumo por aplicaciones web y móviles. \\*
+\hline
+\textbf{toCommand(Register\allowbreak Device\allowbreak Request, UUID)} & Convierte la carga útil HTTP en el comando de aplicación RegisterObd2DeviceCommand inyectando el identificador del taller autenticado. \\*
+\hline
+\textbf{Responsabilidad} & Aísla los agregados de hardware de las representaciones de serialización perimetral de inventario técnico. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador de Recursos:} Device\allowbreak Installation\allowbreak Resource\allowbreak Assembler} \\*
+\hline
+\textbf{toModel(Device\allowbreak Installation)} & Mapea la entidad de montaje telemático hacia DeviceInstallationResource proyectando marcas temporales odómetros inicial y final y estado de vigencia. \\*
+\hline
+\textbf{toInstallCommand(Install\allowbreak Device\allowbreak Request)} & Transforma la solicitud HTTP en InstallDeviceOnVehicleCommand extrayendo los identificadores UUID de escáner y vehículo. \\*
+\hline
+\textbf{toUninstallCommand(UUID, Uninstall\allowbreak Device\allowbreak Request)} & Transforma la solicitud perimetral en UninstallDeviceCommand validando la consistencia temporal y kilométrica del desmonte. \\*
+\hline
+\textbf{Responsabilidad} & Gobierna el mapeo bidireccional entre sesiones de instalación en vehículo y contratos de transporte perimetral. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador de Recursos:} Telemetry\allowbreak Resource\allowbreak Assembler} \\*
+\hline
+\textbf{toLatestResource(Telemetry\allowbreak Record)} & Mapea el registro más reciente de la serie temporal hacia VehicleLatestTelemetryResource formateando magnitudes cinemáticas y térmicas para visualización en tacómetro digital. \\*
+\hline
+\textbf{toAggregateResource(Telemetry\allowbreak Bucket\allowbreak Projection)} & Transforma proyecciones nativas de cubos temporales de TimescaleDB hacia instancias de TelemetryAggregateResource para análisis histórico. \\*
+\hline
+\textbf{toBatchCommand(Telemetry\allowbreak Batch\allowbreak Request)} & Mapea el lote de lecturas sensoriales de transferencia hacia el comando IngestTelemetryBatchCommand validando marcas temporales no futuras. \\*
+\hline
+\textbf{Responsabilidad} & Desacopla la estructura física de series temporales de TimescaleDB de los formatos de transporte de baja latencia. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador de Recursos:} Vehicle\allowbreak Fault\allowbreak Resource\allowbreak Assembler} \\*
+\hline
+\textbf{toModel(Vehicle\allowbreak Fault, Dtc\allowbreak Catalog\allowbreak Entry)} & Mapea la entidad VehicleFault fusionándola con la descripción formal del catálogo oficial SAE J2012 para generar VehicleFaultResource. \\*
+\hline
+\textbf{toRegisterCommand(Register\allowbreak Vehicle\allowbreak Fault\allowbreak Request)} & Construye RegisterVehicleFaultCommand a partir de la solicitud perimetral validando el prefijo del sistema automotriz afectado. \\*
+\hline
+\textbf{toResolveCommand(UUID, Resolve\allowbreak Vehicle\allowbreak Fault\allowbreak Request)} & Mapea la petición de resolución técnica hacia ResolveVehicleFaultCommand asociando notas y orden de trabajo. \\*
+\hline
+\textbf{Responsabilidad} & Centraliza la conversión entre fallas de computadoras de a bordo y fichas diagnósticas enriquecidas para mecánicos. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador de Recursos:} Predictive\allowbreak Alert\allowbreak Resource\allowbreak Assembler} \\*
+\hline
+\textbf{toModel(Predictive\allowbreak Alert)} & Transforma el agregado PredictiveAlert hacia PredictiveAlertResource denormalizando puntuaciones de confianza y descripciones preventivas. \\*
+\hline
+\textbf{toDismissCommand(UUID, Dismiss\allowbreak Alert\allowbreak Request, UUID)} & Construye DismissPredictiveAlertCommand capturando el identificador del colaborador técnico y la justificación obligatoria. \\*
+\hline
+\textbf{Responsabilidad} & Proyecta advertencias matemáticas de mantenimiento predictivo hacia representaciones claras para asesores de taller. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador de Recursos:} Vehicle\allowbreak Health\allowbreak Report\allowbreak Resource\allowbreak Assembler} \\*
+\hline
+\textbf{toCreatedResponse(report, vehicleId, jsonUrl, pdfUrl)} & Construye la respuesta HealthReportCreatedResponse proveyendo el identificador generado, índice consolidado y las URLs canónicas de consulta REST y descarga PDF. \\*
+\hline
+\textbf{toModel(report, vehicleId)} & Transforma el dictamen analítico en VehicleHealthReportResource estructurando evaluaciones de subsistemas, riesgos predictivos y acciones recomendadas. \\*
+\hline
+\textbf{toGenerateCommand(vehicleId, request)} & Mapea la petición perimetral hacia GenerateVehicleHealthReportCommand aplicando valores por defecto para ventana temporal e historial de averías. \\*
+\hline
+\textbf{Responsabilidad} & Desacopla la estructura analítica generada por el motor de inteligencia artificial de las representaciones de serialización y enlace perimetral. \\
+\hline
+\end{longtable}
+*Nota.* Ensambladores de recursos REST y métodos de transformación bidireccional de IoT Telemetry \& Predictive Maintenance.
+
+La integración sincrónica intermodular se canaliza a través de la Fachada de Contexto Abierto **IoTTelemetryContextFacade**. Este componente actúa como una capa de prevención de corrupción ante los módulos consumidores de la plataforma, evitando que la complejidad de las tramas sensoriales o la tecnología de base de datos de series temporales trascienda hacia el resto del sistema.
+
+En la @tbl:iot-facade-methods se presentan las firmas públicas, tipos de retorno, módulos clientes y propósitos arquitectónicos de la fachada de contexto abierto.
+
+\renewcommand{\arraystretch}{1.25}\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Métodos Públicos de la Fachada Inbound OHS IoTTelemetryContextFacade} \label{tbl:iot-facade-methods} \\
+\hline
+\thfirst{Firma del Método} & \thcell{Contrato, Retorno y Módulos Consumidores} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Firma del Método} & \thcell{Contrato, Retorno y Módulos Consumidores} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método OHS:} getVehicle\allowbreak Latest\allowbreak Telemetry(UUID vehicleId)} \\*
+\hline
+\textbf{Tipo de Retorno} & \texttt{Optional<Vehicle\allowbreak Telemetry\allowbreak Snapshot\allowbreak Dto>} \\*
+\hline
+\textbf{Módulos Consumidores} & Customer and Fleet Management (CRM), Workshop Operations (MRO) \\*
+\hline
+\textbf{Propósito y Efecto} & Provee la última lectura cinemática y térmica registrada del vehículo incluyendo velocidad odómetro digital temperatura y voltaje de batería. Permite a los asesores de servicio visualizar el estado operativo instantáneo al momento de recibir el vehículo en patio. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método OHS:} getActive\allowbreak Faults\allowbreak ForVehicle(UUID vehicleId)} \\*
+\hline
+\textbf{Tipo de Retorno} & \texttt{List<Vehicle\allowbreak Dtc\allowbreak Fault\allowbreak Dto>} \\*
+\hline
+\textbf{Módulos Consumidores} & Workshop Operations (MRO) \\*
+\hline
+\textbf{Propósito y Efecto} & Recupera la lista de averías electrónicas activas y códigos DTC no subsanados registrados en la computadora de a bordo. Se invoca automáticamente al aperturar una Orden de Trabajo precargando los hallazgos para inspección en foso. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método OHS:} hasActive\allowbreak Device\allowbreak Installation(UUID vehicleId)} \\*
+\hline
+\textbf{Tipo de Retorno} & \texttt{boolean} \\*
+\hline
+\textbf{Módulos Consumidores} & Customer and Fleet Management (CRM), Mobile Workshop Gateway \\*
+\hline
+\textbf{Propósito y Efecto} & Verifica si el vehículo dispone de un escáner OBD-II enlazado y transmitiendo en tiempo real. Habilita o restringe en la interfaz de usuario del conductor las funciones de monitoreo remoto y tacómetro digital continuo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método OHS:} calculate\allowbreak Vehicle\allowbreak Health\allowbreak Score(UUID vehicleId)} \\*
+\hline
+\textbf{Tipo de Retorno} & \texttt{int} (Puntuación entera de 0 a 100) \\*
+\hline
+\textbf{Módulos Consumidores} & Customer and Fleet Management (CRM) \\*
+\hline
+\textbf{Propósito y Efecto} & Computa un índice integral de salud mecánica a partir de la gravedad de fallas DTC acumuladas desvíos térmicos e irregularidades cinemáticas. Utilizado en paneles de control de flotas y programas de fidelización comercial de mantenimiento preventivo. \\
+\hline
+\end{longtable}
+*Nota.* Especificación formal de los métodos públicos expuestos por la Fachada Inbound OHS IoTTelemetryContextFacade.
+
+La propagación de eventos asíncronos garantiza la sincronización eventual del ecosistema automotriz ante contingencias de telemetría y cambios en la vida operativa de los vehículos:
+
+- **Eventos Publicados**: Notifican a los contextos de CRM y MRO la detección de anomalías críticas, la generación de oportunidades de servicio preventivo y el registro de códigos de falla para agilizar la atención técnica.
+
+- **Eventos Consumidos**: Escuchan instrucciones de baja vehicular, transferencia de dominio y culminación de reparaciones para actualizar de manera autónoma las sesiones telemáticas y el estatus de las averías.
+
+En la @tbl:iot-integration-events se sintetiza la taxonomía de eventos de integración intermodulares, especificando sus cargas útiles y los efectos arquitectónicos derivados en la plataforma.
+
+\renewcommand{\arraystretch}{1.25}\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Taxonomía de Eventos de Integración de IoT Telemetry \& Predictive Maintenance} \label{tbl:iot-integration-events} \\
+\hline
+\thfirst{Aspecto de Integración} & \thcell{Carga Útil y Sincronización Intermodular} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Integración} & \thcell{Carga Útil y Sincronización Intermodular} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Integración:} Vehicle\allowbreak Anomaly\allowbreak Detected\allowbreak Integration\allowbreak Event \quad (\textit{Tipo:} Publicado)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{vehicleId}, \texttt{anomalyType}, \texttt{severity}, \texttt{measuredValue}, \texttt{thresholdValue}, \texttt{detectedAt}, \texttt{occurredOn} \\*
+\hline
+\textbf{Módulos Receptores} & Customer and Fleet Management (CRM), Pasarela de Notificaciones Push FCM \\*
+\hline
+\textbf{Efecto Arquitectónico} & Dispara alertas tempranas de riesgo mecánico crítico hacia el conductor y habilita al asesor comercial para contactar al cliente con propuesta prioritaria de inspección. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Integración:} Predictive\allowbreak Alert\allowbreak Generated\allowbreak Integration\allowbreak Event \quad (\textit{Tipo:} Publicado)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{alertId}, \texttt{vehicleId}, \texttt{recommendedServiceId}, \texttt{confidenceScore}, \texttt{alertType}, \texttt{occurredOn} \\*
+\hline
+\textbf{Módulos Receptores} & Workshop Operations (MRO), Customer and Fleet Management (CRM) \\*
+\hline
+\textbf{Efecto Arquitectónico} & Preconfigura borradores de órdenes de trabajo y presupuestos de repuestos en el taller mecánico antes de que el cliente solicite la cita de atención. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Integración:} Vehicle\allowbreak Fault\allowbreak Logged\allowbreak Integration\allowbreak Event \quad (\textit{Tipo:} Publicado)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{faultId}, \texttt{vehicleId}, \texttt{dtcCode}, \texttt{severity}, \texttt{ecuSystem}, \texttt{occurredOn} \\*
+\hline
+\textbf{Módulos Receptores} & Workshop Operations (MRO) \\*
+\hline
+\textbf{Efecto Arquitectónico} & Asienta de inmediato el código de diagnóstico en el historial clínico automotriz precargando tareas de foso en el módulo operativo del taller. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Integración:} Vehicle\allowbreak Decommissioned\allowbreak Integration\allowbreak Event \quad (\textit{Tipo:} Consumido)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{vehicleId}, \texttt{tenantId}, \texttt{reason}, \texttt{decommissionedAt}, \texttt{occurredOn} \\*
+\hline
+\textbf{Módulo Emisor} & Customer and Fleet Management (CRM) \\*
+\hline
+\textbf{Efecto Arquitectónico} & Finaliza automáticamente cualquier sesión activa de escáner en el vehículo dado de baja definitiva liberando el hardware para nuevo montaje en taller. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Integración:} Vehicle\allowbreak Ownership\allowbreak Transferred\allowbreak Integration\allowbreak Event \quad (\textit{Tipo:} Consumido)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{vehicleId}, \texttt{previousOwnerId}, \texttt{newOwnerId}, \texttt{transferredAt}, \texttt{occurredOn} \\*
+\hline
+\textbf{Módulo Emisor} & Customer and Fleet Management (CRM) \\*
+\hline
+\textbf{Efecto Arquitectónico} & Concluye la instalación telemática actual preservando la privacidad del propietario saliente y reinicia las líneas base estadísticas del vehículo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Integración:} Work\allowbreak Order\allowbreak Completed\allowbreak Integration\allowbreak Event \quad (\textit{Tipo:} Consumido)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{workOrderId}, \texttt{vehicleId}, \texttt{repairedSystems}, \texttt{completedAt}, \texttt{occurredOn} \\*
+\hline
+\textbf{Módulo Emisor} & Workshop Operations (MRO) \\*
+\hline
+\textbf{Efecto Arquitectónico} & Marca de manera automática como resueltas todas las fallas electrónicas DTC asociadas a los subsistemas automotrices reparados en taller. \\
+\hline
+\end{longtable}
+*Nota.* Taxonomía de eventos de integración asíncronos publicados y consumidos por IoT Telemetry \& Predictive Maintenance.
+
+El diseño perimetral de la Capa de Interfaz de IoT Telemetry & Predictive Maintenance asegura el aislamiento absoluto entre el flujo continuo de señales automotrices y las transacciones de gestión operativa del taller mecánico. Al implementar controladores independientes y una ingestión asíncrona con acuse de recibo inmediato, el sistema impide que ráfagas de telemetría de cientos de vehículos conectados degraden los tiempos de respuesta de la facturación, los contratos de suscripción o las agendas de mantenimiento.
+
+Asimismo, la arquitectura perimetral satisface con solvencia las restricciones de conectividad intermitente propias de vehículos en ruta y zonas con cobertura limitada. Al aceptar lotes telemáticos consolidados por pasarelas móviles locales y someterlos a validaciones declarativas rigurosas antes de su persistencia en TimescaleDB, la plataforma conjuga una alta resiliencia operativa en el borde con una defensa hermética frente a lecturas físicas espurias o tramas corruptas de bus CAN.
+
+Finalmente, la articulación de la Fachada de Contexto Abierto con la taxonomía de eventos de integración garantiza una colaboración fluida y proactiva con los módulos de CRM y MRO. Las fallas electrónicas y advertencias predictivas se traducen automáticamente en cotizaciones preventivas y precargas diagnósticas en las órdenes de trabajo de foso, transformando los datos cinemáticos en valor comercial tangible y fidelización técnica para el taller sin generar dependencias acopladas entre subsistemas.
+
 
 
 #### 2.6.9.3. Application Layer
 
+La Capa de Aplicación del Bounded Context IoT Telemetry & Predictive Maintenance opera bajo el paquete canónico **com.andeva.atelier.platform.iot.application**. Su responsabilidad medular consiste en gobernar los flujos de negocio automotrices articulando las estaciones web de mostrador de servicio, las pasarelas móviles Android e iOS en campo y los módems celulares en vehículos. Esta orquestación coordina la persistencia de hardware y sesiones de montaje, la ingesta masiva de series temporales cinemáticas y térmicas, la inferencia analítica de anomalías y la propagación de advertencias preventivas hacia los demás contextos de la plataforma.
+
+Para gestionar las altas demandas de concurrencia y volumen de datos de los vehículos conectados sin comprometer la consistencia del dominio, la capa se fundamenta en cuatro directrices de ingeniería:
+
+- **Segregación categórica de responsabilidades mediante el patrón CQRS:** Separación estricta entre los servicios de comandos responsables de mutar el estado y los servicios de consultas optimizados para lectura analítica sobre hipertablas de TimescaleDB, eliminando la contención de bloqueos relacionales.
+
+- **Orquestación transaccional de ingesta en bloque y evaluación analítica:** Procesamiento eficiente de ráfagas sensoriales mediante inserciones masivas por lotes acopladas con la evaluación inmediata de anomalías físicas por el motor de inferencia, garantizando tiempos de respuesta mínimos.
+
+- **Sincronización reactiva intermodular desacoplada:** Despacho de notificaciones y publicación de eventos de integración supeditados a la confirmación exitosa de las transacciones de base de datos, evitando falsos positivos y asegurando coherencia eventual en el ecosistema.
+
+- **Blindaje y aislamiento mediante Capas Anticorrupción:** Mediación sistemática frente a bibliotecas de terceros y contextos satélites a través de interfaces especializadas que encapsulan el SDK de Firebase Admin, los contratos de mantenimiento de taller y la conectividad JDBC de alto rendimiento.
+
+En la @tbl:iot-application-types se expone el catálogo taxonómico consolidado de los componentes tácticos que integran la Capa de Aplicación de IoT Telemetry & Predictive Maintenance, detallando sus categorías, paquetes canónicos y propósitos arquitectónicos.
+
+\renewcommand{\arraystretch}{1.25}\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Catálogo Consolidado de la Capa de Aplicación de IoT Telemetry \& Predictive Maintenance} \label{tbl:iot-application-types} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\
+\hline
+\endhead
+Telemetry\allowbreak Ingestion\allowbreak Command\allowbreak Service\allowbreak Impl & Orquesta la persistencia masiva en lote de lecturas sensoriales en TimescaleDB y activa en tiempo real el motor analítico de detección de anomalías predictivas. \\*
+\hline
+\textbf{Categoría} & Servicio de Comandos \\*
+\hline
+\textbf{Relaciones} & Implementa TelemetryIngestionCommandService. Invoca DeviceInstallationRepository, TelemetryLogRepository, PredictiveAnomalyDetectionEngine, OperationsAclService y FcmNotificationAclService. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak commandservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Device\allowbreak Installation\allowbreak Command\allowbreak Service\allowbreak Impl & Orquesta el ciclo de vinculación física montaje y desmonte de escáneres en automóviles validando consistencia de odómetros y exclusividad de sesiones. \\*
+\hline
+\textbf{Categoría} & Servicio de Comandos \\*
+\hline
+\textbf{Relaciones} & Implementa DeviceInstallationCommandService. Invoca DeviceInstallationRepository y Obd2DeviceRepository. Publica eventos de dominio e integración. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak commandservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Predictive\allowbreak Alert\allowbreak Command\allowbreak Service\allowbreak Impl & Administra el ciclo operativo de advertencias preventivas confirmación de lectura por asesores y descarte justificado de recomendaciones mecánicas. \\*
+\hline
+\textbf{Categoría} & Servicio de Comandos \\*
+\hline
+\textbf{Relaciones} & Implementa PredictiveAlertCommandService. Invoca PredictiveAlertRepository y OperationsAclService. Emite eventos de integración hacia CRM y MRO. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak commandservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Obd2\allowbreak Device\allowbreak Command\allowbreak Service\allowbreak Impl & Gobierna el alta de escáneres telemáticos en el inventario del taller y la alternancia de estados de disponibilidad física. \\*
+\hline
+\textbf{Categoría} & Servicio de Comandos \\*
+\hline
+\textbf{Relaciones} & Implementa Obd2DeviceCommandService. Invoca Obd2DeviceRepository y valida la unicidad de identificadores físicos MAC o IMEI celular. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak commandservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Vehicle\allowbreak Fault\allowbreak Command\allowbreak Service\allowbreak Impl & Registra averías electrónicas automotrices según la norma SAE J2012 y asienta su subsanación formal tras la reparación en taller. \\*
+\hline
+\textbf{Categoría} & Servicio de Comandos \\*
+\hline
+\textbf{Relaciones} & Implementa VehicleFaultCommandService. Invoca VehicleFaultRepository y publica VehicleFaultLoggedIntegrationEvent. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak commandservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Vehicle\allowbreak Health\allowbreak Report\allowbreak Command\allowbreak Service\allowbreak Impl & Coordina la generación analítica de informes periciales con inteligencia artificial estructurada y persiste alertas de alta certeza. \\*
+\hline
+\textbf{Categoría} & Servicio de Comandos \\*
+\hline
+\textbf{Relaciones} & Implementa VehicleHealthReportCommandService. Invoca VehicleHealthAiDiagnosticService, PredictiveAlertRepository y DomainEventPublisher. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak commandservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Telemetry\allowbreak Log\allowbreak Query\allowbreak Service\allowbreak Impl & Provee lecturas de tacómetro en tiempo real y calcula promedios históricos mediante funciones de hipertabla time\_bucket de TimescaleDB. \\*
+\hline
+\textbf{Categoría} & Servicio de Consultas \\*
+\hline
+\textbf{Relaciones} & Implementa TelemetryLogQueryService. Consulta TelemetryLogRepository con transaccionalidad de solo lectura. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak queryservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Vehicle\allowbreak Fault\allowbreak Query\allowbreak Service\allowbreak Impl & Resuelve consultas de códigos DTC activos y el historial clínico de diagnósticos electrónicos del automóvil. \\*
+\hline
+\textbf{Categoría} & Servicio de Consultas \\*
+\hline
+\textbf{Relaciones} & Implementa VehicleFaultQueryService. Consulta VehicleFaultRepository optimizando lecturas de averías no subsanadas. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak queryservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Predictive\allowbreak Alert\allowbreak Query\allowbreak Service\allowbreak Impl & Resuelve tableros de oportunidades preventivas de taller mecánico y el registro histórico de advertencias emitidas. \\*
+\hline
+\textbf{Categoría} & Servicio de Consultas \\*
+\hline
+\textbf{Relaciones} & Implementa PredictiveAlertQueryService. Consulta PredictiveAlertRepository con filtros de severidad y estado. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak queryservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Obd2\allowbreak Device\allowbreak Query\allowbreak Service\allowbreak Impl & Provee lecturas paginadas del inventario de hardware telemático y filtra dispositivos disponibles para instalación. \\*
+\hline
+\textbf{Categoría} & Servicio de Consultas \\*
+\hline
+\textbf{Relaciones} & Implementa Obd2DeviceQueryService. Consulta Obd2DeviceRepository mediante Spring Data con paginación Pageable. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak queryservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Device\allowbreak Installation\allowbreak Query\allowbreak Service\allowbreak Impl & Consulta la sesión de instalación actualmente activa y la trazabilidad de montajes previos de una unidad vehicular. \\*
+\hline
+\textbf{Categoría} & Servicio de Consultas \\*
+\hline
+\textbf{Relaciones} & Implementa DeviceInstallationQueryService. Consulta DeviceInstallationRepository. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak queryservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Vehicle\allowbreak Health\allowbreak Report\allowbreak Query\allowbreak Service\allowbreak Impl & Resuelve consultas del último dictamen de salud y coordina la compilación del documento pericial en formato PDF. \\*
+\hline
+\textbf{Categoría} & Servicio de Consultas \\*
+\hline
+\textbf{Relaciones} & Implementa VehicleHealthReportQueryService. Invoca VehicleHealthReportPdfGeneratorPort y repositorios telemáticos. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak queryservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Telemetry\allowbreak Domain\allowbreak Event\allowbreak Handler & Despacha de forma asíncrona notificaciones push críticas ante anomalías severas de motor hacia conductores y talleres mecánicos. \\*
+\hline
+\textbf{Categoría} & Manejador de Eventos de Dominio \\*
+\hline
+\textbf{Relaciones} & Escucha CriticalEngineAnomalyDetectedEvent en fase posterior al commit invocando FcmNotificationAclService. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak eventhandlers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Predictive\allowbreak Alert\allowbreak Domain\allowbreak Event\allowbreak Handler & Publica eventos de integración hacia CRM y MRO ante la generación formal de advertencias predictivas. \\*
+\hline
+\textbf{Categoría} & Manejador de Eventos de Dominio \\*
+\hline
+\textbf{Relaciones} & Escucha PredictiveAlertGeneratedEvent y PredictiveAlertDismissedEvent propagando efectos intermodulares. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak eventhandlers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Vehicle\allowbreak Fault\allowbreak Domain\allowbreak Event\allowbreak Handler & Publica eventos de integración hacia MRO ante el asentamiento de nuevos códigos DTC en la computadora vehicular. \\*
+\hline
+\textbf{Categoría} & Manejador de Eventos de Dominio \\*
+\hline
+\textbf{Relaciones} & Escucha VehicleFaultLoggedEvent y VehicleFaultResolvedEvent sincronizando el historial clínico automotriz. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak eventhandlers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Vehicle\allowbreak Lifecycle\allowbreak Integration\allowbreak Event\allowbreak Handler & Consume eventos intermodulares para desconectar escáneres en unidades dadas de baja y resolver fallas reparadas en taller. \\*
+\hline
+\textbf{Categoría} & Manejador de Eventos de Integración \\*
+\hline
+\textbf{Relaciones} & Suscriptor de VehicleDecommissionedIntegrationEvent, VehicleOwnershipTransferredIntegrationEvent y WorkOrderCompletedIntegrationEvent. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak eventhandlers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Fcm\allowbreak Notification\allowbreak Acl\allowbreak Service & Capa Anticorrupción que encapsula el SDK oficial de Firebase Admin para estructurar mensajes push de alta prioridad. \\*
+\hline
+\textbf{Categoría} & Puerto de Salida / ACL \\*
+\hline
+\textbf{Relaciones} & Invoca FirebaseCloudMessagingGateway para despacho de notificaciones a Atelier Driver y Atelier Workshop. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak outboundservices.\allowbreak acl} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Operations\allowbreak Acl\allowbreak Service & Capa Anticorrupción que consulta en Workshop Operations MRO los servicios recomendados y cotizaciones preliminares. \\*
+\hline
+\textbf{Categoría} & Puerto de Salida / ACL \\*
+\hline
+\textbf{Relaciones} & Invoca adaptadores remotos de Workshop Operations para traducir anomalías físicas a tareas de taller. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak outboundservices.\allowbreak acl} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Crm\allowbreak Fleet\allowbreak Acl\allowbreak Service & Capa Anticorrupción que consulta en Customer and Fleet Management CRM los datos de contacto y titulares vehiculares. \\*
+\hline
+\textbf{Categoría} & Puerto de Salida / ACL \\*
+\hline
+\textbf{Relaciones} & Invoca clientes de CRM para enriquecer alertas y validar membresías de flotas automotrices. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak outboundservices.\allowbreak acl} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Timescale\allowbreak Batch\allowbreak Jdbc\allowbreak Client\allowbreak Port & Puerto de persistencia masiva de alto rendimiento para inserción en bloque de series temporales en TimescaleDB. \\*
+\hline
+\textbf{Categoría} & Puerto de Persistencia Especializada \\*
+\hline
+\textbf{Relaciones} & Implementado por TimescaleBatchJdbcAdapter en la Capa de Infraestructura. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak outboundservices.\allowbreak acl} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Vehicle\allowbreak Health\allowbreak Report\allowbreak Pdf\allowbreak Generator\allowbreak Port & Puerto de salida perimetral que define el contrato de renderizado y exportación tipográfica en formato binario PDF. \\*
+\hline
+\textbf{Categoría} & Puerto de Salida / Exportación \\*
+\hline
+\textbf{Relaciones} & Implementado por VehicleHealthReportPdfGeneratorAdapter en la Capa de Infraestructura mediante Thymeleaf y OpenPDF. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak outboundservices.\allowbreak acl} \\
+\hline
+\end{longtable}
+*Nota.* Catálogo taxonómico consolidado de la Capa de Aplicación de IoT Telemetry \& Predictive Maintenance.
+
+**Servicios de Comandos y Flujos Transaccionales**
+
+Los servicios de comandos constituyen el núcleo orquestador del lado de escritura del subsistema telemático. Cada componente encapsula un caso de uso transaccional gobernando la carga de entidades desde los repositorios, la invocación de métodos de dominio y la persistencia de cambios:
+
+- **TelemetryIngestionCommandServiceImpl**: Valida la existencia de sesiones de montaje vigentes, transforma las lecturas recibidas en agregados inmutables y delega la inserción masiva en bloque sobre TimescaleDB. Asimismo, evalúa la lectura más reciente en el motor analítico de anomalías, registrando alertas preventivas y gatillando alertas de alta prioridad hacia conductores y mecánicos cuando se detectan desvíos críticos.
+
+- **DeviceInstallationCommandServiceImpl**: Controla la vinculación física de escáneres OBD-II con automóviles garantizando que no coexistan instalaciones duplicadas activas, y asienta la desvinculación formal registrando el kilometraje acumulado de odómetro.
+
+- **PredictiveAlertCommandServiceImpl**: Conduce el ciclo operativo de las advertencias preventivas, gestionando la confirmación de lectura por el personal técnico, el descarte documentado y la conversión de advertencias en solicitudes de citas de taller.
+
+- **Obd2DeviceCommandServiceImpl**: Supervisa el alta de escáneres en el inventario del taller fiscalizando la unicidad física de identificadores MAC o IMEI celular y actualizando estados de disponibilidad.
+
+- **VehicleFaultCommandServiceImpl**: Canaliza el registro de averías electrónicas bajo la norma SAE J2012 y certifica la corrección formal de fallas tras la culminación de reparaciones en foso.
+
+- **VehicleHealthReportCommandServiceImpl**: Coordina la extracción analítica de telemetría y averías electrónicas, invoca el servicio de inferencia de inteligencia artificial estructurada, persiste alertas preventivas de alta certeza y despacha eventos de integración para flujos de taller.
+
+En la @tbl:iot-command-services se detallan las operaciones transaccionales, signaturas, comandos de entrada y consecuencias en el modelo de dominio de los seis servicios de comandos.
+
+\renewcommand{\arraystretch}{1.25}\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Operaciones Transaccionales de los Servicios de Comandos de IoT Telemetry \& Predictive Maintenance} \label{tbl:iot-command-services} \\
+\hline
+\thfirst{Comando de Entrada} & \thcell{Firma, Retorno y Reglas de Negocio} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Comando de Entrada} & \thcell{Firma, Retorno y Reglas de Negocio} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Comandos:} Telemetry\allowbreak Ingestion\allowbreak Command\allowbreak Service\allowbreak Impl} \\*
+\hline
+\textbf{Comando:} \texttt{Ingest\allowbreak Telemetry\allowbreak Batch\allowbreak Command} & \texttt{handle(IngestTelemetryBatchCommand)} → \texttt{int} \\*
+\hline
+\textbf{Parámetros Principales} & \texttt{UUID vehicleId, List<TelemetryReadingItemDto> readings} \\*
+\hline
+\textbf{Reglas y Transaccionalidad} & Valida que el vehículo mantenga una sesión de montaje activa en DeviceInstallationRepository. Transforma lecturas en agregados inmutables TelemetryRecord y persiste masivamente en bloque JDBC sobre la Hipertabla telemetry\_logs de TimescaleDB. Evalúa la lectura más reciente en PredictiveAnomalyDetectionEngine. Si se detecta anomalía crítica persiste PredictiveAlert despacha notificación push FCM y emite CriticalEngineAnomalyDetectedEvent. Anotado con \texttt{@Transactional}. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Comandos:} Device\allowbreak Installation\allowbreak Command\allowbreak Service\allowbreak Impl} \\*
+\hline
+\textbf{Comando:} \texttt{Install\allowbreak Device\allowbreak On\allowbreak Vehicle\allowbreak Command} & \texttt{handle(InstallDeviceOnVehicleCommand)} → \texttt{UUID} \\*
+\hline
+\textbf{Parámetros Principales} & \texttt{UUID deviceId, UUID vehicleId, int currentOdometerKm} \\*
+\hline
+\textbf{Reglas y Transaccionalidad} & Verifica que el escáner se encuentre en estado AVAILABLE y que el vehículo no cuente con otra instalación activa en curso. Instancia el agregado DeviceInstallation con odómetro inicial transiciona el hardware a estado INSTALLED y persiste la sesión emitiendo DeviceInstalledOnVehicleEvent. \\
+\hline
+\textbf{Comando:} \texttt{Uninstall\allowbreak Device\allowbreak Command} & \texttt{handle(UninstallDeviceCommand)} → \texttt{void} \\*
+\hline
+\textbf{Parámetros Principales} & \texttt{UUID installationId, int finalOdometerKm, Instant uninstalledTimestamp} \\*
+\hline
+\textbf{Reglas y Transaccionalidad} & Localiza la sesión de montaje activa valida que el odómetro final no sea inferior al inicial concluye la sesión con marca temporal y reintegra el escáner a estado AVAILABLE emitiendo DeviceUninstalledFromVehicleEvent. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Comandos:} Predictive\allowbreak Alert\allowbreak Command\allowbreak Service\allowbreak Impl} \\*
+\hline
+\textbf{Comando:} \texttt{Generate\allowbreak Predictive\allowbreak Alert\allowbreak Command} & \texttt{handle(GeneratePredictiveAlertCommand)} → \texttt{UUID} \\*
+\hline
+\textbf{Parámetros Principales} & \texttt{UUID vehicleId, UUID recommendedServiceId, String alertType, BigDecimal confidenceScore, String message} \\*
+\hline
+\textbf{Reglas y Transaccionalidad} & Instancia el agregado PredictiveAlert en estado ACTIVE vinculando la recomendación preventiva emitida por MRO. Persiste la alerta en base de datos relacional y publica PredictiveAlertGeneratedIntegrationEvent. \\
+\hline
+\textbf{Comando:} \texttt{Acknowledge\allowbreak Predictive\allowbreak Alert\allowbreak Command} & \texttt{handle(AcknowledgePredictiveAlertCommand)} → \texttt{void} \\*
+\hline
+\textbf{Parámetros Principales} & \texttt{UUID alertId, UUID staffId} \\*
+\hline
+\textbf{Reglas y Transaccionalidad} & Localiza la advertencia en PredictiveAlertRepository y transiciona su estado a ACKNOWLEDGED registrando el asesor técnico responsable de la revisión. \\
+\hline
+\textbf{Comando:} \texttt{Dismiss\allowbreak Predictive\allowbreak Alert\allowbreak Command} & \texttt{handle(DismissPredictiveAlertCommand)} → \texttt{void} \\*
+\hline
+\textbf{Parámetros Principales} & \texttt{UUID alertId, String dismissalReason, UUID staffId} \\*
+\hline
+\textbf{Reglas y Transaccionalidad} & Exige justificación técnica obligatoria transiciona el estado de la alerta a DISMISSED y emite PredictiveAlertDismissedEvent para retroalimentación analítica. \\
+\hline
+\textbf{Comando:} \texttt{Convert\allowbreak Alert\allowbreak To\allowbreak Appointment\allowbreak Command} & \texttt{handle(ConvertAlertToAppointmentCommand)} → \texttt{UUID} \\*
+\hline
+\textbf{Parámetros Principales} & \texttt{UUID alertId, Instant preferredDate} \\*
+\hline
+\textbf{Reglas y Transaccionalidad} & Invoca a OperationsAclService para formular una pre-orden de trabajo y agendar una inspección técnica en MRO asociando la cotización preventiva. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Comandos:} Obd2\allowbreak Device\allowbreak Command\allowbreak Service\allowbreak Impl} \\*
+\hline
+\textbf{Comando:} \texttt{Register\allowbreak Obd2\allowbreak Device\allowbreak Command} & \texttt{handle(RegisterObd2DeviceCommand)} → \texttt{UUID} \\*
+\hline
+\textbf{Parámetros Principales} & \texttt{UUID tenantId, String deviceIdentifier, String connectionType, String hardwareModel, String firmwareVersion} \\*
+\hline
+\textbf{Reglas y Transaccionalidad} & Comprueba en Obd2DeviceRepository que el identificador MAC o IMEI no se encuentre registrado previamente. Crea el agregado Obd2Device en estado AVAILABLE y lo persiste en PostgreSQL 16. \\
+\hline
+\textbf{Comando:} \texttt{Update\allowbreak Device\allowbreak Status\allowbreak Command} & \texttt{handle(UpdateDeviceStatusCommand)} → \texttt{void} \\*
+\hline
+\textbf{Parámetros Principales} & \texttt{UUID deviceId, DeviceStatus newStatus, String reason} \\*
+\hline
+\textbf{Reglas y Transaccionalidad} & Modifica la situación de inventario del escáner permitiendo retirarlo a mantenimiento técnico o darlo de baja por extravío físico. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Comandos:} Vehicle\allowbreak Fault\allowbreak Command\allowbreak Service\allowbreak Impl} \\*
+\hline
+\textbf{Comando:} \texttt{Register\allowbreak Vehicle\allowbreak Fault\allowbreak Command} & \texttt{handle(RegisterVehicleFaultCommand)} → \texttt{UUID} \\*
+\hline
+\textbf{Parámetros Principales} & \texttt{UUID vehicleId, String dtcCode, String severity, String description} \\*
+\hline
+\textbf{Reglas y Transaccionalidad} & Valida que el código cumpla la estructura oficial SAE J2012. Persiste la entidad VehicleFault en estado no resuelto y publica VehicleFaultLoggedIntegrationEvent hacia MRO. \\
+\hline
+\textbf{Comando:} \texttt{Resolve\allowbreak Vehicle\allowbreak Fault\allowbreak Command} & \texttt{handle(ResolveVehicleFaultCommand)} → \texttt{void} \\*
+\hline
+\textbf{Parámetros Principales} & \texttt{UUID faultId, String resolutionNotes, UUID workOrderId} \\*
+\hline
+\textbf{Reglas y Transaccionalidad} & Marca formalmente la avería electrónica como resuelta asociando las notas técnicas y la orden de trabajo de foso que subsanó el problema. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Comandos:} Vehicle\allowbreak Health\allowbreak Report\allowbreak Command\allowbreak Service\allowbreak Impl} \\*
+\hline
+\textbf{Comando:} \texttt{Generate\allowbreak Vehicle\allowbreak Health\allowbreak Report\allowbreak Command} & \texttt{handle(GenerateVehicleHealthReportCommand)} → \texttt{HealthReportResult} \\*
+\hline
+\textbf{Signatura y Tipos} & Entrada: identificador de vehículo, días de análisis, inclusión de historial DTC y motivo de activación \\*
+\hline
+\textbf{Consecuencias de Dominio} & Extrae métricas agregadas desde TimescaleDB y averías activas, ejecuta inferencia con Spring AI ChatClient bajo BeanOutputConverter, persiste alertas con confianza superior o igual al setenta por ciento y publica el evento VehicleHealthReportGeneratedIntegrationEvent. \\
+\hline
+\textbf{Comando:} \texttt{Enqueue\allowbreak Vehicle\allowbreak Health\allowbreak Report\allowbreak Analysis\allowbreak Command} & \texttt{handle(EnqueueVehicleHealthReportAnalysisCommand)} → \texttt{UUID} \\*
+\hline
+\textbf{Signatura y Tipos} & Entrada: identificador de lote de flota, parámetros de ventana temporal y destinatario de notificación \\*
+\hline
+\textbf{Consecuencias de Dominio} & Registra una tarea de procesamiento asíncrono en segundo plano para evaluación de flotas masivas, retornando un identificador de seguimiento sin bloquear la interfaz de usuario. \\
+\hline
+\end{longtable}
+*Nota.* Especificación de operaciones transaccionales y lógica de orquestación de los Command Services de IoT Telemetry \& Predictive Maintenance.
+
+**Servicios de Consultas y Lectura Especializada**
+
+El lado de lectura del subsistema resuelve los requerimientos informativos de tableros de control web y aplicaciones móviles de taller y conductor sin sobrecargar el modelo de escritura:
+
+- **TelemetryLogQueryServiceImpl**: Combina lecturas instantáneas de tacómetro digital en tiempo real con consultas agregadas de series temporales calculadas mediante la función SQL time\_bucket de TimescaleDB, entregando promedios y cotas máximas de velocidad, revoluciones y temperatura de refrigerante.
+
+- **VehicleFaultQueryServiceImpl**: Provee la recuperación eficiente de averías electrónicas activas para su visualización inmediata al recepcionar vehículos en taller, así como la reconstrucción del historial clínico de diagnósticos.
+
+- **PredictiveAlertQueryServiceImpl**: Filtra las advertencias preventivas activas del taller por nivel de severidad y estado operativo, permitiendo priorizar las intervenciones mecánicas comerciales.
+
+- **Obd2DeviceQueryServiceImpl**: Expone vistas paginadas del inventario de hardware telemático y filtra dispositivos disponibles para asignación inmediata.
+
+- **DeviceInstallationQueryServiceImpl**: Provee la consulta de la sesión telemática actualmente activa en el vehículo y el registro cronológico de instalaciones previas.
+
+- **VehicleHealthReportQueryServiceImpl**: Provee la recuperación estructurada del informe pericial de salud más reciente para cuadros de mando web y móviles, y coordina la compilación tipográfica del dictamen en documento PDF.
+
+En la @tbl:iot-query-services se presentan los métodos de consulta de la capa de aplicación, indicando sus tipos de retorno, parámetros y mecanismos de lectura sobre la base de datos.
+
+\renewcommand{\arraystretch}{1.25}\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Métodos de Consulta de la Capa de Aplicación de IoT Telemetry \& Predictive Maintenance} \label{tbl:iot-query-services} \\
+\hline
+\thfirst{Consulta de Entrada} & \thcell{Firma, Retorno y Mecanismo de Lectura} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Consulta de Entrada} & \thcell{Firma, Retorno y Mecanismo de Lectura} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Consultas:} Telemetry\allowbreak Log\allowbreak Query\allowbreak Service\allowbreak Impl} \\*
+\hline
+\textbf{Consulta:} \texttt{Get\allowbreak Latest\allowbreak Telemetry\allowbreak Query} & \texttt{handle(GetLatestTelemetryQuery)} → \texttt{Optional<VehicleLatestTelemetryResource>} \\*
+\hline
+\textbf{Parámetros} & \texttt{UUID vehicleId} \\*
+\hline
+\textbf{Mecanismo de Lectura} & Consulta el registro con marca temporal más reciente en la hipertabla telemetry\_logs de TimescaleDB mediante índice temporal inverso. Provee lecturas de tacómetro digital en tiempo real con transaccionalidad de solo lectura mediante la anotación \texttt{@Transactional(readOnly = true)}. \\
+\hline
+\textbf{Consulta:} \texttt{Get\allowbreak Aggregated\allowbreak Telemetry\allowbreak Query} & \texttt{handle(GetAggregatedTelemetryQuery)} → \texttt{List<TelemetryAggregateResource>} \\*
+\hline
+\textbf{Parámetros} & \texttt{UUID vehicleId, Instant from, Instant to, Duration bucketInterval} \\*
+\hline
+\textbf{Mecanismo de Lectura} & Ejecuta consultas analíticas aprovechando la función SQL time\_bucket de TimescaleDB promediando velocidades RPM y temperaturas en cubos temporales uniformes. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Consultas:} Vehicle\allowbreak Fault\allowbreak Query\allowbreak Service\allowbreak Impl} \\*
+\hline
+\textbf{Consulta:} \texttt{Get\allowbreak Active\allowbreak Faults\allowbreak By\allowbreak Vehicle\allowbreak Query} & \texttt{handle(GetActiveFaultsByVehicleQuery)} → \texttt{List<VehicleFaultResource>} \\*
+\hline
+\textbf{Parámetros} & \texttt{UUID vehicleId} \\*
+\hline
+\textbf{Mecanismo de Lectura} & Recupera del repositorio relacional todas las averías electrónicas con bandera de resolución en falso para desplegar el diagnóstico en la orden de trabajo de foso. \\
+\hline
+\textbf{Consulta:} \texttt{Get\allowbreak Fault\allowbreak History\allowbreak By\allowbreak Vehicle\allowbreak Query} & \texttt{handle(GetFaultHistoryByVehicleQuery)} → \texttt{List<VehicleFaultResource>} \\*
+\hline
+\textbf{Parámetros} & \texttt{UUID vehicleId} \\*
+\hline
+\textbf{Mecanismo de Lectura} & Provee la trazabilidad histórica completa de anomalías electrónicas detectadas y subsanadas a lo largo de la vida útil del vehículo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Consultas:} Predictive\allowbreak Alert\allowbreak Query\allowbreak Service\allowbreak Impl} \\*
+\hline
+\textbf{Consulta:} \texttt{Get\allowbreak Active\allowbreak Alerts\allowbreak By\allowbreak Tenant\allowbreak Query} & \texttt{handle(GetActiveAlertsByTenantQuery)} → \texttt{List<PredictiveAlertResource>} \\*
+\hline
+\textbf{Parámetros} & \texttt{UUID tenantId, AlertSeverity severity, AlertStatus status} \\*
+\hline
+\textbf{Mecanismo de Lectura} & Filtra las alertas preventivas activas del taller mecánico permitiendo a los asesores de servicio priorizar vehículos con alto riesgo de avería inminente. \\
+\hline
+\textbf{Consulta:} \texttt{Get\allowbreak Alerts\allowbreak By\allowbreak Vehicle\allowbreak Query} & \texttt{handle(GetAlertsByVehicleQuery)} → \texttt{List<PredictiveAlertResource>} \\*
+\hline
+\textbf{Parámetros} & \texttt{UUID vehicleId} \\*
+\hline
+\textbf{Mecanismo de Lectura} & Recupera el historial de advertencias preventivas emitidas por el motor de inferencia analítica para una unidad automotriz específica. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Consultas:} Obd2\allowbreak Device\allowbreak Query\allowbreak Service\allowbreak Impl} \\*
+\hline
+\textbf{Consulta:} \texttt{Get\allowbreak Devices\allowbreak By\allowbreak Tenant\allowbreak Query} & \texttt{handle(GetDevicesByTenantQuery)} → \texttt{Page<Obd2DeviceResource>} \\*
+\hline
+\textbf{Parámetros} & \texttt{UUID tenantId, Pageable pageable} \\*
+\hline
+\textbf{Mecanismo de Lectura} & Consulta paginada del inventario de hardware telemático registrado en el taller optimizando el consumo de memoria mediante Spring Data JPA. \\
+\hline
+\textbf{Consulta:} \texttt{Get\allowbreak Available\allowbreak Devices\allowbreak Query} & \texttt{handle(GetAvailableDevicesQuery)} → \texttt{List<Obd2DeviceResource>} \\*
+\hline
+\textbf{Parámetros} & \texttt{UUID tenantId} \\*
+\hline
+\textbf{Mecanismo de Lectura} & Retorna la lista de escáneres operativos sin sesión de montaje activa disponibles para instalación inmediata en patio vehicular. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Consultas:} Device\allowbreak Installation\allowbreak Query\allowbreak Service\allowbreak Impl} \\*
+\hline
+\textbf{Consulta:} \texttt{Get\allowbreak Active\allowbreak Installation\allowbreak By\allowbreak Vehicle\allowbreak Query} & \texttt{handle(GetActiveInstallationByVehicleQuery)} → \texttt{Optional<DeviceInstallationResource>} \\*
+\hline
+\textbf{Parámetros} & \texttt{UUID vehicleId} \\*
+\hline
+\textbf{Mecanismo de Lectura} & Localiza la sesión de montaje telemático actualmente vigente para la unidad automotriz retornando los metadatos del escáner enlazado. \\
+\hline
+\textbf{Consulta:} \texttt{Get\allowbreak Installation\allowbreak History\allowbreak By\allowbreak Vehicle\allowbreak Query} & \texttt{handle(GetInstallationHistoryByVehicleQuery)} → \texttt{List<DeviceInstallationResource>} \\*
+\hline
+\textbf{Parámetros} & \texttt{UUID vehicleId} \\*
+\hline
+\textbf{Mecanismo de Lectura} & Reconstruye la cronología de escáneres instalados y retirados del vehículo con marcas temporales y lecturas de kilometraje acumulado. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Consultas:} Vehicle\allowbreak Health\allowbreak Report\allowbreak Query\allowbreak Service\allowbreak Impl} \\*
+\hline
+\textbf{Consulta:} \texttt{Get\allowbreak Latest\allowbreak Vehicle\allowbreak Health\allowbreak Report\allowbreak Query} & \texttt{handle(GetLatestVehicleHealthReportQuery)} → \texttt{Optional<VehicleHealthReportResource>} \\*
+\hline
+\textbf{Parámetros} & \texttt{UUID vehicleId} \\*
+\hline
+\textbf{Mecanismo de Lectura} & Recupera el último diagnóstico pericial generado consolidando evaluaciones por subsistema, correlaciones DTC y recomendaciones de mantenimiento preventivo. \\
+\hline
+\textbf{Consulta:} \texttt{Export\allowbreak Vehicle\allowbreak Health\allowbreak Report\allowbreak Pdf\allowbreak Query} & \texttt{handle(ExportVehicleHealthReportPdfQuery)} → \texttt{byte[]} \\*
+\hline
+\textbf{Parámetros} & \texttt{UUID vehicleId, UUID reportId} \\*
+\hline
+\textbf{Mecanismo de Lectura} & Invoca al puerto VehicleHealthReportPdfGeneratorPort para renderizar el informe analítico completo en binario PDF aplicando maquetación institucional con membrete y semáforos de salud mecánica. \\
+\hline
+\end{longtable}
+*Nota.* Métodos de consulta de la Capa de Aplicación de IoT Telemetry \& Predictive Maintenance.
+
+**Manejadores de Eventos de Dominio y de Integración**
+
+La coordinación reactiva y la consistencia eventual entre subsistemas se articulan mediante manejadores dedicados de eventos:
+
+- **TelemetryDomainEventHandler**: Intercepta eventos de detección de anomalías críticas de motor tras la confirmación transaccional de la ingesta sensorial, despachando de forma asíncrona notificaciones push de alta prioridad hacia las aplicaciones móviles de conductor y taller mediante la pasarela de Firebase.
+
+- **PredictiveAlertDomainEventHandler**: Propaga eventos de integración hacia los contextos de CRM y MRO ante la generación formal de advertencias predictivas, facilitando la preconfiguración automática de presupuestos de mantenimiento.
+
+- **VehicleFaultDomainEventHandler**: Emite eventos de integración ante el reporte de códigos DTC en la computadora vehicular para nutrir la ficha técnica automotriz.
+
+- **VehicleLifecycleIntegrationEventHandler**: Consume notificaciones externas de baja definitiva vehicular, transferencia de titularidad y culminación de órdenes de trabajo para liberar dispositivos telemáticos y marcar como subsanadas las averías reparadas.
+
+En la @tbl:iot-event-handlers se especifican los eventos interceptados por los manejadores, detallando sus fases de ejecución, orígenes y consecuencias arquitectónicas.
+
+\renewcommand{\arraystretch}{1.25}\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Manejadores de Eventos de Dominio y de Integración de IoT Telemetry \& Predictive Maintenance} \label{tbl:iot-event-handlers} \\
+\hline
+\thfirst{Evento Interceptado} & \thcell{Fase de Ejecución y Efectos del Manejador} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Evento Interceptado} & \thcell{Fase de Ejecución y Efectos del Manejador} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Manejador de Eventos de Dominio:} Telemetry\allowbreak Domain\allowbreak Event\allowbreak Handler} \\*
+\hline
+\textbf{Evento:} \texttt{Critical\allowbreak Engine\allowbreak Anomaly\allowbreak Detected\allowbreak Event} & Ejecución en fase \texttt{AFTER\_COMMIT} mediante \texttt{@TransactionalEventListener} y \texttt{@Async} \\*
+\hline
+\textbf{Origen del Suceso} & Inferencia analítica del motor matemático tras la ingesta de ráfagas sensoriales \\*
+\hline
+\textbf{Efectos del Manejador} & Invoca de inmediato a FcmNotificationAclService despachando notificaciones push de alta prioridad hacia el teléfono del conductor y la pantalla de recepción del taller mecánico. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Manejador de Eventos de Dominio:} Predictive\allowbreak Alert\allowbreak Domain\allowbreak Event\allowbreak Handler} \\*
+\hline
+\textbf{Evento:} \texttt{Predictive\allowbreak Alert\allowbreak Generated\allowbreak Event} & Ejecución en fase \texttt{AFTER\_COMMIT} mediante \texttt{@TransactionalEventListener} \\*
+\hline
+\textbf{Origen del Suceso} & Agregado PredictiveAlert ante instanciación formal de recomendación preventiva \\*
+\hline
+\textbf{Efectos del Manejador} & Publica el evento PredictiveAlertGeneratedIntegrationEvent hacia el bus de mensajería para preconfigurar presupuestos y citas de mantenimiento en CRM y MRO. \\
+\hline
+\textbf{Evento:} \texttt{Predictive\allowbreak Alert\allowbreak Dismissed\allowbreak Event} & Ejecución en fase \texttt{AFTER\_COMMIT} mediante \texttt{@TransactionalEventListener} \\*
+\hline
+\textbf{Origen del Suceso} & Agregado PredictiveAlert ante descarte fundamentado de una alerta \\*
+\hline
+\textbf{Efectos del Manejador} & Registra los motivos de descarte en el almacén analítico para calibración continua de los umbrales algorítmicos del motor de anomalías. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Manejador de Eventos de Dominio:} Vehicle\allowbreak Fault\allowbreak Domain\allowbreak Event\allowbreak Handler} \\*
+\hline
+\textbf{Evento:} \texttt{Vehicle\allowbreak Fault\allowbreak Logged\allowbreak Event} & Ejecución en fase \texttt{AFTER\_COMMIT} mediante \texttt{@TransactionalEventListener} \\*
+\hline
+\textbf{Origen del Suceso} & Agregado VehicleFault ante detección de un nuevo código DTC en la ECU \\*
+\hline
+\textbf{Efectos del Manejador} & Emite VehicleFaultLoggedIntegrationEvent permitiendo que Workshop Operations precargue la anomalía en la orden de trabajo de foso. \\
+\hline
+\textbf{Evento:} \texttt{Vehicle\allowbreak Fault\allowbreak Resolved\allowbreak Event} & Ejecución en fase \texttt{AFTER\_COMMIT} mediante \texttt{@TransactionalEventListener} \\*
+\hline
+\textbf{Origen del Suceso} & Agregado VehicleFault ante culminación de reparación técnica \\*
+\hline
+\textbf{Efectos del Manejador} & Actualiza el historial clínico del vehículo notificando la corrección exitosa de la anomalía electrónica. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Manejador de Eventos de Integración:} Vehicle\allowbreak Lifecycle\allowbreak Integration\allowbreak Event\allowbreak Handler} \\*
+\hline
+\textbf{Evento:} \texttt{Vehicle\allowbreak Decommissioned\allowbreak Integration\allowbreak Event} & Ejecución asíncrona desacoplada mediante suscriptor del bus de eventos \\*
+\hline
+\textbf{Origen del Suceso} & Bounded Context Customer and Fleet Management CRM ante baja definitiva de unidad \\*
+\hline
+\textbf{Efectos del Manejador} & Finaliza automáticamente cualquier sesión de montaje activa liberando el hardware OBD-II para su reutilización en el inventario del taller. \\
+\hline
+\textbf{Evento:} \texttt{Vehicle\allowbreak Ownership\allowbreak Transferred\allowbreak Integration\allowbreak Event} & Ejecución asíncrona desacoplada mediante suscriptor del bus de eventos \\*
+\hline
+\textbf{Origen del Suceso} & Bounded Context Customer and Fleet Management CRM ante transferencia vehicular \\*
+\hline
+\textbf{Efectos del Manejador} & Concluye la instalación telemática vigente protegiendo la privacidad del usuario saliente y reinicia las líneas base analíticas de conducción. \\
+\hline
+\textbf{Evento:} \texttt{Work\allowbreak Order\allowbreak Completed\allowbreak Integration\allowbreak Event} & Ejecución asíncrona desacoplada mediante suscriptor del bus de eventos \\*
+\hline
+\textbf{Origen del Suceso} & Bounded Context Workshop Operations MRO tras cierre de orden de trabajo en foso \\*
+\hline
+\textbf{Efectos del Manejador} & Marca automáticamente como corregidas todas las fallas electrónicas DTC asociadas a los subsistemas automotrices reparados en taller. \\
+\hline
+\end{longtable}
+*Nota.* Especificación de manejadores de eventos de dominio y de integración de IoT Telemetry \& Predictive Maintenance.
+
+**Puertos Salientes y Capas Anticorrupción**
+
+La comunicación hacia proveedores externos y servicios especializados de persistencia se aísla rigurosamente mediante puertos de salida y Capas Anticorrupción:
+
+- **FcmNotificationAclService**: Encapsula el SDK oficial de Firebase Admin para estructurar y remitir notificaciones push con canalización prioritaria, aislando el núcleo de la aplicación de particularidades técnicas de la infraestructura de Google Cloud.
+
+- **OperationsAclService**: Traduce anomalías telemáticas a servicios sugeridos de mantenimiento y consulta la disponibilidad de bahías en el contexto de Workshop Operations, evitando el acoplamiento directo con el modelo interno de órdenes de trabajo.
+
+- **CrmFleetAclService**: Resuelve la identidad de propietarios y conductores de vehículos corporativos interactuando con Customer and Fleet Management bajo una interfaz neutral.
+
+- **TimescaleBatchJdbcClientPort**: Define el contrato de persistencia masiva de alto rendimiento para la inserción en bloque de lecturas sensoriales sobre la hipertabla particionada de TimescaleDB.
+
+- **VehicleHealthReportPdfGeneratorPort**: Define el contrato perimetral para renderizado y compilación documental del informe de salud mecánica en formato binario PDF con maquetación institucional.
+
+En la @tbl:iot-outbound-ports se detallan los puertos de salida de la capa de aplicación, sus signaturas de métodos y sus adaptadores concretos de infraestructura.
+
+\renewcommand{\arraystretch}{1.25}\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Puertos de Salida, Pasarelas y Adaptadores de la Capa de Aplicación de IoT Telemetry \& Predictive Maintenance} \label{tbl:iot-outbound-ports} \\
+\hline
+\thfirst{Puerto de Salida} & \thcell{Firma de Operaciones y Adaptador de Infraestructura} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Puerto de Salida} & \thcell{Firma de Operaciones y Adaptador de Infraestructura} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto / Capa Anticorrupción:} Fcm\allowbreak Notification\allowbreak Acl\allowbreak Service} \\*
+\hline
+\textbf{Operación Principal} & \texttt{sendPredictiveAlertPush(UUID vehicleId, String title, String body, UUID alertId)} → \texttt{String} \\*
+\hline
+\textbf{Operaciones Secundarias} & - \texttt{sendCriticalFaultPush(UUID vehicleId, String dtcCode, String severity)} → \texttt{String} \newline - \texttt{sendMaintenanceReminderPush(UUID vehicleId, String serviceName)} → \texttt{String} \\*
+\hline
+\textbf{Adaptador Concreto} & FirebaseCloudMessagingGateway en la Capa de Infraestructura mediante el SDK oficial de Firebase Admin \\*
+\hline
+\textbf{Propósito Arquitectónico} & Aislar el núcleo de software de las dependencias externas del SDK de Google Firebase estructurando notificaciones push con canal de alta prioridad para alertas de cabina en ruta. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto / Capa Anticorrupción:} Operations\allowbreak Acl\allowbreak Service} \\*
+\hline
+\textbf{Operación Principal} & \texttt{recommendServiceForAnomaly(AnomalyType type)} → \texttt{ServiceRecommendationDto} \\*
+\hline
+\textbf{Operaciones Secundarias} & - \texttt{createPreliminaryWorkOrder(UUID vehicleId, UUID serviceId, String reason)} → \texttt{UUID} \newline - \texttt{isWorkshopCapacityAvailable(UUID tenantId, Instant preferredDate)} → \texttt{boolean} \\*
+\hline
+\textbf{Adaptador Concreto} & WorkshopOperationsAclAdapter consumiendo la fachada pública Inbound OHS de Workshop Operations MRO \\*
+\hline
+\textbf{Propósito Arquitectónico} & Traducir anomalías telemáticas físicas en paquetes de servicios mecánicos estandarizados y consultar disponibilidad operativa sin acoplarse al modelo interno de órdenes de trabajo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto / Capa Anticorrupción:} Crm\allowbreak Fleet\allowbreak Acl\allowbreak Service} \\*
+\hline
+\textbf{Operación Principal} & \texttt{getVehicleOwnerContact(UUID vehicleId)} → \texttt{VehicleOwnerContactDto} \\*
+\hline
+\textbf{Operaciones Secundarias} & - \texttt{isVehicleActiveInFleet(UUID vehicleId)} → \texttt{boolean} \newline - \texttt{getFleetManagerDeviceToken(UUID tenantId)} → \texttt{Optional<String>} \\*
+\hline
+\textbf{Adaptador Concreto} & CrmFleetAclAdapter consumiendo la fachada pública Inbound OHS de Customer and Fleet Management CRM \\*
+\hline
+\textbf{Propósito Arquitectónico} & Resolver la identidad del conductor y propietario del automóvil para el ruteo de alertas y salvaguardar la autonomía de datos de flotas corporativas. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto Especializado:} Timescale\allowbreak Batch\allowbreak Jdbc\allowbreak Client\allowbreak Port} \\*
+\hline
+\textbf{Operación Principal} & \texttt{saveAllBatch(List<TelemetryRecord> records)} → \texttt{int} \\*
+\hline
+\textbf{Operaciones Secundarias} & - \texttt{queryLatestRecord(UUID vehicleId)} → \texttt{Optional<TelemetryRecord>} \newline - \texttt{queryAggregates(UUID vehicleId, Instant from, Instant to, Duration bucket)} → \texttt{List<TelemetryBucketDto>} \\*
+\hline
+\textbf{Adaptador Concreto} & TimescaleBatchJdbcAdapter en la Capa de Infraestructura mediante Spring JdbcClient con inserciones preparadas por lotes \\*
+\hline
+\textbf{Propósito Arquitectónico} & Garantizar persistencia masiva de series temporales de alta velocidad en hipertablas de TimescaleDB con latencias sub-segundo aislando el código SQL nativo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto Especializado:} Vehicle\allowbreak Health\allowbreak Report\allowbreak Pdf\allowbreak Generator\allowbreak Port} \\*
+\hline
+\textbf{Operación Principal} & \texttt{generateHealthReportPdf(VehicleHealthReportAiDto report, VehicleMetadataDto metadata)} → \texttt{byte[]} \\*
+\hline
+\textbf{Operaciones Secundarias} & - \texttt{isTemplateAvailable(String templateVersion)} → \texttt{boolean} \newline - \texttt{getReportMetadata(UUID reportId)} → \texttt{ReportMetadataDto} \\*
+\hline
+\textbf{Adaptador Concreto} & VehicleHealthReportPdfGeneratorAdapter en la Capa de Infraestructura mediante plantillas XHTML procesadas por Thymeleaf y compilador binario OpenPDF \\*
+\hline
+\textbf{Propósito Arquitectónico} & Aislar la lógica de aplicación de las bibliotecas de maquetación documental tipográfica garantizando compilación determinista y desacoplada de informes periciales en formato PDF. \\
+\hline
+\end{longtable}
+*Nota.* Especificación formal de puertos salientes, pasarelas de infraestructura y Capas Anticorrupción de IoT Telemetry \& Predictive Maintenance.
+
+El desacoplamiento provisto por la Capa de Aplicación de IoT Telemetry & Predictive Maintenance asegura una orquestación fluida y resiliente de los procesos telemáticos del taller automotriz. Al estructurar los flujos bajo el patrón CQRS, el sistema canaliza ráfagas continuas de telemetría de cientos de automóviles en tránsito hacia hipertablas optimizadas en TimescaleDB sin introducir bloqueos transaccionales ni ralentizar las consultas analíticas del personal de servicio.
+
+Asimismo, la mediación de Capas Anticorrupción consolida una protección rigurosa frente a contingencias en proveedores externos y dependencias de red. Al confinar el protocolo de notificaciones push de Firebase Admin y las consultas de servicios de MRO detrás de adaptadores perimetrales, la plataforma garantiza que fallas transitorias de conectividad externa no interrumpan la captura sensorial ni corrompan el estado del dominio automotriz.
+
+Finalmente, la articulación de los manejadores de eventos con el ciclo transaccional posterior al commit garantiza una consistencia eventual intachable en toda la plataforma. Las anomalías de motor y advertencias predictivas se traducen de forma autónoma en oportunidades comerciales tangibles y citas preventivas, consolidando una sinergia operativa entre el monitoreo físico del vehículo y la gestión comercial del taller mecánico.
 
 
-#### 2.6.9.4 Infrastructure Layer
+
+#### 2.6.9.4. Infrastructure Layer
+
+La Capa de Infraestructura del Bounded Context **IoT Telemetry & Predictive Maintenance** (paquete canónico com.andeva.atelier.platform.iot.infrastructure) materializa el acceso físico a los mecanismos de persistencia híbrida, traduce las operaciones de los puertos de dominio hacia tecnologías de almacenamiento concretas y encapsula la interacción perimetral con plataformas en la nube y contextos satélite. En el entorno de la plataforma Atelier, esta capa soporta flujos masivos de telemetría automotriz generados en tiempo real por escáneres OBD-II y módems celulares, asegurando una ingesta continua sin penalizar el rendimiento del modelo relacional transaccional.
+
+La arquitectura de infraestructura descansa sobre cuatro pilares técnicos fundamentales:
+
+- **Persistencia híbrida relacional y de series temporales:** Convivencia armónica entre PostgreSQL 16 para entidades auditadas de inventario y sesiones de montaje, y la extensión TimescaleDB para la ingesta en ráfagas de series temporales en hipertablas particionadas por tiempo.
+- **Ingesta masiva de alto rendimiento con inserción por lotes:** Canalización de lecturas de sensores mediante un adaptador JDBC especializado que prescinde del seguimiento de estados de Hibernate en favor de operaciones por lotes de baja sobrecarga computacional.
+- **Reconstitución pura del modelo de dominio y transformación desacoplada:** Ensambladores de persistencia bidireccionales dedicados que hidratan agregados y objetos de valor inmutables sin disparar eventos de dominio espurios durante consultas operativas.
+- **Aislamiento perimetral y resiliencia en notificaciones push y clientes anticorrupción:** Despacho de advertencias críticas mediante el protocolo HTTP v1 de Google Firebase Cloud Messaging y consumo desacoplado en memoria de las fachadas de gestión de talleres y clientes.
+
+En la @tbl:iot-infrastructure-types se sintetiza el catálogo consolidado de clases, entidades de persistencia, adaptadores de repositorio, ensambladores y pasarelas que configuran este perímetro.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Catálogo Consolidado de la Capa de Infraestructura de IoT Telemetry \& Predictive Maintenance} \label{tbl:iot-infrastructure-types} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\
+\hline
+\endhead
+Obd2\allowbreak Device\allowbreak JpaEntity & Mapeo relacional del inventario físico de hardware telemático hacia la tabla obd2\_devices. \\*
+\hline
+\textbf{Categoría} & Entidad JPA \\*
+\hline
+\textbf{Relaciones} & Hereda de AuditableAbstractPersistenceEntity. Raíz de persistencia para escáneres con índice único sobre device\_identifier. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak entities} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Device\allowbreak Installation\allowbreak JpaEntity & Mapeo relacional de las sesiones de emparejamiento telemático hacia la tabla device\_installations. \\*
+\hline
+\textbf{Categoría} & Entidad JPA \\*
+\hline
+\textbf{Relaciones} & Hereda de AuditableAbstractPersistenceEntity. Claves foráneas lógicas hacia vehicle\_id y device\_id con índices de búsqueda. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak entities} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Telemetry\allowbreak Log\allowbreak JpaEntity & Mapeo relacional de series temporales de telemetría vehicular hacia la hipertabla telemetry\_logs. \\*
+\hline
+\textbf{Categoría} & Entidad JPA e Hipertabla \\*
+\hline
+\textbf{Relaciones} & Clave primaria compuesta TelemetryLogId sobre timestamp y vehicle\_id con índice temporal descendente en TimescaleDB. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak entities} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Vehicle\allowbreak Fault\allowbreak JpaEntity & Mapeo relacional del historial clínico y averías electrónicas hacia la tabla vehicle\_faults. \\*
+\hline
+\textbf{Categoría} & Entidad JPA \\*
+\hline
+\textbf{Relaciones} & Hereda de AuditableAbstractPersistenceEntity. Índice compuesto sobre vehicle\_id y estado de subsanación is\_resolved. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak entities} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Predictive\allowbreak Alert\allowbreak JpaEntity & Mapeo relacional de alertas preventivas y recomendaciones mecánicas hacia la tabla predictive\_alerts. \\*
+\hline
+\textbf{Categoría} & Entidad JPA \\*
+\hline
+\textbf{Relaciones} & Hereda de AuditableAbstractPersistenceEntity. Clave foránea opcional a orden de trabajo e índice por estado operativo. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak entities} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Dtc\allowbreak Catalog\allowbreak Entry\allowbreak JpaEntity & Mapeo relacional del catálogo canónico de fallas SAE J2012 e ISO 15031-6 hacia la tabla dtc\_catalog. \\*
+\hline
+\textbf{Categoría} & Entidad JPA \\*
+\hline
+\textbf{Relaciones} & Hereda de AuditableAbstractPersistenceEntity. Restricción de unicidad estricta sobre la columna dtc\_code. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak entities} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+SpringData\allowbreak Obd2\allowbreak Device\allowbreak Repository & Interfaz de persistencia Spring Data JPA para administración de dispositivos telemáticos del taller. \\*
+\hline
+\textbf{Categoría} & Repositorio JPA \\*
+\hline
+\textbf{Relaciones} & Extiende JpaRepository. Consultas unívocas por identificador físico y verificación de existencia por MAC o IMEI. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+SpringData\allowbreak Device\allowbreak Installation\allowbreak Repository & Interfaz de persistencia Spring Data JPA para control de instalaciones activas e histórico de montaje. \\*
+\hline
+\textbf{Categoría} & Repositorio JPA \\*
+\hline
+\textbf{Relaciones} & Extiende JpaRepository. Consultas por vehículo activo sin desinstalación y listado cronológico de sesiones vehiculares. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+SpringData\allowbreak Vehicle\allowbreak Fault\allowbreak Repository & Interfaz de persistencia Spring Data JPA para gestión de averías electrónicas y códigos DTC activos. \\*
+\hline
+\textbf{Categoría} & Repositorio JPA \\*
+\hline
+\textbf{Relaciones} & Extiende JpaRepository. Filtrado de fallas no subsanadas por vehículo y recuperación de historial de diagnósticos. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+SpringData\allowbreak Predictive\allowbreak Alert\allowbreak Repository & Interfaz de persistencia Spring Data JPA para administración de tableros de alertas de mantenimiento predictivo. \\*
+\hline
+\textbf{Categoría} & Repositorio JPA \\*
+\hline
+\textbf{Relaciones} & Extiende JpaRepository. Búsqueda de alertas por taller automotriz y estado operativo con ordenamiento cronológico. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+SpringData\allowbreak Dtc\allowbreak Catalog\allowbreak Repository & Interfaz de persistencia Spring Data JPA para consulta canónica de definiciones de diagnóstico automotriz. \\*
+\hline
+\textbf{Categoría} & Repositorio JPA \\*
+\hline
+\textbf{Relaciones} & Extiende JpaRepository. Búsqueda por código DTC normalizado y recuperación por categoría de subsistema vehicular. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Timescale\allowbreak Telemetry\allowbreak Jdbc\allowbreak Repository\allowbreak Impl & Adaptador de acceso a datos de alto rendimiento para inserción masiva en ráfagas sobre TimescaleDB. \\*
+\hline
+\textbf{Categoría} & Adaptador JDBC Batch \\*
+\hline
+\textbf{Relaciones} & Implementa TelemetryLogRepository empleando JdbcTemplate y Spring JdbcClient para inserciones y agregaciones temporales. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak timescale} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Obd2\allowbreak Device\allowbreak Repository\allowbreak Adapter & Adaptador secundario de salida que implementa el puerto de dominio Obd2DeviceRepository. \\*
+\hline
+\textbf{Categoría} & Adaptador de Persistencia \\*
+\hline
+\textbf{Relaciones} & Conecta el puerto de dominio con SpringDataObd2DeviceRepository delegando transformaciones en el ensamblador respectivo. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak adapters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Device\allowbreak Installation\allowbreak Repository\allowbreak Adapter & Adaptador secundario de salida que implementa el puerto de dominio DeviceInstallationRepository. \\*
+\hline
+\textbf{Categoría} & Adaptador de Persistencia \\*
+\hline
+\textbf{Relaciones} & Implementa DeviceInstallationRepository orquestando la persistencia relacional y consultas de sesiones activas. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak adapters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Vehicle\allowbreak Fault\allowbreak Repository\allowbreak Adapter & Adaptador secundario de salida que implementa el puerto de dominio VehicleFaultRepository. \\*
+\hline
+\textbf{Categoría} & Adaptador de Persistencia \\*
+\hline
+\textbf{Relaciones} & Implementa VehicleFaultRepository persistiendo anomalías electrónicas y facilitando consultas de fallas abiertas. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak adapters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Predictive\allowbreak Alert\allowbreak Repository\allowbreak Adapter & Adaptador secundario de salida que implementa el puerto de dominio PredictiveAlertRepository. \\*
+\hline
+\textbf{Categoría} & Adaptador de Persistencia \\*
+\hline
+\textbf{Relaciones} & Implementa PredictiveAlertRepository gestionando el ciclo de vida de advertencias y vinculaciones con órdenes de servicio. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak adapters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Dtc\allowbreak Catalog\allowbreak Repository\allowbreak Adapter & Adaptador secundario de salida que implementa el puerto de dominio DtcCatalogRepository. \\*
+\hline
+\textbf{Categoría} & Adaptador de Persistencia \\*
+\hline
+\textbf{Relaciones} & Implementa DtcCatalogRepository resolviendo descripciones en español y severidades predeterminadas de diagnóstico. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak adapters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Obd2\allowbreak Device\allowbreak Persistence\allowbreak Assembler & Ensamblador de datos para transformación bidireccional entre el agregado Obd2Device y su entidad JPA. \\*
+\hline
+\textbf{Categoría} & Ensamblador de Persistencia \\*
+\hline
+\textbf{Relaciones} & Mapea identificadores tipados y estados de hardware reconstituyendo agregados sin emitir eventos espurios. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak assemblers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Device\allowbreak Installation\allowbreak Persistence\allowbreak Assembler & Ensamblador para transformación bidireccional entre DeviceInstallation y DeviceInstallationJpaEntity. \\*
+\hline
+\textbf{Categoría} & Ensamblador de Persistencia \\*
+\hline
+\textbf{Relaciones} & Desempaqueta lecturas de odómetro en kilómetros y fechas Instant en UTC preservando invariantes de instalación. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak assemblers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Vehicle\allowbreak Fault\allowbreak Persistence\allowbreak Assembler & Ensamblador para transformación bidireccional entre VehicleFault y VehicleFaultJpaEntity. \\*
+\hline
+\textbf{Categoría} & Ensamblador de Persistencia \\*
+\hline
+\textbf{Relaciones} & Transforma códigos DTC y niveles de severidad reconstituyendo la entidad de avería con marcas temporales exactas. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak assemblers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Predictive\allowbreak Alert\allowbreak Persistence\allowbreak Assembler & Ensamblador para transformación bidireccional entre PredictiveAlert y PredictiveAlertJpaEntity. \\*
+\hline
+\textbf{Categoría} & Ensamblador de Persistencia \\*
+\hline
+\textbf{Relaciones} & Mapea niveles de confianza de pronóstico y referencias a servicios de taller recomendados en el dominio. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak assemblers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Dtc\allowbreak Catalog\allowbreak Persistence\allowbreak Assembler & Ensamblador para transformación bidireccional entre DtcCatalogEntry y DtcCatalogEntryJpaEntity. \\*
+\hline
+\textbf{Categoría} & Ensamblador de Persistencia \\*
+\hline
+\textbf{Relaciones} & Traduce registros canónicos de normas automotrices aislando la lógica de dominio del esquema físico relacional. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak assemblers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Firebase\allowbreak Cloud\allowbreak Messaging\allowbreak Gateway\allowbreak Impl & Pasarela perimetral de notificaciones push de alta prioridad hacia terminales móviles de conductores y talleres. \\*
+\hline
+\textbf{Categoría} & Pasarela Cloud de Notificaciones \\*
+\hline
+\textbf{Relaciones} & Implementa FirebaseCloudMessagingGateway utilizando el SDK de Google Firebase Admin con protocolo HTTP v1 seguro. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak infrastructure.\allowbreak gateways} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Workshop\allowbreak Operations\allowbreak Acl\allowbreak Adapter & Adaptador de cliente remoto hacia Workshop Operations para mapeo de averías hacia servicios de taller. \\*
+\hline
+\textbf{Categoría} & Adaptador de Integración Intermodular \\*
+\hline
+\textbf{Relaciones} & Implementa OperationsAclService consumiendo WorkshopOperationsContextFacade bajo el patrón Open Host Service. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak infrastructure.\allowbreak acl} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Crm\allowbreak Fleet\allowbreak Acl\allowbreak Adapter & Adaptador de cliente remoto hacia Customer and Fleet Management para recuperación de tokens móviles. \\*
+\hline
+\textbf{Categoría} & Adaptador de Integración Intermodular \\*
+\hline
+\textbf{Relaciones} & Implementa CrmFleetAclService consumiendo CustomerContextFacade sin generar acoplamiento físico en base de datos. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak infrastructure.\allowbreak acl} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Vehicle\allowbreak Health\allowbreak Report\allowbreak Pdf\allowbreak Generator\allowbreak Adapter & Adaptador de salida perimetral para renderizado y compilación de informes de salud en documentos PDF. \\*
+\hline
+\textbf{Categoría} & Adaptador de Renderizado y Exportación Documental \\*
+\hline
+\textbf{Relaciones} & Implementa VehicleHealthReportPdfGeneratorPort. Procesa plantillas XHTML con Thymeleaf y compila el flujo binario con OpenPDF. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak infrastructure.\allowbreak reporting} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Vehicle\allowbreak Health\allowbreak Ai\allowbreak Diagnostic\allowbreak Service & Adaptador de inferencia de inteligencia artificial que sintetiza telemetría y averías en diagnósticos estructurados. \\*
+\hline
+\textbf{Categoría} & Adaptador de Inteligencia Artificial \\*
+\hline
+\textbf{Relaciones} & Utiliza Spring AI ChatClient con BeanOutputConverter consumiendo agregaciones de TimescaleDB e historial de fallas SAE J2012. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak infrastructure.\allowbreak ai} \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes pertenecientes al paquete canónico com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak iot.\allowbreak infrastructure.
+
+**Entidades de Persistencia JPA, Hipertabla Temporal y Esquema Relacional Físico**
+
+El modelado relacional de persistencia reproduce fielmente la topología telemática y automotriz del dominio mediante cinco entidades JPA transaccionales y una hipertabla de series temporales en PostgreSQL 16 con TimescaleDB. La entidad **Obd2DeviceJpaEntity** mapea el hardware físico hacia la tabla **obd2_devices**, extendiendo de la clase abstracta de auditoría para registrar marcas temporales y versiones de control de concurrencia optimista. Por su parte, **DeviceInstallationJpaEntity** custodia en la tabla **device_installations** el historial cronológico de emparejamiento entre escáneres y vehículos, resguardando lecturas de odómetro inicial y final en kilómetros.
+
+A su vez, **TelemetryLogJpaEntity** estructura el almacenamiento masivo sobre la hipertabla **telemetry_logs**, particionada automáticamente por intervalos de tiempo sobre la marca temporal UTC y respaldada por una clave primaria compuesta sobre el instante de captura y el identificador vehicular. Para el diagnóstico electrónico, **VehicleFaultJpaEntity** registra en la tabla **vehicle_faults** las averías bajo el estándar SAE J2012, mientras que **PredictiveAlertJpaEntity** custodia en **predictive_alerts** los pronósticos de degradación mecánica con índices de confianza analíticos. Finalmente, **DtcCatalogEntryJpaEntity** normaliza el catálogo de definiciones automotrices en la tabla **dtc_catalog**. En la @tbl:iot-jpa-entities se detallan los esquemas relacionales, claves primarias, índices B-Tree y restricciones de estas entidades.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Especificación Relacional de Entidades JPA e Hipertabla de IoT Telemetry \& Predictive Maintenance} \label{tbl:iot-jpa-entities} \\
+\hline
+\thfirst{Aspecto de Persistencia} & \thcell{Especificación Físico-Relacional} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Persistencia} & \thcell{Especificación Físico-Relacional} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} Obd2DeviceJpaEntity \quad (\textit{Tabla:} \texttt{obd2\_devices})} \\*
+\hline
+\textbf{Clave Primaria} & \texttt{id (UUID)} \\*
+\hline
+\textbf{Columnas Principales} & \texttt{tenant\_id}, \texttt{device\_identifier}, \texttt{connection\_type}, \texttt{status}, \texttt{hardware\_model}, \texttt{firmware\_version}, \texttt{created\_at}, \texttt{updated\_at}, \texttt{version}, \texttt{deleted\_at} \\*
+\hline
+\textbf{Restricciones e Índices} & Restricción de unicidad estricta uk\_obd2\_devices\_identifier sobre la columna device\_identifier. Restricciones de verificación chk\_device\_conn\_type y chk\_device\_status para dominios de valores válidos. Índice B-Tree idx\_devices\_tenant\_status sobre (tenant\_id, status) para filtrado ágil de escáneres disponibles en patio de taller. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} DeviceInstallationJpaEntity \quad (\textit{Tabla:} \texttt{device\_installations})} \\*
+\hline
+\textbf{Clave Primaria} & \texttt{id (UUID)} \\*
+\hline
+\textbf{Columnas Principales} & \texttt{tenant\_id}, \texttt{device\_id}, \texttt{vehicle\_id}, \texttt{installed\_at}, \texttt{uninstalled\_at}, \texttt{initial\_odometer\_km}, \texttt{final\_odometer\_km}, \texttt{created\_at}, \texttt{updated\_at}, \texttt{version}, \texttt{deleted\_at} \\*
+\hline
+\textbf{Restricciones e Índices} & Claves foráneas fk\_installations\_device hacia obd2\_devices y fk\_installations\_vehicle hacia el módulo vehicular. Restricción de verificación chk\_odometer\_positive sobre kilometrajes no negativos y chk\_uninstalled\_after\_installed para consistencia cronológica. Índices B-Tree idx\_installations\_vehicle sobre vehicle\_id e idx\_installations\_device sobre device\_id para resolución inmediata de sesiones activas. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA e Hipertabla:} TelemetryLogJpaEntity \quad (\textit{Hipertabla TimescaleDB:} \texttt{telemetry\_logs})} \\*
+\hline
+\textbf{Clave Primaria} & Clave compuesta \texttt{TelemetryLogId(timestamp TIMESTAMPTZ, vehicle\_id UUID)} \\*
+\hline
+\textbf{Columnas Principales} & \texttt{timestamp}, \texttt{vehicle\_id}, \texttt{tenant\_id}, \texttt{latitude}, \texttt{longitude}, \texttt{speed}, \texttt{engine\_temp\_c}, \texttt{rpm}, \texttt{fuel\_level}, \texttt{battery\_voltage} \\*
+\hline
+\textbf{Restricciones e Índices} & Hipertabla particionada automáticamente en bloques temporales de siete días mediante la función create\_hypertable de TimescaleDB. Índice temporal descendente idx\_telemetry\_tenant\_time sobre las columnas (tenant\_id, timestamp DESC). Política de compresión columnar activa sobre segmentos (vehicle\_id, tenant\_id) para particiones con antigüedad superior a treinta días. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} VehicleFaultJpaEntity \quad (\textit{Tabla:} \texttt{vehicle\_faults})} \\*
+\hline
+\textbf{Clave Primaria} & \texttt{id (UUID)} \\*
+\hline
+\textbf{Columnas Principales} & \texttt{tenant\_id}, \texttt{vehicle\_id}, \texttt{dtc\_code}, \texttt{severity}, \texttt{description}, \texttt{detected\_at}, \texttt{is\_resolved}, \texttt{resolved\_at}, \texttt{created\_at}, \texttt{updated\_at}, \texttt{version}, \texttt{deleted\_at} \\*
+\hline
+\textbf{Restricciones e Índices} & Clave foránea fk\_faults\_vehicle hacia el registro automotriz. Restricción de verificación chk\_fault\_severity sobre valores LOW, MEDIUM, HIGH y CRITICAL. Índice B-Tree idx\_faults\_vehicle\_active sobre (vehicle\_id, is\_resolved) para inspección inmediata de fallas mecánicas abiertas durante el servicio en bahía. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} PredictiveAlertJpaEntity \quad (\textit{Tabla:} \texttt{predictive\_alerts})} \\*
+\hline
+\textbf{Clave Primaria} & \texttt{id (UUID)} \\*
+\hline
+\textbf{Columnas Principales} & \texttt{tenant\_id}, \texttt{vehicle\_id}, \texttt{recommended\_service\_id}, \texttt{alert\_type}, \texttt{confidence\_score}, \texttt{message}, \texttt{status}, \texttt{fcm\_message\_id}, \texttt{created\_at}, \texttt{updated\_at}, \texttt{version}, \texttt{deleted\_at} \\*
+\hline
+\textbf{Restricciones e Índices} & Restricción de verificación chk\_confidence\_range que asegura un índice de certeza entre 0.00 y 1.00. Índices B-Tree idx\_alerts\_vehicle sobre vehicle\_id e idx\_alerts\_tenant\_status sobre (tenant\_id, status) para alimentar tableros de advertencia en tiempo real. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} DtcCatalogEntryJpaEntity \quad (\textit{Tabla:} \texttt{dtc\_catalog})} \\*
+\hline
+\textbf{Clave Primaria} & \texttt{id (UUID)} \\*
+\hline
+\textbf{Columnas Principales} & \texttt{dtc\_code}, \texttt{system\_category}, \texttt{description\_es}, \texttt{description\_en}, \texttt{default\_severity}, \texttt{is\_critical}, \texttt{created\_at}, \texttt{updated\_at}, \texttt{version}, \texttt{deleted\_at} \\*
+\hline
+\textbf{Restricciones e Índices} & Restricción de unicidad estricta uk\_dtc\_catalog\_code sobre la columna dtc\_code. Índice B-Tree idx\_dtc\_category sobre system\_category para clasificaciones por subsistemas motrices, tren de fuerza, carrocería y chasis. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Especificación relacional en PostgreSQL 16 y extensión TimescaleDB bajo Aiven Cloud.
+
+**Repositorios Spring Data JPA y Adaptador de Persistencia en TimescaleDB**
+
+La mediación entre los contratos abstractos de persistencia del dominio y las operaciones físicas de base de datos se articula mediante interfaces Spring Data JPA y adaptadores de repositorio. El adaptador **Obd2DeviceRepositoryAdapter** implementa el puerto de dominio **Obd2DeviceRepository**, canalizando consultas derivadas por identificador físico de hardware o taller automotriz. Del mismo modo, **DeviceInstallationRepositoryAdapter** resuelve las sesiones activas de escáner en vehículos mediante métodos optimizados en **SpringDataDeviceInstallationRepository**, garantizando que una unidad automotriz no posea dos dispositivos montados simultáneamente.
+
+Asimismo, **VehicleFaultRepositoryAdapter** y **PredictiveAlertRepositoryAdapter** gestionan el almacenamiento de anomalías y advertencias mecánicas, ofreciendo filtros por taller, vehículo y estado operativo para alimentar los tableros de control en bahía. Para la persistencia de alto flujo de mediciones telemáticas, el adaptador **TimescaleTelemetryJdbcRepositoryImpl** implementa **TelemetryLogRepository** utilizando **JdbcTemplate** y sentencias SQL parametrizadas por lotes. Este componente elude deliberadamente el ciclo de vida de entidades JPA para insertar ráfagas de cincuenta a cien registros en un único viaje de red hacia el motor de base de datos. En la @tbl:iot-repository-adapters se detallan los puertos de dominio, repositorios inyectados y operaciones provistas.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Adaptadores de Persistencia y Puertos de Dominio de IoT Telemetry \& Predictive Maintenance} \label{tbl:iot-repository-adapters} \\
+\hline
+\thfirst{Aspecto de Adaptador} & \thcell{Especificación Técnica y Persistencia} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Adaptador} & \thcell{Especificación Técnica y Persistencia} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} Obd2DeviceRepositoryAdapter} \\*
+\hline
+\textbf{Puerto de Dominio} & \texttt{Obd2DeviceRepository} \\*
+\hline
+\textbf{Repositorio Inyectado} & \texttt{SpringDataObd2DeviceRepository} \\*
+\hline
+\textbf{Operaciones Clave} & Conecta el modelo de dominio con la base de datos relacional mediante Obd2DevicePersistenceAssembler. Provee métodos *save()* para alta y actualización de escáneres, *findById()* para hidratación por clave universal, *findByDeviceIdentifier()* para validación por código de fábrica y *existsByDeviceIdentifier()* para cerrojos de concurrencia. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} DeviceInstallationRepositoryAdapter} \\*
+\hline
+\textbf{Puerto de Dominio} & \texttt{DeviceInstallationRepository} \\*
+\hline
+\textbf{Repositorio Inyectado} & \texttt{SpringDataDeviceInstallationRepository} \\*
+\hline
+\textbf{Operaciones Clave} & Administra la persistencia de sesiones de instalación vehicular en la tabla device\_installations. Provee métodos *save()* para iniciar o cerrar emparejamientos, *findActiveByVehicleId()* para resolver el escáner montado actualmente en la unidad y *findAllByVehicleId()* para auditoría histórica de intervenciones. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} VehicleFaultRepositoryAdapter} \\*
+\hline
+\textbf{Puerto de Dominio} & \texttt{VehicleFaultRepository} \\*
+\hline
+\textbf{Repositorio Inyectado} & \texttt{SpringDataVehicleFaultRepository} \\*
+\hline
+\textbf{Operaciones Clave} & Persiste las averías electrónicas automotrices registradas en vehicle\_faults. Provee métodos *save()* para registrar o marcar como resuelta una falla, *findById()* para consulta puntual de avería y *findAllActiveByVehicleId()* optimizado para desplegar diagnósticos pendientes en el tacómetro de taller. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} PredictiveAlertRepositoryAdapter} \\*
+\hline
+\textbf{Puerto de Dominio} & \texttt{PredictiveAlertRepository} \\*
+\hline
+\textbf{Repositorio Inyectado} & \texttt{SpringDataPredictiveAlertRepository} \\*
+\hline
+\textbf{Operaciones Clave} & Custodia el ciclo de vida de advertencias mecánicas preventivas en predictive\_alerts. Provee métodos *save()* para almacenamiento con identificador de mensaje push, *findAllByVehicleId()* para la cronología clínica de la unidad y *findAllByTenantIdAndStatus()* para alimentar consolas de despacho en taller. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} DtcCatalogRepositoryAdapter} \\*
+\hline
+\textbf{Puerto de Dominio} & \texttt{DtcCatalogRepository} \\*
+\hline
+\textbf{Repositorio Inyectado} & \texttt{SpringDataDtcCatalogRepository} \\*
+\hline
+\textbf{Operaciones Clave} & Provee acceso canónico a las descripciones estandarizadas de fallas automotrices. Provee métodos *findByDtcCode()* para traducir códigos alfanuméricos de cinco caracteres a definiciones en español, *findAllBySystemCategory()* para inspecciones por subsistema y *existsByDtcCode()* para verificaciones de catálogo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} TimescaleTelemetryJdbcRepositoryImpl} \\*
+\hline
+\textbf{Puerto de Dominio} & \texttt{TelemetryLogRepository} \\*
+\hline
+\textbf{Tecnología y Cliente} & Spring JdbcClient y JdbcTemplate sobre PostgreSQL 16 con extensión TimescaleDB. \\*
+\hline
+\textbf{Operaciones Clave} & Adaptador de alto rendimiento para flujos telemáticos masivos. Ejecuta *saveAllBatch()* insertando ráfagas completas de lecturas mediante sentencias SQL por lotes y *findLatestByVehicleId()* recuperando en microsegundos la última métrica de motor de cada unidad automotriz registrada. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Clases ubicadas bajo el paquete canónico com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak iot.\allowbreak infrastructure.\allowbreak persistence.
+
+**Ensambladores de Persistencia y Transformación Desacoplada de Datos**
+
+El desacoplamiento estricto entre el esquema físico relacional y los tipos puros del dominio se materializa mediante ensambladores de persistencia bidireccionales. El componente **Obd2DevicePersistenceAssembler** traduce el agregado **Obd2Device** hacia su entidad relacional desempaquetando identificadores fuertemente tipados y enumeraciones de conectividad, al tiempo que restaura agregados puros mediante métodos de fábrica sin disparar eventos de dominio espurios durante consultas. De forma idéntica, **DeviceInstallationPersistenceAssembler** descompone los objetos de valor de odómetro hacia tipos numéricos escalares y garantiza la integridad de marcas temporales Instant en UTC.
+
+Por su parte, **VehicleFaultPersistenceAssembler** y **PredictiveAlertPersistenceAssembler** restauran entidades de avería y alerta preventiva, transformando cadenas DTC alfanuméricas, niveles de severidad y porcentajes de confianza sin alterar las reglas de encapsulamiento del modelo. Para el catálogo de diagnósticos, **DtcCatalogPersistenceAssembler** traduce registros normativos SAE hacia representaciones inmutables de dominio. Finalmente, **TelemetryRecordPersistenceAssembler** descompone lecturas inmutables de velocidad, temperatura de refrigerante, régimen de revoluciones por minuto y tensión de batería en parámetros posicionales SQL para su despacho por lotes. En la @tbl:iot-persistence-assemblers se describen las transformaciones y mapeos de tipos implementados por estos componentes.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Ensambladores de Persistencia y Convertidores JPA de IoT Telemetry \& Predictive Maintenance} \label{tbl:iot-persistence-assemblers} \\
+\hline
+\thfirst{Aspecto de Mapeo} & \thcell{Tipos Relacionados y Transformación} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Mapeo} & \thcell{Tipos Relacionados y Transformación} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador de Persistencia:} Obd2DevicePersistenceAssembler} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{Obd2Device} $\longleftrightarrow$ \texttt{Obd2DeviceJpaEntity} \\*
+\hline
+\textbf{Transformación} & Traduce identificadores fuertemente tipados DeviceId, TenantId y DeviceIdentifier hacia valores UUID y cadenas alfanuméricas. Convierte los enumerados ConnectionType y DeviceStatus hacia representaciones estándar VARCHAR. Reconstituye el agregado puro protegiendo sus invariantes de fábrica sin emitir eventos espurios. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador de Persistencia:} DeviceInstallationPersistenceAssembler} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{DeviceInstallation} $\longleftrightarrow$ \texttt{DeviceInstallationJpaEntity} \\*
+\hline
+\textbf{Transformación} & Descompone los objetos de valor Odometer inicial y final en columnas numéricas enteras. Convierte marcas temporales a objetos Instant en UTC. Reconstituye agregados de instalación validando la consistencia temporal entre la fecha de montaje y la fecha de desinstalación. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador de Persistencia:} VehicleFaultPersistenceAssembler} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{VehicleFault} $\longleftrightarrow$ \texttt{VehicleFaultJpaEntity} \\*
+\hline
+\textbf{Transformación} & Mapea objetos de valor DtcCode y FaultSeverity hacia tipos relacionales normalizados. Preserva el estado booleano de resolución y marcas temporales de subsanación. Reconstituye la entidad de dominio manteniendo intacto el identificador de orden de trabajo vinculada. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador de Persistencia:} PredictiveAlertPersistenceAssembler} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{PredictiveAlert} $\longleftrightarrow$ \texttt{PredictiveAlertJpaEntity} \\*
+\hline
+\textbf{Transformación} & Desempaqueta el objeto de valor ConfidenceScore hacia una columna escalar BigDecimal con dos decimales de precisión. Mapea tipos de advertencia AlertType y estados AlertStatus. Preserva el identificador de despacho FCM para auditoría de entrega push. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador de Persistencia:} DtcCatalogPersistenceAssembler} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{DtcCatalogEntry} $\longleftrightarrow$ \texttt{DtcCatalogEntryJpaEntity} \\*
+\hline
+\textbf{Transformación} & Mapea códigos de falla normalizados de cinco caracteres, descripciones oficiales en español e inglés, y niveles de severidad predeterminados. Convierte banderas booleanas de criticidad y resguarda la inmutabilidad del catálogo automotriz. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador de Persistencia:} TelemetryRecordPersistenceAssembler} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{TelemetryRecord} $\longleftrightarrow$ \texttt{Filas SQL de Hipertabla telemetry\_logs} \\*
+\hline
+\textbf{Transformación} & Descompone objetos inmutables SpeedKmh, EngineTemperature, EngineRpm, FuelLevel, BatteryVoltage y GeoLocation en parámetros posicionales SQL optimizados para inserción en ráfagas batch mediante el cliente JDBC de TimescaleDB. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes ubicados bajo com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak iot.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak assemblers.
+
+**Pasarelas Telemáticas Externas, Integración Cloud y Clientes Anticorrupción**
+
+La interacción con servicios externos en la nube, motores analíticos de inferencia pericial y contextos satélite de la plataforma Atelier se gestiona a través de pasarelas perimetrales y clientes anticorrupción que implementan los puertos de salida de la capa de aplicación. El componente **FirebaseCloudMessagingGatewayImpl** encapsula las llamadas al servicio Google Firebase Cloud Messaging v1 mediante el SDK oficial de administración, estructurando notificaciones push con prioridad alta para alertar a conductores y mecánicos ante anomalías críticas de motor. Esta pasarela incorpora aislamiento de fallos y reintentos automáticos, evitando que eventuales demoras en la red de mensajería degraden el flujo de procesamiento telemático central.
+
+En el ámbito de la inteligencia artificial estructurada y exportación pericial, **VehicleHealthAiDiagnosticService** encapsula la interacción con modelos fundacionales mediante Spring AI ChatClient, transformando tendencias telemáticas extraídas de TimescaleDB e historial DTC en diagnósticos deterministas y tipados en registros inmutables. Complementariamente, **VehicleHealthReportPdfGeneratorAdapter** procesa plantillas XHTML con Thymeleaf y genera binarios PDF mediante OpenPDF con membrete institucional. Asimismo, **WorkshopOperationsAclAdapter** consume en memoria la fachada del contexto de operaciones de taller bajo el patrón Open Host Service, permitiendo mapear códigos de avería hacia servicios de mantenimiento preconcebidos sin generar acoplamiento físico en base de datos. Por su parte, **CrmFleetAclAdapter** consulta la fachada de clientes y flotas para resolver tokens de notificación móvil. Por último, la configuración de hipertablas de TimescaleDB establece intervalos de partición de siete días y compresión columnar. En la @tbl:iot-external-infrastructure se resumen las tecnologías y directrices de resiliencia de estos adaptadores.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
+\caption{Pasarelas Telemáticas Externas, Integración Cloud y Clientes ACL de IoT Telemetry \& Predictive Maintenance} \label{tbl:iot-external-infrastructure} \\
+\hline
+\thfirst{Componente de Integración} & \thcell{Especificación Técnica y Resiliencia} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Componente de Integración} & \thcell{Especificación Técnica y Resiliencia} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Pasarela Cloud:} FirebaseCloudMessagingGatewayImpl} \\*
+\hline
+\textbf{Puerto Implementado} & \texttt{FirebaseCloudMessagingGateway} \\*
+\hline
+\textbf{Tecnología y Cliente} & SDK oficial de Google Firebase Admin v9 mediante protocolo seguro HTTP v1. \\*
+\hline
+\textbf{Operaciones y Resiliencia} & Despacha notificaciones push de alta prioridad con cargas útiles estructuradas hacia terminales móviles de conductores y jefes de taller. Incorpora reintentos exponenciales automáticos y aislamiento de fallos para evitar que demoras en la red de Google degraden la ingesta telemática central. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador ACL:} WorkshopOperationsAclAdapter} \\*
+\hline
+\textbf{Puerto Implementado} & \texttt{OperationsAclService} \\*
+\hline
+\textbf{Tecnología y Cliente} & Fachada pública de contexto WorkshopOperationsContextFacade consumida en memoria. \\*
+\hline
+\textbf{Operaciones y Resiliencia} & Mapea códigos de diagnóstico vehicular hacia paquetes de servicio preventivo del taller mediante el método *findRecommendedServiceIdByDtcCode()*. Garantiza cero acoplamiento físico en base de datos y provee tolerancia ante ausencia transitoria del catálogo operativo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador ACL:} CrmFleetAclAdapter} \\*
+\hline
+\textbf{Puerto Implementado} & \texttt{CrmFleetAclService} \\*
+\hline
+\textbf{Tecnología y Cliente} & Fachada pública de contexto CustomerContextFacade consumida en memoria. \\*
+\hline
+\textbf{Operaciones y Resiliencia} & Resuelve tokens móviles FCM de los propietarios y conductores asignados a la unidad vehicular consultando la fachada en memoria del cliente. Asegura que las advertencias predictivas alcancen oportunamente el dispositivo personal del titular del vehículo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Configuración de Motor:} TimescaleDbHypertableConfig} \\*
+\hline
+\textbf{Puerto Implementado} & \texttt{Configuración de Base de Datos y Políticas de Almacenamiento Temporal} \\*
+\hline
+\textbf{Tecnología y Cliente} & Extensión nativa TimescaleDB 2.14 ejecutándose sobre PostgreSQL 16 en clúster gestionado Aiven Cloud. \\*
+\hline
+\textbf{Operaciones y Resiliencia} & Particiona series temporales en chunks de siete días optimizando memoria de trabajo. Activa compresión columnar automática para registros mayores a treinta días reduciendo el consumo en disco hasta en un noventa por ciento y acelerando consultas analíticas agregadas. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador de Reportes:} Vehicle\allowbreak Health\allowbreak Report\allowbreak Pdf\allowbreak Generator\allowbreak Adapter} \\*
+\hline
+\textbf{Puerto Implementado} & \texttt{VehicleHealthReportPdfGeneratorPort} \\*
+\hline
+\textbf{Tecnología y Cliente} & Motor de plantillas XHTML Thymeleaf 3.1 y biblioteca de renderizado OpenPDF 1.3 mediante canalización en memoria. \\*
+\hline
+\textbf{Operaciones y Resiliencia} & Compila el informe pericial estructurado en formato binario PDF aplicando maquetación institucional con membrete del taller, semáforos cromáticos de salud mecánica y cotizaciones sugeridas. Incorpora manejo de excepciones de renderizado para eludir fugas de memoria y asegurar descargas atómicas. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Motor de IA Generativa:} Vehicle\allowbreak Health\allowbreak Ai\allowbreak Diagnostic\allowbreak Service} \\*
+\hline
+\textbf{Puerto Implementado} & Servicio perimetral de diagnóstico y salud mecánica estructurada \\*
+\hline
+\textbf{Tecnología y Cliente} & Framework Spring AI con ChatClient y modelo GPT-4o-mini bajo BeanOutputConverter para serialización tipada en Java 21 Records. \\*
+\hline
+\textbf{Operaciones y Resiliencia} & Analiza vectores telemáticos agregados de TimescaleDB y averías SAE J2012 emitiendo dictámenes analíticos deterministas con control estricto de temperatura fijado en 0.1 y políticas de reintento automático con respaldo determinista ante contingencias de red. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Adaptadores de infraestructura perimetral bajo com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak iot.\allowbreak infrastructure.
+
+El diseño de la Capa de Infraestructura de IoT Telemetry & Predictive Maintenance asegura el aislamiento completo entre el flujo continuo de ingesta de señales automotrices y las transacciones comerciales de la plataforma Atelier. Al desacoplar la persistencia temporal en TimescaleDB de las entidades de auditoría relacionales en PostgreSQL 16, el sistema preserva la estabilidad operativa del motor principal incluso ante ráfagas simultáneas emitidas por cientos de vehículos conectados en ruta o terminales móviles en talleres de patio.
+
+Asimismo, la sustitución deliberada de Hibernate por inserciones directas mediante operaciones por lotes en el adaptador telemático permite procesar ráfagas de lecturas con una sobrecarga de memoria mínima y tiempos de inserción en base de datos del orden de microsegundos. Este enfoque de alto rendimiento garantiza que los algoritmos de detección de anomalías dispongan de datos actualizados sin provocar contención de bloqueos relacionales sobre las tablas de inventario físico o sesiones de montaje.
+
+Esta arquitectura perimetral se extiende hacia las terminales móviles de patio y cabina vehicular en las aplicaciones cliente Atelier Workshop y Atelier Driver. Ante pérdidas transitorias de cobertura celular en carretera o zonas ciegas del taller, los dispositivos resguardan las lecturas sensoriales en una base de datos local SQLite 3 gestionada mediante Room en Android y Drift en Flutter, ejecutando una sincronización masiva en bloque hacia el adaptador telemático tan pronto se restablece el enlace de red.
+
+Finalmente, la integración perimetral con Firebase Cloud Messaging y las capas anticorrupción hacia los contextos de taller y clientes consolidan un ecosistema predictivo verdaderamente reactivo. La detección inmediata de averías mecánicas críticas desencadena notificaciones push hacia los dispositivos móviles de los conductores en cuestión de milisegundos, vinculando automáticamente recomendaciones de servicio preventivo que optimizan la gestión de citas en los talleres automotrices y mitigan el riesgo de fallas catastróficas en carretera.
 
 
 
 #### 2.6.9.5. Bounded Context Software Architecture Component Level Diagrams
 
+En esta sección se presenta la descomposición arquitectónica interna del contenedor central **API Application** en relación con el Bounded Context **IoT Telemetry & Predictive Maintenance**, bajo el paquete canónico com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak iot, dando estricto cumplimiento al Nivel 3 del Modelo C4.
+
+Dentro de la arquitectura de monolito modular de Atelier Platform, el Bounded Context IoT Telemetry & Predictive Maintenance opera como el centro de ingesta masiva de señales automotrices, procesamiento analítico en tiempo real y gobierno de alertas preventivas. Su diseño táctico garantiza la captura ininterrumpida de ráfagas de telemetría emitidas por adaptadores físicos OBD-II y módems celulares, previene degradaciones de rendimiento en el esquema transaccional mediante el uso de hipertablas temporales en TimescaleDB, e infiere anomalías de motor en milisegundos mediante motores de evaluación analítica desacoplados.
+
+Todos los controladores perimetrales, servicios de aplicación CQRS, manejadores de eventos, motores analíticos de inferencia predictiva, repositorios de persistencia híbrida y fachadas en memoria se articulan de manera armónica para brindar una experiencia reactiva y confiable a las estaciones de trabajo de taller, terminales móviles de mecánicos y conductores en carretera.
+
+En la @tbl:iot-c4-components se presenta el catálogo estructurado de los siete componentes de software constitutivos del Bounded Context IoT Telemetry & Predictive Maintenance dentro del contenedor central de la aplicación.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{4.5cm} | >{\raggedright\arraybackslash}p{10.9cm} |}
+\caption{Catálogo de Componentes de Arquitectura de Software del Bounded Context IoT Telemetry \& Predictive Maintenance} \label{tbl:iot-c4-components} \\
+\hline
+\thfirst{Aspecto Técnico} & \thcell{Especificación de Arquitectura} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto Técnico} & \thcell{Especificación de Arquitectura} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} IoT REST Controllers \& Resource Assemblers Component} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & Spring MVC, SpringDoc OpenAPI, Jakarta Validation, Spring HATEOAS \\*
+\hline
+\textbf{Responsabilidad} & Expone endpoints REST perimetrales para ingesta masiva por lotes de telemetría vehicular, aprovisionamiento de adaptadores OBD-II, sesiones de montaje en vehículos, consulta de averías electrónicas, tablero de advertencias predictivas y generación pericial de informes de salud vehicular con descarga binaria en formato PDF. Valida contratos DTO mediante Jakarta Validation, canaliza errores con Problem Details bajo RFC 7807 y proyecta representaciones hipermedia enriquecidas. \\*
+\hline
+\textbf{Relaciones} & Invocado por módems celulares con tarjeta SIM en vehículos vía HTTP POST masivo, y por Web Application, Mobile Workshop y Mobile Driver mediante peticiones HTTPS seguras para consulta operativa y descarga de reportes clínicos. Despacha comandos de ingesta, montaje físico, resolución de averías y generación de informes periciales hacia IoT CQRS Application Services Component. Emplea ensambladores de recursos REST para transformar modelos de dominio en representaciones hipermedia. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} IoT CQRS Application Services Component} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & Spring Service, Transactional, CQRS, Java 21 Records \\*
+\hline
+\textbf{Responsabilidad} & Orquesta casos de uso transaccionales de ingesta de señales telemáticas, emparejamiento físico de escáneres, resolución de averías DTC, despacho de advertencias mecánicas predictivas y coordinación de diagnósticos periciales asistidos por inteligencia artificial. Aísla las capas perimetrales mediante tipos monádicos Result, gobierna la persistencia automática de riesgos detectados y coordina la ejecución transaccional atómica. \\*
+\hline
+\textbf{Relaciones} & Invocado por IoT REST Controllers \& Resource Assemblers Component. Ejecuta reglas de invariantes en IoT Domain Model \& Predictive Analytics Engines Component, persiste lecturas en IoT Persistence Repositories, JPA \& TimescaleDB Adapters Component, solicita inferencia diagnóstica y despacho push a IoT External Gateways \& Cloud Adapters Component y emite eventos hacia IoT Event Handlers \& Outbox Worker Component. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} IoT Event Handlers \& Outbox Worker Component} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & Spring Events, TransactionalEventListener, Transactional Outbox Pattern \\*
+\hline
+\textbf{Responsabilidad} & Captura eventos de dominio e integración tras el commit transaccional, procesando notificaciones de telemetría procesada y anomalías de motor detectadas. Dispara notificaciones push reactivas hacia terminales móviles y asegura la entrega confiable de mensajes mediante el patrón Transactional Outbox. \\*
+\hline
+\textbf{Relaciones} & Recibe eventos publicados por IoT CQRS Application Services Component y eventos de integración consumidos de otros contextos. Invoca IoT External Gateways \& Cloud Adapters Component para despacho inmediato de notificaciones push críticas hacia conductores. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} IoT Domain Model \& Predictive Analytics Engines Component} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & Java 21, Domain-Driven Design, Inmutabilidad, Estándar SAE J2012 e ISO 15031-6 \\*
+\hline
+\textbf{Responsabilidad} & Custodia los invariantes automotrices en los agregados Obd2Device, DeviceInstallation, VehicleFault, PredictiveAlert, DtcCatalogEntry y TelemetryRecord. Alberga los motores analíticos PredictiveAnomalyDetectionEngine para inferencia de sobrecalentamiento y fallas eléctricas en milisegundos, y DtcCodeEvaluationService para clasificación de severidad de códigos de error. \\*
+\hline
+\textbf{Relaciones} & Invocado por IoT CQRS Application Services Component para evaluación de métricas y validación de reglas de dominio. Emite eventos de dominio inmutables hacia las capas de orquestación de aplicación. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} IoT Persistence Repositories, JPA \& TimescaleDB Adapters Component} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & Jakarta Persistence 3.1, Spring Data JPA, Hibernate 6, Spring JdbcClient, TimescaleDB 2.14 \\*
+\hline
+\textbf{Responsabilidad} & Materializa la arquitectura de persistencia híbrida. Gestiona entidades relacionales auditadas en PostgreSQL 16 para inventario de escáneres, sesiones de montaje, fallas y catálogo DTC, y ejecuta inserciones masivas en bloque de alta velocidad sobre la hipertabla particionada \textbf{telemetry\_logs} en TimescaleDB sin sobrecarga de Hibernate. \\*
+\hline
+\textbf{Relaciones} & Invocado por IoT CQRS Application Services Component y consultado analíticamente por IoT Open Host Facade \& Tacometer Evaluation Component. Conecta vía TCP y JDBC hacia el contenedor anfitrión Database. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} IoT Open Host Facade \& Tacometer Evaluation Component} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & Spring Service, Open Host Service Pattern, In-Memory ACL \\*
+\hline
+\textbf{Responsabilidad} & Expone un contrato público estable en memoria que suministra odómetro digital en tiempo real, última lectura telemática y diagnóstico vehicular activo para Workshop Operations y Customer \& Fleet Management, erradicando acoplamientos físicos en base de datos. \\*
+\hline
+\textbf{Relaciones} & Invocado en memoria por Workshop Operations Module para apertura de órdenes de trabajo y Customer \& Fleet Module para monitoreo de salud de flotas. Recupera lecturas más recientes desde IoT Persistence Repositories, JPA \& TimescaleDB Adapters Component. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} IoT External Gateways \& Cloud Adapters Component} \\*
+\hline
+\textbf{Tipo de Elemento} & Componente \\*
+\hline
+\textbf{Tecnologías} & Google Firebase Admin SDK v9, Spring AI ChatClient, OpenPDF, Thymeleaf, HTTP v1 API, In-Memory ACL \\*
+\hline
+\textbf{Responsabilidad} & Conecta con Google Firebase Cloud Messaging para despacho de notificaciones push de alta prioridad ante averías críticas, ejecuta inferencia analítica ultra-rápida sustentada en Spring AI sobre la infraestructura de Groq Cloud LPU mediante el modelo fundacional Llama 3.3 70B, compila informes periciales en formato PDF mediante OpenPDF y Thymeleaf, e implementa adaptadores de cliente anticorrupción hacia Workshop Operations para mapear fallas a servicios preventivos y Customer \& Fleet para resolver tokens móviles FCM de conductores. \\*
+\hline
+\textbf{Relaciones} & Invocado por IoT CQRS Application Services Component y IoT Event Handlers \& Outbox Worker Component. Conecta vía HTTPS con TLS hacia Firebase Cloud Messaging y Groq Cloud LPU, y consulta en memoria las fachadas de Workshop Operations Module y Customer \& Fleet Module. \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Componentes pertenecientes al contenedor API Application en com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak iot.
+
+En la @fig:c4-component-iot se ilustra el diagrama C4 de componentes para el Bounded Context IoT Telemetry & Predictive Maintenance, detallando las interacciones entre los componentes internos del módulo, los clientes perimetrales, los bounded contexts adyacentes de la plataforma y los servicios de infraestructura externa de ingesta masiva y mensajería push.
+
+![Diagrama de Componentes C4 (Nivel 3) para el Bounded Context IoT Telemetry & Predictive Maintenance en API Application](report/assets/c4-diagrams/component-level-diagram-iot.png){#fig:c4-component-iot}
+
+*Nota.* Diagrama generado mediante Structurizr DSL y PlantUML bajo el enfoque de Diagram-as-Code.
+
+**Dinámica de Interacción y Flujos Operativos del Bounded Context IoT Telemetry & Predictive Maintenance**
+
+Para formalizar la colaboración sincronizada entre los componentes internos del módulo de telemetría y los sistemas externos durante la operación vehicular diaria, se analizan a continuación los cuatro ciclos operacionales más representativos de la solución:
+
+- **Ciclo de Ingesta Masiva por Lotes y Persistencia de Series Temporales (TimescaleDB):**
+  El proceso se desencadena cuando un módem celular o un adaptador físico OBD-II transmite un paquete comprimido de lecturas sensoriales recopiladas en ruta hacia el endpoint perimetral de la plataforma. La solicitud arriba a **IoT REST Controllers & Resource Assemblers Component**, el cual verifica la validez del identificador del dispositivo y la firma de autenticación del mensaje, trasladando la carga útil hacia **IoT CQRS Application Services Component** mediante el comando **IngestTelemetryBatchCommand**.
+
+  El servicio de aplicación coordina la inserción directa en bloque invocando a **IoT Persistence Repositories, JPA & TimescaleDB Adapters Component**, donde un adaptador especializado ejecuta sentencias SQL masivas de alta velocidad empleando Spring JdbcClient sobre la hipertabla particionada **telemetry_logs** en TimescaleDB, evitando por completo la sobrecarga de introspección relacional de Hibernate. Tras la confirmación del lote, el servicio actualiza el odómetro virtual del automotor y publica el evento de dominio inmutable **TelemetryBatchIngestedEvent** para activar de forma asíncrona los mecanismos analíticos de detección de fallas.
+
+- **Ciclo de Detección Analítica de Anomalías de Motor y Despacho Push Reactivo (Firebase Cloud Messaging):**
+  Este flujo asegura la protección activa del automotor ante anomalías térmicas o mecánicas incipientes. Al asentarse las nuevas lecturas sensoriales, el componente **IoT Domain Model & Predictive Analytics Engines Component** somete los registros al motor especializado **PredictiveAnomalyDetectionEngine**, evaluando en milisegundos si la temperatura de refrigerante sobrepasa el umbral crítico de 105.0°C durante intervalos consecutivos o si la tensión de batería desciende de forma anómala por debajo de 11.8 V con motor encendido.
+
+  Al confirmarse una condición de riesgo, el motor analítico instancia el agregado **VehicleFault** y emite la alerta predictiva **PredictiveAlert**. El componente **IoT Event Handlers & Outbox Worker Component** captura el suceso, persiste el mensaje en la tabla transaccional de outbox para garantizar tolerancia a caídas de red y delega en **IoT External Gateways & Cloud Adapters Component** el despacho telemático inmediato hacia Google Firebase Cloud Messaging v1, logrando que la notificación push de advertencia alcance la pantalla del conductor y del jefe de flota en cuestión de milisegundos.
+
+- **Ciclo de Diagnóstico Pericial Asistido por Inteligencia Artificial y Emisión de Informes PDF (Groq Cloud LPU y OpenPDF):**
+  Este ciclo se activa cuando el personal técnico del taller o el conductor solicitan una evaluación clínica integral del automotor desde la aplicación web o el dispositivo móvil. La petición arriba a **IoT REST Controllers & Resource Assemblers Component**, el cual traslada el comando **GenerateVehicleHealthReportCommand** hacia **IoT CQRS Application Services Component**.
+
+  El servicio de aplicación coordina la extracción de agregaciones continuas de series temporales en **IoT Persistence Repositories, JPA & TimescaleDB Adapters Component** mediante la función *time_bucket()* y compila el inventario de códigos DTC activos desde la tabla relacional **vehicle_faults**. Con este vector estadístico consolidado, delega la inferencia en **IoT External Gateways & Cloud Adapters Component**, donde el adaptador perimetral sustentado en Spring AI invoca la infraestructura de **Groq Cloud LPU** ejecutando el modelo fundacional **Llama 3.3 70B Versatile**, alcanzando una velocidad de procesamiento de ~500 tokens por segundo y una latencia de respuesta inferior a 0.8 segundos.
+
+  El resultado estructurado clasifica los hallazgos en sistemas de motor, refrigeración, frenos y batería, asignando probabilidades porcentuales de avería y recomendaciones preventivas de mantenimiento. El servicio persiste automáticamente en la base de datos relacional aquellas advertencias con certeza estadística mayor o igual al 70 por ciento dentro del agregado **PredictiveAlert**, y delega en el motor tipográfico **OpenPDF** la maquetación sobre una plantilla XHTML procesada por **Thymeleaf**, produciendo el informe pericial en formato PDF listo para su descarga inmediata o archivo clínico.
+
+- **Ciclo de Interoperabilidad en Memoria y Diagnóstico Preventivo para Mantenimiento de Flotas:**
+  Para habilitar la sincronización entre el estado físico de los vehículos y la planificación técnica del taller sin incurrir en acoplamientos a nivel de base de datos, este ciclo se activa cuando los módulos de **Workshop Operations** o **Customer & Fleet Management** requieren verificar el kilometraje real o los códigos de falla almacenados. El subsistema solicitante invoca en memoria la interfaz expuesta por **IoT Open Host Facade & Tacometer Evaluation Component** mediante métodos limpios como *getVehicleOdometer()* o *getVehicleLatestTelemetry()*.
+
+  El componente de fachada recupera la información consolidada interactuando con **IoT Persistence Repositories, JPA & TimescaleDB Adapters Component**, resolviendo la consulta en microsegundos sin bloquear el esquema transaccional. Esta interoperabilidad desacoplada permite que el asesor de servicio visualice instantáneamente el odómetro certificado al momento de admitir una orden de trabajo en la bahía de atención, transformando las señales sensoriales continuas en recomendaciones automatizadas de mantenimiento preventivo para el taller automotriz.
+
+El diseño de componentes de IoT Telemetry & Predictive Maintenance responde rigurosamente a las exigencias de alta concurrencia, disponibilidad continua y aislamiento perimetral demandadas por la telemetría automotriz moderna. Al confinar la ingesta masiva en un adaptador JDBC por lotes y delegar las lecturas temporales hacia la hipertabla particionada **telemetry_logs** en TimescaleDB, el sistema elimina por completo la contención de bloqueos relacionales sobre las tablas de inventario físico y sesiones de montaje, garantizando tiempos de respuesta deterministas incluso ante ráfagas simultáneas generadas por flotas vehiculares de gran escala.
+
+Asimismo, la integración desacoplada mediante Google Firebase Cloud Messaging v1 y el patrón Transactional Outbox confiere una robusta tolerancia a fallos transitorios de red. La detección inmediata de averías mecánicas críticas por parte del motor analítico desencadena notificaciones push hacia los dispositivos móviles de los conductores en cuestión de milisegundos, asegurando que las alertas de seguridad vial alcancen oportunamente a los usuarios sin comprometer el ciclo transaccional principal de la API central.
+
+Esta arquitectura perimetral se extiende de forma sinérgica hacia las terminales móviles de patio y cabina en las aplicaciones Atelier Workshop y Atelier Driver. Ante pérdidas eventuales de enlace celular en ruta o zonas sin cobertura, los dispositivos móviles preservan las lecturas sensoriales en una base de datos local SQLite 3 gestionada mediante Room en Android y Drift en Flutter, ejecutando una sincronización masiva en bloque tan pronto se restablece la conectividad hacia el backend.
+
+Finalmente, la exposición de tacómetro y odómetro virtual mediante la fachada Open Host Service consolida una interoperabilidad limpia en memoria con los módulos de órdenes de trabajo y gestión de flotas. Este mecanismo desacopla la persistencia física de series temporales y erradica dependencias directas de base de datos entre módulos, transformando las señales físicas del motor en acciones preventivas automatizadas para el taller mecánico.
 
 
 #### 2.6.9.6. Bounded Context Software Architecture Code Level Diagrams
 
+En esta sección se desarrolla la especificación técnica de menor nivel de abstracción para la arquitectura de software del Bounded Context **IoT Telemetry & Predictive Maintenance**, trasladando las fronteras conceptuales y las responsabilidades tácticas hacia contratos estáticos de código ejecutable. Mediante esta formalización, se asegura que la captura ininterrumpida de ráfagas de telemetría, el diagnóstico automotriz estandarizado y los algoritmos de detección analítica de anomalías mecánicas se materialicen con estricta seguridad de tipos y determinismo computacional.
 
+Esta perspectiva de diseño abarca dos representaciones arquitectónicas complementarias: el Diagrama de Clases de la Capa de Dominio, que modela en memoria las raíces de agregado, objetos de valor inmutables, motores algorítmicos de inferencia predictiva y puertos de persistencia, y el Diagrama de Base de Datos, que formaliza el esquema físico híbrido relacional en PostgreSQL 16 y series temporales sobre hipertablas particionadas en TimescaleDB.
 
 ##### 2.6.9.6.1. *Bounded Context Domain Layer Class Diagrams*
+
+El modelado estático de la Capa de Dominio del Bounded Context IoT Telemetry & Predictive Maintenance establece las estructuras operativas que gobiernan el inventario de escáneres telemáticos, las sesiones de montaje físico en vehículos, el catálogo universal de códigos DTC bajo normativas SAE J2012 e ISO 15031-6, y la generación de advertencias mecánicas predictivas. Su diseño táctico prioriza la pureza algorítmica sin dependencias de frameworks tecnológicos, erradica la obsesión por tipos primitivos mediante identificadores fuertemente tipados y garantiza tiempos de inferencia analítica en microsegundos para proteger la seguridad vehicular en ruta.
+
+En la @fig:class-diagram-iot se expone el Diagrama de Clases UML detallado para la Capa de Dominio de IoT Telemetry & Predictive Maintenance, diseñado conforme a la notación formal UML y compilado mediante la herramienta PlantUML bajo el enfoque de Diagram-as-Code.
+
+![Diagrama de Clases UML de la Capa de Dominio para el Bounded Context IoT Telemetry & Predictive Maintenance](report/assets/class-diagrams/class-diagram-iot.png){#fig:class-diagram-iot}
+
+*Nota.* Elaboración propia en base al diseño táctico de dominio y el estándar UML en PlantUML.
+
+La organización interna del modelo estático se estructura en ocho paquetes cohesivos que encapsulan las responsabilidades del dominio telemático y analítico:
+
+- **Raíces de Agregado (iot.domain.model.aggregates):** Gobierna las entidades maestras que delimitan las fronteras de consistencia transaccional: **Obd2Device** para el inventario y estado operativo de escáneres, **DeviceInstallation** para el emparejamiento físico en automotores, **VehicleFault** para el ciclo de vida de averías DTC, **PredictiveAlert** para las advertencias preventivas generadas analíticamente, **DtcCatalogEntry** para el catálogo maestro de códigos de falla, y **TelemetryRecord** para las mediciones sensoriales instantáneas. A excepción del registro temporal inmutable, las raíces transaccionales extienden de **AbstractDomainAggregateRoot<T>**.
+
+- **Identificadores Fuertemente Tipados (iot.domain.model.ids):** Implementa el contrato **TypedId<UUID>** mediante registros inmutables (**DeviceId**, **InstallationId**, **FaultId**, **AlertId**, **DtcId**), asociando identidades transversales del Shared Kernel (**TenantId**, **VehicleId**, **ServiceId**) y envoltorios alfanuméricos con validación reglamentaria (**DeviceIdentifier**, **MacAddress**, **DtcCode**).
+
+- **Objetos de Valor Sensoriales y Métricos (iot.domain.model.valueobjects):** Encapsula magnitudes físicas con validación estricta de invariantes: **VehicleSpeed**, **EngineRpm**, **EngineTemperature**, **BatteryVoltage**, **FuelLevel**, **ThrottlePosition**, **EngineLoad**, **GeoCoordinates**, **ConfidenceScore**, **FirmwareVersion** e **InstallationNotes**.
+
+- **Enumeraciones de Dominio (iot.domain.model.enums):** Normaliza el vocabulario operativo y normativo (**DeviceStatus**, **ConnectionType**, **ProtocolType**, **InstallationStatus**, **FaultSeverity**, **FaultStatus**, **AlertType**, **AlertStatus**, **DtcStandard**, **DtcSystemCategory**).
+
+- **Servicios de Dominio de Inferencia y Diagnóstico (iot.domain.services):** Provee motores algorítmicos puros sin acoplamiento a infraestructura: **PredictiveAnomalyDetectionEngine** para la inferencia determinista de patrones de sobrecalentamiento térmico o degradación del sistema de carga eléctrica, y **DtcCodeEvaluationService** para la clasificación de severidad de fallas y mapeo de servicios preventivos.
+
+- **Puertos de Repositorio (iot.domain.repositories):** Define los contratos abstractos de almacenamiento y consulta (**Obd2DeviceRepository**, **DeviceInstallationRepository**, **TelemetryLogRepository**, **VehicleFaultRepository**, **PredictiveAlertRepository**, **DtcCatalogEntryRepository**) desacoplados de motores relacionales o de series temporales.
+
+- **Eventos de Dominio y Excepciones Semánticas (iot.domain.events y iot.domain.exceptions):** Formaliza mutaciones del estado vehicular para el Transactional Outbox (**Obd2DeviceRegisteredEvent**, **DeviceInstalledEvent**, **DeviceUninstalledEvent**, **TelemetryBatchIngestedEvent**, **VehicleFaultDetectedEvent**, **VehicleFaultResolvedEvent**, **PredictiveAlertGeneratedEvent**) y jerarquiza excepciones no comprobadas derivadas de **IoTDomainException** bajo la norma RFC 7807 (**DeviceNotFoundException**, **ActiveInstallationConflictException**, **InvalidTelemetryDataException**).
+
+En la @tbl:iot-domain-classes-members se detalla la especificación formal de atributos, firmas de métodos, modificadores de acceso y reglas de negocio para cada componente de la Capa de Dominio.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\caption{Catálogo exhaustivo de clases, miembros, ámbitos y relaciones de la Capa de Dominio del Bounded Context IoT Telemetry \& Predictive Maintenance} \label{tbl:iot-domain-classes-members} \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} Obd2\allowbreak Device \quad (\textit{Aggregate Root})} \\*
+\hline
+Atributos y composición & Raíz de agregado que custodia el inventario físico de escáneres telemáticos. Controla estados operativos, protocolos de comunicación compatibles y actualizaciones de firmware. Generalización de \texttt{AbstractDomainAggregateRoot<\allowbreak DeviceId>\allowbreak }. Composición con \textbf{DeviceIdentifier}, \textbf{MacAddress} y \textbf{FirmwareVersion}. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{DeviceId id} \newline - \texttt{TenantId tenantId} \newline - \texttt{DeviceIdentifier serialNumber} \newline - \texttt{MacAddress macAddress} \newline - \texttt{DeviceStatus status} \newline - \texttt{FirmwareVersion firmwareVersion} \newline - \texttt{ProtocolType protocolType} \newline - \texttt{Instant registeredAt} \newline - \texttt{Optional<\allowbreak Instant>\allowbreak  lastHeartbeatAt} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+Factoría y gestión operativa & Invariantes: el dispositivo nace en estado PROVISIONED o ACTIVE. El número de serie y la dirección MAC son inmutables tras su asignación. El latido telemático actualiza la marca de tiempo de actividad. Emite Obd2\allowbreak Device\allowbreak Registered\allowbreak Event. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{Obd2\allowbreak Device register(TenantId,\allowbreak  DeviceIdentifier,\allowbreak  MacAddress,\allowbreak  ProtocolType,\allowbreak  FirmwareVersion)} \newline - \texttt{void recordHeartbeat(Instant)} \newline - \texttt{void markActive()} \newline - \texttt{void markSuspended()} \newline - \texttt{void markDecommissioned()} \newline - \texttt{void updateFirmware(FirmwareVersion)} \newline - \texttt{DeviceId id()} \newline - \texttt{TenantId tenantId()} \newline - \texttt{DeviceIdentifier serialNumber()} \newline - \texttt{MacAddress macAddress()} \newline - \texttt{DeviceStatus status()} \newline - \texttt{FirmwareVersion firmwareVersion()} \newline - \texttt{ProtocolType protocolType()} \newline - \texttt{boolean isOperational()} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} Device\allowbreak Installation \quad (\textit{Aggregate Root})} \\*
+\hline
+Atributos y vigencia & Raíz de agregado que delimita la sesión física de montaje de un escáner en un automotor. Custodia kilometrajes iniciales y finales para auditoría de odómetro. Generalización de \texttt{AbstractDomainAggregateRoot<\allowbreak InstallationId>\allowbreak }. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{InstallationId id} \newline - \texttt{DeviceId deviceId} \newline - \texttt{VehicleId vehicleId} \newline - \texttt{TenantId tenantId} \newline - \texttt{Instant installedAt} \newline - \texttt{Optional<\allowbreak Instant>\allowbreak  uninstalledAt} \newline - \texttt{int initialOdometerKm} \newline - \texttt{Optional<\allowbreak Integer>\allowbreak  finalOdometerKm} \newline - \texttt{InstallationStatus status} \newline - \texttt{InstallationNotes notes} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+Ciclo de vida y montaje & Invariantes: un automotor solo puede registrar una instalación en estado ACTIVE simultáneamente. El kilometraje final de desmontaje debe ser mayor o igual al inicial. Emite Device\allowbreak Installed\allowbreak Event y Device\allowbreak Uninstalled\allowbreak Event. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{Device\allowbreak Installation install(DeviceId,\allowbreak  VehicleId,\allowbreak  TenantId,\allowbreak  int,\allowbreak  InstallationNotes)} \newline - \texttt{void uninstall(int,\allowbreak  Instant)} \newline - \texttt{boolean isActive()} \newline - \texttt{InstallationId id()} \newline - \texttt{DeviceId deviceId()} \newline - \texttt{VehicleId vehicleId()} \newline - \texttt{TenantId tenantId()} \newline - \texttt{Instant installedAt()} \newline - \texttt{Optional<\allowbreak Instant>\allowbreak  uninstalledAt()} \newline - \texttt{int initialOdometerKm()} \newline - \texttt{Optional<\allowbreak Integer>\allowbreak  finalOdometerKm()} \newline - \texttt{InstallationStatus status()} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} Telemetry\allowbreak Record \quad (\textit{Value Object / Time-Series Aggregate})} \\*
+\hline
+Atributos sensoriales & Registro temporal inmutable que modela una lectura puntual multidimensional del tren motriz. Contiene métricas físicas de velocidad, revoluciones, temperatura de refrigerante y códigos DTC activos. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{Instant timestamp} \newline - \texttt{VehicleId vehicleId} \newline - \texttt{DeviceId deviceId} \newline - \texttt{TenantId tenantId} \newline - \texttt{Optional<\allowbreak GeoCoordinates>\allowbreak  location} \newline - \texttt{VehicleSpeed speed} \newline - \texttt{EngineRpm rpm} \newline - \texttt{EngineTemperature coolantTemperature} \newline - \texttt{Optional<\allowbreak FuelLevel>\allowbreak  fuelLevel} \newline - \texttt{Optional<\allowbreak BatteryVoltage>\allowbreak  batteryVoltage} \newline - \texttt{Optional<\allowbreak ThrottlePosition>\allowbreak  throttlePosition} \newline - \texttt{Optional<\allowbreak EngineLoad>\allowbreak  engineLoad} \newline - \texttt{List<\allowbreak DtcCode>\allowbreak  activeDtcCodes} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+Invariantes y evaluación & Invariantes: la marca de tiempo UTC es obligatoria. La velocidad y RPM deben ubicarse dentro de los límites físicos del vehículo. Provee métodos deterministas de detección preliminar. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{Telemetry\allowbreak Record of(Instant,\allowbreak  VehicleId,\allowbreak  DeviceId,\allowbreak  TenantId,\allowbreak  VehicleSpeed,\allowbreak  EngineRpm,\allowbreak  EngineTemperature)} \newline - \texttt{boolean indicatesOverheating()} \newline - \texttt{boolean indicatesLowBattery()} \newline - \texttt{boolean hasActiveDtcs()} \newline - \texttt{Instant timestamp()} \newline - \texttt{VehicleId vehicleId()} \newline - \texttt{DeviceId deviceId()} \newline - \texttt{VehicleSpeed speed()} \newline - \texttt{EngineRpm rpm()} \newline - \texttt{EngineTemperature coolantTemperature()} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} Vehicle\allowbreak Fault \quad (\textit{Aggregate Root})} \\*
+\hline
+Atributos y diagnóstico & Raíz de agregado que formaliza la persistencia y ciclo de resolución de fallas DTC detectadas en ruta. Generalización de \texttt{AbstractDomainAggregateRoot<\allowbreak FaultId>\allowbreak }. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{FaultId id} \newline - \texttt{VehicleId vehicleId} \newline - \texttt{TenantId tenantId} \newline - \texttt{DeviceId deviceId} \newline - \texttt{DtcCode dtcCode} \newline - \texttt{FaultSeverity severity} \newline - \texttt{FaultStatus status} \newline - \texttt{String description} \newline - \texttt{Instant detectedAt} \newline - \texttt{Optional<\allowbreak Instant>\allowbreak  resolvedAt} \newline - \texttt{Optional<\allowbreak String>\allowbreak  resolutionNotes} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+Resolución y criticidad & Invariantes: el código DTC debe ser válido bajo SAE J2012. La confirmación de falla genera el suceso Vehicle\allowbreak Fault\allowbreak Detected\allowbreak Event. La resolución formal sella con marca de tiempo y emite Vehicle\allowbreak Fault\allowbreak Resolved\allowbreak Event. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{Vehicle\allowbreak Fault detect(VehicleId,\allowbreak  TenantId,\allowbreak  DeviceId,\allowbreak  DtcCode,\allowbreak  FaultSeverity,\allowbreak  String,\allowbreak  Instant)} \newline - \texttt{void markInReview()} \newline - \texttt{void resolve(String,\allowbreak  Instant)} \newline - \texttt{void dismiss(String)} \newline - \texttt{boolean isResolved()} \newline - \texttt{boolean isCritical()} \newline - \texttt{FaultId id()} \newline - \texttt{VehicleId vehicleId()} \newline - \texttt{DtcCode dtcCode()} \newline - \texttt{FaultSeverity severity()} \newline - \texttt{FaultStatus status()} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} Predictive\allowbreak Alert \quad (\textit{Aggregate Root})} \\*
+\hline
+Atributos y despacho & Raíz de agregado que modela advertencias generadas analíticamente por inferencia predictiva. Asocia paquetes de servicio sugeridos y gobierna la notificación telemática hacia la consola de Atelier Workshop y la aplicación móvil Atelier Driver. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{AlertId id} \newline - \texttt{VehicleId vehicleId} \newline - \texttt{TenantId tenantId} \newline - \texttt{Optional<\allowbreak ServiceId>\allowbreak  recommendedServiceId} \newline - \texttt{AlertType alertType} \newline - \texttt{ConfidenceScore confidenceScore} \newline - \texttt{String message} \newline - \texttt{AlertStatus status} \newline - \texttt{Optional<\allowbreak String>\allowbreak  fcmMessageId} \newline - \texttt{Instant createdAt} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+Inferencia y notificación & Invariantes: la confianza estadística debe superar el umbral mínimo del 75 por ciento. El despacho registra el identificador de Firebase Cloud Messaging y emite Predictive\allowbreak Alert\allowbreak Generated\allowbreak Event. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{Predictive\allowbreak Alert generate(VehicleId,\allowbreak  TenantId,\allowbreak  Optional<\allowbreak ServiceId>\allowbreak ,\allowbreak  AlertType,\allowbreak  ConfidenceScore,\allowbreak  String)} \newline - \texttt{void markDispatched(String)} \newline - \texttt{void acknowledge()} \newline - \texttt{void resolve()} \newline - \texttt{void dismiss()} \newline - \texttt{AlertId id()} \newline - \texttt{VehicleId vehicleId()} \newline - \texttt{AlertType alertType()} \newline - \texttt{ConfidenceScore confidenceScore()} \newline - \texttt{AlertStatus status()} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} Dtc\allowbreak Catalog\allowbreak Entry \quad (\textit{Aggregate Root})} \\*
+\hline
+Atributos y normativa & Raíz de agregado del catálogo maestro de diagnóstico vehicular. Clasifica códigos bajo SAE J2012 e ISO 15031-6 en categorías Powertrain, Chassis, Body y Network. Generalización de \texttt{AbstractDomainAggregateRoot<\allowbreak DtcId>\allowbreak }. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{DtcId id} \newline - \texttt{DtcCode code} \newline - \texttt{DtcStandard standard} \newline - \texttt{DtcSystemCategory systemCategory} \newline - \texttt{String description} \newline - \texttt{FaultSeverity defaultSeverity} \newline - \texttt{Optional<\allowbreak ServiceId>\allowbreak  recommendedServiceId} \newline - \texttt{boolean isGeneric} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+Clasificación y enlace MRO & Invariantes: el código de falla es unívoco. Permite actualizar la descripción técnica y asociar dinámicamente plantillas de servicio preventivo para apertura automática de órdenes de trabajo. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{Dtc\allowbreak Catalog\allowbreak Entry register(DtcCode,\allowbreak  DtcStandard,\allowbreak  DtcSystemCategory,\allowbreak  String,\allowbreak  FaultSeverity,\allowbreak  Optional<\allowbreak ServiceId>\allowbreak ,\allowbreak  boolean)} \newline - \texttt{void updateDescription(String)} \newline - \texttt{void updateRecommendedService(ServiceId)} \newline - \texttt{DtcId id()} \newline - \texttt{DtcCode code()} \newline - \texttt{DtcSystemCategory systemCategory()} \newline - \texttt{FaultSeverity defaultSeverity()} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Dominio:} Predictive\allowbreak Anomaly\allowbreak Detection\allowbreak Engine} \\*
+\hline
+Inferencia de fallas & Servicio de dominio algorítmico puro. Evalúa lecturas de telemetría continuas para identificar tendencias de sobrecalentamiento crítico de refrigerante (temperatura mayor o igual a 105.0°C) o degradación del sistema eléctrico con motor encendido (tensión menor a 11.8 V). \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{Optional<\allowbreak AnomalyEvaluationResult>\allowbreak  evaluateTelemetry(TelemetryRecord)} \newline - \texttt{boolean detectThermalRunaway(List<\allowbreak TelemetryRecord>\allowbreak )} \newline - \texttt{boolean detectAlternatorFailure(BatteryVoltage,\allowbreak  EngineRpm)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Dominio:} Dtc\allowbreak Code\allowbreak Evaluation\allowbreak Service} \\*
+\hline
+Evaluación de severidad & Servicio de dominio que contrasta códigos DTC contra el catálogo estandarizado para determinar criticidad operativa y recomendar paquetes de servicio preventivo en taller. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{FaultSeverity evaluateSeverity(DtcCode)} \newline - \texttt{Optional<\allowbreak ServiceId>\allowbreak  resolveRecommendedService(DtcCode)} \newline - \texttt{boolean isEmissionsRelated(DtcCode)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Contratos de Repositorio:} Puertos de la Capa de Dominio} \\*
+\hline
+Puertos de persistencia & Interfaces puras desacopladas de tecnología: \textbf{Obd2DeviceRepository}, \textbf{DeviceInstallationRepository}, \textbf{TelemetryLogRepository}, \textbf{VehicleFaultRepository}, \textbf{PredictiveAlertRepository}, \textbf{DtcCatalogEntryRepository}. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{Obd2Device save(Obd2Device)} \newline - \texttt{Optional<\allowbreak Obd2Device>\allowbreak  findById(DeviceId)} \newline - \texttt{Optional<\allowbreak DeviceInstallation>\allowbreak  findActiveByVehicleId(VehicleId)} \newline - \texttt{void saveAllBatch(List<\allowbreak TelemetryRecord>\allowbreak )} \newline - \texttt{List<\allowbreak VehicleFault>\allowbreak  findActiveByVehicleId(VehicleId)} \newline - \texttt{List<\allowbreak PredictiveAlert>\allowbreak  findAllByVehicleId(VehicleId)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Identificadores Tipados y Objetos de Valor:} Tipos de Dominio Inmutables} \\*
+\hline
+Estructuras inmutables & Registros Java que garantizan tipado fuerte: \textbf{DeviceId}, \textbf{InstallationId}, \textbf{FaultId}, \textbf{AlertId}, \textbf{DtcId}, \textbf{DeviceIdentifier}, \textbf{MacAddress}, \textbf{DtcCode}, \textbf{VehicleSpeed}, \textbf{EngineRpm}, \textbf{EngineTemperature}, \textbf{BatteryVoltage}, \textbf{ConfidenceScore}. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{DeviceId of(UUID)} \newline - \texttt{DtcCode of(String)} \newline - \texttt{MacAddress of(String)} \newline - \texttt{VehicleSpeed of(double)} \newline - \texttt{EngineTemperature of(double)} \newline - \texttt{BatteryVoltage of(double)} \newline - \texttt{ConfidenceScore of(BigDecimal)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepciones de Dominio y Eventos:} Jerarquía Semántica y Sucesos de Negocio} \\*
+\hline
+Excepciones y eventos & Jerarquía no comprobada derivada de \textbf{IoTDomainException} con mapeo RFC 7807 y eventos de dominio inmutables para el patrón Transactional Outbox. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{DeviceNotFoundException(DeviceId)} \newline - \texttt{ActiveInstallationConflictException(VehicleId)} \newline - \texttt{InvalidTelemetryDataException(String)} \newline - \texttt{Obd2DeviceRegisteredEvent(DeviceId,\allowbreak  TenantId,\allowbreak  DeviceIdentifier,\allowbreak  Instant)} \newline - \texttt{TelemetryBatchIngestedEvent(VehicleId,\allowbreak  DeviceId,\allowbreak  TenantId,\allowbreak  int,\allowbreak  Instant,\allowbreak  Instant)} \newline - \texttt{PredictiveAlertGeneratedEvent(AlertId,\allowbreak  VehicleId,\allowbreak  TenantId,\allowbreak  AlertType,\allowbreak  ConfidenceScore,\allowbreak  Instant)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Especificación técnica de la Capa de Dominio en el paquete com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak iot.\allowbreak domain.
+
+A partir del modelo estático ilustrado en la @fig:class-diagram-iot y desglosado en la @tbl:iot-domain-classes-members, se identifican cuatro fundamentos de ingeniería de software que respaldan la solidez técnica y la adaptabilidad operativa de la plataforma:
+
+- **Aislamiento Algorítmico y Determinismo Termodinámico:**
+  El riguroso aislamiento algorítmico de los motores de diagnóstico predictivo y la inmutabilidad de los registros sensoriales garantizan que la evaluación del estado mecánico de los vehículos se ejecute con determinismo matemático y sin acoplamiento a librerías de persistencia. Al encapsular las magnitudes físicas en objetos de valor especializados, el sistema valida las invariantes termodinámicas y eléctricas en el instante mismo de su construcción, asegurando que lecturas anómalas o corrompidas sean interceptadas antes de ingresar a los modelos de inferencia.
+
+- **Integridad Temporal del Emparejamiento Vehicular y Odometría No Decreciente:**
+  La formalización de las sesiones físicas de emparejamiento mediante el agregado **DeviceInstallation** resuelve con precisión la integridad temporal del vínculo entre adaptadores y automotores. Al imponer la regla de que ningún vehículo puede mantener múltiples escáneres activos simultáneamente y certificar la secuencia no decreciente de odómetros entre desmontajes sucesivos, el modelo de dominio protege la fidelidad histórica del kilometraje, erradicando discrepancias de auditoría física tanto en talleres concesionarios como en flotas de transporte corporativo.
+
+- **Diferenciación Semántica entre Diagnóstico Confirmado e Inferencia Preventiva:**
+  La separación limpia entre averías electrónicas normalizadas (**VehicleFault**) bajo el estándar SAE J2012 y advertencias de inferencia predictiva (**PredictiveAlert**) confiere una adaptabilidad excepcional al ecosistema. Esta distinción permite que el taller diferencie entre fallas confirmadas por la computadora del automotor y riesgos incipientes calculados estadísticamente, habilitando la programación anticipada de citas de mantenimiento en la estación web **Atelier Workshop** y la emisión de alertas push instantáneas hacia los conductores en carretera mediante **Atelier Driver**.
+
+- **Sincronización Resiliente Multi-Producto y Amortiguamiento Fuera de Línea:**
+  La articulación del puerto de persistencia masiva en lote modela con exactitud la sincronización resiliente con terminales móviles en campo. Cuando las aplicaciones móviles actúan como pasarelas telemáticas locales en zonas de nula cobertura celular, los registros sensoriales se custodian transitoriamente en el motor relacional embebido **SQLite 3** mediante **Room** en Android y **Drift** en Flutter, garantizando una transmisión posterior íntegra y ordenada hacia las hipertablas de TimescaleDB sin pérdida de telemetría.
 
 
 
 ##### 2.6.9.6.2. *Bounded Context Database Design Diagram*
 
+El diseño de persistencia del Bounded Context **IoT Telemetry & Predictive Maintenance** materializa el modelo de dominio en un esquema híbrido y multi-producto, diseñado para balancear la consistencia transaccional de los diagnósticos con la ingestión masiva en ráfaga de series temporales. La persistencia física se distribuye armónicamente en dos entornos operativos complementarios: la infraestructura central en la nube basada en **PostgreSQL 16** y la extensión **TimescaleDB** para el backend de la plataforma (**API Application**), y el motor relacional transaccional embebido **SQLite 3** para las aplicaciones cliente en movilidad (**Atelier Workshop** y **Atelier Driver**).
 
+En la @fig:database-diagram-iot se expone el Diagrama Entidad-Relación físico para la persistencia del Bounded Context IoT Telemetry & Predictive Maintenance en sus dos entornos operativos de despliegue, delimitando las entidades relacionales transaccionales, la hipertabla de series temporales y las estructuras de amortiguamiento local en terminales móviles.
+
+![Diagrama Entidad-Relación de Base de Datos para el Bounded Context IoT Telemetry & Predictive Maintenance (PostgreSQL 16, TimescaleDB y SQLite 3)](report/assets/database-diagrams/database-diagram-iot.png){#fig:database-diagram-iot}
+
+*Nota.* Elaboración propia en base al diseño físico de persistencia y el estándar PlantUML ERD.
+
+- **Subsistema de Inventario y Homologación de Equipamiento Telemático:**
+  Gobierna el registro maestro de los adaptadores y escáneres OBD-II homologados mediante la tabla **obd2_devices**. Esta entidad preserva la identidad física única de cada adaptador mediante su dirección MAC para enlaces Bluetooth Low Energy o su código IMEI para módems celulares de telemetría continua. Asimismo, fiscaliza el protocolo de bajo nivel soportado y clasifica el estado del hardware para impedir la vinculación de dispositivos averiados, extraviados o dados de baja.
+
+- **Subsistema de Emparejamiento Físico y Auditoría de Odometría:**
+  Administra el ciclo de vida de las sesiones de conexión física del escáner en los puertos de diagnóstico de los vehículos automotores mediante la tabla **device_installations**. Esta estructura formaliza la relación temporal entre el dispositivo y el vehículo intervenido, salvaguardando el kilometraje inicial de conexión y el kilometraje final de desmonte. De este modo, impone como regla de integridad que ningún vehículo admita múltiples escáneres activos simultáneamente y que el odómetro mantenga una progresión no decreciente durante la prestación del servicio.
+
+- **Subsistema de Ingesta Masiva de Series Temporales en TimescaleDB:**
+  Aísla la captura de lecturas sensoriales de alta frecuencia mediante la hipertabla especializada **telemetry_logs**, desplegada sobre TimescaleDB. Esta tabla opera bajo una semántica *append-only* y se particiona automáticamente en bloques temporales de siete días, complementados por una política de compresión columnar automática para registros que superen los treinta días de antigüedad. Este particionamiento optimizado absorbe millones de mediciones de velocidad, temperatura de refrigerante, tensión de batería, nivel de combustible y coordenadas geográficas sin generar contención sobre las transacciones del sistema.
+
+- **Subsistema de Averías Electrónicas y Catálogo Universal de Diagnóstico:**
+  Resguarda la bitácora de códigos de falla registrados por la computadora vehicular mediante la tabla **vehicle_faults**, asociándola al catálogo maestro de averías normalizadas en la tabla **dtc_catalog**. Al estructurar el catálogo bajo las directrices de las normas SAE J2012 e ISO 15031-6, el sistema enriquece semánticamente cada lectura con su descripción técnica en español, severidad de impacto en carretera y recomendaciones de acción inmediata en taller, categorizando los fallos en subsistemas de tren motriz, chasis, carrocería y redes de comunicación.
+
+- **Subsistema de Inferencia Preventiva y Notificaciones Push:**
+  Registra las anomalías mecánicas detectadas analíticamente por los motores de evaluación mediante la tabla **predictive_alerts**. Esta entidad almacena el grado de confianza estadística asignado por el algoritmo, vincula de forma proactiva paquetes de servicio sugeridos procedentes del módulo de mantenimiento y custodia los identificadores de entrega asíncrona hacia Firebase Cloud Messaging, permitiendo despachar alertas críticas tanto a la consola del taller como al teléfono inteligente del conductor.
+
+- **Persistencia Desconectada y Amortiguamiento Fuera de Línea en SQLite 3:**
+  Garantiza la operatividad continua de los clientes móviles en zonas sin cobertura de red móvil mediante las tablas locales **local_telemetry_buffer**, **local_vehicle_faults_cache** y **local_predictive_alerts_cache**. La tabla **local_telemetry_buffer** actúa como un buffer transaccional en el dispositivo para almacenar en frío las tramas OBD-II capturadas por Bluetooth, drenándolas en lote hacia el backend en cuanto se recupera el enlace celular. Por su parte, las tablas de caché local proporcionan acceso inmediato a los códigos de falla y advertencias preventivas sin latencia de red.
+
+A partir de la arquitectura física formalizada en el diagrama de persistencia, en la @tbl:iot-database-tables-schema se cataloga la totalidad de las tablas y objetos físicos que estructuran el modelo de datos, detallando el producto donde residen, sus atributos cardinales, restricciones de integridad, estrategias de indexación y su aporte a la resiliencia operativa.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.1cm} | >{\raggedright\arraybackslash}p{10.3cm} |}
+\caption{Catálogo exhaustivo de tablas, objetos de base de datos, restricciones e índices físicos del Bounded Context IoT Telemetry \& Predictive Maintenance} \label{tbl:iot-database-tables-schema} \\
+\hline
+\thfirst{Aspecto de Persistencia} & \thcell{Especificación Físico-Relacional} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Aspecto de Persistencia} & \thcell{Especificación Físico-Relacional} \\
+\hline
+\endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{obd2\allowbreak \_devices}} \\*
+\hline
+\textbf{Motor y Producto} & PostgreSQL 16 (API Application) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Inventario maestro de adaptadores telemáticos y escáneres OBD-II pertenecientes a la dotación técnica del taller. Almacena las direcciones físicas MAC para dispositivos Bluetooth Low Energy o números IMEI para terminales celulares 4G LTE, administrando el estado funcional del equipo y previniendo la utilización de adaptadores extraviados o dañados. Aislamiento estricto por taller mediante clave foránea obligatoria. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{id (UUID PK)}, \texttt{tenant\_id (UUID FK)}, \texttt{device\_identifier (VARCHAR(100) UK)}, \texttt{connection\_type (VARCHAR(20))}, \texttt{protocol\_type (VARCHAR(20))}, \texttt{status (VARCHAR(20))}, \texttt{hardware\_model (VARCHAR(100))}, \texttt{firmware\_version (VARCHAR(50))}, \texttt{created\_at (TIMESTAMPTZ)}, \texttt{updated\_at (TIMESTAMPTZ)}, \texttt{version (BIGINT)}, \texttt{deleted\_at (TIMESTAMPTZ)}. \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_\allowbreak obd2\_\allowbreak devices (id) \newline - UK: uk\_\allowbreak obd2\_\allowbreak device\_\allowbreak identifier (device\_identifier) \newline - FK: fk\_\allowbreak obd2\_\allowbreak devices\_\allowbreak tenant hacia tenants(id) \newline - CHECK: chk\_\allowbreak obd2\_\allowbreak connection (connection\_type IN ('bluetooth', 'sim\_cellular', 'wifi')), chk\_\allowbreak obd2\_\allowbreak protocol (protocol\_type IN ('elm327', 'custom\_telematics')), chk\_\allowbreak obd2\_\allowbreak status (status IN ('active', 'inactive', 'lost', 'broken')) \newline - Índices B-Tree: idx\_\allowbreak obd2\_\allowbreak tenant (tenant\_id), idx\_\allowbreak obd2\_\allowbreak status (status), idx\_\allowbreak obd2\_\allowbreak identifier (device\_identifier) \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{device\allowbreak \_installations}} \\*
+\hline
+\textbf{Motor y Producto} & PostgreSQL 16 (API Application) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Sesiones de acoplamiento físico entre un escáner OBD-II y un vehículo automotor intervenido. Gobierna el período temporal de monitoreo, auditando el kilometraje inicial al conectar y el kilometraje final al desinstalar. Protege la consistencia operativa asegurando que no existan registros simultáneos activos para el mismo vehículo y comprobando que el odómetro sea monótonamente creciente. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{id (UUID PK)}, \texttt{tenant\_id (UUID FK)}, \texttt{device\_id (UUID FK)}, \texttt{vehicle\_id (UUID FK)}, \texttt{installed\_at (TIMESTAMPTZ)}, \texttt{uninstalled\_at (TIMESTAMPTZ)}, \texttt{initial\_odometer\_km (INTEGER)}, \texttt{final\_odometer\_km (INTEGER)}, \texttt{status (VARCHAR(20))}, \texttt{installation\_notes (VARCHAR(500))}, \texttt{created\_at (TIMESTAMPTZ)}, \texttt{updated\_at (TIMESTAMPTZ)}, \texttt{version (BIGINT)}, \texttt{deleted\_at (TIMESTAMPTZ)}. \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_\allowbreak device\_\allowbreak installations (id) \newline - FK: fk\_\allowbreak inst\_\allowbreak device hacia obd2\_devices(id), fk\_\allowbreak inst\_\allowbreak vehicle hacia vehicles(id), fk\_\allowbreak inst\_\allowbreak tenant hacia tenants(id) \newline - CHECK: chk\_\allowbreak inst\_\allowbreak status (status IN ('active', 'completed')), chk\_\allowbreak inst\_\allowbreak odometer (final\_odometer\_km IS NULL OR final\_odometer\_km >= initial\_odometer\_km), chk\_\allowbreak inst\_\allowbreak init\_\allowbreak odo (initial\_odometer\_km >= 0) \newline - Índices B-Tree: idx\_\allowbreak inst\_\allowbreak device (device\_id), idx\_\allowbreak inst\_\allowbreak vehicle (vehicle\_id), idx\_\allowbreak inst\_\allowbreak active (vehicle\_id, status) \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{telemetry\allowbreak \_logs}} \\*
+\hline
+\textbf{Motor y Producto} & TimescaleDB Extension (API Application / Aiven Cloud) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Hipertabla de series temporales de solo inserción para la ingesta masiva de lecturas de sensores vehiculares de identificación de parámetros. Particionada en intervalos temporales de siete días con compresión columnar automática tras treinta días de antigüedad, optimizando el uso de disco en más de un noventa por ciento. Soporta el cómputo de métricas continuas de velocidad, temperatura del motor, carga, aceleración, tensión de batería y posición geográfica. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{timestamp (TIMESTAMPTZ PK)}, \texttt{vehicle\_id (UUID PK FK)}, \texttt{tenant\_id (UUID FK)}, \texttt{device\_id (UUID FK)}, \texttt{speed (INTEGER)}, \texttt{rpm (INTEGER)}, \texttt{engine\_temp\_c (DECIMAL(5,2))}, \texttt{battery\_voltage (DECIMAL(4,2))}, \texttt{fuel\_level (DECIMAL(5,2))}, \texttt{throttle\_position (DECIMAL(5,2))}, \texttt{engine\_load (DECIMAL(5,2))}, \texttt{latitude (DECIMAL(10,8))}, \texttt{longitude (DECIMAL(11,8))}. \\*
+\hline
+\textbf{Constraints e Índices} & - PK Compuesta: pk\_\allowbreak telemetry\_\allowbreak logs (timestamp, vehicle\_id) \newline - Particionamiento: time chunks de siete días sobre la dimensión temporal timestamp \newline - Compresión Columnar: activada para chunks mayores a treinta días con segmentby vehicle\_id y orderby timestamp DESC \newline - Índices Físicos: idx\_\allowbreak telemetry\_\allowbreak vehicle\_\allowbreak time (vehicle\_id, timestamp DESC), idx\_\allowbreak telemetry\_\allowbreak tenant\_\allowbreak time (tenant\_id, timestamp DESC) \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{vehicle\allowbreak \_faults}} \\*
+\hline
+\textbf{Motor y Producto} & PostgreSQL 16 (API Application) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Registro formal de códigos de avería de diagnóstico automotriz emitidos por la computadora del vehículo y leídos a través del bus CAN. Permite auditar el momento de detección, el estado de resolución técnica por el mecánico en taller y las notas de procedimiento correctivo aplicadas en la orden de servicio. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{id (UUID PK)}, \texttt{tenant\_id (UUID FK)}, \texttt{vehicle\_id (UUID FK)}, \texttt{dtc\_code (VARCHAR(10))}, \texttt{severity (VARCHAR(20))}, \texttt{status (VARCHAR(20))}, \texttt{description (VARCHAR(255))}, \texttt{detected\_at (TIMESTAMPTZ)}, \texttt{resolved\_at (TIMESTAMPTZ)}, \texttt{resolution\_notes (VARCHAR(500))}, \texttt{created\_at (TIMESTAMPTZ)}, \texttt{updated\_at (TIMESTAMPTZ)}, \texttt{version (BIGINT)}, \texttt{deleted\_at (TIMESTAMPTZ)}. \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_\allowbreak vehicle\_\allowbreak faults (id) \newline - FK: fk\_\allowbreak faults\_\allowbreak vehicle hacia vehicles(id), fk\_\allowbreak faults\_\allowbreak tenant hacia tenants(id) \newline - CHECK: chk\_\allowbreak faults\_\allowbreak severity (severity IN ('low', 'medium', 'critical')), chk\_\allowbreak faults\_\allowbreak status (status IN ('active', 'pending\_review', 'resolved', 'cleared')) \newline - Índices B-Tree: idx\_\allowbreak faults\_\allowbreak vehicle (vehicle\_id), idx\_\allowbreak faults\_\allowbreak dtc (dtc\_code), idx\_\allowbreak faults\_\allowbreak status (status) \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{predictive\allowbreak \_alerts}} \\*
+\hline
+\textbf{Motor y Producto} & PostgreSQL 16 (API Application) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Advertencias mecánicas preventivas inferidas deterministamente por los algoritmos analíticos a partir de desviaciones en las series temporales de telemetría. Cuantifica la probabilidad de daño en un porcentaje de certeza, asocia el servicio correctivo sugerido del catálogo de taller y resguarda el acuse de recibo del mensaje push emitido por Firebase Cloud Messaging hacia los clientes. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{id (UUID PK)}, \texttt{tenant\_id (UUID FK)}, \texttt{vehicle\_id (UUID FK)}, \texttt{recommended\_service\_id (UUID FK)}, \texttt{alert\_type (VARCHAR(50))}, \texttt{confidence\_score (DECIMAL(5,2))}, \texttt{message (VARCHAR(255))}, \texttt{status (VARCHAR(20))}, \texttt{fcm\_message\_id (VARCHAR(100))}, \texttt{created\_at (TIMESTAMPTZ)}, \texttt{updated\_at (TIMESTAMPTZ)}, \texttt{version (BIGINT)}, \texttt{deleted\_at (TIMESTAMPTZ)}. \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_\allowbreak predictive\_\allowbreak alerts (id) \newline - FK: fk\_\allowbreak alerts\_\allowbreak vehicle hacia vehicles(id), fk\_\allowbreak alerts\_\allowbreak tenant hacia tenants(id), fk\_\allowbreak alerts\_\allowbreak service hacia services(id) \newline - CHECK: chk\_\allowbreak alerts\_\allowbreak confidence (confidence\_score >= 0.00 AND confidence\_score <= 100.00), chk\_\allowbreak alerts\_\allowbreak status (status IN ('dispatched', 'acknowledged', 'resolved', 'dismissed')) \newline - Índices B-Tree: idx\_\allowbreak alerts\_\allowbreak vehicle (vehicle\_id), idx\_\allowbreak alerts\_\allowbreak status (status), idx\_\allowbreak alerts\_\allowbreak type (alert\_type) \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{dtc\allowbreak \_catalog}} \\*
+\hline
+\textbf{Motor y Producto} & PostgreSQL 16 (API Application) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Diccionario universal estandarizado de códigos de diagnóstico automotriz bajo los esquemas normativos SAE J2012 e ISO 15031-6. Almacena las definiciones técnicas en español, la severidad intrínseca recomendada, la categorización por subsistema vehicular y el indicador de impacto en normativas de control de emisiones contaminantes. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{id (UUID PK)}, \texttt{code (VARCHAR(10) UK)}, \texttt{standard (VARCHAR(20))}, \texttt{system\_category (VARCHAR(30))}, \texttt{description\_es (VARCHAR(500))}, \texttt{severity (VARCHAR(20))}, \texttt{recommended\_action (VARCHAR(500))}, \texttt{is\_emissions\_related (BOOLEAN)}, \texttt{created\_at (TIMESTAMPTZ)}, \texttt{updated\_at (TIMESTAMPTZ)}. \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_\allowbreak dtc\_\allowbreak catalog (id) \newline - UK: uk\_\allowbreak dtc\_\allowbreak code (code) \newline - CHECK: chk\_\allowbreak dtc\_\allowbreak std (standard IN ('sae\_j2012', 'iso\_15031')), chk\_\allowbreak dtc\_\allowbreak cat (system\_category IN ('powertrain', 'chassis', 'body', 'network')), chk\_\allowbreak dtc\_\allowbreak sev (severity IN ('low', 'medium', 'critical')) \newline - Índices B-Tree: idx\_\allowbreak dtc\_\allowbreak code (code), idx\_\allowbreak dtc\_\allowbreak category (system\_category) \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{auditable\allowbreak \_abstract\allowbreak \_entity}} \\*
+\hline
+\textbf{Motor y Producto} & PostgreSQL 16 (API Application) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Superclase arquetípica de persistencia JPA anotada con @MappedSuperclass heredada transversalmente por las entidades maestras del contexto. Suministra la clave técnica primaria UUID, las marcas temporales inmutables de auditoría created\_at y updated\_at, el contador version para el bloqueo optimista en transacciones concurrentes y el soporte de borrado lógico deleted\_at. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{id (UUID PK)}, \texttt{created\_at (TIMESTAMPTZ)}, \texttt{updated\_at (TIMESTAMPTZ)}, \texttt{version (BIGINT)}, \texttt{deleted\_at (TIMESTAMPTZ)}. \\*
+\hline
+\textbf{Constraints e Índices} & - PK técnica: pk\_\allowbreak auditable\_\allowbreak entity (id) \newline - Concurrencia optimista: version administrada por el proveedor JPA Hibernate \newline - Borrado lógico: filtro SQL deleted\_at IS NULL inyectado en consultas relacionales \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{local\allowbreak \_telemetry\allowbreak \_buffer}} \\*
+\hline
+\textbf{Motor y Producto} & SQLite 3 (Atelier Workshop \& Atelier Driver) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Amortiguador transaccional local en terminal móvil gestionado mediante Room en Android y Drift en Flutter. Captura y encola tramas telemáticas OBD-II emitidas por adaptadores Bluetooth en circunstancias de nula cobertura inalámbrica, preservando las marcas temporales ISO-8601 originales y los valores físicos de los sensores para su posterior transmisión en lote hacia la API central. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{id (TEXT PK)}, \texttt{vehicle\_id (TEXT)}, \texttt{timestamp (TEXT)}, \texttt{speed (INTEGER)}, \texttt{rpm (INTEGER)}, \texttt{engine\_temp\_c (REAL)}, \texttt{battery\_voltage (REAL)}, \texttt{fuel\_level (REAL)}, \texttt{latitude (REAL)}, \texttt{longitude (REAL)}, \texttt{sync\_status (TEXT)}, \texttt{created\_at (TEXT)}. \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_\allowbreak local\_\allowbreak telemetry\_\allowbreak buffer (id) \newline - CHECK: chk\_\allowbreak telem\_\allowbreak sync (sync\_status IN ('PENDING', 'SYNCED', 'FAILED')) \newline - Índices B-Tree: idx\_\allowbreak local\_\allowbreak telem\_\allowbreak status (sync\_status, timestamp) \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{local\allowbreak \_vehicle\allowbreak \_faults\allowbreak \_cache}} \\*
+\hline
+\textbf{Motor y Producto} & SQLite 3 (Atelier Workshop \& Atelier Driver) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Réplica relacional local de códigos de avería automotriz activos en el vehículo monitoreado. Habilita la consulta instantánea en foso o en ruta por el técnico mecánico o el conductor sin dependencia de conexión a Internet, permitiendo la visualización inmediata del diagnóstico DTC y su nivel de severidad. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{fault\_id (TEXT PK)}, \texttt{vehicle\_id (TEXT)}, \texttt{dtc\_code (TEXT)}, \texttt{severity (TEXT)}, \texttt{description (TEXT)}, \texttt{detected\_at (TEXT)}, \texttt{synced\_at (TEXT)}. \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_\allowbreak local\_\allowbreak faults (fault\_id) \newline - Índices B-Tree: idx\_\allowbreak local\_\allowbreak faults\_\allowbreak vehicle (vehicle\_id) \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{local\allowbreak \_predictive\allowbreak \_alerts\allowbreak \_cache}} \\*
+\hline
+\textbf{Motor y Producto} & SQLite 3 (Atelier Workshop \& Atelier Driver) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Caché local de historial de alertas preventivas notificadas al usuario a través de notificaciones push o refrescos periódicos de datos. Garantiza la renderización reactiva de advertencias mecánicas en la aplicación móvil aun cuando el dispositivo pierda señal celular en túneles o sótanos. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{alert\_id (TEXT PK)}, \texttt{vehicle\_id (TEXT)}, \texttt{alert\_type (TEXT)}, \texttt{confidence\_score (REAL)}, \texttt{message (TEXT)}, \texttt{status (TEXT)}, \texttt{created\_at (TEXT)}, \texttt{synced\_at (TEXT)}. \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_\allowbreak local\_\allowbreak alerts (alert\_id) \newline - Índices B-Tree: idx\_\allowbreak local\_\allowbreak alerts\_\allowbreak vehicle (vehicle\_id) \\
+\hline
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Elaboración propia en base al diseño físico de persistencia y la arquitectura multi-producto de series temporales.
+
+A partir de la estructura formalizada en la @fig:database-diagram-iot y catalogada en la @tbl:iot-database-tables-schema, se identifican tres fundamentos de ingeniería de software que respaldan la escalabilidad, consistencia y resiliencia de la persistencia:
+
+- **Segregación de Cargas de Trabajo y Particionamiento Temporal en TimescaleDB:**
+  La bifurcación entre el esquema transaccional en PostgreSQL 16 y la hipertabla de series temporales en TimescaleDB erradica la contención de bloqueos relacionales durante la ingestión masiva de datos telemáticos. Al particionar los registros en bloques temporales de siete días y aplicar compresión columnar automática tras treinta días de almacenamiento, el sistema reduce la huella física en más de un noventa por ciento y preserva tiempos de respuesta constantes para las consultas operativas del ERP automotriz.
+
+- **Integridad Referencial Temporal y Monotonicidad Odometría:**
+  La formalización de las sesiones de emparejamiento mediante **device_installations** y el registro de averías en **vehicle_faults** garantizan la trazabilidad física inmutable de las intervenciones mecánicas. La imposición de restricciones CHECK que validan la monotonicidad no decreciente del odómetro y los índices compuestos sobre el estado del vehículo aseguran que ninguna discrepancia en los sensores corrompa el historial legal y técnico del automotor durante auditorías o inspecciones de flota.
+
+- **Amortiguamiento Transaccional Desconectado y Replicación Resiliente en SQLite 3:**
+  La implementación de colas locales de sincronización en terminales móviles mediante SQLite 3 confiere una robustez excepcional al ecosistema ante interrupciones de conectividad en carretera o instalaciones subterráneas. El buffer local **local_telemetry_buffer** actúa como un cerrojo transaccional en el dispositivo, asegurando que las ráfagas sensoriales se drenen de manera ordenada y con marcas temporales fidedignas hacia la nube una vez restablecido el enlace telemático, garantizando cero pérdida de información crítica.
 
 \newpage

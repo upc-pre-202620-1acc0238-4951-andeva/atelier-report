@@ -8,6 +8,7 @@ component api "Components-API" "Diagrama de Componentes de la API Central de Ate
     exclude hr_controllers hr_app_services hr_event_handlers hr_domain hr_persistence hr_facade hr_external_gateways
     exclude invoicing_controllers invoicing_app_services invoicing_event_handlers invoicing_domain invoicing_persistence invoicing_facade invoicing_external_gateways
     exclude billing_controllers billing_app_services billing_event_handlers billing_domain billing_persistence billing_facade billing_external_gateways
+    exclude iot_controllers iot_app_services iot_event_handlers iot_domain iot_persistence iot_facade iot_external_gateways
     autoLayout tb 250 200
 }
 
@@ -71,6 +72,14 @@ component api "component-level-diagram-billing" "Diagrama de Componentes C4 (Niv
     include iam_comp mro_comp
     autoLayout tb 250 200
 }
+
+component api "component-level-diagram-iot" "Diagrama de Componentes C4 (Nivel 3) para el Bounded Context IoT Telemetry & Predictive Maintenance en API Application" {
+    include iot_controllers iot_app_services iot_event_handlers iot_domain iot_persistence iot_facade iot_external_gateways
+    include webapp workshop_mobile driver_mobile obd2_sim db fcm groq
+    include mro_comp customer_fleet_comp
+    autoLayout tb 250 200
+}
+
 
 
 

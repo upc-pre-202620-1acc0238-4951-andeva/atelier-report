@@ -1,0 +1,937 @@
+@startuml class-diagram-iot
+title <size:18>Diagrama de Clases UML - Bounded Context IoT Telemetry & Predictive Maintenance (Domain Layer)</size>\n<size:12>Paquete Canónico: com.andeva.atelier.platform.iot.domain</size>
+
+scale max 3200 width
+
+' Configuraciones visuales y de diseño profesional
+skinparam classAttributeIconSize 0
+skinparam monochrome false
+skinparam shadowing false
+skinparam roundcorner 6
+skinparam linetype ortho
+skinparam nodesep 26
+skinparam ranksep 30
+skinparam defaultFontName "Helvetica", "Arial", sans-serif
+skinparam defaultFontSize 10
+skinparam defaultFontColor #2C3E50
+skinparam arrowColor #34495E
+skinparam arrowThickness 1.1
+skinparam packageBorderColor #7F8C8D
+skinparam packageFontSize 11
+skinparam packageFontStyle bold
+
+' Estilos específicos por categoría táctica
+skinparam class {
+    BackgroundColor #FFFFFF
+    BorderColor #2C3E50
+    HeaderBackgroundColor #EAEDED
+}
+skinparam class<<AggregateRoot>> {
+    BackgroundColor #E8F8F5
+    BorderColor #16A085
+    HeaderBackgroundColor #A3E4D7
+}
+skinparam class<<Entity>> {
+    BackgroundColor #EBF5FB
+    BorderColor #2980B9
+    HeaderBackgroundColor #AED6F1
+}
+skinparam class<<ValueObject>> {
+    BackgroundColor #FEF9E7
+    BorderColor #D68910
+    HeaderBackgroundColor #FAD7A0
+}
+skinparam class<<TypedId>> {
+    BackgroundColor #EBF5FB
+    BorderColor #2980B9
+    HeaderBackgroundColor #AED6F1
+}
+skinparam class<<DomainService>> {
+    BackgroundColor #E8F8F5
+    BorderColor #117A65
+    HeaderBackgroundColor #A2D9CE
+}
+skinparam class<<DomainEvent>> {
+    BackgroundColor #FADBD8
+    BorderColor #C0392B
+    HeaderBackgroundColor #F1948A
+}
+skinparam class<<Exception>> {
+    BackgroundColor #F4ECF7
+    BorderColor #8E44AD
+    HeaderBackgroundColor #D2B4DE
+}
+skinparam class<<SharedKernel>> {
+    BackgroundColor #F8F9F9
+    BorderColor #BDC3C7
+    HeaderBackgroundColor #EAEDED
+}
+skinparam interface {
+    BackgroundColor #E8F6F3
+    BorderColor #117A65
+    HeaderBackgroundColor #A2D9CE
+}
+skinparam enum {
+    BackgroundColor #FCF3CF
+    BorderColor #B7950B
+    HeaderBackgroundColor #F9E79F
+}
+
+set separator none
+
+' ==============================================================================
+' 1. MODELO DE AGREGADOS (AGGREGATES)
+' ==============================================================================
+package "iot.domain.model.aggregates" as aggregates #FDFEFE {
+
+    abstract class "AbstractDomainAggregateRoot<T>" as AbstractDomainAggregateRoot <<SharedKernel>> {
+        # id: T
+        - domainEvents: List<DomainEvent>
+        --
+        # registerDomainEvent(event: DomainEvent): void
+        + domainEvents(): List<DomainEvent>
+        + clearDomainEvents(): void
+    }
+
+    class Obd2Device <<AggregateRoot>> {
+        - id: DeviceId
+        - tenantId: TenantId
+        - serialNumber: DeviceIdentifier
+        - macAddress: MacAddress
+        - status: DeviceStatus
+        - firmwareVersion: FirmwareVersion
+        - protocolType: ProtocolType
+        - registeredAt: Instant
+        - lastHeartbeatAt: Optional<Instant>
+        --
+        + {static} register(tenantId: TenantId, serial: DeviceIdentifier, mac: MacAddress, protocol: ProtocolType, firmware: FirmwareVersion): Obd2Device
+        + recordHeartbeat(timestamp: Instant): void
+        + markActive(): void
+        + markSuspended(): void
+        + markDecommissioned(): void
+        + updateFirmware(newVersion: FirmwareVersion): void
+        + id(): DeviceId
+        + tenantId(): TenantId
+        + serialNumber(): DeviceIdentifier
+        + macAddress(): MacAddress
+        + status(): DeviceStatus
+        + firmwareVersion(): FirmwareVersion
+        + protocolType(): ProtocolType
+        + isOperational(): boolean
+    }
+
+    class DeviceInstallation <<AggregateRoot>> {
+        - id: InstallationId
+        - deviceId: DeviceId
+        - vehicleId: VehicleId
+        - tenantId: TenantId
+        - installedAt: Instant
+        - uninstalledAt: Optional<Instant>
+        - initialOdometerKm: int
+        - finalOdometerKm: Optional<Integer>
+        - status: InstallationStatus
+        - notes: InstallationNotes
+        --
+        + {static} install(deviceId: DeviceId, vehicleId: VehicleId, tenantId: TenantId, initialKm: int, notes: InstallationNotes): DeviceInstallation
+        + uninstall(finalKm: int, timestamp: Instant): void
+        + isActive(): boolean
+        + id(): InstallationId
+        + deviceId(): DeviceId
+        + vehicleId(): VehicleId
+        + tenantId(): TenantId
+        + installedAt(): Instant
+        + uninstalledAt(): Optional<Instant>
+        + initialOdometerKm(): int
+        + finalOdometerKm(): Optional<Integer>
+        + status(): InstallationStatus
+        + notes(): InstallationNotes
+    }
+
+    class TelemetryRecord <<ValueObject>> {
+        - timestamp: Instant
+        - vehicleId: VehicleId
+        - deviceId: DeviceId
+        - tenantId: TenantId
+        - location: Optional<GeoCoordinates>
+        - speed: VehicleSpeed
+        - rpm: EngineRpm
+        - coolantTemperature: EngineTemperature
+        - fuelLevel: Optional<FuelLevel>
+        - batteryVoltage: Optional<BatteryVoltage>
+        - throttlePosition: Optional<ThrottlePosition>
+        - engineLoad: Optional<EngineLoad>
+        - activeDtcCodes: List<DtcCode>
+        --
+        + {static} of(timestamp: Instant, vehicleId: VehicleId, deviceId: DeviceId, tenantId: TenantId, speed: VehicleSpeed, rpm: EngineRpm, temp: EngineTemperature): TelemetryRecord
+        + indicatesOverheating(): boolean
+        + indicatesLowBattery(): boolean
+        + hasActiveDtcs(): boolean
+        + timestamp(): Instant
+        + vehicleId(): VehicleId
+        + deviceId(): DeviceId
+        + tenantId(): TenantId
+        + location(): Optional<GeoCoordinates>
+        + speed(): VehicleSpeed
+        + rpm(): EngineRpm
+        + coolantTemperature(): EngineTemperature
+        + fuelLevel(): Optional<FuelLevel>
+        + batteryVoltage(): Optional<BatteryVoltage>
+        + throttlePosition(): Optional<ThrottlePosition>
+        + engineLoad(): Optional<EngineLoad>
+        + activeDtcCodes(): List<DtcCode>
+    }
+
+    class VehicleFault <<AggregateRoot>> {
+        - id: FaultId
+        - vehicleId: VehicleId
+        - tenantId: TenantId
+        - deviceId: DeviceId
+        - dtcCode: DtcCode
+        - severity: FaultSeverity
+        - status: FaultStatus
+        - description: String
+        - detectedAt: Instant
+        - resolvedAt: Optional<Instant>
+        - resolutionNotes: Optional<String>
+        --
+        + {static} detect(vehicleId: VehicleId, tenantId: TenantId, deviceId: DeviceId, dtc: DtcCode, severity: FaultSeverity, desc: String, timestamp: Instant): VehicleFault
+        + markInReview(): void
+        + resolve(notes: String, timestamp: Instant): void
+        + dismiss(reason: String): void
+        + isResolved(): boolean
+        + isCritical(): boolean
+        + id(): FaultId
+        + vehicleId(): VehicleId
+        + tenantId(): TenantId
+        + deviceId(): DeviceId
+        + dtcCode(): DtcCode
+        + severity(): FaultSeverity
+        + status(): FaultStatus
+        + description(): String
+        + detectedAt(): Instant
+        + resolvedAt(): Optional<Instant>
+        + resolutionNotes(): Optional<String>
+    }
+
+    class PredictiveAlert <<AggregateRoot>> {
+        - id: AlertId
+        - vehicleId: VehicleId
+        - tenantId: TenantId
+        - recommendedServiceId: Optional<ServiceId>
+        - alertType: AlertType
+        - confidenceScore: ConfidenceScore
+        - message: String
+        - status: AlertStatus
+        - fcmMessageId: Optional<String>
+        - createdAt: Instant
+        --
+        + {static} generate(vehicleId: VehicleId, tenantId: TenantId, serviceId: Optional<ServiceId>, type: AlertType, score: ConfidenceScore, msg: String): PredictiveAlert
+        + markDispatched(fcmId: String): void
+        + acknowledge(): void
+        + resolve(): void
+        + dismiss(): void
+        + id(): AlertId
+        + vehicleId(): VehicleId
+        + tenantId(): TenantId
+        + recommendedServiceId(): Optional<ServiceId>
+        + alertType(): AlertType
+        + confidenceScore(): ConfidenceScore
+        + message(): String
+        + status(): AlertStatus
+        + fcmMessageId(): Optional<String>
+        + createdAt(): Instant
+    }
+
+    class DtcCatalogEntry <<AggregateRoot>> {
+        - id: DtcId
+        - code: DtcCode
+        - standard: DtcStandard
+        - systemCategory: DtcSystemCategory
+        - description: String
+        - defaultSeverity: FaultSeverity
+        - recommendedServiceId: Optional<ServiceId>
+        - isGeneric: boolean
+        --
+        + {static} register(code: DtcCode, std: DtcStandard, cat: DtcSystemCategory, desc: String, sev: FaultSeverity, serviceId: Optional<ServiceId>, isGeneric: boolean): DtcCatalogEntry
+        + updateDescription(desc: String): void
+        + updateRecommendedService(serviceId: ServiceId): void
+        + id(): DtcId
+        + code(): DtcCode
+        + standard(): DtcStandard
+        + systemCategory(): DtcSystemCategory
+        + description(): String
+        + defaultSeverity(): FaultSeverity
+        + recommendedServiceId(): Optional<ServiceId>
+        + isGeneric(): boolean
+    }
+}
+
+' ==============================================================================
+' 2. SERVICIOS DE DOMINIO (DOMAIN SERVICES)
+' ==============================================================================
+package "iot.domain.services" as services #E8F8F5 {
+
+    class PredictiveAnomalyDetectionEngine <<DomainService>> {
+        - {static} OVERHEATING_THRESHOLD_CELSIUS: double = 105.0
+        - {static} LOW_VOLTAGE_THRESHOLD_VOLTS: double = 11.8
+        --
+        + evaluateTelemetry(record: TelemetryRecord): Optional<AnomalyEvaluationResult>
+        + detectThermalRunaway(history: List<TelemetryRecord>): boolean
+        + detectAlternatorFailure(voltage: BatteryVoltage, rpm: EngineRpm): boolean
+    }
+
+    class DtcCodeEvaluationService <<DomainService>> {
+        - dtcCatalog: DtcCatalogEntryRepository
+        --
+        + evaluateSeverity(code: DtcCode): FaultSeverity
+        + resolveRecommendedService(code: DtcCode): Optional<ServiceId>
+        + isEmissionsRelated(code: DtcCode): boolean
+    }
+
+    class AnomalyEvaluationResult <<ValueObject>> {
+        - alertType: AlertType
+        - severity: FaultSeverity
+        - confidenceScore: ConfidenceScore
+        - diagnosticMessage: String
+        --
+        + {static} of(type: AlertType, sev: FaultSeverity, score: ConfidenceScore, msg: String): AnomalyEvaluationResult
+        + alertType(): AlertType
+        + severity(): FaultSeverity
+        + confidenceScore(): ConfidenceScore
+        + diagnosticMessage(): String
+    }
+}
+
+' ==============================================================================
+' 3. PUERTOS DE REPOSITORIO (REPOSITORY INTERFACES)
+' ==============================================================================
+package "iot.domain.repositories" as repositories #E8F6F3 {
+
+    interface Obd2DeviceRepository <<Interface>> {
+        + save(device: Obd2Device): Obd2Device
+        + findById(id: DeviceId): Optional<Obd2Device>
+        + findBySerialNumber(serial: DeviceIdentifier): Optional<Obd2Device>
+        + findAllByTenantId(tenantId: TenantId): List<Obd2Device>
+    }
+
+    interface DeviceInstallationRepository <<Interface>> {
+        + save(installation: DeviceInstallation): DeviceInstallation
+        + findActiveByVehicleId(vehicleId: VehicleId): Optional<DeviceInstallation>
+        + findActiveByDeviceId(deviceId: DeviceId): Optional<DeviceInstallation>
+        + findHistoryByVehicleId(vehicleId: VehicleId): List<DeviceInstallation>
+    }
+
+    interface TelemetryLogRepository <<Interface>> {
+        + saveAllBatch(records: List<TelemetryRecord>): void
+        + findLatestByVehicleId(vehicleId: VehicleId): Optional<TelemetryRecord>
+        + findHistoryByVehicleIdAndRange(vehicleId: VehicleId, from: Instant, to: Instant): List<TelemetryRecord>
+    }
+
+    interface VehicleFaultRepository <<Interface>> {
+        + save(fault: VehicleFault): VehicleFault
+        + findActiveByVehicleId(vehicleId: VehicleId): List<VehicleFault>
+        + findById(id: FaultId): Optional<VehicleFault>
+        + findAllByTenantId(tenantId: TenantId): List<VehicleFault>
+    }
+
+    interface PredictiveAlertRepository <<Interface>> {
+        + save(alert: PredictiveAlert): PredictiveAlert
+        + findAllByVehicleId(vehicleId: VehicleId): List<PredictiveAlert>
+        + findPendingAlerts(tenantId: TenantId): List<PredictiveAlert>
+        + findById(id: AlertId): Optional<PredictiveAlert>
+    }
+
+    interface DtcCatalogEntryRepository <<Interface>> {
+        + save(entry: DtcCatalogEntry): DtcCatalogEntry
+        + findByCode(code: DtcCode): Optional<DtcCatalogEntry>
+        + findAllBySystem(category: DtcSystemCategory): List<DtcCatalogEntry>
+    }
+}
+
+' ==============================================================================
+' 4. IDENTIFICADORES TIPADOS (TYPED IDS)
+' ==============================================================================
+package "iot.domain.model.ids" as ids #F4F6F6 {
+
+    interface "TypedId<T>" as TypedId <<interface>> {
+        + value(): T
+    }
+
+    class DeviceId <<TypedId>> {
+        - value: UUID
+        --
+        + {static} of(value: UUID): DeviceId
+        + {static} generate(): DeviceId
+        + value(): UUID
+    }
+
+    class InstallationId <<TypedId>> {
+        - value: UUID
+        --
+        + {static} of(value: UUID): InstallationId
+        + {static} generate(): InstallationId
+        + value(): UUID
+    }
+
+    class FaultId <<TypedId>> {
+        - value: UUID
+        --
+        + {static} of(value: UUID): FaultId
+        + {static} generate(): FaultId
+        + value(): UUID
+    }
+
+    class AlertId <<TypedId>> {
+        - value: UUID
+        --
+        + {static} of(value: UUID): AlertId
+        + {static} generate(): AlertId
+        + value(): UUID
+    }
+
+    class DtcId <<TypedId>> {
+        - value: UUID
+        --
+        + {static} of(value: UUID): DtcId
+        + {static} generate(): DtcId
+        + value(): UUID
+    }
+
+    class DeviceIdentifier <<TypedId>> {
+        - value: String
+        --
+        + {static} of(value: String): DeviceIdentifier
+        + value(): String
+    }
+
+    class MacAddress <<ValueObject>> {
+        - value: String
+        --
+        + {static} of(value: String): MacAddress
+        + value(): String
+    }
+
+    class DtcCode <<ValueObject>> {
+        - value: String
+        --
+        + {static} of(value: String): DtcCode
+        + value(): String
+        + systemCategory(): DtcSystemCategory
+        + isManufacturerSpecific(): boolean
+    }
+}
+
+' ==============================================================================
+' 5. OBJETOS DE VALOR (VALUE OBJECTS)
+' ==============================================================================
+package "iot.domain.model.valueobjects" as valueobjects #FEFDE8 {
+
+    class VehicleSpeed <<ValueObject>> {
+        - kmh: double
+        --
+        + {static} of(kmh: double): VehicleSpeed
+        + kmh(): double
+        + isZero(): boolean
+    }
+
+    class EngineRpm <<ValueObject>> {
+        - rpm: int
+        --
+        + {static} of(rpm: int): EngineRpm
+        + rpm(): int
+        + isIdling(): boolean
+        + isExcessive(): boolean
+    }
+
+    class EngineTemperature <<ValueObject>> {
+        - celsius: double
+        --
+        + {static} of(celsius: double): EngineTemperature
+        + celsius(): double
+        + isCriticalOverheating(): boolean
+        + isColdEngine(): boolean
+    }
+
+    class BatteryVoltage <<ValueObject>> {
+        - volts: double
+        --
+        + {static} of(volts: double): BatteryVoltage
+        + volts(): double
+        + isLowBattery(): boolean
+        + isOvercharging(): boolean
+    }
+
+    class FuelLevel <<ValueObject>> {
+        - percentage: double
+        --
+        + {static} of(percentage: double): FuelLevel
+        + percentage(): double
+        + isLowFuel(): boolean
+    }
+
+    class ThrottlePosition <<ValueObject>> {
+        - percentage: double
+        --
+        + {static} of(percentage: double): ThrottlePosition
+        + percentage(): double
+    }
+
+    class EngineLoad <<ValueObject>> {
+        - percentage: double
+        --
+        + {static} of(percentage: double): EngineLoad
+        + percentage(): double
+        + isHighLoad(): boolean
+    }
+
+    class GeoCoordinates <<ValueObject>> {
+        - latitude: double
+        - longitude: double
+        --
+        + {static} of(lat: double, lon: double): GeoCoordinates
+        + latitude(): double
+        + longitude(): double
+    }
+
+    class ConfidenceScore <<ValueObject>> {
+        - value: BigDecimal
+        --
+        + {static} of(score: BigDecimal): ConfidenceScore
+        + value(): BigDecimal
+        + isHighConfidence(): boolean
+    }
+
+    class FirmwareVersion <<ValueObject>> {
+        - version: String
+        --
+        + {static} of(version: String): FirmwareVersion
+        + version(): String
+    }
+
+    class InstallationNotes <<ValueObject>> {
+        - text: String
+        --
+        + {static} of(text: String): InstallationNotes
+        + text(): String
+    }
+}
+
+' ==============================================================================
+' 6. ENUMERACIONES DE DOMINIO (ENUMS)
+' ==============================================================================
+package "iot.domain.model.enums" as enums #FCF9E8 {
+
+    enum DeviceStatus <<Enum>> {
+        PROVISIONED
+        ACTIVE
+        SUSPENDED
+        LOST
+        BROKEN
+        DECOMMISSIONED
+    }
+
+    enum ConnectionType <<Enum>> {
+        CELLULAR_SIM
+        BLUETOOTH_BLE
+        WIFI
+    }
+
+    enum ProtocolType <<Enum>> {
+        ISO15765_4_CAN
+        ISO14230_4_KWP
+        ISO9141_2
+        SAE_J1850_PWM
+        SAE_J1850_VPW
+    }
+
+    enum InstallationStatus <<Enum>> {
+        ACTIVE
+        UNINSTALLED
+    }
+
+    enum FaultSeverity <<Enum>> {
+        MINOR
+        MODERATE
+        CRITICAL
+    }
+
+    enum FaultStatus <<Enum>> {
+        PENDING
+        IN_REVIEW
+        RESOLVED
+        DISMISSED
+    }
+
+    enum AlertType <<Enum>> {
+        OVERHEATING_RISK
+        BATTERY_DEGRADATION
+        BRAKE_WEAR
+        OIL_LIFE_DEPLETION
+        EMISSIONS_FAILURE
+    }
+
+    enum AlertStatus <<Enum>> {
+        DISPATCHED
+        ACKNOWLEDGED
+        RESOLVED
+        DISMISSED
+    }
+
+    enum DtcStandard <<Enum>> {
+        SAE_J2012
+        ISO_15031_6
+    }
+
+    enum DtcSystemCategory <<Enum>> {
+        POWERTRAIN
+        CHASSIS
+        BODY
+        NETWORK
+    }
+}
+
+' ==============================================================================
+' 7. EVENTOS DE DOMINIO (DOMAIN EVENTS)
+' ==============================================================================
+package "iot.domain.events" as events #FADBD8 {
+
+    interface "DomainEvent" as DomainEvent <<SharedKernel>> {
+        + occurredOn(): Instant
+    }
+
+    class Obd2DeviceRegisteredEvent <<DomainEvent>> {
+        - deviceId: DeviceId
+        - tenantId: TenantId
+        - serialNumber: DeviceIdentifier
+        - occurredOn: Instant
+        --
+        + deviceId(): DeviceId
+        + tenantId(): TenantId
+        + serialNumber(): DeviceIdentifier
+        + occurredOn(): Instant
+    }
+
+    class DeviceInstalledEvent <<DomainEvent>> {
+        - installationId: InstallationId
+        - deviceId: DeviceId
+        - vehicleId: VehicleId
+        - tenantId: TenantId
+        - occurredOn: Instant
+        --
+        + installationId(): InstallationId
+        + deviceId(): DeviceId
+        + vehicleId(): VehicleId
+        + tenantId(): TenantId
+        + occurredOn(): Instant
+    }
+
+    class DeviceUninstalledEvent <<DomainEvent>> {
+        - installationId: InstallationId
+        - deviceId: DeviceId
+        - vehicleId: VehicleId
+        - finalOdometerKm: int
+        - occurredOn: Instant
+        --
+        + installationId(): InstallationId
+        + finalOdometerKm(): int
+        + occurredOn(): Instant
+    }
+
+    class TelemetryBatchIngestedEvent <<DomainEvent>> {
+        - vehicleId: VehicleId
+        - deviceId: DeviceId
+        - tenantId: TenantId
+        - batchSize: int
+        - latestTimestamp: Instant
+        - occurredOn: Instant
+        --
+        + vehicleId(): VehicleId
+        + deviceId(): DeviceId
+        + batchSize(): int
+        + latestTimestamp(): Instant
+        + occurredOn(): Instant
+    }
+
+    class VehicleFaultDetectedEvent <<DomainEvent>> {
+        - faultId: FaultId
+        - vehicleId: VehicleId
+        - tenantId: TenantId
+        - dtcCode: DtcCode
+        - severity: FaultSeverity
+        - occurredOn: Instant
+        --
+        + faultId(): FaultId
+        + vehicleId(): VehicleId
+        + dtcCode(): DtcCode
+        + severity(): FaultSeverity
+        + occurredOn(): Instant
+    }
+
+    class VehicleFaultResolvedEvent <<DomainEvent>> {
+        - faultId: FaultId
+        - vehicleId: VehicleId
+        - tenantId: TenantId
+        - occurredOn: Instant
+        --
+        + faultId(): FaultId
+        + vehicleId(): VehicleId
+        + occurredOn(): Instant
+    }
+
+    class PredictiveAlertGeneratedEvent <<DomainEvent>> {
+        - alertId: AlertId
+        - vehicleId: VehicleId
+        - tenantId: TenantId
+        - alertType: AlertType
+        - confidenceScore: ConfidenceScore
+        - occurredOn: Instant
+        --
+        + alertId(): AlertId
+        + vehicleId(): VehicleId
+        + alertType(): AlertType
+        + confidenceScore(): ConfidenceScore
+        + occurredOn(): Instant
+    }
+}
+
+' ==============================================================================
+' 8. EXCEPCIONES DE DOMINIO (DOMAIN EXCEPTIONS)
+' ==============================================================================
+package "iot.domain.exceptions" as exceptions #F4ECF7 {
+
+    abstract class IoTDomainException <<Exception>> {
+        - message: String
+        --
+        # IoTDomainException(message: String)
+        + getMessage(): String
+    }
+
+    class DeviceNotFoundException <<Exception>> {
+        + DeviceNotFoundException(id: DeviceId)
+        + DeviceNotFoundException(serial: DeviceIdentifier)
+    }
+
+    class DeviceAlreadyRegisteredException <<Exception>> {
+        + DeviceAlreadyRegisteredException(serial: DeviceIdentifier)
+    }
+
+    class ActiveInstallationConflictException <<Exception>> {
+        + ActiveInstallationConflictException(vehicleId: VehicleId)
+        + ActiveInstallationConflictException(deviceId: DeviceId)
+    }
+
+    class InstallationNotFoundException <<Exception>> {
+        + InstallationNotFoundException(id: InstallationId)
+    }
+
+    class VehicleFaultNotFoundException <<Exception>> {
+        + VehicleFaultNotFoundException(id: FaultId)
+    }
+
+    class PredictiveAlertNotFoundException <<Exception>> {
+        + PredictiveAlertNotFoundException(id: AlertId)
+    }
+
+    class DtcCodeNotFoundException <<Exception>> {
+        + DtcCodeNotFoundException(code: DtcCode)
+    }
+
+    class InvalidTelemetryDataException <<Exception>> {
+        + InvalidTelemetryDataException(reason: String)
+    }
+}
+
+' ==============================================================================
+' 9. SHARED KERNEL EXTERNO (CROSS-CUTTING TYPES)
+' ==============================================================================
+package "Shared Kernel (Cross-Cutting)" as shared_kernel #F8F9F9 {
+    class TenantId <<SharedKernel>> {
+        - value: UUID
+        + value(): UUID
+    }
+    class VehicleId <<SharedKernel>> {
+        - value: UUID
+        + value(): UUID
+    }
+    class ServiceId <<SharedKernel>> {
+        - value: UUID
+        + value(): UUID
+    }
+}
+
+' ==============================================================================
+' RELACIONES Y ASOCIACIONES TÁCTICAS
+' ==============================================================================
+
+' Herencia de Agregados
+AbstractDomainAggregateRoot <|-- Obd2Device
+AbstractDomainAggregateRoot <|-- DeviceInstallation
+AbstractDomainAggregateRoot <|-- VehicleFault
+AbstractDomainAggregateRoot <|-- PredictiveAlert
+AbstractDomainAggregateRoot <|-- DtcCatalogEntry
+
+' Identificadores Fuertemente Tipados
+TypedId <|.. DeviceId
+TypedId <|.. InstallationId
+TypedId <|.. FaultId
+TypedId <|.. AlertId
+TypedId <|.. DtcId
+TypedId <|.. DeviceIdentifier
+
+' Herencia de Excepciones
+IoTDomainException <|-- DeviceNotFoundException
+IoTDomainException <|-- DeviceAlreadyRegisteredException
+IoTDomainException <|-- ActiveInstallationConflictException
+IoTDomainException <|-- InstallationNotFoundException
+IoTDomainException <|-- VehicleFaultNotFoundException
+IoTDomainException <|-- PredictiveAlertNotFoundException
+IoTDomainException <|-- DtcCodeNotFoundException
+IoTDomainException <|-- InvalidTelemetryDataException
+
+' Herencia de Eventos
+DomainEvent <|.. Obd2DeviceRegisteredEvent
+DomainEvent <|.. DeviceInstalledEvent
+DomainEvent <|.. DeviceUninstalledEvent
+DomainEvent <|.. TelemetryBatchIngestedEvent
+DomainEvent <|.. VehicleFaultDetectedEvent
+DomainEvent <|.. VehicleFaultResolvedEvent
+DomainEvent <|.. PredictiveAlertGeneratedEvent
+
+' Relaciones de Agregados con Enums y Objetos de Valor
+Obd2Device *--> DeviceId : id
+Obd2Device *--> DeviceIdentifier : serialNumber
+Obd2Device *--> MacAddress : macAddress
+Obd2Device *--> DeviceStatus : status
+Obd2Device *--> FirmwareVersion : firmwareVersion
+Obd2Device *--> ProtocolType : protocolType
+
+DeviceInstallation *--> InstallationId : id
+DeviceInstallation *--> DeviceId : deviceId
+DeviceInstallation *--> VehicleId : vehicleId
+DeviceInstallation *--> InstallationStatus : status
+DeviceInstallation *--> InstallationNotes : notes
+
+VehicleFault *--> FaultId : id
+VehicleFault *--> VehicleId : vehicleId
+VehicleFault *--> DeviceId : deviceId
+VehicleFault *--> DtcCode : dtcCode
+VehicleFault *--> FaultSeverity : severity
+VehicleFault *--> FaultStatus : status
+
+PredictiveAlert *--> AlertId : id
+PredictiveAlert *--> VehicleId : vehicleId
+PredictiveAlert *--> AlertType : alertType
+PredictiveAlert *--> ConfidenceScore : confidenceScore
+PredictiveAlert *--> AlertStatus : status
+
+DtcCatalogEntry *--> DtcId : id
+DtcCatalogEntry *--> DtcCode : code
+DtcCatalogEntry *--> DtcStandard : standard
+DtcCatalogEntry *--> DtcSystemCategory : systemCategory
+DtcCatalogEntry *--> FaultSeverity : defaultSeverity
+
+TelemetryRecord *--> VehicleId : vehicleId
+TelemetryRecord *--> DeviceId : deviceId
+TelemetryRecord *--> VehicleSpeed : speed
+TelemetryRecord *--> EngineRpm : rpm
+TelemetryRecord *--> EngineTemperature : coolantTemperature
+TelemetryRecord *--> BatteryVoltage : batteryVoltage
+TelemetryRecord *--> DtcCode : activeDtcCodes
+
+' Relaciones de Servicios y Repositorios
+PredictiveAnomalyDetectionEngine ..> TelemetryRecord : evalúa
+PredictiveAnomalyDetectionEngine ..> AnomalyEvaluationResult : produce
+DtcCodeEvaluationService ..> DtcCode : evalúa
+DtcCodeEvaluationService ..> DtcCatalogEntryRepository : consulta
+
+Obd2DeviceRepository ..> Obd2Device : gestiona
+DeviceInstallationRepository ..> DeviceInstallation : gestiona
+TelemetryLogRepository ..> TelemetryRecord : persiste en lote
+VehicleFaultRepository ..> VehicleFault : gestiona
+PredictiveAlertRepository ..> PredictiveAlert : gestiona
+DtcCatalogEntryRepository ..> DtcCatalogEntry : gestiona
+
+' ==============================================================================
+' REGLAS DE POSICIONAMIENTO Y ALINEACIÓN (LAYOUT HINTS)
+' ==============================================================================
+
+' Fila 1: Agregados en rejilla balanceada
+AbstractDomainAggregateRoot -[hidden]down-> Obd2Device
+Obd2Device -[hidden]right-> DeviceInstallation
+DeviceInstallation -[hidden]right-> TelemetryRecord
+Obd2Device -[hidden]down-> VehicleFault
+VehicleFault -[hidden]right-> PredictiveAlert
+PredictiveAlert -[hidden]right-> DtcCatalogEntry
+
+' Fila 2: Servicios y Repositorios bajo los Agregados
+VehicleFault -[hidden]down-> PredictiveAnomalyDetectionEngine
+PredictiveAnomalyDetectionEngine -[hidden]right-> DtcCodeEvaluationService
+DtcCodeEvaluationService -[hidden]right-> AnomalyEvaluationResult
+
+DtcCatalogEntry -[hidden]down-> Obd2DeviceRepository
+Obd2DeviceRepository -[hidden]right-> DeviceInstallationRepository
+DeviceInstallationRepository -[hidden]right-> TelemetryLogRepository
+Obd2DeviceRepository -[hidden]down-> VehicleFaultRepository
+VehicleFaultRepository -[hidden]right-> PredictiveAlertRepository
+PredictiveAlertRepository -[hidden]right-> DtcCatalogEntryRepository
+
+' Fila 3: IDs (Col. 1), Value Objects (Col. 2), Enums (Col. 3)
+AnomalyEvaluationResult -[hidden]down-> TypedId
+TypedId -[hidden]down-> DeviceId
+DeviceId -[hidden]right-> InstallationId
+InstallationId -[hidden]right-> FaultId
+FaultId -[hidden]right-> AlertId
+DeviceId -[hidden]down-> DtcId
+DtcId -[hidden]right-> DeviceIdentifier
+DeviceIdentifier -[hidden]right-> MacAddress
+MacAddress -[hidden]right-> DtcCode
+DtcId -[hidden]down-> TenantId
+TenantId -[hidden]right-> VehicleId
+VehicleId -[hidden]right-> ServiceId
+
+VehicleFaultRepository -[hidden]down-> VehicleSpeed
+VehicleSpeed -[hidden]right-> EngineRpm
+EngineRpm -[hidden]right-> EngineTemperature
+EngineTemperature -[hidden]right-> BatteryVoltage
+VehicleSpeed -[hidden]down-> FuelLevel
+FuelLevel -[hidden]right-> ThrottlePosition
+ThrottlePosition -[hidden]right-> EngineLoad
+EngineLoad -[hidden]right-> GeoCoordinates
+FuelLevel -[hidden]down-> ConfidenceScore
+ConfidenceScore -[hidden]right-> FirmwareVersion
+FirmwareVersion -[hidden]right-> InstallationNotes
+
+DtcCatalogEntryRepository -[hidden]down-> DeviceStatus
+DeviceStatus -[hidden]right-> ConnectionType
+ConnectionType -[hidden]right-> ProtocolType
+ProtocolType -[hidden]right-> InstallationStatus
+DeviceStatus -[hidden]down-> FaultSeverity
+FaultSeverity -[hidden]right-> FaultStatus
+FaultStatus -[hidden]right-> AlertType
+AlertType -[hidden]right-> AlertStatus
+FaultSeverity -[hidden]down-> DtcStandard
+DtcStandard -[hidden]right-> DtcSystemCategory
+
+' Fila 4: Eventos de Dominio (Izquierda) y Excepciones Semánticas (Derecha)
+ServiceId -[hidden]down-> DomainEvent
+DomainEvent -[hidden]down-> Obd2DeviceRegisteredEvent
+Obd2DeviceRegisteredEvent -[hidden]right-> DeviceInstalledEvent
+DeviceInstalledEvent -[hidden]right-> DeviceUninstalledEvent
+DeviceUninstalledEvent -[hidden]right-> TelemetryBatchIngestedEvent
+Obd2DeviceRegisteredEvent -[hidden]down-> VehicleFaultDetectedEvent
+VehicleFaultDetectedEvent -[hidden]right-> VehicleFaultResolvedEvent
+VehicleFaultResolvedEvent -[hidden]right-> PredictiveAlertGeneratedEvent
+
+DtcSystemCategory -[hidden]down-> IoTDomainException
+IoTDomainException -[hidden]down-> DeviceNotFoundException
+DeviceNotFoundException -[hidden]right-> DeviceAlreadyRegisteredException
+DeviceAlreadyRegisteredException -[hidden]right-> ActiveInstallationConflictException
+ActiveInstallationConflictException -[hidden]right-> InstallationNotFoundException
+DeviceNotFoundException -[hidden]down-> VehicleFaultNotFoundException
+VehicleFaultNotFoundException -[hidden]right-> PredictiveAlertNotFoundException
+PredictiveAlertNotFoundException -[hidden]right-> DtcCodeNotFoundException
+DtcCodeNotFoundException -[hidden]right-> InvalidTelemetryDataException
+
+TelemetryBatchIngestedEvent -[hidden]right-> DeviceNotFoundException
+
+@enduml

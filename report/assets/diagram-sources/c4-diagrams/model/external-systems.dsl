@@ -25,5 +25,8 @@ google_identity = softwareSystem "Google Identity Services" "Plataforma OAuth2 y
 sunat = softwareSystem "SUNAT" "Servicios web de la administración tributaria peruana para validación de padrón RUC y condición de contribuyentes." {
     tags "External"
 }
+groq = softwareSystem "Groq Cloud LPU" "Plataforma de inferencia ultra-rápida de LLMs (LPU) ejecutando Llama 3.3 70B para diagnósticos predictivos vehiculares." {
+    tags "External"
+}
 
 

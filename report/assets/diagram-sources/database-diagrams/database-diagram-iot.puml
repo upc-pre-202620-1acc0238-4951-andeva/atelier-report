@@ -1,0 +1,388 @@
+@startuml database-diagram-iot
+title <size:16>Diagrama de Base de Datos (ERD) - Bounded Context IoT Telemetry & Predictive Maintenance</size>\n<size:11>Persistencia Híbrida Multi-Producto: PostgreSQL 16 & TimescaleDB (API Application) y SQLite 3 (Atelier Workshop & Atelier Driver)</size>
+
+' Configuraciones visuales y de diseño profesional
+hide circle
+skinparam monochrome false
+skinparam shadowing false
+skinparam roundcorner 6
+skinparam linetype ortho
+skinparam nodesep 80
+skinparam ranksep 48
+skinparam defaultFontName "Helvetica", "Arial", sans-serif
+skinparam defaultFontSize 11
+skinparam defaultFontColor #2C3E50
+skinparam arrowColor #34495E
+skinparam arrowThickness 1.3
+skinparam packageBorderColor #7F8C8D
+skinparam packageFontSize 12
+skinparam packageFontStyle bold
+
+skinparam entity {
+    BackgroundColor #FFFFFF
+    BorderColor #34495E
+    HeaderBackgroundColor #EAEDED
+}
+
+' ==============================================================================
+' PRODUCTO 1: API APPLICATION (BACKEND CENTRAL - POSTGRESQL 16 & TIMESCALEDB)
+' ==============================================================================
+package "PostgreSQL 16 & TimescaleDB (API Application - Backend Central)" as pg_backend #F8F9F9 {
+
+    ' ==========================================================================
+    ' COLUMNA 1: ARQUETIPO JPA, CONTEXTOS EXTERNOS Y DISPOSITIVOS TELEMÁTICOS
+    ' ==========================================================================
+    entity "auditable_abstract_entity" as auditable_abstract_entity <<archetype, JPA>> #E8F8F5 {
+        * id : UUID <<PK>>
+        --
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Propiedades del Arquetipo JPA:</b>
+        + Clave primaria técnica UUID v4
+        + Control de concurrencia optimista (version)
+        + Borrado lógico auditable (deleted_at)
+        + Heredado físicamente por entidades de negocio:
+          obd2_devices, device_installations,
+          vehicle_faults y predictive_alerts (@MappedSuperclass)
+    }
+
+    entity "tenants" as tenants <<table, IAM>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * name : VARCHAR(100)
+        * status : VARCHAR(20)
+        --
+        <b>Contexto Externo (IAM & Tenancy):</b>
+        + Taller automotriz titular del equipamiento
+    }
+
+    entity "vehicles" as vehicles <<table, CRM Fleet>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        * license_plate : VARCHAR(10) <<UK>>
+        * vin : VARCHAR(17) <<UK>>
+        * make : VARCHAR(50)
+        * model : VARCHAR(50)
+        --
+        <b>Contexto Externo (Customer & Fleet CRM):</b>
+        + Automotor cliente intervenido y monitoreado
+    }
+
+    entity "services" as services <<table, Inventory MRO>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        * name : VARCHAR(100)
+        * category : VARCHAR(50)
+        --
+        <b>Contexto Externo (Inventory & Work Orders):</b>
+        + Paquete de servicio de mantenimiento recomendado
+    }
+
+    entity "obd2_devices" as obd2_devices <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        * device_identifier : VARCHAR(100) <<UK>>
+        * connection_type : VARCHAR(20)
+        * protocol_type : VARCHAR(20)
+        * status : VARCHAR(20)
+        hardware_model : VARCHAR(100)
+        firmware_version : VARCHAR(50)
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_obd2_devices : PRIMARY KEY (id)
+        + uk_obd2_identifier : UNIQUE (device_identifier)
+        + fk_obd2_tenant : FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+        + chk_obd2_conn : CHECK (connection_type IN ('bluetooth', 'sim_cellular', 'wifi'))
+        + chk_obd2_protocol : CHECK (protocol_type IN ('elm327', 'custom_telematics'))
+        + chk_obd2_status : CHECK (status IN ('active', 'inactive', 'lost', 'broken'))
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_obd2_tenant : (tenant_id)
+        + idx_obd2_status : (status)
+        + idx_obd2_identifier : (device_identifier)
+    }
+
+    entity "dtc_catalog" as dtc_catalog <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * code : VARCHAR(10) <<UK>>
+        * standard : VARCHAR(20)
+        * system_category : VARCHAR(30)
+        * description_es : VARCHAR(500)
+        * severity : VARCHAR(20)
+        * recommended_action : VARCHAR(500)
+        * is_emissions_related : BOOLEAN
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_dtc_catalog : PRIMARY KEY (id)
+        + uk_dtc_code : UNIQUE (code)
+        + chk_dtc_standard : CHECK (standard IN ('sae_j2012', 'iso_15031'))
+        + chk_dtc_category : CHECK (system_category IN ('powertrain', 'chassis', 'body', 'network'))
+        + chk_dtc_severity : CHECK (severity IN ('low', 'medium', 'critical'))
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_dtc_code : (code)
+        + idx_dtc_category : (system_category)
+    }
+
+    ' ==========================================================================
+    ' COLUMNA 2: INSTALACIONES, AVERÍAS, ALERTAS Y SERIES TEMPORALES
+    ' ==========================================================================
+    entity "device_installations" as device_installations <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        * device_id : UUID <<FK>>
+        * vehicle_id : UUID <<FK>>
+        * installed_at : TIMESTAMPTZ
+        uninstalled_at : TIMESTAMPTZ
+        * initial_odometer_km : INTEGER
+        final_odometer_km : INTEGER
+        * status : VARCHAR(20)
+        installation_notes : VARCHAR(500)
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_device_installations : PRIMARY KEY (id)
+        + fk_installations_device : FOREIGN KEY (device_id) REFERENCES obd2_devices(id)
+        + fk_installations_vehicle : FOREIGN KEY (vehicle_id) REFERENCES vehicles(id)
+        + fk_installations_tenant : FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+        + chk_installations_status : CHECK (status IN ('active', 'completed'))
+        + chk_installations_odometer : CHECK (final_odometer_km IS NULL OR final_odometer_km >= initial_odometer_km)
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_installations_device : (device_id)
+        + idx_installations_vehicle : (vehicle_id)
+        + idx_installations_active : (vehicle_id, status)
+    }
+
+    entity "vehicle_faults" as vehicle_faults <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        * vehicle_id : UUID <<FK>>
+        * dtc_code : VARCHAR(10)
+        * severity : VARCHAR(20)
+        * status : VARCHAR(20)
+        * description : VARCHAR(255)
+        * detected_at : TIMESTAMPTZ
+        resolved_at : TIMESTAMPTZ
+        resolution_notes : VARCHAR(500)
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_vehicle_faults : PRIMARY KEY (id)
+        + fk_faults_vehicle : FOREIGN KEY (vehicle_id) REFERENCES vehicles(id)
+        + fk_faults_tenant : FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+        + chk_faults_severity : CHECK (severity IN ('low', 'medium', 'critical'))
+        + chk_faults_status : CHECK (status IN ('active', 'pending_review', 'resolved', 'cleared'))
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_faults_vehicle : (vehicle_id)
+        + idx_faults_dtc : (dtc_code)
+        + idx_faults_status : (status)
+    }
+
+    entity "predictive_alerts" as predictive_alerts <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * tenant_id : UUID <<FK>>
+        * vehicle_id : UUID <<FK>>
+        recommended_service_id : UUID <<FK>>
+        * alert_type : VARCHAR(50)
+        * confidence_score : DECIMAL(5,2)
+        * message : VARCHAR(255)
+        * status : VARCHAR(20)
+        fcm_message_id : VARCHAR(100)
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_predictive_alerts : PRIMARY KEY (id)
+        + fk_alerts_vehicle : FOREIGN KEY (vehicle_id) REFERENCES vehicles(id)
+        + fk_alerts_tenant : FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+        + fk_alerts_service : FOREIGN KEY (recommended_service_id) REFERENCES services(id)
+        + chk_alerts_confidence : CHECK (confidence_score >= 0.00 AND confidence_score <= 100.00)
+        + chk_alerts_status : CHECK (status IN ('dispatched', 'acknowledged', 'resolved', 'dismissed'))
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_alerts_vehicle : (vehicle_id)
+        + idx_alerts_status : (status)
+        + idx_alerts_type : (alert_type)
+    }
+
+    entity "telemetry_logs" as telemetry_logs <<hypertable, TimescaleDB>> #EBF5FB {
+        * timestamp : TIMESTAMPTZ <<PK, Time Dimension>>
+        * vehicle_id : UUID <<PK, FK, Space Partition>>
+        --
+        * tenant_id : UUID <<FK>>
+        * device_id : UUID <<FK>>
+        speed : INTEGER
+        rpm : INTEGER
+        engine_temp_c : DECIMAL(5,2)
+        battery_voltage : DECIMAL(4,2)
+        fuel_level : DECIMAL(5,2)
+        throttle_position : DECIMAL(5,2)
+        engine_load : DECIMAL(5,2)
+        latitude : DECIMAL(10,8)
+        longitude : DECIMAL(11,8)
+        --
+        <b>Restricciones y Particionamiento (TimescaleDB):</b>
+        + pk_telemetry_logs : PRIMARY KEY (timestamp, vehicle_id)
+        + Particionamiento temporal automático: time chunks de 7 días
+        + Compresión columnar automática: chunks > 30 días
+        + Segmentación de compresión: segmentby vehicle_id, orderby timestamp DESC
+        --
+        <b>Índices Físicos (TimescaleDB B-Tree):</b>
+        + idx_telemetry_vehicle_time : (vehicle_id, timestamp DESC)
+        + idx_telemetry_tenant_time : (tenant_id, timestamp DESC)
+    }
+
+    ' Disposición vertical en columnas internas
+    auditable_abstract_entity -[hidden]down-> tenants
+    tenants -[hidden]down-> vehicles
+    vehicles -[hidden]down-> services
+    services -[hidden]down-> obd2_devices
+    obd2_devices -[hidden]down-> dtc_catalog
+
+    device_installations -[hidden]down-> vehicle_faults
+    vehicle_faults -[hidden]down-> predictive_alerts
+    predictive_alerts -[hidden]down-> telemetry_logs
+
+    auditable_abstract_entity -[hidden]right-> device_installations
+    tenants -[hidden]right-> device_installations
+    vehicles -[hidden]right-> vehicle_faults
+    obd2_devices -[hidden]right-> telemetry_logs
+
+    ' Relaciones de Herencia JPA
+    auditable_abstract_entity <|-- obd2_devices : "herencia física JPA\n(@MappedSuperclass)"
+    auditable_abstract_entity <|-- device_installations
+    auditable_abstract_entity <|-- vehicle_faults
+    auditable_abstract_entity <|-- predictive_alerts
+
+    ' Relaciones Cardinales de Integridad Referencial
+    tenants "1  " ||--o{ "0..* " obd2_devices : "posee escáneres"
+    tenants "1  " ||--o{ "0..* " device_installations : "supervisa montajes"
+    vehicles "1  " ||--o{ "0..* " device_installations : "recibe escáner"
+    obd2_devices "1  " ||--o{ "0..* " device_installations : "se instala en"
+    vehicles "1  " ||--o{ "0..* " vehicle_faults : "registra averías"
+    vehicles "1  " ||--o{ "0..* " predictive_alerts : "recibe alertas"
+    services "0..1" ||--o{ "0..* " predictive_alerts : "resuelve alerta"
+    vehicles "1  " ||--o{ "0..* " telemetry_logs : "transmite telemetría"
+    obd2_devices "1  " ||--o{ "0..* " telemetry_logs : "captura señales"
+}
+
+' ==============================================================================
+' PRODUCTO 2: MOBILE CLIENTS (ATELIER WORKSHOP & ATELIER DRIVER - SQLITE 3)
+' ==============================================================================
+package "SQLite 3 (Mobile Clients: Atelier Workshop & Atelier Driver)" as sqlite_mobile #FEFDE8 {
+
+    entity "local_telemetry_buffer" as local_telemetry_buffer <<table, SQLite>> #FEF9E7 {
+        * id : TEXT <<PK>>
+        --
+        * vehicle_id : TEXT
+        * timestamp : TEXT (ISO8601)
+        speed : INTEGER
+        rpm : INTEGER
+        engine_temp_c : REAL
+        battery_voltage : REAL
+        fuel_level : REAL
+        latitude : REAL
+        longitude : REAL
+        * sync_status : TEXT
+        * created_at : TEXT (ISO8601)
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_local_telemetry : PRIMARY KEY (id)
+        + chk_telem_sync : CHECK (sync_status IN ('PENDING', 'SYNCED', 'FAILED'))
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_local_telem_status : (sync_status, timestamp)
+        --
+        <b>Propósito Operativo:</b>
+        + Buffer local de tramas OBD2 (ELM327 BLE) sin conectividad
+        + Garantiza cero pérdida de datos en carretera o sótano
+    }
+
+    entity "local_vehicle_faults_cache" as local_vehicle_faults_cache <<table, SQLite>> #FEF9E7 {
+        * fault_id : TEXT <<PK>>
+        --
+        * vehicle_id : TEXT
+        * dtc_code : TEXT
+        * severity : TEXT
+        * description : TEXT
+        * detected_at : TEXT (ISO8601)
+        * synced_at : TEXT (ISO8601)
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_local_faults : PRIMARY KEY (fault_id)
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_local_faults_vehicle : (vehicle_id)
+        --
+        <b>Propósito Operativo:</b>
+        + Réplica local de averías y códigos de diagnóstico activos
+        + Consulta instantánea en foso o en cabina sin latencia
+    }
+
+    entity "local_predictive_alerts_cache" as local_predictive_alerts_cache <<table, SQLite>> #FEF9E7 {
+        * alert_id : TEXT <<PK>>
+        --
+        * vehicle_id : TEXT
+        * alert_type : TEXT
+        * confidence_score : REAL
+        * message : TEXT
+        * status : TEXT
+        * created_at : TEXT (ISO8601)
+        * synced_at : TEXT (ISO8601)
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_local_alerts : PRIMARY KEY (alert_id)
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_local_alerts_vehicle : (vehicle_id)
+        --
+        <b>Propósito Operativo:</b>
+        + Historial local de alertas predictivas recibidas vía push
+        + Visualización inmediata de advertencias preventivas
+    }
+
+    ' Disposición vertical en columna SQLite
+    local_telemetry_buffer -[hidden]down-> local_vehicle_faults_cache
+    local_vehicle_faults_cache -[hidden]down-> local_predictive_alerts_cache
+}
+
+' Disposición horizontal entre paquetes y entidades correspondientes
+pg_backend -[hidden]right-> sqlite_mobile
+telemetry_logs -[hidden]right-> local_telemetry_buffer
+vehicle_faults -[hidden]right-> local_vehicle_faults_cache
+predictive_alerts -[hidden]right-> local_predictive_alerts_cache
+
+' ==============================================================================
+' RELACIONES DE SINCRONIZACIÓN INTER-PRODUCTO
+' ==============================================================================
+local_telemetry_buffer .[#2980B9]left.> telemetry_logs : "<b>HTTPS REST Ingestión en Lote</b>\n(Vaciado de Buffer Offline)"
+local_vehicle_faults_cache .[#27AE60]left.> vehicle_faults : "<b>Sincronización Incremental</b>\n(Delta de Averías DTC)"
+local_predictive_alerts_cache .[#E67E22]left.> predictive_alerts : "<b>Firebase Cloud Messaging + REST</b>\n(Alertas Push y Confirmación)"
+
+@enduml

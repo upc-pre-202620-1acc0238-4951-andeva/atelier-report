@@ -21,6 +21,7 @@ workspace "Atelier Architecture" "Diagramas de Arquitectura C4 para el Proyecto 
         atelier -> resend "Envía correos transaccionales de OTP, invitaciones y facturas vía" "HTTPS/API"
         atelier -> google_maps "Normaliza direcciones y valida geocercas GPS usando" "HTTPS/API"
         atelier -> google_identity "Valida identidades federadas de Google OAuth2 vía" "HTTPS/API"
+        atelier -> groq "Infiere diagnósticos estructurados de salud vehicular asistidos por IA vía" "HTTPS/API"
         // Relaciones a nivel de Contenedor (Container Level)
         manager -> landing "Explora la propuesta de valor y planes de suscripción usando" "HTTPS"
         driver -> landing "Consulta información de talleres afiliados usando" "HTTPS"
@@ -43,6 +44,7 @@ workspace "Atelier Architecture" "Diagramas de Arquitectura C4 para el Proyecto 
         api -> fcm "Envía notificaciones push predictivas a dispositivos móviles vía" "HTTPS/API"
         api -> google_maps "Normaliza direcciones y calcula geocercas de asistencia vía" "HTTPS/API"
         api -> google_identity "Valida certificados públicos y tokens de Google OAuth2 vía" "HTTPS/API"
+        api -> groq "Ejecuta inferencia analítica de IA para diagnósticos vehiculares vía" "Spring AI / HTTPS"
         webapp -> google_identity "Autentica usuarios mediante Single Sign-On de Google vía" "Google Identity Services / HTTPS"
         workshop_mobile -> google_identity "Autentica mecánicos y personal mediante Google SSO vía" "Google Sign-In SDK / HTTPS"
         driver_mobile -> google_identity "Autentica conductores y propietarios mediante Google SSO vía" "Google Sign-In SDK / HTTPS"
@@ -58,6 +60,7 @@ workspace "Atelier Architecture" "Diagramas de Arquitectura C4 para el Proyecto 
         !include model/components/hr-relationships.dsl
         !include model/components/invoicing-relationships.dsl
         !include model/components/billing-relationships.dsl
+        !include model/components/iot-relationships.dsl
 
         !include model/deployment/production-environment.dsl
     }
