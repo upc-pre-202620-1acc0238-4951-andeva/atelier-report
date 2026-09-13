@@ -70,7 +70,15 @@ Estas tareas corresponden a acciones habituales dentro de su dinámica laboral, 
 
 ### 2.3.3. *User Journey Mapping*
 
+En esta sección se presenta el *User Journey Mapping* para nuestros dos segmentos clave, detallando paso a paso su interacción diaria dentro del flujo operativo del taller mecánico. Esta herramienta visual permite mapear las acciones, canales de interacción y fluctuaciones emocionales de nuestros usuarios, desde la recepción o asignación de un vehículo hasta la entrega final o cierre de la orden de trabajo. A través de este mapeo integral, logramos identificar los puntos críticos de fricción —como la elaboración manual de cotizaciones para los administradores y los tiempos muertos logísticos para los técnicos— y establecer las oportunidades concretas donde el ecosistema Atelier generará un impacto directo mediante automatización y conectividad *Offline-First*.
 
+**Segmento 1**
+
+![User Journey Map: Segmento 1 - Personal de Gestión y Propietarios de Taller](report/assets/NeedFinding/Journey-Mapping/Customer-journey-map-segmento-1.png)
+
+**Segmento 2**
+
+![User Journey Map: Segmento 2 - Personal Operativo del Taller](report/assets/NeedFinding/Journey-Mapping/customer-journey-map2.png)
 
 ### 2.3.4. *Empathy Mapping*
 
