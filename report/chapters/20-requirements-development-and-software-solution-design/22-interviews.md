@@ -73,7 +73,7 @@ Con el propósito de obtener hallazgos comparables y estructurados, se desarroll
 ### 2.2.2. *Registro de entrevistas*
 En esta sección presentamos los registros de las entrevistas que hicimos para cada segmento objetivo de nuestra aplicación.
 
-![Interviews]()
+Entrevistas: https://upcedupe-my.sharepoint.com/:v:/g/personal/u202417423_upc_edu_pe/IQCoX-8G-fZvRJ7ys_uYXQWLAdghmmAa7RQhMg0yGPv39eI?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=MTMkT1
 
 **Segmento 1:**
 
