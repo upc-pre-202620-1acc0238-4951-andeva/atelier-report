@@ -1815,8 +1815,19 @@ US32 & Dueño de taller & Media & EP10 \\
 
 ### 2.4.2. *Impact Mapping*
 
+El *Impact Mapping* es una técnica estratégica que nos permite alinear los objetivos de negocio de Atelier con las necesidades y comportamientos de nuestros usuarios principales. A continuación, se presentan los mapas de impacto desarrollados para nuestros dos segmentos objetivo, detallando cómo cada entregable de software contribuirá directamente a las metas operativas del taller mecánico.
 
+**Segmento 1: Personal de Gestión y Propietarios de Taller**
 
+![Impact Map: Segmento 1 - Pedro Suárez](report/assets/NeedFinding/Impact-Mapping/Impact-map-Pedro-Suarez.png)
+
+El mapa de impacto del primer segmento objetivo nos ayudó a entender cómo el dueño o administrador del taller tiene un rol crítico como cuello de botella administrativo. Nos permitió identificar oportunidades clave para reducir su carga operativa, como la necesidad de generar cotizaciones automatizadas con precios reales y la integración de facturación electrónica. Asimismo, nos permitió extender el alcance de la plataforma al contemplar módulos vitales para la rentabilidad del negocio, tales como el sistema de alertas de stock mínimo para evitar el desabastecimiento durante las reparaciones.
+
+**Segmento 2: Personal Operativo y Técnicos de Bahía**
+
+![Impact Map: Segmento 2 - Andrés Vílchez](report/assets/NeedFinding/Impact-Mapping/Impact-map-Andres-Vilchez.png)
+
+El mapa de impacto del segundo segmento objetivo evidenció cómo el mecánico de bahía es fundamental para cumplir la meta de reducir los tiempos muertos operativos. A través de este análisis, identificamos oportunidades tecnológicas urgentes en su entorno de trabajo, como la necesidad de contar con una aplicación móvil *Offline-First* que soporte la pérdida de señal en fosas y herramientas de diagnóstico automático OBD-II. Esto nos permitió orientar los entregables hacia la inmediatez, incorporando notificaciones push para la aprobación de presupuestos y recepción de repuestos, agilizando así el flujo de servicio.
 ### 2.4.3. *Product Backlog*
 
 
