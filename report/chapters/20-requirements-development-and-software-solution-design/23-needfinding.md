@@ -1,143 +1,243 @@
 ## 2.3. *Needfinding*
 
+El proceso de Needfinding constituye la fase metodológica orientada a descubrir, comprender y estructurar las necesidades reales, expectativas operativas y fricciones latentes de los usuarios que integran el ecosistema del taller automotriz. A través de este análisis, se transforma la evidencia empírica recolectada en el trabajo de campo en una base sólida para el diseño de la solución tecnológica, garantizando que cada capacidad de la plataforma responda a una problemática constatada en el entorno laboral.
 
+Para articular estos hallazgos de forma rigurosa, en esta sección se presentan y analizan los artefactos analíticos desarrollados por el equipo de ingeniería: **User Personas**, **User Task Matrix**, **User Journey Mapping**, **Empathy Mapping**, **Big Picture EventStorming** y **Ubiquitous Language**.
 
 ### 2.3.1. *User Personas*
 
-En esta sección se describen dos User Personas que representan los segmentos clave a los que está dirigida la plataforma Atelier: los Propietarios y Administradores de Talleres, así como el Personal Operativo integrado por Técnicos y Mecánicos. A través de estos perfiles se profundiza en sus necesidades, motivaciones, frustraciones y hábitos digitales, con la finalidad de diseñar una solución bajo el modelo Software as a Service (SaaS) y principio Bring Your Own Device (BYOD) que optimice la gestión del negocio, reduzca los tiempos muertos y facilite el monitoreo preventivo mediante la lectura de datos OBD2.
+En esta sección se desarrollan las fichas de User Persona representativas de los dos segmentos objetivo del ecosistema Atelier: el Personal de Gestión y Propietarios del Taller (Segmento 1) y el Personal Operativo del Taller (Segmento 2). La construcción de estos perfiles sintetiza de manera directa los hallazgos cuantitativos y cualitativos obtenidos en el consolidado de entrevistas de la @tbl:analisis-entrevistas-segmento-1 y la @tbl:analisis-entrevistas-segmento-2, complementados con las brechas detectadas en la matriz de competidores de la @tbl:analisis-competitivo.
 
-**Segmento 1**
+Por un lado, el análisis de la competencia evidenció que las soluciones actuales en el mercado peruano y regional, tales como Mi Taller CRM u OK CAR, presentan interfaces web rígidas para escritorio y carecen de conexión telemática directa con la computadora del vehículo. Por otro lado, la investigación de campo constató que el personal directivo asume una sobrecarga administrativa manual mientras gestiona el negocio mediante teléfonos móviles Android y canales como WhatsApp. En paralelo, los técnicos de patio operan bajo métodos tradicionales basados en papel, padeciendo tiempos muertos logísticos y experimentando caídas de señal en fosos de inspección.
 
-![User Persona 1: Jorge Aguilar - Personal de Gestión y Propietarios de Taller](report/assets/NeedFinding/User-Personas/User-Persona-Pedro-Suárez.png)
+A partir de estas premisas, se diseñaron dos fichas de arquetipos utilizando la herramienta especializada UXPressia. Cada ficha modela exhaustivamente la demografía, entorno laboral, metas, frustraciones, habilidades técnicas, canales de comunicación, tecnologías empleadas y marcas de influencia.
 
-El User Persona de Jorge Aguilar revela la brecha estructural entre una extensa experiencia técnica y la exigencia de coordinar de forma integral las operaciones de un negocio independiente. A pesar de contar con más de 35 años de trayectoria y una alta capacidad para fidelizar clientes mediante el diagnóstico honesto en servicios de campo, su eficiencia operativa se ve limitada por la carga de gestionar la administración en solitario. Para un perfil que valora la transparencia y el mantenimiento preventivo por encima de la reparación reactiva, la falta de herramientas que automaticen el seguimiento a distancia representa un obstáculo directo a su rentabilidad. En última instancia, la sostenibilidad del negocio de Jorge depende de adoptar una plataforma ligera que centralice la comunicación con sus clientes y le brinde visibilidad constante sobre el estado de las unidades sin sobrecargarlo de tareas administrativas.
+**Segmento 1: Personal de Gestión y Propietarios del Taller**
 
-**Segmento 2**
+El primer arquetipo representa al dueño y administrador de la micro o pequeña empresa automotriz, encarnado en la figura de **Pedro Suárez**. En la @fig:user-persona-pedro-suarez se detalla su ficha de caracterización integral:
 
-![User Persona 2: César Nikolay - Personal Operativo del Taller](report/assets/NeedFinding/User-Personas/User-Persona-Andrés-Vílchez.png)
+![User Persona 1: Pedro Suárez - Personal de Gestión y Propietarios del Taller](report/assets/NeedFinding/User-Personas/User-Persona-Pedro-Suárez.png){#fig:user-persona-pedro-suarez}
 
-Por otro lado, el User Persona de Nicolay evidencia la fricción constante entre el dominio del diagnóstico computarizado moderno y la presencia de flujos de trabajo tradicionales en la tallería. Aunque posee una sólida formación en sistemas de inyección electrónica y un dominio fluido del entorno digital Android, su productividad diaria se trunca por "tiempos muertos" derivados de la desorganización logística, canales de comunicación informales y registros de tiempos de reparación imprecisos. Para un técnico que busca destacar en mecatrónica automotriz y validar con precisión el volumen de su trabajo diario, depender de órdenes en papel e improvisar respaldos fotográficos en su celular personal genera un desgaste innecesario. Su éxito y crecimiento profesional dependen de integrarse a un entorno digitalizado que funcione sin interrupciones —incluso en fosos sin señal— y que transforme los datos de los escáneres OBD2 en indicadores de rendimiento claros y automatizados.
+*Nota.* Ficha de User Persona elaborada en la herramienta UXPressia correspondiente al Segmento 1, sintetizada a partir del consolidado estadístico de entrevistas y la evaluación del panorama competitivo.
+
+El perfil de Pedro Suárez sintetiza la tensión operativa existente entre una dilatada trayectoria técnica de más de tres décadas y la necesidad ineludible de conducir la administración integral de su negocio. Pedro combina la atención directa y el servicio de campo itinerante con la gestión de presupuestos y cobranzas, modelo en el cual su principal factor de fidelización es el asesoramiento honesto y el mantenimiento preventivo orientado a evitar averías costosas en las unidades de sus clientes.
+
+No obstante, su principal fricción radica en absorber en solitario tareas de control de inventarios, cuadre de caja y facturación manual, lo cual le genera sobrecarga y le resta horas productivas en la bahía de servicio. Al operar habitualmente mediante su teléfono inteligente Android y coordinar pedidos vía WhatsApp, la viabilidad de su negocio depende de incorporar una plataforma SaaS ligera que automatice el seguimiento de servicios y la facturación electrónica bajo el Régimen MYPE Tributario, reduciendo la dependencia del papel sin imponer una curva de aprendizaje compleja.
+
+**Segmento 2: Personal Operativo del Taller**
+
+El segundo arquetipo corresponde a los técnicos de mantenimiento y diagnóstico que ejecutan el trabajo directo sobre las unidades vehiculares, encarnado en la figura de **Andrés Vílchez**. En la @fig:user-persona-andres-vilchez se ilustra su ficha analítica:
+
+![User Persona 2: Andrés Vílchez - Personal Operativo del Taller](report/assets/NeedFinding/User-Personas/User-Persona-Andrés-Vílchez.png){#fig:user-persona-andres-vilchez}
+
+*Nota.* Ficha de User Persona elaborada en la herramienta UXPressia correspondiente al Segmento 2, sintetizada a partir del consolidado estadístico de entrevistas y la evaluación del panorama competitivo.
+
+El perfil de Andrés Vílchez refleja la realidad del técnico joven egresado de carreras de mecatrónica y mecánica automotriz, caracterizado por su destreza en el manejo de escáneres multimarca, lectura de códigos DTC y diagnóstico de sistemas de inyección electrónica. A pesar de su fluidez digital nativa y su disposición a operar bajo procedimientos rigurosos para evitar roturas de componentes bajo presión, su ritmo de trabajo diario se ve afectado por tiempos muertos derivados de demoras en la aprobación de presupuestos o abastecimiento tardío de repuestos.
+
+Asimismo, Andrés depende obligatoriamente de órdenes de trabajo físicas en papel y carece de un sistema formal para acreditar las horas reales invertidas en cada labor, viéndose en la necesidad de tomar fotografías con su teléfono personal para respaldar su desempeño ante posibles observaciones. Esta situación exige una aplicación móvil de uso rudo para la bahía con arquitectura *Offline-First*, capaz de sincronizar datos cuando se trabaja en fosos sin cobertura y de registrar evidencias fotográficas y mediciones telemétricas OBD-II de forma transparente e inmutable.
 
 ### 2.3.2. *User Task Matrix*
 
-En esta sección se desarrolla el User Task Matrix, en el cual identifica las principales actividades que realizan los User Personas: los Propietarios y Administradores de Talleres y el Personal Operativo integrado por Técnicos y Mecánicos.
+En esta sección se presenta el User Task Matrix, artefacto analítico que concentra y evalúa las actividades habituales que desempeñan los arquetipos de usuario, representados por **Pedro Suárez** en la gestión del negocio y **Andrés Vílchez** en la labor técnica operativa, para alcanzar sus objetivos laborales cotidianos. En el marco de Needfinding, las tareas analizadas corresponden a los procedimientos habituales que los actores ejecutan en el taller mecánico con independencia de cualquier solución de software.
 
-Estas tareas corresponden a acciones habituales dentro de su dinámica laboral, necesarias para alcanzar sus objetivos, sin depender necesariamente de una solución digital. Este análisis nos permite comprender cómo trabajan actualmente, así como detectar ineficiencias y oportunidades donde la plataforma puede generar valor.
+En la @tbl:user-task-matrix se detalla la matriz comparativa consolidada, clasificando cada tarea según su escala de frecuencia (Diaria, Semanal, Mensual, Ocasional o Constante) y su nivel de importancia operativa (Crítica, Alta, Media o Baja):
 
-**Segmento 1**
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.2}
+\caption{User Task Matrix de los Arquetipos de Usuario}
+\label{tbl:user-task-matrix}
+\begin{tabularx}{\textwidth}{| p{5.5cm} | >{\centering\arraybackslash}X | >{\centering\arraybackslash}X | >{\centering\arraybackslash}X | >{\centering\arraybackslash}X |}
+\hline
+\multirow{2}{*}{\textbf{Tarea del Taller Automotriz}} & \multicolumn{2}{c|}{\textbf{Pedro Suárez (Gestión)}} & \multicolumn{2}{c|}{\textbf{Andrés Vílchez (Operativo)}} \\
+\cline{2-5}
+& \textbf{Frecuencia} & \textbf{Importancia} & \textbf{Frecuencia} & \textbf{Importancia} \\
+\hline
+Recepción presencial de vehículos y registro del motivo de ingreso en orden física & Diaria & Crítica & N/A & N/A \\
+\hline
+Inspección visual y diagnóstico computarizado con escáner automotriz & Ocasional & Alta & Diaria & Crítica \\
+\hline
+Elaboración manual de presupuestos y cotizaciones de reparación & Diaria & Alta & N/A & N/A \\
+\hline
+Coordinación telefónica y confirmación de presupuestos con el cliente & Constante & Crítica & N/A & N/A \\
+\hline
+Espera de autorización de presupuestos o entrega de repuestos en bahía & Constante & Media & Constante & Alta \\
+\hline
+Búsqueda, cotización y compra de repuestos a distribuidores locales & Diaria & Crítica & N/A & N/A \\
+\hline
+Solicitud y retiro de repuestos e insumos en el almacén del taller & Semanal & Media & Constante & Alta \\
+\hline
+Ejecución física de servicios mecánicos, afinamiento y reparación eléctrica & Ocasional & Media & Diaria & Crítica \\
+\hline
+Pruebas de funcionamiento, control de calidad y borrado de fallas & Ocasional & Alta & Diaria & Alta \\
+\hline
+Captura de fotografías con celular personal de piezas dañadas o faltantes & Ocasional & Media & Diaria & Media \\
+\hline
+Apunte manual de horas laboradas y firma de la orden de trabajo física & Diaria & Media & Diaria & Alta \\
+\hline
+Cobro directo al cliente, cuadre diario de caja y emisión de comprobantes & Diaria & Crítica & N/A & N/A \\
+\hline
+Entrega física del vehículo y orientación técnica preventiva al cliente & Diaria & Alta & Ocasional & Media \\
+\hline
+Consulta de diagramas técnicos y manuales de taller en internet & Ocasional & Media & Ocasional & Alta \\
+\hline
+\end{tabularx}
+\end{table}
 
-|                                             Task   | Frequency | Importance |
-|----------------------------------------------------|-----------|------------|
-| Atención, recepción de clientes y diagnóstico      | Daily     | Critical   |
-| Elaboración de presupuestos MRO y cotización       | Daily     | High       |
-| Asignación de vehículos a bahías y tareas          | Daily     | High       |
-| Control de inventario y solicitud de repuestos     | Weekly    | Critical   |
-| Supervisión del estado y avance de reparaciones    | Constant  | High       |
-| Facturación, cobranza y cuadre de caja final       | Daily     | Critical   |
-| Seguimiento a clientes para alertas preventivas    | Occasionally| Medium   |
+*Nota.* Consolidado comparativo de tareas operativas y administrativas habituales en el taller mecánico evaluadas según su nivel de recurrencia e impacto. N/A indica que la tarea no forma parte de las responsabilidades habituales del arquetipo.
 
-**Análisis**
+**Análisis de Tareas con Mayor Frecuencia e Importancia**
 
-- Foco en la Operatividad Centralizada: La alta frecuencia e importancia crítica de tareas como la facturación, los presupuestos y la supervisión del avance confirman que el administrador asume casi la totalidad de la carga administrativa, convirtiéndolo en el principal cuello de botella.
+La evaluación de la matriz confirma que las tareas de mayor frecuencia e impacto crítico en el perfil de Pedro Suárez se concentran en la gestión comercial y financiera del negocio. Actividades como la recepción presencial de unidades, la cotización manual, la compra de repuestos a distribuidores y el cobro o cuadre de caja se ejecutan con periodicidad diaria y prioridad crítica. Esta concentración evidencia que el administrador asume la totalidad de las responsabilidades mercantiles y de caja, convirtiéndose en el principal cuello de botella operativo cuando se acumulan consultas simultáneas o trámites de proveedores.
 
-- Conflicto de Eficiencia: Existe una contradicción entre su mayor habilidad (fidelizar al cliente y brindar diagnóstico experto) y la tarea manual de gestionar inventarios o cuadrar caja; estas últimas consumen recursos desproporcionados que lo alejan de la bahía de servicio.
+Por su parte, en el perfil de Andrés Vílchez las actividades de máxima criticidad y frecuencia diaria se centran en el trabajo técnico dentro de la bahía: el diagnóstico computarizado con escáner multimarca y la ejecución física de reparaciones mecánicas y eléctricas. No obstante, la tarea que mayor fricción genera en su jornada es la espera forzosa por aprobación de presupuestos o abastecimiento de piezas, la cual ostenta una frecuencia constante e importancia alta; esta inactividad involuntaria inmoviliza vehículos en los elevadores y merma directamente sus métricas de rendimiento diario.
 
-- Prioridad Estratégica: La matriz revela que automatizar el control de repuestos (FIFO) y el cumplimiento tributario (SUNAT) es vital. Delegar esto a un sistema SaaS le liberará horas para enfocarse en el diagnóstico preventivo y la expansión comercial.
+**Coincidencias Operativas entre Arquetipos**
 
-**Segmento 2**
+Al contrastar la dinámica de ambos perfiles, la principal coincidencia radica en la dependencia crítica de la cadena de repuestos y suministros para la continuidad operativa del taller. Mientras que Pedro debe coordinar precios y compras para resguardar la rentabilidad del negocio, Andrés requiere que los insumos lleguen oportunamente al puesto de trabajo para no interrumpir el montaje de componentes. Asimismo, ambos coinciden en el uso intensivo de canales informales como llamadas telefónicas y mensajería instantánea para coordinar avances, asumiendo el riesgo latente de traspapelar especificaciones técnicas o acuerdos verbales.
 
-|                                             Task   | Frequency | Importance |
-|----------------------------------------------------|-----------|------------|
-| Inspección física y lectura de códigos (OBD-II)    | Daily     | Critical   |
-| Ejecución de reparaciones y tareas mecánicas       | Daily     | Critical   |
-| Solicitud y recojo de repuestos en el almacén      | Constant  | High       |
-| Espera por aprobación de presupuestos de clientes  | Constant  | High       |
-| Registro de evidencia fotográfica de las piezas    | Daily     | Medium     |
-| Apunte manual de horas trabajadas y cierre de OT   | Daily     | High       |
-| Búsqueda de diagramas o manuales en internet       | Occasionally| Medium   |
+**Diferencias Sustanciales entre Arquetipos**
 
-**Análisis**
-
-- El problema de los "Tiempos Muertos": Las tareas con frecuencia Constante e importancia Alta vinculadas a la logística (solicitar repuestos y esperar aprobaciones) son las que mantienen al técnico inactivo. Automatizar estas aprobaciones y el inventario impactará directamente en su rendimiento diario.
-
-- Desconexión en el Registro Probatorio: El hecho de que la toma de fotos y el registro de horas sean tareas "Altas/Medias" pero se hagan manualmente o con el celular personal revela un vacío tecnológico. Esta es una funcionalidad clave que justificará el uso de la aplicación móvil en la bahía.
-
-- Necesidad de Integración en la Bahía: Las tareas críticas ocurren lejos de un escritorio, muchas veces en zonas de baja cobertura. Esto reafirma la urgencia de proveer una aplicación móvil de uso rudo con arquitectura Offline-First que no interrumpa el flujo del técnico.
-
-**Coincidencias y Diferencias entre Segmentos**
-
-- Al contrastar ambos perfiles, la principal **coincidencia** radica en la gestión de repuestos y tiempos: mientras el Segmento 1 los controla para asegurar la rentabilidad (Weekly/Critical), el Segmento 2 depende de ellos para ejecutar su labor diaria (Constant/High). Por otro lado, la principal **diferencia** es la división operativa: el administrador absorbe el 100% del contacto comercial y facturación, mientras que el mecánico está aislado en la ejecución técnica y el diagnóstico de campo.
+La disparidad más notoria se manifiesta en la estricta división del trabajo entre la gestión administrativa y la ejecución mecánica. Pedro absorbe el trato comercial directo con los clientes, la negociación con distribuidores de autopartes, la facturación y la cobranza, tareas en las que Andrés no interviene. En contraposición, Andrés concentra sus esfuerzos en la manipulación de herramientas de diagnóstico, el desmontaje mecánico y el registro manual de horas en órdenes físicas en papel, debiendo recurrir a su teléfono móvil personal para registrar evidencias fotográficas preventivas ante posibles reclamos de piezas deterioradas.
 
 ### 2.3.3. *User Journey Mapping*
 
-En esta sección se presenta el *User Journey Mapping* para nuestros dos segmentos clave, detallando paso a paso su interacción diaria dentro del flujo operativo del taller mecánico. Esta herramienta visual permite mapear las acciones, canales de interacción y fluctuaciones emocionales de nuestros usuarios, desde la recepción o asignación de un vehículo hasta la entrega final o cierre de la orden de trabajo. A través de este mapeo integral, logramos identificar los puntos críticos de fricción —como la elaboración manual de cotizaciones para los administradores y los tiempos muertos logísticos para los técnicos— y establecer las oportunidades concretas donde el ecosistema Atelier generará un impacto directo mediante automatización y conectividad *Offline-First*.
+User Journey Mapping sintetiza el recorrido cronológico y emocional que experimentan los actores clave en el ejercicio diario de sus actividades dentro del taller automotriz independiente. Esta técnica gráfica descompone el ciclo completo de atención en etapas consecutivas para contrastar las metas del usuario, sus puntos de contacto, los canales de interacción y las fricciones que condicionan su estado de ánimo en la situación operativa actual previa a la incorporación de una solución tecnológica.
 
-**Segmento 1**
+El recorrido integral estructurado en la plataforma colaborativa UXPressia abarca cinco fases canónicas del servicio automotriz: Aware para la recepción de solicitudes y coordinación de citas, Join para el arribo de la unidad e inspección diagnóstica, Use para la cotización de repuestos y aprobación comercial, Develop para la ejecución técnica en bahía con pruebas de ruta, y Leave para la liquidación administrativa, entrega del vehículo y cierre de orden. La modelación se efectuó de manera directa para cada arquetipo representativo desarrollado en la misma herramienta, vinculando a Pedro Suárez (@fig:user-persona-pedro-suarez) en la dimensión de gestión y a Andrés Vílchez (@fig:user-persona-andres-vilchez) en la dimensión operativa.
 
-![User Journey Map: Segmento 1 - Personal de Gestión y Propietarios de Taller](report/assets/NeedFinding/Journey-Mapping/Customer-journey-map-segmento-1.png)
+**Segmento 1: Personal de Gestión y Propietarios de Taller: Pedro Suárez**
 
-**Segmento 2**
+El recorrido del administrador de taller (@fig:user-journey-mapping-pedro-suarez) refleja las vicisitudes del propietario que asume en simultáneo la dirección comercial, la coordinación logística y el control financiero del negocio sin respaldo de sistemas automatizados.
 
-![User Journey Map: Segmento 2 - Personal Operativo del Taller](report/assets/NeedFinding/Journey-Mapping/customer-journey-map2.png)
+![Customer Journey Map del Administrador de Taller: Pedro Suárez](report/assets/NeedFinding/Journey-Mapping/user-journey-mapping-1.png){#fig:user-journey-mapping-pedro-suarez}
+
+*Nota.* Mapeo de la experiencia del administrador de taller elaborado en UXPressia a través de las cinco etapas del servicio automotriz actual.
+
+En la etapa inicial Aware, Pedro gestiona llamadas telefónicas y mensajes dispersos en su smartphone personal para coordinar citas. La falta de una agenda centralizada ocasiona cruces de horarios y descoordinación entre atenciones en taller y visitas de campo, manteniendo un estado anímico neutral. Al recibir e inspeccionar la unidad en Join, experimenta satisfacción profesional gracias a su vocación de servicio; no obstante, el registro manual de fallas en libretas o cuadernos físicos genera vacíos informativos sobre el historial de mantenimiento previo del vehículo.
+
+El punto crítico de mayor fricción se desata en la fase de cotización Use, donde el ánimo del usuario decae en una marcada frustración. La carga administrativa al cotizar manualmente con múltiples proveedores de repuestos y calcular la mano de obra por WhatsApp demora la entrega de presupuestos, propiciando la pérdida de clientes impacientes. Durante la reparación en Develop, la necesidad de supervisar el trabajo técnico mientras atiende consultas comerciales simultáneas genera un desgaste solitario y un estado de alerta permanente. Finalmente, en Leave, Pedro recupera la tranquilidad y confianza al resolver la avería, aunque enfrenta dificultades para emitir comprobantes de pago inmediatos y cierta resistencia de los clientes a costear mantenimientos preventivos.
+
+**Segmento 2: Personal Operativo del Taller: Andrés Vílchez**
+
+El recorrido del técnico automotriz (@fig:user-journey-mapping-andres-vilchez) ilustra la rutina en la bahía de servicio y revela cómo las deficiencias logísticas del taller impactan negativamente en su productividad y bienestar laboral.
+
+![Customer Journey Map del Técnico Mecánico Automotriz: Andrés Vílchez](report/assets/NeedFinding/Journey-Mapping/user-journey-mapping-2.png){#fig:user-journey-mapping-andres-vilchez}
+
+*Nota.* Mapeo de la experiencia de diagnóstico y reparación técnica elaborado en UXPressia para el perfil operativo en bahía de servicio.
+
+En el inicio de su jornada en Aware, Andrés recibe del jefe de taller una orden de trabajo en papel. La ilegibilidad de las anotaciones, las manchas de grasa y la omisión de detalles sobre los síntomas del vehículo generan incertidumbre operativa con un estado de ánimo neutral. En la inspección Join, conecta el escáner computarizado al puerto OBD-II del vehículo para leer códigos DTC, manifestando un interés técnico genuino; sin embargo, la falta de cobertura inalámbrica en zonas profundas del taller o fosas de servicio le impide consultar manuales y diagramas eléctricos en línea.
+
+La fase más crítica para el mecánico acontece durante la gestión de suministros en Use. Tras solicitar repuestos mediante mensajes de WhatsApp, Andrés se ve forzado a esperar varias horas a que el cliente apruebe la compra y el proveedor despache la pieza. Estos tiempos muertos prolongados le provocan profunda molestia, pues bloquean inútilmente los elevadores hidráulicos y paralizan su ritmo productivo. En la ejecución mecánica en Develop, experimenta alta tensión y estrés operativo, ya que debe apresurar el desmontaje y montaje para recuperar el tiempo perdido sin cometer fallas mecánicas. En la culminación del servicio en Leave, experimenta serenidad al concluir las tareas, a pesar de la incomodidad que supone saturar su teléfono personal con fotografías probatorias y registrar horas laboradas en cuadernos físicos.
 
 ### 2.3.4. *Empathy Mapping*
 
-Se ha elaborado el Empathy Map para cada uno de nuestros User Personas con el fin de profundizar en su experiencia diaria, emociones, motivaciones y fricciones reales dentro del taller mecánico. Este análisis nos permite sintetizar la información obtenida en las entrevistas de campo y observar la operación desde la perspectiva de nuestros usuarios clave —administradores y técnicos—, asegurando que el diseño de Atelier responda de manera empática y precisa a sus necesidades de gestión, diagnóstico y comunicación.
+Empathy Mapping complementa la comprensión fenomenológica de los usuarios clave al situar en el centro de la reflexión a los arquetipos formulados. Para su construcción en la plataforma colaborativa UXPressia, el equipo consolidó los testimonios recogidos durante las entrevistas de campo y formuló observaciones guiadas por interrogantes clave: con quién se empatiza, qué metas necesita cumplir, qué aspectos observa en su entorno, qué comentarios escucha de clientes o colegas, qué actitudes manifiesta públicamente, y cuáles son sus preocupaciones y aspiraciones más profundas. A partir de esta exploración, se identificaron los dolores y ganancias esperadas de cada perfil.
 
-![Empathy Mapping: Pedro Suarez - Personal de Gestión y Propietarios de Taller](report/assets/NeedFinding/Empathy-Mapping/Empathy%20Mapping-Pedro-Suarez.png)
+**Segmento 1: Personal de Gestión y Propietarios del Taller: Pedro Suárez**
 
-![Empathy Mapping: Andres Vilchez - Personal de Gestión y Propietarios de Taller](report/assets/NeedFinding/Empathy-Mapping/Empathy%20Mapping-Andres-Vilchez.png)
+El mapa de empatía de Pedro Suárez (@fig:empathy-mapping-pedro-suarez) profundiza en la perspectiva del administrador que atiende servicios de forma itinerante y gestiona la rentabilidad global de su taller.
+
+![Empathy Mapping del Administrador de Taller: Pedro Suárez](report/assets/NeedFinding/Empathy-Mapping/Empathy%20Mapping-Pedro-Suarez.png){#fig:empathy-mapping-pedro-suarez}
+
+*Nota.* Mapa de empatía elaborado en UXPressia para caracterizar las motivaciones y fricciones del administrador de taller automotriz.
+
+El análisis revela que Pedro percibe la frustración de clientes que acuden únicamente ante fallas mecánicas graves por haber postergado mantenimientos preventivos. Mientras escucha quejas por costos imprevistos de reparación, experimenta en solitario el desgaste de calcular presupuestos en notas manuales y la incertidumbre de perder oportunidades comerciales por no contar con una plataforma que centralice el historial de fallas y agilice cotizaciones transparentes.
+
+**Segmento 2: Personal Operativo del Taller: Andrés Vílchez**
+
+El mapa de empatía de Andrés Vílchez (@fig:empathy-mapping-andres-vilchez) captura las vivencias del técnico especializado que labora directamente en las bahías y fosas de servicio.
+
+![Empathy Mapping del Técnico Mecánico Automotriz: Andrés Vílchez](report/assets/NeedFinding/Empathy-Mapping/Empathy%20Mapping-Andres-Vilchez.png){#fig:empathy-mapping-andres-vilchez}
+
+*Nota.* Mapa de empatía elaborado en UXPressia para sintetizar las percepciones y demandas operativas del técnico mecánico automotriz.
+
+Andrés manifiesta incomodidad ante la desorganización de los canales informales de mensajería y la inactividad involuntaria cuando los vehículos ocupan elevadores esperando repuestos. En su día a día, valora resolver averías complejas mediante escáneres multimarca y busca una herramienta digital que funcione sin conexión en fosas de servicio, valide con objetividad sus horas de trabajo técnico y sustituya el registro manual de evidencias fotográficas en su dispositivo personal.
 
 
 ### 2.3.5. *Big Picture EventStorming*
 
-Como parte fundamental de la fase de exploración y comprensión de necesidades (*Needfinding*), el equipo llevó a cabo un taller colaborativo de **Big Picture EventStorming**. Esta dinámica, concebida por Alberto Brandolini, tuvo como propósito construir un modelo mental compartido y sinérgico entre todos los integrantes sobre la totalidad del ciclo de vida operativo del ecosistema **Atelier**, identificando las interacciones entre los diferentes actores, los puntos de fricción (*hotspots*), los cuellos de botella en la gestión de talleres y las oportunidades para la automatización mediante telemetría IoT.
+Como cierre analítico de la fase de Needfinding, el equipo desarrolló un taller colaborativo de Big Picture EventStorming utilizando la plataforma virtual Miro. Esta dinámica metodológica, concebida por Alberto Brandolini, permite explorar visualmente el dominio integral del servicio automotriz independiente, reuniendo en una misma conversación a expertos del negocio, analistas e ingenieros de software para alinear el entendimiento del flujo operativo, identificar eventos de relevancia y detectar puntos críticos de fricción antes de abordar especificaciones técnicas formales.
 
-A diferencia del modelado de diseño técnico futuro, el taller de *Big Picture EventStorming* captura la realidad operativa actual (*As-Is*) del negocio y del servicio automotriz: los hábitos reactivos de los conductores que postergan revisiones preventivas, las fallas mecánicas imprevistas que inmovilizan vehículos, la gestión manual de citas y órdenes físicas en papel, las fricciones al solicitar presupuestos por canales informales y los cuellos de botella en la liquidación y entrega. Este levantamiento transparente del escenario actual permite identificar los puntos críticos de dolor donde el software debe generar valor inmediato.
+El desarrollo del taller siguió un proceso estructurado en etapas secuenciales:
 
-El resultado de esta exploración integral en la herramienta colaborativa Miro se presenta en dos dimensiones complementarias: la recolección exhaustiva del flujo de eventos (@fig:big-picture-flujo-eventos) y la estructuración por carriles de actores, etapas del proceso y puntos críticos del servicio (@fig:big-picture-actores-puntos-criticos).
+- **Generación masiva de eventos de dominio:** El equipo identificó los hechos significativos que ocurren en la vida real del taller y del conductor, redactándolos en participio pasado sobre tarjetas adhesivas naranjas, desde la omisión de mantenimientos preventivos hasta la liquidación final del servicio.
+- **Ordenamiento cronológico y narrativa inversa:** Los eventos se secuenciaron sobre una línea de tiempo horizontal de izquierda a derecha, aplicando una revisión en sentido inverso para detectar hechos omitidos, dependencias operativas y consecuencias no deseadas.
+- **Asignación de actores y carriles de responsabilidad:** Se incorporaron tarjetas amarillas para representar a los actores participantes y segmentar el recorrido en carriles funcionales: Conductor, Asesor de Servicio y Mecánico / Jefe de Taller.
+- **Identificación de etapas y puntos críticos:** El flujo completo se organizó en tres macro-etapas del negocio, señalando mediante rombos morados de interrogación las zonas de incertidumbre, cuellos de botella e ineficiencias operativas conocidas como hotspots.
 
-![Big Picture EventStorming: Recolección y Flujo de Eventos de Dominio](report/assets/strategic-ddd/big-picture-01-flujo-eventos.png){#fig:big-picture-flujo-eventos}
+La @fig:big-picture-flujo-eventos expone la recolección exhaustiva de los treinta y dos eventos de dominio estructurados a lo largo de la línea temporal de exploración en Miro.
 
-*Nota.* Vista de la recolección y secuencia de eventos de dominio durante el taller de Big Picture EventStorming en Miro.
+![Recolección y Flujo Cronológico de Eventos de Dominio en Miro](report/assets/strategic-ddd/big-picture-01-flujo-eventos.png){#fig:big-picture-flujo-eventos}
 
-![Big Picture EventStorming: Actores, Etapas del Proceso y Puntos Críticos](report/assets/strategic-ddd/big-picture-02-actores-puntos-criticos.png){#fig:big-picture-actores-puntos-criticos}
+*Nota.* Vista de la recolección y secuencia de eventos de dominio en participio pasado formulados durante el taller en Miro.
 
-*Nota.* Vista estructurada por carriles de actores (Conductor, Asesor de Servicio, Mecánico / Jefe de Taller, Administrador), etapas operativas y puntos críticos de decisión en Miro. Se puede acceder al tablero colaborativo interactivo mediante el siguiente enlace: [Tablero de Miro: Big Picture EventStorming](https://miro.com/app/board/uXjVHq7YYWw=/?share_link_id=20364641152).
+Posteriormente, la @fig:big-picture-actores-puntos-criticos ilustra la estructuración del dominio en carriles de actores, delimitando las tres macro-etapas operativas y los tres puntos críticos descubiertos.
 
-El recorrido del dominio modelado en el Big Picture abarca los siguientes momentos clave de la operativa automotriz actual:
+![Estructuración por Carriles de Actores, Etapas del Proceso y Puntos Críticos](report/assets/strategic-ddd/big-picture-02-actores-puntos-criticos.png){#fig:big-picture-actores-puntos-criticos}
 
-1. **Aprovisionamiento y Configuración:** Registro inicial del taller mecánico, definición de sucursales, alta de bahías de servicio y configuración de planes de suscripción.
-2. **Monitoreo Telemático Continuo:** Ingesta en tiempo real de flujos de datos vehiculares provenientes de escáneres OBD-II y evaluación analítica de umbrales críticos de temperatura, presión y códigos DTC.
-3. **Recepción e Inspección Diagnóstica:** Generación de citas, ingreso del vehículo a patio, inspección visual con evidencia fotográfica y formulación del presupuesto de mantenimiento (MRO).
-4. **Aprobación Digital y Asignación Operativa:** Validación del presupuesto por parte del cliente desde la app móvil y distribución de tareas específicas a los técnicos mecánicos según especialidad.
-5. **Ejecución Mecánica y Abastecimiento FIFO:** Registro del avance de reparación en patio móvil y descarga contable de repuestos y fluidos bajo el método de Primeras Entradas, Primeras Salidas (FIFO).
-6. **Liquidación y Cumplimiento Tributario:** Consolidación de costos de mano de obra e insumos, emisión electrónica de Boletas o Facturas UBL 2.1 validadas ante SUNAT.
-7. **Entrega y Seguimiento Predictivo:** Devolución del vehículo reparado al cliente, solicitud de retroalimentación de servicio y reactivación del monitoreo telemático predictivo.
+*Nota.* Estructura por carriles de actores, etapas operativas y puntos críticos en el [Tablero de Miro: Big Picture EventStorming](https://miro.com/app/board/uXjVHq7YYWw=/?share_link_id=20364641152).
+
+A partir de esta estructuración, el análisis del negocio identificó tres etapas clave y sus correspondientes focos de fricción operativa:
+
+**Prevención, Detección y Decisión de Actuar: Conductor**
+
+El carril del conductor evidencia dos dinámicas paralelas en la operativa actual. En el nivel pasivo superior, se manifiesta el deterioro gradual del vehículo ocasionado por la omisión de revisiones periódicas, la falta de historiales actualizados y el desinterés ante desgastes iniciales, lo cual agrava la avería. En el carril de acción, el conductor percibe los síntomas pero posterga la atención hasta que la falla inmoviliza la unidad, viéndose forzado a buscar un taller y solicitar una cita de urgencia.
+
+El primer punto crítico emerge en la entrega del vehículo al taller. En este hito convergen la desconfianza del usuario sobre el diagnóstico real, la falta de información verificable del estado del motor y la incertidumbre respecto al costo final de la reparación, lo que condiciona negativamente el inicio de la relación de servicio.
+
+**Recepción, Diagnóstico y Autorización: Asesor de Servicio**
+
+Esta etapa abarca la apertura formal de la orden de trabajo, la inspección técnica física, el registro computarizado de fallas y la formulación del presupuesto de mantenimiento MRO. Tras el envío de la propuesta económica y su autorización por parte del cliente, el personal verifica la disponibilidad de insumos en el almacén del taller.
+
+El segundo punto crítico, identificado como el principal cuello de botella logístico, ocurre entre la solicitud y recepción de repuestos. La dependencia de cotizaciones telefónicas manuales con distribuidores externos y las demoras en la aprobación de costos por parte del cliente generan tiempos muertos prolongados que paralizan los puestos de trabajo y retienen vehículos desarmados en las bahías.
+
+**Reparación, Control de Calidad y Cierre: Mecánico / Jefe de Taller**
+
+La fase técnica final comprende la asignación de tareas al puesto mecánico, la ejecución de labores de desmontaje y sustitución de piezas averiadas, y la aprobación de pruebas de ruta y calidad. Una vez superadas las pruebas, se notifica la culminación del trabajo al cliente, se efectúa el cobro, se entrega el vehículo y se procede al cierre administrativo del servicio.
+
+El tercer punto crítico se ubica en el cierre formal de la atención. La liquidación manual de pagos y la emisión desarticulada de comprobantes tributarios dificultan el control de caja del taller, mientras que la falta de un canal automatizado de seguimiento posventa rompe el vínculo preventivo con el conductor, reiniciando el ciclo reactivo de averías mecánicas.
+
+**Articulación con los Contextos Delimitados de Atelier**
+
+El entendimiento visual alcanzado en el Big Picture EventStorming sienta las bases funcionales para modular la arquitectura del backend de Atelier en contextos delimitados altamente cohesivos:
+
+- La captación de síntomas y prevención telemática orienta el alcance de IoT Telemetry & Predictive Maintenance y Customer & Fleet Management.
+- La apertura de órdenes de trabajo, peritaje fotográfico y distribución de tareas mecánicas fundamenta el contexto Workshop Operations.
+- La adquisición, costeo por lote FIFO y recepción de repuestos articula el contexto Inventory & Supply Chain.
+- El control de jornada laboral y asignación de técnicos en bahías guía el contexto Human Resources Management.
+- La liquidación de costos, registro de cobros y emisión de comprobantes electrónicos UBL 2.1 ante SUNAT estructura el contexto Invoicing & Compliance.
 
 ### 2.3.6. *Ubiquitous Language*
 
-Uno de los aportes más trascendentales de *Domain-Driven Design* es la consolidación de un **Lenguaje Ubicuo** (*Ubiquitous Language*). Este lenguaje consiste en un vocabulario compartido, riguroso y sin ambigüedades, adoptado de manera unánime tanto por los expertos del dominio automotriz (mecánicos, administradores de taller) como por los ingenieros de software, analistas y diseñadores de UX.
+La consolidación de un Lenguaje Ubicuo (*Ubiquitous Language*) constituye uno de los pilares esenciales de *Domain-Driven Design* propuestos por @evans2003ddd. Este artefacto establece un vocabulario formal, compartido y riguroso entre los especialistas del negocio automotriz y el equipo de ingeniería de software, erradicando ambigüedades interpretativas y sobrecostos de traducción en el desarrollo del sistema.
 
-El empleo de un lenguaje ubicuo erradica las fallas de comunicación y la sobrecarga de traducción en el código fuente, garantizando que los nombres de las clases, métodos, eventos, comandos y tablas de base de datos reflejen exactamente la terminología del negocio. La @tbl:ubiquitous-language recopila los términos esenciales del ecosistema Atelier, su definición formal y el ámbito de aplicación correspondiente:
+Conforme a las directrices de modelado estratégico, el glosario incorpora exclusivamente términos propios del dominio del negocio automotriz, la gestión operativa de talleres mecánicos y la telemetría vehicular, prescindiendo deliberadamente de tecnicismos propios de la infraestructura de software. La @tbl:ubiquitous-language consolida los términos fundamentales en inglés con sus correspondientes definiciones formales en español y su contexto delimitado de aplicación:
 
-| Término en el Dominio | Definición Formal y Regla de Negocio Asociada | Ámbito / Contexto |
-| :--- | :--- | :---: |
-| Atelier Workshop | Plataforma digital orientada a la gestión B2B de talleres automotrices, disponible en WebApp (escritorio para gestión) y Mobile (patio para mecánicos). | Transversal B2B |
-| Atelier Driver | Aplicación móvil orientada a clientes particulares y administradores de flotas para seguimiento telemático, aprobación de presupuestos y citas. | Transversal B2C |
-| Orden de Trabajo (OT) | Documento y raíz de agregado que centraliza la ejecución técnica, evidencias fotográficas, tareas y consumo de insumos de una intervención. | Workshop Operation |
-| Tarea MRO | Unidad atómica de trabajo mecánico asignada a un técnico específico dentro de una Orden de Trabajo, con seguimiento de estados y horas hombre. | Workshop Operation |
-| Presupuesto MRO | Propuesta económica preliminar estructurada tras el diagnóstico que detalla costos de mano de obra y repuestos para aprobación del cliente. | Workshop Operation |
-| Telemetría OBD-II | Flujo continuo de parámetros vehiculares normalizados (velocidad, RPM, temperatura) capturados desde el puerto de diagnóstico a bordo del motor. | IoT Telemetry |
-| DTC (Diagnostic Trouble Code) | Código estandarizado alfanumérico generado por la ECU del vehículo para señalar una falla específica en alguno de sus subsistemas mecánicos. | IoT Telemetry |
-| Lote de Inventario (Batch) | Conjunto homogéneo de repuestos o insumos adquiridos en una misma fecha y costo de compra, con stock físico y número de factura asociado. | Inventory |
-| Método FIFO | Regla contable estricta de Primeras Entradas, Primeras Salidas donde los repuestos se descargan siempre del lote más antiguo disponible. | Inventory |
-| Marcación por Geocerca (Geofence Clock-in) | Registro y validación satelital que certifica la presencia física del técnico dentro de las instalaciones del taller automotriz al momento de registrar su asistencia laboral. | Human Resources |
-| Comprobante Electrónico (CPE) | Documento tributario formal (Boleta o Factura) emitido bajo el estándar UBL 2.1 ante SUNAT mediante la integración con Nubefact. | Invoicing |
-| Tenant (Inquilino) | Instancia lógica aislada correspondiente a una empresa o taller automotriz que garantiza privacidad y confidencialidad multi-tenant absoluta. | IAM & Tenancy |
-| Transactional Outbox | Patrón arquitectónico de persistencia transaccional que asegura la entrega garantizada y asíncrona de eventos de dominio intermodulares. | Shared / Plataforma |
-: Glosario de Lenguaje Ubicuo del Ecosistema Atelier {#tbl:ubiquitous-language}
+| Término en el Dominio | Definición Formal y Regla de Negocio Asociada | Contexto Delimitado / Ámbito |
+| :---: | :--- | :---: |
+| Work Order | Documento maestro que registra el ingreso de una unidad al taller, centralizando los síntomas reportados, el peritaje inicial de recepción, las tareas mecánicas asignadas, los repuestos requeridos y el estado general del servicio. | Workshop Operations |
+| Work Order Task | Unidad atómica de labor mecánica o eléctrica asignada a un técnico específico dentro de una orden de trabajo, vinculada a una tasa de mano de obra y sujeta a verificación de calidad. | Workshop Operations |
+| MRO Estimate | Propuesta económica formal elaborada tras el diagnóstico que desglosa los costos estimados de mano de obra e insumos requeridos, cuya ejecución exige la autorización expresa del cliente. | Workshop Operations |
+| Service Bay | Espacio físico delimitado dentro del taller automotriz equipado con elevador hidráulico o fosa de inspección para la intervención técnica simultánea de un vehículo. | Workshop Operations |
+| Inspection Checklist | Protocolo sistemático de peritaje visual y funcional ejecutado al ingresar un vehículo para registrar daños preexistentes en carrocería, desgaste de neumáticos, niveles de fluidos y pertenencias a bordo. | Workshop Operations |
+| OBD-II Telemetry | Flujo continuo de parámetros operativos estandarizados del motor capturados en tiempo real desde el puerto de diagnóstico a bordo del vehículo, tales como temperatura del refrigerante, revoluciones por minuto y velocidad. | IoT Telemetry |
+| Diagnostic Trouble Code | Código alfanumérico estandarizado generado por la computadora del vehículo para identificar una anomalía o falla puntual en subsistemas mecánicos, eléctricos o de control de emisiones. | IoT Telemetry |
+| Predictive Fault Alert | Notificación temprana emitida cuando el análisis de series temporales de telemetría detecta desviaciones críticas en los parámetros del motor, advirtiendo una falla potencial antes de que ocurra una avería inmovilizante. | IoT Telemetry |
+| Freeze Frame Data | Registro instantáneo de parámetros operativos del motor almacenados automáticamente por la computadora del vehículo en el milisegundo exacto en que se registró un código de falla. | IoT Telemetry |
+| Inventory Item | Componente mecánico, autoparte de recambio o insumo consumible catalogado en el almacén del taller para su utilización en órdenes de trabajo o comercialización directa. | Inventory & Supply Chain |
+| Inventory Batch | Lote homogéneo de repuestos o insumos ingresado al almacén en una misma fecha, bajo un costo de adquisición unitario específico y respaldado por una factura de compra del distribuidor. | Inventory & Supply Chain |
+| FIFO Inventory Valuation | Regla contable de valuación en la que los repuestos e insumos se descargan física y económicamente según el orden cronológico de su ingreso, consumiendo siempre el lote más antiguo disponible. | Inventory & Supply Chain |
+| Safety Stock Threshold | Nivel mínimo de existencia predeterminado para un repuesto o insumo en el almacén, por debajo del cual se emite una orden de reabastecimiento para prevenir interrupciones en los puestos de trabajo. | Inventory & Supply Chain |
+| Vehicle Fleet | Conjunto organizado de unidades vehiculares pertenecientes a una misma empresa o cliente corporativo, sujetas a calendarios de mantenimiento preventivo y monitoreo telemático unificado. | Customer & Fleet Management |
+| Service Appointment | Reserva programada de fecha, horario y puesto de trabajo para el ingreso de un vehículo al taller con fines de mantenimiento preventivo o revisión correctiva. | Customer & Fleet Management |
+| Vehicle Identification Number | Código alfanumérico único de diecisiete caracteres grabado en el chasis del vehículo que identifica de manera universal su fabricante, país de origen, modelo, motorización y año de fabricación. | Customer & Fleet Management |
+| Geofenced Clock-in | Marcación de jornada laboral validada mediante coordenadas satelitales que certifica la presencia física del técnico dentro de las instalaciones del taller automotriz al momento de registrar su asistencia. | Human Resources |
+| Work Shift | Jornada programada que establece los turnos de atención, horarios de refrigerio y disponibilidad de los técnicos en cada sucursal del taller mecánico. | Human Resources |
+| Electronic Tax Receipt | Comprobante de pago con validez fiscal emitido ante la administración tributaria bajo el estándar UBL 2.1 para respaldar los servicios mecánicos prestados y repuestos consumidos en una orden de trabajo. | Invoicing & Compliance |
+: Glosario de Lenguaje Ubicuo del Dominio Automotriz {#tbl:ubiquitous-language}
 
-*Nota.* Tabla de terminología canónica elaborada por el equipo para alinear la comunicación técnica y de negocio.
+*Nota.* Glosario de términos del negocio automotriz y telemetría clasificados por contexto delimitado según las directrices de Domain-Driven Design.
 
 \newpage

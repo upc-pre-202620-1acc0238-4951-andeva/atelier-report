@@ -583,7 +583,7 @@ A continuación, se detalla el catálogo de nodos físicos, entornos de ejecuci�
 
 **Decisiones de Arquitectura de Infraestructura, Redes y Resiliencia**
 
-El diseño del despliegue físico y en la nube satisface estrictos requerimientos de ingeniería de software:
+El diseño del despliegue físico y en la nube satisface estrictos requisitos de ingeniería de software:
 
 1. **Topología de Red y Cifrado de Comunicaciones:**
    * Todas las conexiones externas e inter-servicios en la nube están cifradas mediante TLS 1.3 / HTTPS sobre el puerto estándar 443.

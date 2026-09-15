@@ -13,6 +13,8 @@
 |0.15.0|03/09/2026|Huamani Estefanero, Joel|Añadido de la sección de ***Software Architecture*** y reformulación de la documentación de Atelier.|
 |0.15.0|06/09/2026|Teran Zavala, Mauricio Alejandro|Inserción de la primera entrevista para el primer segmento y todo el marco de las entrevistas.|
 |0.17.0|07/09/2026|Huamani Estefanero, Joel|Añadido de ***Bounded Context: Shared*** y documentación del backend.|
+|0.17.0|07/09/2026|Rocha Cotrina, Alvaro|Añadido de Objetivos SMART para Alvaro Rocha.|
+|0.20.0|07/09/2026|Rocha Cotrina, Alvaro|Añadido del perfil de Alvaro para el capítulo 1.|
 |0.20.0|08/09/2026|Huamani Estefanero, Joel|Añadido de ***Bounded Context: Identity and Access Management (IAM) & Tenancy*** y documentación del backend.|
 |0.21.0|08/09/2026|Huamani Estefanero, Joel|Añadido de ***Bounded Context: Customer and Fleet Management (CRM)*** y documentación del backend.|
 |0.23.0|08/09/2026|Teran Zavala, Mauricio Alejandro|Añadido de **User Persona** para ambos segmentos.|
@@ -23,6 +25,7 @@
 |0.25.0|08/09/2026|Huamani Estefanero, Joel|Añadido de ***Bounded Context: Workshop Operations (MRO)*** y documentación del backend.|
 |0.25.0|08/09/2026|Teran Zavala, Mauricio Alejandro|Inserción **Empathy Mapping** para ambos user persona.|
 |0.26.0|08/09/2026|Teran Zavala, Mauricio Alejandro|Inserción **Interview Analysis** para ambos segmentos.|
+|0.26.0|08/09/2026|Rocha Cotrina, Alvaro|Añadido y normalización de la **User Task Matrix** para ambos segmentos y corrección de rutas relativas de imágenes.|
 |0.28.0|10/09/2026|Huamani Estefanero, Joel|Añadido de ***Bounded Context: Inventory & Supply Chain*** y documentación del backend.|
 |0.29.0|10/09/2026|Huamani Estefanero, Joel|Añadido de ***Bounded Context: Human Resources Management (HR)*** y documentación del backend.|
 |0.30.0|11/09/2026|Huamani Estefanero, Joel|Añadido de ***Bounded Context: Invoicing & Compliance*** y documentación del backend.|

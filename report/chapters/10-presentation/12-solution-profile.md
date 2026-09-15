@@ -105,8 +105,6 @@ Nuestro producto abordará esta brecha mediante **Atelier Workshop**, una plataf
 
 Nuestro enfoque inicial estará en los dos perfiles operativos internos de talleres automotrices independientes (MYPEs) de Lima Metropolitana: los gestores y propietarios de talleres y los técnicos mecánicos automotrices.
 
-¿Cómo podríamos dotar a los administradores y técnicos mecánicos de talleres MYPE con una herramienta digital integrada que elimine la fricción operativa y probatoria en bahía, asegure la rentabilidad real de las reparaciones mediante costeo FIFO y habilite diagnósticos telemétricos predictivos sin requerir inversiones prohibitivas en hardware propietario?
-
 Sabremos que tenemos éxito cuando observemos los siguientes cambios medibles en el comportamiento de nuestro público objetivo:
 
 1. Una **reducción de al menos el 40%** en el tiempo promedio de recepción vehicular y emisión de diagnóstico preliminar en bahía, gracias a los datos telemétricos precargados y al flujo digital de órdenes de trabajo.
@@ -217,8 +215,10 @@ Sabremos que tenemos éxito cuando observemos los siguientes cambios medibles en
 
 #### 1.2.2.4. Lean UX Canvas
 
-![Matriz del Lean UX Canvas para el Ecosistema Atelier Workshop](assets/lean-ux/lean-ux-canva.jpg)
+A partir de la articulación sistemática de los enunciados de problema, supuestos de negocio y declaraciones de hipótesis, en la @fig:lean-ux-canvas se presenta la matriz consolidada del Lean UX Canvas para el ecosistema Atelier Workshop, integrando en una sola vista visual las decisiones estratégicas de producto:
 
-*Enlace al tablero interactivo:* [Ver en Miro](https://miro.com/welcomeonboard/ZEZJcWF2dElmbVAwcG1VV2JxUEc2RHpsSkxHL25uNE9RcFBVaTdxekxqNTlxK2xmczRXTDVXTzNvS2NDMXdKUkRjQmxNMDZhUmpvQlZ0cEllS21yMHZZMDFnbHRlL0pwSHhNR2l0WmhaL0ZNNytYQzhyb0dIWkpQaFN5WkNaMkNzVXVvMm53MW9OWFg5bkJoVXZxdFhRPT0hdjE=?share_link_id=454241249260)
+![Matriz del Lean UX Canvas para el Ecosistema Atelier Workshop](assets/lean-ux/lean-ux-canva.jpg){#fig:lean-ux-canvas}
+
+*Nota.* Matriz consolidada del Lean UX Canvas desarrollada en el lienzo interactivo de trabajo en [Miro](https://miro.com/welcomeonboard/ZEZJcWF2dElmbVAwcG1VV2JxUEc2RHpsSkxHL25uNE9RcFBVaTdxekxqNTlxK2xmczRXTDVXTzNvS2NDMXdKUkRjQmxNMDZhUmpvQlZ0cEllS21yMHZZMDFnbHRlL0pwSHhNR2l0WmhaL0ZNNytYQzhyb0dIWkpQaFN5WkNaMkNzVXVvMm53MW9OWFg5bkJoVXZxdFhRPT0hdjE=?share_link_id=454241249260). Elaboración propia (2026).
 
 \newpage
