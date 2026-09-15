@@ -816,7 +816,7 @@ addProduct & Agrega una demanda de repuesto a la colección interna de la tarea.
 \hline
 \thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
 \hline
-removeProduct & Remueve un requerimiento de repuesto liberando el ítem asociado. \\*
+removeProduct & Remueve una solicitud de repuesto liberando el ítem asociado. \\*
 \hline
 \textbf{Tipo o Firma} & \texttt{void removeProduct(WorkOrderTaskProductId productId)} \\*
 \hline
@@ -824,7 +824,7 @@ removeProduct & Remueve un requerimiento de repuesto liberando el ítem asociado
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad Dependiente:} WorkOrderTaskProduct (Demanda y Consumo de Repuestos)} \\*
 \hline
-id & Identificador unívoco universal del requerimiento de repuesto. \\*
+id & Identificador unívoco universal de la solicitud de repuesto. \\*
 \hline
 \textbf{Tipo o Firma} & \texttt{WorkOrderTaskProductId} \\*
 \hline
@@ -1739,7 +1739,7 @@ El tercer fundamento se sustenta en la integridad referencial y coordinación as
 
 La Capa de Interfaz del Bounded Context Workshop Operations (MRO) actúa como el adaptador primario perimetral bajo el paquete canónico **com.andeva.atelier.platform.operations.interfaces**. Su propósito arquitectónico consiste en traducir las interacciones externas provenientes de clientes web y dispositivos móviles hacia invocaciones deterministas sobre los casos de uso transaccionales, salvaguardando la integridad del núcleo operativo del taller mecánico.
 
-Para asegurar una frontera desacoplada y alineada a los requerimientos de alta concurrencia en planta, el diseño perimetral de Workshop Operations se rige por cinco directrices tácticas fundamentales:
+Para asegurar una frontera desacoplada y alineada a los requisitos de alta concurrencia en planta, el diseño perimetral de Workshop Operations se rige por cinco directrices tácticas fundamentales:
 
 - **Mediación determinista mediante tipos funcionales sellados**: La interacción con la Capa de Aplicación se gestiona de forma estricta a través del contenedor tipado **Result<T, ApplicationError>**, canalizando excepciones de infraestructura hacia respuestas de error HTTP predecibles sin propagar fallos no controlados.
 - **Modelado RESTful estricto y enrutamiento plano (*Shallow Routing*)**: Las URIs erradican anidamientos de más de dos niveles. Las labores en foso se orquestan bajo **/api/v1/tasks/{taskId}**, mientras que la orden macro gobierna apertura, puestos físicos y propuestas bajo **/api/v1/work-orders**.
@@ -3657,7 +3657,7 @@ A fin de resumir la arquitectura de eventos, en la @tbl:mro-event-handlers se es
 
 **Puertos de Salida y Pasarelas de Integración**
 
-Para salvaguardar la independencia de la lógica de aplicación frente a detalles de implementación externos y librerías propietarias, la capa define contratos formales de puertos de salida en su perímetro arquitectónico.
+Para salvaguardar la independencia de la lógica de aplicación frente a detalles de implementación externos y bibliotecas propietarias, la capa define contratos formales de puertos de salida en su perímetro arquitectónico.
 
 El puerto **CustomerFleetAclService** establece la pasarela de comunicación con el Bounded Context de CRM a través de su fachada de contexto abierto, posibilitando la validación estricta de vehículos universalmente registrados, titulares de flota y citas agendadas sin acoplar la capa de operaciones al esquema de persistencia de clientes.
 
@@ -4263,7 +4263,7 @@ A fin de ilustrar la arquitectura de integración y servicios en la nube, en la 
 \hline
 \textbf{Tecnología Subyacente} & In-Memory Module Facade / Outbox Events \\*
 \hline
-\textbf{Responsabilidad} & Comunica requerimientos de repuestos al contexto Inventory solicitando reservas preventivas durante la tarea mecánica y confirmando la deducción FIFO definitiva tras la liquidación contable. Implementa InventoryReservationGateway. \\
+\textbf{Responsabilidad} & Comunica solicitudes de repuestos al contexto Inventory requiriendo reservas preventivas durante la tarea mecánica y confirmando la deducción FIFO definitiva tras la liquidación contable. Implementa InventoryReservationGateway. \\
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
@@ -8066,14 +8066,14 @@ Para comprender la colaboración entre los componentes de Inventory & Supply Cha
   Posteriormente, el cliente emite la solicitud de ingreso de lote con el enlace de la imagen almacenada. El servicio de aplicación invoca el agregado en **Inventory Domain Model & FIFO Valuation Engine**, el cual valida el costo unitario de adquisición, la cantidad inicial y la fecha de recepción, creando una entidad de lote inmutable. Finalmente, el adaptador **Inventory Persistence Repositories & JPA Adapters** persiste el lote en PostgreSQL 16, actualiza el saldo global de existencias y registra el evento de lote ingresado en la tabla transaccional **outbox_messages**.
 
 - **Ciclo de Reserva Preventiva y Consumo FIFO Orquestado desde Taller:**
-  Durante la ejecución de una labor técnica en foso, el módulo de Workshop Operations solicita la reserva de piezas requeridas mediante la fachada **Inbound ACL & Inventory Open Host Facade**. Esta fachada canaliza el requerimiento hacia **Inventory CQRS Application Services**, el cual recupera las existencias activas a través de los adaptadores JPA ordenadas cronológicamente por fecha de ingreso ascendente.
+  Durante la ejecución de una labor técnica en foso, el módulo de Workshop Operations solicita la reserva de piezas requeridas mediante la fachada **Inbound ACL & Inventory Open Host Facade**. Esta fachada canaliza la solicitud hacia **Inventory CQRS Application Services**, el cual recupera las existencias activas a través de los adaptadores JPA ordenadas cronológicamente por fecha de ingreso ascendente.
 
   El motor **Inventory Domain Model & FIFO Valuation Engine** evalúa los lotes físicos disponibles, consumiendo prioritariamente los más antiguos para calcular de forma determinista el Costo de Mercadería Vendida. El servicio de aplicación aplica la deducción en los lotes correspondientes y verifica si el stock remanente se sitúa por debajo del umbral mínimo de seguridad. Ante saldos críticos, el manejador **Inventory Event Handlers & Transactional Dispatcher** persiste una alerta de reabastecimiento en **outbox_messages** para notificar al área de compras.
 
 - **Ciclo de Aprovisionamiento, Certificación Tributaria de Proveedores y Conformidad de Compra:**
   Al incorporar un nuevo proveedor comercial al catálogo maestro, **Inventory REST Controllers & Resource Assemblers** intercepta el registro y delega en el servicio de aplicación. La pasarela **Inventory External Gateways & Cloud Integration** consulta en tiempo real el servicio web de la SUNAT mediante HTTPS y almacenamiento en caché, certificando que el número de RUC corresponda a una entidad activa y con condición de habido.
 
-  Confirmada la habilitación fiscal, se emite una orden de compra consolidando los requerimientos de reposición. Al arribar la mercadería al taller, el jefe de almacén registra la recepción física en el sistema. El servicio de aplicación verifica las cantidades recibidas frente a las ordenadas, concilia los costos unitarios pactados y actualiza el estado de la orden a recibida, insertando de manera atómica el evento de conformidad en **outbox_messages** para su posterior liquidación financiera.
+  Confirmada la habilitación fiscal, se emite una orden de compra consolidando las solicitudes de reposición. Al arribar la mercadería al taller, el jefe de almacén registra la recepción física en el sistema. El servicio de aplicación verifica las cantidades recibidas frente a las ordenadas, concilia los costos unitarios pactados y actualiza el estado de la orden a recibida, insertando de manera atómica el evento de conformidad en **outbox_messages** para su posterior liquidación financiera.
 
 #### 2.6.5.6. Bounded Context Software Architecture Code Level Diagrams
 
@@ -8083,7 +8083,7 @@ Esta dimensión arquitectónica se estructura en dos perspectivas complementaria
 
 ##### 2.6.5.6.1. *Bounded Context Domain Layer Class Diagrams*
 
-El modelado estático de la Capa de Dominio del Bounded Context Inventory & Supply Chain establece las estructuras de datos y contratos en memoria que gobiernan la custodia de inventarios, la valorización de costos de mercadería y el reaprovisionamiento comercial. Su diseño prioriza el encapsulamiento riguroso de reglas de negocio, erradica la obsesión por tipos primitivos mediante identificadores fuertemente tipados y preserva la pureza conceptual al excluir anotaciones de frameworks externos o librerías de persistencia relacional.
+El modelado estático de la Capa de Dominio del Bounded Context Inventory & Supply Chain establece las estructuras de datos y contratos en memoria que gobiernan la custodia de inventarios, la valorización de costos de mercadería y el reaprovisionamiento comercial. Su diseño prioriza el encapsulamiento riguroso de reglas de negocio, erradica la obsesión por tipos primitivos mediante identificadores fuertemente tipados y preserva la pureza conceptual al excluir anotaciones de frameworks externos o bibliotecas de persistencia relacional.
 
 En la @fig:class-diagram-inventory se expone el Diagrama de Clases UML detallado para la Capa de Dominio del Bounded Context Inventory & Supply Chain, modelado conforme al estándar UML y compilado mediante la herramienta PlantUML bajo el enfoque de Diagram-as-Code.
 
@@ -8268,11 +8268,11 @@ En la @fig:database-diagram-inventory se presenta el Diagrama Entidad-Relación 
 
 *Nota.* Elaboración propia en base al diseño físico de persistencia y el estándar PlantUML ERD.
 
-El diseño relacional presentado en la @fig:database-diagram-inventory se estructura en dos subsistemas articulados para satisfacer los requerimientos operativos y contables de la plataforma:
+El diseño relacional presentado en la @fig:database-diagram-inventory se estructura en dos subsistemas articulados para satisfacer los requisitos operativos y contables de la plataforma:
 - **Gestión Transaccional Central y Núcleo Contable FIFO en PostgreSQL 16:**
   Consolida las tablas maestras **inventory_items**, **suppliers**, **purchase_orders**, **inventory_batches** y **purchase_order_items**, las cuales extienden la superclase JPA **auditable_abstract_entity**. Este subsistema garantiza aislamiento multi-inquilino mediante la clave foránea indexada **tenant_id**, control de concurrencia optimista a través del atributo **version** y resolución sub-milisegundo de la prelación cronológica FIFO mediante un índice B-Tree parcial condicionado a lotes con existencias remanentes positivas.
 - **Persistencia Desconectada y Buffer de Reservas en SQLite 3:**
-  Garantiza la continuidad operativa en los terminales móviles de taller mediante las tablas locales **local_inventory_cache**, **local_batches_cache**, **local_suppliers_cache** y **offline_inventory_reservations**. Esta arquitectura retiene réplicas ligeras de consulta inmediata en foso y encola de manera transaccional los apartados de repuestos efectuados por mecánicos en zonas de blindaje electromagnético, sincronizando las reservas hacia el backend central mediante llamadas REST idempotentes al restablecer la conectividad.
+  Garantiza la continuidad operativa en los terminales móviles de taller mediante las tablas locales **local_inventory_cache**, **local_batches_cache**, **local_suppliers_cache** y **offline_inventory_reservations**. Esta arquitectura retiene réplicas ligeras de consulta inmediata en foso y encola de manera transaccional las reservas de repuestos efectuadas por mecánicos en zonas de blindaje electromagnético, sincronizando las reservas hacia el backend central mediante llamadas REST idempotentes al restablecer la conectividad.
 
 A partir de la arquitectura relacional definida en el diagrama de persistencia, en la @tbl:inventory-database-objects se cataloga la totalidad de las tablas y objetos físicos que conforman el modelo de datos, detallando el producto donde residen, sus atributos cardinales, restricciones de integridad, estrategias de indexación y su contribución al aislamiento de información.
 
@@ -8361,7 +8361,7 @@ A partir de la arquitectura relacional definida en el diagrama de persistencia, 
 \hline
 \textbf{Motor y Producto} & SQLite 3 (Mobile Workshop) \\*
 \hline
-\textbf{Propósito y Aislamiento} & Directorio local de proveedores comerciales homologados. Facilita la consulta de razones sociales y números de contacto de emergencia ante requerimientos urgentes de repuestos en bahía. \\*
+\textbf{Propósito y Aislamiento} & Directorio local de proveedores comerciales homologados. Facilita la consulta de razones sociales y números de contacto de emergencia ante solicitudes urgentes de repuestos en bahía. \\*
 \hline
 \textbf{Columnas Clave y Tipos} & \texttt{supplier\_id (TEXT)}, \texttt{tenant\_id (TEXT)}, \texttt{business\_name (TEXT)}, \texttt{tax\_id (TEXT)}, \texttt{phone (TEXT)}, \texttt{synced\_at (TEXT).} \\*
 \hline
@@ -8371,7 +8371,7 @@ A partir de la arquitectura relacional definida en el diagrama de persistencia, 
 \hline
 \textbf{Motor y Producto} & SQLite 3 (Mobile Workshop) \\*
 \hline
-\textbf{Propósito y Aislamiento} & Buffer transaccional local de apartados de repuestos efectuados por operarios en foso. Retiene solicitudes mecánicas para su drenaje atómico e idempotente hacia la API central al recuperar enlace. \\*
+\textbf{Propósito y Aislamiento} & Buffer transaccional local de reservas de repuestos efectuadas por operarios en foso. Retiene solicitudes mecánicas para su drenaje atómico e idempotente hacia la API central al recuperar enlace. \\*
 \hline
 \textbf{Columnas Clave y Tipos} & \texttt{reservation\_id (TEXT)}, \texttt{work\_order\_id (TEXT)}, \texttt{task\_id (TEXT)}, \texttt{item\_id (TEXT)}, \texttt{requested\_quantity (REAL)}, \texttt{status (TEXT)}, \texttt{retry\_count (INTEGER)}, \texttt{created\_at (TEXT)}, \texttt{synced\_at (TEXT).} \\*
 \hline
@@ -8400,7 +8400,7 @@ A partir de la estructura formalizada en la @fig:database-diagram-inventory y la
   La deducción algorítmica de costos First-In, First-Out se sustenta en el índice parcial B-Tree **idx_inventory_batches_item_fifo**, el cual descarta los lotes históricos con saldo agotado para resolver en tiempo sub-milisegundo la remesa activa más antigua. De forma complementaria, la integración con Firebase Storage bajo el patrón Direct-to-Cloud elude la memoria de la API Spring Boot al persistir exclusivamente las referencias sanitizadas de las facturas escaneadas, asegurando trazabilidad probatoria inalterable ante auditorías contables.
 
 - **Resiliencia Operacional Desconectada en Foso Automotriz y Reconciliación Determinista:**
-  La coexistencia del esquema central con el motor relacional SQLite 3 en terminales móviles salvaguarda la continuidad de la faena mecánica en fosas subterráneas sin cobertura inalámbrica [@herrera2026offline]. Mediante las estructuras **local_inventory_cache** y **offline_inventory_reservations**, los operarios consultan existencias y registran apartados provisionales que, al restablecerse el enlace de red, se drenan atómicamente hacia la API con claves de idempotencia para prevenir duplicidades o inconsistencias en el almacén [@korichi2026dmrp].
+  La coexistencia del esquema central con el motor relacional SQLite 3 en terminales móviles salvaguarda la continuidad de la faena mecánica en fosas subterráneas sin cobertura inalámbrica [@herrera2026offline]. Mediante las estructuras **local_inventory_cache** y **offline_inventory_reservations**, los operarios consultan existencias y registran reservas provisionales que, al restablecerse el enlace de red, se drenan atómicamente hacia la API con claves de idempotencia para prevenir duplicidades o inconsistencias en el almacén [@korichi2026dmrp].
 
 ### 2.6.6. *Bounded Context: Human Resources Management (HR)*
 
@@ -11879,7 +11879,7 @@ En la @fig:c4-component-hr se ilustra el diagrama C4 de componentes para el Boun
 Para comprender la colaboración entre los componentes de Human Resources Management y los módulos adyacentes durante la operativa diaria del taller, se analizan a continuación los tres flujos operacionales críticos de la plataforma:
 
 - **Ciclo de Marcación Móvil Geocercada y Validación Haversine Satelital:**
-  Cuando un mecánico o colaborador operativo registra su ingreso matutino desde Mobile Workshop, el aplicativo captura las coordenadas geográficas del dispositivo mediante telemetría satelital WGS84. El componente **HR REST Controllers & Resource Assemblers** recibe la petición HTTP segura y delega en **HR CQRS Application Services**, el cual consulta el centroide y radio de tolerancia de la sede física a través de **HR External Gateways & Outbound Integration** invocando la fachada de IAM.
+  Cuando un mecánico o colaborador operativo registra su ingreso matutino desde Mobile Workshop, la aplicación captura las coordenadas geográficas del dispositivo mediante telemetría satelital WGS84. El componente **HR REST Controllers & Resource Assemblers** recibe la petición HTTP segura y delega en **HR CQRS Application Services**, el cual consulta el centroide y radio de tolerancia de la sede física a través de **HR External Gateways & Outbound Integration** invocando la fachada de IAM.
 
   El servicio de aplicación delega la verificación espacial en **HR Domain Model & Geofencing Calculation Engines**, donde el servicio **HaversineGeofencingService** calcula la distancia geodésica entre el colaborador y el taller en memoria pura. Verificada la proximidad dentro de la tolerancia estipulada y evaluada la puntualidad frente al horario del turno, **HR Persistence Repositories & JPA Adapters** persiste el nuevo agregado **AttendanceRecord** en PostgreSQL 16 y canaliza el evento **AttendanceClockedInEvent** hacia **outbox_messages** mediante **HR Event Handlers & Transactional Dispatcher** para su publicación desacoplada.
 
@@ -11901,7 +11901,7 @@ Esta dimensión arquitectónica se estructura en dos perspectivas complementaria
 
 ##### 2.6.6.6.1. *Bounded Context Domain Layer Class Diagrams*
 
-El modelado estático de la Capa de Dominio del Bounded Context Human Resources Management establece las estructuras de datos y contratos en memoria que gobiernan las relaciones laborales, la disciplina de asistencia presencial y la retribución económica del personal de taller. Su diseño prioriza la encapsulación rigurosa de reglas de negocio en agregados autónomos, erradica la obsesión por tipos primitivos mediante identificadores fuertemente tipados y preserva la pureza conceptual al excluir dependencias de frameworks externos o librerías de persistencia relacional.
+El modelado estático de la Capa de Dominio del Bounded Context Human Resources Management establece las estructuras de datos y contratos en memoria que gobiernan las relaciones laborales, la disciplina de asistencia presencial y la retribución económica del personal de taller. Su diseño prioriza la encapsulación rigurosa de reglas de negocio en agregados autónomos, erradica la obsesión por tipos primitivos mediante identificadores fuertemente tipados y preserva la pureza conceptual al excluir dependencias de frameworks externos o bibliotecas de persistencia relacional.
 
 En la @fig:class-diagram-hr se expone el Diagrama de Clases UML detallado para la Capa de Dominio del Bounded Context Human Resources Management, modelado conforme al estándar UML y compilado mediante la herramienta PlantUML bajo el enfoque de Diagram-as-Code.
 
@@ -12110,7 +12110,7 @@ En la @fig:database-diagram-hr se presenta el Diagrama Entidad-Relación físico
 
 *Nota.* Elaboración propia en base al diseño físico de persistencia y el estándar PlantUML ERD.
 
-El diseño relacional presentado en la @fig:database-diagram-hr se estructura en cinco subsistemas articulados para satisfacer los requerimientos laborales, operativos y de compensación del taller automotriz:
+El diseño relacional presentado en la @fig:database-diagram-hr se estructura en cinco subsistemas articulados para satisfacer los requisitos laborales, operativos y de compensación del taller automotriz:
 
 - **Subsistema de Programación de Turnos y Franjas Horarias (**work_shifts**):**
   Gobierna la definición formal de los esquemas horarios de la jornada laboral del taller en PostgreSQL 16. Custodia los instantes oficiales de inicio y culminación de labores, junto con el umbral de tolerancia de tardanza en minutos (*grace_period_m* $\ge$ 0 y *grace_period_m* $\le$ 60), garantizando que cada taller administre franjas horarias soberanas mediante la restricción de unicidad compuesta sobre (**tenant_id**, **name**).

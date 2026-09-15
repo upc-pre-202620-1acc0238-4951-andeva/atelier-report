@@ -257,7 +257,7 @@ A continuación, se profundiza en la especificación a manera de diccionario de 
 
 **Superclase base de agregados y contrato de eventos de dominio**
 
-En Domain-Driven Design, las raíces de agregado salvaguardan los límites de consistencia transaccional del negocio. Para facilitar la propagación de eventos hacia otros módulos y hacia el almacenamiento seguro del Transactional Outbox sin incorporar librerías ORM en el dominio, la arquitectura suministra la clase abstracta **AbstractDomainAggregateRoot<T>**.
+En Domain-Driven Design, las raíces de agregado salvaguardan los límites de consistencia transaccional del negocio. Para facilitar la propagación de eventos hacia otros módulos y hacia el almacenamiento seguro del Transactional Outbox sin incorporar bibliotecas ORM en el dominio, la arquitectura suministra la clase abstracta **AbstractDomainAggregateRoot<T>**.
 
 Esta clase emplea la técnica de polimorfismo con límite F (F-bounded polymorphism, expresado como `T extends AbstractDomainAggregateRoot<T>`), permitiendo que las clases derivadas mantengan una referencia fuertemente tipada sobre sí mismas. Al extender de la clase base de Spring Data Commons, la superclase acumula eventos de dominio en una colección interna en memoria cada vez que se invoca el método protegido *registerDomainEvent()*.
 
@@ -2552,7 +2552,7 @@ Esta perspectiva comprende dos dimensiones complementarias: el Diagrama de Clase
 
 ##### 2.6.1.6.1. *Bounded Context Domain Layer Class Diagrams*
 
-El modelado estático de la Capa de Dominio del Bounded Context Shared establece las estructuras fundacionales compartidas por los ocho bounded contexts de la plataforma Atelier. Su propósito primordial es erradicar el antipatrón de obsesión por primitivos, garantizar la inmutabilidad de los datos en memoria y consolidar la pureza arquitectónica de Clean Architecture, asegurando que las clases del núcleo de dominio permanezcan libres de anotaciones de frameworks externos o librerías de persistencia relacional.
+El modelado estático de la Capa de Dominio del Bounded Context Shared establece las estructuras fundacionales compartidas por los ocho bounded contexts de la plataforma Atelier. Su propósito primordial es erradicar el antipatrón de obsesión por primitivos, garantizar la inmutabilidad de los datos en memoria y consolidar la pureza arquitectónica de Clean Architecture, asegurando que las clases del núcleo de dominio permanezcan libres de anotaciones de frameworks externos o bibliotecas de persistencia relacional.
 
 En la @fig:class-diagram-shared se presenta el Diagrama de Clases UML detallado para la Capa de Dominio del Bounded Context Shared, modelado rigurosamente bajo el estándar UML empleando la herramienta PlantUML como Diagram-as-Code.
 
@@ -6480,7 +6480,7 @@ Las operaciones de recuperación de información se estructuran mediante servici
 consulta especializados anotados con transaccionalidad de solo lectura, permitiendo a la
 infraestructura relacional omitir la gestión de instantáneas de detección de cambios.
 
-Los seis servicios de consulta abarcan la totalidad de requerimientos del contexto:
+Los seis servicios de consulta abarcan la totalidad de requisitos del contexto:
 **TenantQueryServiceImpl** recupera fichas corporativas por identificador o RUC;
 **UserQueryServiceImpl** provee consultas demográficas y de credenciales; mientras que
 **BranchQueryServiceImpl** lista las sedes físicas y geocercas satelitales.
@@ -7581,7 +7581,7 @@ componentes.
 
 En esta sección se presenta la descomposición arquitectónica interna del contenedor central **API Application** en relación con el Bounded Context IAM & Tenancy. Siguiendo el Nivel 3 del Modelo C4, se ilustran los bloques estructurales que conforman este subsistema perimetral, formalizando sus responsabilidades técnicas, fronteras operacionales y mecanismos de integración con clientes, módulos adyacentes y servicios externos.
 
-Dentro de la arquitectura de monolito modular de Atelier Platform, el Bounded Context IAM & Tenancy asume la responsabilidad crítica de gobernar la identidad, la autenticación sin estado y el aislamiento multi-inquilino. La totalidad de peticiones emitidas desde el portal administrativo web y los aplicativos móviles transita por este subsistema antes de alcanzar la lógica operacional de órdenes de trabajo, inventario, facturación o telemetría.
+Dentro de la arquitectura de monolito modular de Atelier Platform, el Bounded Context IAM & Tenancy asume la responsabilidad crítica de gobernar la identidad, la autenticación sin estado y el aislamiento multi-inquilino. La totalidad de peticiones emitidas desde el portal administrativo web y las aplicaciones móviles transita por este subsistema antes de alcanzar la lógica operacional de órdenes de trabajo, inventario, facturación o telemetría.
 
 En la @tbl:iam-c4-components se presenta el catálogo estructurado de los ocho componentes constitutivos del Bounded Context IAM & Tenancy dentro del contenedor anfitrión. Cada bloque encapsula una responsabilidad arquitectónica cohesiva, delimitando con precisión la frontera entre la seguridad perimetral, la orquestación de casos de uso, el modelo de dominio puro y la persistencia física en base de datos.
 
@@ -8159,13 +8159,13 @@ Dentro del sector automotriz, los talleres mecánicos atienden a dos perfiles de
 
 - **Flotas corporativas (B2B):** Empresas de transporte, distribución, logística o servicios que gestionan decenas o cientos de vehículos comerciales. Para estos clientes corporativos, el sistema requiere registrar la razón social y el número de RUC ante la autoridad tributaria, permitiendo administrar una flota heterogénea con condiciones comerciales preferenciales.
 
-El diseño táctico resuelve estos requerimientos mediante la raíz de agregado **Customer**, la cual modela de forma polimórfica a ambos perfiles bajo un estricto aislamiento por taller (**TenantId**). A su vez, el automóvil físico se representa mediante la raíz de agregado global **Vehicle**, cuya existencia es independiente de cualquier taller particular para consolidar una historia clínica automotriz universal. La titularidad sobre las unidades se gobierna a través de la entidad dependiente **VehicleOwnership**, registrando el inicio y cese de custodia sin duplicar registros de chasis ni desvincular diagnósticos históricos.
+El diseño táctico resuelve estos requisitos mediante la raíz de agregado **Customer**, la cual modela de forma polimórfica a ambos perfiles bajo un estricto aislamiento por taller (**TenantId**). A su vez, el automóvil físico se representa mediante la raíz de agregado global **Vehicle**, cuya existencia es independiente de cualquier taller particular para consolidar una historia clínica automotriz universal. La titularidad sobre las unidades se gobierna a través de la entidad dependiente **VehicleOwnership**, registrando el inicio y cese de custodia sin duplicar registros de chasis ni desvincular diagnósticos históricos.
 
 Adicionalmente, el contexto modela la raíz de agregado **Appointment** para coordinar el ingreso ordenado de vehículos a las sedes físicas del taller (**BranchId**). La gestión de citas actúa como la antesala al proceso operativo de MRO, garantizando que la demanda de servicios no sobrepase la capacidad física instalada de bahías ni la disponibilidad de personal técnico en cada sucursal.
 
 #### 2.6.3.1. Domain Layer
 
-La capa de dominio de Customer and Fleet Management encapsula los modelos conceptuales, las invariantes transaccionales de la cartera comercial y las reglas de custodia automotriz sin establecer dependencia con librerías tecnológicas ni motores de persistencia. Residiendo bajo el paquete canónico **com.andeva.atelier.platform.crm.domain**, su diseño táctico se estructura sobre cuatro pilares fundamentales:
+La capa de dominio de Customer and Fleet Management encapsula los modelos conceptuales, las invariantes transaccionales de la cartera comercial y las reglas de custodia automotriz sin establecer dependencia con bibliotecas tecnológicas ni motores de persistencia. Residiendo bajo el paquete canónico **com.andeva.atelier.platform.crm.domain**, su diseño táctico se estructura sobre cuatro pilares fundamentales:
 
 - **Aislamiento multi-inquilino de la cartera comercial:** Las fichas comerciales de clientes particulares y corporativos pertenecen a un taller determinado mediante **TenantId**, garantizando la confidencialidad de la base de clientes y la autonomía operativa de cada negocio mecánico adscrito a la plataforma.
 
@@ -10976,7 +10976,7 @@ Con el propósito de especificar la correlación física y estructural del model
 
 **Repositorios Spring Data JPA y Adaptadores de Persistencia**
 
-El acceso a los datos y la ejecución de sentencias relacionales se desacoplan rigurosamente mediante el patrón de Adaptador de Repositorio. Las interfaces Spring Data JPA ubicadas en el paquete com.andeva.atelier.platform.crm.infrastructure.persistence.jpa.repositories declaran métodos de consulta derivados y proyecciones JPQL optimizadas para resolver requerimientos de lectura y comprobación de unicidad.
+El acceso a los datos y la ejecución de sentencias relacionales se desacoplan rigurosamente mediante el patrón de Adaptador de Repositorio. Las interfaces Spring Data JPA ubicadas en el paquete com.andeva.atelier.platform.crm.infrastructure.persistence.jpa.repositories declaran métodos de consulta derivados y proyecciones JPQL optimizadas para resolver requisitos de lectura y comprobación de unicidad.
 
 En este nivel, **CustomerPersistenceRepository** define consultas compuestas para validar la disponibilidad del documento fiscal o correo electrónico dentro de un taller, además de incorporar la sentencia JPQL *searchCustomers()* para búsquedas flexibles y paginadas. Complementariamente, **VehiclePersistenceRepository** gestiona la validación perimetral de placas de rodaje y números de chasis a escala global en toda la plataforma.
 
@@ -11190,7 +11190,7 @@ A fin de ilustrar la arquitectura de integración y servicios en la nube, en la 
 
 En esta sección se expone la descomposición arquitectónica interna del contenedor central **API Application** en relación con el Bounded Context Customer & Fleet Management (CRM). Siguiendo el Nivel 3 del Modelo C4, se ilustran los bloques estructurales que conforman este subsistema, formalizando sus responsabilidades técnicas, fronteras operacionales y mecanismos de integración con clientes, módulos adyacentes y servicios externos.
 
-Dentro de la arquitectura de monolito modular de Atelier Platform, el Bounded Context Customer & Fleet Management asume la responsabilidad de gobernar la cartera comercial de clientes particulares y corporativos, el catálogo automotriz universal, la trazabilidad de tenencias vehiculares y el motor de agendamiento de citas. Las peticiones emitidas desde el portal administrativo web y los aplicativos móviles interactúan con este subsistema para coordinar la admisión de automotores y preparar las órdenes operativas.
+Dentro de la arquitectura de monolito modular de Atelier Platform, el Bounded Context Customer & Fleet Management asume la responsabilidad de gobernar la cartera comercial de clientes particulares y corporativos, el catálogo automotriz universal, la trazabilidad de tenencias vehiculares y el motor de agendamiento de citas. Las peticiones emitidas desde el portal administrativo web y las aplicaciones móviles interactúan con este subsistema para coordinar la admisión de automotores y preparar las órdenes operativas.
 
 En la @tbl:crm-c4-components se presenta el catálogo estructurado de los siete componentes constitutivos del Bounded Context Customer & Fleet Management dentro del contenedor anfitrión. Cada bloque encapsula una responsabilidad arquitectónica cohesiva, delimitando con precisión la frontera entre la interfaz de controladores REST, la orquestación de casos de uso mediante CQRS, el modelo de dominio puro, la persistencia relacional en base de datos y la integración con pasarelas externas.
 
@@ -11297,7 +11297,7 @@ Para comprender la colaboración dinámica y el flujo de control entre los compo
   Con las coordenadas geocodificadas, el servicio instancia la raíz de agregado **Customer** de tipo corporativo en **CRM Domain Model & Aggregate Roots** y delega su almacenamiento en **CRM Persistence Repositories & JPA Adapters**, persistiendo en la tabla relacional de clientes de PostgreSQL 16. La raíz de agregado registra el evento de dominio correspondiente y deposita un evento de integración en el Transactional Outbox para coordinar la pre-carga fiscal en el subsistema de facturación electrónica.
 
 - **Ciclo de Agendamiento, Alertas Push Móviles y Recepción en Bahía:**
-  El agendamiento de atenciones técnicas se inicia cuando un conductor solicita una cita desde el aplicativo móvil o cuando recepción ingresa la reserva desde la consola de escritorio. El controlador valida una antelación temporal mínima de dos horas y traslada el comando hacia **CRM CQRS Application Services**, el cual corrobora la disponibilidad operativa de las bahías físicas y persiste la entidad **Appointment** en estado pendiente a través de los adaptadores JPA.
+  El agendamiento de atenciones técnicas se inicia cuando un conductor solicita una cita desde la aplicación móvil o cuando recepción ingresa la reserva desde la consola de escritorio. El controlador valida una antelación temporal mínima de dos horas y traslada el comando hacia **CRM CQRS Application Services**, el cual corrobora la disponibilidad operativa de las bahías físicas y persiste la entidad **Appointment** en estado pendiente a través de los adaptadores JPA.
 
   Al confirmarse la reserva por parte del taller, el servicio de comando ejecuta la transición formal en el agregado y emite el evento de confirmación de cita. El componente **CRM Domain Event Listeners & Integration Dispatcher** captura dicho evento y solicita a **External Gateways & Cloud Integration** el despacho de una notificación push mediante Firebase Cloud Messaging, alertando al dispositivo del conductor sobre la confirmación del servicio de manera inmediata.
 
@@ -11318,7 +11318,7 @@ Esta dimensión arquitectónica se estructura en dos perspectivas complementaria
 
 ##### 2.6.3.6.1. *Bounded Context Domain Layer Class Diagrams*
 
-El modelado estático de la Capa de Dominio del Bounded Context Customer & Fleet Management (CRM) establece las estructuras de datos y contratos en memoria que gobiernan la relación con clientes y la trazabilidad del parque automotor. Su diseño prioriza el encapsulamiento estricto de reglas de negocio, erradica la obsesión por primitivos mediante identificadores fuertemente tipados y preserva la pureza conceptual al excluir anotaciones de frameworks o librerías de persistencia relacional.
+El modelado estático de la Capa de Dominio del Bounded Context Customer & Fleet Management (CRM) establece las estructuras de datos y contratos en memoria que gobiernan la relación con clientes y la trazabilidad del parque automotor. Su diseño prioriza el encapsulamiento estricto de reglas de negocio, erradica la obsesión por primitivos mediante identificadores fuertemente tipados y preserva la pureza conceptual al excluir anotaciones de frameworks o bibliotecas de persistencia relacional.
 
 En la @fig:class-diagram-crm se expone el Diagrama de Clases UML detallado para la Capa de Dominio del Bounded Context Customer & Fleet Management (CRM), modelado conforme al estándar UML y compilado mediante la herramienta PlantUML bajo el enfoque de Diagram-as-Code.
 

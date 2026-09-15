@@ -1066,7 +1066,7 @@ En la @tbl:invoicing-domain-services se presentan los servicios de dominio de es
 
 **Puertos de Repositorio de la Capa de Dominio**
 
-El aislamiento del modelo conceptual respecto a la infraestructura de persistencia se garantiza mediante contratos de interfaz que definen los puertos de salida del dominio. Estos contratos permiten recuperar y persistir el estado de los agregados respetando sus invariantes transaccionales, prescindiendo por completo de dependencias directas hacia tecnologías relacionales o librerías ORM.
+El aislamiento del modelo conceptual respecto a la infraestructura de persistencia se garantiza mediante contratos de interfaz que definen los puertos de salida del dominio. Estos contratos permiten recuperar y persistir el estado de los agregados respetando sus invariantes transaccionales, prescindiendo por completo de dependencias directas hacia tecnologías relacionales o bibliotecas ORM.
 
 En este marco, **ElectronicVoucherRepository** proporciona métodos de búsqueda por serie, correlativo y rangos de fechas contables, mientras **SeriesConfigurationRepository** provee consultas optimizadas para la gestión y bloqueo concurrente de correlativos por sucursal. Por su parte, **VoucherPaymentRepository** administra el registro histórico de recaudaciones financieras para respaldar arqueos diarios de caja y procesos de conciliación bancaria en el taller.
 
@@ -2823,7 +2823,7 @@ OpenPdf\allowbreak Invoicing\allowbreak Generator\allowbreak Adapter & Motor doc
 \hline
 \textbf{Categoría} & Pasarela Documental \\*
 \hline
-\textbf{Relaciones} & Implementa InvoicingPdfGeneratorPort mediante librería OpenPDF para generar formatos corporativos A4 y tiras de 80 mm. \\*
+\textbf{Relaciones} & Implementa InvoicingPdfGeneratorPort mediante la biblioteca OpenPDF para generar formatos corporativos A4 y tiras de 80 mm. \\*
 \hline
 \textbf{Paquete} & \texttt{...\allowbreak infrastructure.\allowbreak adapters} \\
 \hline
@@ -3213,7 +3213,7 @@ Para formalizar la colaboración sincronizada entre los componentes internos del
 
   La totalidad de registros monetarios es trasladada a **Invoicing Domain Model & Peruvian Tax Calculation Engines Component**, donde el motor especializado **CashFlowAggregationEngine** totaliza los ingresos brutos, cuantifica la estructura de costos y deduce el saldo neto de tesorería del taller. El servicio de aplicación estructura la respuesta en un recurso DTO inmutable con enlaces HATEOAS y metadatos de auditoría, retornando la proyección analítica a la aplicación web para su renderizado visual en tablas y gráficas ejecutivas o su descarga documental en formato PDF formal.
 
-En primer término, la alta cohesión de las responsabilidades funcionales y el estricto desacoplamiento modular alcanzados mediante el principio de inversión de dependencias permiten que el motor tributario peruano opere como un núcleo de cálculo puro libre de librerías de infraestructura. Dicha segregación formaliza un modelo donde las variaciones normativas de la autoridad fiscal o las adaptaciones de esquemas tributarios se resuelven de forma autocontenida en la capa de dominio, garantizando que los módulos operativos de taller, inventario y recursos humanos permanezcan inmunes ante alteraciones en las reglas impositivas de comprobantes.
+En primer término, la alta cohesión de las responsabilidades funcionales y el estricto desacoplamiento modular alcanzados mediante el principio de inversión de dependencias permiten que el motor tributario peruano opere como un núcleo de cálculo puro libre de bibliotecas de infraestructura. Dicha segregación formaliza un modelo donde las variaciones normativas de la autoridad fiscal o las adaptaciones de esquemas tributarios se resuelven de forma autocontenida en la capa de dominio, garantizando que los módulos operativos de taller, inventario y recursos humanos permanezcan inmunes ante alteraciones en las reglas impositivas de comprobantes.
 
 En segundo término, la implementación del Transactional Outbox Pattern en el componente de despacho de eventos garantiza la consistencia eventual y la entrega al menos una vez de los sucesos de facturación y cobro sin recurrir a protocolos distribuidos de dos fases. Al persistir los eventos de integración dentro del mismo límite de transacción relacional en que se asienta el comprobante o pago, se erradican las discrepancias contables entre el libro fiscal de facturación y el estado de cierre de las órdenes de trabajo en taller, manteniendo la integridad del sistema ante eventuales interrupciones telemáticas del servidor de aplicaciones.
 
@@ -6426,7 +6426,7 @@ Asimismo, el adaptador **IamClientAdapter** resuelve los datos de razón social,
 \hline
 \textbf{Puerto Implementado} & \texttt{org.springframework.cache.CacheManager} \\*
 \hline
-\textbf{Tecnología y Cliente} & Librería Caffeine Cache v3.x integrada en el ecosistema Spring Cache. \\*
+\textbf{Tecnología y Cliente} & Biblioteca Caffeine Cache v3.x integrada en el ecosistema Spring Cache. \\*
 \hline
 \textbf{Operaciones y Resiliencia} & Configura BillingCacheManager gestionando cachés dedicados tenantSubscriptionStatus y activePlans con directiva de expiración *expireAfterWrite* de 5 minutos y capacidad máxima de 10,000 entradas. Provee evaluación de membresía y cuotas operativas con latencia sub-milisegundo (< 0.05 ms) para interacciones concurrentes desde estaciones web y talleres móviles. \\
 \hline
@@ -6920,7 +6920,7 @@ A partir de la estructura formalizada en la @fig:database-diagram-billing y la @
   La persistencia física en la tabla **stripe_events** constituye una barrera transaccional que neutraliza las contingencias de red inherentes a los pagos electrónicos en la nube. Al sincronizar las transiciones de estado de cobro en **invoices** y renovaciones de ciclo en **subscriptions** dentro de la misma frontera transaccional ACID donde se inserta el evento de Stripe, se asegura que anomalías en las comunicaciones HTTP nunca originen cobros duplicados o desincronizaciones contractuales.
 
 - **Evaluación de Cuotas Operativas en Frío y Sincronización Reactiva hacia Clientes Móviles:**
-  La inclusión de las tablas de caché en SQLite 3 responde al requerimiento operacional de movilidad en talleres automotrices, donde la recepción de vehículos y asignación de órdenes de trabajo puede ejecutarse en sótanos o zonas sin cobertura inalámbrica. Mediante un protocolo de refresco incremental basado en marcas temporales y cabeceras de validación condicional ETag, la aplicación móvil actualiza sus techos de capacidad sin generar sobrecarga en el backend central, garantizando fluidez en la atención al cliente.
+  La inclusión de las tablas de caché en SQLite 3 responde al requisito operacional de movilidad en talleres automotrices, donde la recepción de vehículos y asignación de órdenes de trabajo puede ejecutarse en sótanos o zonas sin cobertura inalámbrica. Mediante un protocolo de refresco incremental basado en marcas temporales y cabeceras de validación condicional ETag, la aplicación móvil actualiza sus techos de capacidad sin generar sobrecarga en el backend central, garantizando fluidez en la atención al cliente.
 
 ### 2.6.9. *Bounded Context: IoT Telemetry & Predictive Maintenance*
 
@@ -8895,7 +8895,7 @@ En la @tbl:iot-command-services se detallan las operaciones transaccionales, sig
 
 **Servicios de Consultas y Lectura Especializada**
 
-El lado de lectura del subsistema resuelve los requerimientos informativos de tableros de control web y aplicaciones móviles de taller y conductor sin sobrecargar el modelo de escritura:
+El lado de lectura del subsistema resuelve los requisitos informativos de tableros de control web y aplicaciones móviles de taller y conductor sin sobrecargar el modelo de escritura:
 
 - **TelemetryLogQueryServiceImpl**: Combina lecturas instantáneas de tacómetro digital en tiempo real con consultas agregadas de series temporales calculadas mediante la función SQL time\_bucket de TimescaleDB, entregando promedios y cotas máximas de velocidad, revoluciones y temperatura de refrigerante.
 
@@ -10060,7 +10060,7 @@ Excepciones y eventos & Jerarquía no comprobada derivada de \textbf{IoTDomainEx
 A partir del modelo estático ilustrado en la @fig:class-diagram-iot y desglosado en la @tbl:iot-domain-classes-members, se identifican cuatro fundamentos de ingeniería de software que respaldan la solidez técnica y la adaptabilidad operativa de la plataforma:
 
 - **Aislamiento Algorítmico y Determinismo Termodinámico:**
-  El riguroso aislamiento algorítmico de los motores de diagnóstico predictivo y la inmutabilidad de los registros sensoriales garantizan que la evaluación del estado mecánico de los vehículos se ejecute con determinismo matemático y sin acoplamiento a librerías de persistencia. Al encapsular las magnitudes físicas en objetos de valor especializados, el sistema valida las invariantes termodinámicas y eléctricas en el instante mismo de su construcción, asegurando que lecturas anómalas o corrompidas sean interceptadas antes de ingresar a los modelos de inferencia.
+  El riguroso aislamiento algorítmico de los motores de diagnóstico predictivo y la inmutabilidad de los registros sensoriales garantizan que la evaluación del estado mecánico de los vehículos se ejecute con determinismo matemático y sin acoplamiento a bibliotecas de persistencia. Al encapsular las magnitudes físicas en objetos de valor especializados, el sistema valida las invariantes termodinámicas y eléctricas en el instante mismo de su construcción, asegurando que lecturas anómalas o corrompidas sean interceptadas antes de ingresar a los modelos de inferencia.
 
 - **Integridad Temporal del Emparejamiento Vehicular y Odometría No Decreciente:**
   La formalización de las sesiones físicas de emparejamiento mediante el agregado **DeviceInstallation** resuelve con precisión la integridad temporal del vínculo entre adaptadores y automotores. Al imponer la regla de que ningún vehículo puede mantener múltiples escáneres activos simultáneamente y certificar la secuencia no decreciente de odómetros entre desmontajes sucesivos, el modelo de dominio protege la fidelidad histórica del kilometraje, erradicando discrepancias de auditoría física tanto en talleres concesionarios como en flotas de transporte corporativo.
