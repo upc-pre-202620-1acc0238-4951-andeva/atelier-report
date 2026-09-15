@@ -258,17 +258,22 @@ El análisis de este segmento consolida la información recopilada en la entrevi
 
 **Consolidado Estadístico y Tendencias del Segmento 1**
 
-| Variable / Categoría | Indicador / Característica Dominante | Porcentaje ($N=1$) | Sustento Cualitativo en Entrevistas |
+| Variable / Categoría | Indicador / Característica Dominante | Porcentaje | Sustento Cualitativo en Entrevistas |
 | :--- | :--- | :---: | :--- |
-| **Rango de Edad** | 50+ años (53 años) | **100%** | Jorge Aguilar registra 53 años de edad. |
-| **Experiencia en el Rubro** | Mayor a 30 años | **100%** | Acumula 35 años de trayectoria operativa y administrativa. |
-| **Modelo Operativo** | Servicio itinerante / Campo (*delivery*) | **100%** | Opera directamente en campo donde se ubican las unidades o máquinas. |
-| **Rol Dual** | Administrador y Técnico a la vez | **100%** | Gestiona los movimientos administrativos y ejecuta la labor operativa. |
-| **Fortaleza Comercial** | Trato directo y recomendación preventiva | **100%** | Asesora de manera honesta para evitar inconvenientes futuros en las unidades. |
-| **Canales Digitales** | Comunicación directa (Llamadas / WhatsApp) | **100%** | Mantiene contacto personalizado con los dueños de las unidades. |
+| **Rango de Edad** | +50 años | **100%** | Ambos entrevistados superan los 50 años de edad. |
+| **Experiencia en el Rubro** | Mayor a 30 años | **100%** | Jorge registra 35 años y el segundo entrevistado más de 30 años en el rubro. |
+| **Estilo de Gestión** | Orden, Punctualidad y Trato Directo | **100%** | Valoran la puntualidad, la responsabilidad y la recomendación transparente. |
+| **Base de Clientes** | Clientes Frecuentes | **100%** | Ambos basan sus ingresos en la recurrencia y confianza de clientes fidelizados. |
+| **Roles** | Gestión Centralizada / Propietario Directo| **100%** | El dueño asume la administración general y la supervisión del trabajo. |
+| **Fricción por Equipos** | Estrés por retrasos por fallas de máquinas o repuestos | **100%** | Reportan cuellos de botella y semanas de retraso cuando falla una herramienta/máquina. |
+| **Proyección de Negocio** | Expansión a flotas o importaciones | **100%** | Buscan hacer crecer sus ingresos mediante nuevas líneas comerciales o servicios. |
 
-*   **Características Objetivas:** El perfil dominante corresponde a profesionales de madurez avanzada ($100\%$ mayores de 50 años) con amplia trayectoria práctica ($100\%$ con $+30$ años de experiencia). Presentan una estructura organizativa unipersonal o altamente centralizada donde el dueño asume tanto las cobranzas como las reparaciones.
-*   **Características Subjetivas:** Existe un alto sentido de responsabilidad técnica enfocado en la fidelización mediante el diagnóstico transparente. La principal fricción subjetiva es la sobrecarga por la gestión dual y la resistencia de los clientes a aplicar mantenimientos preventivos antes de que ocurra una falla catastrófica.
+* **Características Objetivas:** El 100% de los entrevistados pertenece a un rango etario maduro (+50 años) con más de tres décadas de experiencia continua en el sector automotriz. Presentan estructuras de negocio centralizadas en la figura del propietario, con una operación fuertemente ligada a carteras de clientes habituales.
+* **Características Subjetivas:** El 100% coincide en que la puntualidad y la responsabilidad son los pilares de su reputación. Su mayor dolor de cabeza operativo es la interrupción de la productividad por fallas logísticas o averías en herramientas clave, las cuales generan retrasos de hasta una semana y estancan el flujo de caja.
+
+**Gráficos**
+![Graficos](../../assets/Interview-Evidence/Gráfico1.jpeg)
+![Graficos](../../assets/Interview-Evidence/Gráfico2.jpeg)
 
 **Análisis del Segmento 2: Personal Operativo del Taller**
 
@@ -276,24 +281,24 @@ Este análisis consolida los datos de la muestra de técnicos y especialistas en
 
 **Consolidado Estadístico y Tendencias del Segmento 2**
 
-| Variable / Categoría | Indicador / Característica Dominante | Porcentaje ($N=3$) | Sustento Cualitativo en Entrevistas |
+| Variable / Categoría | Indicador / Característica Dominante | Porcentaje | Sustento Cualitativo en Entrevistas |
 | :--- | :--- | :---: | :--- |
-| **Rango de Edad** | 23 a 25 años | **100%** | Muestra joven: Nicolay (23), Bruno (25), Angie (25). |
+| **Rango de Edad** | 23 a 25 años | **100%** | Perfil joven: Nicolay (23), Bruno (25), Angie (25). |
 | **Estado Civil** | Solteros | **100%** | El 100% de los entrevistados declara estado civil soltero. |
 | **Formación Técnica** | Egresados de Carrera Técnica / Mecatrónica | **100%** | Titulados/egresados en Mecánica Automotriz y Mecatrónica. |
-| **Especialidad Principal** | Diagnóstico Electrónico y Escáner OBD2 | **100%** | Todos señalan la lectura de datos OBD2 e inyección como su fuerte. |
-| **Flujo de Trabajo** | Basado en Orden de Trabajo Física | **100%** | Reciben hoja de papel en recepción antes de evaluar el auto en bahía. |
-| **Frustración Principal** | "Tiempos muertos" y desorganización | **100%** | Inactividad por falta de repuestos o retrasos en aprobación de presupuestos. |
-| **Canal de Coordinación** | WhatsApp informal (Grupos) | **100%** | Uso de chats grupales donde la información técnica suele traspapelarse. |
-| **Respaldos de Trabajo** | Evidencia fotográfica en celular personal | **66.7%** | Nicolay y Bruno toman fotos/videos en su celular como prueba de cumplimiento. |
-| **Infraestructura / Señal** | Pérdida de datos en fosos / zonas cerradas | **66.7%** | Reportan desconexión en fosos de inspección y bahías con estructuras gruesas. |
-| **Sistemas Operativos** | Preferencia/Uso de Android | **100%** | Todos operan con smartphones Android (Xiaomi, Samsung). |
+| **Especialidad Principal** | Diagnóstico Electrónico y Escáner OBD2 | **100%** | Experiencia avanzada en lectura de códigos de falla (DTC) e inyección. |
+| **Flujo Operativo** | Inicio mediante Orden de Trabajo Física | **100%** | Dependencia del papel entregado en recepción para ingresar la unidad a bahía. |
+| **Frustración Principal** | "Tiempos muertos" e inactividad forzada | **100%** | Paradas por falta de repuestos o demoras en la aprobación del cliente. |
+| **Plataforma Móvil** | Preferencia por Android | **100%** | Todos operan con teléfonos Android (Xiaomi, Samsung).|
+| **Pérdida de Conectividad** | Problemas de señal en fosos/bahías cerradas | **66.7%** | Reportan caída de datos móviles en fosos de inspección y zonas profundas. |
+| **Mecanismo de Respaldo** | Evidencias fotográficas en celular personal| **66.7%** | Uso de fotos/videos personales para certificar el trabajo completado. |
 
-*   **Características Objetivas:** Segmento joven ($100\%$ entre 23 y 25 años) con formación técnica superior o universitaria en mecatrónica. Tienen un dominio fluido de smartphones ($100\%$ Android) y herramientas de diagnóstico computarizado. Su rutina depende obligatoriamente del papel para iniciar una orden y de escáneres multimarca para la lectura de códigos de falla (DTC).
+* **Características Objetivas:** Segmento joven (100% entre 23 y 25 años), altamente alfabetizado en tecnología móvil (100% usuarios de Android) y con especialización técnica formal en lectura de datos OBD2.
+* **Características Subjetivas (Dolores y Motivaciones):** El 100% experimenta una profunda frustración ante los "tiempos muertos", ya que disminuyen sus indicadores de rendimiento diario. Un 66.7% sufre problemas de conectividad en zonas clave del taller y debe improvisar respaldos fotográficos en sus teléfonos personales ante la falta de un sistema digital integrado.
 
-*   **Características Subjetivas:**
-    *   *Actitud ante el estrés ($100\%$):* Buscan mantener la serenidad y actuar de forma metódica/paso a paso para evitar romper componentes o sensores.
-    *   *Puntos de Dolor ($100\%$):* Rechazo absoluto a los "tiempos muertos" (espera de repuestos o aprobación de clientes) porque perjudican directamente la medición de su rendimiento diario.
-    *   *Metas Profesionales ($100\%$):* Deseo de especialización continua (mecatrónica, híbridos/eléctricos) y proyección a futuro hacia la jefatura de taller o administración de un centro de servicio propio.
+**Gráficos**
+![Graficos](../../assets/Interview-Evidence/Gráfico3.jpeg)
+![Graficos](../../assets/Interview-Evidence/Gráfico4.jpeg)
+![Graficos](../../assets/Interview-Evidence/Gráfico5.jpeg)
 
 \newpage
