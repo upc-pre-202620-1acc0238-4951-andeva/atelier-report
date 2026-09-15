@@ -65,6 +65,7 @@ El ecosistema se divide estratégicamente en dos fases para conectar a todos los
     % ==============================
     % Alumno 2
     % ==============================
+    \pagebreak
     \multirow{5}{2.5cm}{\centering\includegraphics[width=2.2cm, keepaspectratio]{report/assets/startup-team-members/joel.jpg}} 
     & Huamani Estefanero, Joel – U20241E275 & Ingeniería de Software \\*
     \cline{2-3}
@@ -78,7 +79,6 @@ El ecosistema se divide estratégicamente en dos fases para conectar a todos los
     % ==============================
     % Alumno 3
     % ==============================
-    \pagebreak
     \multirow{5}{2.5cm}{\centering\includegraphics[width=2.2cm, keepaspectratio]{report/assets/startup-team-members/alvaro.jpg}} 
     & Rocha Cotrina, Alvaro – U202411243 & Ingeniería de Software \\*
     \cline{2-3}
@@ -92,20 +92,20 @@ El ecosistema se divide estratégicamente en dos fases para conectar a todos los
     % ==============================
     % Alumno 4
     % ==============================
+    \pagebreak
     \multirow{5}{2.5cm}{\centering\includegraphics[width=2.2cm, keepaspectratio]{report/assets/startup-team-members/adiel.jpeg}} 
     & Sanchez Santin, Adiel Abdiaz – U20241E287 & Ingeniería de Software \\*
     \cline{2-3}
     & \thspan{2}{Descripción} \\*
     \cline{2-3}
     & \multicolumn{2}{p{\dimexpr\textwidth-2.5cm-4\tabcolsep-3\arrayrulewidth\relax}|}{%
-        Soy Adiel Sanchez Santin, estudiante de Ingeniería de Software de la Universidad Peruana de Ciencias Aplicadas, con un perfil analítico y detallista. Me considero una persona reflexiva y dedicada, lo que me lleva a investigar y comprender en profundidad cómo funcionan las herramientas y tecnologías antes de utilizarlas. Cuento con conocimientos en lenguajes como C++, Python y Java, y disfruto explorar sus librerías y ecosistemas para entender la lógica técnica detrás de cada solución. En el equipo de Atelier, aporto desde el análisis riguroso, el modelado estratégico del dominio y la organización técnica, buscando siempre que las soluciones sean ordenadas, escalables y funcionen correctamente. Mi enfoque se centra en el aprendizaje continuo y en traducir requerimientos complejos en implementaciones técnicas claras, robustas y funcionales.
+        Soy Adiel Sanchez Santin, estudiante de Ingeniería de Software de la Universidad Peruana de Ciencias Aplicadas, con un perfil analítico y detallista. Me considero una persona reflexiva y dedicada, lo que me lleva a investigar y comprender en profundidad cómo funcionan las herramientas y tecnologías antes de utilizarlas. Cuento con conocimientos en lenguajes como C++, Python y Java, y disfruto explorar sus bibliotecas y ecosistemas para entender la lógica técnica detrás de cada solución. En el equipo de Atelier, aporto desde el análisis riguroso, el modelado estratégico del dominio y la organización técnica, buscando siempre que las soluciones sean ordenadas, escalables y funcionen correctamente. Mi enfoque se centra en el aprendizaje continuo y en traducir requisitos complejos en implementaciones técnicas claras, robustas y funcionales.
     } \\
     \hline
     
     % ==============================
     % Alumno 5
     % ==============================
-    \pagebreak
     \multirow{5}{2.5cm}{\centering\includegraphics[width=2.2cm, keepaspectratio]{report/assets/startup-team-members/Mauricio.jpeg}} 
     & Teran Zavala, Mauricio – U202417423 & Ingeniería de Software \\*
     \cline{2-3}

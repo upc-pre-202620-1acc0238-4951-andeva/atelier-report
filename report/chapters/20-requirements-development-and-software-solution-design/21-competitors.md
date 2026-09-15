@@ -2,17 +2,17 @@
 
 ## 2.1. Competidores
 
-En esta sección se identifican, analizan y comparan las principales soluciones tecnológicas existentes en el mercado frente a nuestra propuesta de valor **Atelier** (específicamente a través de su plataforma SaaS B2B **Atelier Workshop**). Este estudio comparativo permite evaluar las fortalezas, debilidades y modelos operativos de los competidores directos e indirectos, con el objetivo de identificar oportunidades estratégicas y ventajas competitivas que permitan resolver eficientemente las necesidades de nuestros segmentos objetivo en el sector de micro y pequeñas empresas (MYPE) de mantenimiento, reparación y operaciones automotrices (MRO).
+En esta sección se identifican, analizan y comparan las principales soluciones tecnológicas existentes en el mercado frente a la propuesta de valor de **Atelier** (específicamente a través de su plataforma SaaS B2B **Atelier Workshop**). Este estudio comparativo permite evaluar las fortalezas, debilidades y modelos operativos de los competidores directos e indirectos, con el objetivo de identificar oportunidades estratégicas y ventajas competitivas que permitan resolver eficientemente las necesidades de los segmentos objetivo en el sector de micro y pequeñas empresas (MYPE) de mantenimiento, reparación y operaciones automotrices.
 
 ### 2.1.1. *Análisis Competitivo*
 
-A continuación, en la Tabla \ref{tbl:analisis-competitivo}, se presenta la matriz de análisis comparativo integral entre Atelier Workshop y tres competidores representativos del mercado: **Mi Taller CRM** (competidor directo local en Perú), **OK CAR** (competidor directo regional en Latinoamérica) y **Taller GP** (competidor indirecto internacional de nivel enterprise).
+A continuación, en la @tbl:analisis-competitivo, se presenta la matriz de análisis comparativo integral entre Atelier Workshop y tres competidores representativos del mercado: **Mi Taller CRM** (competidor directo local en Perú), **OK CAR** (competidor directo regional en Latinoamérica) y **Taller GP** (competidor indirecto internacional de nivel enterprise).
 
 \small
 \renewcommand{\arraystretch}{1.25}
 \setlength{\tabcolsep}{3.5pt}
 \begin{longtable}{| >{\raggedright\arraybackslash}p{2.2cm} | >{\raggedright\arraybackslash}p{3.1cm} | >{\raggedright\arraybackslash}p{3.1cm} | >{\raggedright\arraybackslash}p{3.1cm} | >{\raggedright\arraybackslash}p{\dimexpr\textwidth-11.5cm-10\tabcolsep-6\arrayrulewidth\relax} |}
-\caption{Matriz de Análisis Comparativo de Competidores} \label{tbl:analisis-competitivo} \\
+\caption{Competitive Analysis Landscape} \label{tbl:analisis-competitivo} \\
 \hline
 \multicolumn{1}{|>{\centering\arraybackslash}p{2.2cm}|}{\textbf{Criterio}} & 
 \multicolumn{1}{>{\centering\arraybackslash}p{3.1cm}|}{\vspace{0.1cm}\includegraphics[width=2.4cm, height=0.85cm, keepaspectratio]{report/assets/logos/imagotipo-atelier.jpg}\vspace{0.05cm}\newline \textbf{Atelier Workshop}} & 
@@ -116,7 +116,7 @@ A continuación, en la Tabla \ref{tbl:analisis-competitivo}, se presenta la matr
 
 ### 2.1.2. *Estrategias y Tácticas frente a Competidores*
 
-En la Tabla \ref{tbl:estrategias-tacticas-competidores} se detallan las tácticas diferenciadoras, las fortalezas que enfrentamos y las debilidades que aprovecharemos de cada competidor evaluado para posicionar estratégicamente a **Atelier Workshop** en el mercado automotriz peruano.
+En la @tbl:estrategias-tacticas-competidores se detallan las tácticas diferenciadoras, las fortalezas enfrentadas y las debilidades aprovechables de cada competidor evaluado para posicionar estratégicamente a **Atelier Workshop** en el mercado automotriz peruano.
 
 \small
 \renewcommand{\arraystretch}{1.3}
@@ -155,7 +155,7 @@ En la Tabla \ref{tbl:estrategias-tacticas-competidores} se detallan las táctica
 \textbf{OK CAR}
 \vspace{0.15cm}
 & Confrontar su proyección teórica con diagnóstico telemétrico real: OK CAR basa el preventivo en estimaciones de fechas, mientras que Atelier Workshop procesa lecturas en tiempo real de los sensores del motor y códigos de falla activos, sumando cumplimiento tributario local directo.
-& Posicionamiento en 6 países y aplicativo pulido. Atelier contrarresta esto mediante una aplicación móvil Android de uso rudo diseñada para la bahía de servicio (alto contraste, pocos toques, Offline-First), adaptada a las condiciones hostiles de fosas y talleres mecánicos.
+& Posicionamiento en 6 países y aplicación pulida. Atelier contrarresta esto mediante una aplicación móvil Android de uso rudo diseñada para la bahía de servicio (alto contraste, pocos toques, Offline-First), adaptada a las condiciones hostiles de fosas y talleres mecánicos.
 & OK CAR carece de facturación SUNAT para Perú (obliga al taller a usar un software contable paralelo) y su predictivo carece de sustento telemétrico. Atelier resuelve esto con una solución todo-en-uno que factura en soles y emite alertas mecánicas precisas sin costos en dólares. \\
 \hline
 
