@@ -272,8 +272,8 @@ El análisis de este segmento consolida la información recopilada en la entrevi
 * **Características Subjetivas:** El 100% coincide en que la puntualidad y la responsabilidad son los pilares de su reputación. Su mayor dolor de cabeza operativo es la interrupción de la productividad por fallas logísticas o averías en herramientas clave, las cuales generan retrasos de hasta una semana y estancan el flujo de caja.
 
 **Gráficos**
-![Graficos](../../assets/Interview-Evidence/Gráfico1.jpeg)
-![Graficos](../../assets/Interview-Evidence/Gráfico2.jpeg)
+![Graficos](report/assets/Interview-Evidence/Gráfico1.jpeg)
+![Graficos](report/assets/Interview-Evidence/Gráfico2.jpeg)
 
 **Análisis del Segmento 2: Personal Operativo del Taller**
 
@@ -297,8 +297,8 @@ Este análisis consolida los datos de la muestra de técnicos y especialistas en
 * **Características Subjetivas (Dolores y Motivaciones):** El 100% experimenta una profunda frustración ante los "tiempos muertos", ya que disminuyen sus indicadores de rendimiento diario. Un 66.7% sufre problemas de conectividad en zonas clave del taller y debe improvisar respaldos fotográficos en sus teléfonos personales ante la falta de un sistema digital integrado.
 
 **Gráficos**
-![Graficos](../../assets/Interview-Evidence/Gráfico3.jpeg)
-![Graficos](../../assets/Interview-Evidence/Gráfico4.jpeg)
-![Graficos](../../assets/Interview-Evidence/Gráfico5.jpeg)
+![Graficos](report/assets/Interview-Evidence/Gráfico3.jpeg)
+![Graficos](report/assets/Interview-Evidence/Gráfico4.jpeg)
+![Graficos](report/assets/Interview-Evidence/Gráfico5.jpeg)
 
 \newpage
