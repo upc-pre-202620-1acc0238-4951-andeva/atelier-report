@@ -37,5 +37,9 @@
 |0.36.0|12/09/2026|Sanchez Santin, Adiel Abdiaz|Añadido de especificación de requisitos: 10 Épicas y 32 Historias de Usuario bajo formato APA 7 y BDD.|
 |0.37.0|12/09/2026|Sanchez Santin, Adiel Abdiaz|Añadido de Objetivos SMART para Sanchez Santin, Adiel Abdiaz.|
 |0.38.0|12/09/2026|Sanchez Santin, Adiel Abdiaz|Normalización de rutas relativas de diagramas e imágenes a report/assets para compilación Pandoc.|
+|0.39.0|13/09/2026|Granda Ibarra, Luis Daniel|Inserción de Customer Journey Mapping para ambos segmentos en Needfinding.|
+|0.40.0|14/09/2026|Granda Ibarra, Luis Daniel|Inserción de diagramas de Impact Mapping en la especificación de requisitos.|
+|0.41.0|15/09/2026|Huamani Estefanero, Joel|Estandarización y formateo tipográfico de tablas LaTeX y figuras para compilación Pandoc.|
+|0.42.0|16/09/2026|Sanchez Santin, Adiel Abdiaz|Actualización de enlace a tablero Miro de Big Picture EventStorming y redacción de Student Outcome.|
 
 \newpage
