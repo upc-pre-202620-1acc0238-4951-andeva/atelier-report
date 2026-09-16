@@ -52,13 +52,13 @@ La integración articulada entre metodologías de diseño centrado en el usuario
 % --- Alumno 3 ---
 & 
 \textbf{Rocha Cotrina, Alvaro} \newline
-\textbf{AV1}: Aquí detallas tu aporte...
+\textbf{AV1}: Asimilación y aplicación práctica de herramientas de compilación automatizada y documentación técnica (entorno Pandoc, motores LaTeX y Markdown) para la correcta estandarización del reporte en el repositorio, gestionando la resolución de conflictos de dependencias y rutas relativas bajo control de versiones (Git). Asimismo, se integraron conocimientos metodológicos centrados en el usuario mediante la estructuración de la User Task Matrix y el apoyo en el análisis de las entrevistas del Segmento 2 (Personal Operativo del Taller). Este involucramiento directo permitió asimilar y actualizar conceptos del dominio mecánico (como el uso de escáneres OBD2 y la identificación de "tiempos muertos" como fricción operativa), traduciendo el modelo mental de los técnicos automotrices en requerimientos de software de alta fidelidad.
 & \\ \cline{2-2}
 
 % --- Alumno 4 ---
 & 
 \textbf{Sanchez Santin, Adiel Abdiaz} \newline
-\textbf{AV1}: Aquí detallas tu aporte...
+\textbf{AV1}: Investigación, asimilación y aplicación práctica del marco metodológico Domain-Driven Design (DDD) a nivel estratégico mediante la técnica de EventStorming (Big Picture y Design-Level) de Alberto Brandolini para el modelado colaborativo del ecosistema Atelier. Se evaluó críticamente la descomposición del dominio en contextos delimitados (Bounded Contexts) altamente cohesivos y flujos de mensajes asíncronos (Domain Message Flows), identificando como principales fortalezas el desacoplamiento estructural de subsistemas, la mitigación del antipatrón Big Ball of Mud y la sincronización entre las necesidades del negocio y los modelos de software, frente a la sobrecarga inicial de coordinación intercontextual y la complejidad técnica de garantizar consistencia eventual como debilidades operativas. Asimismo, se integraron conocimientos multidisciplinarios articulando la ingeniería de software con los procesos de mantenimiento, reparación y operaciones automotrices (MRO), el diagnóstico vehicular por telemetría OBD-II (códigos DTC y parámetros PID) y la valorización de inventarios bajo el método FIFO. Finalmente, se estructuró el Lenguaje Ubicuo del dominio y se formularon diez épicas con treinta y dos historias de usuario estimadas en Story Points y formalizadas con criterios de aceptación verificables bajo sintaxis BDD Gherkin.
 & \\ \cline{2-2}
 
 % --- Alumno 5 ---
@@ -89,13 +89,13 @@ El equipo comprende que la competitividad y vigencia en la industria del softwar
 % --- Alumno 3 ---
 & 
 \textbf{Rocha Cotrina, Alvaro} \newline
-\textbf{AV1}: Aquí detallas tu aporte...
+\textbf{AV1}: Reconocimiento estratégico de la necesidad de mantener un aprendizaje continuo mediante la formulación de Objetivos profesionales SMART orientados a corto y mediano plazo. La experiencia de configurar flujos de integración en repositorios colaborativos y analizar los procesos operativos del sector automotriz, evidenció que la competitividad en la ingeniería de software exige una constante adaptación técnica. En respuesta a ello, se ha definido una hoja de ruta profesional enfocada en la auto-capacitación constante sobre nuevas herramientas de automatización, gestión avanzada de control de versiones y metodologías ágiles de diseño; garantizando de este modo la capacidad de aportar soluciones de calidad y adaptabilidad en entornos de desarrollo tecnológico altamente dinámicos.
 & \\ \cline{2-2}
 
 % --- Alumno 4 ---
 & 
 \textbf{Sanchez Santin, Adiel Abdiaz} \newline
-\textbf{AV1}: Aquí detallas tu aporte...
+\textbf{AV1}: Reconocimiento de la naturaleza dinámica y cambiante de la ingeniería de software, evidenciado en la exigencia de adoptar paradigmas móviles offline-first, ingesta telemétrica de datos vehiculares en tiempo real y servicios en la nube para responder a los retos del ecosistema Atelier. Frente a estas demandas y para sostener la competitividad técnica, se diseñó un plan de desarrollo profesional continuo estructurado en dos fases estratégicas alineadas con metas SMART. La primera fase, proyectada a corto plazo en un horizonte de dos años tras el egreso universitario, comprende la obtención de dos certificaciones internacionales de estándar profesional: Google Associate Android Developer, con énfasis en arquitecturas móviles reactivas, almacenamiento local y conectividad por Bluetooth de bajo consumo, y AWS Certified Solutions Architect - Associate, orientada al diseño de microservicios distribuidos y arquitecturas elásticas. La segunda fase, proyectada a mediano plazo en un periodo de tres años post-graduación, establece el liderazgo del diseño arquitectónico y desarrollo técnico de una plataforma SaaS B2B para la automatización operativa y logística, validando el producto con organizaciones del sector en el rol de Líder de Ingeniería de Software o Arquitecto de Soluciones.
 & \\ \cline{2-2}
 
 % --- Alumno 5 ---
