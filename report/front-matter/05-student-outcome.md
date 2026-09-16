@@ -52,7 +52,7 @@ La integración articulada entre metodologías de diseño centrado en el usuario
 % --- Alumno 3 ---
 & 
 \textbf{Rocha Cotrina, Alvaro} \newline
-\textbf{AV1}: Aquí detallas tu aporte...
+\textbf{AV1}: Asimilación y aplicación práctica de herramientas de compilación automatizada y documentación técnica (entorno Pandoc, motores LaTeX y Markdown) para la correcta estandarización del reporte en el repositorio, gestionando la resolución de conflictos de dependencias y rutas relativas bajo control de versiones (Git). Asimismo, se integraron conocimientos metodológicos centrados en el usuario mediante la estructuración de la User Task Matrix y el apoyo en el análisis de las entrevistas del Segmento 2 (Personal Operativo del Taller). Este involucramiento directo permitió asimilar y actualizar conceptos del dominio mecánico (como el uso de escáneres OBD2 y la identificación de "tiempos muertos" como fricción operativa), traduciendo el modelo mental de los técnicos automotrices en requerimientos de software de alta fidelidad.
 & \\ \cline{2-2}
 
 % --- Alumno 4 ---
@@ -89,7 +89,7 @@ El equipo comprende que la competitividad y vigencia en la industria del softwar
 % --- Alumno 3 ---
 & 
 \textbf{Rocha Cotrina, Alvaro} \newline
-\textbf{AV1}: Aquí detallas tu aporte...
+\textbf{AV1}: Reconocimiento estratégico de la necesidad de mantener un aprendizaje continuo mediante la formulación de Objetivos profesionales SMART orientados a corto y mediano plazo. La experiencia de configurar flujos de integración en repositorios colaborativos y analizar los procesos operativos del sector automotriz, evidenció que la competitividad en la ingeniería de software exige una constante adaptación técnica. En respuesta a ello, se ha definido una hoja de ruta profesional enfocada en la auto-capacitación constante sobre nuevas herramientas de automatización, gestión avanzada de control de versiones y metodologías ágiles de diseño; garantizando de este modo la capacidad de aportar soluciones de calidad y adaptabilidad en entornos de desarrollo tecnológico altamente dinámicos.
 & \\ \cline{2-2}
 
 % --- Alumno 4 ---
