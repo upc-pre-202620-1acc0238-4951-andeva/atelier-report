@@ -64,7 +64,7 @@ La integración articulada entre metodologías de diseño centrado en el usuario
 % --- Alumno 5 ---
 & 
 \textbf{Teran Zavala, Mauricio Alejandro} \newline
-\textbf{AV1}: Aquí detallas tu aporte...
+\textbf{AV1}: Con el fin de fundamentar la solución tecnológica sobre conocimientos actualizados del entorno automotriz y potenciar el desarrollo del proyecto de software, se llevó a cabo un proceso integral de investigación cualitativa y modelado de usuarios. Este proceso comprendió el diseño metodológico de los instrumentos de recolección, el registro riguroso de las entrevistas en profundidad a los actores clave del sector y un análisis estadístico paramétrico de las respuestas obtenidas. A partir de los hallazgos, se elaboraron los Empathy Maps para cada segmento objetivo, permitiendo identificar patrones de conducta, fricciones operativas y requerimientos técnicos reales —como la necesidad de un sistema con arquitectura offline-first para zonas sin conectividad y un modelo Bring Your Own Device (BYOD) sobre Android—. Esta actualización de conceptos garantizó que la arquitectura y funcionalidades de la plataforma Atelier respondan de manera precisa a los estándares actuales de gestión de talleres y diagnóstico por puerto OBD2.
 & \\ \hline
 
 % =========================================================================
@@ -101,7 +101,7 @@ El equipo comprende que la competitividad y vigencia en la industria del softwar
 % --- Alumno 5 ---
 & 
 \textbf{Teran Zavala, Mauricio Alejandro} \newline
-\textbf{AV1}: Aquí detallas tu aporte...
+\textbf{AV1}: El desarrollo y la evolución de la plataforma Atelier evidencia que la ingeniería de software moderna exige un aprendizaje continuo y una constante actualización tecnológica para responder a entornos cambiantes. La identificación de brechas en los flujos de diagnóstico tradicionales, la adopción de arquitecturas Software as a Service (SaaS) sustentadas en paradigmas Bring Your Own Device (BYOD) y la necesidad de procesar telemetría automotriz mediante el protocolo OBD2 demuestran que el diseño de soluciones eficientes no depende únicamente de conocimientos teóricos previos, sino de la capacidad para investigar, incorporar nuevas tecnologías y adaptar metodologías acordes a las exigencias operativas del mercado actual. Este proceso reafirma que la actualización constante y la capacidad de autoaprendizaje constituyen pilares fundamentales para garantizar la calidad, sostenibilidad y competitividad de los proyectos tecnológicos.
 & \\ \hline
 
 \end{longtable}
