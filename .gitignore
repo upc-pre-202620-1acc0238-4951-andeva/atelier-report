@@ -17,6 +17,7 @@ docs/superpowers
 notes/
 build/
 .inputs/
+.codegraph
 
 # Heavy binaries
 *.jar
