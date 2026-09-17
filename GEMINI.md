@@ -50,16 +50,28 @@ Al redactar o modificar cualquier archivo dentro de `report/` o `docs/`, se debe
    - El reporte es una memoria profesional de ingeniería y arquitectura, no una tarea estudiantil.
 3. **Erradicación Total de Rayas Em Dash (`—`):**
    - No usar rayas (`—`) como incisos o aclaraciones. Emplear comas gramaticales sobrias, preposiciones directas o reestructurar la sintaxis.
-4. **Prohibición de Paréntesis Traductores o Redundantes:**
+4. **Prohibición de Paréntesis Traductores, Explicativos o en Encabezados:**
    - Quedan prohibidas duplicaciones como `levantamiento de necesidades (Needfinding)`, `códigos de falla (DTC)`, `mapeo de experiencia (User Journey Mapping)`.
-   - Utilizar directamente una sola denominación técnica estándar en el texto corrido.
-5. **Notas de Tablas y Figuras:**
+   - Prohibido el uso de paréntesis en títulos y subtítulos como `(Problem Statements)` o `(Task Proposals)`. Emplear redacción directa articulada con preposiciones o dos puntos.
+   - Prohibidos los incisos de ejemplos entre paréntesis («por ejemplo, ...», «ej. ...»).
+   - Los paréntesis quedan reservados estrictamente a citas bibliográficas APA 7, referencias cruzadas Pandoc (`@fig:...`, `@tbl:...`), signaturas de métodos (`metodo()`) y restricciones matemáticas formales.
+5. **Prohibición Estricta de Punto y Coma (`;`):**
+   - Prohibido el uso de punto y coma (`;`) tanto en prosa corrida como en celdas de tablas.
+   - En prosa, fragmentar las oraciones compuestas en enunciados independientes mediante punto seguido (`.`).
+   - En tablas, estructurar múltiples elementos o responsabilidades mediante saltos de línea (`\newline` en LaTeX o saltos en Markdown) o viñetas con guion (`- `).
+6. **Normalización Terminológica y Traducciones (Anexo F):**
+   - Emplear traducciones técnicas formales: *Biblioteca* (nunca librería), *Requisito* (nunca requerimiento), *Aplicación* (nunca aplicativo), *Obtener* (nunca elicitar), *Despliegue/Desplegar* (nunca deploy/deployar).
+   - Prohibidas las mutaciones verbales en espanglish (*testear, comitear, buildear*).
+   - Para el historial de control de versiones de GitHub, emplear de forma técnica el término **«commit»** (en minúsculas o cursiva según contexto, evitando perífrasis confusas).
+7. **Figuras en Secciones del Prefacio (Front-Matter):**
+   - En secciones introductorias o colaborativas del prefacio (*Project Report Collaboration Insights*), las capturas no deben numerarse como figuras formales (sin `{#fig:...}` ni rótulos de «Figura X»). Deben presentarse con título descriptivo en negrita (`**...**`), imagen centrada y nota explicativa concisa.
+8. **Notas de Tablas y Figuras:**
    - Extensión estricta de **1 a 2 líneas**.
    - No incluir frases como «según la norma APA 7» ni referencias a la rúbrica; limitarse a la fuente o descripción del contenido.
-6. **Jerarquía Estricta de Títulos:**
+9. **Jerarquía Estricta de Títulos:**
    - Solo los encabezados principales del estándar llevan marcadores Markdown (`## 2.4.`, `### 2.4.1.`, `### 2.4.2.`, `### 2.4.3.`).
    - Los subtítulos de historias individuales o artefactos no numerados deben usar negrita en línea (`**...**`).
-7. **Límite de Esfuerzo en Historias:**
+10. **Límite de Esfuerzo en Historias:**
    - Ninguna historia de usuario o técnica puede superar los **5 Story Points** (escala permitida: 1, 2, 3 o 5 SP).
 
 ---

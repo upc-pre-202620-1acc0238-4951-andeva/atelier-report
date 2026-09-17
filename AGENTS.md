@@ -62,6 +62,10 @@ Cualquier propuesta o cambio debe superar la siguiente lista de control obligato
 
 - [ ] **Cero menciones a la evaluación:** Prohibida cualquier alusión a «según la rúbrica», «criterios de evaluación» o «para cumplir con el ítem».
 - [ ] **Cero rayas em dash (`—`):** Queda terminantemente prohibido el uso de guiones largos (`—`) en notas, descripciones o párrafos narrativos.
+- [ ] **Cero punto y coma (`;`):** Prohibido el uso de punto y coma tanto en prosa corrida como en celdas de tablas; usar punto seguido o viñetas.
+- [ ] **Cero abuso de paréntesis:** Prohibidos paréntesis traductores, explicativos de ejemplos o en encabezados/subtítulos.
+- [ ] **Figuras sin numeración en Front-Matter:** Las capturas de prefacios (ej. analíticos de colaboración) no llevan `{#fig:...}` ni rótulos de «Figura X».
+- [ ] **Terminología formal Anexo F:** Uso estricto de *Biblioteca*, *Requisito*, *Aplicación*, *Despliegue*, y el término técnico *commit* para registros de control de versiones.
 - [ ] **Sin notas redundantes sobre APA 7:** Las notas de tablas y figuras deben limitarse a la fuente o descripción del contenido, omitiendo la frase «según la norma APA 7».
 - [ ] **Notas concisas:** Longitud estricta de 1 a 2 líneas en notas de tablas y figuras (`*Nota.* ...`).
 - [ ] **Jerarquía de títulos:** Solo `## 2.4.`, `### 2.4.1.`, `### 2.4.2.` y `### 2.4.3.` emplean marcadores `#`. Subtítulos menores usan negrita en línea (`**...**`).
