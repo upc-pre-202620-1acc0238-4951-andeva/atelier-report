@@ -170,7 +170,8 @@ package "PostgreSQL 16 (API Application - Backend Central)" as pg_backend #F8F9F
     entity "roles" as roles <<table, PostgreSQL>> #FFFFFF {
         * id : UUID <<PK>>
         --
-        tenant_id : UUID <<FK>>
+        * tenant_id : UUID <<FK>>
+        code : VARCHAR(50)
         * name : VARCHAR(100)
         * description : VARCHAR(255)
         * is_system_role : BOOLEAN
@@ -182,10 +183,12 @@ package "PostgreSQL 16 (API Application - Backend Central)" as pg_backend #F8F9F
         <b>Restricciones (Constraints):</b>
         + pk_roles : PRIMARY KEY (id)
         + fk_roles_tenant_id : FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
-        + chk_roles_tenant_or_system : CHECK ((is_system_role = TRUE AND tenant_id IS NULL) OR (is_system_role = FALSE AND tenant_id IS NOT NULL))
+        + uk_roles_tenant_name : UNIQUE (tenant_id, name)
+        + uk_roles_tenant_code : UNIQUE (tenant_id, code)
         --
         <b>Índices Físicos (B-Tree):</b>
         + idx_roles_tenant_name : (tenant_id, name)
+        + idx_roles_tenant_code : (tenant_id, code)
     }
 
     entity "role_permissions" as role_permissions <<table, PostgreSQL>> #FFFFFF {
@@ -301,7 +304,7 @@ package "PostgreSQL 16 (API Application - Backend Central)" as pg_backend #F8F9F
     ' Relaciones Cardinales de Integridad Referencial
     tenants "1  " ||--o{ "0..* " branches : "posee sedes"
     tenants "1  " ||--o{ "0..* " invitations : "emite"
-    tenants "0..1" ||--o{ "0..* " roles : "define roles"
+    tenants "1  " ||--o{ "0..* " roles : "define roles"
     tenants "1  " ||--o{ "0..* " tenant_memberships : "emplea"
 
     users "1  " ||--|| "1  " profiles : "perfil demográfico"

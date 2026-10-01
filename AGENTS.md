@@ -25,6 +25,7 @@ Antes de realizar modificaciones sustanciales, los agentes deben consultar y act
 
 - **academic-report-writer:** Directrices mandatorias de redacción académica, estilo formal, erradicación de «markdown soup» y moderación visual de tablas/figuras para el reporte de tesis.
 - **academic-report-reviewer:** Auditoría rigurosa para detectar violaciones a las normas de redacción (comillas invertidas excesivas, rayas `—`, menciones a la rúbrica, notas extensas).
+- **docs-writer:** Redacción, revisión y edición técnica de estándares, guías de diseño y documentación en la carpeta `/docs`.
 - **ddd-strategic-design:** Diseño estratégico en DDD (subdominios, contextos acotados, lenguaje ubicuo y mapas de contexto).
 - **architecture-patterns:** Implementación de Arquitectura Limpia, Arquitectura Hexagonal y patrones tácticos de dominio.
 - **api-designer / rest-api-design:** Especificaciones OpenAPI, modelado de recursos RESTful, convenciones HTTP y códigos de estado.
@@ -71,6 +72,7 @@ Cualquier propuesta o cambio debe superar la siguiente lista de control obligato
 - [ ] **Jerarquía de títulos:** Solo `## 2.4.`, `### 2.4.1.`, `### 2.4.2.` y `### 2.4.3.` emplean marcadores `#`. Subtítulos menores usan negrita en línea (`**...**`).
 - [ ] **Tope de Story Points:** Toda historia de usuario o técnica debe estar acotada a $\le 5$ SP (1, 2, 3 o 5).
 - [ ] **Estricto pnpm:** Nunca usar comandos `npm`, `npx` o `yarn`.
+- [ ] **Sistema de diseño canónico:** Toda interfaz o componente web debe alinearse a los tokens `@theme` de Tailwind CSS v4, fuentes oficiales (**Satoshi** para interfaz y **Albert Sans ExtraBold** para imagotipo) y paleta de Atelier Workshop definida en `docs/frontend-documentation/design-system.md`.
 
 ---
 

@@ -1,6 +1,6 @@
 ## 2.4. Requirements Specification
 
-La especificación de requisitos consolida las capacidades funcionales, operativas y de integración requeridas por el ecosistema Atelier, traduciendo los hallazgos del levantamiento de necesidades y los modelos de dominio en artefactos ágiles de ingeniería de software. Para el presente desarrollo, la especificación delimita su alcance a dos componentes cardinales de la arquitectura: la aplicación móvil orientada a la gestión operativa en patio y bahías de servicio, denominada Atelier Workshop Mobile, y los servicios e interfaces de programación de aplicaciones del backend centralizado, denominado Atelier Platform Backend. Quedan excluidos de este alcance el portal web institucional y la aplicación orientada a conductores particulares.
+La especificación de requisitos consolida las capacidades funcionales, operativas y de integración requeridas por el ecosistema Atelier, traduciendo los hallazgos del levantamiento de necesidades y los modelos de dominio en artefactos ágiles de ingeniería de software. Para el presente desarrollo, la especificación delimita su alcance a los componentes principales de la arquitectura: la aplicación móvil orientada a la gestión operativa en patio y bahías de servicio, denominada Atelier Workshop Mobile, los servicios e interfaces de programación de aplicaciones del backend centralizado, denominado Atelier Platform Backend, y el portal web institucional para el descubrimiento y captación comercial. Queda excluida de este alcance la aplicación orientada a conductores particulares.
 
 Esta sección articula el modelado de escenarios proyectados del servicio automotriz, la formulación de historias de usuario y técnicas, el mapa de impactos y la priorización del catálogo de producto para la solución digital.
 
@@ -8,13 +8,13 @@ Esta sección articula el modelado de escenarios proyectados del servicio automo
 
 Las historias de usuario y las historias técnicas constituyen la unidad básica para la planificación y verificación del comportamiento del software. Cada historia encapsula una necesidad operativa o técnica bajo el estándar formulado por Mike Cohn, complementada con criterios de aceptación estructurados bajo la sintaxis BDD de Gherkin en escenarios comprobables redactados en tiempo presente y tercera persona. La redacción se orienta estrictamente al comportamiento del sistema y a las reglas del negocio automotriz, omitiendo cualquier referencia a elementos gráficos o componentes visuales de interfaz de usuario.
 
-Las historias se agrupan en diez épicas de trabajo: nueve épicas funcionales enfocadas en las operaciones de patio, bahía, diagnóstico telemático, inventario y facturación fiscal de Atelier Workshop Mobile (EP01 a EP09), y una épica técnica enfocada en los contratos RESTful, persistencia y seguridad del backend (EP10). La prioridad de cada historia se clasifica en tres niveles:
+Las historias se agrupan en once épicas de trabajo: nueve épicas funcionales enfocadas en las operaciones de patio, bahía, diagnóstico telemático, inventario y facturación fiscal de Atelier Workshop Mobile (EP01 a EP09), una épica técnica enfocada en los contratos RESTful, persistencia y seguridad del backend (EP10), y una épica comercial orientada al descubrimiento de la propuesta de valor y captación de clientes en el portal web (EP11). La prioridad de cada historia se clasifica en tres niveles:
 
 - **Alta:** Capacidades indispensables para la operatividad del taller, la integridad transaccional del backend o el cumplimiento tributario, cuya ausencia bloquea el flujo del servicio.
 - **Media:** Funcionalidades de optimización logística, control de inventario y soporte operativo que enriquecen la trazabilidad sin paralizar la atención en bahía.
 - **Baja:** Herramientas analíticas y métricas avanzadas de supervisión que facilitan la toma de decisiones gerenciales.
 
-La @tbl:catalogo-epicas presenta la matriz consolidada de las diez épicas definidas para el ecosistema Atelier, detallando su identificador, título, área funcional, rol de usuario participante, prioridad asignada y alcance operativo general:
+La @tbl:catalogo-epicas presenta la matriz consolidada de las once épicas definidas para el ecosistema Atelier, detallando su identificador, título, área funcional, rol de usuario participante, prioridad asignada y alcance operativo general:
 
 \renewcommand{\arraystretch}{1.2}
 \begin{longtable}{| >{\centering\arraybackslash}p{1.8cm} | >{\raggedright\arraybackslash}p{6.8cm} | >{\centering\arraybackslash}p{3.8cm} | >{\centering\arraybackslash}p{\dimexpr\textwidth-12.4cm-8\tabcolsep-5\arrayrulewidth\relax} |}
@@ -31,49 +31,53 @@ La @tbl:catalogo-epicas presenta la matriz consolidada de las diez épicas defin
 \endfoot
 \hline
 \endlastfoot
-\textbf{EP01} & \textbf{Autenticación y Control de Acceso Móvil}\newline \textit{Área: Seguridad e Identidad (IAM)} & Personal de taller & Alta \\
+\textbf{EP01} & \textbf{Autenticación y Control de Acceso Móvil}\newline \textit{Área: Seguridad e Identidad (IAM)} & Colaborador del taller & Alta \\
 \hline
 \multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Alcance:} Gestión de credenciales corporativas, validación de tokens JWT y selección de sucursal de trabajo con aislamiento multi-inquilino.} \\
 \hline
-\textbf{EP02} & \textbf{Control de Asistencia Satelital y Turnos}\newline \textit{Área: Gestión de Personal (HR)} & Técnico automotriz & Alta \\
+\textbf{EP02} & \textbf{Control de Asistencia Satelital y Turnos}\newline \textit{Área: Gestión de Personal (HR)} & Técnico mecánico & Alta \\
 \hline
 \multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Alcance:} Marcación laboral de ingreso y salida validada por geocerca GPS satelital con fórmula de Haversine y consulta de turnos programados.} \\
 \hline
-\textbf{EP03} & \textbf{Recepción Pericial e Inspección en Patio}\newline \textit{Área: Operaciones de Taller y Clientes (CRM/MRO)} & Asesor de servicio & Alta \\
+\textbf{EP03} & \textbf{Recepción Pericial e Inspección en Patio}\newline \textit{Área: Operaciones de Taller y Clientes (CRM/MRO)} & Recepcionista y asesor de servicio & Alta \\
 \hline
 \multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Alcance:} Registro de cliente y unidad por placa o VIN, checklist de peritaje visual, captura de evidencias fotográficas y apertura de la orden de trabajo.} \\
 \hline
-\textbf{EP04} & \textbf{Diagnóstico Electrónico y Telemetría OBD-II}\newline \textit{Área: Telemetría Vehicular IoT} & Técnico automotriz & Alta \\
+\textbf{EP04} & \textbf{Diagnóstico Electrónico y Telemetría OBD-II}\newline \textit{Área: Telemetría Vehicular IoT} & Técnico mecánico & Alta \\
 \hline
 \multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Alcance:} Enlace inalámbrico con escáner OBD-II, lectura de parámetros en tiempo real, extracción de códigos DTC y registro local offline en fosa.} \\
 \hline
-\textbf{EP05} & \textbf{Presupuestos y Cotizaciones de Mantenimiento}\newline \textit{Área: Operaciones de Taller (MRO)} & Administrador de taller & Alta \\
+\textbf{EP05} & \textbf{Presupuestos y Cotizaciones de Mantenimiento}\newline \textit{Área: Operaciones de Taller (MRO)} & Asesor de servicio & Alta \\
 \hline
 \multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Alcance:} Formulación de presupuestos MRO desglosando mano de obra y repuestos de catálogo, verificación de existencias y aprobación del cliente.} \\
 \hline
-\textbf{EP06} & \textbf{Ejecución de Tareas en Bahía de Servicio}\newline \textit{Área: Operaciones de Taller (MRO)} & Técnico automotriz & Alta \\
+\textbf{EP06} & \textbf{Ejecución de Tareas en Bahía de Servicio}\newline \textit{Área: Operaciones de Taller (MRO)} & Técnico mecánico y mecánico jefe & Alta \\
 \hline
 \multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Alcance:} Gestión de tareas mecánicas asignadas, cronometraje de horas hombre y registro fotográfico de piezas desmontadas y repuestos nuevos.} \\
 \hline
-\textbf{EP07} & \textbf{Abastecimiento y Descargo de Repuestos FIFO}\newline \textit{Área: Logística e Inventario} & Personal de taller & Media \\
+\textbf{EP07} & \textbf{Abastecimiento y Descargo de Repuestos FIFO}\newline \textit{Área: Logística e Inventario} & Encargado de inventario & Media \\
 \hline
 \multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Alcance:} Requisición de repuestos desde la bahía, descargo contable bajo regla estricta FIFO por lote y alertas de stock de seguridad en almacén.} \\
 \hline
-\textbf{EP08} & \textbf{Facturación Electrónica y Cierre de Servicio}\newline \textit{Área: Facturación y Cumplimiento Fiscal} & Administrador de taller & Alta \\
+\textbf{EP08} & \textbf{Facturación Electrónica y Cierre de Servicio}\newline \textit{Área: Facturación y Cumplimiento Fiscal} & Cajero y asesor de servicio & Alta \\
 \hline
 \multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Alcance:} Consolidación de costos de orden de trabajo, emisión de Boletas o Facturas UBL 2.1 ante SUNAT vía Nubefact, cobro y entrega vehicular.} \\
 \hline
-\textbf{EP09} & \textbf{Monitoreo Operativo de Patio y Gestión Gerencial}\newline \textit{Área: Operaciones y Gestión de Negocio} & Personal directivo de taller & Media \\
+\textbf{EP09} & \textbf{Monitoreo Operativo de Patio y Gestión Gerencial}\newline \textit{Área: Operaciones y Gestión de Negocio} & Mecánico jefe y dueño de taller & Media \\
 \hline
 \multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Alcance:} Supervisión en tiempo real de bahías, parametrización tributaria SUNAT y exportación documental de balances y diagnósticos periciales en formato PDF.} \\
 \hline
-\textbf{EP10} & \textbf{Servicios e Interfaces RESTful del Backend}\newline \textit{Área: Servicios de Plataforma (API)} & Developer & Alta \\
+\textbf{EP10} & \textbf{Servicios e Interfaces RESTful del Backend}\newline \textit{Área: Servicios de Plataforma (API)} & Ingeniero de software & Alta \\
 \hline
 \multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Alcance:} Exposición de endpoints RESTful seguros con autenticación JWT, persistencia transaccional, validación de esquemas y trazabilidad de eventos.} \\
 \hline
+\textbf{EP11} & \textbf{Descubrimiento y Captación de Interés}\newline \textit{Área: Comercial y Adquisición Digital} & Dueño de taller & Alta \\
+\hline
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Alcance:} Presentación de la propuesta de valor de Atelier, comparativa interactiva de planes y proyección de ahorros, resolución de dudas operativas frecuentes y redirección hacia el flujo de alta de cuenta en la aplicación principal.} \\
+\hline
 \end{longtable}
 
-*Nota.* Catálogo consolidado de épicas funcionales para la aplicación móvil Atelier Workshop y épicas técnicas del backend de plataforma.
+*Nota.* Catálogo consolidado de épicas funcionales para la aplicación móvil, portal web y servicios del backend de Atelier.
 
 **Epic 1: Autenticación y Control de Acceso Móvil**
 
@@ -94,13 +98,13 @@ A continuación, se presentan las historias de usuario pertenecientes a la épic
 \endfoot
 \hline
 \endlastfoot
-EP01 & Personal de taller & Alta \\
+EP01 & Colaborador del taller & Alta \\
 \hline
 \thfirst{Title} & \multicolumn{2}{p{\dimexpr\textwidth-2.5cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Autenticación y Control de Acceso Móvil} \\
 \hline
 \thspanfirst{3}{Description} \\
 \hline
-\multicolumn{3}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} personal de taller,\newline \textbf{quiero} registrarme mediante invitación corporativa, validar mi correo con código OTP, autenticarme con mis credenciales y gestionar mi sesión de forma segura,\newline \textbf{para} acceder a las operaciones del taller bajo aislamiento multi-inquilino y proteger la información operativa.} \\
+\multicolumn{3}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} colaborador del taller,\newline \textbf{quiero} registrarme mediante invitación corporativa, validar mi correo con código OTP, autenticarme con mis credenciales y gestionar mi sesión de forma segura,\newline \textbf{para} acceder a las operaciones del taller bajo aislamiento multi-inquilino y proteger la información operativa.} \\
 \hline
 \end{longtable}
 
@@ -121,7 +125,7 @@ EP01 & Personal de taller & Alta \\
 \endfoot
 \hline
 \endlastfoot
-US01 & Personal de taller & Alta & EP01 \\
+US01 & Colaborador del taller & Alta & EP01 \\
 \hline
 \thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Registro y vinculación de colaborador mediante invitación corporativa} \\
 \hline
@@ -168,13 +172,13 @@ US01 & Personal de taller & Alta & EP01 \\
 \endfoot
 \hline
 \endlastfoot
-US02 & Personal de taller & Alta & EP01 \\
+US02 & Colaborador del taller & Alta & EP01 \\
 \hline
 \thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Verificación de identidad y correo electrónico mediante código OTP} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} usuario recién registrado en el taller,\newline \textbf{quiero} ingresar el código numérico OTP de seis dígitos despachado a mi correo electrónico institucional,\newline \textbf{para} certificar la titularidad de mi cuenta y habilitar mi acceso operativo a la aplicación móvil.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} colaborador en proceso de registro institucional,\newline \textbf{quiero} ingresar el código numérico OTP de seis dígitos despachado a mi correo electrónico institucional,\newline \textbf{para} certificar la titularidad de mi cuenta y habilitar mi acceso operativo a la aplicación móvil.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -210,13 +214,13 @@ US02 & Personal de taller & Alta & EP01 \\
 \endfoot
 \hline
 \endlastfoot
-US03 & Personal de taller & Alta & EP01 \\
+US03 & Colaborador del taller & Alta & EP01 \\
 \hline
 \thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Inicio de sesión corporativo y contextualización de sede de trabajo} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} personal de taller con cuenta activa y verificada,\newline \textbf{quiero} autenticarme con mi correo institucional y contraseña en la aplicación móvil,\newline \textbf{para} obtener un token de sesión seguro y operar en el contexto de mi sede laboral asignada.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} colaborador registrado del taller,\newline \textbf{quiero} autenticarme con mi correo institucional y contraseña en la aplicación móvil,\newline \textbf{para} obtener un token de sesión seguro y operar en el contexto de mi sede laboral asignada.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -252,13 +256,13 @@ US03 & Personal de taller & Alta & EP01 \\
 \endfoot
 \hline
 \endlastfoot
-US04 & Personal de taller & Alta & EP01 \\
+US04 & Colaborador del taller & Alta & EP01 \\
 \hline
 \thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Cierre de sesión seguro y revocación de credenciales en el dispositivo móvil} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} personal de taller,\newline \textbf{quiero} finalizar voluntariamente mi sesión de trabajo en el dispositivo móvil,\newline \textbf{para} revocar los tokens locales e impedir accesos no autorizados a la información operativa del taller.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} colaborador que culmina su labor o entrega el terminal móvil,\newline \textbf{quiero} finalizar voluntariamente mi sesión de trabajo en el dispositivo móvil,\newline \textbf{para} revocar los tokens locales e impedir accesos no autorizados a la información operativa del taller.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -294,13 +298,13 @@ US04 & Personal de taller & Alta & EP01 \\
 \endfoot
 \hline
 \endlastfoot
-US05 & Personal de taller & Media & EP01 \\
+US05 & Colaborador del taller & Media & EP01 \\
 \hline
 \thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Restablecimiento de credenciales de acceso mediante token de verificación} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} personal de taller,\newline \textbf{quiero} solicitar el restablecimiento de mi contraseña corporativa mediante un token temporal enviado a mi correo institucional,\newline \textbf{para} recuperar el acceso a mis funciones operativas ante olvido de clave sin comprometer la seguridad.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} colaborador que ha olvidado su clave de acceso corporativa,\newline \textbf{quiero} solicitar el restablecimiento de mi contraseña corporativa mediante un token temporal enviado a mi correo institucional,\newline \textbf{para} recuperar el acceso a mis funciones operativas ante olvido de clave sin comprometer la seguridad.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -340,13 +344,13 @@ A continuación, se presentan las historias de usuario pertenecientes a la épic
 \endfoot
 \hline
 \endlastfoot
-EP02 & Técnico automotriz & Alta \\
+EP02 & Técnico mecánico & Alta \\
 \hline
 \thfirst{Title} & \multicolumn{2}{p{\dimexpr\textwidth-2.5cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Control de Asistencia Satelital y Turnos} \\
 \hline
 \thspanfirst{3}{Description} \\
 \hline
-\multicolumn{3}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} técnico automotriz,\newline \textbf{quiero} registrar mi asistencia de ingreso y salida validando mi ubicación satelital dentro del perímetro del taller y consultar mi cronograma de trabajo,\newline \textbf{para} acreditar mi presencia física en la sucursal asignada y dar seguimiento a mis turnos laborales.} \\
+\multicolumn{3}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} técnico mecánico,\newline \textbf{quiero} registrar mi asistencia de ingreso y salida validando mi ubicación satelital dentro del perímetro del taller y consultar mi cronograma de trabajo,\newline \textbf{para} acreditar mi presencia física en la sucursal asignada y dar seguimiento a mis turnos laborales.} \\
 \hline
 \end{longtable}
 
@@ -367,13 +371,13 @@ EP02 & Técnico automotriz & Alta \\
 \endfoot
 \hline
 \endlastfoot
-US06 & Técnico automotriz & Alta & EP02 \\
+US06 & Técnico mecánico & Alta & EP02 \\
 \hline
 \thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Marcación de ingreso laboral con validación de geocerca GPS satelital} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} técnico automotriz,\newline \textbf{quiero} registrar mi ingreso laboral validando mis coordenadas de posicionamiento satelital respecto a la sede asignada,\newline \textbf{para} certificar mi puntualidad y presencia física dentro de las instalaciones del taller automotriz.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} técnico mecánico asignado a la jornada matutina,\newline \textbf{quiero} registrar mi ingreso laboral validando mis coordenadas de posicionamiento satelital respecto a la sede asignada,\newline \textbf{para} certificar mi puntualidad y presencia física dentro de las instalaciones del taller automotriz.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -414,13 +418,13 @@ US06 & Técnico automotriz & Alta & EP02 \\
 \endfoot
 \hline
 \endlastfoot
-US07 & Técnico automotriz & Alta & EP02 \\
+US07 & Técnico mecánico & Alta & EP02 \\
 \hline
 \thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Auditoría perimétrica y contingencias de conectividad satelital} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} técnico automotriz,\newline \textbf{quiero} que el sistema audite mi posición geográfica en tiempo de marcación y gestione contingencias de cobertura celular en patio,\newline \textbf{para} garantizar la fiabilidad del cómputo laboral y asegurar el registro de mi asistencia ante pérdidas transitorias de conectividad.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} técnico mecánico que acude a laborar en la sede del taller,\newline \textbf{quiero} que el sistema audite mi posición geográfica en tiempo de marcación y gestione contingencias de cobertura celular en patio,\newline \textbf{para} garantizar la fiabilidad del cómputo laboral y asegurar el registro de mi asistencia ante pérdidas transitorias de conectividad.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -461,13 +465,13 @@ US07 & Técnico automotriz & Alta & EP02 \\
 \endfoot
 \hline
 \endlastfoot
-US08 & Técnico automotriz & Alta & EP02 \\
+US08 & Técnico mecánico & Alta & EP02 \\
 \hline
 \thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Marcación de salida y liquidación de jornada laboral efectiva} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} técnico automotriz,\newline \textbf{quiero} registrar mi salida al término de mis actividades en el taller,\newline \textbf{para} cerrar formalmente el turno diario y liquidar las horas hombre efectivamente laboradas.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} técnico mecánico que culmina su jornada operativa diaria,\newline \textbf{quiero} registrar mi salida al término de mis actividades en el taller,\newline \textbf{para} cerrar formalmente el turno diario y liquidar las horas hombre efectivamente laboradas.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -508,13 +512,13 @@ US08 & Técnico automotriz & Alta & EP02 \\
 \endfoot
 \hline
 \endlastfoot
-US09 & Técnico automotriz & Media & EP02 \\
+US09 & Técnico mecánico & Media & EP02 \\
 \hline
 \thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Consulta de programación semanal de turnos y márgenes de tolerancia} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} técnico automotriz,\newline \textbf{quiero} consultar mi calendario de turnos asignados, sucursales de guardia y márgenes de tolerancia,\newline \textbf{para} organizar con anticipación mis jornadas de trabajo y evitar penalizaciones por impuntualidad.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} técnico mecánico que planifica sus actividades laborales semanales,\newline \textbf{quiero} consultar mi calendario de turnos asignados, sucursales de guardia y márgenes de tolerancia,\newline \textbf{para} organizar con anticipación mis jornadas de trabajo y evitar penalizaciones por impuntualidad.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -550,13 +554,13 @@ US09 & Técnico automotriz & Media & EP02 \\
 \endfoot
 \hline
 \endlastfoot
-US10 & Técnico automotriz & Media & EP02 \\
+US10 & Técnico mecánico & Media & EP02 \\
 \hline
 \thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Emisión y seguimiento de descargos justificatorios de tardanza} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} técnico automotriz,\newline \textbf{quiero} sustentar digitalmente los motivos de demoras imprevistas y dar seguimiento a su evaluación por administración,\newline \textbf{para} regularizar mi récord de puntualidad y mitigar deducciones salariales injustificadas.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} técnico mecánico que arriba a la sede con retraso involuntario,\newline \textbf{quiero} sustentar digitalmente los motivos de demoras imprevistas y dar seguimiento a su evaluación por administración,\newline \textbf{para} regularizar mi récord de puntualidad y mitigar deducciones salariales injustificadas.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -579,7 +583,7 @@ US10 & Técnico automotriz & Media & EP02 \\
 
 **Epic 3: Recepción Pericial e Inspección en Patio**
 
-A continuación, se presentan las historias de usuario pertenecientes a la épica número 3, que agrupa las funcionalidades de búsqueda de cliente y vehículo, apertura de órdenes de trabajo por el administrador, registro fotográfico pericial de recepción en patio y el ciclo de propuestas de tareas sobrevenidas en bahía dentro de Atelier Workshop Mobile.
+A continuación, se presentan las historias de usuario pertenecientes a la épica número 3, que agrupa las funcionalidades de búsqueda de cliente y vehículo, el alta y afiliación diferenciada de clientes por correo electrónico, la apertura de órdenes de trabajo por el personal de taller, el registro fotográfico pericial de recepción en patio y el ciclo de propuestas de tareas sobrevenidas en bahía dentro de Atelier Workshop Mobile.
 
 \renewcommand{\arraystretch}{1.3}
 \begin{longtable}{| >{\centering\arraybackslash}p{2.5cm} | >{\centering\arraybackslash}p{5.0cm} | >{\centering\arraybackslash}p{\dimexpr\textwidth-7.5cm-6\tabcolsep-4\arrayrulewidth\relax} |}
@@ -596,13 +600,13 @@ A continuación, se presentan las historias de usuario pertenecientes a la épic
 \endfoot
 \hline
 \endlastfoot
-EP03 & Administrador de taller & Alta \\
+EP03 & Recepcionista y asesor de servicio & Alta \\
 \hline
 \thfirst{Title} & \multicolumn{2}{p{\dimexpr\textwidth-2.5cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Recepción Pericial e Inspección en Patio} \\
 \hline
 \thspanfirst{3}{Description} \\
 \hline
-\multicolumn{3}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} administrador de taller,\newline \textbf{quiero} identificar al cliente y vehículo, aperturar la orden de trabajo con sus tareas técnicas, capturar fotos periciales de recepción y gestionar propuestas de reparación sobrevenidas,\newline \textbf{para} formalizar el ingreso a la sucursal, respaldar el estado inicial del automóvil y autorizar trabajos adicionales con evidencia probatoria.} \\
+\multicolumn{3}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} recepcionista y asesor de servicio,\newline \textbf{quiero} identificar al cliente y vehículo, aperturar la orden de trabajo con sus tareas técnicas, capturar fotos periciales de recepción y gestionar propuestas de reparación sobrevenidas,\newline \textbf{para} formalizar el ingreso a la sucursal, respaldar el estado inicial del automóvil y autorizar trabajos adicionales con evidencia probatoria.} \\
 \hline
 \end{longtable}
 
@@ -623,13 +627,13 @@ EP03 & Administrador de taller & Alta \\
 \endfoot
 \hline
 \endlastfoot
-US11 & Asesor de servicio & Alta & EP03 \\
+US11 & Recepcionista & Alta & EP03 \\
 \hline
 \thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Búsqueda y vinculación de cliente y vehículo por placa o documento} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} asesor de servicio,\newline \textbf{quiero} consultar o registrar los datos de identidad del cliente y la ficha técnica del vehículo mediante su placa o documento fiscal,\newline \textbf{para} recuperar el historial de atenciones previas o incorporar una nueva unidad al catálogo del taller.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} recepcionista en el counter de atención inicial del taller,\newline \textbf{quiero} consultar o registrar los datos de identidad del cliente y la ficha técnica del vehículo mediante su placa o documento fiscal,\newline \textbf{para} recuperar el historial de atenciones previas o incorporar una nueva unidad al catálogo del taller.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -665,13 +669,13 @@ US11 & Asesor de servicio & Alta & EP03 \\
 \endfoot
 \hline
 \endlastfoot
-US12 & Administrador de taller & Alta & EP03 \\
+US12 & Asesor de servicio & Alta & EP03 \\
 \hline
 \thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Apertura de orden de trabajo y parametrización de tareas iniciales} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} administrador de taller,\newline \textbf{quiero} crear la orden de trabajo asentando el kilometraje de odómetro, el resumen diagnóstico inicial y programar las tareas técnicas a realizar,\newline \textbf{para} formalizar el ingreso del vehículo a la sucursal y delegar las faenas a los mecánicos responsables.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} asesor de servicio responsable de la recepción e inspección técnica en patio,\newline \textbf{quiero} crear la orden de trabajo asentando el kilometraje de odómetro, el resumen diagnóstico inicial y programar las tareas técnicas a realizar,\newline \textbf{para} formalizar el ingreso del vehículo a la sucursal y delegar las faenas a los mecánicos responsables.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -707,13 +711,13 @@ US12 & Administrador de taller & Alta & EP03 \\
 \endfoot
 \hline
 \endlastfoot
-US13 & Administrador de taller & Media & EP03 \\
+US13 & Asesor de servicio & Media & EP03 \\
 \hline
 \thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Registro pericial de evidencias fotográficas de recepción vehicular} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} administrador de taller,\newline \textbf{quiero} registrar evidencias fotográficas del estado exterior de la carrocería del vehículo en el patio y vincularlas a la orden de trabajo,\newline \textbf{para} blindar legalmente a la empresa constatando averías o raspones preexistentes antes de iniciar el servicio.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} asesor de servicio que efectúa la inspección pericial 360° en patio,\newline \textbf{quiero} registrar evidencias fotográficas del estado exterior de la carrocería del vehículo en el patio y vincularlas a la orden de trabajo,\newline \textbf{para} blindar legalmente a la empresa constatando averías o raspones preexistentes antes de iniciar el servicio.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -749,13 +753,13 @@ US13 & Administrador de taller & Media & EP03 \\
 \endfoot
 \hline
 \endlastfoot
-US14 & Técnico automotriz & Alta & EP03 \\
+US14 & Técnico mecánico & Alta & EP03 \\
 \hline
 \thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Generación de propuesta de tarea adicional por hallazgo en foso} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} técnico automotriz,\newline \textbf{quiero} registrar una propuesta de tarea adicional con nivel de severidad y fotografía probatoria al hallar un defecto imprevisto en bahía,\newline \textbf{para} reportar al administrador la necesidad de una reparación adicional no identificada en el diagnóstico inicial.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} técnico mecánico asignado a la ejecución de una tarea en foso,\newline \textbf{quiero} registrar una propuesta de tarea adicional con nivel de severidad y fotografía probatoria al hallar un defecto imprevisto en bahía,\newline \textbf{para} reportar al administrador la necesidad de una reparación adicional no identificada en el diagnóstico inicial.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -791,13 +795,13 @@ US14 & Técnico automotriz & Alta & EP03 \\
 \endfoot
 \hline
 \endlastfoot
-US15 & Administrador de taller & Alta & EP03 \\
+US15 & Asesor de servicio & Alta & EP03 \\
 \hline
 \thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Notificación y aprobación de propuesta técnica con el cliente} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} administrador de taller,\newline \textbf{quiero} remitir la propuesta técnica con su respaldo fotográfico al cliente y asentar su veredicto de aprobación o rechazo,\newline \textbf{para} obtener la conformidad del propietario e incorporar la labor autorizada como tarea activa en la orden de trabajo.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} asesor de servicio que gestiona la comunicación comercial con el cliente,\newline \textbf{quiero} remitir la propuesta técnica con su respaldo fotográfico al cliente y asentar su veredicto de aprobación o rechazo,\newline \textbf{para} obtener la conformidad del propietario e incorporar la labor autorizada como tarea activa en la orden de trabajo.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -818,6 +822,53 @@ US15 & Administrador de taller & Alta & EP03 \\
 
 *Nota.* Criterios de aceptación estructurados en formato BDD Gherkin para la historia US15.
 
+\renewcommand{\arraystretch}{1.3}
+\begin{longtable}{| >{\centering\arraybackslash}p{2.2cm} | >{\centering\arraybackslash}p{4.2cm} | >{\centering\arraybackslash}p{2.2cm} | >{\centering\arraybackslash}p{\dimexpr\textwidth-8.6cm-8\tabcolsep-5\arrayrulewidth\relax} |}
+\caption{Historia de Usuario US44 - Alta y afiliación de clientes en taller según tenencia previa de cuenta en la plataforma} \label{tbl:us44} \\
+\hline
+\thfirst{Story ID} & \thcell{User} & \thcell{Priority} & \thcell{Epic} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Story ID} & \thcell{User} & \thcell{Priority} & \thcell{Epic} \\
+\hline
+\endhead
+\hline
+\endfoot
+\hline
+\endlastfoot
+US44 & Recepcionista & Alta & EP03 \\
+\hline
+\thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Alta y afiliación de clientes en taller según tenencia previa de cuenta en la plataforma} \\
+\hline
+\thspanfirst{4}{Description} \\
+\hline
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} recepcionista en el área de bienvenida y atención al cliente,\newline \textbf{quiero} que el sistema distinga entre clientes presenciales nuevos y conductores que ya cuentan con cuenta en la aplicación móvil al ingresar su correo electrónico,\newline \textbf{para} registrar desde cero a los clientes presenciales (walk-in) junto con sus vehículos, o afiliar de forma inmediata a los usuarios preexistentes vinculando automáticamente sus autos ya registrados sin duplicar información.} \\
+\hline
+\thspanfirst{4}{Acceptance Criteria} \\
+\hline
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{%
+\textbf{Escenario 1: Afiliación rápida de cliente con cuenta previa en la aplicación móvil}\newline
+\textbf{Dado que} un conductor ya cuenta con una cuenta activa en la plataforma y tiene registrados sus vehículos en la aplicación móvil,\newline
+\textbf{cuando} acude al taller y el asesor de servicio ingresa su correo electrónico para darlo de alta en la cartera del taller,\newline
+\textbf{entonces} el sistema reconoce que el usuario ya existe en la plataforma,\newline
+\textbf{y} afilia al cliente al taller vinculando automáticamente todos los vehículos que ya tenía registrados en su cuenta móvil, dejándolos disponibles en el taller sin requerir que el asesor vuelva a digitar sus datos técnicos.\vspace{4pt}\newline
+\textbf{Escenario 2: Registro completo de cliente presencial sin cuenta previa (caso walk-in)}\newline
+\textbf{Dado que} un conductor acude al taller y no cuenta con una cuenta registrada en la plataforma,\newline
+\textbf{cuando} el asesor de servicio ingresa su correo electrónico en el módulo de recepción y el sistema confirma que no existe una cuenta previa,\newline
+\textbf{entonces} el sistema habilita el formulario completo de registro presencial para capturar los datos del cliente y los datos de sus vehículos,\newline
+\textbf{y} crea la ficha comercial del cliente en el taller con sus automóviles correspondientes.\vspace{4pt}\newline
+\textbf{Escenario 3: Conciliación automática cuando un cliente presencial crea posteriormente su cuenta móvil}\newline
+\textbf{Dado que} un cliente fue registrado en el taller bajo la modalidad presencial con su correo electrónico y sus vehículos,\newline
+\textbf{cuando} tiempo después descarga la aplicación móvil y se registra utilizando ese mismo correo electrónico,\newline
+\textbf{entonces} el sistema detecta la coincidencia con la ficha registrada previamente en el taller,\newline
+\textbf{y} vincula automáticamente su nueva cuenta móvil a los vehículos ya registrados, mostrándolos en su garaje digital con todo su historial de servicio acumulado.%
+} \\
+\hline
+\end{longtable}
+
+*Nota.* Criterios de aceptación estructurados en formato BDD Gherkin para la historia US44.
+
 **Epic 4: Diagnóstico Electrónico y Telemetría OBD-II**
 
 A continuación, se presentan las historias de usuario pertenecientes a la épica número 4, que agrupa las funcionalidades de enlace inalámbrico con escáneres OBD-II, extracción de códigos DTC, monitoreo telemétrico de sensores en vivo, resiliencia offline en fosa y generación de diagnósticos predictivos con inteligencia artificial y reportes en PDF en Atelier Workshop Mobile.
@@ -837,13 +888,13 @@ A continuación, se presentan las historias de usuario pertenecientes a la épic
 \endfoot
 \hline
 \endlastfoot
-EP04 & Técnico automotriz & Alta \\
+EP04 & Técnico mecánico & Alta \\
 \hline
 \thfirst{Title} & \multicolumn{2}{p{\dimexpr\textwidth-2.5cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Diagnóstico Electrónico y Telemetría OBD-II} \\
 \hline
 \thspanfirst{3}{Description} \\
 \hline
-\multicolumn{3}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} técnico automotriz,\newline \textbf{quiero} enlazar el escáner telemático al puerto OBD-II, leer códigos DTC, monitorear sensores en vivo y generar reportes predictivos con inteligencia artificial en un período seleccionado,\newline \textbf{para} identificar fallas con precisión instrumental, contrastar las recomendaciones del modelo con mi criterio pericial y emitir diagnósticos en PDF para el cliente.} \\
+\multicolumn{3}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} técnico mecánico,\newline \textbf{quiero} enlazar el escáner telemático al puerto OBD-II, leer códigos DTC, monitorear sensores en vivo y generar reportes predictivos con inteligencia artificial en un período seleccionado,\newline \textbf{para} identificar fallas con precisión instrumental, contrastar las recomendaciones del modelo con mi criterio pericial y emitir diagnósticos en PDF para el cliente.} \\
 \hline
 \end{longtable}
 
@@ -864,13 +915,13 @@ EP04 & Técnico automotriz & Alta \\
 \endfoot
 \hline
 \endlastfoot
-US16 & Técnico automotriz & Alta & EP04 \\
+US16 & Técnico mecánico & Alta & EP04 \\
 \hline
 \thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Enlace inalámbrico y sincronización de escáner OBD-II en bahía} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} técnico automotriz,\newline \textbf{quiero} conectar la aplicación móvil al adaptador telemático acoplado en el puerto OBD-II del automóvil,\newline \textbf{para} habilitar el canal de comunicación bidireccional con la unidad de control del motor.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} técnico mecánico asignado al diagnóstico automotriz en bahía,\newline \textbf{quiero} conectar la aplicación móvil al adaptador telemático acoplado en el puerto OBD-II del automóvil,\newline \textbf{para} habilitar el canal de comunicación bidireccional con la unidad de control del motor.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -906,13 +957,13 @@ US16 & Técnico automotriz & Alta & EP04 \\
 \endfoot
 \hline
 \endlastfoot
-US17 & Técnico automotriz & Alta & EP04 \\
+US17 & Técnico mecánico & Alta & EP04 \\
 \hline
 \thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Extracción y decodificación de códigos de falla computarizados} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} técnico automotriz,\newline \textbf{quiero} interrogar la memoria de averías de la unidad de control vehicular para extraer los códigos de error almacenados y sus datos de cuadro congelado,\newline \textbf{para} determinar los circuitos y actuadores mecánicos que originaron el encendido del testigo de fallo de motor.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} técnico mecánico que efectúa el escaneo computarizado de una unidad,\newline \textbf{quiero} interrogar la memoria de averías de la unidad de control vehicular para extraer los códigos de error almacenados y sus datos de cuadro congelado,\newline \textbf{para} determinar los circuitos y actuadores mecánicos que originaron el encendido del testigo de fallo de motor.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -948,13 +999,13 @@ US17 & Técnico automotriz & Alta & EP04 \\
 \endfoot
 \hline
 \endlastfoot
-US18 & Técnico automotriz & Media & EP04 \\
+US18 & Técnico mecánico & Media & EP04 \\
 \hline
 \thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Monitoreo dinámico de parámetros telemétricos en tiempo real} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} técnico automotriz,\newline \textbf{quiero} supervisar flujos continuos de revoluciones de motor, temperatura de refrigerante, presión de admisión y voltaje eléctrico en la unidad intervenida,\newline \textbf{para} analizar el comportamiento térmico y dinámico del propulsor bajo condiciones de prueba.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} técnico mecánico que monitorea el comportamiento de los sensores del motor,\newline \textbf{quiero} supervisar flujos continuos de revoluciones de motor, temperatura de refrigerante, presión de admisión y voltaje eléctrico en la unidad intervenida,\newline \textbf{para} analizar el comportamiento térmico y dinámico del propulsor bajo condiciones de prueba.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -990,13 +1041,13 @@ US18 & Técnico automotriz & Media & EP04 \\
 \endfoot
 \hline
 \endlastfoot
-US19 & Técnico automotriz & Alta & EP04 \\
+US19 & Técnico mecánico & Alta & EP04 \\
 \hline
 \thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Almacenamiento local resiliente y sincronización diferida en fosa} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} técnico automotriz,\newline \textbf{quiero} registrar diagnósticos computarizados y lecturas de telemetría de forma autónoma sin depender de conectividad a internet en áreas apantalladas o fosas subterráneas,\newline \textbf{para} garantizar la continuidad operativa del escaneo y sincronizar los resultados al recuperar enlace de datos.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} técnico mecánico que labora en foso con conectividad inalámbrica inestable,\newline \textbf{quiero} registrar diagnósticos computarizados y lecturas de telemetría de forma autónoma sin depender de conectividad a internet en áreas apantalladas o fosas subterráneas,\newline \textbf{para} garantizar la continuidad operativa del escaneo y sincronizar los resultados al recuperar enlace de datos.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -1032,13 +1083,13 @@ US19 & Técnico automotriz & Alta & EP04 \\
 \endfoot
 \hline
 \endlastfoot
-US20 & Técnico automotriz & Media & EP04 \\
+US20 & Técnico mecánico & Media & EP04 \\
 \hline
 \thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Borrado y verificación de restablecimiento de fallas en la computadora} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} técnico automotriz,\newline \textbf{quiero} transmitir el comando de borrado de códigos de avería a la unidad de control y comprobar el apagado de testigos tras completar la reparación física,\newline \textbf{para} validar el éxito de la intervención mecánica y asegurar la entrega del vehículo en estado óptimo.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} técnico mecánico que concluye la subsanación de una avería automotriz,\newline \textbf{quiero} transmitir el comando de borrado de códigos de avería a la unidad de control y comprobar el apagado de testigos tras completar la reparación física,\newline \textbf{para} validar el éxito de la intervención mecánica y asegurar la entrega del vehículo en estado óptimo.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -1074,13 +1125,13 @@ US20 & Técnico automotriz & Media & EP04 \\
 \endfoot
 \hline
 \endlastfoot
-US21 & Técnico automotriz & Alta & EP04 \\
+US21 & Técnico mecánico & Alta & EP04 \\
 \hline
 \thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Generación de informe pericial predictivo con inteligencia artificial y exportación en PDF} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} técnico automotriz,\newline \textbf{quiero} solicitar un diagnóstico predictivo asistido por inteligencia artificial seleccionando una ventana temporal de telemetría y generar un reporte en PDF,\newline \textbf{para} contrastar las recomendaciones del modelo con mi criterio mecánico profesional y emitir un dictamen pericial preventivo de alta precisión para el cliente.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} técnico mecánico que requiere sustentar un diagnóstico predictivo avanzado,\newline \textbf{quiero} solicitar un diagnóstico predictivo asistido por inteligencia artificial seleccionando una ventana temporal de telemetría y generar un reporte en PDF,\newline \textbf{para} contrastar las recomendaciones del modelo con mi criterio mecánico profesional y emitir un dictamen pericial preventivo de alta precisión para el cliente.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -1125,13 +1176,13 @@ A continuación, se presentan las historias de usuario pertenecientes a la épic
 \endfoot
 \hline
 \endlastfoot
-EP05 & Administrador de taller & Alta \\
+EP05 & Asesor de servicio & Alta \\
 \hline
 \thfirst{Title} & \multicolumn{2}{p{\dimexpr\textwidth-2.5cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Presupuestos y Cotizaciones de Mantenimiento} \\
 \hline
 \thspanfirst{3}{Description} \\
 \hline
-\multicolumn{3}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} administrador de taller,\newline \textbf{quiero} disponer del cálculo automático de costos de tareas y repuestos, auditar asignaciones de almacén y asentar la conformidad del cliente,\newline \textbf{para} garantizar la transparencia tarifaria del taller y formalizar el inicio de labores tras la aceptación de la cotización.} \\
+\multicolumn{3}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} asesor de servicio,\newline \textbf{quiero} disponer del cálculo automático de costos de tareas y repuestos, auditar asignaciones de almacén y asentar la conformidad del cliente,\newline \textbf{para} garantizar la transparencia tarifaria del taller y formalizar el inicio de labores tras la aceptación de la cotización.} \\
 \hline
 \end{longtable}
 
@@ -1152,13 +1203,13 @@ EP05 & Administrador de taller & Alta \\
 \endfoot
 \hline
 \endlastfoot
-US22 & Administrador de taller & Alta & EP05 \\
+US22 & Asesor de servicio & Alta & EP05 \\
 \hline
 \thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Cómputo automático en cascada de costos de tareas e impuestos} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} administrador de taller,\newline \textbf{quiero} que el sistema calcule automáticamente el precio de cada tarea, el subtotal acumulado, el impuesto de ley y el total general,\newline \textbf{para} eliminar discrepancias aritméticas manuales y mantener la integridad contable de la orden de trabajo.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} asesor de servicio que formula el presupuesto de mantenimiento,\newline \textbf{quiero} que el sistema calcule automáticamente el precio de cada tarea, el subtotal acumulado, el impuesto de ley y el total general,\newline \textbf{para} eliminar discrepancias aritméticas manuales y mantener la integridad contable de la orden de trabajo.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -1194,13 +1245,13 @@ US22 & Administrador de taller & Alta & EP05 \\
 \endfoot
 \hline
 \endlastfoot
-US23 & Personal de taller & Alta & EP05 \\
+US23 & Encargado de inventario & Alta & EP05 \\
 \hline
 \thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Imputación de repuestos a tareas y supervisión administrativa} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} personal de taller (mecánico o administrador),\newline \textbf{quiero} agregar productos del catálogo a una tarea mecánica y alertar a la administración sobre consumos realizados en bahía,\newline \textbf{para} aprovisionar los materiales necesarios y permitir al administrador auditar o retirar piezas no aplicables reintegrándolas al almacén.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} encargado de inventario responsable de la reserva y abastecimiento de repuestos,\newline \textbf{quiero} agregar productos del catálogo a una tarea mecánica y alertar a la administración sobre consumos realizados en bahía,\newline \textbf{para} aprovisionar los materiales necesarios y permitir al administrador auditar o retirar piezas no aplicables reintegrándolas al almacén.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -1240,13 +1291,13 @@ US23 & Personal de taller & Alta & EP05 \\
 \endfoot
 \hline
 \endlastfoot
-US24 & Administrador de taller & Media & EP05 \\
+US24 & Asesor de servicio & Media & EP05 \\
 \hline
 \thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Generación y remisión digital de proforma comercial en PDF} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} administrador de taller,\newline \textbf{quiero} generar un documento de cotización estructurado en formato PDF y remitirlo digitalmente al cliente,\newline \textbf{para} proporcionarle un desglose claro de mano de obra, repuestos y costos totales previo a solicitar su conformidad.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} asesor de servicio responsable del trato técnico-comercial con el cliente,\newline \textbf{quiero} generar un documento de cotización estructurado en formato PDF y remitirlo digitalmente al cliente,\newline \textbf{para} proporcionarle un desglose claro de mano de obra, repuestos y costos totales previo a solicitar su conformidad.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -1282,13 +1333,13 @@ US24 & Administrador de taller & Media & EP05 \\
 \endfoot
 \hline
 \endlastfoot
-US25 & Administrador de taller & Alta & EP05 \\
+US25 & Asesor de servicio & Alta & EP05 \\
 \hline
 \thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Formalización de resolución de presupuesto tras comunicación externa} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} administrador de taller,\newline \textbf{quiero} asentar en el sistema la decisión de aceptación o desistimiento comunicada externamente por el cliente,\newline \textbf{para} habilitar el inicio formal de las faenas mecánicas en bahía o cancelar la orden liberando los materiales.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} asesor de servicio responsable del seguimiento de presupuestos con el cliente,\newline \textbf{quiero} asentar en el sistema la decisión de aceptación o desistimiento comunicada externamente por el cliente,\newline \textbf{para} habilitar el inicio formal de las faenas mecánicas en bahía o cancelar la orden liberando los materiales.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -1328,13 +1379,13 @@ A continuación, se presentan las historias de usuario pertenecientes a la épic
 \endfoot
 \hline
 \endlastfoot
-EP06 & Técnico automotriz & Alta \\
+EP06 & Técnico mecánico y mecánico jefe & Alta \\
 \hline
 \thfirst{Title} & \multicolumn{2}{p{\dimexpr\textwidth-2.5cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Ejecución de Tareas en Bahía de Servicio} \\
 \hline
 \thspanfirst{3}{Description} \\
 \hline
-\multicolumn{3}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} técnico automotriz,\newline \textbf{quiero} gestionar mis tareas mecánicas asignadas en bahía, cronometrar tiempos efectivos de mano de obra con pausas auditadas y capturar evidencias fotográficas del desmontaje y montaje de piezas,\newline \textbf{para} garantizar una ejecución metódica del servicio, sustentar pericialmente el trabajo ante el cliente y transparentar las horas hombre laboradas.} \\
+\multicolumn{3}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} técnico mecánico y mecánico jefe,\newline \textbf{quiero} gestionar mis tareas mecánicas asignadas en bahía, cronometrar tiempos efectivos de mano de obra con pausas auditadas y capturar evidencias fotográficas del desmontaje y montaje de piezas,\newline \textbf{para} garantizar una ejecución metódica del servicio, sustentar pericialmente el trabajo ante el cliente y transparentar las horas hombre laboradas.} \\
 \hline
 \end{longtable}
 
@@ -1355,13 +1406,13 @@ EP06 & Técnico automotriz & Alta \\
 \endfoot
 \hline
 \endlastfoot
-US26 & Técnico automotriz & Alta & EP06 \\
+US26 & Técnico mecánico & Alta & EP06 \\
 \hline
 \thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Consulta y priorización de tareas mecánicas asignadas en bahía} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} técnico automotriz,\newline \textbf{quiero} consultar en mi dispositivo móvil el listado ordenado de tareas mecánicas asignadas a mi nombre en las distintas órdenes de trabajo,\newline \textbf{para} organizar las intervenciones del día según prioridad operativa y preparar las herramientas necesarias.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} técnico mecánico que inicia su turno de trabajo en bahía,\newline \textbf{quiero} consultar en mi dispositivo móvil el listado ordenado de tareas mecánicas asignadas a mi nombre en las distintas órdenes de trabajo,\newline \textbf{para} organizar las intervenciones del día según prioridad operativa y preparar las herramientas necesarias.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -1397,13 +1448,13 @@ US26 & Técnico automotriz & Alta & EP06 \\
 \endfoot
 \hline
 \endlastfoot
-US27 & Técnico automotriz & Alta & EP06 \\
+US27 & Técnico mecánico & Alta & EP06 \\
 \hline
 \thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Cronometraje de labor efectiva, pausas operativas y sincronización con turnos laborales} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} técnico automotriz,\newline \textbf{quiero} registrar el inicio de labor en bahía, pausar el cronómetro por refrigerio o fin de turno y sincronizar la suspensión con mi horario laboral validado,\newline \textbf{para} garantizar un cómputo exacto de horas hombre efectivas, notificar mis pausas a la supervisión e impedir registros anómalos fuera de mi turno.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} técnico mecánico que ejecuta una tarea de mantenimiento asignada,\newline \textbf{quiero} registrar el inicio de labor en bahía, pausar el cronómetro por refrigerio o fin de turno y sincronizar la suspensión con mi horario laboral validado,\newline \textbf{para} garantizar un cómputo exacto de horas hombre efectivas, notificar mis pausas a la supervisión e impedir registros anómalos fuera de mi turno.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -1454,13 +1505,13 @@ US27 & Técnico automotriz & Alta & EP06 \\
 \endfoot
 \hline
 \endlastfoot
-US28 & Técnico automotriz & Alta & EP06 \\
+US28 & Técnico mecánico & Alta & EP06 \\
 \hline
 \thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Registro fotográfico pericial de desmontaje y montaje de piezas en foso} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} técnico automotriz,\newline \textbf{quiero} capturar fotografías de la pieza desgastada desmontada y del repuesto nuevo instalado en la tarea técnica,\newline \textbf{para} vincular las evidencias en el registro de tareas y respaldar pericialmente la ejecución física del servicio ante el cliente.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} técnico mecánico que realiza el desmontaje y montaje de piezas en foso,\newline \textbf{quiero} capturar fotografías de la pieza desgastada desmontada y del repuesto nuevo instalado en la tarea técnica,\newline \textbf{para} vincular las evidencias en el registro de tareas y respaldar pericialmente la ejecución física del servicio ante el cliente.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -1496,13 +1547,13 @@ US28 & Técnico automotriz & Alta & EP06 \\
 \endfoot
 \hline
 \endlastfoot
-US29 & Personal de taller & Alta & EP06 \\
+US29 & Mecánico jefe & Alta & EP06 \\
 \hline
 \thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Solicitud y validación administrativa de suspensión por pieza defectuosa indispensable} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} personal de taller,\newline \textbf{quiero} gestionar la solicitud de suspensión técnica cuando una pieza de recambio suministrada presente defecto insalvable que impida continuar la faena,\newline \textbf{para} que el administrador audite la justificación técnica y autorice formalmente el pase a espera o desestime la pausa obligando a continuar en progreso.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} mecánico jefe que supervisa la viabilidad técnica y disponibilidad de piezas en bahía,\newline \textbf{quiero} gestionar la solicitud de suspensión técnica cuando una pieza de recambio suministrada presente defecto insalvable que impida continuar la faena,\newline \textbf{para} que el administrador audite la justificación técnica y autorice formalmente el pase a espera o desestime la pausa obligando a continuar en progreso.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -1543,13 +1594,13 @@ US29 & Personal de taller & Alta & EP06 \\
 \endfoot
 \hline
 \endlastfoot
-US30 & Técnico automotriz & Alta & EP06 \\
+US30 & Técnico mecánico & Alta & EP06 \\
 \hline
 \thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Cierre técnico de tarea con cómputo de horas hombre efectivas} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} técnico automotriz,\newline \textbf{quiero} registrar la finalización formal de la faena mecánica en la aplicación móvil,\newline \textbf{para} cerrar el cómputo de horas hombre reales trabajadas y habilitar la orden para el control de calidad.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} técnico mecánico que concluye una tarea técnica en bahía,\newline \textbf{quiero} registrar la finalización formal de la faena mecánica en la aplicación móvil,\newline \textbf{para} cerrar el cómputo de horas hombre reales trabajadas y habilitar la orden para el control de calidad.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -1589,13 +1640,13 @@ A continuación, se presentan las historias de usuario pertenecientes a la épic
 \endfoot
 \hline
 \endlastfoot
-EP07 & Personal de taller & Media \\
+EP07 & Encargado de inventario & Media \\
 \hline
 \thfirst{Title} & \multicolumn{2}{p{\dimexpr\textwidth-2.5cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Abastecimiento y Descargo de Repuestos FIFO} \\
 \hline
 \thspanfirst{3}{Description} \\
 \hline
-\multicolumn{3}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} personal de taller,\newline \textbf{quiero} consultar existencias de catálogo, liquidar descargos bajo la regla contable FIFO por lote, restituir materiales no utilizados y liquidar precios automáticos,\newline \textbf{para} preservar la exactitud del kardex valorizado, calcular márgenes comerciales reales y prevenir quiebres de inventario que interrumpan los servicios.} \\
+\multicolumn{3}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} encargado de inventario,\newline \textbf{quiero} consultar existencias de catálogo, liquidar descargos bajo la regla contable FIFO por lote, restituir materiales no utilizados y liquidar precios automáticos,\newline \textbf{para} preservar la exactitud del kardex valorizado, calcular márgenes comerciales reales y prevenir quiebres de inventario que interrumpan los servicios.} \\
 \hline
 \end{longtable}
 
@@ -1616,13 +1667,13 @@ EP07 & Personal de taller & Media \\
 \endfoot
 \hline
 \endlastfoot
-US31 & Personal de taller & Alta & EP07 \\
+US31 & Encargado de inventario & Alta & EP07 \\
 \hline
 \thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Búsqueda y consulta de disponibilidad de repuestos en catálogo} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} personal de taller (técnico o administrador),\newline \textbf{quiero} buscar piezas por SKU, categoría o denominación comercial para verificar existencias físicas y precio,\newline \textbf{para} determinar la viabilidad inmediata de su instalación en bahía sin requerir verificación manual en anaquel.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} encargado de inventario responsable de la gestión y existencias del almacén,\newline \textbf{quiero} buscar piezas por SKU, categoría o denominación comercial para verificar existencias físicas y precio,\newline \textbf{para} determinar la viabilidad inmediata de su instalación en bahía sin requerir verificación manual en anaquel.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -1658,13 +1709,13 @@ US31 & Personal de taller & Alta & EP07 \\
 \endfoot
 \hline
 \endlastfoot
-US32 & Personal de taller & Alta & EP07 \\
+US32 & Encargado de inventario & Alta & EP07 \\
 \hline
 \thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Descargo contable y físico automatizado mediante regla estricta FIFO por lote} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} personal de taller (técnico o administrador),\newline \textbf{quiero} registrar el consumo de repuestos en una tarea mecánica rebajando los lotes cronológicos de adquisición más antiguos,\newline \textbf{para} valorizar con exactitud el costo de ventas bajo el método FIFO e impedir la asignación de materiales inexistentes.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} encargado de inventario que despacha piezas para una orden de trabajo,\newline \textbf{quiero} registrar el consumo de repuestos en una tarea mecánica rebajando los lotes cronológicos de adquisición más antiguos,\newline \textbf{para} valorizar con exactitud el costo de ventas bajo el método FIFO e impedir la asignación de materiales inexistentes.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -1705,13 +1756,13 @@ US32 & Personal de taller & Alta & EP07 \\
 \endfoot
 \hline
 \endlastfoot
-US33 & Administrador de taller & Media & EP07 \\
+US33 & Encargado de inventario & Media & EP07 \\
 \hline
 \thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Reincorporación lógica de materiales a inventario por remoción en tarea técnica} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} administrador de taller,\newline \textbf{quiero} revertir la asignación de un repuesto registrado erróneamente en una tarea técnica y devolverlo a disponibilidad de almacén,\newline \textbf{para} corregir el presupuesto de la orden y reintegrar las unidades a los lotes físicos de inventario.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} encargado de inventario responsable de la auditoría y custodia de repuestos,\newline \textbf{quiero} revertir la asignación de un repuesto registrado erróneamente en una tarea técnica y devolverlo a disponibilidad de almacén,\newline \textbf{para} corregir el presupuesto de la orden y reintegrar las unidades a los lotes físicos de inventario.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -1747,13 +1798,13 @@ US33 & Administrador de taller & Media & EP07 \\
 \endfoot
 \hline
 \endlastfoot
-US34 & Administrador de taller & Media & EP07 \\
+US34 & Encargado de inventario & Media & EP07 \\
 \hline
 \thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Disparo y desactivación de alertas automáticas de reposición por stock mínimo} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} administrador de taller,\newline \textbf{quiero} recibir alertas cuando el stock de un repuesto alcance el umbral mínimo configurado y que se desactiven al ingresar nuevas compras,\newline \textbf{para} gestionar oportunamente las adquisiciones a proveedores antes de que ocurra una rotura operativa en bahía.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} encargado de inventario responsable del abastecimiento oportuno del almacén,\newline \textbf{quiero} recibir alertas cuando el stock de un repuesto alcance el umbral mínimo configurado y que se desactiven al ingresar nuevas compras,\newline \textbf{para} gestionar oportunamente las adquisiciones a proveedores antes de que ocurra una rotura operativa en bahía.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -1789,13 +1840,13 @@ US34 & Administrador de taller & Media & EP07 \\
 \endfoot
 \hline
 \endlastfoot
-US35 & Personal de taller & Alta & EP07 \\
+US35 & Encargado de inventario & Alta & EP07 \\
 \hline
 \thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Imputación automática de precios de venta de catálogo y conciliación de margen FIFO} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} personal de taller (técnico o administrador),\newline \textbf{quiero} que el sistema replique automáticamente el precio base del catálogo al registrar productos en tareas y concilie el costo de adquisición de los lotes consumidos,\newline \textbf{para} garantizar un cobro transparente y uniforme al cliente, automatizar los importes de la orden y registrar la rentabilidad bruta real del servicio.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} encargado de inventario que supervisa la valorización contable de repuestos,\newline \textbf{quiero} que el sistema replique automáticamente el precio base del catálogo al registrar productos en tareas y concilie el costo de adquisición de los lotes consumidos,\newline \textbf{para} garantizar un cobro transparente y uniforme al cliente, automatizar los importes de la orden y registrar la rentabilidad bruta real del servicio.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -1840,13 +1891,13 @@ A continuación, se presentan las historias de usuario pertenecientes a la épic
 \endfoot
 \hline
 \endlastfoot
-EP08 & Administrador de taller & Alta \\
+EP08 & Cajero y asesor de servicio & Alta \\
 \hline
 \thfirst{Title} & \multicolumn{2}{p{\dimexpr\textwidth-2.5cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Facturación Electrónica y Cierre de Servicio} \\
 \hline
 \thspanfirst{3}{Description} \\
 \hline
-\multicolumn{3}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} administrador de taller,\newline \textbf{quiero} liquidar automáticamente los importes de la orden, emitir comprobantes tributarios UBL 2.1 ante SUNAT, amortizar cobros y transicionar la orden a pagada,\newline \textbf{para} garantizar el cumplimiento fiscal, certificar el abono dinerario del servicio y finalizar la custodia legal del vehículo.} \\
+\multicolumn{3}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} cajero y asesor de servicio,\newline \textbf{quiero} liquidar automáticamente los importes de la orden, emitir comprobantes tributarios UBL 2.1 ante SUNAT, amortizar cobros y transicionar la orden a pagada,\newline \textbf{para} garantizar el cumplimiento fiscal, certificar el abono dinerario del servicio y finalizar la custodia legal del vehículo.} \\
 \hline
 \end{longtable}
 
@@ -1867,13 +1918,13 @@ EP08 & Administrador de taller & Alta \\
 \endfoot
 \hline
 \endlastfoot
-US36 & Administrador de taller & Alta & EP08 \\
+US36 & Cajero & Alta & EP08 \\
 \hline
 \thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Liquidación económica automática en cascada de la orden de trabajo} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} administrador de taller,\newline \textbf{quiero} que el sistema calcule automáticamente los importes consolidados de la orden de trabajo sumando los precios de tareas y repuestos,\newline \textbf{para} disponer del importe exacto a cobrar y alimentar la base del comprobante electrónico sin digitación manual.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} cajero responsable de la liquidación económica y cierre contable de la orden,\newline \textbf{quiero} que el sistema calcule automáticamente los importes consolidados de la orden de trabajo sumando los precios de tareas y repuestos,\newline \textbf{para} disponer del importe exacto a cobrar y alimentar la base del comprobante electrónico sin digitación manual.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -1909,13 +1960,13 @@ US36 & Administrador de taller & Alta & EP08 \\
 \endfoot
 \hline
 \endlastfoot
-US37 & Administrador de taller & Alta & EP08 \\
+US37 & Cajero & Alta & EP08 \\
 \hline
 \thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Emisión de comprobantes tributarios electrónicos UBL 2.1 ante SUNAT vía PSE} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} administrador de taller,\newline \textbf{quiero} emitir Boletas de Venta o Facturas Electrónicas con numeración correlativa estricta y enviarlas a SUNAT mediante el proveedor PSE,\newline \textbf{para} otorgar comprobantes con plena validez fiscal y obtener la Constancia de Recepción oficial.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} cajero encargado de la emisión de comprobantes de pago electrónicos ante SUNAT,\newline \textbf{quiero} emitir Boletas de Venta o Facturas Electrónicas con numeración correlativa estricta y enviarlas a SUNAT mediante el proveedor PSE,\newline \textbf{para} otorgar comprobantes con plena validez fiscal y obtener la Constancia de Recepción oficial.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -1956,13 +2007,13 @@ US37 & Administrador de taller & Alta & EP08 \\
 \endfoot
 \hline
 \endlastfoot
-US38 & Administrador de taller & Alta & EP08 \\
+US38 & Cajero & Alta & EP08 \\
 \hline
 \thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Recaudación y amortización de pagos multi-medio en mostrador y patio} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} administrador de taller,\newline \textbf{quiero} registrar abonos dinerarios totales o parciales indicando el medio de pago y código de operación bancario,\newline \textbf{para} amortizar el saldo adeudado del comprobante fiscal y conciliar la recaudación de la jornada.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} cajero encargado de la cobranza y tesorería en mostrador,\newline \textbf{quiero} registrar abonos dinerarios totales o parciales indicando el medio de pago y código de operación bancario,\newline \textbf{para} amortizar el saldo adeudado del comprobante fiscal y conciliar la recaudación de la jornada.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -2004,7 +2055,7 @@ US39 & Asesor de servicio & Alta & EP08 \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} asesor de servicio,\newline \textbf{quiero} verificar la culminación de tareas, validar la amortización total del pago y registrar la conformidad de entrega del cliente,\newline \textbf{para} transicionar la orden a pagada, emitir el pase de salida vehicular y extinguir la custodia legal del taller.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} asesor de servicio responsable de la entrega técnica vehicular en patio,\newline \textbf{quiero} verificar la culminación de tareas, validar la amortización total del pago y registrar la conformidad de entrega del cliente,\newline \textbf{para} transicionar la orden a pagada, emitir el pase de salida vehicular y extinguir la custodia legal del taller.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -2049,13 +2100,13 @@ A continuación, se presentan la especificación de la épica número 9 y sus co
 \endfoot
 \hline
 \endlastfoot
-EP09 & Personal directivo de taller & Media \\
+EP09 & Mecánico jefe y dueño de taller & Media \\
 \hline
 \thfirst{Title} & \multicolumn{2}{p{\dimexpr\textwidth-2.5cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Monitoreo Operativo de Patio y Gestión Gerencial} \\
 \hline
 \thspanfirst{3}{Description} \\
 \hline
-\multicolumn{3}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} personal directivo de taller (dueño y administrador),\newline \textbf{quiero} supervisar el estado de las bahías en tiempo real, configurar parámetros fiscales SUNAT y exportar reportes de flujo de caja e informes periciales en formato PDF,\newline \textbf{para} optimizar el flujo físico de unidades en patio y gobernar la gestión financiera y comercial del negocio automotriz.} \\
+\multicolumn{3}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} personal directivo de taller (mecánico jefe y dueño de taller),\newline \textbf{quiero} supervisar el estado de las bahías en tiempo real, configurar parámetros fiscales SUNAT y exportar reportes de flujo de caja e informes periciales en formato PDF,\newline \textbf{para} optimizar el flujo físico de unidades en patio y gobernar la gestión financiera y comercial del negocio automotriz.} \\
 \hline
 \end{longtable}
 
@@ -2076,13 +2127,13 @@ EP09 & Personal directivo de taller & Media \\
 \endfoot
 \hline
 \endlastfoot
-US40 & Administrador de taller & Media & EP09 \\
+US40 & Mecánico jefe & Media & EP09 \\
 \hline
 \thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Supervisión y reasignación de bahías de servicio en tiempo real} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} administrador de taller,\newline \textbf{quiero} visualizar la ocupación de las bahías mecánicas y transferir una orden de trabajo hacia un puesto desocupado,\newline \textbf{para} asegurar la continuidad de las tareas ante imprevistos, averías en elevadores o redistribución de labores en patio.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} mecánico jefe que supervisa el flujo operativo de las bahías de servicio en tiempo real,\newline \textbf{quiero} visualizar la ocupación de las bahías mecánicas y transferir una orden de trabajo hacia un puesto desocupado,\newline \textbf{para} asegurar la continuidad de las tareas ante imprevistos, averías en elevadores o redistribución de labores en patio.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -2129,7 +2180,7 @@ US41 & Dueño de taller & Alta & EP09 \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} dueño de taller,\newline \textbf{quiero} generar y descargar el reporte consolidado de flujo de caja e ingresos fiscales en formato PDF,\newline \textbf{para} entregarlo al contador externo de la empresa y facilitar la liquidación tributaria sin requerir que acceda a la plataforma Atelier.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} dueño de taller automotriz que realiza la auditoría contable y financiera,\newline \textbf{quiero} generar y descargar el reporte consolidado de flujo de caja e ingresos fiscales en formato PDF,\newline \textbf{para} entregarlo al contador externo de la empresa y facilitar la liquidación tributaria sin requerir que acceda a la plataforma Atelier.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -2171,7 +2222,7 @@ US42 & Dueño de taller & Alta & EP09 \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} dueño de taller,\newline \textbf{quiero} registrar la razón social, RUC, series correlativas autorizadas y el token de conexión con el PSE Nubefact,\newline \textbf{para} asegurar la validez legal y tributaria de los comprobantes electrónicos emitidos ante la SUNAT.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} dueño de taller automotriz responsable del cumplimiento tributario institucional,\newline \textbf{quiero} registrar la razón social, RUC, series correlativas autorizadas y el token de conexión con el PSE Nubefact,\newline \textbf{para} asegurar la validez legal y tributaria de los comprobantes electrónicos emitidos ante la SUNAT.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -2207,13 +2258,13 @@ US42 & Dueño de taller & Alta & EP09 \\
 \endfoot
 \hline
 \endlastfoot
-US43 & Dueño de taller & Media & EP09 \\
+US43 & Asesor de servicio & Media & EP09 \\
 \hline
 \thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Descarga y remisión de informe pericial de salud vehicular en PDF} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} dueño de taller,\newline \textbf{quiero} descargar en formato PDF el informe pericial de salud vehicular generado por el modelo de IA a partir de telemetría y códigos DTC,\newline \textbf{para} remitirlo al cliente o gestor de flota corporativa y justificar técnicamente el presupuesto de mantenimiento preventivo.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} asesor de servicio que requiere descargar y remitir el informe pericial de salud vehicular al cliente,\newline \textbf{quiero} descargar en formato PDF el informe pericial de salud vehicular generado por el modelo de IA a partir de telemetría y códigos DTC,\newline \textbf{para} remitirlo al cliente o gestor de flota corporativa y justificar técnicamente el presupuesto de mantenimiento preventivo.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -2253,13 +2304,13 @@ A continuación, se presentan la especificación de la épica número 10 y su co
 \endfoot
 \hline
 \endlastfoot
-EP10 & Developer & Alta \\
+EP10 & Ingeniero de software & Alta \\
 \hline
 \thfirst{Title} & \multicolumn{2}{p{\dimexpr\textwidth-2.5cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Servicios e Interfaces RESTful del Backend} \\
 \hline
 \thspanfirst{3}{Description} \\
 \hline
-\multicolumn{3}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} Developer,\newline \textbf{quiero} implementar endpoints RESTful seguros, estandarizados bajo el protocolo HTTP y con contratos JSON normalizados en la capa de interfaces del backend,\newline \textbf{para} proveer servicios transaccionales de alta disponibilidad, aislamiento multi-inquilino y respuesta predecible a las aplicaciones web y móviles de la plataforma Atelier.} \\
+\multicolumn{3}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} ingeniero de software,\newline \textbf{quiero} implementar endpoints RESTful seguros, estandarizados bajo el protocolo HTTP y con contratos JSON normalizados en la capa de interfaces del backend,\newline \textbf{para} proveer servicios transaccionales de alta disponibilidad, aislamiento multi-inquilino y respuesta predecible a las aplicaciones web y móviles de la plataforma Atelier.} \\
 \hline
 \end{longtable}
 
@@ -3273,6 +3324,215 @@ TS24 & Developer & Media & EP10 \\
 
 *Nota.* Criterios de aceptación estructurados en formato BDD Gherkin para la historia técnica TS24.
 
+**Epic 11: Descubrimiento y Captación de Interés**
+
+A continuación, se presentan la especificación de la épica número 11 y su conjunto de historias de usuario orientadas al portal web de Atelier. Esta sección agrupa las capacidades comerciales de presentación de la propuesta de valor, comparativa dinámica de planes y tarifas, resolución de dudas operativas y redirección hacia el flujo de alta de taller en la aplicación principal.
+
+\renewcommand{\arraystretch}{1.3}
+\begin{longtable}{| >{\centering\arraybackslash}p{2.5cm} | >{\centering\arraybackslash}p{5.0cm} | >{\centering\arraybackslash}p{\dimexpr\textwidth-7.5cm-6\tabcolsep-4\arrayrulewidth\relax} |}
+\caption{Épica EP11: Descubrimiento y Captación de Interés} \label{tbl:ep11} \\
+\hline
+\thfirst{Epic ID} & \thcell{User} & \thcell{Priority} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Epic ID} & \thcell{User} & \thcell{Priority} \\
+\hline
+\endhead
+\hline
+\endfoot
+\hline
+\endlastfoot
+EP11 & Dueño de taller & Alta \\
+\hline
+\thfirst{Title} & \multicolumn{2}{p{\dimexpr\textwidth-2.5cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Descubrimiento y Captación de Interés} \\
+\hline
+\thspanfirst{3}{Description} \\
+\hline
+\multicolumn{3}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} dueño de taller,\newline \textbf{quiero} comprender con rapidez el propósito de Atelier y su solución a los problemas de desorden operativo, pérdidas en repuestos y diagnóstico vehicular, comparar las opciones comerciales y resolver dudas técnicas en el portal web,\newline \textbf{para} determinar si el ecosistema es valioso para mi negocio y decidir iniciar mi prueba en la plataforma.} \\
+\hline
+\end{longtable}
+
+*Nota.* Especificación de la épica EP11 elaborada para el proyecto Atelier.
+
+\renewcommand{\arraystretch}{1.3}
+\begin{longtable}{| >{\centering\arraybackslash}p{2.2cm} | >{\centering\arraybackslash}p{4.2cm} | >{\centering\arraybackslash}p{2.2cm} | >{\centering\arraybackslash}p{\dimexpr\textwidth-8.6cm-8\tabcolsep-5\arrayrulewidth\relax} |}
+\caption{Historia de Usuario US45 - Presentación de la propuesta de valor central del ecosistema Atelier} \label{tbl:us45} \\
+\hline
+\thfirst{Story ID} & \thcell{User} & \thcell{Priority} & \thcell{Epic} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Story ID} & \thcell{User} & \thcell{Priority} & \thcell{Epic} \\
+\hline
+\endhead
+\hline
+\endfoot
+\hline
+\endlastfoot
+US45 & Dueño de taller & Alta & EP11 \\
+\hline
+\thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Presentación de la propuesta de valor central del ecosistema Atelier} \\
+\hline
+\thspanfirst{4}{Description} \\
+\hline
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} dueño de taller automotriz que explora soluciones digitales para su negocio,\newline \textbf{quiero} que el sistema presente con claridad el contraste entre la gestión tradicional de un taller y la digitalización integral de Atelier,\newline \textbf{para} entender de inmediato los problemas operativos que resuelve la plataforma y evaluar su pertinencia para mi negocio.} \\
+\hline
+\thspanfirst{4}{Acceptance Criteria} \\
+\hline
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{%
+\textbf{Escenario 1: Comprensión del propósito operativo general}\newline
+\textbf{Dado que} el dueño de taller accede a la página principal del ecosistema,\newline
+\textbf{cuando} explora la introducción del servicio,\newline
+\textbf{entonces} el sistema presenta el contraste entre las pérdidas por descontrol de inventario y desorden en patio frente a la rentabilidad garantizada por el control exacto de repuestos y la sincronización en tiempo real,\newline
+\textbf{y} destaca la capacidad de la plataforma para operar sin conexión a internet en fosas mecánicas.\vspace{4pt}\newline
+\textbf{Escenario 2: Exploración de capacidades tecnológicas diferenciales}\newline
+\textbf{Dado que} el dueño de taller busca modernizar la atención técnica hacia sus clientes,\newline
+\textbf{cuando} examina las capacidades centrales destacadas en la introducción,\newline
+\textbf{entonces} el sistema expone el funcionamiento del diagnóstico vehicular en vivo y la generación de reportes preventivos con Inteligencia Artificial,\newline
+\textbf{y} confirma la validez de los comprobantes electrónicos emitidos ante la entidad tributaria nacional.%
+} \\
+\hline
+\end{longtable}
+
+*Nota.* Criterios de aceptación estructurados en formato BDD Gherkin para la historia US45.
+
+\renewcommand{\arraystretch}{1.3}
+\begin{longtable}{| >{\centering\arraybackslash}p{2.2cm} | >{\centering\arraybackslash}p{4.2cm} | >{\centering\arraybackslash}p{2.2cm} | >{\centering\arraybackslash}p{\dimexpr\textwidth-8.6cm-8\tabcolsep-5\arrayrulewidth\relax} |}
+\caption{Historia de Usuario US46 - Exploración y comparativa dinámica de planes comerciales según periodicidad de facturación} \label{tbl:us46} \\
+\hline
+\thfirst{Story ID} & \thcell{User} & \thcell{Priority} & \thcell{Epic} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Story ID} & \thcell{User} & \thcell{Priority} & \thcell{Epic} \\
+\hline
+\endhead
+\hline
+\endfoot
+\hline
+\endlastfoot
+US46 & Dueño de taller & Alta & EP11 \\
+\hline
+\thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Exploración y comparativa dinámica de planes comerciales según periodicidad de facturación} \\
+\hline
+\thspanfirst{4}{Description} \\
+\hline
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} dueño de taller automotriz interesado en evaluar la rentabilidad del servicio,\newline \textbf{quiero} consultar las tarifas y capacidades de los planes comerciales alternando entre frecuencia de facturación mensual y anual en el portal web,\newline \textbf{para} identificar el nivel de servicio adecuado a mi presupuesto operativo y proyectar el ahorro económico por pago adelantado.} \\
+\hline
+\thspanfirst{4}{Acceptance Criteria} \\
+\hline
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{%
+\textbf{Escenario 1: Proyección de tarifas con frecuencia anual y bonificación de ahorro}\newline
+\textbf{Dado que} el dueño de taller consulta las alternativas de suscripción en el sitio web,\newline
+\textbf{cuando} selecciona la periodicidad de facturación anual,\newline
+\textbf{entonces} el sistema actualiza la tarifa mensual equivalente a ciento nueve soles para el Plan Go, doscientos diecinueve soles para el Plan Pro y trescientos noventa y nueve soles para el Plan Max,\newline
+\textbf{y} detalla el monto consolidado anualizado reflejando un ahorro equivalente a más de dos meses de servicio libre de costo.\vspace{4pt}\newline
+\textbf{Escenario 2: Despliegue de tarifas mensuales estándar con renovación flexible}\newline
+\textbf{Dado que} el dueño de taller requiere flexibilidad en sus pagos operativos mes a mes,\newline
+\textbf{cuando} selecciona la periodicidad de facturación mensual,\newline
+\textbf{entonces} el sistema ajusta las tarifas a ciento treinta y nueve soles para el Plan Go, doscientos sesenta y nueve soles para el Plan Pro y cuatrocientos ochenta y nueve soles para el Plan Max,\newline
+\textbf{y} notifica que el servicio opera bajo renovación de treinta días con libertad de cancelación o cambio de nivel en cualquier momento.\vspace{4pt}\newline
+\textbf{Escenario 3: Comparación progresiva de beneficios acumulativos entre planes}\newline
+\textbf{Dado que} el dueño de taller evalúa las diferencias operativas entre niveles contiguos,\newline
+\textbf{cuando} solicita el desglose de capacidades incluidas,\newline
+\textbf{entonces} el sistema expone que cada plan superior conserva la totalidad de las funciones del plan anterior,\newline
+\textbf{y} resalta la adición de escáneres en vivo, reportes con Inteligencia Artificial o soporte multi-sucursal según el nivel consultado.%
+} \\
+\hline
+\end{longtable}
+
+*Nota.* Criterios de aceptación estructurados en formato BDD Gherkin para la historia US46.
+
+\renewcommand{\arraystretch}{1.3}
+\begin{longtable}{| >{\centering\arraybackslash}p{2.2cm} | >{\centering\arraybackslash}p{4.2cm} | >{\centering\arraybackslash}p{2.2cm} | >{\centering\arraybackslash}p{\dimexpr\textwidth-8.6cm-8\tabcolsep-5\arrayrulewidth\relax} |}
+\caption{Historia de Usuario US47 - Resolución interactiva de dudas operativas y condiciones del servicio} \label{tbl:us47} \\
+\hline
+\thfirst{Story ID} & \thcell{User} & \thcell{Priority} & \thcell{Epic} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Story ID} & \thcell{User} & \thcell{Priority} & \thcell{Epic} \\
+\hline
+\endhead
+\hline
+\endfoot
+\hline
+\endlastfoot
+US47 & Dueño de taller & Media & EP11 \\
+\hline
+\thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Resolución interactiva de dudas operativas y condiciones del servicio} \\
+\hline
+\thspanfirst{4}{Description} \\
+\hline
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} dueño de taller automotriz que evalúa los requisitos técnicos y operativos de la plataforma,\newline \textbf{quiero} consultar las respuestas a preguntas frecuentes sobre conectividad en fosa, escáneres compatibles, propiedad de los datos y políticas de cancelación en el portal web,\newline \textbf{para} despejar mis inquietudes técnicas y contractuales antes de iniciar la adopción de la plataforma.} \\
+\hline
+\thspanfirst{4}{Acceptance Criteria} \\
+\hline
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{%
+\textbf{Escenario 1: Verificación del funcionamiento sin conexión a internet en áreas de fosa}\newline
+\textbf{Dado que} el dueño de taller tiene dudas sobre la calidad de señal inalámbrica en sus instalaciones subterráneas o fosa de trabajo,\newline
+\textbf{cuando} consulta las especificaciones de conectividad en el sitio web,\newline
+\textbf{entonces} el sistema explica el mecanismo de sincronización local que permite a los técnicos trabajar sin conexión y transmitir los datos automáticamente al recuperar la señal,\newline
+\textbf{y} garantiza que ninguna tarea ni registro fotográfico se pierde por interrupciones de internet.\vspace{4pt}\newline
+\textbf{Escenario 2: Comprobación de compatibilidad con escáneres de diagnóstico estándar}\newline
+\textbf{Dado que} el dueño de taller desea saber si requiere adquirir hardware propietario de alto costo,\newline
+\textbf{cuando} revisa los requerimientos de escaneo vehicular,\newline
+\textbf{entonces} el sistema detalla la compatibilidad abierta con adaptadores estándar Bluetooth del mercado,\newline
+\textbf{y} asegura que no es necesaria la compra de equipos exclusivos para utilizar las funciones de diagnóstico en vivo.\vspace{4pt}\newline
+\textbf{Escenario 3: Verificación de políticas de cancelación y exportación de datos contables}\newline
+\textbf{Dado que} el dueño de taller busca certificar la libertad comercial del servicio,\newline
+\textbf{cuando} consulta las condiciones de permanencia y resguardo de información,\newline
+\textbf{entonces} el sistema confirma la ausencia de penalidades por cancelación anticipada,\newline
+\textbf{y} garantiza que los registros históricos de clientes, vehículos e inventarios pueden exportarse íntegramente en formatos estándar en cualquier momento.%
+} \\
+\hline
+\end{longtable}
+
+*Nota.* Criterios de aceptación estructurados en formato BDD Gherkin para la historia US47.
+
+\renewcommand{\arraystretch}{1.3}
+\begin{longtable}{| >{\centering\arraybackslash}p{2.2cm} | >{\centering\arraybackslash}p{4.2cm} | >{\centering\arraybackslash}p{2.2cm} | >{\centering\arraybackslash}p{\dimexpr\textwidth-8.6cm-8\tabcolsep-5\arrayrulewidth\relax} |}
+\caption{Historia de Usuario US48 - Redirección y transición hacia el flujo de registro de prueba gratuita en la aplicación principal} \label{tbl:us48} \\
+\hline
+\thfirst{Story ID} & \thcell{User} & \thcell{Priority} & \thcell{Epic} \\
+\hline
+\endfirsthead
+\hline
+\thfirst{Story ID} & \thcell{User} & \thcell{Priority} & \thcell{Epic} \\
+\hline
+\endhead
+\hline
+\endfoot
+\hline
+\endlastfoot
+US48 & Dueño de taller & Alta & EP11 \\
+\hline
+\thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Redirección y transición hacia el flujo de registro de prueba gratuita en la aplicación principal} \\
+\hline
+\thspanfirst{4}{Description} \\
+\hline
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} dueño de taller automotriz convencido de profesionalizar la gestión de su negocio,\newline \textbf{quiero} disponer de un acceso directo para activar la prueba gratuita de catorce días desde el plan elegido en el portal web,\newline \textbf{para} transicionar de forma transparente desde el sitio informativo hacia el flujo de alta de taller en la aplicación principal sin ingresar tarjeta de crédito.} \\
+\hline
+\thspanfirst{4}{Acceptance Criteria} \\
+\hline
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{%
+\textbf{Escenario 1: Transición hacia el registro de cuenta con selección de plan}\newline
+\textbf{Dado que} el dueño de taller ha evaluado la propuesta de valor y las opciones comerciales en el portal web,\newline
+\textbf{cuando} decide iniciar su experiencia con un plan específico,\newline
+\textbf{entonces} el sistema transfiere la navegación hacia la dirección del módulo de registro de la aplicación principal conservando el identificador del plan seleccionado,\newline
+\textbf{y} habilita el formulario de creación de organización en modo de prueba gratuita de catorce días sin requerir datos de medios de pago.\vspace{4pt}\newline
+\textbf{Escenario 2: Retención de parámetros de frecuencia de facturación en la transición}\newline
+\textbf{Dado que} el dueño de taller seleccionó una periodicidad anual con descuento en el comparador de planes,\newline
+\textbf{cuando} ejecuta la acción de inicio de prueba gratuita,\newline
+\textbf{entonces} el sistema transfiere el contexto de la modalidad de cobro elegida hacia el módulo de alta,\newline
+\textbf{y} preconfigura la suscripción proyectada respetando la bonificación económica anual para cuando el taller decida continuar con el servicio remunerado.%
+} \\
+\hline
+\end{longtable}
+
+*Nota.* Criterios de aceptación estructurados en formato BDD Gherkin para la historia US48.
+
 **Spike Stories: Investigación y Reducción de Incertidumbre Técnica**
 
 En el marco del desarrollo ágil de Atelier, las historias de tipo *Spike* corresponden a actividades de investigación técnica, análisis arquitectónico y pruebas de concepto orientadas a reducir la incertidumbre en componentes críticos antes de su implementación definitiva en el flujo de valor. Aunque no generan de forma directa un incremento funcional terminado para el usuario final, resultan fundamentales para evaluar la viabilidad de bibliotecas externas, validar restricciones de hardware móvil, medir tiempos de respuesta y acotar el esfuerzo requerido en el backlog del proyecto.
@@ -3537,7 +3797,7 @@ El mapa de impacto del segundo segmento objetivo evidenció cómo el mecánico d
 
 El *Product Backlog* consolida el catálogo priorizado y estimado de todos los incrementos funcionales (User Stories), servicios de plataforma (Technical Stories) y actividades de mitigación de incertidumbre técnica (Spikes) que componen el ecosistema Atelier. Las estimaciones relativas fueron determinadas mediante la técnica de *Planning Poker* bajo la serie de Fibonacci modificada, estableciendo como regla metodológica un límite máximo de 5 puntos de historia (1, 2, 3 o 5 SP) para asegurar un flujo de entrega continua y predecible sin historias sobredimensionadas.
 
-La priorización de las incidencias está determinada estrictamente por el retorno de valor de negocio (*Business Value*) percibido por los usuarios y propietarios del taller automotriz. Por ello, el catálogo está liderado por las capacidades nucleares del servicio: recepción e inspección pericial vehicular, diagnóstico telemático OBD-II, órdenes de trabajo, ejecución en bahía, abastecimiento FIFO de repuestos y facturación electrónica UBL 2.1 ante SUNAT; mientras que las historias de infraestructura de acceso, identidad y control satelital se ubican como habilitadores operativos transversales. La planificación abarca tres sprints de desarrollo, considerando la puesta en marcha del sitio web estático (*Landing Page*) y el producto mínimo viable (MVP) de patio desde el primer sprint.
+La priorización de las incidencias está determinada estrictamente por el retorno de valor de negocio (*Business Value*) percibido por los usuarios y propietarios del taller automotriz. La planificación abarca tres sprints de desarrollo. En el primer sprint se aborda con exclusividad el despliegue del portal web comercial (Landing Page) junto con los servicios fundacionales y contratos RESTful del backend. En el segundo sprint se implementan las operaciones nucleares de taller en patio, control de asistencia, ejecución en bahía y abastecimiento FIFO de repuestos sobre la aplicación móvil. Finalmente, en el tercer sprint se concluye con la telemetría vehicular OBD-II, la facturación electrónica UBL 2.1 ante SUNAT, los reportes periciales con Inteligencia Artificial y el cierre operativo.
 
 A continuación, la @tbl:product-backlog presenta la matriz consolidada del *Product Backlog* del ecosistema Atelier:
 
@@ -3556,19 +3816,19 @@ A continuación, la @tbl:product-backlog presenta la matriz consolidada del *Pro
 \endfoot
 \hline
 \endlastfoot
-1 & US11 & Búsqueda y vinculación de cliente y vehículo por placa o documento & 2 & Sprint 1 \\
+1 & US11 & Búsqueda y vinculación de cliente y vehículo por placa o documento & 2 & Sprint 2 \\
 \hline
-2 & US12 & Apertura de orden de trabajo y parametrización de tareas iniciales & 3 & Sprint 1 \\
+2 & US12 & Apertura de orden de trabajo y parametrización de tareas iniciales & 3 & Sprint 2 \\
 \hline
 3 & TS04 & Búsqueda y vinculación de clientes con verificación tributaria (\texttt{POST /api/v1/crm/customers}) & 2 & Sprint 1 \\
 \hline
 4 & TS05 & Apertura transaccional de orden de trabajo (\texttt{POST /api/v1/operations/work-orders}) & 3 & Sprint 1 \\
 \hline
-5 & US16 & Enlace inalámbrico y sincronización de escáner OBD-II en bahía & 3 & Sprint 1 \\
+5 & US16 & Enlace inalámbrico y sincronización de escáner OBD-II en bahía & 3 & Sprint 3 \\
 \hline
-6 & US17 & Extracción y decodificación de códigos de falla computarizados & 2 & Sprint 1 \\
+6 & US17 & Extracción y decodificación de códigos de falla computarizados & 2 & Sprint 3 \\
 \hline
-7 & US18 & Monitoreo dinámico de parámetros telemétricos en tiempo real & 3 & Sprint 1 \\
+7 & US18 & Monitoreo dinámico de parámetros telemétricos en tiempo real & 3 & Sprint 3 \\
 \hline
 8 & TS18 & Ingesta masiva y persistencia de telemetría OBD-II (\texttt{POST /api/v1/iot/telemetry/ingest}) & 3 & Sprint 1 \\
 \hline
@@ -3576,37 +3836,37 @@ A continuación, la @tbl:product-backlog presenta la matriz consolidada del *Pro
 \hline
 10 & SP01 & Telemetría Bluetooth OBD-II e Inferencia Predictiva con Spring AI & 5 & Sprint 1 \\
 \hline
-11 & US26 & Consulta y priorización de tareas mecánicas asignadas en bahía & 2 & Sprint 1 \\
+11 & US26 & Consulta y priorización de tareas mecánicas asignadas en bahía & 2 & Sprint 2 \\
 \hline
-12 & US27 & Cronometraje de labor efectiva, pausas operativas y sincronización con turnos laborales & 3 & Sprint 1 \\
+12 & US27 & Cronometraje de labor efectiva, pausas operativas y sincronización con turnos laborales & 3 & Sprint 2 \\
 \hline
 13 & TS08 & Actualización y transición de estados operativos de tarea (\texttt{PATCH /api/v1/operations/tasks/\{id\}/status}) & 2 & Sprint 1 \\
 \hline
-14 & US31 & Búsqueda y consulta de disponibilidad de repuestos en catálogo & 2 & Sprint 1 \\
+14 & US31 & Búsqueda y consulta de disponibilidad de repuestos en catálogo & 2 & Sprint 2 \\
 \hline
 15 & TS10 & Búsqueda de repuestos y validación de stock disponible (\texttt{GET /api/v1/inventory/items}) & 2 & Sprint 1 \\
 \hline
-16 & US13 & Registro pericial de evidencias fotográficas de recepción vehicular & 2 & Sprint 1 \\
+16 & US13 & Registro pericial de evidencias fotográficas de recepción vehicular & 2 & Sprint 2 \\
 \hline
-17 & US22 & Cómputo automático en cascada de costos de tareas e impuestos & 3 & Sprint 1 \\
+17 & US22 & Cómputo automático en cascada de costos de tareas e impuestos & 3 & Sprint 2 \\
 \hline
 18 & SP02 & Pasarela de Pagos Stripe y Webhooks Asíncronos para Suscripciones SaaS & 3 & Sprint 1 \\
 \hline
 19 & SP03 & Persistencia Relacional Local SQLite 3 y Sincronización Offline-First en Fosa & 3 & Sprint 1 \\
 \hline
-20 & US06 & Marcación de ingreso laboral con validación de geocerca GPS satelital & 3 & Sprint 1 \\
+20 & US06 & Marcación de ingreso laboral con validación de geocerca GPS satelital & 3 & Sprint 2 \\
 \hline
 21 & TS16 & Marcación satelital de ingreso con validación Haversine (\texttt{POST /api/v1/hr/attendance/clock-in}) & 3 & Sprint 1 \\
 \hline
-22 & US08 & Marcación de salida y liquidación de jornada laboral efectiva & 2 & Sprint 1 \\
+22 & US08 & Marcación de salida y liquidación de jornada laboral efectiva & 2 & Sprint 2 \\
 \hline
-23 & US07 & Auditoría perimétrica y contingencias de conectividad satelital & 2 & Sprint 1 \\
+23 & US07 & Auditoría perimétrica y contingencias de conectividad satelital & 2 & Sprint 2 \\
 \hline
-24 & US01 & Registro y vinculación de colaborador mediante invitación corporativa & 2 & Sprint 1 \\
+24 & US01 & Registro y vinculación de colaborador mediante invitación corporativa & 2 & Sprint 2 \\
 \hline
-25 & US02 & Verificación de identidad y correo electrónico mediante código OTP & 2 & Sprint 1 \\
+25 & US02 & Verificación de identidad y correo electrónico mediante código OTP & 2 & Sprint 2 \\
 \hline
-26 & US03 & Inicio de sesión corporativo y contextualización de sede de trabajo & 3 & Sprint 1 \\
+26 & US03 & Inicio de sesión corporativo y contextualización de sede de trabajo & 3 & Sprint 2 \\
 \hline
 27 & TS01 & Autenticación de credenciales y expedición de tokens JWT (\texttt{POST /api/v1/auth/sign-in}) & 2 & Sprint 1 \\
 \hline
@@ -3622,7 +3882,7 @@ A continuación, la @tbl:product-backlog presenta la matriz consolidada del *Pro
 \hline
 33 & TS07 & Formulación y cálculo de presupuesto de mantenimiento (\texttt{POST /api/v1/operations/quotes}) & 3 & Sprint 2 \\
 \hline
-34 & US30 & Cierre técnico de tarea con cómputo de horas hombre efectivas & 2 & Sprint 2 \\
+34 & US30 & Cierre técnico de tarea con cómputo de horas hombre efectivas & 2 & Sprint 3 \\
 \hline
 35 & TS09 & Registro de intervalos y cronometraje de horas hombre (\texttt{POST /api/v1/operations/tasks/\{id\}/time-logs}) & 2 & Sprint 2 \\
 \hline
@@ -3630,9 +3890,9 @@ A continuación, la @tbl:product-backlog presenta la matriz consolidada del *Pro
 \hline
 37 & TS11 & Descargo atómico de existencias bajo regla estricta FIFO (\texttt{POST /api/v1/inventory/movements/fifo-dispatch}) & 5 & Sprint 2 \\
 \hline
-38 & US35 & Imputación automática de precios de venta de catálogo y conciliación de margen FIFO & 3 & Sprint 2 \\
+38 & US35 & Imputación automática de precios de venta de catálogo y conciliación de margen FIFO & 3 & Sprint 3 \\
 \hline
-39 & US21 & Generación de informe pericial predictivo con inteligencia artificial y exportación en PDF & 5 & Sprint 2 \\
+39 & US21 & Generación de informe pericial predictivo con inteligencia artificial y exportación en PDF & 5 & Sprint 3 \\
 \hline
 40 & TS20 & Inferencia predictiva y generación de reporte con Spring AI (\texttt{POST /api/v1/iot/vehicles/\{id\}/health-reports/generate}) & 5 & Sprint 2 \\
 \hline
@@ -3640,13 +3900,13 @@ A continuación, la @tbl:product-backlog presenta la matriz consolidada del *Pro
 \hline
 42 & US15 & Notificación y aprobación de propuesta técnica con el cliente & 2 & Sprint 2 \\
 \hline
-43 & US28 & Registro fotográfico pericial de desmontaje y montaje de piezas en foso & 2 & Sprint 2 \\
+43 & US28 & Registro fotográfico pericial de desmontaje y montaje de piezas en foso & 2 & Sprint 3 \\
 \hline
-44 & US29 & Solicitud y validación administrativa de suspensión por pieza defectuosa indispensable & 2 & Sprint 2 \\
+44 & US29 & Solicitud y validación administrativa de suspensión por pieza defectuosa indispensable & 2 & Sprint 3 \\
 \hline
 45 & US33 & Reincorporación lógica de materiales a inventario por remoción en tarea técnica & 3 & Sprint 2 \\
 \hline
-46 & US34 & Disparo y desactivación de alertas automáticas de reposición por stock mínimo & 2 & Sprint 2 \\
+46 & US34 & Disparo y desactivación de alertas automáticas de reposición por stock mínimo & 2 & Sprint 3 \\
 \hline
 47 & US23 & Imputación de repuestos a tareas y supervisión administrativa & 2 & Sprint 2 \\
 \hline
@@ -3696,19 +3956,35 @@ A continuación, la @tbl:product-backlog presenta la matriz consolidada del *Pro
 \hline
 70 & US05 & Restablecimiento de credenciales de acceso mediante token de verificación & 2 & Sprint 3 \\
 \hline
+71 & US44 & Alta y afiliación de clientes en taller según tenencia previa de cuenta en la plataforma & 3 & Sprint 2 \\
+\hline
+72 & US45 & Presentación de la propuesta de valor central del ecosistema Atelier & 2 & Sprint 1 \\
+\hline
+73 & US46 & Exploración y comparativa dinámica de planes comerciales según periodicidad de facturación & 3 & Sprint 1 \\
+\hline
+74 & US47 & Resolución interactiva de dudas operativas y condiciones del servicio & 2 & Sprint 1 \\
+\hline
+75 & US48 & Redirección y transición hacia el flujo de registro de prueba gratuita en la aplicación principal & 3 & Sprint 1 \\
+\hline
 \end{longtable}
+
+*Nota.* Matriz consolidada del Product Backlog priorizado por valor de negocio y distribuido en tres iteraciones.
+
+\newpage
 
 La @tbl:sprint-velocity-summary sintetiza la distribución global del esfuerzo estimado y el balance de velocidad proyectada a lo largo de las tres iteraciones del proyecto:
 
 | Sprint | Alcance Operativo y Hito Académico | Puntos US | Puntos TS / SP | Total SP |
 |:---:|:----------|:---:|:---:|:---:|
-| Sprint 1 | Despliegue de Landing Page, MVP de Patio y Servicios Core | 39 | 35 | 74 |
-| Sprint 2 | Gestión Integral MRO, Descargo FIFO por Lote y Diagnóstico IA | 39 | 20 | 59 |
-| Sprint 3 | Facturación Electrónica UBL 2.1 SUNAT, Cierre y Monitoreo | 33 | 25 | 58 |
-| **Total** | Consolidado del Catálogo de Producto Atelier | 111 | 80 | 191 |
+| Sprint 1 | Despliegue de Portal Web Comercial y Servicios Core del Backend | 10 | 35 | 45 |
+| Sprint 2 | Operaciones de Patio, Bahías de Servicio y Control de Repuestos FIFO | 57 | 20 | 77 |
+| Sprint 3 | Diagnóstico Telemático OBD-II, Facturación SUNAT y Cierre Operativo | 57 | 25 | 82 |
+| **Total** | Consolidado del Catálogo de Producto Atelier | 124 | 80 | 204 |
 : Resumen Consolidado de Capacidad y Velocidad por Sprint {#tbl:sprint-velocity-summary}
 
 *Nota.* Consolidación de esfuerzo estimado y balance de velocidad por iteración.
+
+\newpage
 
 En la @fig:jira-product-backlog se presenta el tablero del *Product Backlog* priorizado y estimado para el ecosistema Atelier en la herramienta de gestión ágil Jira Software:
 

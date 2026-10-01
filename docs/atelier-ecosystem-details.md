@@ -54,3 +54,23 @@ Es la aplicación orientada al **Segmento 3: Propietarios de Vehículos (Particu
   * Un conductor puede registrar cualquier vehículo, incluso si no desea pagar por el servicio de OBD2 y las alertas preventivas.
   * En este escenario, la app sigue siendo sumamente útil: permite agendar citas con el taller, visualizar estimaciones de costos para las órdenes de trabajo, y acceder al historial completo del vehículo (registros pasados, citas, órdenes de trabajo finalizadas, e incluso alertas pasadas en caso de que el vehículo alguna vez haya gozado del servicio de telemetría).
   * En conclusión, la app Driver funciona como la interfaz de usuario del ERP del taller, fidelizando al cliente a través de la transparencia y la facilidad de gestión de su propio vehículo.
+
+### Fase 3: Atelier Business (Portal Web B2B para Gestión de Flotas y Clientes Corporativos)
+Es la solución de software orientada al **Segmento Corporativo B2B**: empresas con flotas vehiculares (distribuidoras, empresas de logística, flotas de taxis o empresas de arrendamiento) que mantienen convenios institucionales de mantenimiento con talleres afiliados a la red Atelier.
+
+* **Naturaleza del Producto:** Se concibe exclusivamente como una **Aplicación Web Responsive para Escritorio (Desktop/Tablet)**, adaptada a la dinámica de trabajo en oficinas de logística y operaciones, sin necesidad de imponer la instalación de una aplicación móvil nativa.
+* **Perfiles y Roles Internos de la Empresa Cliente (RBAC):**
+  * **Dueño o Gerente de Flota (`FLEET_ADMIN`):** Control integral sobre todos los vehículos de la compañía. Supervisa costos operativos acumulados, aprueba o rechaza presupuestos y cotizaciones de reparaciones adicionales en tiempo real, descarga masivamente comprobantes de pago oficiales de SUNAT (Facturas electrónicas en PDF y XML UBL 2.1 con CDR) y gestiona los accesos de su personal.
+  * **Asistente de Patio o Despachador de Flota (`FLEET_OPERATOR`):** Perfil operativo con privilegios acotados (sin acceso a liquidaciones financieras ni facturación sensible). Su labor se enfoca en agendar citas técnicas para las unidades, reportar anomalías detectadas en ruta por los choferes y dar seguimiento en vivo al estado de los vehículos dentro del taller (recepción, diagnóstico, espera de repuestos o listo para entrega).
+
+* **Sistema de Notificaciones Multicanal para Aplicación Web:**
+  Al operar como un portal web de escritorio, la comunicación se articula en tres canales complementarios:
+  1. **Canal A: Notificaciones en vivo en el navegador (WebSockets / Server-Sent Events):** Conexión reactiva en tiempo real que actualiza el estado de las órdenes y muestra alertas visuales flotantes (*toasts*) y contadores en la campana de notificaciones mientras el usuario tiene el portal abierto.
+  2. **Canal B: Notificaciones de escritorio en segundo plano (Web Push API):** Alertas del sistema operativo emitidas mediante Service Workers, notificando eventos críticos incluso si el navegador se encuentra minimizado o en otra pestaña.
+  3. **Canal C: Notificaciones transaccionales corporativas (Correo Electrónico y WhatsApp Business API):** Envío formal de proformas para aprobación con un clic, remisión inmediata de facturas electrónicas timbradas por SUNAT y alertas de emergencia para coordinación logística directa con el taller.
+
+* **Mecanismo Dual de Citas Técnicas (Proactivas y Predictivas):**
+  * **Citas Proactivas Regulares:** El gestor de flota o asistente programa inspecciones preventivas rutinarias por kilometraje o atenciones correctivas en la fecha y sede física de su preferencia.
+  * **Citas Asistidas por Telemetría Predictiva OBD-II:** Ante anomalías detectadas por el motor algorítmico en tiempo real (ejemplo: sobrecalentamiento sostenido o degradación crítica de batería), el agendamiento opera bajo dos opciones:
+    * *Opción A (Iniciada por el Cliente):* El administrador de flota recibe la alerta telemétrica en el portal web y agenda la cita de revisión preventiva con un solo clic.
+    * *Opción B (Iniciada por el Taller):* El taller receptor visualiza la alerta telemétrica en su monitor de patio y contacta proactivamente al cliente (vía telefónica o WhatsApp) para ofrecer el turno preventivo. Si el cliente acepta, el taller confirma la cita en la agenda técnica; si el cliente prefiere no agendar o no responde, no se genera acción forzada.

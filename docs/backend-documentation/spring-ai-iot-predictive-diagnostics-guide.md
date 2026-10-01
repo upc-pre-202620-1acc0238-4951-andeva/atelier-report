@@ -1048,3 +1048,57 @@ Con esta implementación:
   4. Spring AI convertirá el JSON recibido en tu registro Java VehicleHealthReportAiDto.
   5. OpenPDF compilará el reporte con semáforos de salud y membrete del taller.
   6. La respuesta HTTP retornará 201 Created con el JSON y la URL de descarga del PDF.
+
+---
+
+## 11. Gobernanza de Cuotas y Autorización en Backend (*Backend-Enforced Authorization*)
+
+El consumo de modelos fundacionales LLM acarrea costos de infraestructura de cómputo por token procesado. Por esta razón, el endpoint de generación de reportes periciales PDF está estrictamente gobernado por el **SaaS Billing & Subscriptions Context** mediante autorización forzada en el backend:
+
+### 11.1. Matriz de Acceso por Plan Comercial
+
+| Nivel (*Tier*) | Dispositivos OBD-II Activos | Telemetría en Vivo en Pantalla | Reportes PDF con IA Mensuales | Comportamiento del Backend |
+| :--- | :---: | :---: | :---: | :--- |
+| **Go** | `0` | Deshabilitada | `0` | HTTP 403 `QuotaExceededException` ("Plan Go does not include IoT telemetry or AI reports") |
+| **Pro** | `5` | Habilitada (streaming interactivo) | `0` | HTTP 403 `QuotaExceededException` ("AI Health Report generation is reserved for Max and Enterprise plans") |
+| **Max** | `15` | Habilitada | `60` reportes / mes | Valida que `currentMonthlyReports < 60`. Al exceder, HTTP 403 `QuotaExceededException` |
+| **Enterprise** | Personalizado | Habilitada | Ilimitado / Elástico | Facturación por consumo o techo ampliado contractualmente |
+
+### 11.2. Flujo de Ejecución del Guardián de Cuotas
+
+Antes de consultar agregaciones en TimescaleDB o invocar al cliente `ChatClient` de Spring AI, el controlador o caso de uso (`GenerateVehicleHealthReportUseCase`) ejecuta la validación determinista:
+
+```java
+@Service
+@Transactional
+public class GenerateVehicleHealthReportUseCase {
+
+    private final SubscriptionContextFacade subscriptionFacade;
+    private final PredictiveReportRepository reportRepository;
+    private final VehicleTelemetryAnalysisService analysisService;
+    private final VehicleHealthAiDiagnosticService aiDiagnosticService;
+    private final VehicleHealthReportPdfGenerator pdfGenerator;
+
+    public VehicleHealthReportResponse execute(TenantId tenantId, VehicleId vehicleId) {
+        // 1. Contar reportes emitidos por el taller en el período contable vigente
+        int currentMonthlyReports = reportRepository.countByTenantIdAndPeriod(tenantId, YearMonth.now());
+
+        // 2. Comprobación de cuota en el backend (< 0.05 ms vía Caffeine Cache)
+        // Arroja QuotaExceededException si el taller está en Go/Pro o si en Max superó los 60 reportes
+        subscriptionFacade.validateAiReportGenerationAllowed(tenantId, currentMonthlyReports);
+
+        // 3. Extracción analítica de TimescaleDB y compilación pericial con Spring AI
+        var metricsVector = analysisService.buildAnalysisVector(vehicleId);
+        var aiDiagnosis = aiDiagnosticService.analyzeVehicleHealth(metricsVector);
+
+        // 4. Renderizado PDF inmutable y almacenamiento
+        byte[] pdfBytes = pdfGenerator.renderReport(aiDiagnosis);
+        // ... persistencia y retorno
+    }
+}
+```
+
+### 11.3. Experiencia de Usuario Progresiva en Frontend
+
+- En los planes **Go** y **Pro**, el botón *«Generar Reporte PDF con IA»* en el panel web y la app móvil se muestra bloqueado visualmente con un candado 🔒 y un tooltip descriptivo: *«Actualiza a Atelier Max para exportar diagnósticos periciales en PDF con Inteligencia Artificial»*.
+- Si un usuario malintencionado intenta saltarse la interfaz web realizando un `curl` o llamada HTTP directa al endpoint `POST /api/v1/iot/vehicles/{vehicleId}/health-reports/generate`, el backend deniega la ejecución de inmediato con **HTTP 403 Forbidden** bajo el estándar RFC 7807, protegiendo los recursos computacionales y las API keys del sistema.

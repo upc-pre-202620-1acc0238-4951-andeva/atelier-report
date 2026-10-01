@@ -104,6 +104,31 @@ package "PostgreSQL 16 (API Application - Backend Central)" as pg_backend #F8F9F
         + idx_customers_search : (tenant_id, status)
     }
 
+    entity "customer_memberships" as customer_memberships <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * customer_id : UUID <<FK>>
+        * user_id : UUID <<FK>>
+        * role : VARCHAR(20)
+        * status : VARCHAR(20)
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_customer_memberships : PRIMARY KEY (id)
+        + fk_memberships_customer_id : FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE
+        + fk_memberships_user_id : FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        + uk_membership_customer_user : UNIQUE (customer_id, user_id)
+        + chk_membership_role : CHECK (role IN ('FLEET_ADMIN', 'FLEET_OPERATOR'))
+        + chk_membership_status : CHECK (status IN ('active', 'suspended', 'revoked'))
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_memberships_customer : (customer_id)
+        + idx_memberships_user_status : (user_id, status)
+    }
+
     entity "appointments" as appointments <<table, PostgreSQL>> #FFFFFF {
         * id : UUID <<PK>>
         --
@@ -136,8 +161,48 @@ package "PostgreSQL 16 (API Application - Backend Central)" as pg_backend #F8F9F
     }
 
     ' ==========================================================================
-    ' COLUMNA 3: PARQUE AUTOMOTOR Y CADENA DE CUSTODIA
+    ' COLUMNA 3: IDENTIDAD DE USUARIO, PARQUE AUTOMOTOR Y TENENCIA
     ' ==========================================================================
+    entity "users" as users <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * email : VARCHAR(150) <<UK>>
+        * auth_provider : VARCHAR(20)
+        * status : VARCHAR(20)
+        --
+        <b>Contexto Externo (IAM & Tenancy):</b>
+        + Identidad global del usuario o conductor
+        + Titular en app móvil y flotas corporativas
+    }
+
+    entity "vehicle_ownerships" as vehicle_ownerships <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        customer_id : UUID <<FK>>
+        user_id : UUID <<FK>>
+        * vehicle_id : UUID <<FK>>
+        * start_date : DATE
+        end_date : DATE
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_vehicle_ownerships : PRIMARY KEY (id)
+        + fk_ownerships_customer_id : FOREIGN KEY (customer_id) REFERENCES customers(id)
+        + fk_ownerships_user_id : FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        + fk_ownerships_vehicle_id : FOREIGN KEY (vehicle_id) REFERENCES vehicles(id)
+        + chk_ownership_owner : CHECK (customer_id IS NOT NULL OR user_id IS NOT NULL)
+        + chk_ownership_dates : CHECK (end_date IS NULL OR end_date >= start_date)
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_ownerships_customer : (customer_id) WHERE customer_id IS NOT NULL
+        + idx_ownerships_user : (user_id) WHERE user_id IS NOT NULL
+        + idx_ownerships_vehicle : (vehicle_id, end_date)
+        + uk_vehicle_active_ownership : UNIQUE (vehicle_id) WHERE end_date IS NULL
+    }
+
     entity "vehicles" as vehicles <<table, PostgreSQL>> #FFFFFF {
         * id : UUID <<PK>>
         --
@@ -166,41 +231,24 @@ package "PostgreSQL 16 (API Application - Backend Central)" as pg_backend #F8F9F
         + Activo físico universal sin tenant_id
     }
 
-    entity "vehicle_ownerships" as vehicle_ownerships <<table, PostgreSQL>> #FFFFFF {
-        * id : UUID <<PK>>
-        --
-        * customer_id : UUID <<FK>>
-        * vehicle_id : UUID <<FK>>
-        * start_date : DATE
-        end_date : DATE
-        * created_at : TIMESTAMPTZ
-        * updated_at : TIMESTAMPTZ
-        * version : BIGINT
-        deleted_at : TIMESTAMPTZ
-        --
-        <b>Restricciones (Constraints):</b>
-        + pk_vehicle_ownerships : PRIMARY KEY (id)
-        + fk_ownerships_customer_id : FOREIGN KEY (customer_id) REFERENCES customers(id)
-        + fk_ownerships_vehicle_id : FOREIGN KEY (vehicle_id) REFERENCES vehicles(id)
-        + chk_ownership_dates : CHECK (end_date IS NULL OR end_date >= start_date)
-        --
-        <b>Índices Físicos (B-Tree):</b>
-        + idx_ownerships_customer : (customer_id)
-        + idx_ownerships_vehicle : (vehicle_id, end_date)
-        + uk_vehicle_active_ownership : UNIQUE (vehicle_id) WHERE end_date IS NULL
-    }
-
     ' Disposición vertical forzada por columnas
     auditable_abstract_entity -[hidden]down-> tenants
     tenants -[hidden]down-> branches
 
-    customers -[hidden]down-> appointments
+    customers -[hidden]down-> customer_memberships
+    customer_memberships -[hidden]down-> appointments
 
+    users -[hidden]down-> vehicle_ownerships
     vehicle_ownerships -[hidden]down-> vehicles
 
     ' Disposición horizontal entre columnas de Backend
     tenants -[hidden]right-> customers
-    customers -[hidden]right-> vehicle_ownerships
+    customers -[hidden]right-> users
+
+    branches -[hidden]right-> customer_memberships
+    customer_memberships -[hidden]right-> vehicle_ownerships
+
+    appointments -[hidden]right-> vehicles
 
     ' Relaciones de Herencia JPA
     auditable_abstract_entity <|-- customers : "herencia física JPA\n(@MappedSuperclass)"
@@ -210,8 +258,12 @@ package "PostgreSQL 16 (API Application - Backend Central)" as pg_backend #F8F9F
     tenants "1  " ||--o{ "0..* " appointments : "gestiona citas"
     branches "1  " ||--o{ "0..* " appointments : "sede física"
 
-    customers "1  " ||--o{ "0..* " vehicle_ownerships : "\ntitularidad"
+    customers "1  " ||--o{ "0..* " customer_memberships : "membresías B2B"
     customers "1  " ||--o{ "0..* " appointments : "agenda cita"
+    customers "0..1  " ||--o{ "0..* " vehicle_ownerships : "\ntitularidad taller"
+
+    users "1  " ||--o{ "0..* " customer_memberships : "miembro operador"
+    users "0..1  " ||--o{ "0..* " vehicle_ownerships : "garaje digital"
 
     vehicles "1  " ||--o{ "0..* " vehicle_ownerships : "historial tenencia"
     vehicles "1  " ||--o{ "0..* " appointments : "sujeto atención"
@@ -312,7 +364,9 @@ package "SQLite 3 (Mobile Workshop - Cliente Técnico Offline)" as sqlite_mobile
 }
 
 ' Disposición horizontal entre paquetes
-vehicle_ownerships -[hidden]right-> local_customers_cache
+users -[hidden]right-> local_customers_cache
+vehicle_ownerships -[hidden]right-> local_vehicles_cache
+vehicles -[hidden]right-> local_appointments_cache
 pg_backend -[hidden]right-> sqlite_mobile
 
 ' ==============================================================================

@@ -1,4 +1,4 @@
-## 8. Fase 5: Bounded Context 5 — Human Resources Management (HR) Context (`com.andeva.atelier.platform.hr`)
+## 8. Fase 5: Bounded Context 5: Human Resources Management (HR) Context (`com.andeva.atelier.platform.hr`)
 
 ### 8.1. Diccionario y Propósito del Contexto
 
@@ -12,13 +12,235 @@ El **Human Resources Management (HR) Context** administra los aspectos laborales
 6. **Liquidación y Cálculo de Nóminas (`PayrollPayment`):** Modela el cálculo periódico de las remuneraciones del personal para un intervalo temporal dado (`period_start` a `period_end`). Consolida el salario base pactado, deduce automáticamente las penalizaciones económicas por tardanzas acumuladas o faltas injustificadas, suma bonificaciones por productividad o comisiones operativas, y genera la orden de pago en estado borrador (`DRAFT`) para su revisión, aprobación contable (`APPROVED`) y desembolso final (`PAID`).
 
 #### 8.1.2. Decisiones de Diseño e Integraciones Críticas
-* **Ejecución In-Memory de la Fórmula de Haversine:** En lugar de realizar invocaciones remotas a APIs externas de geolocalización (como Google Maps Distance Matrix API) en cada marcación —lo cual induciría latencias de red de 200 a 500 ms, generaría costos por consumo de cuota API y expondría al taller a fallos de conexión en horas punta matutinas—, Atelier resuelve el cálculo de distancia geodésica mediante un servicio de dominio puramente matemático (`HaversineGeofencingService`) en menos de un microsegundo.
+* **Ejecución In-Memory de la Fórmula de Haversine:** En lugar de realizar invocaciones remotas a APIs externas de geolocalización (como Google Maps Distance Matrix API) en cada marcación (lo cual induciría latencias de red de 200 a 500 ms, generaría costos por consumo de cuota API y expondría al taller a fallos de conexión en horas punta matutinas), Atelier resuelve el cálculo de distancia geodésica mediante un servicio de dominio puramente matemático (`HaversineGeofencingService`) en menos de un microsegundo.
 * **Desacoplamiento con IAM & Tenancy mediante ACL:** HR no manipula las tablas `users` ni `tenant_memberships`. En su lugar, hace referencia al identificador unívoco de membresía (`membership_id`) y consulta la fachada de inbound `TenancyContextFacade` para obtener las coordenadas geográficas oficiales y el radio de geocerca de la sucursal (`BranchGeoCoordinatesDto`).
 * **Desacoplamiento con MRO mediante Fachada Open Host Service (OHS):** El contexto de operaciones de taller (MRO) jamás debe consultar directamente la tabla `attendance_records` ni calcular tiempos laborales. Para verificar si un mecánico está físicamente disponible antes de asignarle una orden de trabajo o tarea urgente en foso, MRO consulta la interfaz `HumanResourcesContextFacade.isMechanicOnDuty(TenantMembershipId membershipId)`.
 
+#### 8.1.3. Estructura de Directorios y Organización de Paquetes
+
+La siguiente estructura de directorios y archivos representa la taxonomía canónica definitiva de **Human Resources Management (HR) Context** (`com.andeva.atelier.platform.hr`), alineada estrictamente con el estándar arquitectónico de *Learning Center* y los patrones tácticos de Domain-Driven Design (DDD) Hexagonal:
+
+```text
+com.andeva.atelier.platform.hr/
+├── domain/
+│   ├── exceptions/
+│   │   ├── AttendanceNotJustifiableException.java
+│   │   ├── AttendanceRecordNotFoundException.java
+│   │   ├── DuplicateActiveAttendanceException.java
+│   │   ├── EmployeeProfileNotFoundException.java
+│   │   ├── GeofenceViolationException.java
+│   │   ├── HrDomainException.java
+│   │   ├── InvalidAttendanceClockOutException.java
+│   │   ├── InvalidPayrollModificationException.java
+│   │   ├── PayrollPaymentNotFoundException.java
+│   │   ├── ShiftConflictException.java
+│   │   └── WorkShiftNotFoundException.java
+│   ├── model/
+│   │   ├── aggregates/
+│   │   │   ├── AttendanceRecord.java
+│   │   │   ├── EmployeeProfile.java
+│   │   │   ├── PayrollPayment.java
+│   │   │   └── WorkShift.java
+│   │   ├── commands/
+│   │   │   ├── AddPayrollBonusCommand.java
+│   │   │   ├── AddPayrollDeductionCommand.java
+│   │   │   ├── AssignShiftToEmployeeCommand.java
+│   │   │   ├── CreateWorkShiftCommand.java
+│   │   │   ├── DisbursePayrollPaymentCommand.java
+│   │   │   ├── GeneratePayrollCommand.java
+│   │   │   ├── JustifyAttendanceCommand.java
+│   │   │   ├── RecordClockInCommand.java
+│   │   │   ├── RecordClockOutCommand.java
+│   │   │   ├── RegisterEmployeeProfileCommand.java
+│   │   │   ├── UpdateEmploymentStatusCommand.java
+│   │   │   ├── UpdateSalaryCommand.java
+│   │   │   └── UpdateWorkShiftCommand.java
+│   │   ├── entities/
+│   │   │   ├── PayrollBonusItem.java
+│   │   │   └── PayrollDeductionItem.java
+│   │   ├── enums/
+│   │   │   ├── AttendanceStatus.java
+│   │   │   ├── BonusType.java
+│   │   │   ├── CompensationType.java
+│   │   │   ├── DeductionType.java
+│   │   │   ├── EmploymentStatus.java
+│   │   │   └── PayrollStatus.java
+│   │   ├── events/
+│   │   │   ├── AttendanceJustifiedEvent.java
+│   │   │   ├── EmployeeClockedInEvent.java
+│   │   │   ├── EmployeeClockedOutEvent.java
+│   │   │   ├── EmployeeProfileRegisteredEvent.java
+│   │   │   ├── GeofenceViolationDetectedEvent.java
+│   │   │   ├── LateAttendanceRecordedEvent.java
+│   │   │   ├── PayrollApprovedEvent.java
+│   │   │   ├── PayrollCalculatedEvent.java
+│   │   │   ├── PayrollDisbursedEvent.java
+│   │   │   ├── WorkShiftCreatedEvent.java
+│   │   │   └── WorkShiftUpdatedEvent.java
+│   │   ├── ids/
+│   │   │   ├── AttendanceRecordId.java
+│   │   │   ├── EmployeeProfileId.java
+│   │   │   ├── PayrollBonusItemId.java
+│   │   │   ├── PayrollDeductionItemId.java
+│   │   │   ├── PayrollPaymentId.java
+│   │   │   └── WorkShiftId.java
+│   │   ├── queries/
+│   │   │   ├── GetAttendanceRecordByIdQuery.java
+│   │   │   ├── GetEmployeeAttendanceHistoryQuery.java
+│   │   │   ├── GetEmployeeProfileByIdQuery.java
+│   │   │   ├── GetEmployeeProfileByMembershipIdQuery.java
+│   │   │   ├── GetPayrollPaymentByIdQuery.java
+│   │   │   ├── GetWorkShiftByIdQuery.java
+│   │   │   ├── IsEmployeeOnDutyQuery.java
+│   │   │   ├── ListAttendanceByBranchAndDateQuery.java
+│   │   │   ├── ListPayrollPaymentsByPeriodQuery.java
+│   │   │   └── ListWorkShiftsByTenantQuery.java
+│   │   └── valueobjects/
+│   │       ├── GeoCoordinates.java
+│   │       ├── GracePeriod.java
+│   │       ├── HaversineDistance.java
+│   │       ├── PayPeriod.java
+│   │       ├── ShiftSchedule.java
+│   │       └── WorkingHours.java
+│   ├── repositories/
+│   │   ├── AttendanceRecordRepository.java
+│   │   ├── EmployeeProfileRepository.java
+│   │   ├── PayrollPaymentRepository.java
+│   │   └── WorkShiftRepository.java
+│   └── services/
+│       ├── HaversineGeofencingService.java
+│       └── PayrollCalculationEngine.java
+├── application/
+│   ├── acl/
+│   │   └── HumanResourcesContextFacadeImpl.java
+│   ├── commandservices/
+│   │   ├── AttendanceCommandService.java
+│   │   ├── EmployeeProfileCommandService.java
+│   │   ├── PayrollPaymentCommandService.java
+│   │   └── WorkShiftCommandService.java
+│   ├── internal/
+│   │   ├── commandservices/
+│   │   │   ├── AttendanceCommandServiceImpl.java
+│   │   │   ├── EmployeeProfileCommandServiceImpl.java
+│   │   │   ├── PayrollPaymentCommandServiceImpl.java
+│   │   │   └── WorkShiftCommandServiceImpl.java
+│   │   ├── eventhandlers/
+│   │   │   ├── AttendanceDomainEventsHandler.java
+│   │   │   ├── HumanResourcesExternalEventsListener.java
+│   │   │   └── PayrollDomainEventsHandler.java
+│   │   ├── outbound/acl/
+│   │   │   ├── MroLaborCommissionAclService.java
+│   │   │   ├── PayrollReceiptNotificationGateway.java
+│   │   │   ├── SunatPlameExportGateway.java
+│   │   │   └── TenancyGeofenceAclService.java
+│   │   └── queryservices/
+│   │       ├── AttendanceQueryServiceImpl.java
+│   │       ├── EmployeeProfileQueryServiceImpl.java
+│   │       ├── PayrollPaymentQueryServiceImpl.java
+│   │       └── WorkShiftQueryServiceImpl.java
+│   └── queryservices/
+│       ├── AttendanceQueryService.java
+│       ├── EmployeeProfileQueryService.java
+│       ├── PayrollPaymentQueryService.java
+│       └── WorkShiftQueryService.java
+├── infrastructure/
+│   ├── external/
+│   │   ├── acl/
+│   │   │   ├── iam/
+│   │   │   │   └── TenancyGeofenceAclAdapter.java
+│   │   │   └── operations/
+│   │   │       └── MroLaborCommissionAclAdapter.java
+│   │   ├── mail/
+│   │   │   └── resend/
+│   │   │       └── ResendPayrollReceiptNotificationAdapter.java
+│   │   ├── messaging/
+│   │   │   └── outbox/
+│   │   │       └── HrOutboxMessageRelayAdapter.java
+│   │   └── tax/
+│   │       └── sunat/
+│   │           └── SunatPlameExportAdapter.java
+│   └── persistence/
+│       └── jpa/
+│           ├── adapters/
+│           │   ├── AttendanceRecordRepositoryImpl.java
+│           │   ├── EmployeeProfileRepositoryImpl.java
+│           │   ├── PayrollPaymentRepositoryImpl.java
+│           │   └── WorkShiftRepositoryImpl.java
+│           ├── assemblers/
+│           │   ├── AttendanceRecordPersistenceAssembler.java
+│           │   ├── EmployeeProfilePersistenceAssembler.java
+│           │   ├── PayrollPaymentPersistenceAssembler.java
+│           │   └── WorkShiftPersistenceAssembler.java
+│           ├── converters/
+│           │   ├── AttendanceStatusAttributeConverter.java
+│           │   ├── BonusTypeAttributeConverter.java
+│           │   ├── CompensationTypeAttributeConverter.java
+│           │   ├── DeductionTypeAttributeConverter.java
+│           │   ├── EmploymentStatusAttributeConverter.java
+│           │   └── PayrollStatusAttributeConverter.java
+│           ├── entities/
+│           │   ├── AttendanceRecordPersistenceEntity.java
+│           │   ├── EmployeeProfilePersistenceEntity.java
+│           │   ├── PayrollItemPersistenceEntity.java
+│           │   ├── PayrollPaymentPersistenceEntity.java
+│           │   └── WorkShiftPersistenceEntity.java
+│           └── repositories/
+│               ├── AttendanceRecordPersistenceRepository.java
+│               ├── EmployeeProfilePersistenceRepository.java
+│               ├── PayrollPaymentPersistenceRepository.java
+│               └── WorkShiftPersistenceRepository.java
+└── interfaces/
+    ├── acl/
+    │   ├── HumanResourcesContextFacade.java
+    │   └── dto/
+    │       ├── AttendanceSummaryAclDto.java
+    │       ├── EmployeeWorkShiftAclDto.java
+    │       ├── MechanicDutyProfileAclDto.java
+    │       └── PayrollLaborCostAclDto.java
+    ├── events/
+    │   ├── MechanicClockedInIntegrationEvent.java
+    │   ├── MechanicClockedOutIntegrationEvent.java
+    │   └── PayrollProcessedIntegrationEvent.java
+    └── rest/
+        ├── controllers/
+        │   ├── AttendanceController.java
+        │   ├── PayrollPaymentsController.java
+        │   ├── StaffProfilesController.java
+        │   └── WorkShiftsController.java
+        ├── resources/
+        │   ├── requests/
+        │   │   ├── AddPayrollBonusRequest.java
+        │   │   ├── AddPayrollDeductionRequest.java
+        │   │   ├── AssignShiftRequest.java
+        │   │   ├── ClockInRequest.java
+        │   │   ├── ClockOutRequest.java
+        │   │   ├── CreateWorkShiftResource.java
+        │   │   ├── DisbursePayrollRequest.java
+        │   │   ├── GeneratePayrollRequest.java
+        │   │   ├── JustifyAttendanceRequest.java
+        │   │   ├── RegisterEmployeeProfileRequest.java
+        │   │   ├── UpdateEmploymentStatusRequest.java
+        │   │   ├── UpdateSalaryRequest.java
+        │   │   └── UpdateWorkShiftResource.java
+        │   └── responses/
+        │       ├── AttendanceResource.java
+        │       ├── EmployeeProfileResource.java
+        │       ├── PayrollItemResource.java
+        │       ├── PayrollPaymentResource.java
+        │       ├── PayrollPaymentSummaryResource.java
+        │       └── WorkShiftResource.java
+        └── transform/
+            ├── AttendanceResourceAssembler.java
+            ├── EmployeeProfileResourceAssembler.java
+            ├── PayrollPaymentResourceAssembler.java
+            └── WorkShiftResourceAssembler.java
+```
+
 ---
 
-### 8.2. 2.6.5.1. Domain Layer
+---
+
+### 8.2. 2.6.6.1. Domain Layer
 
 #### 8.2.1. Aggregates & Aggregate Roots
 
@@ -27,18 +249,18 @@ El **Human Resources Management (HR) Context** administra los aspectos laborales
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<WorkShift>`
 * **Propósito:** Representa un turno de trabajo laboral configurado para una empresa automotriz. Define los horarios oficiales de inicio y término, así como la tolerancia horaria para el ingreso del personal.
 * **Atributos:**
-  * `id: ShiftId` — Identificador universal del turno de trabajo (UUID).
-  * `tenantId: TenantId` — Identificador del taller automotriz propietario del turno.
-  * `name: String` — Denominación del turno (ej. "Turno Mañana Mecánicos", "Turno Integral Taller", "Guardia Nocturna").
-  * `schedule: ShiftSchedule` — Objeto de valor que encapsula la hora de inicio (`startTime`) y la hora de fin (`endTime`), contemplando soporte para cruce de medianoche.
-  * `gracePeriod: GracePeriod` — Objeto de valor que especifica los minutos de tolerancia permitidos antes de clasificar una marcación como tardanza (ej. 15 minutos).
-  * `isActive: boolean` — Bandera de disponibilidad operativa del turno.
+  * `id: WorkShiftId`: Identificador universal del turno de trabajo (UUID).
+  * `tenantId: TenantId`: Identificador del taller automotriz propietario del turno.
+  * `name: String`: Denominación del turno (ej. "Turno Mañana Mecánicos", "Turno Integral Taller", "Guardia Nocturna").
+  * `schedule: ShiftSchedule`: Objeto de valor que encapsula la hora de inicio (`startTime`) y la hora de fin (`endTime`), contemplando soporte para cruce de medianoche.
+  * `gracePeriod: GracePeriod`: Objeto de valor que especifica los minutos de tolerancia permitidos antes de clasificar una marcación como tardanza (ej. 15 minutos).
+  * `isActive: boolean`: Bandera de disponibilidad operativa del turno.
 * **Invariantes y Reglas de Negocio:**
   * El nombre del turno no puede ser nulo ni estar en blanco, y su longitud máxima es de 50 caracteres.
   * La hora de inicio y la hora de fin no pueden ser idénticas.
   * El periodo de gracia no puede ser negativo y no debe exceder los 60 minutos.
 * **Métodos:**
-  * `+ static WorkShift create(TenantId tenantId, String name, LocalTime startTime, LocalTime endTime, int gracePeriodMinutes): WorkShift`: Factoría de dominio; valida invariantes, asigna estado activo y registra `WorkShiftCreatedEvent`.
+  * `+ static WorkShift create(TenantId tenantId, String name, LocalTime startTime, LocalTime endTime, int gracePeriodMinutes): WorkShift`: Factoría de dominio, valida invariantes, asigna estado activo y registra `WorkShiftCreatedEvent`.
   * `+ void updateSchedule(String name, LocalTime startTime, LocalTime endTime, int gracePeriodMinutes): void`: Modifica los parámetros horarios del turno y registra `WorkShiftUpdatedEvent`.
   * `+ void deactivate(): void`: Inhabilita el turno para futuras asignaciones a empleados.
   * `+ void activate(): void`: Restablece la vigencia del turno.
@@ -50,29 +272,29 @@ El **Human Resources Management (HR) Context** administra los aspectos laborales
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<AttendanceRecord>`
 * **Propósito:** Representa la evidencia de asistencia laboral de un empleado en una fecha y turno determinados. Custodia la marcación de ingreso, la marcación de egreso, la geolocalización satelital obtenida del smartphone y la distancia calculada contra la sucursal.
 * **Atributos:**
-  * `id: AttendanceId` — Identificador universal de la marcación (UUID).
-  * `tenantId: TenantId` — Taller propietario de la operación.
-  * `branchId: BranchId` — Sucursal física donde el empleado presta servicios.
-  * `membershipId: TenantMembershipId` — Identificador del empleado/mecánico en el sistema.
-  * `shiftId: ShiftId` — Turno de trabajo bajo el cual se evalúa la asistencia.
-  * `clockIn: Instant` — Timestamp exacto de registro de ingreso presencial.
-  * `clockOut: Instant` — Timestamp de registro de salida laboral (nullable hasta que el empleado finalice su jornada).
-  * `status: AttendanceStatus` — Clasificación del estado de asistencia (`ON_TIME`, `LATE`, `EXCUSED`, `ABSENT`).
-  * `checkInLocation: GeoCoordinates` — Coordenadas GPS satelitales (latitud, longitud) emitidas por el smartphone al momento del ingreso.
-  * `distanceToBranch: HaversineDistance` — Distancia física en metros calculada matemáticamente entre el smartphone y la sucursal.
-  * `justificationReason: String` — Descripción justificatoria aprobada por supervisión (nullable, requerida si el estado es `EXCUSED`).
-  * `justifiedBy: TenantMembershipId` — Identificador del supervisor o administrador que aprobó la excepción (nullable).
-  * `justifiedAt: Instant` — Momento cronológico de la justificación administrativa (nullable).
+  * `id: AttendanceRecordId`: Identificador universal de la marcación (UUID).
+  * `tenantId: TenantId`: Taller propietario de la operación.
+  * `branchId: BranchId`: Sucursal física donde el empleado presta servicios.
+  * `membershipId: TenantMembershipId`: Identificador del empleado/mecánico en el sistema.
+  * `shiftId: WorkShiftId`: Turno de trabajo bajo el cual se evalúa la asistencia.
+  * `clockIn: Instant`: Timestamp exacto de registro de ingreso presencial.
+  * `clockOut: Instant`: Timestamp de registro de salida laboral (nullable hasta que el empleado finalice su jornada).
+  * `status: AttendanceStatus`: Clasificación del estado de asistencia (`ON_TIME`, `LATE`, `EXCUSED`, `ABSENT`).
+  * `checkInLocation: GeoCoordinates`: Coordenadas GPS satelitales (latitud, longitud) emitidas por el smartphone al momento del ingreso.
+  * `distanceToBranch: HaversineDistance`: Distancia física en metros calculada matemáticamente entre el smartphone y la sucursal.
+  * `justificationReason: String`: Descripción justificatoria aprobada por supervisión (nullable, requerida si el estado es `EXCUSED`).
+  * `justifiedBy: TenantMembershipId`: Identificador del supervisor o administrador que aprobó la excepción (nullable).
+  * `justifiedAt: Instant`: Momento cronológico de la justificación administrativa (nullable).
 * **Invariantes y Reglas de Negocio:**
   * La hora de salida (`clockOut`) no puede ser cronológicamente anterior a la hora de entrada (`clockIn`).
   * Las coordenadas GPS deben encontrarse en rangos geográficos válidos (latitud entre -90 y 90, longitud entre -180 y 180).
-  * La distancia calculada a la sucursal no puede exceder el radio geodésico autorizado de la sede física (`branchGeofenceRadiusMeters`); si se supera, la marcación es inválida y no se instancia el registro.
+  * La distancia calculada a la sucursal no puede exceder el radio geodésico autorizado de la sede física (`branchGeofenceRadiusMeters`). Si se supera, la marcación es inválida y no se instancia el registro.
   * No puede existir más de un registro de asistencia abierto (sin `clockOut`) para el mismo empleado en el mismo día laboral.
 * **Métodos:**
-  * `+ static AttendanceRecord recordClockIn(TenantId tenantId, BranchId branchId, TenantMembershipId membershipId, ShiftId shiftId, WorkShift shift, GeoCoordinates employeeLocation, GeoCoordinates branchCentroid, double maxAllowedRadiusMeters, HaversineGeofencingService geofencingService): AttendanceRecord`:
+  * `+ static AttendanceRecord recordClockIn(TenantId tenantId, BranchId branchId, TenantMembershipId membershipId, WorkShiftId shiftId, WorkShift shift, GeoCoordinates employeeLocation, GeoCoordinates branchCentroid, double maxAllowedRadiusMeters, HaversineGeofencingService geofencingService): AttendanceRecord`:
     1. Invoca a `geofencingService.calculateDistance(employeeLocation, branchCentroid)` obteniendo `HaversineDistance`.
     2. Valida que `distance.meters() <= maxAllowedRadiusMeters`. Si se incumple, lanza `GeofenceViolationException`.
-    3. Compara `clockIn` local contra `shift.startTime + shift.gracePeriod`. Si está dentro de la tolerancia, clasifica como `ON_TIME`; si la sobrepasa, clasifica como `LATE`.
+    3. Compara `clockIn` local contra `shift.startTime + shift.gracePeriod`. Si está dentro de la tolerancia, clasifica como `ON_TIME`, mientras que si la sobrepasa, clasifica como `LATE`.
     4. Registra `EmployeeClockedInEvent` y, si corresponde, `LateAttendanceRecordedEvent`.
   * `+ void recordClockOut(Instant clockOutTime): void`:
     1. Valida que `clockOut` no haya sido registrado previamente.
@@ -82,36 +304,36 @@ El **Human Resources Management (HR) Context** administra los aspectos laborales
     1. Valida que el estado actual sea `LATE` o `ABSENT`.
     2. Modifica el estado a `EXCUSED`, asigna la causal explicativa y el auditor responsable.
     3. Registra `AttendanceJustifiedEvent`.
-  * `+ static AttendanceRecord recordAbsent(TenantId tenantId, BranchId branchId, TenantMembershipId membershipId, ShiftId shiftId, LocalDate date): AttendanceRecord`: Factoría administrativa para registrar formalmente una inasistencia no justificada.
+  * `+ static AttendanceRecord recordAbsent(TenantId tenantId, BranchId branchId, TenantMembershipId membershipId, WorkShiftId shiftId, LocalDate date): AttendanceRecord`: Factoría administrativa para registrar formalmente una inasistencia no justificada.
 
 ##### 3. `PayrollPayment` (Aggregate Root)
 * **Paquete:** `com.andeva.atelier.platform.hr.domain.model.aggregates`
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<PayrollPayment>`
 * **Propósito:** Representa la liquidación salarial o boleta de pago emitida a un empleado para un intervalo temporal contable determinado. Orquesta las deducciones por incidencias y bonificaciones operativas.
 * **Atributos:**
-  * `id: PayrollPaymentId` — Identificador universal de la boleta de pago (UUID).
-  * `tenantId: TenantId` — Taller emisor del pago.
-  * `membershipId: TenantMembershipId` — Empleado beneficiario de la liquidación.
-  * `period: PayPeriod` — Objeto de valor con fecha de inicio (`periodStart`) y fecha de fin (`periodEnd`).
-  * `baseAmount: Money` — Salario base mensual o proporcional estipulado en el contrato laboral.
-  * `deductions: Money` — Suma consolidada de descuentos monetarios aplicados (tardanzas, inasistencias, retenciones).
-  * `bonuses: Money` — Suma consolidada de bonificaciones económicas asignadas (productividad de patio, horas extras).
-  * `totalPaid: Money` — Importe neto a transferir al colaborador (`baseAmount - deductions + bonuses`).
-  * `status: PayrollStatus` — Ciclo de vida de la boleta (`DRAFT`, `APPROVED`, `PAID`, `CANCELLED`).
-  * `deductionItems: List<PayrollDeductionItem>` — Entidades hijas con el desglose pormenorizado de descuentos.
-  * `bonusItems: List<PayrollBonusItem>` — Entidades hijas con el desglose pormenorizado de bonificaciones.
-  * `paidAt: Instant` — Fecha y hora del desembolso financiero (nullable hasta concretar el pago).
-  * `paymentReference: String` — Número de operación bancaria o comprobante de transferencia (nullable).
+  * `id: PayrollPaymentId`: Identificador universal de la boleta de pago (UUID).
+  * `tenantId: TenantId`: Taller emisor del pago.
+  * `membershipId: TenantMembershipId`: Empleado beneficiario de la liquidación.
+  * `period: PayPeriod`: Objeto de valor con fecha de inicio (`periodStart`) y fecha de fin (`periodEnd`).
+  * `baseAmount: Money`: Salario base mensual o proporcional estipulado en el contrato laboral.
+  * `deductions: Money`: Suma consolidada de descuentos monetarios aplicados (tardanzas, inasistencias, retenciones).
+  * `bonuses: Money`: Suma consolidada de bonificaciones económicas asignadas (productividad de patio, horas extras).
+  * `totalPaid: Money`: Importe neto a transferir al colaborador (`baseAmount - deductions + bonuses`).
+  * `status: PayrollStatus`: Ciclo de vida de la boleta (`DRAFT`, `APPROVED`, `PAID`, `CANCELLED`).
+  * `deductionItems: List<PayrollDeductionItem>`: Entidades hijas con el desglose pormenorizado de descuentos.
+  * `bonusItems: List<PayrollBonusItem>`: Entidades hijas con el desglose pormenorizado de bonificaciones.
+  * `paidAt: Instant`: Fecha y hora del desembolso financiero (nullable hasta concretar el pago).
+  * `paymentReference: String`: Número de operación bancaria o comprobante de transferencia (nullable).
 * **Invariantes y Reglas de Negocio:**
   * La fecha de inicio del periodo no puede ser posterior a la fecha de fin.
-  * El importe neto (`totalPaid`) no puede ser negativo; si las deducciones superan el salario base más bonos, el total pagado se ajusta al límite mínimo reglamentario o genera deuda controlada.
+  * El importe neto (`totalPaid`) no puede ser negativo. Si las deducciones superan el salario base más bonos, el total pagado se ajusta al límite mínimo reglamentario o genera deuda controlada.
   * No se pueden agregar deducciones ni bonificaciones una vez que la boleta se encuentra en estado `APPROVED` o `PAID`.
   * Únicamente las boletas en estado `APPROVED` pueden ser marcadas como pagadas (`PAID`).
 * **Métodos:**
   * `+ static PayrollPayment calculate(TenantId tenantId, TenantMembershipId membershipId, PayPeriod period, Money baseAmount, List<PayrollDeductionItem> deductions, List<PayrollBonusItem> bonuses): PayrollPayment`: Factoría de dominio que crea la liquidación en estado `DRAFT`, calcula los totales netos y registra `PayrollCalculatedEvent`.
   * `+ void addDeduction(String concept, Money amount, DeductionType type, LocalDate date): void`: Agrega un ítem de descuento a la colección interna y recalcula `deductions` y `totalPaid`.
   * `+ void addBonus(String concept, Money amount, BonusType type, LocalDate date): void`: Agrega un ítem de bono a la colección interna y recalcula `bonuses` y `totalPaid`.
-  * `+ void approve(): void`: Transiciona el estado a `APPROVED` tras auditoría del administrador; registra `PayrollApprovedEvent`.
+  * `+ void approve(): void`: Transiciona el estado a `APPROVED` tras auditoría del administrador, registrando `PayrollApprovedEvent`.
   * `+ void markAsPaid(String paymentReference, Instant paymentTimestamp): void`: Transiciona el estado a `PAID`, registra el comprobante de pago bancario y emite `PayrollDisbursedEvent`.
   * `+ void cancel(String cancelReason): void`: Anula la liquidación devolviéndola al pool de periodos no liquidados.
 
@@ -120,19 +342,19 @@ El **Human Resources Management (HR) Context** administra los aspectos laborales
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<EmployeeProfile>`
 * **Propósito:** Modela la ficha laboral y contractual del empleado dentro del contexto de Recursos Humanos, asociándolo a su sede de adscripción, turno asignado y esquema salarial.
 * **Atributos:**
-  * `id: EmployeeProfileId` — Identificador unívoco del perfil operativo (UUID).
-  * `tenantId: TenantId` — Taller automotriz empleador.
-  * `branchId: BranchId` — Sede física donde cumple sus funciones laborales.
-  * `membershipId: TenantMembershipId` — Enlace unívoco con la identidad de membresía en IAM.
-  * `assignedShiftId: ShiftId` — Turno regular predeterminado para el empleado.
-  * `baseSalary: Money` — Remuneración ordinaria pactada.
-  * `salaryType: SalaryType` — Tipo de esquema salarial (`MONTHLY_FIXED`, `HOURLY_RATE`).
-  * `jobTitle: String` — Cargo u ocupación técnica (ej. "Mecánico Senior de Motor", "Electricista Automotriz", "Asesor de Servicio").
-  * `employmentStatus: EmploymentStatus` — Situación contractual activa (`ACTIVE`, `ON_LEAVE`, `TERMINATED`).
+  * `id: EmployeeProfileId`: Identificador unívoco del perfil operativo (UUID).
+  * `tenantId: TenantId`: Taller automotriz empleador.
+  * `branchId: BranchId`: Sede física donde cumple sus funciones laborales.
+  * `membershipId: TenantMembershipId`: Enlace unívoco con la identidad de membresía en IAM.
+  * `assignedShiftId: WorkShiftId`: Turno regular predeterminado para el empleado.
+  * `baseSalary: Money`: Remuneración ordinaria pactada.
+  * `compensationType: CompensationType`: Tipo de esquema salarial (`MONTHLY_FIXED`, `HOURLY_RATE`).
+  * `jobTitle: String`: Cargo u ocupación técnica (ej. "Mecánico Senior de Motor", "Electricista Automotriz", "Asesor de Servicio").
+  * `employmentStatus: EmploymentStatus`: Situación contractual activa (`ACTIVE`, `ON_LEAVE`, `TERMINATED`).
 * **Métodos:**
-  * `+ static EmployeeProfile register(TenantId tenantId, BranchId branchId, TenantMembershipId membershipId, ShiftId shiftId, Money baseSalary, SalaryType salaryType, String jobTitle): EmployeeProfile`: Factoría que registra el perfil y emite `EmployeeProfileRegisteredEvent`.
-  * `+ void assignShift(ShiftId newShiftId): void`: Actualiza el turno regular del colaborador.
-  * `+ void updateSalary(Money newSalary, SalaryType salaryType): void`: Ajusta las condiciones de compensación económica.
+  * `+ static EmployeeProfile register(TenantId tenantId, BranchId branchId, TenantMembershipId membershipId, WorkShiftId workShiftId, Money baseSalary, CompensationType compensationType, String jobTitle): EmployeeProfile`: Factoría que registra el perfil y emite `EmployeeProfileRegisteredEvent`.
+  * `+ void assignShift(WorkShiftId newShiftId): void`: Actualiza el turno regular del colaborador.
+  * `+ void updateCompensation(Money newSalary, CompensationType compensationType): void`: Ajusta las condiciones de compensación económica.
   * `+ void changeBranch(BranchId newBranchId): void`: Transfiere al colaborador a otra sede del taller.
   * `+ void terminateEmployment(): void`: Da de baja operativa al empleado impidiendo futuras marcaciones.
 
@@ -144,66 +366,76 @@ El **Human Resources Management (HR) Context** administra los aspectos laborales
 * **Paquete:** `com.andeva.atelier.platform.hr.domain.model.entities`
 * **Propósito:** Representa una partida individual de descuento monetario aplicada dentro de una boleta de pago.
 * **Atributos:**
-  * `id: UUID` — Identificador del ítem de descuento.
-  * `concept: String` — Descripción del motivo del descuento (ej. "Descuento por 3 tardanzas acumuladas (45 min)", "Inasistencia injustificada 14/08/2026").
-  * `amount: Money` — Importe monetario deducido.
-  * `deductionType: DeductionType` — Categoría (`TARDINESS`, `UNJUSTIFIED_ABSENCE`, `EQUIPMENT_DAMAGE`, `LOAN_REPAYMENT`, `OTHER`).
-  * `appliedDate: LocalDate` — Fecha en que se originó la causal de la deducción.
+  * `id: PayrollDeductionItemId`: Identificador del ítem de descuento.
+  * `concept: String`: Descripción del motivo del descuento (ej. "Descuento por 3 tardanzas acumuladas (45 min)", "Inasistencia injustificada 14/08/2026").
+  * `amount: Money`: Importe monetario deducido.
+  * `deductionType: DeductionType`: Categoría (`TARDINESS`, `UNJUSTIFIED_ABSENCE`, `EQUIPMENT_DAMAGE`, `LOAN_REPAYMENT`, `OTHER`).
+  * `appliedDate: LocalDate`: Fecha en que se originó la causal de la deducción.
 
 ##### 2. `PayrollBonusItem` (Entity)
 * **Paquete:** `com.andeva.atelier.platform.hr.domain.model.entities`
 * **Propósito:** Representa una partida individual de bonificación o incentivo económico sumado a una boleta de pago.
 * **Atributos:**
-  * `id: UUID` — Identificador del ítem de bonificación.
-  * `concept: String` — Descripción del motivo de la bonificación (ej. "Bono de productividad: 25 órdenes cerradas", "Comisión por alineamiento y balanceo").
-  * `amount: Money` — Importe monetario otorgado.
-  * `bonusType: BonusType` — Categoría (`PRODUCTIVITY`, `OVERTIME_HOURS`, `SPECIAL_MERIT`, `HOLIDAY_ALLOWANCE`).
-  * `awardedDate: LocalDate` — Fecha en que se concedió la bonificación.
+  * `id: PayrollBonusItemId`: Identificador del ítem de bonificación.
+  * `concept: String`: Descripción del motivo de la bonificación (ej. "Bono de productividad: 25 órdenes cerradas", "Comisión por alineamiento y balanceo").
+  * `amount: Money`: Importe monetario otorgado.
+  * `bonusType: BonusType`: Categoría (`PRODUCTIVITY`, `OVERTIME_HOURS`, `SPECIAL_MERIT`, `HOLIDAY_ALLOWANCE`).
+  * `awardedDate: LocalDate`: Fecha en que se concedió la bonificación.
 
 ---
 
 #### 8.2.3. Value Objects
 
-* **`ShiftId`:** Identificador universal inmutable de un turno (`record ShiftId(UUID value)`).
-* **`AttendanceId`:** Identificador inmutable de un registro de marcación (`record AttendanceId(UUID value)`).
-* **`PayrollPaymentId`:** Identificador inmutable de una boleta salarial (`record PayrollPaymentId(UUID value)`).
-* **`EmployeeProfileId`:** Identificador del perfil laboral (`record EmployeeProfileId(UUID value)`).
-* **`ShiftSchedule`:** Encapsula la ventana horaria del turno (`record ShiftSchedule(LocalTime startTime, LocalTime endTime, boolean spansOverMidnight)`). Contiene el método de dominio `boolean isWithinWindow(LocalTime checkTime)`.
-* **`GracePeriod`:** Encapsula los minutos de tolerancia reglamentaria (`record GracePeriod(int minutes)`). Valida que `minutes >= 0 && minutes <= 60`.
-* **`GeoCoordinates`:** Representa una coordenada geográfica satelital (`record GeoCoordinates(double latitude, double longitude)`). Valida que $-90.0 \le \text{latitude} \le 90.0$ y $-180.0 \le \text{longitude} \le 180.0$.
-* **`HaversineDistance`:** Distancia métrica escalar calculada en el espacio geodésico terrestre (`record HaversineDistance(double meters)`). Provee métodos de conveniencia como `boolean isWithin(double thresholdMeters)` y `double toKilometers()`.
-* **`PayPeriod`:** Intervalo temporal contable de nómina (`record PayPeriod(LocalDate startDate, LocalDate endDate)`). Valida que `!startDate.isAfter(endDate)` y calcula la cantidad de días laborales contenidos.
-* **`AttendanceStatus`:** Enumeración del estado de asistencia (`ON_TIME`, `LATE`, `EXCUSED`, `ABSENT`).
-* **`PayrollStatus`:** Enumeración del ciclo de vida de la nómina (`DRAFT`, `APPROVED`, `PAID`, `CANCELLED`).
-* **`SalaryType`:** Esquema de remuneración del personal (`MONTHLY_FIXED`, `HOURLY_RATE`).
-* **`EmploymentStatus`:** Situación contractual del trabajador (`ACTIVE`, `ON_LEAVE`, `TERMINATED`).
-* **`DeductionType`:** Categoría analítica de descuentos (`TARDINESS`, `UNJUSTIFIED_ABSENCE`, `EQUIPMENT_DAMAGE`, `LOAN_REPAYMENT`, `OTHER`).
-* **`BonusType`:** Categoría analítica de beneficios (`PRODUCTIVITY`, `OVERTIME_HOURS`, `SPECIAL_MERIT`, `HOLIDAY_ALLOWANCE`).
+Los tipos de soporte del dominio de recursos humanos se organizan formalmente en tres subpaquetes modulares según su semántica táctica de Domain-Driven Design:
+
+##### 1. Identificadores Fuertemente Tipados (`com.andeva.atelier.platform.hr.domain.model.ids`)
+* **`WorkShiftId(UUID value)`:** Identificador tipado universal del turno de trabajo en el catálogo del taller.
+* **`AttendanceRecordId(UUID value)`:** Identificador tipado universal del registro de marcación de asistencia presencial.
+* **`PayrollPaymentId(UUID value)`:** Identificador tipado universal de la boleta o comprobante de liquidación salarial.
+* **`EmployeeProfileId(UUID value)`:** Identificador tipado universal del perfil o expediente laboral del colaborador.
+* **`PayrollDeductionItemId(UUID value)`:** Identificador tipado de la partida individual de deducción salarial.
+* **`PayrollBonusItemId(UUID value)`:** Identificador tipado de la partida individual de bonificación o incentivo laboral.
+
+##### 2. Enumeraciones de Dominio (`com.andeva.atelier.platform.hr.domain.model.enums`)
+* **`AttendanceStatus`:** Clasificación operativa del registro presencial (`ON_TIME`, `LATE`, `EXCUSED`, `ABSENT`).
+* **`PayrollStatus`:** Ciclo de vida y estados contables de la nómina salarial (`DRAFT`, `APPROVED`, `PAID`, `CANCELLED`).
+* **`CompensationType`:** Modalidad contractual de remuneración económica (`MONTHLY_FIXED`, `HOURLY_RATE`).
+* **`DeductionType`:** Categoría analítica de descuentos laborales (`TARDINESS`, `UNJUSTIFIED_ABSENCE`, `EQUIPMENT_DAMAGE`, `LOAN_REPAYMENT`, `OTHER`).
+* **`BonusType`:** Categoría analítica de bonificaciones e incentivos (`PRODUCTIVITY`, `OVERTIME_HOURS`, `SPECIAL_MERIT`, `HOLIDAY_ALLOWANCE`).
+* **`EmploymentStatus`:** Situación contractual activa del trabajador (`ACTIVE`, `ON_LEAVE`, `TERMINATED`).
+
+##### 3. Objetos de Valor Puros (`com.andeva.atelier.platform.hr.domain.model.valueobjects`)
+* **`GeoCoordinates(double latitude, double longitude)`:** Coordenada geográfica satelital en el elipsoide WGS84. Valida rigurosamente que $-90.0 \le 	ext{latitude} \le 90.0$ y $-180.0 \le 	ext{longitude} \le 180.0$.
+* **`GracePeriod(int minutes)`:** Minutos de tolerancia reglamentaria asignados al turno. Valida que $0 \le 	ext{minutes} \le 60$ y provee el método de verificación `hasExpired(long delayMinutes)`.
+* **`HaversineDistance(double meters)`:** Distancia métrica escalar calculada en el espacio geodésico terrestre entre el dispositivo móvil y la sucursal. Provee métodos de conveniencia como `isWithin(double thresholdMeters)` y `toKilometers()`.
+* **`PayPeriod(LocalDate startDate, LocalDate endDate)`:** Intervalo temporal contable de liquidación de nómina. Valida que la fecha inicial no sea posterior a la final y calcula la cantidad de días laborales contenidos en el lapso.
+* **`ShiftSchedule(LocalTime startTime, LocalTime endTime, boolean spansOverMidnight)`:** Ventana horaria de la jornada laboral con soporte para turnos que cruzan la medianoche. Provee el método de comprobación `isWithinWindow(LocalTime checkTime)`.
+* **`WorkingHours(double hours)`:** Magnitud numérica de horas efectivas laboradas o computadas durante un turno o intervalo mensual. Valida valores no negativos y provee utilitarios para el cómputo de sobretiempo.
 
 ---
 
 #### 8.2.4. Domain Commands
 
 * **`CreateWorkShiftCommand`:** Parámetros para registrar un turno (`TenantId tenantId, String name, LocalTime startTime, LocalTime endTime, int gracePeriodMinutes`).
-* **`UpdateWorkShiftCommand`:** Parámetros para modificar un turno (`ShiftId shiftId, String name, LocalTime startTime, LocalTime endTime, int gracePeriodMinutes`).
-* **`RecordClockInCommand`:** Parámetros de marcación de ingreso móvil (`TenantId tenantId, BranchId branchId, TenantMembershipId membershipId, ShiftId shiftId, double latitude, double longitude`).
-* **`RecordClockOutCommand`:** Parámetros de marcación de salida móvil (`AttendanceId attendanceId, TenantMembershipId membershipId, Instant clockOutTime`).
-* **`JustifyAttendanceCommand`:** Parámetros para autorizar una excepción de asistencia (`AttendanceId attendanceId, String reason, TenantMembershipId supervisorMembershipId`).
+* **`UpdateWorkShiftCommand`:** Parámetros para modificar un turno (`WorkShiftId workShiftId, String name, LocalTime startTime, LocalTime endTime, int gracePeriodMinutes`).
+* **`RecordClockInCommand`:** Parámetros de marcación de ingreso móvil (`TenantId tenantId, BranchId branchId, TenantMembershipId membershipId, WorkShiftId workShiftId, double latitude, double longitude`).
+* **`RecordClockOutCommand`:** Parámetros de marcación de salida móvil (`AttendanceRecordId attendanceRecordId, TenantMembershipId membershipId, Instant clockOutTime`).
+* **`JustifyAttendanceCommand`:** Parámetros para autorizar una excepción de asistencia (`AttendanceRecordId attendanceRecordId, String reason, TenantMembershipId supervisorMembershipId`).
 * **`GeneratePayrollCommand`:** Parámetros para procesar la nómina de un periodo (`TenantId tenantId, TenantMembershipId membershipId, LocalDate periodStart, LocalDate periodEnd`).
 * **`AddPayrollDeductionCommand`:** Incorpora un descuento a una planilla (`PayrollPaymentId payrollId, String concept, Money amount, DeductionType type, LocalDate date`).
 * **`AddPayrollBonusCommand`:** Incorpora un bono a una planilla (`PayrollPaymentId payrollId, String concept, Money amount, BonusType type, LocalDate date`).
 * **`ApprovePayrollCommand`:** Aprobación administrativa (`PayrollPaymentId payrollId, TenantMembershipId approverMembershipId`).
 * **`DisbursePayrollPaymentCommand`:** Registro del desembolso bancario (`PayrollPaymentId payrollId, String paymentReference, Instant paidAt`).
-* **`RegisterEmployeeProfileCommand`:** Ficha de contratación (`TenantId tenantId, BranchId branchId, TenantMembershipId membershipId, ShiftId shiftId, Money baseSalary, SalaryType salaryType, String jobTitle`).
-* **`AssignShiftToEmployeeCommand`:** Reasignación de turno (`EmployeeProfileId profileId, ShiftId newShiftId`).
+* **`RegisterEmployeeProfileCommand`:** Ficha de contratación (`TenantId tenantId, BranchId branchId, TenantMembershipId membershipId, WorkShiftId workShiftId, Money baseSalary, CompensationType compensationType, String jobTitle`).
+* **`AssignShiftToEmployeeCommand`:** Reasignación de turno (`EmployeeProfileId profileId, WorkShiftId newWorkShiftId`).
 
 ---
 
 #### 8.2.5. Domain Queries
 
-* **`GetWorkShiftByIdQuery`:** Consulta de un turno por su ID (`ShiftId shiftId`).
+* **`GetWorkShiftByIdQuery`:** Consulta de un turno por su ID (`WorkShiftId workShiftId`).
 * **`ListWorkShiftsByTenantQuery`:** Catálogo de turnos vigentes del taller (`TenantId tenantId`).
-* **`GetAttendanceRecordByIdQuery`:** Detalle de una marcación específica (`AttendanceId attendanceId`).
+* **`GetAttendanceRecordByIdQuery`:** Detalle de una marcación específica (`AttendanceRecordId attendanceRecordId`).
 * **`ListAttendanceByBranchAndDateQuery`:** Cuadro de asistencias diario por sucursal (`BranchId branchId, LocalDate date`).
 * **`GetEmployeeAttendanceHistoryQuery`:** Historial de marcaciones de un empleado en un rango temporal (`TenantMembershipId membershipId, LocalDate from, LocalDate to`).
 * **`GetPayrollPaymentByIdQuery`:** Consulta de una boleta de pago (`PayrollPaymentId payrollPaymentId`).
@@ -215,13 +447,13 @@ El **Human Resources Management (HR) Context** administra los aspectos laborales
 
 #### 8.2.6. Domain Events
 
-* **`WorkShiftCreatedEvent`:** Emitido al parametrizar un nuevo horario laboral (`ShiftId shiftId, TenantId tenantId, String name, LocalTime startTime, LocalTime endTime`).
-* **`WorkShiftUpdatedEvent`:** Emitido al modificar horarios o minutos de gracia (`ShiftId shiftId, LocalTime startTime, LocalTime endTime, int gracePeriod`).
-* **`EmployeeClockedInEvent`:** Emitido tras una marcación presencial válida en patio (`AttendanceId attendanceId, TenantMembershipId membershipId, BranchId branchId, AttendanceStatus status, double distanceMeters, Instant timestamp`).
-* **`EmployeeClockedOutEvent`:** Emitido al concluir la jornada de trabajo (`AttendanceId attendanceId, TenantMembershipId membershipId, Instant clockOutTimestamp, long totalWorkedMinutes`).
-* **`LateAttendanceRecordedEvent`:** Emitido cuando la marcación superó la tolerancia del turno (`AttendanceId attendanceId, TenantMembershipId membershipId, long minutesLate, Instant timestamp`).
+* **`WorkShiftCreatedEvent`:** Emitido al parametrizar un nuevo horario laboral (`WorkShiftId workShiftId, TenantId tenantId, String name, LocalTime startTime, LocalTime endTime`).
+* **`WorkShiftUpdatedEvent`:** Emitido al modificar horarios o minutos de gracia (`WorkShiftId workShiftId, LocalTime startTime, LocalTime endTime, int gracePeriod`).
+* **`EmployeeClockedInEvent`:** Emitido tras una marcación presencial válida en patio (`AttendanceRecordId attendanceRecordId, TenantMembershipId membershipId, BranchId branchId, AttendanceStatus status, double distanceMeters, Instant timestamp`).
+* **`EmployeeClockedOutEvent`:** Emitido al concluir la jornada de trabajo (`AttendanceRecordId attendanceRecordId, TenantMembershipId membershipId, Instant clockOutTimestamp, long totalWorkedMinutes`).
+* **`LateAttendanceRecordedEvent`:** Emitido cuando la marcación superó la tolerancia del turno (`AttendanceRecordId attendanceRecordId, TenantMembershipId membershipId, long minutesLate, Instant timestamp`).
 * **`GeofenceViolationDetectedEvent`:** Emitido cuando se rechaza una marcación móvil que excede el radio de la sede física (`TenantMembershipId membershipId, BranchId branchId, double attemptedDistanceMeters, double maxAllowedMeters`).
-* **`AttendanceJustifiedEvent`:** Emitido al regularizarse una tardanza o falta por orden médica o permiso (`AttendanceId attendanceId, TenantMembershipId justifiedBy, String reason`).
+* **`AttendanceJustifiedEvent`:** Emitido al regularizarse una tardanza o falta por orden médica o permiso (`AttendanceRecordId attendanceRecordId, TenantMembershipId justifiedBy, String reason`).
 * **`PayrollCalculatedEvent`:** Emitido al generarse el cálculo proforma de la nómina (`PayrollPaymentId payrollId, TenantMembershipId membershipId, Money totalPaid, PayPeriod period`).
 * **`PayrollApprovedEvent`:** Emitido al autorizarse el pago formal por gerencia (`PayrollPaymentId payrollId, TenantMembershipId approverMembershipId`).
 * **`PayrollDisbursedEvent`:** Emitido al liquidarse la transferencia bancaria (`PayrollPaymentId payrollId, String paymentReference, Instant timestamp`).
@@ -235,7 +467,7 @@ package com.andeva.atelier.platform.hr.domain.repositories;
 
 public interface WorkShiftRepository {
     WorkShift save(WorkShift workShift);
-    Optional<WorkShift> findById(ShiftId id);
+    Optional<WorkShift> findById(WorkShiftId id);
     Optional<WorkShift> findByTenantIdAndName(TenantId tenantId, String name);
     List<WorkShift> findAllByTenantId(TenantId tenantId);
     boolean existsByTenantIdAndName(TenantId tenantId, String name);
@@ -243,7 +475,7 @@ public interface WorkShiftRepository {
 
 public interface AttendanceRecordRepository {
     AttendanceRecord save(AttendanceRecord attendanceRecord);
-    Optional<AttendanceRecord> findById(AttendanceId id);
+    Optional<AttendanceRecord> findById(AttendanceRecordId id);
     Optional<AttendanceRecord> findActiveByMembershipIdAndDate(TenantMembershipId membershipId, LocalDate date);
     List<AttendanceRecord> findAllByBranchIdAndDate(BranchId branchId, LocalDate date);
     List<AttendanceRecord> findAllByMembershipIdAndPeriod(TenantMembershipId membershipId, Instant start, Instant end);
@@ -318,6 +550,24 @@ public class HaversineGeofencingService {
 * **Paquete:** `com.andeva.atelier.platform.hr.domain.services`
 * **Propósito:** Consolida el historial de marcaciones del empleado durante el periodo contable, detecta faltas y tardanzas, calcula deducciones proporcionales de acuerdo con las políticas del taller automotriz y genera la estructura base para la boleta de pago.
 
+#### 8.2.9. Excepciones Semánticas de Dominio
+
+Jerarquía de excepciones semánticas no comprobadas del dominio de recursos humanos, derivadas de `HrDomainException` (`com.andeva.atelier.platform.hr.domain.exceptions.HrDomainException`) y de la raíz base `DomainException` (`com.andeva.atelier.platform.shared.domain.exceptions.DomainException`), provistas de código unívoco legible según la norma RFC 7807 y correspondencia con códigos de respuesta HTTP:
+
+| Excepción de Dominio | Código RFC 7807 | Estatus HTTP | Condición de Activación en el Dominio |
+| :--- | :--- | :---: | :--- |
+| `HrDomainException` | `ERR_HR_DOMAIN_ROOT` | 400 Bad Request | Clase base abstracta de las excepciones de negocio del dominio de recursos humanos. |
+| `GeofenceViolationException` | `ERR_HR_GEOFENCE_BREACH` | 422 Unprocessable | La separación espacial calculada entre el dispositivo móvil del operario y el centroide de la sucursal supera el radio perimetral autorizado de la sede física. |
+| `DuplicateActiveAttendanceException` | `ERR_HR_DUPLICATE_CLOCK_IN` | 409 Conflict | Se intenta registrar un nuevo ingreso laboral cuando el colaborador ya cuenta con una marcación abierta sin egreso en la misma jornada. |
+| `InvalidAttendanceClockOutException` | `ERR_HR_INVALID_CLOCK_OUT` | 400 Bad Request | Se intenta asentar la salida laboral sin una marcación previa de ingreso o con una marca temporal cronológicamente anterior a la entrada. |
+| `ShiftConflictException` | `ERR_HR_SHIFT_CONFLICT` | 409 Conflict | Se intenta crear un turno con una denominación duplicada para el mismo taller o con horarios superpuestos de forma conflictiva. |
+| `WorkShiftNotFoundException` | `ERR_HR_SHIFT_NOT_FOUND` | 404 Not Found | No se localiza el turno de trabajo consultado en el catálogo del taller automotriz mediante el identificador unívoco provisto. |
+| `AttendanceRecordNotFoundException` | `ERR_HR_ATTENDANCE_NOT_FOUND` | 404 Not Found | No se encuentra la marcación de asistencia consultada para operaciones de salida, justificación administrativa o auditoría. |
+| `EmployeeProfileNotFoundException` | `ERR_HR_EMPLOYEE_NOT_FOUND` | 404 Not Found | No se localiza la ficha laboral del trabajador asociada al identificador de perfil o membresía de usuario suministrado. |
+| `PayrollPaymentNotFoundException` | `ERR_HR_PAYROLL_NOT_FOUND` | 404 Not Found | No se encuentra la liquidación salarial requerida para revisión, adición de ítems, aprobación contable o pago. |
+| `InvalidPayrollModificationException` | `ERR_HR_PAYROLL_ALREADY_LOCKED` | 409 Conflict | Se intenta añadir descuentos o bonificaciones a una boleta que ya se encuentra en estado aprobado o pagado. |
+| `AttendanceNotJustifiableException` | `ERR_HR_ATTENDANCE_NOT_JUSTIFIABLE` | 400 Bad Request | Se intenta registrar una justificación sobre una asistencia que ya fue calificada como puntual o que no admite regularización. |
+
 ---
 
 ### 8.3. 2.6.6.2. Interface Layer
@@ -357,7 +607,7 @@ public class HaversineGeofencingService {
   * `POST /api/v1/hr/payrolls/{payrollId}/bonuses`: Registra una bonificación por productividad o comisión a la boleta proforma (`AddPayrollBonusRequest`). Responde `200 OK` con `PayrollPaymentResource` o `409 Conflict`.
   * `POST /api/v1/hr/payrolls/{payrollId}/approve`: Aprueba formalmente la liquidación salarial fijando los montos definitivos. Responde `200 OK` con `PayrollPaymentResource`.
   * `POST /api/v1/hr/payrolls/{payrollId}/disburse`: Marca la nómina como efectivamente pagada, asociando el comprobante y referencia bancaria (`DisbursePayrollRequest`). Responde `200 OK` con `PayrollPaymentResource`.
-  * `GET /api/v1/hr/payrolls/export/sunat-rem`: Exporta el archivo estructurado oficial para la Planilla Mensual de Pagos de SUNAT (PLAME) en formato de texto plano (`.rem`). Recibe el parámetro `period` (`YYYY-MM`), valida que la nómina del periodo esté aprobada y genera la trama formateada con delimitadores de barra vertical (`|`) para importación directa en el aplicativo de SUNAT. Responde `200 OK` con cabecera `Content-Disposition: attachment; filename="0601{YYYYMM}{RUC}.rem"` y tipo `text/plain`.
+  * `GET /api/v1/hr/payrolls/export/sunat-rem`: Exporta el archivo estructurado oficial para la Planilla Mensual de Pagos de SUNAT (PLAME) en formato de texto plano (`.rem`). Recibe el parámetro `period` (`YYYY-MM`), valida que la nómina del periodo esté aprobada y genera la trama formateada con delimitadores de barra vertical (`|`) para importación directa en el aplicativo de SUNAT. Responde `200 OK` con cabecera `Content-Disposition` de tipo adjunto con nombre de archivo `"0601{YYYYMM}{RUC}.rem"` y tipo `text/plain`.
 
 ##### 4. `StaffProfilesController`
 * **Ruta Base:** `/api/v1/hr/employees`
@@ -375,8 +625,13 @@ public class HaversineGeofencingService {
 
 #### 8.3.2. REST Resources & DTOs (Records)
 
+Estructuras de datos inmutables modeladas como Java Records de transporte perimetral, decoradas con Jakarta Bean Validation 3.0 para validación sintáctica defensiva en el perímetro HTTP, segregadas canónicamente en `com.andeva.atelier.platform.hr.interfaces.rest.resources.requests` y `com.andeva.atelier.platform.hr.interfaces.rest.resources.responses`:
+
+##### 1. Recursos de Petición (Requests)
+Ubicados en el paquete `com.andeva.atelier.platform.hr.interfaces.rest.resources.requests`:
+
 ```java
-package com.andeva.atelier.platform.hr.interfaces.rest.resources;
+package com.andeva.atelier.platform.hr.interfaces.rest.resources.requests;
 
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
@@ -391,10 +646,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
 import java.util.UUID;
-
-// === Recursos de Petición (Inbound DTOs) ===
 
 public record CreateWorkShiftResource(
     @NotBlank(message = "El nombre del turno es obligatorio")
@@ -545,7 +797,7 @@ public record RegisterEmployeeProfileRequest(
 
     @NotBlank(message = "El esquema salarial es obligatorio")
     @Pattern(regexp = "FIXED_MONTHLY|DAILY_RATE|HOURLY_RATE|COMMISSION_BASED", message = "Esquema salarial no admitido")
-    String salaryType,
+    String compensationType,
 
     @NotBlank(message = "El cargo o puesto laboral es obligatorio")
     @Size(max = 100, message = "El cargo laboral no puede exceder 100 caracteres")
@@ -569,7 +821,7 @@ public record UpdateSalaryRequest(
 
     @NotBlank(message = "El esquema salarial es obligatorio")
     @Pattern(regexp = "FIXED_MONTHLY|DAILY_RATE|HOURLY_RATE|COMMISSION_BASED", message = "Esquema salarial no admitido")
-    String salaryType
+    String compensationType
 ) {}
 
 public record UpdateEmploymentStatusRequest(
@@ -577,8 +829,20 @@ public record UpdateEmploymentStatusRequest(
     @Pattern(regexp = "ACTIVE|ON_LEAVE|TERMINATED", message = "Estado laboral no válido")
     String employmentStatus
 ) {}
+```
 
-// === Recursos de Respuesta (Outbound DTOs) ===
+##### 2. Recursos de Respuesta (Responses)
+Ubicados en el paquete `com.andeva.atelier.platform.hr.interfaces.rest.resources.responses`:
+
+```java
+package com.andeva.atelier.platform.hr.interfaces.rest.resources.responses;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.UUID;
 
 public record WorkShiftResource(
     UUID id,
@@ -648,7 +912,7 @@ public record EmployeeProfileResource(
     UUID assignedShiftId,
     BigDecimal baseSalary,
     String currency,
-    String salaryType,
+    String compensationType,
     String jobTitle,
     String employmentStatus
 ) {}
@@ -658,24 +922,24 @@ public record EmployeeProfileResource(
 
 #### 8.3.3. REST Assemblers (Mappers)
 
-Los ensambladores de recursos operan bajo un modelo bidireccional estricto, aislando el protocolo HTTP de la lógica de aplicación y del modelo de dominio:
+Los ensambladores de recursos operan bajo un modelo bidireccional estricto, ubicados en el paquete canónico `com.andeva.atelier.platform.hr.interfaces.rest.transform`, aislando el protocolo HTTP de la lógica de aplicación y del modelo de dominio:
 
 * **Inbound Assemblers (Transformadores de Petición a Comando):**
   * `WorkShiftResourceAssembler`:
     * `CreateWorkShiftCommand toCommand(CreateWorkShiftResource resource, TenantId tenantId)`
     * `UpdateWorkShiftCommand toCommand(UpdateWorkShiftResource resource, UUID shiftId, TenantId tenantId)`
   * `AttendanceResourceAssembler`:
-    * `ClockInCommand toCommand(ClockInRequest resource, UUID membershipId, TenantId tenantId)`
-    * `ClockOutCommand toCommand(ClockOutRequest resource, UUID membershipId, TenantId tenantId)`
+    * `RecordClockInCommand toCommand(ClockInRequest resource, UUID membershipId, TenantId tenantId)`
+    * `RecordClockOutCommand toCommand(ClockOutRequest resource, UUID membershipId, TenantId tenantId)`
     * `JustifyAttendanceCommand toCommand(JustifyAttendanceRequest resource, UUID attendanceId, UUID justifiedBy, TenantId tenantId)`
   * `PayrollPaymentResourceAssembler`:
     * `GeneratePayrollCommand toCommand(GeneratePayrollRequest resource, TenantId tenantId)`
     * `AddPayrollDeductionCommand toCommand(AddPayrollDeductionRequest resource, UUID payrollId, TenantId tenantId)`
     * `AddPayrollBonusCommand toCommand(AddPayrollBonusRequest resource, UUID payrollId, TenantId tenantId)`
-    * `DisbursePayrollCommand toCommand(DisbursePayrollRequest resource, UUID payrollId, TenantId tenantId)`
+    * `DisbursePayrollPaymentCommand toCommand(DisbursePayrollRequest resource, UUID payrollId, TenantId tenantId)`
   * `EmployeeProfileResourceAssembler`:
     * `RegisterEmployeeProfileCommand toCommand(RegisterEmployeeProfileRequest resource, TenantId tenantId)`
-    * `AssignShiftCommand toCommand(AssignShiftRequest resource, UUID profileId, TenantId tenantId)`
+    * `AssignShiftToEmployeeCommand toCommand(AssignShiftRequest resource, UUID profileId, TenantId tenantId)`
     * `UpdateSalaryCommand toCommand(UpdateSalaryRequest resource, UUID profileId, TenantId tenantId)`
     * `UpdateEmploymentStatusCommand toCommand(UpdateEmploymentStatusRequest resource, UUID profileId, TenantId tenantId)`
 
@@ -689,7 +953,7 @@ Los ensambladores de recursos operan bajo un modelo bidireccional estricto, aisl
   * `PayrollPaymentResourceAssembler`:
     * `PayrollPaymentResource toResource(PayrollPayment entity)`
     * `PayrollPaymentSummaryResource toSummaryResource(PayrollPayment entity)`
-    * `PayrollItemResource toItemResource(PayrollItem entity)`
+    * `PayrollItemResource toItemResource(PayrollItemPersistenceEntity entity)`
   * `EmployeeProfileResourceAssembler`:
     * `EmployeeProfileResource toResource(EmployeeProfile entity)`
     * `List<EmployeeProfileResource> toResourceList(List<EmployeeProfile> entities)`
@@ -698,11 +962,15 @@ Los ensambladores de recursos operan bajo un modelo bidireccional estricto, aisl
 
 #### 8.3.4. Inbound ACL Facade (Open Host Service - OHS)
 
-Para mantener desacoplado el contexto de Recursos Humanos del contexto de Operaciones de Taller (MRO) e IAM, HR publica una fachada canónica bajo el patrón Open Host Service (OHS):
+Para mantener desacoplado el contexto de Recursos Humanos del contexto de Operaciones de Taller (MRO), IAM y Facturación, HR publica una fachada canónica bajo el patrón Open Host Service (OHS) en el paquete `com.andeva.atelier.platform.hr.interfaces.acl`, complementada con DTOs inmutables en `com.andeva.atelier.platform.hr.interfaces.acl.dto`:
 
 ```java
 package com.andeva.atelier.platform.hr.interfaces.acl;
 
+import com.andeva.atelier.platform.hr.interfaces.acl.dto.AttendanceSummaryAclDto;
+import com.andeva.atelier.platform.hr.interfaces.acl.dto.EmployeeWorkShiftAclDto;
+import com.andeva.atelier.platform.hr.interfaces.acl.dto.MechanicDutyProfileAclDto;
+import com.andeva.atelier.platform.hr.interfaces.acl.dto.PayrollLaborCostAclDto;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Optional;
@@ -723,20 +991,59 @@ public interface HumanResourcesContextFacade {
     /**
      * Obtiene el perfil operativo del mecánico incluyendo su cargo y turno asignado.
      */
-    Optional<MechanicDutyProfileDto> getMechanicProfile(UUID membershipId);
+    Optional<MechanicDutyProfileAclDto> getMechanicProfile(UUID membershipId);
 
     /**
      * Obtiene el resumen de asistencia diaria del empleado.
      */
-    Optional<AttendanceSummaryDto> getDailyAttendanceSummary(UUID membershipId, LocalDate date);
+    Optional<AttendanceSummaryAclDto> getDailyAttendanceSummary(UUID membershipId, LocalDate date);
+
+    /**
+     * Obtiene la definición del turno de trabajo regular asignado al colaborador.
+     */
+    Optional<EmployeeWorkShiftAclDto> getEmployeeWorkShift(UUID membershipId);
+
+    /**
+     * Consulta el costo laboral consolidado de la nómina para un periodo contable específico.
+     */
+    Optional<PayrollLaborCostAclDto> getPayrollLaborCost(UUID tenantId, LocalDate periodStart, LocalDate periodEnd);
 
     /**
      * Computa el acumulado devengado por comisiones de órdenes de trabajo cerradas en el periodo.
      */
     BigDecimal calculateAccruedProductivityBonus(UUID membershipId, LocalDate periodStart, LocalDate periodEnd);
 }
+```
 
-public record MechanicDutyProfileDto(
+##### DTOs Inmutables Exportados por la Fachada (Paquete `com.andeva.atelier.platform.hr.interfaces.acl.dto`)
+
+```java
+package com.andeva.atelier.platform.hr.interfaces.acl.dto;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.UUID;
+
+public record AttendanceSummaryAclDto(
+    UUID attendanceId,
+    UUID membershipId,
+    LocalDate date,
+    String status,
+    boolean isLate,
+    long minutesLate
+) {}
+
+public record EmployeeWorkShiftAclDto(
+    UUID membershipId,
+    UUID shiftId,
+    String shiftName,
+    LocalTime startTime,
+    LocalTime endTime,
+    int gracePeriodMinutes
+) {}
+
+public record MechanicDutyProfileAclDto(
     UUID membershipId,
     UUID branchId,
     String jobTitle,
@@ -745,11 +1052,15 @@ public record MechanicDutyProfileDto(
     boolean isOnDuty
 ) {}
 
-public record AttendanceSummaryDto(
-    UUID attendanceId,
-    String status,
-    boolean isLate,
-    long minutesLate
+public record PayrollLaborCostAclDto(
+    UUID tenantId,
+    LocalDate periodStart,
+    LocalDate periodEnd,
+    BigDecimal totalBaseAmount,
+    BigDecimal totalBonuses,
+    BigDecimal totalDeductions,
+    BigDecimal totalNetPaid,
+    String currency
 ) {}
 ```
 
@@ -757,16 +1068,18 @@ public record AttendanceSummaryDto(
 
 #### 8.3.5. Integration Events (Published / Consumed)
 
+Los eventos de integración representan el lenguaje publicado (*Published Language*) formal para la coreografía de eventos asíncronos entre Bounded Contexts, ubicados en el paquete `com.andeva.atelier.platform.hr.interfaces.events`:
+
 ##### 1. Eventos Publicados por HR hacia otros Bounded Contexts (Transactional Outbox)
-* **`MechanicCheckedInIntegrationEvent`:** Publicado cuando un mecánico marca ingreso válido en patio tras superar la geocerca. Consumido por Workshop Operations (MRO) para actualizar el tablero de disponibilidad en patio.
-* **`MechanicClockedOutIntegrationEvent`:** Publicado cuando un mecánico culmina su jornada laboral. Consumido por MRO para alertar si existen tareas inconclusas en su foso asignado.
-* **`PayrollDisbursedIntegrationEvent`:** Publicado cuando se ejecuta formalmente el pago y desembolso de la nómina. Consumido por el contexto de Facturación y Contabilidad para asentar la salida de caja/banco.
-* **`EmployeeProfileRegisteredIntegrationEvent`:** Publicado tras registrar el alta de un nuevo colaborador. Consumido por IAM y MRO para sincronizar catálogos y perfiles técnicos de patio.
+* **`MechanicClockedInIntegrationEvent`:** Publicado cuando un mecánico marca ingreso válido en patio tras superar la geocerca. Consumido por Workshop Operations (MRO) para actualizar el tablero de disponibilidad de operarios en patio.
+* **`MechanicClockedOutIntegrationEvent`:** Publicado cuando un mecánico culmina su jornada laboral. Consumido por MRO para alertar si existen faenas o tareas inconclusas en su foso asignado.
+* **`PayrollProcessedIntegrationEvent`:** Publicado cuando se procesa, aprueba o desembolsa formalmente la nómina salarial. Consumido por el contexto de Facturación y Contabilidad para asentar las obligaciones y salidas de tesorería del taller.
 
 ##### 2. Eventos Consumidos por HR desde otros Bounded Contexts
-* **`TenantMembershipCreatedIntegrationEvent` (emitido por IAM & Tenancy Context):** Notifica la creación de un nuevo miembro en el taller, permitiendo a HR aprovisionar su ficha laboral (`EmployeeProfile`).
+* **`TenantMembershipCreatedIntegrationEvent` (emitido por IAM & Tenancy Context):** Notifica la creación de un nuevo colaborador en el taller, permitiendo a HR aprovisionar su ficha laboral (`EmployeeProfile`).
 * **`WorkOrderCompletedIntegrationEvent` (emitido por Workshop Operations - MRO):** Informa la culminación pericial de una orden de trabajo por parte de un mecánico, permitiendo a HR computar comisiones devengadas para la siguiente liquidación salarial.
 
+---
 ### 8.4. 2.6.6.3. Application Layer
 
 La Capa de Aplicación del Bounded Context **Human Resources Management (HR)** opera como el orquestador transaccional bajo el paquete canónico `com.andeva.atelier.platform.hr.application`. Su función primordial reside en coordinar los flujos de negocio laborales del taller automotriz implementando el patrón arquitectónico CQRS (*Command Query Responsibility Segregation*), garantizando el determinismo en la parametrización de jornadas y turnos de trabajo, la verificación geodésica satelital de asistencia presencial de mecánicos en bahías de servicio, la liquidación matemática de haberes periódicos con conciliación de comisiones operativas de MRO, y la exportación fiscal de estructuras remunerativas conforme al formato oficial SUNAT PLAME.
@@ -781,8 +1094,10 @@ El diseño táctico de la Capa de Aplicación se articula sobre cuatro directric
 
 #### 8.4.1. Command Services & Implementations
 
+Los contratos de interfaces de comandos se definen en `com.andeva.atelier.platform.hr.application.commandservices`, mientras que sus implementaciones transaccionales se ubican en `com.andeva.atelier.platform.hr.application.internal.commandservices`. Se encuentran anotadas con `@Service` y aplican `@Transactional(isolation = Isolation.READ_COMMITTED, rollbackFor = Exception.class)`, garantizando consistencia transaccional en cada caso de uso mutacional:
+
 ##### 1. `WorkShiftCommandService` & `WorkShiftCommandServiceImpl`
-* **Paquete:** `com.andeva.atelier.platform.hr.application.services`
+* **Paquetes:** Interfaz pública en `com.andeva.atelier.platform.hr.application.commandservices` e implementación interna en `com.andeva.atelier.platform.hr.application.internal.commandservices`
 * **Responsabilidad:** Orquestar el ciclo de vida de los turnos de trabajo del personal del taller mecánico, asegurando la consistencia temporal de los horarios y ventanas de tolerancia.
 * **Operaciones:**
   * `Result<WorkShift, ApplicationError> handle(CreateWorkShiftCommand command)`:
@@ -804,12 +1119,12 @@ El diseño táctico de la Capa de Aplicación se articula sobre cuatro directric
     2. Persiste la entidad y retorna `Result.success(null)`.
 
 ##### 2. `AttendanceCommandService` & `AttendanceCommandServiceImpl`
-* **Paquete:** `com.andeva.atelier.platform.hr.application.services`
+* **Paquetes:** Interfaz pública en `com.andeva.atelier.platform.hr.application.commandservices` e implementación interna en `com.andeva.atelier.platform.hr.application.internal.commandservices`
 * **Responsabilidad:** Orquestar el registro probatorio de presencia física en patio, control de puntualidad georreferenciada y regularización formal de incidencias.
 * **Operaciones:**
   * `Result<AttendanceRecord, ApplicationError> handle(RecordClockInCommand command)`:
     1. Extrae el `membershipId` y `tenantId` del contexto de seguridad JWT autenticado.
-    2. Consulta al puerto de salida `TenancyAclGateway` para obtener las coordenadas centroidales y el radio de geocerca en metros configurado para la sucursal física (`branchId`). Si la sucursal no existe o no tiene geocerca válida, retorna error de precondición.
+    2. Consulta al puerto de salida `TenancyGeofenceAclService` para obtener las coordenadas centroidales y el radio de geocerca en metros configurado para la sucursal física (`branchId`). Si la sucursal no existe o no tiene geocerca válida, retorna error de precondición.
     3. Recupera el perfil laboral del empleado (`EmployeeProfile`) para constatar su turno asignado (`shiftId`) y su estado laboral activo.
     4. Recupera el turno de trabajo (`WorkShift`) correspondiente para evaluar la franja horaria de ingreso y el margen de tolerancia.
     5. Comprueba mediante `AttendanceRecordRepository.existsOpenClockInForToday` que el trabajador no posea una marcación abierta para la jornada en curso. Si ya registró ingreso hoy, retorna `ApplicationError.conflict("ERR_DUPLICATE_CLOCK_IN", "El colaborador ya cuenta con una marcación de ingreso activa para el día de hoy")`.
@@ -831,14 +1146,14 @@ El diseño táctico de la Capa de Aplicación se articula sobre cuatro directric
     5. Retorna `Result.success(record)`.
 
 ##### 3. `PayrollPaymentCommandService` & `PayrollPaymentCommandServiceImpl`
-* **Paquete:** `com.andeva.atelier.platform.hr.application.services`
+* **Paquetes:** Interfaz pública en `com.andeva.atelier.platform.hr.application.commandservices` e implementación interna en `com.andeva.atelier.platform.hr.application.internal.commandservices`
 * **Responsabilidad:** Orquestar el cálculo retributivo periódico, aplicación de bonos de patio y retenciones, bloqueo contable de boletas y dispersión salarial formal.
 * **Operaciones:**
   * `Result<PayrollPayment, ApplicationError> handle(GeneratePayrollCommand command)`:
     1. Recupera el expediente laboral del empleado (`EmployeeProfile`) para obtener su salario base pactado, tipo de contrato y régimen previsional.
     2. Consulta en `AttendanceRecordRepository` todas las marcaciones del colaborador dentro del rango temporal `[periodStart, periodEnd]`.
-    3. Computa las penalizaciones laborales: por cada tardanza injustificada aplica la escala de descuento porcentual reglamentaria; por cada inasistencia injustificada deduce la cuota diaria ordinaria ($baseSalary / 30$).
-    4. Consulta al puerto de salida perimetral `OperationsAclGateway` para obtener las comisiones monetarias devengadas por el mecánico en el período en virtud de órdenes de trabajo cerradas y facturadas en MRO.
+    3. Computa las penalizaciones laborales: por cada tardanza injustificada aplica la escala de descuento porcentual reglamentaria, y por cada inasistencia injustificada deduce la cuota diaria ordinaria ($baseSalary / 30$).
+    4. Consulta al puerto de salida perimetral `MroLaborCommissionAclService` para obtener las comisiones monetarias devengadas por el mecánico en el período en virtud de órdenes de trabajo cerradas y facturadas en MRO.
     5. Instancia la raíz de agregado `PayrollPayment` en estado `DRAFT` integrando el salario base, las comisiones de patio, las penalizaciones de asistencia y las retenciones legales de ley (ONP/AFP).
     6. Persiste la proforma en base de datos y publica `PayrollCalculatedEvent`.
     7. Retorna `Result.success(payrollPayment)`.
@@ -853,21 +1168,21 @@ El diseño táctico de la Capa de Aplicación se articula sobre cuatro directric
   * `Result<PayrollPayment, ApplicationError> handle(ApprovePayrollCommand command)`:
     1. Recupera la boleta y valida que su estado sea `DRAFT`.
     2. Invoca `payroll.approve(approverMembershipId)`, transicionando el estado a `APPROVED` y bloqueando cualquier alteración en sus partidas.
-    3. Genera la representación documental PDF preliminar de la boleta y la envía al colaborador mediante `TransactionalEmailGateway`.
+    3. Genera la representación documental PDF preliminar de la boleta y la envía al colaborador mediante `PayrollReceiptNotificationGateway`.
     4. Emite el evento de dominio `PayrollApprovedEvent`.
     5. Retorna `Result.success(payroll)`.
   * `Result<PayrollPayment, ApplicationError> handle(DisbursePayrollPaymentCommand command)`:
     1. Recupera la nómina en estado `APPROVED`.
     2. Invoca `payroll.disburse(disbursementReference, paymentMethod, disbursedAt)`, conmutando el estado a `PAID`.
-    3. Registra el evento de dominio `PayrollDisbursedEvent` y deposita el evento de integración `PayrollDisbursedIntegrationEvent` en el Transactional Outbox para asentar la salida financiera en Tesorería y Contabilidad.
+    3. Registra el evento de dominio `PayrollDisbursedEvent` y deposita el evento de integración `PayrollProcessedIntegrationEvent` en el Transactional Outbox para asentar la salida financiera en Tesorería y Contabilidad.
     4. Retorna `Result.success(payroll)`.
 
 ##### 4. `EmployeeProfileCommandService` & `EmployeeProfileCommandServiceImpl`
-* **Paquete:** `com.andeva.atelier.platform.hr.application.services`
+* **Paquetes:** Interfaz pública en `com.andeva.atelier.platform.hr.application.commandservices` e implementación interna en `com.andeva.atelier.platform.hr.application.internal.commandservices`
 * **Responsabilidad:** Administrar los expedientes de contratación laboral, asignación de turnos, categorización salarial y ciclo de vigencia de contratos.
 * **Operaciones:**
   * `Result<EmployeeProfile, ApplicationError> handle(RegisterEmployeeProfileCommand command)`:
-    1. Valida la existencia de la membresía y cuenta de usuario en IAM mediante `TenancyAclGateway.isValidMember(tenantId, membershipId)`. Si la cuenta no existe, retorna error de precondición.
+    1. Valida la existencia de la membresía y cuenta de usuario en IAM mediante `TenancyGeofenceAclService.isValidActiveMembership(tenantId, membershipId)`. Si la cuenta no existe, retorna error de precondición.
     2. Valida que el turno asignado exista y pertenezca al mismo taller automotriz (`WorkShiftRepository.findByIdAndTenantId`).
     3. Verifica que no exista un expediente laboral previo para dicha membresía (`EmployeeProfileRepository.existsByMembershipId`).
     4. Instancia la raíz de agregado `EmployeeProfile` en estado `ACTIVE` con su especialidad técnica, cargo de taller y salario pactado.
@@ -876,9 +1191,9 @@ El diseño táctico de la Capa de Aplicación se articula sobre cuatro directric
   * `Result<EmployeeProfile, ApplicationError> handle(AssignShiftToEmployeeCommand command)`:
     1. Recupera el expediente laboral del empleado por ID.
     2. Valida la existencia y estado activo del nuevo turno de trabajo.
-    3. Invoca `profile.assignShift(newShiftId)`.
+    3. Invoca `profile.assignShift(newWorkShiftId)`.
     4. Persiste los cambios y retorna `Result.success(profile)`.
-  * `Result<EmployeeProfile, ApplicationError> handle(UpdateEmployeeSalaryCommand command)`:
+  * `Result<EmployeeProfile, ApplicationError> handle(UpdateSalaryCommand command)`:
     1. Recupera el expediente del colaborador.
     2. Invoca `profile.updateSalary(newSalaryAmount, reason)`, actualizando la remuneración base y registrando la justificación del incremento.
     3. Persiste los cambios y retorna `Result.success(profile)`.
@@ -894,13 +1209,13 @@ El diseño táctico de la Capa de Aplicación se articula sobre cuatro directric
 Los servicios de consulta se ejecutan bajo aislamiento transaccional de solo lectura (`@Transactional(readOnly = true)`), suprimiendo la sobrecarga de dirty checking en Hibernate y optimizando las consultas SQL directas en PostgreSQL:
 
 ##### 1. `WorkShiftQueryService` & `WorkShiftQueryServiceImpl`
-* **Paquete:** `com.andeva.atelier.platform.hr.application.services`
+* **Paquetes:** Interfaz pública en `com.andeva.atelier.platform.hr.application.queryservices` e implementación interna en `com.andeva.atelier.platform.hr.application.internal.queryservices`
 * **Operaciones:**
   * `Optional<WorkShift> handle(GetWorkShiftByIdQuery query)`: Recupera un turno por identificador UUID con anotación `@Cacheable(value = "work-shifts", key = "#query.shiftId().value()")` sobre Caffeine Cache para acelerar la resolución repetitiva en marcaciones concurrentes.
   * `List<WorkShift> handle(ListWorkShiftsByTenantQuery query)`: Retorna el catálogo completo de turnos vigentes adscritos al taller automotriz ordenados alfabéticamente.
 
 ##### 2. `AttendanceQueryService` & `AttendanceQueryServiceImpl`
-* **Paquete:** `com.andeva.atelier.platform.hr.application.services`
+* **Paquetes:** Interfaz pública en `com.andeva.atelier.platform.hr.application.queryservices` e implementación interna en `com.andeva.atelier.platform.hr.application.internal.queryservices`
 * **Operaciones:**
   * `Optional<AttendanceRecord> handle(GetAttendanceRecordByIdQuery query)`: Recupera el detalle íntegro de una marcación individual por su identificador UUID.
   * `List<AttendanceResource> handle(ListAttendanceByBranchAndDateQuery query)`: Retorna el consolidado de asistencias de una sucursal específica para una fecha determinada, proyectando estatus de puntualidad (`ON_TIME`, `LATE`, `ABSENT`), minutos de tardanza y coordenadas satelitales reportadas.
@@ -908,7 +1223,7 @@ Los servicios de consulta se ejecutan bajo aislamiento transaccional de solo lec
   * `Optional<AttendanceResource> handle(GetTodayAttendanceByMembershipQuery query)`: Proyecta la marcación del día en curso para la terminal móvil del mecánico, permitiendo al frontend renderizar el estado del botón de ingreso/salida.
 
 ##### 3. `PayrollPaymentQueryService` & `PayrollPaymentQueryServiceImpl`
-* **Paquete:** `com.andeva.atelier.platform.hr.application.services`
+* **Paquetes:** Interfaz pública en `com.andeva.atelier.platform.hr.application.queryservices` e implementación interna en `com.andeva.atelier.platform.hr.application.internal.queryservices`
 * **Operaciones:**
   * `Optional<PayrollPayment> handle(GetPayrollPaymentByIdQuery query)`: Recupera la boleta de nómina individual con desglose de haberes básicos, comisiones de taller, bonificaciones extraordinarias y deducciones fiscales.
   * `PagedResult<PayrollPayment> handle(ListPayrollPaymentsByPeriodQuery query)`: Retorna la relación paginada de planillas del taller filtradas por período mensual y estado (`DRAFT`, `APPROVED`, `PAID`).
@@ -943,7 +1258,7 @@ Los servicios de consulta se ejecutan bajo aislamiento transaccional de solo lec
       5. Retorna la trama de texto completa lista para descarga con nomenclatura oficial `0601<RUC><AAAAMM>.rem`.
 
 ##### 4. `EmployeeProfileQueryService` & `EmployeeProfileQueryServiceImpl`
-* **Paquete:** `com.andeva.atelier.platform.hr.application.services`
+* **Paquetes:** Interfaz pública en `com.andeva.atelier.platform.hr.application.queryservices` e implementación interna en `com.andeva.atelier.platform.hr.application.internal.queryservices`
 * **Operaciones:**
   * `Optional<EmployeeProfile> handle(GetEmployeeProfileByIdQuery query)`: Recupera el expediente laboral por identificador UUID.
   * `Optional<EmployeeProfile> handle(GetEmployeeProfileByMembershipIdQuery query)`: Recupera la ficha de colaborador asociada a la membresía de IAM.
@@ -955,11 +1270,11 @@ Los servicios de consulta se ejecutan bajo aislamiento transaccional de solo lec
 #### 8.4.3. Domain Event Handlers & Integration Listeners
 
 ##### 1. `AttendanceDomainEventsHandler`
-* **Paquete:** `com.andeva.atelier.platform.hr.application.events`
+* **Paquete:** `com.andeva.atelier.platform.hr.application.internal.eventhandlers`
 * **Responsabilidad:** Reaccionar ante las incidencias de presencia física y sincronizar el estado laboral del taller.
 * **Manejadores:**
   * `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT) void on(EmployeeClockedInEvent event)`:
-    * Publica el evento de integración `MechanicCheckedInIntegrationEvent` en la tabla `outbox_messages` para que Workshop Operations actualice el tablero de disponibilidad de mecánicos en bahías de servicio.
+    * Publica el evento de integración `MechanicClockedInIntegrationEvent` en la tabla `outbox_messages` para que Workshop Operations actualice el tablero de disponibilidad de mecánicos en bahías de servicio.
   * `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT) void on(LateAttendanceRecordedEvent event)`:
     * Registra la penalización en el expediente del trabajador y genera una notificación preventiva en el panel de supervisión de taller.
   * `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT) void on(GeofenceViolationDetectedEvent event)`:
@@ -970,18 +1285,18 @@ Los servicios de consulta se ejecutan bajo aislamiento transaccional de solo lec
     * Actualiza las estadísticas disciplinarias del expediente laboral revocando el descuento monetario proforma.
 
 ##### 2. `PayrollDomainEventsHandler`
-* **Paquete:** `com.andeva.atelier.platform.hr.application.events`
+* **Paquete:** `com.andeva.atelier.platform.hr.application.internal.eventhandlers`
 * **Responsabilidad:** Gestionar los efectos colaterales de la aprobación y desembolso de nóminas.
 * **Manejadores:**
   * `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT) void on(PayrollCalculatedEvent event)`:
     * Notifica al administrador de recursos humanos sobre la generación de la planilla proforma para su revisión.
   * `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT) void on(PayrollApprovedEvent event)`:
-    * Genera la boleta de pago electrónica en PDF y la despacha al colaborador vía `TransactionalEmailGateway`.
+    * Genera la boleta de pago electrónica en PDF y la despacha al colaborador vía `PayrollReceiptNotificationGateway`.
   * `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT) void on(PayrollDisbursedEvent event)`:
-    * Serializa y publica `PayrollDisbursedIntegrationEvent` en la tabla `outbox_messages` del Shared Kernel para que los contextos de Facturación y Contabilidad registren el egreso financiero formal en bancos.
+    * Serializa y publica `PayrollProcessedIntegrationEvent` en la tabla `outbox_messages` del Shared Kernel para que los contextos de Facturación y Contabilidad registren el egreso financiero formal en bancos.
 
 ##### 3. `HumanResourcesExternalEventsListener`
-* **Paquete:** `com.andeva.atelier.platform.hr.application.events`
+* **Paquete:** `com.andeva.atelier.platform.hr.application.internal.eventhandlers`
 * **Responsabilidad:** Escuchar eventos de integración originados en otros Bounded Contexts y reaccionar dentro de la frontera de HR.
 * **Manejadores:**
   * `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT) void on(TenantMembershipCreatedIntegrationEvent event)`:
@@ -993,88 +1308,204 @@ Los servicios de consulta se ejecutan bajo aislamiento transaccional de solo lec
 
 #### 8.4.4. Outbound ACL Gateways & Remote Ports
 
-##### 1. `TenancyAclGateway`
-* **Paquete:** `com.andeva.atelier.platform.hr.application.internal.outboundservices.acl`
-* **Propósito:** Abstraer la interacción con el Bounded Context IAM & Tenancy para consultar parámetros de sucursales y validar identidades de colaboradores.
+Puertos de salida perimetrales orientados a la integración intermodular y servicios en la nube, ubicados en el paquete canónico `com.andeva.atelier.platform.hr.application.internal.outbound.acl`:
+
+##### 1. `TenancyGeofenceAclService`
+* **Paquete:** `com.andeva.atelier.platform.hr.application.internal.outbound.acl`
+* **Propósito:** Abstraer la interacción con el Bounded Context IAM & Tenancy para consultar parámetros de sucursales físicas y validar membresías laborales activas.
 * **Firma de Contrato:**
-  ```java
-  package com.andeva.atelier.platform.hr.application.internal.outboundservices.acl;
+```java
+package com.andeva.atelier.platform.hr.application.internal.outbound.acl;
 
-  import com.andeva.atelier.platform.hr.domain.model.valueobjects.GeoCoordinates;
-  import com.andeva.atelier.platform.shared.domain.model.valueobjects.BranchId;
-  import com.andeva.atelier.platform.shared.domain.model.valueobjects.TenantId;
-  import java.util.UUID;
+import com.andeva.atelier.platform.hr.domain.model.valueobjects.GeoCoordinates;
+import java.util.Optional;
+import java.util.UUID;
 
-  public interface TenancyAclGateway {
-      BranchGeofenceDto getBranchGeofenceData(BranchId branchId);
-      boolean isValidMember(TenantId tenantId, UUID membershipId);
-  }
+public interface TenancyGeofenceAclService {
+    Optional<BranchGeofenceData> getBranchGeofence(UUID branchId);
+    boolean isValidActiveMembership(UUID tenantId, UUID membershipId);
 
-  public record BranchGeofenceDto(
-      GeoCoordinates centroid,
-      double radiusMeters
-  ) {}
-  ```
-* **Implementación:** `TenancyAclGatewayImpl` delega en `TenancyContextFacade` de IAM aislando al módulo de HR de las entidades JPA internas de Tenancy.
+    record BranchGeofenceData(
+        GeoCoordinates centroid,
+        double radiusMeters
+    ) {}
+}
+```
+* **Implementación:** `TenancyGeofenceAclAdapter` delega en `TenancyContextFacade` de IAM, aislando al módulo de HR de los esquemas relacionales internos de Tenancy.
 
-##### 2. `OperationsAclGateway`
-* **Paquete:** `com.andeva.atelier.platform.hr.application.internal.outboundservices.acl`
+##### 2. `MroLaborCommissionAclService`
+* **Paquete:** `com.andeva.atelier.platform.hr.application.internal.outbound.acl`
 * **Propósito:** Recuperar de forma desacoplada la información de productividad técnica y comisiones devengadas desde Workshop Operations (MRO).
 * **Firma de Contrato:**
-  ```java
-  package com.andeva.atelier.platform.hr.application.internal.outboundservices.acl;
+```java
+package com.andeva.atelier.platform.hr.application.internal.outbound.acl;
 
-  import java.math.BigDecimal;
-  import java.time.LocalDate;
-  import java.util.UUID;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.UUID;
 
-  public interface OperationsAclGateway {
-      BigDecimal getAccruedMechanicCommissions(UUID membershipId, LocalDate startDate, LocalDate endDate);
-  }
-  ```
-* **Implementación:** `OperationsAclGatewayImpl` invoca `WorkshopOperationsFacade` bajo protocolo in-process tipado.
+public interface MroLaborCommissionAclService {
+    BigDecimal getAccruedMechanicCommissions(UUID membershipId, LocalDate startDate, LocalDate endDate);
+}
+```
+* **Implementación:** `MroLaborCommissionAclAdapter` invoca `WorkshopOperationsContextFacade` bajo protocolo in-process tipado.
 
-##### 3. `TransactionalEmailGateway`
-* **Paquete:** `com.andeva.atelier.platform.hr.application.internal.outboundservices.notifications`
-* **Propósito:** Enviar notificaciones transaccionales y boletas de pago digitales a los colaboradores mediante proveedores de correo en la nube (Resend / SendGrid).
+##### 3. `PayrollReceiptNotificationGateway`
+* **Paquete:** `com.andeva.atelier.platform.hr.application.internal.outbound.acl`
+* **Propósito:** Despachar notificaciones transaccionales y boletas de pago digitales a los colaboradores mediante proveedores de correo en la nube.
 * **Firma de Contrato:**
-  ```java
-  package com.andeva.atelier.platform.hr.application.internal.outboundservices.notifications;
+```java
+package com.andeva.atelier.platform.hr.application.internal.outbound.acl;
 
-  public interface TransactionalEmailGateway {
-      void sendPayrollVoucher(String recipientEmail, byte[] pdfVoucher, String period);
-  }
-  ```
-* **Implementación:** Adaptada en la capa de infraestructura mediante clientes HTTP asíncronos.
+import java.util.UUID;
 
-##### 4. `DomainEventPublisher`
-* **Paquete:** `com.andeva.atelier.platform.hr.application.internal.outboundservices.events`
-* **Propósito:** Despachar eventos de dominio e integración hacia la tabla `outbox_messages` del Shared Kernel para su posterior retransmisión hacia el broker de mensajería distribuida (RabbitMQ / Kafka).
+public interface PayrollReceiptNotificationGateway {
+    void sendPayrollReceiptPdf(UUID payrollId, String recipientEmail, byte[] pdfContent, String payPeriod);
+    void sendAttendanceAlert(UUID membershipId, String recipientEmail, String subject, String alertMessage);
+}
+```
+* **Implementación:** `ResendPayrollReceiptNotificationAdapter` canaliza las solicitudes mediante clientes REST HTTP seguros hacia Resend API.
+
+##### 4. `SunatPlameExportGateway`
+* **Paquete:** `com.andeva.atelier.platform.hr.application.internal.outbound.acl`
+* **Propósito:** Formatear y generar los archivos planos oficiales para la Planilla Mensual de Pagos (PLAME) ante la autoridad tributaria peruana SUNAT.
 * **Firma de Contrato:**
-  ```java
-  package com.andeva.atelier.platform.hr.application.internal.outboundservices.events;
+```java
+package com.andeva.atelier.platform.hr.application.internal.outbound.acl;
 
-  import com.andeva.atelier.platform.shared.domain.model.events.DomainEvent;
-  import java.util.List;
+import java.time.YearMonth;
+import java.util.UUID;
 
-  public interface DomainEventPublisher {
-      void publish(DomainEvent event);
-      void publishAll(List<DomainEvent> events);
-  }
-  ```
-* **Implementación:** `DomainEventPublisherImpl` inserta los eventos en la tabla `outbox_messages` dentro de la transacción activa de base de datos.
+public interface SunatPlameExportGateway {
+    String generateRemStructure(UUID tenantId, YearMonth period);
+    String generateJorStructure(UUID tenantId, YearMonth period);
+}
+```
+* **Implementación:** `SunatPlameExportAdapter` construye los registros planos estructurados con delimitadores de barra vertical.
 
 ---
 
+#### 8.4.5. Implementación de Fachada Inbound ACL
+
+Implementación operativa de la fachada Open Host Service (OHS), ubicada en `com.andeva.atelier.platform.hr.application.acl.HumanResourcesContextFacadeImpl`. Esta clase implementa la interfaz pública `HumanResourcesContextFacade` expuesta en `interfaces.acl`, orquestando llamadas en memoria hacia los servicios de consulta (`AttendanceQueryService`, `EmployeeProfileQueryService`, `WorkShiftQueryService`, `PayrollPaymentQueryService`), traduciendo los agregados hacia DTOs inmutables de fachada (`AttendanceSummaryAclDto`, `EmployeeWorkShiftAclDto`, `MechanicDutyProfileAclDto`, `PayrollLaborCostAclDto`) para el consumo de módulos clientes sin exponer el modelo interno:
+
+```java
+package com.andeva.atelier.platform.hr.application.acl;
+
+import com.andeva.atelier.platform.hr.application.queryservices.AttendanceQueryService;
+import com.andeva.atelier.platform.hr.application.queryservices.EmployeeProfileQueryService;
+import com.andeva.atelier.platform.hr.application.queryservices.PayrollPaymentQueryService;
+import com.andeva.atelier.platform.hr.application.queryservices.WorkShiftQueryService;
+import com.andeva.atelier.platform.hr.interfaces.acl.HumanResourcesContextFacade;
+import com.andeva.atelier.platform.hr.interfaces.acl.dto.AttendanceSummaryAclDto;
+import com.andeva.atelier.platform.hr.interfaces.acl.dto.EmployeeWorkShiftAclDto;
+import com.andeva.atelier.platform.hr.interfaces.acl.dto.MechanicDutyProfileAclDto;
+import com.andeva.atelier.platform.hr.interfaces.acl.dto.PayrollLaborCostAclDto;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Optional;
+import java.util.UUID;
+
+@Service
+@Transactional(readOnly = true)
+public class HumanResourcesContextFacadeImpl implements HumanResourcesContextFacade {
+
+    private final AttendanceQueryService attendanceQueryService;
+    private final EmployeeProfileQueryService employeeProfileQueryService;
+    private final WorkShiftQueryService workShiftQueryService;
+    private final PayrollPaymentQueryService payrollPaymentQueryService;
+
+    public HumanResourcesContextFacadeImpl(
+            AttendanceQueryService attendanceQueryService,
+            EmployeeProfileQueryService employeeProfileQueryService,
+            WorkShiftQueryService workShiftQueryService,
+            PayrollPaymentQueryService payrollPaymentQueryService) {
+        this.attendanceQueryService = attendanceQueryService;
+        this.employeeProfileQueryService = employeeProfileQueryService;
+        this.workShiftQueryService = workShiftQueryService;
+        this.payrollPaymentQueryService = payrollPaymentQueryService;
+    }
+
+    @Override
+    public boolean isMechanicOnDuty(UUID membershipId) {
+        return attendanceQueryService.hasActiveClockInToday(membershipId);
+    }
+
+    @Override
+    public Optional<UUID> getMechanicActiveBranchId(UUID membershipId) {
+        return attendanceQueryService.findActiveBranchByMembershipId(membershipId);
+    }
+
+    @Override
+    public Optional<MechanicDutyProfileAclDto> getMechanicProfile(UUID membershipId) {
+        return employeeProfileQueryService.findProfileByMembershipId(membershipId)
+                .map(profile -> {
+                    boolean onDuty = isMechanicOnDuty(membershipId);
+                    String shiftName = workShiftQueryService.findShiftNameById(profile.assignedShiftId())
+                            .orElse("Sin Turno");
+                    return new MechanicDutyProfileAclDto(
+                            profile.membershipId(),
+                            profile.branchId(),
+                            profile.jobTitle(),
+                            profile.assignedShiftId(),
+                            shiftName,
+                            onDuty
+                    );
+                });
+    }
+
+    @Override
+    public Optional<AttendanceSummaryAclDto> getDailyAttendanceSummary(UUID membershipId, LocalDate date) {
+        return attendanceQueryService.findByMembershipAndDate(membershipId, date)
+                .map(att -> new AttendanceSummaryAclDto(
+                        att.id(),
+                        att.membershipId(),
+                        date,
+                        att.status().name(),
+                        att.isLate(),
+                        att.minutesLate()
+                ));
+    }
+
+    @Override
+    public Optional<EmployeeWorkShiftAclDto> getEmployeeWorkShift(UUID membershipId) {
+        return employeeProfileQueryService.findProfileByMembershipId(membershipId)
+                .flatMap(profile -> workShiftQueryService.findById(profile.assignedShiftId()))
+                .map(shift -> new EmployeeWorkShiftAclDto(
+                        membershipId,
+                        shift.id().value(),
+                        shift.name(),
+                        shift.schedule().startTime(),
+                        shift.schedule().endTime(),
+                        shift.gracePeriod().minutes()
+                ));
+    }
+
+    @Override
+    public Optional<PayrollLaborCostAclDto> getPayrollLaborCost(UUID tenantId, LocalDate periodStart, LocalDate periodEnd) {
+        return payrollPaymentQueryService.calculatePeriodLaborCost(tenantId, periodStart, periodEnd);
+    }
+
+    @Override
+    public BigDecimal calculateAccruedProductivityBonus(UUID membershipId, LocalDate periodStart, LocalDate periodEnd) {
+        return payrollPaymentQueryService.calculateAccruedBonus(membershipId, periodStart, periodEnd);
+    }
+}
+```
+
+---
 ### 8.5. 2.6.6.4. Infrastructure Layer
 
 La Capa de Infraestructura de Human Resources Management implementa los adaptadores de salida y los mecanismos de persistencia técnica bajo el paquete canónico `com.andeva.atelier.platform.hr.infrastructure`. Materializa los puertos de repositorio de dominio sobre PostgreSQL 16 gestionado en Aiven Cloud a través de Spring Data JPA y Hibernate 6.5, administra el mapeo bidireccional aséptico mediante ensambladores y convertidores de tipos, gestiona las pasarelas anticorrupción in-process con IAM y Workshop Operations, despacha eventos atómicamente a la tabla `outbox_messages`, y orquesta el envío de boletas de pago vía Resend API.
 
-#### 8.5.1. JPA Entities
+#### 8.5.1. JPA Persistence Entities
 
 Las entidades JPA residen en el paquete `com.andeva.atelier.platform.hr.infrastructure.persistence.jpa.entities` y heredan de `AuditableAbstractPersistenceEntity` para asegurar campos uniformes de auditoría (`id`, `tenant_id`, `created_at`, `updated_at`, `deleted_at`, `version`).
 
-##### 1. `WorkShiftJpaEntity`
+##### 1. `WorkShiftPersistenceEntity`
 * **Tabla Relacional:** `work_shifts`
 * **Mapeo:**
 ```java
@@ -1091,7 +1522,7 @@ import java.util.UUID;
 }, indexes = {
     @Index(name = "idx_work_shifts_tenant_name", columnList = "tenant_id, name")
 })
-public class WorkShiftJpaEntity extends AuditableAbstractPersistenceEntity {
+public class WorkShiftPersistenceEntity extends AuditableAbstractPersistenceEntity {
     @Id
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
@@ -1118,7 +1549,7 @@ public class WorkShiftJpaEntity extends AuditableAbstractPersistenceEntity {
 }
 ```
 
-##### 2. `AttendanceRecordJpaEntity`
+##### 2. `AttendanceRecordPersistenceEntity`
 * **Tabla Relacional:** `attendance_records`
 * **Mapeo:**
 ```java
@@ -1135,7 +1566,7 @@ import java.util.UUID;
     @Index(name = "idx_attendance_membership_date", columnList = "membership_id, clock_in"),
     @Index(name = "idx_attendance_branch_date", columnList = "branch_id, clock_in")
 })
-public class AttendanceRecordJpaEntity extends AuditableAbstractPersistenceEntity {
+public class AttendanceRecordPersistenceEntity extends AuditableAbstractPersistenceEntity {
     @Id
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
@@ -1183,7 +1614,7 @@ public class AttendanceRecordJpaEntity extends AuditableAbstractPersistenceEntit
 }
 ```
 
-##### 3. `PayrollPaymentJpaEntity`
+##### 3. `PayrollPaymentPersistenceEntity`
 * **Tabla Relacional:** `payroll_payments`
 * **Mapeo:**
 ```java
@@ -1205,7 +1636,7 @@ import java.util.UUID;
     @Index(name = "idx_payroll_tenant_period", columnList = "tenant_id, period_start, period_end"),
     @Index(name = "idx_payroll_membership", columnList = "membership_id")
 })
-public class PayrollPaymentJpaEntity extends AuditableAbstractPersistenceEntity {
+public class PayrollPaymentPersistenceEntity extends AuditableAbstractPersistenceEntity {
     @Id
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
@@ -1247,13 +1678,13 @@ public class PayrollPaymentJpaEntity extends AuditableAbstractPersistenceEntity 
     private String paymentReference;
 
     @OneToMany(mappedBy = "payrollPayment", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<PayrollItemJpaEntity> items = new ArrayList<>();
+    private List<PayrollItemPersistenceEntity> items = new ArrayList<>();
 
     // Constructores, Getters y Setters JPA
 }
 ```
 
-##### 4. `PayrollItemJpaEntity`
+##### 4. `PayrollItemPersistenceEntity`
 * **Tabla Relacional:** `payroll_items`
 * **Mapeo:**
 ```java
@@ -1268,14 +1699,14 @@ import java.util.UUID;
 @Table(name = "payroll_items", indexes = {
     @Index(name = "idx_payroll_items_payment", columnList = "payroll_payment_id")
 })
-public class PayrollItemJpaEntity {
+public class PayrollItemPersistenceEntity {
     @Id
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "payroll_payment_id", nullable = false, updatable = false)
-    private PayrollPaymentJpaEntity payrollPayment;
+    private PayrollPaymentPersistenceEntity payrollPayment;
 
     @Column(name = "category", nullable = false, length = 20)
     private String category;
@@ -1296,7 +1727,7 @@ public class PayrollItemJpaEntity {
 }
 ```
 
-##### 5. `EmployeeProfileJpaEntity`
+##### 5. `EmployeeProfilePersistenceEntity`
 * **Tabla Relacional:** `employee_profiles`
 * **Mapeo:**
 ```java
@@ -1314,7 +1745,7 @@ import java.util.UUID;
     @Index(name = "idx_employee_profiles_branch", columnList = "branch_id"),
     @Index(name = "idx_employee_profiles_membership", columnList = "membership_id")
 })
-public class EmployeeProfileJpaEntity extends AuditableAbstractPersistenceEntity {
+public class EmployeeProfilePersistenceEntity extends AuditableAbstractPersistenceEntity {
     @Id
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
@@ -1338,7 +1769,7 @@ public class EmployeeProfileJpaEntity extends AuditableAbstractPersistenceEntity
     private String currency = "PEN";
 
     @Column(name = "salary_type", nullable = false, length = 20)
-    private String salaryType;
+    private String compensationType;
 
     @Column(name = "job_title", nullable = false, length = 100)
     private String jobTitle;
@@ -1354,7 +1785,7 @@ public class EmployeeProfileJpaEntity extends AuditableAbstractPersistenceEntity
 
 #### 8.5.2. Spring Data JPA Repositories
 
-Ubicados en el paquete `com.andeva.atelier.platform.hr.infrastructure.persistence.jpa.repositories`, proporcionan acceso optimizado y consultas derivadas mediante Spring Data JPA.
+Ubicados en el paquete `com.andeva.atelier.platform.hr.infrastructure.persistence.jpa.repositories`, proporcionan acceso optimizado y consultas derivadas mediante Spring Data JPA:
 
 ```java
 package com.andeva.atelier.platform.hr.infrastructure.persistence.jpa.repositories;
@@ -1369,33 +1800,33 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface SpringDataWorkShiftRepository extends JpaRepository<WorkShiftJpaEntity, UUID> {
-    Optional<WorkShiftJpaEntity> findByTenantIdAndName(UUID tenantId, String name);
-    List<WorkShiftJpaEntity> findAllByTenantId(UUID tenantId);
+public interface WorkShiftPersistenceRepository extends JpaRepository<WorkShiftPersistenceEntity, UUID> {
+    Optional<WorkShiftPersistenceEntity> findByTenantIdAndName(UUID tenantId, String name);
+    List<WorkShiftPersistenceEntity> findAllByTenantId(UUID tenantId);
     boolean existsByTenantIdAndName(UUID tenantId, String name);
 }
 
-public interface SpringDataAttendanceRecordRepository extends JpaRepository<AttendanceRecordJpaEntity, UUID> {
-    @Query("SELECT a FROM AttendanceRecordJpaEntity a WHERE a.membershipId = :membershipId AND a.clockIn >= :dayStart AND a.clockIn < :dayEnd AND a.clockOut IS NULL")
-    Optional<AttendanceRecordJpaEntity> findActiveClockIn(@Param("membershipId") UUID membershipId, @Param("dayStart") Instant dayStart, @Param("dayEnd") Instant dayEnd);
+public interface AttendanceRecordPersistenceRepository extends JpaRepository<AttendanceRecordPersistenceEntity, UUID> {
+    @Query("SELECT a FROM AttendanceRecordPersistenceEntity a WHERE a.membershipId = :membershipId AND a.clockIn >= :dayStart AND a.clockIn < :dayEnd AND a.clockOut IS NULL")
+    Optional<AttendanceRecordPersistenceEntity> findActiveClockIn(@Param("membershipId") UUID membershipId, @Param("dayStart") Instant dayStart, @Param("dayEnd") Instant dayEnd);
 
-    @Query("SELECT a FROM AttendanceRecordJpaEntity a WHERE a.branchId = :branchId AND a.clockIn >= :dayStart AND a.clockIn < :dayEnd ORDER BY a.clockIn DESC")
-    List<AttendanceRecordJpaEntity> findAllByBranchAndDay(@Param("branchId") UUID branchId, @Param("dayStart") Instant dayStart, @Param("dayEnd") Instant dayEnd);
+    @Query("SELECT a FROM AttendanceRecordPersistenceEntity a WHERE a.branchId = :branchId AND a.clockIn >= :dayStart AND a.clockIn < :dayEnd ORDER BY a.clockIn DESC")
+    List<AttendanceRecordPersistenceEntity> findAllByBranchAndDay(@Param("branchId") UUID branchId, @Param("dayStart") Instant dayStart, @Param("dayEnd") Instant dayEnd);
 
-    @Query("SELECT a FROM AttendanceRecordJpaEntity a WHERE a.membershipId = :membershipId AND a.clockIn >= :start AND a.clockIn <= :end ORDER BY a.clockIn ASC")
-    List<AttendanceRecordJpaEntity> findAllByMembershipAndPeriod(@Param("membershipId") UUID membershipId, @Param("start") Instant start, @Param("end") Instant end);
+    @Query("SELECT a FROM AttendanceRecordPersistenceEntity a WHERE a.membershipId = :membershipId AND a.clockIn >= :start AND a.clockIn <= :end ORDER BY a.clockIn ASC")
+    List<AttendanceRecordPersistenceEntity> findAllByMembershipAndPeriod(@Param("membershipId") UUID membershipId, @Param("start") Instant start, @Param("end") Instant end);
 }
 
-public interface SpringDataPayrollPaymentRepository extends JpaRepository<PayrollPaymentJpaEntity, UUID> {
-    Optional<PayrollPaymentJpaEntity> findByMembershipIdAndPeriodStartAndPeriodEnd(UUID membershipId, LocalDate periodStart, LocalDate periodEnd);
-    List<PayrollPaymentJpaEntity> findAllByTenantIdAndPeriodStartGreaterThanEqualAndPeriodEndLessThanEqual(UUID tenantId, LocalDate start, LocalDate end);
-    List<PayrollPaymentJpaEntity> findAllByMembershipIdOrderByPeriodStartDesc(UUID membershipId);
+public interface PayrollPaymentPersistenceRepository extends JpaRepository<PayrollPaymentPersistenceEntity, UUID> {
+    Optional<PayrollPaymentPersistenceEntity> findByMembershipIdAndPeriodStartAndPeriodEnd(UUID membershipId, LocalDate periodStart, LocalDate periodEnd);
+    List<PayrollPaymentPersistenceEntity> findAllByTenantIdAndPeriodStartGreaterThanEqualAndPeriodEndLessThanEqual(UUID tenantId, LocalDate start, LocalDate end);
+    List<PayrollPaymentPersistenceEntity> findAllByMembershipIdOrderByPeriodStartDesc(UUID membershipId);
 }
 
-public interface SpringDataEmployeeProfileRepository extends JpaRepository<EmployeeProfileJpaEntity, UUID> {
-    Optional<EmployeeProfileJpaEntity> findByMembershipId(UUID membershipId);
-    List<EmployeeProfileJpaEntity> findAllByBranchId(UUID branchId);
-    List<EmployeeProfileJpaEntity> findAllByTenantIdAndEmploymentStatus(UUID tenantId, String status);
+public interface EmployeeProfilePersistenceRepository extends JpaRepository<EmployeeProfilePersistenceEntity, UUID> {
+    Optional<EmployeeProfilePersistenceEntity> findByMembershipId(UUID membershipId);
+    List<EmployeeProfilePersistenceEntity> findAllByBranchId(UUID branchId);
+    List<EmployeeProfilePersistenceEntity> findAllByTenantIdAndEmploymentStatus(UUID tenantId, String status);
 }
 ```
 
@@ -1403,23 +1834,23 @@ public interface SpringDataEmployeeProfileRepository extends JpaRepository<Emplo
 
 #### 8.5.3. Repository Implementations & Adapters
 
-Ubicados en el paquete `com.andeva.atelier.platform.hr.infrastructure.persistence.jpa.adapters`, implementan los puertos de repositorio declarados en la Capa de Dominio, delegando en los repositorios Spring Data JPA y publicando eventos de dominio al `DomainEventPublisher`:
+Ubicados en el paquete `com.andeva.atelier.platform.hr.infrastructure.persistence.jpa.adapters`, implementan los puertos de repositorio declarados en la Capa de Dominio, delegando en los repositorios Spring Data JPA y publicando eventos de dominio al despachador de eventos:
 
 * **`WorkShiftRepositoryImpl`:** Implementa `WorkShiftRepository`. Mapea el agregado `WorkShift` a su entidad relacional mediante `WorkShiftPersistenceAssembler`. Persiste en PostgreSQL 16, extrae eventos de dominio acumulados mediante `pullDomainEvents()` y los despacha al publicador transaccional hacia `outbox_messages`. Implementa `findById`, `findByTenantIdAndName`, `findAllByTenantId` y `existsByTenantIdAndName`.
-* **`AttendanceRecordRepositoryImpl`:** Implementa `AttendanceRecordRepository`. Encapsula consultas de marcación abierta activa (`findActiveClockIn`), reportes diarios de asistencia por sucursal y rango temporal. Extrae eventos `AttendanceMarkedEvent` y `AttendanceJustifiedEvent` canalizándolos al publicador transaccional.
-* **`PayrollPaymentRepositoryImpl`:** Implementa `PayrollPaymentRepository`. Orquesta el guardado relacional en cascada (`CascadeType.ALL`, `orphanRemoval = true`) de partidas de nómina (`PayrollItemJpaEntity`). Extrae eventos de liquidación y desembolso (`PayrollCalculatedEvent`, `PayrollApprovedEvent`, `PayrollPaidEvent`) canalizándolos hacia `DomainEventPublisher`. Implementa búsquedas por periodo, colaborador y taller.
+* **`AttendanceRecordRepositoryImpl`:** Implementa `AttendanceRecordRepository`. Encapsula consultas de marcación abierta activa (`findActiveClockIn`), reportes diarios de asistencia por sucursal y rango temporal. Extrae eventos `EmployeeClockedInEvent` y `AttendanceJustifiedEvent` canalizándolos al publicador transaccional.
+* **`PayrollPaymentRepositoryImpl`:** Implementa `PayrollPaymentRepository`. Orquesta el guardado relacional en cascada (`CascadeType.ALL`, `orphanRemoval = true`) de partidas de nómina (`PayrollItemPersistenceEntity`). Extrae eventos de liquidación y desembolso (`PayrollCalculatedEvent`, `PayrollApprovedEvent`, `PayrollDisbursedEvent`) canalizándolos hacia `DomainEventPublisher`. Implementa búsquedas por periodo, colaborador y taller.
 * **`EmployeeProfileRepositoryImpl`:** Implementa `EmployeeProfileRepository`. Persiste fichas laborales de colaboradores automotrices, coordinando la asignación de turnos, sueldos base y estatus contractual activo o inactivo.
 
 ---
 
 #### 8.5.4. Persistence Assemblers & Data Mappers
 
-Ubicados en el paquete `com.andeva.atelier.platform.hr.infrastructure.persistence.jpa.transform`, gestionan la transformación bidireccional aséptica entre agregados puros del dominio y entidades relacionales mutables:
+Ubicados en el paquete `com.andeva.atelier.platform.hr.infrastructure.persistence.jpa.assemblers`, gestionan la transformación bidireccional aséptica entre agregados puros del dominio y entidades relacionales mutables:
 
-* **`WorkShiftPersistenceAssembler`:** Transforma bidireccionalmente entre el agregado puro `WorkShift` y `WorkShiftJpaEntity`. Provee métodos `toJpaEntity(WorkShift domain)` y `toDomain(WorkShiftJpaEntity entity)`. Reconstituye el agregado en memoria mediante métodos estáticos de fábrica controlados sin disparar eventos de dominio espurios.
-* **`AttendanceRecordPersistenceAssembler`:** Transforma bidireccionalmente entre `AttendanceRecord` y `AttendanceRecordJpaEntity`. Mapea objetos de valor `GeoCoordinates(BigDecimal latitude, BigDecimal longitude)` y `HaversineDistance(int meters)`. Reconstituye el estado de marcación (`AttendanceStatus`) y motivos justificados (`JustificationReason`, `JustifiedBy`, `JustifiedAt`).
-* **`PayrollPaymentPersistenceAssembler`:** Transforma bidireccionalmente entre `PayrollPayment` y `PayrollPaymentJpaEntity`. Reconstituye el agregado raíz y su colección inmutable de partidas de remuneración, bonos y deducciones (`PayrollItemJpaEntity`), asegurando la correspondencia referencial de claves foráneas y la precisión contable de `Money`.
-* **`EmployeeProfilePersistenceAssembler`:** Transforma bidireccionalmente entre `EmployeeProfile` y `EmployeeProfileJpaEntity`. Mapea `Salary(Money amount, SalaryType type)` y estados contractuales (`EmploymentStatus`).
+* **`WorkShiftPersistenceAssembler`:** Transforma bidireccionalmente entre el agregado puro `WorkShift` y `WorkShiftPersistenceEntity`. Provee métodos `toPersistenceEntity(WorkShift domain)` y `toDomain(WorkShiftPersistenceEntity entity)`. Reconstituye el agregado en memoria mediante métodos estáticos de fábrica controlados sin disparar eventos de dominio espurios.
+* **`AttendanceRecordPersistenceAssembler`:** Transforma bidireccionalmente entre `AttendanceRecord` y `AttendanceRecordPersistenceEntity`. Mapea objetos de valor `GeoCoordinates(double latitude, double longitude)` y `HaversineDistance(double meters)`. Reconstituye el estado de marcación (`AttendanceStatus`) y motivos justificados (`justificationReason`, `justifiedBy`, `justifiedAt`).
+* **`PayrollPaymentPersistenceAssembler`:** Transforma bidireccionalmente entre `PayrollPayment` y `PayrollPaymentPersistenceEntity`. Reconstituye el agregado raíz y su colección inmutable de partidas de remuneración, bonos y deducciones (`PayrollItemPersistenceEntity`), asegurando la correspondencia referencial de claves foráneas y la precisión contable de `Money`.
+* **`EmployeeProfilePersistenceAssembler`:** Transforma bidireccionalmente entre `EmployeeProfile` y `EmployeeProfilePersistenceEntity`. Mapea `baseSalary`, `compensationType` (`CompensationType`) y estados contractuales (`EmploymentStatus`).
 
 ---
 
@@ -1427,27 +1858,50 @@ Ubicados en el paquete `com.andeva.atelier.platform.hr.infrastructure.persistenc
 
 Ubicados en el paquete `com.andeva.atelier.platform.hr.infrastructure.persistence.jpa.converters`, normalizan automáticamente enumeraciones y objetos de valor hacia tipos relacionales estándar en PostgreSQL 16:
 
-* **`AttendanceStatusConverter`:** `@Converter(autoApply = true)` implementa `AttributeConverter<AttendanceStatus, String>`. Convierte entre la enumeración de dominio (`ON_TIME`, `LATE`, `ABSENT`, `JUSTIFIED`) y columna `VARCHAR(20)`.
-* **`PayrollStatusConverter`:** `@Converter(autoApply = true)` implementa `AttributeConverter<PayrollStatus, String>`. Convierte entre `PayrollStatus` (`DRAFT`, `CALCULATED`, `APPROVED`, `PAID`, `CANCELLED`) y columna `VARCHAR(20)`.
-* **`SalaryTypeConverter`:** `@Converter(autoApply = true)` implementa `AttributeConverter<SalaryType, String>`. Convierte entre `SalaryType` (`FIXED_MONTHLY`, `HOURLY`, `COMMISSION_BASED`) y columna `VARCHAR(20)`.
-* **`DeductionTypeConverter`:** `@Converter(autoApply = true)` implementa `AttributeConverter<DeductionType, String>`. Convierte tipos de deducción (`TARDINESS`, `UNJUSTIFIED_ABSENCE`, `HEALTH_INSURANCE`, `PENSION_AFP_ONP`, `JUDICIAL_RETENTION`, `OTHER`) a columna `VARCHAR(50)`.
-* **`BonusTypeConverter`:** `@Converter(autoApply = true)` implementa `AttributeConverter<BonusType, String>`. Convierte tipos de bonificación (`OVERTIME`, `WORKSHOP_COMMISSION`, `PERFORMANCE_TARGET`, `FAMILY_ALLOWANCE`, `HOLIDAY_GRATIFICATION`) a columna `VARCHAR(50)`.
-* **`EmploymentStatusConverter`:** `@Converter(autoApply = true)` implementa `AttributeConverter<EmploymentStatus, String>`. Convierte entre `EmploymentStatus` (`ACTIVE`, `ON_LEAVE`, `SUSPENDED`, `TERMINATED`) y columna `VARCHAR(20)`.
+* **`AttendanceStatusAttributeConverter`:** `@Converter(autoApply = true)` implementa `AttributeConverter<AttendanceStatus, String>`. Convierte entre la enumeración de dominio (`ON_TIME`, `LATE`, `ABSENT`, `EXCUSED`) y columna `VARCHAR(20)`.
+* **`PayrollStatusAttributeConverter`:** `@Converter(autoApply = true)` implementa `AttributeConverter<PayrollStatus, String>`. Convierte entre `PayrollStatus` (`DRAFT`, `APPROVED`, `PAID`, `CANCELLED`) y columna `VARCHAR(20)`.
+* **`CompensationTypeAttributeConverter`:** `@Converter(autoApply = true)` implementa `AttributeConverter<CompensationType, String>`. Convierte entre `CompensationType` (`MONTHLY_FIXED`, `HOURLY_RATE`) y columna `VARCHAR(20)`.
+* **`DeductionTypeAttributeConverter`:** `@Converter(autoApply = true)` implementa `AttributeConverter<DeductionType, String>`. Convierte tipos de deducción (`TARDINESS`, `UNJUSTIFIED_ABSENCE`, `EQUIPMENT_DAMAGE`, `LOAN_REPAYMENT`, `OTHER`) a columna `VARCHAR(50)`.
+* **`BonusTypeAttributeConverter`:** `@Converter(autoApply = true)` implementa `AttributeConverter<BonusType, String>`. Convierte tipos de bonificación (`PRODUCTIVITY`, `OVERTIME_HOURS`, `SPECIAL_MERIT`, `HOLIDAY_ALLOWANCE`) a columna `VARCHAR(50)`.
+* **`EmploymentStatusAttributeConverter`:** `@Converter(autoApply = true)` implementa `AttributeConverter<EmploymentStatus, String>`. Convierte entre `EmploymentStatus` (`ACTIVE`, `ON_LEAVE`, `TERMINATED`) y columna `VARCHAR(20)`.
 
 ---
 
 #### 8.5.6. External Gateways & Outbound Adapters
 
-Ubicados en el paquete `com.andeva.atelier.platform.hr.infrastructure.gateways`, comunican el contexto con servicios periféricos y módulos hermanos:
+Implementaciones de adaptadores de salida y pasarelas perimetrales reorganizadas en paquetes modulares bajo `com.andeva.atelier.platform.hr.infrastructure.external`:
 
-* **`TenancyAclAdapter`:** Implementa el puerto de aplicación `TenancyAclPort`. Conecta in-process con `TenancyContextFacade` (IAM & Tenancy) para resolver datos de sucursales físicas del taller (coordenadas geodésicas de latitud y longitud satelital WGS84 y radio de geocerca en metros) requeridos para la validación Haversine de marcaciones GPS.
-* **`OperationsAclAdapter`:** Implementa el puerto de aplicación `OperationsAclPort`. Conecta in-process con `WorkshopOperationsFacade` (Workshop Operations) para consultar comisiones por reparaciones vehiculares y horas hombre facturables acumuladas por mecánicos y técnicos en órdenes de trabajo liquidadas, integrándolas al cálculo de nómina.
-* **`TransactionalEmailGatewayImpl`:** Implementa el puerto de aplicación `TransactionalEmailGateway`. Cliente REST HTTPS sobre Spring `RestClient` que conecta con Resend API para el despacho asíncrono de boletas de pago en formato PDF firmado y notificaciones disciplinarias por tardanzas recurrentes.
-* **`GooglePlacesGeoGatewayImpl`:** Implementa el puerto de aplicación `GooglePlacesGeoGateway`. Conecta con Google Places API / Google Geocoding API mediante HTTP seguro con timeout de conexión de 3 segundos y política de *fallback* para resolución de direcciones postales de nuevas sedes sin bloquear el hilo de ejecución.
-* **`DomainEventPublisherImpl`:** Implementa el puerto de dominio `DomainEventPublisher`. Serializa eventos de dominio a JSON e inserta registros atómicamente en la tabla relacional `outbox_messages` dentro de la transacción activa de PostgreSQL 16, garantizando semántica de entrega al menos una vez hacia el bus de eventos mediante Debezium CDC.
+##### 1. `TenancyGeofenceAclAdapter` (Adaptador Anticorrupción hacia IAM & Tenancy)
+* **Paquete:** `com.andeva.atelier.platform.hr.infrastructure.external.acl.iam`
+* **Implementa:** `TenancyGeofenceAclService`
+* **Tecnología:** Invocación síncrona en memoria a través de `TenancyContextFacade` (modo monolito modular) con caché local Caffeine para centroides y radios de geocerca de sucursales.
+* **Responsabilidad:** Resuelve la información espacial y de membresía de los colaboradores en el taller físico (coordenadas geodésicas de latitud y longitud satelital WGS84 y radio perimetral autorizado en metros), abstrayendo al dominio de recursos humanos de los modelos de persistencia internos de IAM.
+
+##### 2. `MroLaborCommissionAclAdapter` (Adaptador Anticorrupción hacia Workshop Operations MRO)
+* **Paquete:** `com.andeva.atelier.platform.hr.infrastructure.external.acl.operations`
+* **Implementa:** `MroLaborCommissionAclService`
+* **Tecnología:** Fachada en memoria `WorkshopOperationsContextFacade` y consumo de eventos de integración.
+* **Responsabilidad:** Consulta y consolida las comisiones por mano de obra devengadas por técnicos y mecánicos en órdenes de trabajo culminadas y liquidadas dentro del periodo contable, integrándolas al cálculo de nómina y liquidación de haberes.
+
+##### 3. `ResendPayrollReceiptNotificationAdapter` (Pasarela de Correo Transaccional con Resend API)
+* **Paquete:** `com.andeva.atelier.platform.hr.infrastructure.external.mail.resend`
+* **Implementa:** `PayrollReceiptNotificationGateway`
+* **Tecnología:** Cliente REST HTTPS seguro sobre Spring 6 `RestClient` conectado a Resend API (`https://api.resend.com/emails`) con autenticación API Key y política de reintentos con retroceso exponencial.
+* **Responsabilidad:** Despacha asíncronamente las boletas de pago en formato PDF y comprobantes electrónicos de liquidación salarial a los correos electrónicos corporativos de los colaboradores, además de emitir notificaciones preventivas y alertas disciplinarias por tardanzas reiteradas.
+
+##### 4. `SunatPlameExportAdapter` (Exportador Estructurado para SUNAT PLAME)
+* **Paquete:** `com.andeva.atelier.platform.hr.infrastructure.external.tax.sunat`
+* **Implementa:** `SunatPlameExportGateway`
+* **Tecnología:** Generador de flujos de texto plano con codificación ISO-8859-1 (Latin-1) y delimitador de barra vertical (`|`) conforme a la especificación técnica de la Planilla Mensual de Pagos de SUNAT.
+* **Responsabilidad:** Transforma las liquidaciones de nómina aprobadas en los archivos estructurados oficiales `.rem` (Información de Ingresos, Descuentos y Aportaciones) y `.jor` (Jornada Laboral y Días Subsidiados), generando la trama estandarizada para su importación directa y validación en el aplicativo PDT Planilla Electrónica PLAME de la autoridad tributaria peruana.
+
+##### 5. `HrOutboxMessageRelayAdapter` (Adaptador de Mensajería Transaccional Outbox)
+* **Paquete:** `com.andeva.atelier.platform.hr.infrastructure.external.messaging.outbox`
+* **Implementa:** Despachador de mensajes transaccionales outbox
+* **Tecnología:** Persistencia transaccional directa sobre la tabla `outbox_messages` en PostgreSQL 16 con serialización JSONB mediante Jackson ObjectMapper.
+* **Responsabilidad:** Captura eventos de dominio e integración emitidos por los agregados de recursos humanos (`MechanicClockedInIntegrationEvent`, `MechanicClockedOutIntegrationEvent`, `PayrollProcessedIntegrationEvent`, etc.) y los persiste de manera atómica dentro de la misma transacción local ACID, habilitando su retransmisión asíncrona confiable con semántica de entrega al menos una vez hacia el bus de mensajería empresarial.
 
 ---
-
 ### 8.6. 2.6.6.5. Bounded Context Software Architecture Component Level Diagram
 
 En esta sección se formaliza la descomposición arquitectónica interna del contenedor central **API Application** (`com.andeva.atelier.platform`) en relación con el Bounded Context **Human Resources Management** (`com.andeva.atelier.platform.hr`), dando estricto cumplimiento al Nivel 3 (Component Diagram) del Modelo C4 y a las directrices establecidas en `report/assets/diagram-sources/c4-diagrams/c4-guidelines.md`.
@@ -1468,7 +1922,7 @@ A continuación, se detalla la especificación técnica de los siete componentes
 
 | Componente | Tipo de Elemento | Tecnologías | Responsabilidad | Relaciones |
 | :--- | :---: | :--- | :--- | :--- |
-| **HR REST Controllers & Resource Assemblers Component** | Componente | Spring MVC, SpringDoc OpenAPI, Jakarta Validation | Expone endpoints REST para turnos, marcación móvil GPS, justificaciones, cálculo de nóminas y expedientes laborales; valida contratos DTO y proyecta recursos REST. | Invocado por WebApp y Mobile Workshop. Despacha comandos de mutación y consultas de lectura a servicios CQRS. Utiliza ensambladores de recursos REST. |
+| **HR REST Controllers & Resource Assemblers Component** | Componente | Spring MVC, SpringDoc OpenAPI, Jakarta Validation | Expone endpoints REST para turnos, marcación móvil GPS, justificaciones, cálculo de nóminas y expedientes laborales, valida contratos DTO y proyecta recursos REST. | Invocado por WebApp y Mobile Workshop. Despacha comandos de mutación y consultas de lectura a servicios CQRS. Utiliza ensambladores de recursos REST. |
 | **HR CQRS Application Services Component** | Componente | Spring Service, Transactional, CQRS | Orquesta casos de uso de asignación de turnos, registro de asistencia geocercada, liquidación de planillas con integración SUNAT PLAME y gestión de expedientes bajo transacciones ACID. | Implementa contratos de comando y consulta. Invoca reglas de negocio en el núcleo de dominio. Delega en adaptadores de persistencia JPA y pasarelas de nube. Emite eventos de dominio hacia oyentes transaccionales. |
 | **HR Event Handlers & Transactional Dispatcher Component** | Componente | Spring Events, TransactionalEventListener, Outbox Pattern | Captura eventos de dominio locales de asistencia y nómina, canalizando eventos atómicos hacia outbox_messages para publicación asíncrona hacia MRO, Invoicing y CRM. | Escucha eventos de dominio de servicios de aplicación. Persiste mensajes transaccionales en PostgreSQL 16 mediante puertos de repositorio. Notifica a consumidores en módulos adyacentes. |
 | **HR Domain Model & Geofencing Calculation Engines Component** | Componente | Java 26, Domain Model, Records, Inmutabilidad | Encapsula invariantes de negocio, motor de geocerca esférica con fórmula de Haversine, cálculo algorítmico de horas efectivas y descuentos de planilla, y agregados inmutables. | Contiene raíces WorkShift, AttendanceRecord, PayrollPayment, EmployeeProfile. Ejecuta cálculos en HaversineGeofencingService y PayrollCalculationEngine. |
@@ -1492,7 +1946,7 @@ C4Component
     Container_Boundary(apiApp, "API Application (Monolito Modular - Spring Boot 3.5)") {
 
         Boundary(hrBoundary, "Human Resources Module (com.andeva.atelier.platform.hr)") {
-            Component(hrControllers, "HR REST Controllers & Resource Assemblers Component", "Spring MVC, OpenAPI, Jakarta Validation", "Expone endpoints REST para turnos, marcación móvil GPS, justificaciones, cálculo de nóminas y expedientes laborales; valida contratos DTO y proyecta recursos REST.")
+            Component(hrControllers, "HR REST Controllers & Resource Assemblers Component", "Spring MVC, OpenAPI, Jakarta Validation", "Expone endpoints REST para turnos, marcación móvil GPS, justificaciones, cálculo de nóminas y expedientes laborales, valida contratos DTO y proyecta recursos REST.")
             Component(hrAppServices, "HR CQRS Application Services Component", "Spring Service, Transactional, CQRS", "Orquesta casos de uso de asignación de turnos, registro de asistencia geocercada, liquidación de planillas con integración SUNAT PLAME y gestión de expedientes bajo transacciones ACID.")
             Component(hrEventHandlers, "HR Event Handlers & Transactional Dispatcher Component", "Spring Events, TransactionalEventListener, Outbox Pattern", "Captura eventos de dominio locales de asistencia y nómina, canalizando eventos atómicos hacia outbox_messages para publicación asíncrona hacia MRO, Invoicing y CRM.")
             Component(hrDomain, "HR Domain Model & Geofencing Calculation Engines Component", "Java 26, Domain Model, Records, Inmutabilidad", "Encapsula invariantes de negocio, motor de geocerca esférica con fórmula de Haversine, cálculo algorítmico de horas efectivas y descuentos de planilla, y agregados inmutables.")
@@ -1572,7 +2026,7 @@ El modelo estático de la Capa de Dominio de **Human Resources Management** ha s
 1. **Aislamiento Tecnológico y Pureza de Dominio:**
    El paquete `com.andeva.atelier.platform.hr.domain` carece intencionalmente de cualquier anotación o dependencia de frameworks externos (tales como `@Entity`, `@Table` de Jakarta Persistence, o `@Component`, `@Autowired` de Spring Framework). Todas las entidades y agregados se implementan como clases Java estándar (POJOs), garantizando que las pruebas unitarias se ejecuten en microsegundos sin requerir contextos de Spring ni contenedores de base de datos.
 2. **Erradicación de Primitive Obsession mediante TypedId:**
-   Ningún identificador de entidad o concepto con reglas de validación intrínsecas se modela mediante tipos primitivos planos (`UUID`, `String`, `double`). Se emplean registros Java inmutables (`record`) para los identificadores (`WorkShiftId`, `AttendanceRecordId`, `PayrollPaymentId`, `PayrollItemId`, `EmployeeProfileId`, `TenantId`, `BranchId`, `TenantMembershipId`) y objetos de valor (`WorkShiftSchedule`, `GracePeriod`, `GeoCoordinates`, `HaversineDistance`, `PaymentPeriod`, `AttendanceJustification`, `Money`), los cuales validan sus invariantes en constructores compactos y previenen la instanciación de estados inválidos en tiempo de ejecución.
+   Ningún identificador de entidad o concepto con reglas de validación intrínsecas se modela mediante tipos primitivos planos (`UUID`, `String`, `double`). Se emplean registros Java inmutables (`record`) para los identificadores (`WorkShiftId`, `AttendanceRecordId`, `PayrollPaymentId`, `PayrollItemId`, `EmployeeProfileId`, `TenantId`, `BranchId`, `TenantMembershipId`) y objetos de valor (`ShiftSchedule`, `GracePeriod`, `GeoCoordinates`, `HaversineDistance`, `PayPeriod`, `AttendanceJustification`, `Money`), los cuales validan sus invariantes en constructores compactos y previenen la instanciación de estados inválidos en tiempo de ejecución.
 3. **Consistencia Transaccional en Raíces de Agregado:**
    Las cuatro raíces de agregado delimitan fronteras transaccionales atómicas:
    - **WorkShift:** Custodia la franja horaria reglamentaria y el periodo de tolerancia, garantizando que la hora de inicio y fin sean consistentes y que la tolerancia en minutos no exceda los límites normativos.
@@ -1594,35 +2048,35 @@ En la siguiente tabla se documenta el catálogo exhaustivo de clases, miembros, 
 
 | Clase o Estructura | Elemento | Firma o Tipo | Ámbito | Descripción, Relaciones y Reglas de Negocio |
 | :---: | :---: | :--- | :---: | :--- |
-| **WorkShift** | Atributos | `WorkShiftId id`<br>`TenantId tenantId`<br>`String name`<br>`WorkShiftSchedule schedule`<br>`GracePeriod gracePeriod`<br>`boolean isActive` | Privado | Raíz de agregado de turnos laborales de taller. Extiende `AbstractDomainAggregateRoot<WorkShiftId>`. Custodia la delimitación de horarios y tolerancia oficial. |
-| **WorkShift** | Factorías y Métodos | `WorkShift create(TenantId, String, LocalTime, LocalTime, int)`<br>`void updateSchedule(String, LocalTime, LocalTime, int)`<br>`void deactivate()`<br>`void activate()`<br>`boolean isLate(LocalTime)`<br>`boolean isWithinWorkingHours(LocalTime)`<br>`WorkShiftId id()`<br>`TenantId tenantId()`<br>`WorkShiftSchedule schedule()`<br>`GracePeriod gracePeriod()`<br>`boolean isActive()` | Público | `create()` inicializa el turno en estado activo y emite `WorkShiftCreatedEvent`. `updateSchedule()` modifica parámetros y registra `WorkShiftUpdatedEvent`. `isLate()` evalúa si la hora de ingreso excede el umbral de gracia. |
+| **WorkShift** | Atributos | `WorkShiftId id`<br>`TenantId tenantId`<br>`String name`<br>`ShiftSchedule schedule`<br>`GracePeriod gracePeriod`<br>`boolean isActive` | Privado | Raíz de agregado de turnos laborales de taller. Extiende `AbstractDomainAggregateRoot<WorkShiftId>`. Custodia la delimitación de horarios y tolerancia oficial. |
+| **WorkShift** | Factorías y Métodos | `WorkShift create(TenantId, String, LocalTime, LocalTime, int)`<br>`void updateSchedule(String, LocalTime, LocalTime, int)`<br>`void deactivate()`<br>`void activate()`<br>`boolean isLate(LocalTime)`<br>`boolean isWithinWorkingHours(LocalTime)`<br>`WorkShiftId id()`<br>`TenantId tenantId()`<br>`ShiftSchedule schedule()`<br>`GracePeriod gracePeriod()`<br>`boolean isActive()` | Público | `create()` inicializa el turno en estado activo y emite `WorkShiftCreatedEvent`. `updateSchedule()` modifica parámetros y registra `WorkShiftUpdatedEvent`. `isLate()` evalúa si la hora de ingreso excede el umbral de gracia. |
 | **AttendanceRecord** | Atributos | `AttendanceRecordId id`<br>`TenantId tenantId`<br>`BranchId branchId`<br>`TenantMembershipId membershipId`<br>`WorkShiftId shiftId`<br>`Instant clockIn`<br>`Instant clockOut`<br>`AttendanceStatus status`<br>`GeoCoordinates coordinates`<br>`HaversineDistance distanceToBranch`<br>`AttendanceJustification justification` | Privado | Raíz de agregado de marcación presencial. Extiende `AbstractDomainAggregateRoot<AttendanceRecordId>`. Almacena evidencia GPS y distancia calculada frente a la sucursal. |
 | **AttendanceRecord** | Factorías y Operaciones | `AttendanceRecord recordClockIn(TenantId, BranchId, TenantMembershipId, WorkShift, GeoCoordinates, HaversineGeofencingService)`<br>`void recordClockOut(Instant)`<br>`void justify(String, TenantMembershipId)`<br>`AttendanceRecord recordAbsent(TenantId, BranchId, TenantMembershipId, WorkShiftId, LocalDate)`<br>`AttendanceRecordId id()`<br>`AttendanceStatus status()`<br>`Instant clockIn()`<br>`Instant clockOut()`<br>`GeoCoordinates coordinates()`<br>`HaversineDistance distanceToBranch()` | Público | `recordClockIn()` valida la geocerca circular in-memory (radio $\le 150$ m), clasifica puntualidad y registra `EmployeeClockedInEvent` o `LateAttendanceRecordedEvent`. `recordClockOut()` asienta el fin de jornada. `justify()` regulariza incidencias conmutable a `EXCUSED`. |
-| **PayrollPayment** | Atributos | `PayrollPaymentId id`<br>`TenantId tenantId`<br>`TenantMembershipId membershipId`<br>`PaymentPeriod period`<br>`Money baseAmount`<br>`Money deductions`<br>`Money bonuses`<br>`Money totalPaid`<br>`PayrollStatus status`<br>`Instant paidAt`<br>`String paymentReference`<br>`List<PayrollItem> items` | Privado | Raíz de agregado de liquidación salarial. Extiende `AbstractDomainAggregateRoot<PayrollPaymentId>`. Composición 1 a 1..* con `PayrollItem`. |
-| **PayrollPayment** | Factorías y Ciclo de Vida | `PayrollPayment calculate(TenantId, TenantMembershipId, PaymentPeriod, Money, List<PayrollItem>)`<br>`void addDeduction(String, Money, DeductionType, LocalDate)`<br>`void addBonus(String, Money, BonusType, LocalDate)`<br>`void approve(TenantMembershipId)`<br>`void disburse(String, Instant)`<br>`void cancel(String)`<br>`PayrollPaymentId id()`<br>`Money totalPaid()`<br>`PayrollStatus status()`<br>`List<PayrollItem> items()` | Público | `calculate()` genera la liquidación proforma en estado `DRAFT` y emite `PayrollCalculatedEvent`. `approve()` formaliza la aprobación contable emitiendo `PayrollApprovedEvent`. `disburse()` asienta la transferencia bancaria conmutando a `PAID` y emite `PayrollDisbursedEvent`. Bloquea mutaciones tras su aprobación. |
-| **EmployeeProfile** | Atributos | `EmployeeProfileId id`<br>`TenantId tenantId`<br>`BranchId branchId`<br>`TenantMembershipId membershipId`<br>`WorkShiftId assignedShiftId`<br>`Money baseSalary`<br>`SalaryType salaryType`<br>`String jobTitle`<br>`List<String> specialties`<br>`EmploymentStatus employmentStatus` | Privado | Raíz de agregado del expediente laboral y perfil técnico del operario. Extiende `AbstractDomainAggregateRoot<EmployeeProfileId>`. Enlaza con IAM mediante `TenantMembershipId`. |
-| **EmployeeProfile** | Factorías y Operaciones | `EmployeeProfile register(TenantId, BranchId, TenantMembershipId, WorkShiftId, Money, SalaryType, String, List<String>)`<br>`void assignShift(WorkShiftId)`<br>`void updateSalary(Money, SalaryType)`<br>`void changeBranch(BranchId)`<br>`void terminateEmployment()`<br>`EmployeeProfileId id()`<br>`EmploymentStatus employmentStatus()`<br>`Money baseSalary()`<br>`WorkShiftId assignedShiftId()` | Público | `register()` asienta el alta de personal en estado `ACTIVE` registrando `EmployeeProfileRegisteredEvent`. `assignShift()` actualiza el turno emitiendo `EmployeeShiftAssignedEvent`. `terminateEmployment()` concluye la relación contractual inhabilitando asignaciones operativas en foso. |
+| **PayrollPayment** | Atributos | `PayrollPaymentId id`<br>`TenantId tenantId`<br>`TenantMembershipId membershipId`<br>`PayPeriod period`<br>`Money baseAmount`<br>`Money deductions`<br>`Money bonuses`<br>`Money totalPaid`<br>`PayrollStatus status`<br>`Instant paidAt`<br>`String paymentReference`<br>`List<PayrollItem> items` | Privado | Raíz de agregado de liquidación salarial. Extiende `AbstractDomainAggregateRoot<PayrollPaymentId>`. Composición 1 a 1..* con `PayrollItem`. |
+| **PayrollPayment** | Factorías y Ciclo de Vida | `PayrollPayment calculate(TenantId, TenantMembershipId, PayPeriod, Money, List<PayrollItem>)`<br>`void addDeduction(String, Money, DeductionType, LocalDate)`<br>`void addBonus(String, Money, BonusType, LocalDate)`<br>`void approve(TenantMembershipId)`<br>`void disburse(String, Instant)`<br>`void cancel(String)`<br>`PayrollPaymentId id()`<br>`Money totalPaid()`<br>`PayrollStatus status()`<br>`List<PayrollItem> items()` | Público | `calculate()` genera la liquidación proforma en estado `DRAFT` y emite `PayrollCalculatedEvent`. `approve()` formaliza la aprobación contable emitiendo `PayrollApprovedEvent`. `disburse()` asienta la transferencia bancaria conmutando a `PAID` y emite `PayrollDisbursedEvent`. Bloquea mutaciones tras su aprobación. |
+| **EmployeeProfile** | Atributos | `EmployeeProfileId id`<br>`TenantId tenantId`<br>`BranchId branchId`<br>`TenantMembershipId membershipId`<br>`WorkShiftId assignedShiftId`<br>`Money baseSalary`<br>`CompensationType compensationType`<br>`String jobTitle`<br>`List<String> specialties`<br>`EmploymentStatus employmentStatus` | Privado | Raíz de agregado del expediente laboral y perfil técnico del operario. Extiende `AbstractDomainAggregateRoot<EmployeeProfileId>`. Enlaza con IAM mediante `TenantMembershipId`. |
+| **EmployeeProfile** | Factorías y Operaciones | `EmployeeProfile register(TenantId, BranchId, TenantMembershipId, WorkShiftId, Money, CompensationType, String, List<String>)`<br>`void assignShift(WorkShiftId)`<br>`void updateCompensation(Money, CompensationType)`<br>`void changeBranch(BranchId)`<br>`void terminateEmployment()`<br>`EmployeeProfileId id()`<br>`EmploymentStatus employmentStatus()`<br>`Money baseSalary()`<br>`WorkShiftId assignedShiftId()` | Público | `register()` asienta el alta de personal en estado `ACTIVE` registrando `EmployeeProfileRegisteredEvent`. `assignShift()` actualiza el turno emitiendo `ShiftAssignedEvent`. `terminateEmployment()` concluye la relación contractual inhabilitando asignaciones operativas en foso. |
 | **PayrollItem** | Entidad Dependiente | `PayrollItemId id`<br>`PayrollPaymentId payrollPaymentId`<br>`PayrollItemCategory category`<br>`String concept`<br>`Money amount`<br>`Optional<DeductionType> deductionType`<br>`Optional<BonusType> bonusType`<br>`LocalDate date` | Privado / Público | Entidad dependiente subordinada a `PayrollPayment`. Modela partidas individuales de retención monetaria o bonificación económica por productividad de patio. Métodos factoría `deduction()` y `bonus()`. |
 | **HaversineGeofencingService** | Servicio de Dominio | `HaversineDistance calculateDistance(GeoCoordinates, GeoCoordinates)`<br>`boolean isWithinGeofence(GeoCoordinates, GeoCoordinates, double)` | Público | Servicio sin estado. Calcula la distancia ortodrómica geodésica esférica en microsegundos y valida la presencia física del colaborador dentro del radio autorizado de la sucursal. |
-| **PayrollCalculationEngine** | Servicio de Dominio | `PayrollPayment calculatePayroll(TenantId, TenantMembershipId, PaymentPeriod, Money, List<AttendanceRecord>, List<MroCommissionDto>)` | Público | Servicio sin estado. Consolida el historial de marcaciones, liquida descuentos por tardanzas e inasistencias, acumula bonificaciones por órdenes de mantenimiento mecánico cerradas y genera el agregado `PayrollPayment` en borrador. |
+| **PayrollCalculationEngine** | Servicio de Dominio | `PayrollPayment calculatePayroll(TenantId, TenantMembershipId, PayPeriod, Money, List<AttendanceRecord>, List<MroCommissionDto>)` | Público | Servicio sin estado. Consolida el historial de marcaciones, liquida descuentos por tardanzas e inasistencias, acumula bonificaciones por órdenes de mantenimiento mecánico cerradas y genera el agregado `PayrollPayment` en borrador. |
 | **WorkShiftRepository** | Puerto de Repositorio | `WorkShift save(WorkShift)`<br>`Optional<WorkShift> findById(WorkShiftId)`<br>`Optional<WorkShift> findByTenantIdAndName(TenantId, String)`<br>`List<WorkShift> findAllByTenantId(TenantId)`<br>`boolean existsByTenantIdAndName(TenantId, String)` | Público | Contrato de persistencia agnóstica para el catálogo de turnos laborales y verificación de unicidad de denominación por taller automotriz. |
 | **AttendanceRecordRepository** | Puerto de Repositorio | `AttendanceRecord save(AttendanceRecord)`<br>`Optional<AttendanceRecord> findById(AttendanceRecordId)`<br>`Optional<AttendanceRecord> findActiveByMembershipAndDate(TenantMembershipId, LocalDate)`<br>`List<AttendanceRecord> findAllByBranchIdAndDate(BranchId, LocalDate)`<br>`List<AttendanceRecord> findAllByMembershipAndPeriod(TenantMembershipId, Instant, Instant)`<br>`boolean hasActiveClockIn(TenantMembershipId, LocalDate)` | Público | Contrato de persistencia agnóstica para marcaciones históricas, detección de jornadas abiertas y reportes de presencia por sucursal física. |
-| **PayrollPaymentRepository** | Puerto de Repositorio | `PayrollPayment save(PayrollPayment)`<br>`Optional<PayrollPayment> findById(PayrollPaymentId)`<br>`Optional<PayrollPayment> findByMembershipAndPeriod(TenantMembershipId, PaymentPeriod)`<br>`List<PayrollPayment> findAllByTenantIdAndPeriod(TenantId, PaymentPeriod)`<br>`List<PayrollPayment> findAllByMembershipId(TenantMembershipId)` | Público | Contrato de persistencia agnóstica para liquidaciones salariales periódicas y seguimiento contable de boletas de remuneración. |
+| **PayrollPaymentRepository** | Puerto de Repositorio | `PayrollPayment save(PayrollPayment)`<br>`Optional<PayrollPayment> findById(PayrollPaymentId)`<br>`Optional<PayrollPayment> findByMembershipAndPeriod(TenantMembershipId, PayPeriod)`<br>`List<PayrollPayment> findAllByTenantIdAndPeriod(TenantId, PayPeriod)`<br>`List<PayrollPayment> findAllByMembershipId(TenantMembershipId)` | Público | Contrato de persistencia agnóstica para liquidaciones salariales periódicas y seguimiento contable de boletas de remuneración. |
 | **EmployeeProfileRepository** | Puerto de Repositorio | `EmployeeProfile save(EmployeeProfile)`<br>`Optional<EmployeeProfile> findById(EmployeeProfileId)`<br>`Optional<EmployeeProfile> findByMembershipId(TenantMembershipId)`<br>`List<EmployeeProfile> findAllByBranchId(BranchId)`<br>`List<EmployeeProfile> findAllActiveByTenantId(TenantId)` | Público | Contrato de persistencia agnóstica para expedientes de personal operativo con filtrado por sucursal física y estado contractual activo. |
 | **WorkShiftId** | Identificador Tipado | `UUID value` | Público | Registro inmutable (`record`) que realiza `TypedId<UUID>`. Identificador unívoco universal de turno laboral. |
 | **AttendanceRecordId** | Identificador Tipado | `UUID value` | Público | Registro inmutable (`record`) que realiza `TypedId<UUID>`. Identificador unívoco universal de marcación presencial. |
 | **PayrollPaymentId** | Identificador Tipado | `UUID value` | Público | Registro inmutable (`record`) que realiza `TypedId<UUID>`. Identificador unívoco universal de liquidación salarial. |
 | **PayrollItemId** | Identificador Tipado | `UUID value` | Público | Registro inmutable (`record`) que realiza `TypedId<UUID>`. Identificador unívoco universal de partida analítica de nómina. |
 | **EmployeeProfileId** | Identificador Tipado | `UUID value` | Público | Registro inmutable (`record`) que realiza `TypedId<UUID>`. Identificador unívoco universal de perfil técnico del colaborador. |
-| **WorkShiftSchedule** | Objeto de Valor | `LocalTime startTime`<br>`LocalTime endTime`<br>`boolean spansOverMidnight` | Público | Registro inmutable (`record`). Delimitación horaria de la jornada laboral con soporte para turnos que cruzan la medianoche y método `isWithinWindow()`. |
+| **ShiftSchedule** | Objeto de Valor | `LocalTime startTime`<br>`LocalTime endTime`<br>`boolean spansOverMidnight` | Público | Registro inmutable (`record`). Delimitación horaria de la jornada laboral con soporte para turnos que cruzan la medianoche y método `isWithinWindow()`. |
 | **GracePeriod** | Objeto de Valor | `int minutes` | Público | Registro inmutable (`record`). Tolerancia reglamentaria de ingreso acotada entre 0 y 60 minutos con método de consulta `hasExpired()`. |
 | **GeoCoordinates** | Objeto de Valor | `double latitude`<br>`double longitude` | Público | Registro inmutable (`record`). Par ordenado de latitud y longitud en el elipsoide WGS84 con validación estricta de rangos geográficos. |
 | **HaversineDistance** | Objeto de Valor | `double meters` | Público | Registro inmutable (`record`). Magnitud métrica escalar no negativa con métodos de conveniencia `isWithin()` y `toKilometers()`. |
-| **PaymentPeriod** | Objeto de Valor | `LocalDate startDate`<br>`LocalDate endDate` | Público | Registro inmutable (`record`). Intervalo temporal contable de liquidación con validación de no inversión cronológica y método `workingDays()`. |
+| **PayPeriod** | Objeto de Valor | `LocalDate startDate`<br>`LocalDate endDate` | Público | Registro inmutable (`record`). Intervalo temporal contable de liquidación con validación de no inversión cronológica y método `workingDays()`. |
 | **AttendanceJustification** | Objeto de Valor | `String reason`<br>`TenantMembershipId justifiedBy`<br>`Instant justifiedAt` | Público | Registro inmutable (`record`). Regularización formal de incidencias de asistencia autorizada por jefatura de taller. |
 | **AttendanceStatus** | Enumeración | `ON_TIME, LATE, EXCUSED, ABSENT` | Público | Clasificación operativa de presencia física y puntualidad en patio. |
 | **PayrollStatus** | Enumeración | `DRAFT, APPROVED, PAID, CANCELLED` | Público | Ciclo de vida determinista de la liquidación salarial del colaborador. |
-| **SalaryType** | Enumeración | `MONTHLY_FIXED, HOURLY_RATE` | Público | Modalidad contractual de remuneración pactada en el expediente laboral. |
+| **CompensationType** | Enumeración | `MONTHLY_FIXED, HOURLY_RATE` | Público | Modalidad contractual de remuneración pactada en el expediente laboral. |
 | **EmploymentStatus** | Enumeración | `ACTIVE, ON_LEAVE, TERMINATED` | Público | Situación laboral vigente del operario en el taller automotriz. |
 | **DeductionType** | Enumeración | `TARDINESS, UNJUSTIFIED_ABSENCE, EQUIPMENT_DAMAGE, LOAN_REPAYMENT, OTHER` | Público | Clasificación analítica de descuentos y retenciones en boleta salarial. |
 | **BonusType** | Enumeración | `PRODUCTIVITY, OVERTIME_HOURS, SPECIAL_MERIT, HOLIDAY_ALLOWANCE` | Público | Clasificación analítica de incentivos y bonificaciones por mérito técnico en foso. |

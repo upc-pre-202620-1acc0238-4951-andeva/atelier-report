@@ -153,18 +153,22 @@ package "iam.domain.model.aggregates" as aggregates #FDFEFE {
     class Role <<AggregateRoot>> {
         - id: RoleId
         - tenantId: TenantId
+        - code: String
         - name: String
         - description: String
         - isSystemRole: boolean
         - permissions: Set<Permission>
         --
-        + {static} defineTenantRole(tenantId: TenantId, name: String, desc: String, perms: Set<Permission>): Role
-        + {static} defineSystemRole(name: String, desc: String, perms: Set<Permission>): Role
+        + {static} createCustom(tenantId: TenantId, name: String, desc: String, perms: Set<Permission>): Role
+        + {static} provisionFromTemplate(tenantId: TenantId, template: RoleTemplate, perms: Set<Permission>): Role
+        + updatePermissions(newPermissions: Set<Permission>): void
+        + resetToTemplate(template: RoleTemplate): void
         + grantPermission(permission: Permission): void
         + revokePermission(permissionId: PermissionId): void
         + updateDetails(name: String, desc: String): void
         + id(): RoleId
         + tenantId(): TenantId
+        + code(): String
         + isSystemRole(): boolean
         + permissions(): Set<Permission>
     }
@@ -356,6 +360,17 @@ package "iam.domain.model.enums" as enums #FDFEFE {
         ACCEPTED
         EXPIRED
         REVOKED
+    }
+
+    enum RoleTemplate <<Enum>> {
+        WORKSHOP_OWNER
+        WORKSHOP_ADMINISTRATOR
+        SERVICE_ADVISOR
+        CHIEF_MECHANIC
+        MECHANIC
+        ASSISTANT_MECHANIC
+        INVENTORY_MANAGER
+        CASHIER
     }
 }
 
@@ -569,6 +584,7 @@ PermissionRepository -[hidden]down-> TokenType
 TokenType -[hidden]right-> MembershipStatus
 MembershipStatus -[hidden]right-> SalaryType
 SalaryType -[hidden]right-> InvitationStatus
+    InvitationStatus -[hidden]right-> RoleTemplate
 
 ' Nivel 7 (Excepciones en 2 filas de 4)
 BranchId -[hidden]down-> DomainException

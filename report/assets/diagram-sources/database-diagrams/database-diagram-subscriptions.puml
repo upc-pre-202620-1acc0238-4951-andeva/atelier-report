@@ -71,6 +71,12 @@ package "PostgreSQL 16 (API Application - Backend Central)" as pg_backend #F8F9F
         * billing_cycle : VARCHAR(20)
         * max_branches : INTEGER
         * max_active_staff : INTEGER
+        * max_active_obd2_devices : INTEGER
+        * max_photos_per_work_order : INTEGER
+        * max_monthly_ai_reports : INTEGER
+        * company_registration_allowed : BOOLEAN
+        * multi_warehouse_allowed : BOOLEAN
+        * marketplace_listed : BOOLEAN
         * max_monthly_work_orders : INTEGER
         * iot_telemetry_enabled : BOOLEAN
         * ai_diagnostics_enabled : BOOLEAN
@@ -83,7 +89,7 @@ package "PostgreSQL 16 (API Application - Backend Central)" as pg_backend #F8F9F
         <b>Restricciones (Constraints):</b>
         + pk_plans : PRIMARY KEY (id)
         + uk_plans_stripe_price : UNIQUE (stripe_price_id)
-        + chk_plans_tier : CHECK (tier IN ('COMMUNITY', 'STARTER', 'PROFESSIONAL', 'ENTERPRISE'))
+        + chk_plans_tier : CHECK (tier IN ('GO', 'PRO', 'MAX', 'ENTERPRISE'))
         + chk_plans_cycle : CHECK (billing_cycle IN ('MONTHLY', 'YEARLY'))
         + chk_plans_price : CHECK (price >= 0.00)
         + chk_plans_quotas : CHECK (max_branches > 0 AND max_active_staff > 0 AND max_monthly_work_orders > 0)
@@ -241,7 +247,10 @@ package "SQLite 3 (Mobile Workshop - Cliente Técnico Offline)" as sqlite_mobile
         * subscription_status : TEXT
         * max_branches : INTEGER
         * max_active_staff : INTEGER
+        * max_active_obd2_devices : INTEGER
+        * max_photos_per_work_order : INTEGER
         * max_monthly_work_orders : INTEGER
+        * company_registration_allowed : INTEGER
         * iot_telemetry_enabled : INTEGER
         * ai_diagnostics_enabled : INTEGER
         * current_period_end : TEXT (ISO8601)

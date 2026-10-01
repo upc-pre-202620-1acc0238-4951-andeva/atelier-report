@@ -1,4 +1,4 @@
-## 7. Fase 4: Bounded Context 4 — Inventory & Supply Chain Context (`com.andeva.atelier.platform.inventory`)
+## 7. Fase 4: Bounded Context 4: Inventory & Supply Chain Context (`com.andeva.atelier.platform.inventory`)
 
 ### 7.1. Diccionario y Propósito del Contexto
 
@@ -15,9 +15,221 @@ El **Inventory & Supply Chain Context** opera como el núcleo logístico y finan
 * **Desacoplamiento con MRO mediante Eventos y Fachada (OHS):** El contexto MRO no accede a la tabla `inventory_batches`. Cuando una tarea en MRO demanda un repuesto, emite `ProductStockReservationRequestedEvent`. El módulo de inventario procesa este requerimiento a través de su fachada `InventoryContextFacade`, valida la existencia de stock, ejecuta la deducción FIFO y responde con éxito o error de desabastecimiento.
 * **Auditoría Directa de Comprobantes de Compra:** Al recepcionar una orden de compra o crear un lote directo, la imagen del comprobante fiscal (Factura/Boleta de proveedor) se vincula directamente al lote, cerrando el círculo entre la compra física y el consumo en el foso mecánico.
 
+#### 7.1.3. Estructura de Directorios y Organización de Paquetes
+
+La siguiente estructura de directorios y archivos representa la taxonomía canónica definitiva de **Inventory & Supply Chain Context** (`com.andeva.atelier.platform.inventory`), alineada estrictamente con el estándar arquitectónico de *Learning Center* y los patrones tácticos de Domain-Driven Design (DDD) Hexagonal:
+
+```text
+com.andeva.atelier.platform.inventory/
+├── domain/
+│   ├── exceptions/
+│   │   ├── DuplicateSkuException.java
+│   │   ├── DuplicateSupplierTaxIdException.java
+│   │   ├── InsufficientStockException.java
+│   │   ├── InvalidBatchQuantityException.java
+│   │   ├── InvalidPurchaseOrderTransitionException.java
+│   │   ├── InventoryItemNotFoundException.java
+│   │   ├── MissingReceiptDocumentationException.java
+│   │   ├── PurchaseOrderEmptyException.java
+│   │   ├── PurchaseOrderNotFoundException.java
+│   │   └── SupplierNotFoundException.java
+│   ├── model/
+│   │   ├── aggregates/
+│   │   │   ├── InventoryItem.java
+│   │   │   ├── PurchaseOrder.java
+│   │   │   └── Supplier.java
+│   │   ├── commands/
+│   │   │   ├── AddInventoryBatchCommand.java
+│   │   │   ├── AddPurchaseOrderItemCommand.java
+│   │   │   ├── AllocateStockFifoCommand.java
+│   │   │   ├── CancelPurchaseOrderCommand.java
+│   │   │   ├── CreateInventoryItemCommand.java
+│   │   │   ├── CreatePurchaseOrderCommand.java
+│   │   │   ├── DeactivateInventoryItemCommand.java
+│   │   │   ├── DeactivateSupplierCommand.java
+│   │   │   ├── IssuePurchaseOrderCommand.java
+│   │   │   ├── ReceivePurchaseOrderCommand.java
+│   │   │   ├── RegisterSupplierCommand.java
+│   │   │   ├── ReleaseStockAllocationCommand.java
+│   │   │   ├── RemovePurchaseOrderItemCommand.java
+│   │   │   ├── UpdateInventoryItemCommand.java
+│   │   │   └── UpdateSupplierCommand.java
+│   │   ├── entities/
+│   │   │   ├── InventoryBatch.java
+│   │   │   └── PurchaseOrderItem.java
+│   │   ├── enums/
+│   │   │   ├── InventoryItemStatus.java
+│   │   │   ├── ItemCategory.java
+│   │   │   └── PurchaseOrderStatus.java
+│   │   ├── events/
+│   │   │   ├── InventoryBatchAddedEvent.java
+│   │   │   ├── InventoryItemCreatedEvent.java
+│   │   │   ├── InventoryItemDeactivatedEvent.java
+│   │   │   ├── LowStockThresholdReachedEvent.java
+│   │   │   ├── PurchaseOrderCanceledEvent.java
+│   │   │   ├── PurchaseOrderCreatedEvent.java
+│   │   │   ├── PurchaseOrderReceivedEvent.java
+│   │   │   ├── StockAllocatedFifoEvent.java
+│   │   │   ├── StockReleasedEvent.java
+│   │   │   └── SupplierRegisteredEvent.java
+│   │   ├── ids/
+│   │   │   ├── InventoryBatchId.java
+│   │   │   ├── InventoryItemId.java
+│   │   │   ├── PurchaseOrderId.java
+│   │   │   ├── PurchaseOrderItemId.java
+│   │   │   └── SupplierId.java
+│   │   ├── queries/
+│   │   │   ├── GetInventoryBatchesByItemIdQuery.java
+│   │   │   ├── GetInventoryItemByIdQuery.java
+│   │   │   ├── GetInventoryItemDetailQuery.java
+│   │   │   ├── GetInventoryItemsByTenantIdQuery.java
+│   │   │   ├── GetInventoryItemsPagedQuery.java
+│   │   │   ├── GetInventoryValuationQuery.java
+│   │   │   ├── GetLowStockItemsQuery.java
+│   │   │   ├── GetPurchaseOrderByIdQuery.java
+│   │   │   ├── GetPurchaseOrderDetailQuery.java
+│   │   │   ├── GetPurchaseOrdersByTenantIdQuery.java
+│   │   │   ├── GetSupplierByIdQuery.java
+│   │   │   └── GetSuppliersByTenantIdQuery.java
+│   │   └── valueobjects/
+│   │       ├── BatchDeduction.java
+│   │       ├── Quantity.java
+│   │       ├── Sku.java
+│   │       └── StockAllocation.java
+│   ├── repositories/
+│   │   ├── InventoryBatchRepository.java
+│   │   ├── InventoryItemRepository.java
+│   │   ├── PurchaseOrderRepository.java
+│   │   └── SupplierRepository.java
+│   └── services/
+│       ├── FifoAllocationEngine.java
+│       ├── InventoryValuationService.java
+│       └── StockReorderEvaluationService.java
+├── application/
+│   ├── acl/
+│   │   └── InventoryContextFacadeImpl.java
+│   ├── commandservices/
+│   │   ├── InventoryItemCommandService.java
+│   │   ├── PurchaseOrderCommandService.java
+│   │   └── SupplierCommandService.java
+│   ├── internal/
+│   │   ├── commandservices/
+│   │   │   ├── InventoryItemCommandServiceImpl.java
+│   │   │   ├── PurchaseOrderCommandServiceImpl.java
+│   │   │   └── SupplierCommandServiceImpl.java
+│   │   ├── eventhandlers/
+│   │   │   ├── InventoryLowStockAlertListener.java
+│   │   │   ├── WorkOrderStockReservationCancelledListener.java
+│   │   │   └── WorkOrderStockReservationRequestedListener.java
+│   │   ├── outbound/acl/
+│   │   │   ├── FirebaseReceiptImageStorageGateway.java
+│   │   │   ├── InventoryEventPublisherPort.java
+│   │   │   └── SunatTaxIdValidationGateway.java
+│   │   └── queryservices/
+│   │       ├── InventoryItemQueryServiceImpl.java
+│   │       ├── PurchaseOrderQueryServiceImpl.java
+│   │       └── SupplierQueryServiceImpl.java
+│   └── queryservices/
+│       ├── InventoryItemQueryService.java
+│       ├── PurchaseOrderQueryService.java
+│       └── SupplierQueryService.java
+├── infrastructure/
+│   ├── external/
+│   │   ├── acl/
+│   │   │   └── operations/
+│   │   │       └── WorkshopOperationsAclAdapter.java
+│   │   ├── cloud/
+│   │   │   └── firebase/
+│   │   │       └── FirebaseReceiptImageStorageGatewayImpl.java
+│   │   └── tax/
+│   │       └── sunat/
+│   │           └── SunatTaxIdValidationGatewayImpl.java
+│   └── persistence/
+│       ├── jpa/
+│       │   ├── adapters/
+│       │   │   ├── InventoryItemRepositoryImpl.java
+│       │   │   ├── PurchaseOrderRepositoryImpl.java
+│       │   │   └── SupplierRepositoryImpl.java
+│       │   ├── assemblers/
+│       │   │   ├── InventoryBatchPersistenceAssembler.java
+│       │   │   ├── InventoryItemPersistenceAssembler.java
+│       │   │   ├── PurchaseOrderItemPersistenceAssembler.java
+│       │   │   ├── PurchaseOrderPersistenceAssembler.java
+│       │   │   └── SupplierPersistenceAssembler.java
+│       │   ├── converters/
+│       │   │   ├── InventoryItemStatusAttributeConverter.java
+│       │   │   ├── ItemCategoryAttributeConverter.java
+│       │   │   ├── MoneyAttributeConverter.java
+│       │   │   ├── PurchaseOrderStatusAttributeConverter.java
+│       │   │   ├── QuantityAttributeConverter.java
+│       │   │   ├── SkuAttributeConverter.java
+│       │   │   └── TaxIdAttributeConverter.java
+│       │   ├── entities/
+│       │   │   ├── InventoryBatchPersistenceEntity.java
+│       │   │   ├── InventoryItemPersistenceEntity.java
+│       │   │   ├── PurchaseOrderItemPersistenceEntity.java
+│       │   │   ├── PurchaseOrderPersistenceEntity.java
+│       │   │   └── SupplierPersistenceEntity.java
+│       │   └── repositories/
+│       │       ├── InventoryBatchPersistenceRepository.java
+│       │       ├── InventoryItemPersistenceRepository.java
+│       │       ├── PurchaseOrderItemPersistenceRepository.java
+│       │       ├── PurchaseOrderPersistenceRepository.java
+│       │       └── SupplierPersistenceRepository.java
+│       └── outbox/
+│           └── InventoryTransactionalOutboxPublisherImpl.java
+└── interfaces/
+    ├── acl/
+    │   ├── InventoryContextFacade.java
+    │   └── dtos/
+    │       ├── BatchDeductionAclDto.java
+    │       ├── InventoryItemSummaryAclDto.java
+    │       └── StockAllocationAclDto.java
+    ├── events/
+    │   ├── BatchReceivedIntegrationEvent.java
+    │   ├── InventoryItemCreatedIntegrationEvent.java
+    │   ├── InventoryItemDeactivatedIntegrationEvent.java
+    │   ├── PurchaseOrderIssuedIntegrationEvent.java
+    │   ├── PurchaseOrderReceivedIntegrationEvent.java
+    │   ├── StockLowIntegrationEvent.java
+    │   ├── StockReservationFailedIntegrationEvent.java
+    │   └── StockReservedIntegrationEvent.java
+    └── rest/
+        ├── assemblers/
+        │   ├── InventoryBatchResourceAssembler.java
+        │   ├── InventoryItemResourceAssembler.java
+        │   ├── PurchaseOrderResourceAssembler.java
+        │   └── SupplierResourceAssembler.java
+        ├── controllers/
+        │   ├── InventoryBatchesController.java
+        │   ├── InventoryItemsController.java
+        │   ├── PurchaseOrdersController.java
+        │   └── SuppliersController.java
+        └── resources/
+            ├── requests/
+            │   ├── AddInventoryBatchResource.java
+            │   ├── AddPurchaseOrderItemResource.java
+            │   ├── CancelPurchaseOrderResource.java
+            │   ├── CreateInventoryItemResource.java
+            │   ├── CreatePurchaseOrderResource.java
+            │   ├── CreateSupplierResource.java
+            │   ├── ReceivePurchaseOrderResource.java
+            │   ├── UpdateInventoryItemResource.java
+            │   └── UpdateSupplierResource.java
+            └── responses/
+                ├── InventoryBatchResource.java
+                ├── InventoryItemDetailResource.java
+                ├── InventoryItemResource.java
+                ├── InventoryItemSummaryResource.java
+                ├── InventoryValuationResource.java
+                ├── PurchaseOrderItemResource.java
+                ├── PurchaseOrderResource.java
+                └── SupplierResource.java
+```
+
 ---
 
-### 7.2. 2.6.4.1. Domain Layer
+### 7.2. 2.6.5.1. Domain Layer
 
 #### 7.2.1. Aggregates & Aggregate Roots
 
@@ -26,16 +238,16 @@ El **Inventory & Supply Chain Context** opera como el núcleo logístico y finan
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<InventoryItem>`
 * **Propósito:** Representa un tipo de repuesto, líquido o consumible comercializado o utilizado en el taller. Es la raíz del agregado que custodia la suma virtual de existencias y sus lotes FIFO asociados.
 * **Atributos:**
-  * `id: InventoryItemId` — Identificador universal del repuesto (UUID).
-  * `tenantId: TenantId` — Taller mecánico dueño del inventario.
-  * `name: String` — Denominación comercial (ej. "Filtro de Aceite Bosch PH3614", "Aceite Sintético 5W-30 Mobil 1").
-  * `sku: Sku` — Código interno o número de parte de fabricante (único por taller).
-  * `category: ItemCategory` — Categoría técnica (`LUBRICANTS`, `BRAKES`, `SUSPENSION`, `ENGINE`, `ELECTRICAL`, `TIRES`, `FILTERS`).
-  * `basePrice: Money` — Precio unitario de venta sugerido al cliente final.
-  * `totalStock: Quantity` — Cantidad total de existencias disponibles (suma virtual de `remaining_qty` de todos los lotes activos).
-  * `minimumStock: Quantity` — Umbral mínimo de existencias para disparo de alertas de reorden.
-  * `status: InventoryItemStatus` — Estado del ítem (`ACTIVE`, `INACTIVE`, `DISCONTINUED`).
-  * `batches: List<InventoryBatch>` — Colección interna de lotes físicos ordenados cronológicamente.
+  * `id: InventoryItemId`: Identificador universal del repuesto (UUID).
+  * `tenantId: TenantId`: Taller mecánico dueño del inventario.
+  * `name: String`: Denominación comercial (ej. "Filtro de Aceite Bosch PH3614", "Aceite Sintético 5W-30 Mobil 1").
+  * `sku: Sku`: Código interno o número de parte de fabricante (único por taller).
+  * `category: ItemCategory`: Categoría técnica (`LUBRICANTS`, `BRAKES`, `SUSPENSION`, `ENGINE`, `ELECTRICAL`, `TIRES`, `FILTERS`).
+  * `basePrice: Money`: Precio unitario de venta sugerido al cliente final.
+  * `totalStock: Quantity`: Cantidad total de existencias disponibles (suma virtual de `remaining_qty` de todos los lotes activos).
+  * `minimumStock: Quantity`: Umbral mínimo de existencias para disparo de alertas de reorden.
+  * `status: InventoryItemStatus`: Estado del ítem (`ACTIVE`, `INACTIVE`, `DISCONTINUED`).
+  * `batches: List<InventoryBatch>`: Colección interna de lotes físicos ordenados cronológicamente.
 * **Invariantes y Reglas de Negocio:**
   * El `sku` debe ser único en el ámbito del `tenantId`.
   * El `totalStock` no puede ser negativo y siempre debe ser exactamente igual a la suma aritmética de los `remainingQuantity` de los lotes de la colección interna.
@@ -60,15 +272,15 @@ El **Inventory & Supply Chain Context** opera como el núcleo logístico y finan
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<Supplier>`
 * **Propósito:** Modela al proveedor comercial de repuestos, lubricantes y consumibles del taller.
 * **Atributos:**
-  * `id: SupplierId` — Identificador único del proveedor (UUID).
-  * `tenantId: TenantId` — Taller propietario del registro de proveedor.
-  * `businessName: String` — Razón Social o nombre comercial formal.
-  * `taxId: TaxId` — RUC de 11 dígitos de la empresa proveedora (validado formalmente).
-  * `contactName: String` — Nombre de la persona o asesor de ventas de contacto.
-  * `phone: PhoneNumber` — Teléfono de contacto.
-  * `email: EmailAddress` — Correo electrónico para cotizaciones y órdenes de compra.
-  * `address: String` — Dirección fiscal o almacén principal del proveedor.
-  * `isActive: boolean` — Estado operativo del proveedor en el taller.
+  * `id: SupplierId`: Identificador único del proveedor (UUID).
+  * `tenantId: TenantId`: Taller propietario del registro de proveedor.
+  * `businessName: String`: Razón Social o nombre comercial formal.
+  * `taxId: TaxId`: RUC de 11 dígitos de la empresa proveedora (validado formalmente).
+  * `contactName: String`: Nombre de la persona o asesor de ventas de contacto.
+  * `phone: PhoneNumber`: Teléfono de contacto.
+  * `email: EmailAddress`: Correo electrónico para cotizaciones y órdenes de compra.
+  * `address: String`: Dirección fiscal o almacén principal del proveedor.
+  * `isActive: boolean`: Estado operativo del proveedor en el taller.
 * **Invariantes y Reglas de Negocio:**
   * El `taxId` (RUC) es obligatorio y único dentro del mismo taller (`tenant_id, tax_id`).
   * `businessName` no puede ser vacío.
@@ -83,17 +295,17 @@ El **Inventory & Supply Chain Context** opera como el núcleo logístico y finan
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<PurchaseOrder>`
 * **Propósito:** Representa la orden formal de adquisición de repuestos emitida a un proveedor y su posterior recepción física con comprobante.
 * **Atributos:**
-  * `id: PurchaseOrderId` — Identificador universal de la orden de compra (UUID).
-  * `tenantId: TenantId` — Taller emisor.
-  * `supplierId: SupplierId` — Proveedor seleccionado.
-  * `branchId: BranchId` — Sede física que recibirá la mercadería.
-  * `orderNumber: String` — Correlativo interno de compra (ej. "OC-2026-0042").
-  * `status: PurchaseOrderStatus` — Estado (`DRAFT`, `ISSUED`, `RECEIVED`, `CANCELED`).
-  * `totalCost: Money` — Costo total de adquisición de la orden.
-  * `receiptImageUrl: ImageUrl` — URL de la factura o boleta escaneada en Firebase Storage (nullable hasta recepción).
-  * `receiptNumber: String` — Número del comprobante fiscal del proveedor (ej. "F001-004928", nullable hasta recepción).
-  * `receivedAt: Instant` — Fecha y hora de recepción física y conformidad (nullable hasta recepción).
-  * `items: List<PurchaseOrderItem>` — Colección de repuestos y cantidades compradas.
+  * `id: PurchaseOrderId`: Identificador universal de la orden de compra (UUID).
+  * `tenantId: TenantId`: Taller emisor.
+  * `supplierId: SupplierId`: Proveedor seleccionado.
+  * `branchId: BranchId`: Sede física que recibirá la mercadería.
+  * `orderNumber: String`: Correlativo interno de compra (ej. "OC-2026-0042").
+  * `status: PurchaseOrderStatus`: Estado (`DRAFT`, `ISSUED`, `RECEIVED`, `CANCELED`).
+  * `totalCost: Money`: Costo total de adquisición de la orden.
+  * `receiptImageUrl: ImageUrl`: URL de la factura o boleta escaneada en Firebase Storage (nullable hasta recepción).
+  * `receiptNumber: String`: Número del comprobante fiscal del proveedor (ej. "F001-004928", nullable hasta recepción).
+  * `receivedAt: Instant`: Fecha y hora de recepción física y conformidad (nullable hasta recepción).
+  * `items: List<PurchaseOrderItem>`: Colección de repuestos y cantidades compradas.
 * **Invariantes y Reglas de Negocio:**
   * No se pueden modificar ítems si la orden se encuentra en estado `RECEIVED` o `CANCELED`.
   * Solo una orden en estado `ISSUED` puede ser recibida (`RECEIVED`).
@@ -118,16 +330,16 @@ El **Inventory & Supply Chain Context** opera como el núcleo logístico y finan
 * **Paquete:** `com.andeva.atelier.platform.inventory.domain.model.entities`
 * **Propósito:** Modela el lote físico específico ingresado al taller, portador del costo de adquisición histórico para el algoritmo FIFO.
 * **Atributos:**
-  * `id: InventoryBatchId` — Identificador único del lote (UUID).
-  * `tenantId: TenantId` — Taller propietario.
-  * `itemId: InventoryItemId` — Repuesto al que pertenece el lote.
-  * `supplierId: SupplierId` — Proveedor de procedencia (nullable si es stock inicial).
-  * `batchNumber: String` — Código de lote provisto por el fabricante o proveedor.
-  * `initialQuantity: Quantity` — Cantidad original ingresada al almacén.
-  * `remainingQuantity: Quantity` — Cantidad remanente disponible para consumo.
-  * `unitCost: Money` — Costo unitario real de adquisición de este lote.
-  * `arrivalDate: Instant` — Marca de tiempo exacta de recepción (clave del ordenamiento FIFO).
-  * `receiptImageUrl: ImageUrl` — Enlace a la fotografía de la factura de compra en Firebase Storage.
+  * `id: InventoryBatchId`: Identificador único del lote (UUID).
+  * `tenantId: TenantId`: Taller propietario.
+  * `itemId: InventoryItemId`: Repuesto al que pertenece el lote.
+  * `supplierId: SupplierId`: Proveedor de procedencia (nullable si es stock inicial).
+  * `batchNumber: String`: Código de lote provisto por el fabricante o proveedor.
+  * `initialQuantity: Quantity`: Cantidad original ingresada al almacén.
+  * `remainingQuantity: Quantity`: Cantidad remanente disponible para consumo.
+  * `unitCost: Money`: Costo unitario real de adquisición de este lote.
+  * `arrivalDate: Instant`: Marca de tiempo exacta de recepción (clave del ordenamiento FIFO).
+  * `receiptImageUrl: ImageUrl`: Enlace a la fotografía de la factura de compra en Firebase Storage.
 * **Métodos:**
   * `+ boolean hasStock(): boolean`: Retorna `true` si `remainingQuantity.isGreaterThan(Quantity.ZERO)`.
   * `+ Quantity deduct(Quantity requestedQuantity): Quantity`: Deduce hasta el máximo de `remainingQuantity` disponible y retorna la cantidad efectivamente consumida de este lote.
@@ -137,12 +349,12 @@ El **Inventory & Supply Chain Context** opera como el núcleo logístico y finan
 * **Paquete:** `com.andeva.atelier.platform.inventory.domain.model.entities`
 * **Propósito:** Línea de detalle de compra de un repuesto específico.
 * **Atributos:**
-  * `id: PurchaseOrderItemId` — Identificador del ítem (UUID).
-  * `orderId: PurchaseOrderId` — Orden de compra padre.
-  * `itemId: InventoryItemId` — Repuesto solicitado.
-  * `quantity: Quantity` — Cantidad demandada.
-  * `unitCost: Money` — Costo unitario pactado con el proveedor.
-  * `totalCost: Money` — Subtotal calculado (`quantity * unitCost`).
+  * `id: PurchaseOrderItemId`: Identificador del ítem (UUID).
+  * `orderId: PurchaseOrderId`: Orden de compra padre.
+  * `itemId: InventoryItemId`: Repuesto solicitado.
+  * `quantity: Quantity`: Cantidad demandada.
+  * `unitCost: Money`: Costo unitario pactado con el proveedor.
+  * `totalCost: Money`: Subtotal calculado (`quantity * unitCost`).
 * **Métodos:**
   * `+ void updateQuantity(Quantity newQuantity): void`: Modifica cantidad y recalcula `totalCost`.
 
@@ -150,16 +362,23 @@ El **Inventory & Supply Chain Context** opera como el núcleo logístico y finan
 
 #### 7.2.3. Value Objects
 
-* **`InventoryItemId(UUID value)`:** Identificador tipado de repuesto.
-* **`InventoryBatchId(UUID value)`:** Identificador tipado de lote.
-* **`SupplierId(UUID value)`:** Identificador tipado de proveedor.
-* **`PurchaseOrderId(UUID value)`:** Identificador tipado de orden de compra.
-* **`PurchaseOrderItemId(UUID value)`:** Identificador tipado de ítem de orden de compra.
+Los tipos de soporte del dominio de inventario se organizan formalmente en tres subpaquetes modulares según su semántica táctica de Domain-Driven Design:
+
+##### 1. Identificadores Fuertemente Tipados (`com.andeva.atelier.platform.inventory.domain.model.ids`)
+* **`InventoryItemId(UUID value)`:** Identificador tipado universal del repuesto en catálogo.
+* **`InventoryBatchId(UUID value)`:** Identificador tipado del lote físico de adquisición.
+* **`SupplierId(UUID value)`:** Identificador tipado de la entidad comercial proveedora.
+* **`PurchaseOrderId(UUID value)`:** Identificador tipado de la orden de reabastecimiento.
+* **`PurchaseOrderItemId(UUID value)`:** Identificador tipado de la línea de ítem dentro de una orden de compra.
+
+##### 2. Enumeraciones de Dominio (`com.andeva.atelier.platform.inventory.domain.model.enums`)
+* **`ItemCategory`:** Categorías taxonómicas de autopartes (`LUBRICANTS`, `BRAKES`, `SUSPENSION`, `ENGINE`, `ELECTRICAL`, `TIRES`, `FILTERS`, `BODYWORK`, `ACCESSORIES`).
+* **`InventoryItemStatus`:** Estados del ciclo de vida del repuesto (`ACTIVE`, `INACTIVE`, `DISCONTINUED`).
+* **`PurchaseOrderStatus`:** Estados de la máquina de compra (`DRAFT`, `ISSUED`, `RECEIVED`, `CANCELED`).
+
+##### 3. Objetos de Valor de Negocio (`com.andeva.atelier.platform.inventory.domain.model.valueobjects`)
 * **`Sku(String value)`:** Stock Keeping Unit. Normaliza eliminando espacios y convirtiendo a mayúsculas. Valida formato alfanumérico de 3 a 50 caracteres.
 * **`Quantity(BigDecimal value)`:** Cantidad numérica no negativa con dos decimales de precisión. Métodos: `add()`, `subtract()`, `isGreaterThan()`, `isLessThanOrEqualTo()`.
-* **`ItemCategory` (Enum):** `LUBRICANTS`, `BRAKES`, `SUSPENSION`, `ENGINE`, `ELECTRICAL`, `TIRES`, `FILTERS`, `BODYWORK`, `ACCESSORIES`.
-* **`InventoryItemStatus` (Enum):** `ACTIVE`, `INACTIVE`, `DISCONTINUED`.
-* **`PurchaseOrderStatus` (Enum):** `DRAFT`, `ISSUED`, `RECEIVED`, `CANCELED`.
 * **`StockAllocation(UUID allocationId, Quantity allocatedQuantity, Money totalCostOfGoodsSold, List<BatchDeduction> deductions)`:** Registro inmutable que encapsula el resultado de una deducción FIFO completa, incluyendo el Costo de Ventas (COGS) ponderado.
 * **`BatchDeduction(UUID batchId, Quantity quantityDeducted, Money unitCost)`:** Detalle de las unidades y costo extraídos de un lote específico.
 
@@ -292,7 +511,7 @@ Jerarquía de excepciones semánticas no comprobadas del dominio de inventario, 
 
 ---
 
-### 7.3. 2.6.4.2. Interface Layer
+### 7.3. 2.6.5.2. Interface Layer
 
 #### 7.3.1. REST Controllers
 
@@ -338,7 +557,9 @@ Jerarquía de excepciones semánticas no comprobadas del dominio de inventario, 
 
 #### 7.3.2. Resources / DTOs
 
-* **Peticiones (Requests):**
+Los objetos de transferencia de datos de la API REST se segregan estrictamente según la dirección del flujo de comunicación HTTP:
+
+* **Recursos de Petición (`com.andeva.atelier.platform.inventory.interfaces.rest.resources.requests`):**
   * `CreateInventoryItemResource(String name, String sku, String category, BigDecimal basePrice, BigDecimal minStock, String currency)`
   * `UpdateInventoryItemResource(String name, String category, BigDecimal basePrice, BigDecimal minStock, String currency)`
   * `AddInventoryBatchResource(UUID supplierId, String batchNumber, BigDecimal quantity, BigDecimal unitCost, String currency, String receiptImageUrl)`
@@ -348,7 +569,8 @@ Jerarquía de excepciones semánticas no comprobadas del dominio de inventario, 
   * `AddPurchaseOrderItemResource(UUID itemId, BigDecimal quantity, BigDecimal unitCost, String currency)`
   * `ReceivePurchaseOrderResource(String receiptImageUrl, String receiptNumber, Instant receivedAt)`
   * `CancelPurchaseOrderResource(String reason)`
-* **Respuestas (Responses):**
+
+* **Recursos de Respuesta (`com.andeva.atelier.platform.inventory.interfaces.rest.resources.responses`):**
   * `InventoryItemResource(UUID id, UUID tenantId, String name, String sku, String category, BigDecimal basePrice, BigDecimal totalStock, BigDecimal minimumStock, String status, String currency)`
   * `InventoryItemSummaryResource(UUID id, String name, String sku, String category, BigDecimal basePrice, BigDecimal totalStock, String currency)`
   * `InventoryItemDetailResource(UUID id, String name, String sku, String category, BigDecimal basePrice, BigDecimal totalStock, BigDecimal minimumStock, String currency, List<InventoryBatchResource> batches)`
@@ -371,7 +593,7 @@ Jerarquía de excepciones semánticas no comprobadas del dominio de inventario, 
 
 #### 7.3.4. Open Host Service (OHS) / Inbound ACL Facade
 
-Interfaz pública en `com.andeva.atelier.platform.inventory.interfaces.acl`:
+Contrato público de interfaz expuesto en `com.andeva.atelier.platform.inventory.interfaces.acl`:
 
 ```java
 package com.andeva.atelier.platform.inventory.interfaces.acl;
@@ -391,10 +613,13 @@ public interface InventoryContextFacade {
 }
 ```
 
-*DTOs Exportados por la Fachada:*
+*DTOs Inmutables Exportados por la Fachada (`com.andeva.atelier.platform.inventory.interfaces.acl.dtos`):*
 * `StockAllocationAclDto(UUID allocationId, BigDecimal allocatedQuantity, BigDecimal totalCogs, List<BatchDeductionAclDto> deductions)`
 * `BatchDeductionAclDto(UUID batchId, BigDecimal quantityDeducted, BigDecimal unitCost)`
 * `InventoryItemSummaryAclDto(UUID id, UUID tenantId, String name, String sku, BigDecimal basePrice, BigDecimal totalStock)`
+
+*Implementación de la Fachada:*
+La implementación formal de este contrato reside en la Capa de Aplicación bajo el paquete `com.andeva.atelier.platform.inventory.application.acl.InventoryContextFacadeImpl`, orquestando los comandos y consultas internos sin exponer entidades ni repositorios de infraestructura hacia otros Bounded Contexts (documentada en la subsección 7.4.5).
 
 ---
 
@@ -420,6 +645,8 @@ El diseño táctico de la Capa de Aplicación se fundamenta en cuatro pilares de
 ---
 
 #### 7.4.1. Command Services & Implementations
+
+Los contratos de interfaces de comandos se definen en `com.andeva.atelier.platform.inventory.application.commandservices`, mientras que sus implementaciones transaccionales se ubican en `com.andeva.atelier.platform.inventory.application.internal.commandservices`:
 
 ##### 1. `InventoryItemCommandService` & `InventoryItemCommandServiceImpl`
 
@@ -522,7 +749,7 @@ El diseño táctico de la Capa de Aplicación se fundamenta en cuatro pilares de
 
 #### 7.4.2. Query Services & Implementations
 
-Los servicios de consulta se ejecutan bajo aislamiento transaccional de solo lectura (`@Transactional(readOnly = true)`), optimizando los planes de ejecución en PostgreSQL:
+Los contratos de interfaces de consultas se definen en `com.andeva.atelier.platform.inventory.application.queryservices`, mientras que sus implementaciones de solo lectura se ubican en `com.andeva.atelier.platform.inventory.application.internal.queryservices`. Estos servicios de consulta se ejecutan bajo aislamiento transaccional de solo lectura (`@Transactional(readOnly = true)`), optimizando los planes de ejecución en PostgreSQL:
 
 * **`InventoryItemQueryService` & `InventoryItemQueryServiceImpl`:**
   * `Optional<InventoryItem> handle(GetInventoryItemByIdQuery query)`: Recupera el agregado completo por su identificador único.
@@ -544,6 +771,8 @@ Los servicios de consulta se ejecutan bajo aislamiento transaccional de solo lec
 
 #### 7.4.3. Event Handlers & Listeners
 
+Ubicados en el paquete canónico `com.andeva.atelier.platform.inventory.application.internal.eventhandlers`:
+
 * **Manejadores Síncronos Locales (`@EventListener`):**
   * `WorkOrderStockReservationRequestedListener`: Escucha el evento `ProductStockReservationRequestedIntegrationEvent` originado en *Workshop Operations (MRO)*. Invoca atómicamente `InventoryItemCommandService.handle(AllocateStockFifoCommand)`. Si la asignación tiene éxito, emite `StockReservedIntegrationEvent` transportando el COGS exacto; si las existencias son insuficientes, emite `StockReservationFailedIntegrationEvent` para pausar la labor mecánica en foso.
   * `WorkOrderStockReservationCancelledListener`: Escucha `ProductStockReservationCancelledIntegrationEvent` cuando una tarea de foso es modificada o cancelada, restituyendo los repuestos a sus lotes de procedencia mediante `ReleaseStockAllocationCommand`.
@@ -556,9 +785,118 @@ Los servicios de consulta se ejecutan bajo aislamiento transaccional de solo lec
 
 #### 7.4.4. Outbound ACL Services & Gateways
 
+Ubicados en el paquete canónico `com.andeva.atelier.platform.inventory.application.internal.outbound.acl`:
+
 * **`FirebaseReceiptImageStorageGateway`:** Interfaz y adaptador de salida que valida la accesibilidad y los metadatos de las fotografías de comprobantes de compra almacenadas en Google Cloud Storage / Firebase Storage mediante URLs firmadas HTTPS.
 * **`SunatTaxIdValidationGateway`:** Pasarela perimetral que consulta los servicios de validación de padrón RUC ante SUNAT para certificar la existencia, razón social y condición tributaria de los proveedores comerciales antes de autorizar su registro en el sistema.
+* **`SubscriptionQuotaAclGateway`:** Pasarela perimetral conectada con la fachada de `SaaS Billing & Subscriptions` (`SubscriptionContextFacade`). En operaciones de traspaso o transferencias de lotes FIFO entre múltiples sedes, valida que el taller cuente con autorización multi-almacén (`validateMultiWarehouseTransferAllowed(tenantId)`), reservada exclusivamente para los planes **Max** y **Enterprise**.
 * **`InventoryEventPublisherPort`:** Puerto de infraestructura para el despacho asíncrono de eventos de integración hacia otros Bounded Contexts.
+
+---
+
+#### 7.4.5. Implementación de Fachada Inbound ACL
+
+Implementación operativa de la fachada Open Host Service (OHS), ubicada en `com.andeva.atelier.platform.inventory.application.acl.InventoryContextFacadeImpl`. Esta clase implementa la interfaz pública `InventoryContextFacade` expuesta en `interfaces.acl`, orquestando llamadas directas en memoria hacia los servicios de consulta (`InventoryItemQueryService`) y comandos transaccionales controlados (`InventoryItemCommandService`), traduciendo los agregados y registros de dominio hacia DTOs inmutables de ACL (`StockAllocationAclDto`, `BatchDeductionAclDto`, `InventoryItemSummaryAclDto`) para el consumo seguro de otros Bounded Contexts (Workshop Operations e Invoicing) sin exponer entidades internas:
+
+```java
+package com.andeva.atelier.platform.inventory.application.acl;
+
+import com.andeva.atelier.platform.inventory.application.commandservices.InventoryItemCommandService;
+import com.andeva.atelier.platform.inventory.application.queryservices.InventoryItemQueryService;
+import com.andeva.atelier.platform.inventory.domain.model.commands.AllocateStockFifoCommand;
+import com.andeva.atelier.platform.inventory.domain.model.commands.ReleaseStockAllocationCommand;
+import com.andeva.atelier.platform.inventory.domain.model.ids.InventoryItemId;
+import com.andeva.atelier.platform.inventory.domain.model.queries.GetInventoryItemByIdQuery;
+import com.andeva.atelier.platform.inventory.domain.model.queries.GetInventoryValuationQuery;
+import com.andeva.atelier.platform.inventory.domain.model.valueobjects.BatchDeduction;
+import com.andeva.atelier.platform.inventory.domain.model.valueobjects.Quantity;
+import com.andeva.atelier.platform.inventory.domain.model.valueobjects.StockAllocation;
+import com.andeva.atelier.platform.inventory.interfaces.acl.InventoryContextFacade;
+import com.andeva.atelier.platform.inventory.interfaces.acl.dtos.BatchDeductionAclDto;
+import com.andeva.atelier.platform.inventory.interfaces.acl.dtos.InventoryItemSummaryAclDto;
+import com.andeva.atelier.platform.inventory.interfaces.acl.dtos.StockAllocationAclDto;
+import com.andeva.atelier.platform.shared.application.result.Result;
+import com.andeva.atelier.platform.shared.domain.model.ids.TenantId;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+@Service
+@Transactional
+public class InventoryContextFacadeImpl implements InventoryContextFacade {
+
+    private final InventoryItemCommandService commandService;
+    private final InventoryItemQueryService queryService;
+
+    public InventoryContextFacadeImpl(
+            InventoryItemCommandService commandService,
+            InventoryItemQueryService queryService) {
+        this.commandService = commandService;
+        this.queryService = queryService;
+    }
+
+    @Override
+    public Result<StockAllocationAclDto, String> reserveStockForWorkOrder(UUID tenantId, UUID itemId, BigDecimal quantity) {
+        var command = new AllocateStockFifoCommand(new InventoryItemId(itemId), quantity);
+        var result = commandService.handle(command);
+        return result.mapBoth(
+                allocation -> new StockAllocationAclDto(
+                        allocation.allocationId(),
+                        allocation.allocatedQuantity().value(),
+                        allocation.totalCostOfGoodsSold().amount(),
+                        allocation.deductions().stream()
+                                .map(d -> new BatchDeductionAclDto(d.batchId(), d.quantityDeducted().value(), d.unitCost().amount()))
+                                .toList()
+                ),
+                error -> error.message()
+        );
+    }
+
+    @Override
+    public void releaseStockReservation(UUID tenantId, UUID itemId, List<BatchDeductionAclDto> deductions) {
+        var domainDeductions = deductions.stream()
+                .map(d -> new BatchDeduction(d.batchId(), Quantity.of(d.quantityDeducted()), null))
+                .toList();
+        var allocation = new StockAllocation(UUID.randomUUID(), null, null, domainDeductions);
+        var command = new ReleaseStockAllocationCommand(new InventoryItemId(itemId), allocation);
+        commandService.handle(command);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<InventoryItemSummaryAclDto> fetchItemSummary(UUID itemId) {
+        var query = new GetInventoryItemByIdQuery(new InventoryItemId(itemId));
+        return queryService.handle(query)
+                .map(item -> new InventoryItemSummaryAclDto(
+                        item.getId().value(),
+                        item.getTenantId().value(),
+                        item.getName(),
+                        item.getSku().value(),
+                        item.getBasePrice().amount(),
+                        item.getTotalStock().value()
+                ));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public BigDecimal fetchItemCurrentStock(UUID itemId) {
+        return fetchItemSummary(itemId)
+                .map(InventoryItemSummaryAclDto::totalStock)
+                .orElse(BigDecimal.ZERO);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public BigDecimal calculateInventoryValuation(UUID tenantId) {
+        var query = new GetInventoryValuationQuery(new TenantId(tenantId));
+        return queryService.handle(query).totalValuation();
+    }
+}
+```
 
 ---
 
@@ -926,7 +1264,7 @@ Cada mutación de estado ejecutada en los adaptadores de repositorio sigue un pr
 
 #### 7.5.4. Persistence Assemblers
 
-Ubicados en el paquete `com.andeva.atelier.platform.inventory.infrastructure.persistence.jpa.transform`. Son componentes responsables de la conversión bidireccional entre los modelos de dominio puros (inmutables, con Value Objects y métodos de comportamiento) y las entidades relacionales JPA:
+Ubicados en el paquete `com.andeva.atelier.platform.inventory.infrastructure.persistence.jpa.assemblers`. Son componentes responsables de la conversión bidireccional entre los modelos de dominio puros (inmutables, con Value Objects y métodos de comportamiento) y las entidades relacionales JPA:
 
 ##### Principio de Aislamiento de Ciclo de Vida y Reconstitución:
 Los métodos `toDomain` emplean estrictamente métodos estáticos de reconstitución (`reconstitute(...)`) provistos por los agregados y entidades de dominio (`InventoryItem.reconstitute(...)`, `InventoryBatch.reconstitute(...)`, `Supplier.reconstitute(...)`, `PurchaseOrder.reconstitute(...)`, `PurchaseOrderItem.reconstitute(...)`). Estos métodos rehidratan el estado interno a partir de las columnas de base de datos sin disparar eventos de dominio espurios en el *Transactional Outbox* ni evaluar invariantes de inicialización, asegurando que operaciones de lectura y proyecciones nunca contaminen la mensajería distribuida.
@@ -1007,7 +1345,7 @@ Ubicados en el paquete canónico `com.andeva.atelier.platform.inventory.infrastr
 Implementaciones de adaptadores de salida y pasarelas perimetrales ubicadas en el paquete canónico `com.andeva.atelier.platform.inventory.infrastructure.external`:
 
 ##### 1. `FirebaseReceiptImageStorageGatewayImpl` (Google Cloud Storage / Firebase Direct-to-Cloud)
-* **Paquete:** `com.andeva.atelier.platform.inventory.infrastructure.external.firebase`
+* **Paquete:** `com.andeva.atelier.platform.inventory.infrastructure.external.cloud.firebase`
 * **Implementa:** `FirebaseReceiptImageStorageGateway`
 * **Tecnología:** Google Cloud Storage SDK oficial para Java (`com.google.cloud:google-cloud-storage:2.42.0`).
 * **Responsabilidad y Arquitectura Direct-to-Cloud:**
@@ -1017,7 +1355,7 @@ Implementaciones de adaptadores de salida y pasarelas perimetrales ubicadas en e
   * Valida estrictamente tipos MIME autorizados (`image/jpeg`, `image/png`, `image/webp`, `application/pdf`), impone un límite de tamaño de archivo de 10 MB y comprueba la integridad criptográfica SHA-256 antes de indexar la referencia en `inventory_batches` y `purchase_orders`.
 
 ##### 2. `SunatTaxIdValidationGatewayImpl` (Validación Perimetral de Proveedores ante SUNAT)
-* **Paquete:** `com.andeva.atelier.platform.inventory.infrastructure.external.sunat`
+* **Paquete:** `com.andeva.atelier.platform.inventory.infrastructure.external.tax.sunat`
 * **Implementa:** `SunatTaxIdValidationGateway`
 * **Tecnología:** Cliente REST HTTPS seguro implementado mediante Spring 6 `RestClient` con soporte para mTLS y autenticación por token portador (*Bearer Token*).
 * **Responsabilidad:**
@@ -1026,7 +1364,7 @@ Implementaciones de adaptadores de salida y pasarelas perimetrales ubicadas en e
   * Incorpora una capa de almacenamiento en caché en memoria mediante Caffeine con tiempo de expiración (TTL) de 24 horas, minimizando la latencia de respuesta y protegiendo el sistema frente a límites de tasa (*rate-limiting*) del servicio tributario estatal.
 
 ##### 3. `InventoryTransactionalOutboxPublisherImpl` (Transactional Outbox Publisher)
-* **Paquete:** `com.andeva.atelier.platform.inventory.infrastructure.external.outbox`
+* **Paquete:** `com.andeva.atelier.platform.inventory.infrastructure.persistence.outbox`
 * **Implementa:** `InventoryTransactionalOutboxPublisher`, `DomainEventPublisher`
 * **Tecnología:** Persistencia transaccional directa sobre la tabla `outbox_messages` en PostgreSQL 16 con serialización JSONB mediante Jackson ObjectMapper.
 * **Responsabilidad:**
@@ -1035,7 +1373,7 @@ Implementaciones de adaptadores de salida y pasarelas perimetrales ubicadas en e
   * Los registros en estado `PENDING` son leídos de manera asíncrona mediante un componente relay en segundo plano (utilizando Debezium CDC o un worker planificado) para su publicación confiable con semántica *At-Least-Once* hacia el bus de mensajería empresarial (Apache Kafka / RabbitMQ).
 
 ##### 4. `WorkshopOperationsAclAdapter` (Adaptador Anticorrupción hacia Workshop Operations MRO)
-* **Paquete:** `com.andeva.atelier.platform.inventory.infrastructure.external.operations`
+* **Paquete:** `com.andeva.atelier.platform.inventory.infrastructure.external.acl.operations`
 * **Implementa:** Adaptador perimetral de enlace anticorrupción (ACL) para la integración con el Bounded Context de Workshop Operations.
 * **Tecnología:** Fachada en memoria `InventoryContextFacade` (modo monolito modular) y coreografía de eventos de integración asíncronos.
 * **Responsabilidad:**

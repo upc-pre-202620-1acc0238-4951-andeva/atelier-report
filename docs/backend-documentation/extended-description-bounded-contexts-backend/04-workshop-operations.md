@@ -1,4 +1,4 @@
-## 6. Fase 3: Bounded Context 3 — Workshop Operations Context (MRO) (`com.andeva.atelier.platform.operations`)
+## 6. Fase 3: Bounded Context 3: Workshop Operations Context (MRO) (`com.andeva.atelier.platform.operations`)
 
 ### 6.1. Diccionario y Propósito del Contexto
 
@@ -16,6 +16,299 @@ El **Workshop Operations Context (MRO - Maintenance, Repair, and Operations)** e
 * **Soporte de Operatividad *Offline-First* y *Shallow Routing* REST:** Dado que las fosas mecánicas y sótanos de talleres sufren de conectividad intermitente, los mecánicos operan contra una base de datos relacional local embebida en sus dispositivos móviles (**SQLite** mediante Room en Kotlin y Drift en Flutter). Al recuperar conectividad, el cliente móvil sincroniza consumiendo endpoints planos de segundo nivel (`/api/v1/tasks/{taskId}/products` y `/api/v1/tasks/{taskId}/evidence-images`), erradicando antipatrones de URIs sobre-anidadas.
 * **Cálculo Financiero Centralizado en el Agregado:** El monto total (`total_amount`) de la orden se recalcula de forma puramente determinista y atómica dentro del agregado raíz sumando el costo de mano de obra de todas las tareas activas más el producto de `(quantity * unit_price)` de todos los repuestos solicitados, garantizando coherencia absoluta con el módulo de *Invoicing*.
 
+#### 6.1.3. Estructura Canónica de Paquetes y Archivos del Bounded Context
+
+La siguiente estructura de directorios y archivos representa la taxonomía canónica definitiva de **Workshop Operations Context (MRO)** (`com.andeva.atelier.platform.operations`), alineada estrictamente con el estándar arquitectónico de *Learning Center* y los patrones tácticos de DDD Hexagonal:
+
+```text
+com.andeva.atelier.platform.operations/
+├── domain/
+│   ├── exceptions/
+│   │   ├── InvalidLaborHoursException.java
+│   │   ├── InvalidMileageException.java
+│   │   ├── InvalidQuantityException.java
+│   │   ├── InvalidStorageUrlException.java
+│   │   ├── InvalidWorkOrderStatusTransitionException.java
+│   │   ├── ServiceNotFoundException.java
+│   │   ├── TaskCannotBePutOnHoldException.java
+│   │   ├── TaskNotOnHoldException.java
+│   │   ├── TaskProposalAlreadyProcessedException.java
+│   │   ├── TaskProposalNotFoundException.java
+│   │   ├── WorkBayNotFoundException.java
+│   │   ├── WorkBayOccupiedException.java
+│   │   ├── WorkBayUnderMaintenanceException.java
+│   │   ├── WorkOrderCannotBePaidException.java
+│   │   ├── WorkOrderNotFoundException.java
+│   │   ├── WorkOrderTaskAlreadyCompletedException.java
+│   │   └── WorkOrderTaskNotFoundException.java
+│   ├── model/
+│   │   ├── aggregates/
+│   │   │   ├── Service.java
+│   │   │   ├── WorkBay.java
+│   │   │   └── WorkOrder.java
+│   │   ├── commands/
+│   │   │   ├── AddProductToTaskCommand.java
+│   │   │   ├── AddTaskToWorkOrderCommand.java
+│   │   │   ├── ApproveTaskProposalCommand.java
+│   │   │   ├── AssignTaskMechanicCommand.java
+│   │   │   ├── AssignWorkBayCommand.java
+│   │   │   ├── AttachIntakeImageCommand.java
+│   │   │   ├── AttachTaskEvidenceImageCommand.java
+│   │   │   ├── CancelWorkOrderCommand.java
+│   │   │   ├── CompleteWorkOrderTaskCommand.java
+│   │   │   ├── CreateServiceItemCommand.java
+│   │   │   ├── CreateWorkBayCommand.java
+│   │   │   ├── CreateWorkOrderCommand.java
+│   │   │   ├── DeliverVehicleCommand.java
+│   │   │   ├── HoldWorkOrderTaskCommand.java
+│   │   │   ├── MarkWorkOrderAsPaidCommand.java
+│   │   │   ├── RejectTaskProposalCommand.java
+│   │   │   ├── ReleaseWorkBayCommand.java
+│   │   │   ├── RemoveProductFromTaskCommand.java
+│   │   │   ├── ReopenWorkOrderTaskCommand.java
+│   │   │   ├── ResumeWorkOrderTaskCommand.java
+│   │   │   ├── StartWorkOrderCommand.java
+│   │   │   ├── StartWorkOrderTaskCommand.java
+│   │   │   ├── SubmitTaskProposalCommand.java
+│   │   │   ├── UpdateServiceItemCommand.java
+│   │   │   ├── UpdateTaskProductQuantityCommand.java
+│   │   │   └── UpdateWorkBayStatusCommand.java
+│   │   ├── entities/
+│   │   │   ├── TaskProposal.java
+│   │   │   ├── WorkOrderImage.java
+│   │   │   ├── WorkOrderTask.java
+│   │   │   ├── WorkOrderTaskImage.java
+│   │   │   └── WorkOrderTaskProduct.java
+│   │   ├── enums/
+│   │   │   ├── BayStatus.java
+│   │   │   ├── BayType.java
+│   │   │   ├── EvidenceType.java
+│   │   │   ├── HoldReason.java
+│   │   │   ├── ProposalSeverity.java
+│   │   │   ├── ProposalStatus.java
+│   │   │   ├── WorkOrderStatus.java
+│   │   │   └── WorkOrderTaskStatus.java
+│   │   ├── events/
+│   │   │   ├── ProductStockReservationCancelledEvent.java
+│   │   │   ├── ProductStockReservationRequestedEvent.java
+│   │   │   ├── TaskProposalApprovedEvent.java
+│   │   │   ├── TaskProposalRejectedEvent.java
+│   │   │   ├── TaskProposalSubmittedEvent.java
+│   │   │   ├── WorkBayAssignedEvent.java
+│   │   │   ├── WorkBayReleasedEvent.java
+│   │   │   ├── WorkOrderCompletedEvent.java
+│   │   │   ├── WorkOrderCreatedEvent.java
+│   │   │   ├── WorkOrderDeliveredEvent.java
+│   │   │   ├── WorkOrderIntakeImageAttachedEvent.java
+│   │   │   ├── WorkOrderPaidEvent.java
+│   │   │   ├── WorkOrderTaskAssignedEvent.java
+│   │   │   ├── WorkOrderTaskCompletedEvent.java
+│   │   │   ├── WorkOrderTaskEvidenceAttachedEvent.java
+│   │   │   ├── WorkOrderTaskHoldEvent.java
+│   │   │   ├── WorkOrderTaskResumedEvent.java
+│   │   │   └── WorkOrderTaskStartedEvent.java
+│   │   ├── ids/
+│   │   │   ├── ServiceId.java
+│   │   │   ├── WorkBayId.java
+│   │   │   ├── WorkOrderId.java
+│   │   │   ├── WorkOrderTaskId.java
+│   │   │   └── WorkOrderTaskProductId.java
+│   │   ├── queries/
+│   │   │   ├── GetAvailableWorkBaysQuery.java
+│   │   │   ├── GetServiceByIdQuery.java
+│   │   │   ├── GetServicesByTenantIdQuery.java
+│   │   │   ├── GetTaskProposalsByWorkOrderIdQuery.java
+│   │   │   ├── GetWorkBaysByBranchIdQuery.java
+│   │   │   ├── GetWorkOrderByIdQuery.java
+│   │   │   ├── GetWorkOrderTaskByIdQuery.java
+│   │   │   ├── GetWorkOrdersByBayIdQuery.java
+│   │   │   ├── GetWorkOrdersByBranchIdQuery.java
+│   │   │   ├── GetWorkOrdersByCustomerIdQuery.java
+│   │   │   ├── GetWorkOrdersByTenantIdQuery.java
+│   │   │   └── GetWorkOrdersByVehicleIdQuery.java
+│   │   └── valueobjects/
+│   │       ├── DiagnosticSummary.java
+│   │       ├── LaborHours.java
+│   │       ├── Mileage.java
+│   │       ├── Quantity.java
+│   │       ├── StorageUrl.java
+│   │       └── WorkOrderNumber.java
+│   ├── repositories/
+│   │   ├── ServiceRepository.java
+│   │   ├── WorkBayRepository.java
+│   │   └── WorkOrderRepository.java
+│   └── services/
+│       ├── BayAllocationService.java
+│       ├── WorkOrderCostCalculator.java
+│       └── WorkOrderTransitionValidator.java
+├── application/
+│   ├── acl/
+│   │   └── WorkshopOperationsContextFacadeImpl.java
+│   ├── commandservices/
+│   │   ├── ServiceCommandService.java
+│   │   ├── WorkBayCommandService.java
+│   │   └── WorkOrderCommandService.java
+│   ├── queryservices/
+│   │   ├── ServiceQueryService.java
+│   │   ├── WorkBayQueryService.java
+│   │   └── WorkOrderQueryService.java
+│   └── internal/
+│       ├── commandservices/
+│       │   ├── ServiceCommandServiceImpl.java
+│       │   ├── WorkBayCommandServiceImpl.java
+│       │   └── WorkOrderCommandServiceImpl.java
+│       ├── queryservices/
+│       │   ├── ServiceQueryServiceImpl.java
+│       │   ├── WorkBayQueryServiceImpl.java
+│       │   └── WorkOrderQueryServiceImpl.java
+│       ├── eventhandlers/
+│       │   ├── WorkOrderDomainEventsHandler.java
+│       │   ├── WorkOrderTaskDomainEventsHandler.java
+│       │   └── WorkshopExternalEventsListener.java
+│       └── outbound/acl/
+│           ├── CustomerFleetAclService.java
+│           ├── CustomerSummaryDto.java
+│           ├── DirectToCloudStorageGateway.java
+│           ├── InventoryItemSummaryDto.java
+│           ├── InventoryReservationAclService.java
+│           ├── MechanicStaffDto.java
+│           ├── StorageMetadataDto.java
+│           ├── TenancyAclService.java
+│           └── VehicleSummaryDto.java
+├── infrastructure/
+│   ├── external/
+│   │   ├── acl/
+│   │   │   ├── crm/
+│   │   │   │   └── CustomerFleetAclAdapter.java
+│   │   │   ├── iam/
+│   │   │   │   └── TenancyAclAdapter.java
+│   │   │   └── inventory/
+│   │   │       └── InventoryReservationAclAdapter.java
+│   │   └── cloud/
+│   │       └── firebase/
+│   │           └── FirebaseStorageDirectUploadGatewayImpl.java
+│   └── persistence/jpa/
+│       ├── adapters/
+│       │   ├── ServiceRepositoryImpl.java
+│       │   ├── WorkBayRepositoryImpl.java
+│       │   └── WorkOrderRepositoryImpl.java
+│       ├── assemblers/
+│       │   ├── ServicePersistenceAssembler.java
+│       │   ├── TaskProposalPersistenceAssembler.java
+│       │   ├── WorkBayPersistenceAssembler.java
+│       │   ├── WorkOrderImagePersistenceAssembler.java
+│       │   ├── WorkOrderPersistenceAssembler.java
+│       │   ├── WorkOrderTaskImagePersistenceAssembler.java
+│       │   ├── WorkOrderTaskPersistenceAssembler.java
+│       │   └── WorkOrderTaskProductPersistenceAssembler.java
+│       ├── converters/
+│       │   ├── BayStatusAttributeConverter.java
+│       │   ├── BayTypeAttributeConverter.java
+│       │   ├── EvidenceTypeAttributeConverter.java
+│       │   ├── MoneyAttributeConverter.java
+│       │   ├── ProposalSeverityAttributeConverter.java
+│       │   ├── ProposalStatusAttributeConverter.java
+│       │   ├── WorkOrderStatusAttributeConverter.java
+│       │   └── WorkOrderTaskStatusAttributeConverter.java
+│       ├── entities/
+│       │   ├── ServicePersistenceEntity.java
+│       │   ├── TaskProposalPersistenceEntity.java
+│       │   ├── WorkBayPersistenceEntity.java
+│       │   ├── WorkOrderImagePersistenceEntity.java
+│       │   ├── WorkOrderPersistenceEntity.java
+│       │   ├── WorkOrderTaskImagePersistenceEntity.java
+│       │   ├── WorkOrderTaskPersistenceEntity.java
+│       │   └── WorkOrderTaskProductPersistenceEntity.java
+│       └── repositories/
+│           ├── ServicePersistenceRepository.java
+│           ├── TaskProposalPersistenceRepository.java
+│           ├── WorkBayPersistenceRepository.java
+│           ├── WorkOrderImagePersistenceRepository.java
+│           ├── WorkOrderPersistenceRepository.java
+│           ├── WorkOrderTaskImagePersistenceRepository.java
+│           ├── WorkOrderTaskPersistenceRepository.java
+│           └── WorkOrderTaskProductPersistenceRepository.java
+└── interfaces/
+    ├── acl/
+    │   ├── WorkshopOperationsContextFacade.java
+    │   └── dto/
+    │       ├── WorkBaySummaryDto.java
+    │       ├── WorkOrderBillingDto.java
+    │       ├── WorkOrderConsumedProductDto.java
+    │       └── WorkOrderSummaryDto.java
+    ├── events/
+    │   ├── ProductStockReservationCancelledIntegrationEvent.java
+    │   ├── ProductStockReservationRequestedIntegrationEvent.java
+    │   ├── WorkOrderBayAssignedIntegrationEvent.java
+    │   ├── WorkOrderCompletedIntegrationEvent.java
+    │   ├── WorkOrderCreatedIntegrationEvent.java
+    │   ├── WorkOrderDeliveredIntegrationEvent.java
+    │   ├── WorkOrderPaidIntegrationEvent.java
+    │   └── WorkOrderStartedIntegrationEvent.java
+    └── rest/
+        ├── controllers/
+        │   ├── ServicesController.java
+        │   ├── TasksController.java
+        │   ├── WorkBaysController.java
+        │   └── WorkOrdersController.java
+        ├── resources/
+        │   ├── requests/
+        │   │   ├── AddTaskProductResource.java
+        │   │   ├── ApproveTaskProposalResource.java
+        │   │   ├── AssignWorkBayResource.java
+        │   │   ├── AttachImageResource.java
+        │   │   ├── AttachTaskEvidenceResource.java
+        │   │   ├── CancelWorkOrderResource.java
+        │   │   ├── CompleteTaskResource.java
+        │   │   ├── CreateServiceResource.java
+        │   │   ├── CreateWorkBayResource.java
+        │   │   ├── CreateWorkOrderResource.java
+        │   │   ├── CreateWorkOrderTaskResource.java
+        │   │   ├── HoldTaskResource.java
+        │   │   ├── MaintenanceBayResource.java
+        │   │   ├── RejectTaskProposalResource.java
+        │   │   ├── SubmitTaskProposalResource.java
+        │   │   ├── UpdateServiceResource.java
+        │   │   ├── UpdateTaskProductResource.java
+        │   │   ├── UpdateWorkOrderResource.java
+        │   │   └── UpdateWorkOrderTaskResource.java
+        │   └── responses/
+        │       ├── ServiceResource.java
+        │       ├── TaskProductResource.java
+        │       ├── TaskProposalResource.java
+        │       ├── WorkBayResource.java
+        │       ├── WorkOrderDetailResource.java
+        │       ├── WorkOrderImageResource.java
+        │       ├── WorkOrderResource.java
+        │       ├── WorkOrderSummaryResource.java
+        │       ├── WorkOrderTaskImageResource.java
+        │       └── WorkOrderTaskResource.java
+        └── transform/
+            ├── AddTaskProductCommandFromResourceAssembler.java
+            ├── ApproveTaskProposalCommandFromResourceAssembler.java
+            ├── AssignTaskMechanicCommandFromResourceAssembler.java
+            ├── AssignWorkBayCommandFromResourceAssembler.java
+            ├── AttachIntakeImageCommandFromResourceAssembler.java
+            ├── AttachTaskEvidenceCommandFromResourceAssembler.java
+            ├── CancelWorkOrderCommandFromResourceAssembler.java
+            ├── CompleteWorkOrderTaskCommandFromResourceAssembler.java
+            ├── CreateServiceCommandFromResourceAssembler.java
+            ├── CreateWorkBayCommandFromResourceAssembler.java
+            ├── CreateWorkOrderCommandFromResourceAssembler.java
+            ├── CreateWorkOrderTaskCommandFromResourceAssembler.java
+            ├── HoldTaskCommandFromResourceAssembler.java
+            ├── RejectTaskProposalCommandFromResourceAssembler.java
+            ├── ResumeTaskCommandFromResourceAssembler.java
+            ├── ServiceResourceAssembler.java
+            ├── SubmitTaskProposalCommandFromResourceAssembler.java
+            ├── TaskProposalResourceAssembler.java
+            ├── UpdateServiceCommandFromResourceAssembler.java
+            ├── UpdateTaskProductQuantityCommandFromResourceAssembler.java
+            ├── WorkBayResourceAssembler.java
+            ├── WorkOrderResourceAssembler.java
+            └── WorkOrderTaskResourceAssembler.java
+```
+
 ---
 
 ### 6.2. 2.6.4.1. Domain Layer
@@ -27,23 +320,23 @@ El **Workshop Operations Context (MRO - Maintenance, Repair, and Operations)** e
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<WorkOrder>`
 * **Propósito:** Representa la orden de servicio automotriz y frontera de consistencia transaccional del taller mecánico. Es el agregado raíz que custodia la integridad del diagnóstico vehicular, la asignación física de bahía, el desglose de tareas mecánicas, el consumo de repuestos hacia inventario FIFO y el cálculo financiero determinista del costo total. No se asigna a un mecánico global, sino que alberga tareas individuales asignadas a especialistas.
 * **Atributos:**
-  * `id: WorkOrderId` — Identificador único universal fuertemente tipado de la orden de trabajo (UUID).
-  * `tenantId: TenantId` — Taller mecánico propietario del registro.
-  * `branchId: BranchId` — Sede física donde se ejecuta la intervención técnica.
-  * `appointmentId: AppointmentId` — Cita previa de la cual deriva la orden (nullable en caso de ingreso directo de emergencia).
-  * `vehicleId: VehicleId` — Unidad vehicular objeto de la intervención técnica.
-  * `customerId: CustomerId` — Cliente propietario civil o empresa flotillera responsable del vehículo.
-  * `internalNumber: WorkOrderNumber` — Código correlativo legible y formal de la orden (`WO-YYYYMM-XXXX`).
-  * `currentBayId: WorkBayId` — Bahía física donde se encuentra posicionado el vehículo (nullable).
-  * `mileageIn: Mileage` — Kilometraje del vehículo al momento de ingresar a recepción técnica (`value >= 0`).
-  * `diagnosticSummary: DiagnosticSummary` — Diagnóstico y fallas reportadas (máximo 2000 caracteres normalizados).
-  * `subtotal: Money` — Importe acumulado antes de impuestos de mano de obra y repuestos consumidos.
-  * `tax: Money` — Monto tributario correspondiente al Impuesto General a las Ventas (IGV 18%).
-  * `totalAmount: Money` — Importe total liquidado de la orden (`totalAmount = subtotal + tax`).
-  * `status: WorkOrderStatus` — Estado en la máquina de estados finita (`DRAFT`, `IN_PROGRESS`, `COMPLETED`, `PAID`, `CANCELED`).
-  * `tasks: List<WorkOrderTask>` — Colección interna de tareas mecánicas desglosadas.
-  * `proposals: List<TaskProposal>` — Colección interna de hallazgos periciales y propuestas de tareas adicionales detectadas en foso.
-  * `intakeImages: List<WorkOrderImage>` — Colección de evidencias fotográficas del peritaje de recepción.
+  * `id: WorkOrderId`: Identificador único universal fuertemente tipado de la orden de trabajo (UUID).
+  * `tenantId: TenantId`: Taller mecánico propietario del registro.
+  * `branchId: BranchId`: Sede física donde se ejecuta la intervención técnica.
+  * `appointmentId: AppointmentId`: Cita previa de la cual deriva la orden (nullable en caso de ingreso directo de emergencia).
+  * `vehicleId: VehicleId`: Unidad vehicular objeto de la intervención técnica.
+  * `customerId: CustomerId`: Cliente propietario civil o empresa flotillera responsable del vehículo.
+  * `internalNumber: WorkOrderNumber`: Código correlativo legible y formal de la orden (`WO-YYYYMM-XXXX`).
+  * `currentBayId: WorkBayId`: Bahía física donde se encuentra posicionado el vehículo (nullable).
+  * `mileageIn: Mileage`: Kilometraje del vehículo al momento de ingresar a recepción técnica (`value >= 0`).
+  * `diagnosticSummary: DiagnosticSummary`: Diagnóstico y fallas reportadas (máximo 2000 caracteres normalizados).
+  * `subtotal: Money`: Importe acumulado antes de impuestos de mano de obra y repuestos consumidos.
+  * `tax: Money`: Monto tributario correspondiente al Impuesto General a las Ventas (IGV 18%).
+  * `totalAmount: Money`: Importe total liquidado de la orden (`totalAmount = subtotal + tax`).
+  * `status: WorkOrderStatus`: Estado en la máquina de estados finita (`DRAFT`, `IN_PROGRESS`, `COMPLETED`, `PAID`, `CANCELED`).
+  * `tasks: List<WorkOrderTask>`: Colección interna de tareas mecánicas desglosadas.
+  * `proposals: List<TaskProposal>`: Colección interna de hallazgos periciales y propuestas de tareas adicionales detectadas en foso.
+  * `intakeImages: List<WorkOrderImage>`: Colección de evidencias fotográficas del peritaje de recepción.
 * **Invariantes de Negocio y Máquina de Estados Finita:**
   * Máquina de estados determinista:
     $$\text{DRAFT} \xrightarrow{\text{startTask}} \text{IN\_PROGRESS} \xrightarrow{\text{completeAllTasks}} \text{COMPLETED} \xrightarrow{\text{markPaid}} \text{PAID}$$
@@ -80,13 +373,13 @@ El **Workshop Operations Context (MRO - Maintenance, Repair, and Operations)** e
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<WorkBay>`
 * **Propósito:** Representa un espacio físico o puesto de trabajo habilitado en una sucursal del taller (elevador de dos columnas, fosa mecánica, cabina de pintura, zona de alineamiento o lavado).
 * **Atributos:**
-  * `id: WorkBayId` — Identificador único universal de la bahía (UUID).
-  * `tenantId: TenantId` — Taller propietario de la instalación física.
-  * `branchId: BranchId` — Sede física donde se ubica la bahía.
-  * `name: String` — Denominación identificatoria legible (ej. "Elevador Hidráulico 1", "Cabina de Pintura A").
-  * `type: BayType` — Clasificación técnica de la bahía (`LIFT`, `PAINT_BOOTH`, `WASHING`, `ALIGNMENT`).
-  * `status: BayStatus` — Estado de ocupación operativa (`AVAILABLE`, `OCCUPIED`, `MAINTENANCE`).
-  * `currentWorkOrderId: WorkOrderId` — Orden de trabajo que ocupa actualmente la bahía (nullable).
+  * `id: WorkBayId`: Identificador único universal de la bahía (UUID).
+  * `tenantId: TenantId`: Taller propietario de la instalación física.
+  * `branchId: BranchId`: Sede física donde se ubica la bahía.
+  * `name: String`: Denominación identificatoria legible (ej. "Elevador Hidráulico 1", "Cabina de Pintura A").
+  * `type: BayType`: Clasificación técnica de la bahía (`LIFT`, `PAINT_BOOTH`, `WASHING`, `ALIGNMENT`).
+  * `status: BayStatus`: Estado de ocupación operativa (`AVAILABLE`, `OCCUPIED`, `MAINTENANCE`).
+  * `currentWorkOrderId: WorkOrderId`: Orden de trabajo que ocupa actualmente la bahía (nullable).
 * **Invariantes y Reglas de Negocio:**
   * No se puede ocupar una bahía que ya se encuentre en estado `OCCUPIED` o `MAINTENANCE`.
   * Solo una bahía en estado `OCCUPIED` puede ser liberada.
@@ -103,11 +396,11 @@ El **Workshop Operations Context (MRO - Maintenance, Repair, and Operations)** e
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<Service>`
 * **Propósito:** Modela el catálogo de servicios estándar y paquetes de mano de obra técnica que ofrece el taller automotriz a sus clientes.
 * **Atributos:**
-  * `id: ServiceId` — Identificador único universal del servicio (UUID).
-  * `tenantId: TenantId` — Taller dueño del catálogo tarifario.
-  * `name: String` — Denominación del servicio (ej. "Alineamiento y Balanceo Computarizado", "Cambio de Pastillas de Freno").
-  * `basePrice: Money` — Tarifa base sugerida por concepto de mano de obra.
-  * `estimatedDurationMinutes: int` — Tiempo promedio estimado de ejecución técnica (por defecto: 60 minutos).
+  * `id: ServiceId`: Identificador único universal del servicio (UUID).
+  * `tenantId: TenantId`: Taller dueño del catálogo tarifario.
+  * `name: String`: Denominación del servicio (ej. "Alineamiento y Balanceo Computarizado", "Cambio de Pastillas de Freno").
+  * `basePrice: Money`: Tarifa base sugerida por concepto de mano de obra.
+  * `estimatedDurationMinutes: int`: Tiempo promedio estimado de ejecución técnica (por defecto: 60 minutos).
 * **Invariantes:**
   * El nombre del servicio no puede ser nulo ni vacío (longitud entre 3 y 150 caracteres).
   * La tarifa base debe ser un monto no negativo (`basePrice >= 0.00`).
@@ -124,23 +417,23 @@ El **Workshop Operations Context (MRO - Maintenance, Repair, and Operations)** e
 * **Paquete:** `com.andeva.atelier.platform.operations.domain.model.entities`
 * **Propósito:** Representa una actividad atómica y concreta de mano de obra técnica dentro del plan de reparación vehicular.
 * **Atributos:**
-  * `id: WorkOrderTaskId` — Identificador único universal de la tarea (UUID).
-  * `workOrderId: WorkOrderId` — Orden de trabajo a la que se subordina.
-  * `serviceId: ServiceId` — Servicio de catálogo asociado.
-  * `mechanicId: UUID` — Identificador de membresía del mecánico ejecutante (referencia a `tenant_memberships`, nullable).
-  * `status: WorkOrderTaskStatus` — Estado de la labor (`PENDING`, `ASSIGNED`, `IN_PROGRESS`, `ON_HOLD`, `COMPLETED`, `CANCELLED`).
-  * `description: String` — Detalle del procedimiento mecánico o diagnóstico específico ejecutado.
-  * `price: Money` — Costo cobrado por la mano de obra de esta tarea específica.
-  * `estimatedHours: LaborHours` — Tiempo presupuestado en horas hombre para la intervención (`> 0.00`).
-  * `actualHours: LaborHours` — Tiempo real consumido de mano de obra efectiva (*Wrench Time*) tras la culminación de la labor.
-  * `holdReason: HoldReason` — Motivo tipado de suspensión técnica (`WAITING_PARTS`, nullable).
-  * `missingItemDescription: String` — Detalle del repuesto o insumo faltante que provocó la suspensión (nullable).
-  * `pausedAt: Instant` — Marca temporal del momento en que se suspendió la labor (nullable).
-  * `totalPausedSeconds: long` — Tiempo acumulado en suspensión por falta de repuestos para descontar del cómputo de rendimiento.
-  * `startedAt: Instant` — Marca de tiempo en que el técnico inició efectivamente la labor.
-  * `completedAt: Instant` — Marca de tiempo en que el técnico finalizó el procedimiento mecánico.
-  * `consumedProducts: List<WorkOrderTaskProduct>` — Colección de repuestos e insumos demandados para esta labor.
-  * `taskImages: List<WorkOrderTaskImage>` — Evidencias fotográficas periciales específicas de esta labor.
+  * `id: WorkOrderTaskId`: Identificador único universal de la tarea (UUID).
+  * `workOrderId: WorkOrderId`: Orden de trabajo a la que se subordina.
+  * `serviceId: ServiceId`: Servicio de catálogo asociado.
+  * `mechanicId: UUID`: Identificador de membresía del mecánico ejecutante (referencia a `tenant_memberships`, nullable).
+  * `status: WorkOrderTaskStatus`: Estado de la labor (`PENDING`, `ASSIGNED`, `IN_PROGRESS`, `ON_HOLD`, `COMPLETED`, `CANCELLED`).
+  * `description: String`: Detalle del procedimiento mecánico o diagnóstico específico ejecutado.
+  * `price: Money`: Costo cobrado por la mano de obra de esta tarea específica.
+  * `estimatedHours: LaborHours`: Tiempo presupuestado en horas hombre para la intervención (`> 0.00`).
+  * `actualHours: LaborHours`: Tiempo real consumido de mano de obra efectiva (*Wrench Time*) tras la culminación de la labor.
+  * `holdReason: HoldReason`: Motivo tipado de suspensión técnica (`WAITING_PARTS`, nullable).
+  * `missingItemDescription: String`: Detalle del repuesto o insumo faltante que provocó la suspensión (nullable).
+  * `pausedAt: Instant`: Marca temporal del momento en que se suspendió la labor (nullable).
+  * `totalPausedSeconds: long`: Tiempo acumulado en suspensión por falta de repuestos para descontar del cómputo de rendimiento.
+  * `startedAt: Instant`: Marca de tiempo en que el técnico inició efectivamente la labor.
+  * `completedAt: Instant`: Marca de tiempo en que el técnico finalizó el procedimiento mecánico.
+  * `consumedProducts: List<WorkOrderTaskProduct>`: Colección de repuestos e insumos demandados para esta labor.
+  * `taskImages: List<WorkOrderTaskImage>`: Evidencias fotográficas periciales específicas de esta labor.
 * **Métodos:**
   * `+ void assignMechanic(UUID mechanicMembershipId): void`: Asocia el técnico responsable de la intervención y transiciona a `ASSIGNED`.
   * `+ void start(): void`: Registra `startedAt = Instant.now()`, fija `status = IN_PROGRESS` y activa el cómputo de horas efectivas.
@@ -157,12 +450,12 @@ El **Workshop Operations Context (MRO - Maintenance, Repair, and Operations)** e
 * **Paquete:** `com.andeva.atelier.platform.operations.domain.model.entities`
 * **Propósito:** Cuantifica la demanda y el consumo físico de un repuesto, insumo o lubricante para una tarea determinada.
 * **Atributos:**
-  * `id: WorkOrderTaskProductId` — Identificador único universal del requerimiento de repuesto (UUID).
-  * `taskId: WorkOrderTaskId` — Tarea mecánica que demanda el ítem.
-  * `productId: UUID` — Identificador del repuesto en catálogo de inventario (`inventory_items`).
-  * `quantity: Quantity` — Cantidad solicitada con precisión decimal fija (`value > 0.00`).
-  * `unitPrice: Money` — Precio unitario de venta pactado al momento de su incorporación a la orden.
-  * `totalAmount: Money` — Subtotal calculado (`quantity * unitPrice`).
+  * `id: WorkOrderTaskProductId`: Identificador único universal del requerimiento de repuesto (UUID).
+  * `taskId: WorkOrderTaskId`: Tarea mecánica que demanda el ítem.
+  * `productId: UUID`: Identificador del repuesto en catálogo de inventario (`inventory_items`).
+  * `quantity: Quantity`: Cantidad solicitada con precisión decimal fija (`value > 0.00`).
+  * `unitPrice: Money`: Precio unitario de venta pactado al momento de su incorporación a la orden.
+  * `totalAmount: Money`: Subtotal calculado (`quantity * unitPrice`).
 * **Métodos:**
   * `+ void updateQuantity(Quantity newQuantity): void`: Modifica la cantidad consumida y recalcula `totalAmount`.
 
@@ -170,95 +463,106 @@ El **Workshop Operations Context (MRO - Maintenance, Repair, and Operations)** e
 * **Paquete:** `com.andeva.atelier.platform.operations.domain.model.entities`
 * **Propósito:** Registra evidencias visuales del peritaje de recepción o entrega del vehículo bajo el patrón Direct-to-Cloud.
 * **Atributos:**
-  * `id: UUID` — Identificador único de la evidencia fotográfica.
-  * `workOrderId: WorkOrderId` — Orden de trabajo vinculada.
-  * `imageUrl: StorageUrl` — URL HTTPS inmutable alojada en Firebase Cloud Storage / Google Cloud Storage.
-  * `description: String` — Nota pericial descriptiva (ej. "Abolladura previa en guardafango delantero derecho").
-  * `uploadedAt: Instant` — Marca de tiempo de registro de la fotografía.
+  * `id: UUID`: Identificador único de la evidencia fotográfica.
+  * `workOrderId: WorkOrderId`: Orden de trabajo vinculada.
+  * `imageUrl: StorageUrl`: URL HTTPS inmutable alojada en Firebase Cloud Storage / Google Cloud Storage.
+  * `description: String`: Nota pericial descriptiva (ej. "Abolladura previa en guardafango delantero derecho").
+  * `uploadedAt: Instant`: Marca de tiempo de registro de la fotografía.
 
 ##### 4. `WorkOrderTaskImage` (Entidad Dependiente de `WorkOrderTask`)
 * **Paquete:** `com.andeva.atelier.platform.operations.domain.model.entities`
 * **Propósito:** Registra evidencias visuales del procedimiento técnico pericial ejecutado por el mecánico sobre un componente.
 * **Atributos:**
-  * `id: UUID` — Identificador único del registro fotográfico.
-  * `taskId: WorkOrderTaskId` — Tarea mecánica asociada a la evidencia.
-  * `imageUrl: StorageUrl` — URL HTTPS inmutable del binario en Firebase Cloud Storage.
-  * `evidenceType: EvidenceType` — Tipología técnica de la evidencia (`INITIAL_INSPECTION`, `DEFECT`, `IN_PROGRESS`, `COMPLETED`).
-  * `description: String` — Descripción técnica pericial (ej. "Pastilla de freno desgastada al 10% vs pastilla cerámica nueva").
-  * `uploadedAt: Instant` — Marca de tiempo de captura y registro.
+  * `id: UUID`: Identificador único del registro fotográfico.
+  * `taskId: WorkOrderTaskId`: Tarea mecánica asociada a la evidencia.
+  * `imageUrl: StorageUrl`: URL HTTPS inmutable del binario en Firebase Cloud Storage.
+  * `evidenceType: EvidenceType`: Tipología técnica de la evidencia (`INITIAL_INSPECTION`, `DEFECT`, `IN_PROGRESS`, `COMPLETED`).
+  * `description: String`: Descripción técnica pericial (ej. "Pastilla de freno desgastada al 10% vs pastilla cerámica nueva").
+  * `uploadedAt: Instant`: Marca de tiempo de captura y registro.
 
 ##### 5. `TaskProposal` (Entidad Dependiente de `WorkOrder`)
 * **Paquete:** `com.andeva.atelier.platform.operations.domain.model.entities`
 * **Propósito:** Modela hallazgos periciales y propuestas de tareas técnicas adicionales detectadas por el mecánico en foso o elevador. El mecánico no calcula montos financieros; documenta el problema técnico y lo envía al Asesor de Servicio, quien cotiza formalmente mano de obra y repuestos en diálogo concertado con el conductor.
 * **Atributos:**
-  * `id: UUID` — Identificador único del hallazgo / propuesta.
-  * `workOrderId: WorkOrderId` — Orden de trabajo vinculada.
-  * `taskId: WorkOrderTaskId` — Tarea durante la cual se detectó la avería (nullable).
-  * `serviceId: ServiceId` — Servicio de catálogo sugerido por el mecánico o seleccionado por el asesor (nullable).
-  * `mechanicId: UUID` — Técnico que detectó el hallazgo (referencia a `tenant_memberships`).
-  * `description: String` — Descripción técnica del hallazgo pericial.
-  * `severity: ProposalSeverity` — Nivel de severidad técnica (`LOW`, `MEDIUM`, `CRITICAL`).
-  * `imageUrl: StorageUrl` — Evidencia fotográfica pericial alojada en Firebase Cloud Storage.
-  * `status: ProposalStatus` — Estado de evaluación (`PENDING_REVIEW`, `APPROVED`, `REJECTED`).
-  * `customerNotes: String` — Anotaciones de la concertación con el cliente o justificación de rechazo.
-  * `createdAt: Instant` — Marca temporal de reporte en foso.
-  * `updatedAt: Instant` — Marca temporal de resolución por el asesor.
+  * `id: UUID`: Identificador único del hallazgo / propuesta.
+  * `workOrderId: WorkOrderId`: Orden de trabajo vinculada.
+  * `taskId: WorkOrderTaskId`: Tarea durante la cual se detectó la avería (nullable).
+  * `serviceId: ServiceId`: Servicio de catálogo sugerido por el mecánico o seleccionado por el asesor (nullable).
+  * `mechanicId: UUID`: Técnico que detectó el hallazgo (referencia a `tenant_memberships`).
+  * `description: String`: Descripción técnica del hallazgo pericial.
+  * `severity: ProposalSeverity`: Nivel de severidad técnica (`LOW`, `MEDIUM`, `CRITICAL`).
+  * `imageUrl: StorageUrl`: Evidencia fotográfica pericial alojada en Firebase Cloud Storage.
+  * `status: ProposalStatus`: Estado de evaluación (`PENDING_REVIEW`, `APPROVED`, `REJECTED`).
+  * `customerNotes: String`: Anotaciones de la concertación con el cliente o justificación de rechazo.
+  * `createdAt: Instant`: Marca temporal de reporte en foso.
+  * `updatedAt: Instant`: Marca temporal de resolución por el asesor.
 * **Métodos:**
   * `+ void approve(String notes): void`: Transiciona el estado a `APPROVED`, registrando las notas de la concertación y presupuesto acordado con el cliente.
   * `+ void reject(String customerReason): void`: Transiciona el estado a `REJECTED`, preservando la causa del rechazo para trazabilidad en el expediente vehicular.
 
 ---
 
-#### 6.2.3. Value Objects & Enums
+#### 6.2.3. Identificadores Fuertemente Tipados, Objetos de Valor y Enumeraciones
+
+##### 1. Identificadores Fuertemente Tipados (`ids`)
+Ubicados en el paquete canónico `com.andeva.atelier.platform.operations.domain.model.ids`. Modelan identidades inmutables fuertemente tipadas que realizan la interfaz genérica `TypedId<UUID>` del Shared Kernel, previniendo errores de transposición de identificadores primitivos entre agregados y entidades:
 
 * **`WorkOrderId(UUID value)`:** Identificador único universal fuertemente tipado de la orden de trabajo.
-* **`WorkOrderNumber(String value)`:** Código correlativo legible formateado bajo la expresión regular `^WO-[0-9]{6}-[0-9]{4}$` (ej. `WO-202609-0142`), inmutable y único por taller.
 * **`WorkOrderTaskId(UUID value)`:** Identificador único universal fuertemente tipado para tareas mecánicas.
-* **`WorkOrderTaskProductId(UUID value)`:** Identificador único universal para requerimientos de repuestos en tareas.
-* **`WorkBayId(UUID value)`:** Identificador único universal fuertemente tipado para bahías de taller.
-* **`ServiceId(UUID value)`:** Identificador único universal fuertemente tipado para servicios de catálogo.
+* **`WorkOrderTaskProductId(UUID value)`:** Identificador único universal para requerimientos de repuestos en tareas mecánicas.
+* **`WorkBayId(UUID value)`:** Identificador único universal fuertemente tipado para bahías físicas de taller.
+* **`ServiceId(UUID value)`:** Identificador único universal fuertemente tipado para servicios del catálogo maestro de mano de obra.
+
+##### 2. Objetos de Valor Puros (`valueobjects`)
+Ubicados en el paquete canónico `com.andeva.atelier.platform.operations.domain.model.valueobjects`. Encapsulan reglas de validación invariantes de negocio, inmutabilidad intrínseca y semántica de valor sin identidad persistente propia:
+
+* **`WorkOrderNumber(String value)`:** Código correlativo legible formateado bajo la expresión regular `^WO-[0-9]{6}-[0-9]{4}$` (ej. `WO-202609-0142`), inmutable y único por taller.
 * **`Mileage(Integer value)`:** Kilometraje automotriz entero no negativo (`value >= 0`).
 * **`DiagnosticSummary(String value)`:** Resumen de diagnóstico preliminar de recepción (máximo 2000 caracteres, normalizado sin espacios redundantes).
 * **`LaborHours(BigDecimal value)`:** Cantidad de horas hombre de trabajo mecánico con escala fija de 2 decimales y valor estrictamente positivo (`value > 0.00`).
 * **`Quantity(BigDecimal value)`:** Cantidad numérica positiva para repuestos o volumen de lubricantes con escala fija de 2 decimales (`value > 0.00`).
 * **`StorageUrl(String value)`:** Dirección URL segura HTTPS validada proveniente de Firebase Cloud Storage o Google Cloud Storage (`storage.googleapis.com` o dominio verificado).
+
+##### 3. Enumeraciones de Dominio (`enums`)
+Ubicadas en el paquete canónico `com.andeva.atelier.platform.operations.domain.model.enums`. Gobiernan los estados discretos, tipologías físicas y clasificaciones técnicas del taller mecánico:
+
 * **`WorkOrderStatus` (Enum):** Ciclo de vida determinista de la orden de trabajo:
-  * `DRAFT` — Orden en recepción inicial; levantamiento de diagnóstico, peritaje y asignación de bahía.
-  * `IN_PROGRESS` — Labores mecánicas activas en patio de taller (iniciadas por al menos una tarea en foso).
-  * `COMPLETED` — Todas las tareas mecánicas finalizadas satisfactoriamente.
-  * `PAID` — Liquidación económica registrada; lista para entrega vehicular.
-  * `CANCELED` — Orden anulada con liberación de bahía y reversión de reservas de stock.
+  * `DRAFT`: Orden en recepción inicial, levantamiento de diagnóstico, peritaje y asignación de bahía.
+  * `IN_PROGRESS`: Labores mecánicas activas en patio de taller, iniciadas por al menos una tarea en foso.
+  * `COMPLETED`: Todas las tareas mecánicas finalizadas satisfactoriamente.
+  * `PAID`: Liquidación económica registrada, lista para entrega vehicular.
+  * `CANCELED`: Orden anulada con liberación de bahía y reversión de reservas de stock.
 * **`WorkOrderTaskStatus` (Enum):** Ciclo de ejecución de la labor mecánica en foso:
-  * `PENDING` — Tarea creada sin técnico asignado aún.
-  * `ASSIGNED` — Técnico mecánico asignado a la labor; listo para iniciar.
-  * `IN_PROGRESS` — Técnico ejecutando activamente la labor en bahía o foso.
-  * `ON_HOLD` — Labor suspendida por falta de repuestos o fluidos en almacén; cronómetro de mano de obra efectiva pausado.
-  * `COMPLETED` — Labor técnica finalizada con registro de horas reales de mano de obra (*Wrench Time*).
-  * `CANCELLED` — Tarea cancelada antes de su culminación.
+  * `PENDING`: Tarea creada sin técnico asignado aún.
+  * `ASSIGNED`: Técnico mecánico asignado a la labor, listo para iniciar.
+  * `IN_PROGRESS`: Técnico ejecutando activamente la labor en bahía o foso.
+  * `ON_HOLD`: Labor suspendida por falta de repuestos o fluidos en almacén, con cronómetro de mano de obra efectiva pausado.
+  * `COMPLETED`: Labor técnica finalizada con registro de horas reales de mano de obra (*Wrench Time*).
+  * `CANCELLED`: Tarea cancelada antes de su culminación.
 * **`HoldReason` (Enum):** Causal tipada de suspensión de la labor técnica:
-  * `WAITING_PARTS` — Tarea detenida en foso por desabastecimiento temporal de repuesto o lubricante en almacén central; alerta disparada a compras y cronómetro de horas efectivas pausado.
+  * `WAITING_PARTS`: Tarea detenida en foso por desabastecimiento temporal de repuesto o lubricante en almacén central, con alerta disparada a compras y cronómetro de horas efectivas pausado.
 * **`ProposalSeverity` (Enum):** Gravedad técnica del hallazgo detectado:
-  * `LOW` — Defecto estético o mantenimiento preventivo no urgente.
-  * `MEDIUM` — Desgaste mecánico moderado que amerita sustitución a corto plazo.
-  * `CRITICAL` — Riesgo inminente para la seguridad del vehículo o integridad del motor.
+  * `LOW`: Defecto estético o mantenimiento preventivo no urgente.
+  * `MEDIUM`: Desgaste mecánico moderado que amerita sustitución a corto plazo.
+  * `CRITICAL`: Riesgo inminente para la seguridad del vehículo o integridad del motor.
 * **`ProposalStatus` (Enum):** Estado del flujo de aprobación del hallazgo:
-  * `PENDING_REVIEW` — Registrado en foso; pendiente de revisión y cotización por el Asesor de Servicio.
-  * `APPROVED` — Aceptado por el conductor tras diálogo humano; instanciado como tarea formal en estado `ASSIGNED` (o `PENDING`).
-  * `REJECTED` — Desestimado por el cliente; archivado en el expediente clínico para mantenimiento predictivo.
+  * `PENDING_REVIEW`: Registrado en foso, pendiente de revisión y cotización por el Asesor de Servicio.
+  * `APPROVED`: Aceptado por el conductor tras diálogo humano, e instanciado como tarea formal en estado `ASSIGNED` (o `PENDING`).
+  * `REJECTED`: Desestimado por el cliente y archivado en el expediente clínico para mantenimiento predictivo.
 * **`BayType` (Enum):** Clasificación física y electromecánica del puesto de taller:
-  * `LIFT` — Elevador hidráulico o electromecánico de dos o cuatro postes.
-  * `PAINT_BOOTH` — Cabina presurizada de pintura y secado térmico.
-  * `WASHING` — Bahía de lavado, detal y descontaminado de carrocería.
-  * `ALIGNMENT` — Fosa o rampa con equipo computarizado de dirección y alineamiento.
+  * `LIFT`: Elevador hidráulico o electromecánico de dos o cuatro postes.
+  * `PAINT_BOOTH`: Cabina presurizada de pintura y secado térmico.
+  * `WASHING`: Bahía de lavado, detal y descontaminado de carrocería.
+  * `ALIGNMENT`: Fosa o rampa con equipo computarizado de dirección y alineamiento.
 * **`BayStatus` (Enum):** Estado de disponibilidad física del puesto de taller:
-  * `AVAILABLE` — Bahía desocupada lista para recibir un vehículo.
-  * `OCCUPIED` — Bahía bloqueada con una orden de trabajo activa.
-  * `MAINTENANCE` — Bahía inhabilitada por calibración o avería mecánica.
+  * `AVAILABLE`: Bahía desocupada lista para recibir un vehículo.
+  * `OCCUPIED`: Bahía bloqueada con una orden de trabajo activa.
+  * `MAINTENANCE`: Bahía inhabilitada por calibración o avería mecánica.
 * **`EvidenceType` (Enum):** Clasificación pericial de la fotografía técnica:
-  * `INITIAL_INSPECTION` — Fotografía de diagnóstico y condición de ingreso.
-  * `DEFECT` — Evidencia del componente averiado, fisurado o desgastado.
-  * `IN_PROGRESS` — Registro del proceso de montaje o rectificación.
-  * `COMPLETED` — Evidencia del componente nuevo instalado y calibrado.
+  * `INITIAL_INSPECTION`: Fotografía de diagnóstico y condición de ingreso.
+  * `DEFECT`: Evidencia del componente averiado, fisurado o desgastado.
+  * `IN_PROGRESS`: Registro del proceso de montaje o rectificación.
+  * `COMPLETED`: Evidencia del componente nuevo instalado y calibrado.
 
 ---
 
@@ -530,9 +834,10 @@ Controladores REST HTTP anotados con `@RestController`, `@RequestMapping` y espe
 
 #### 6.3.2. Resources / DTOs
 
-Estructuras de datos inmutables modeladas como Java Records de transporte perimetral, decoradas con Jakarta Bean Validation 3.0 para validación sintáctica defensiva en el perímetro:
+Estructuras de datos inmutables modeladas como Java Records de transporte perimetral, decoradas con Jakarta Bean Validation 3.0 para validación sintáctica defensiva en el perímetro, segregadas canónicamente en `com.andeva.atelier.platform.operations.interfaces.rest.resources.requests` y `com.andeva.atelier.platform.operations.interfaces.rest.resources.responses`:
 
 ##### 1. Recursos de Petición (Requests)
+Ubicados en el paquete `com.andeva.atelier.platform.operations.interfaces.rest.resources.requests` (19 DTOs):
 ```java
 // Apertura de Orden de Trabajo
 public record CreateWorkOrderResource(
@@ -740,6 +1045,8 @@ public record UpdateServiceResource(
 ```
 
 ##### 2. Recursos de Respuesta (Responses)
+Ubicados en el paquete `com.andeva.atelier.platform.operations.interfaces.rest.resources.responses` (10 DTOs):
+
 ```java
 public record WorkOrderResource(
     UUID id,
@@ -906,7 +1213,7 @@ Clases transformadoras bidireccionales ubicadas en `com.andeva.atelier.platform.
 
 #### 6.3.4. Open Host Service (OHS) / Inbound ACL Facade
 
-Interfaz canónica pública en memoria expuesta en `com.andeva.atelier.platform.operations.interfaces.acl` para el consumo seguro y desacoplado por parte de otros Bounded Contexts (Invoicing, Inventory y CRM):
+Interfaz canónica pública en memoria expuesta en `com.andeva.atelier.platform.operations.interfaces.acl` para el consumo seguro y desacoplado por parte de otros Bounded Contexts (Invoicing, Inventory y CRM). Su implementación operativa, `WorkshopOperationsContextFacadeImpl`, reside en la Capa de Aplicación bajo el paquete `com.andeva.atelier.platform.operations.application.acl`, orquestando llamadas en memoria hacia servicios de consulta y comandos transaccionales sin exponer entidades del dominio:
 
 ```java
 package com.andeva.atelier.platform.operations.interfaces.acl;
@@ -995,16 +1302,17 @@ Residiendo bajo el paquete raíz canónico `com.andeva.atelier.platform.operatio
 1. **Orquestación transaccional atómica de órdenes y bahías:** Coordina transacciones ACID de escritura anotadas con `@Transactional(isolation = Isolation.READ_COMMITTED, rollbackFor = Exception.class)`, garantizando consistencia fuerte entre el agregado raíz **WorkOrder** y el agregado de infraestructura **WorkBay**. Esta sincronización previene colisiones en la ocupación física de puestos de trabajo, asegura la observancia de la máquina de estados finita determinista (`DRAFT` $\rightarrow$ `IN_PROGRESS` $\rightarrow$ `COMPLETED` $\rightarrow$ `PAID`, con derivación controlada a `CANCELED`) y gobierna el recálculo financiero de mano de obra y repuestos mediante operaciones de precisión fija y redondeo bancario (`RoundingMode.HALF_EVEN`).
 2. **Manejo de errores determinista con `Result<T, ApplicationError>`:** Adopta un enfoque funcional basado en tipos de resultado sellados para la gobernanza del flujo de control sin incurrir en el escape indiscriminado de excepciones no comprobadas en la capa de aplicación. Cada fallo de negocio, violación de precondición o conflicto de disponibilidad se encapsula en estructuras de error semánticas (**WorkOrderErrors**, **WorkBayErrors**, **ServiceErrors**) provistas de un código legible, mensaje contextual y su correspondiente mapeo a especificaciones de error estandarizadas RFC 7807 en el perímetro REST.
 3. **Coreografía de eventos y Transactional Outbox:** Desacopla asíncronamente los efectos colaterales intermodulares mediante oyentes de eventos de dominio anotados con `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)`. Los eventos de integración pertenecientes al lenguaje publicado (*Published Language*) se persisten atómicamente en la tabla relacional `outbox_messages` dentro de la misma unidad transaccional relacional, garantizando entrega confiable al menos una vez (*at-least-once delivery*) hacia *Inventory & Supply Chain* (reservas y cancelaciones FIFO), *Invoicing & Fiscal Compliance* (liquidación y emisión de comprobantes SUNAT), y *Customer & Fleet Management (CRM)* (trazabilidad del historial clínico vehicular y notificaciones móviles).
-4. **Inversión de dependencias perimetrales mediante puertos de salida ACL:** Aísla el núcleo de aplicación frente a detalles de infraestructura o contratos externos mediante interfaces Java puras ubicadas en el paquete `com.andeva.atelier.platform.operations.application.acl`. Los adaptadores perimetrales (*Anti-Corruption Layer*) intermedian la verificación vehicular y de clientes con CRM (**CustomerFleetAclService**), la comprobación de membresías activas y sucursales con IAM (**TenancyAclService**), la reserva física de piezas con Inventario (**InventoryReservationAclService**) y la validación de firmas y binarios en Firebase Cloud Storage (**DirectToCloudStorageGateway**).
+4. **Inversión de dependencias perimetrales mediante puertos de salida ACL:** Aísla el núcleo de aplicación frente a detalles de infraestructura o contratos externos mediante interfaces Java puras ubicadas en el paquete `com.andeva.atelier.platform.operations.application.internal.outbound.acl`. Los adaptadores perimetrales (*Anti-Corruption Layer*) intermedian la verificación vehicular y de clientes con CRM (**CustomerFleetAclService**), la comprobación de membresías activas y sucursales con IAM (**TenancyAclService**), la reserva física de piezas con Inventario (**InventoryReservationAclService**) y la validación de firmas y binarios en Firebase Cloud Storage (**DirectToCloudStorageGateway**).
+5. **Implementación de Fachada Inbound ACL:** Clase `WorkshopOperationsContextFacadeImpl` en `com.andeva.atelier.platform.operations.application.acl`, que implementa la interfaz pública de Open Host Service (OHS) para consultas y comandos intercontextuales seguros sin acoplamiento a modelos de dominio.
 
 ---
 
 #### 6.4.1. Command Services & Implementations
 
-Los servicios de comando se encuentran anotados con `@Service` y aplican `@Transactional(isolation = Isolation.READ_COMMITTED, rollbackFor = Exception.class)`, garantizando consistencia transaccional en cada caso de uso mutacional:
+Los contratos de interfaz pública de servicios de comando residen en `com.andeva.atelier.platform.operations.application.commandservices`, mientras que sus implementaciones operativas residen en `com.andeva.atelier.platform.operations.application.internal.commandservices`. Se encuentran anotadas con `@Service` y aplican `@Transactional(isolation = Isolation.READ_COMMITTED, rollbackFor = Exception.class)`, garantizando consistencia transaccional en cada caso de uso mutacional:
 
 ##### 1. `WorkOrderCommandService` & `WorkOrderCommandServiceImpl`
-* Paquete: `com.andeva.atelier.platform.operations.application.services`
+* **Paquetes:** Interfaz pública en `com.andeva.atelier.platform.operations.application.commandservices` e implementación interna en `com.andeva.atelier.platform.operations.application.internal.commandservices`
 * Contratos y Casos de Uso:
   * `Result<WorkOrder, ApplicationError> handle(CreateWorkOrderCommand command)`:
     1. Resuelve el identificador del taller (`tenantId`) a partir del contexto autenticado.
@@ -1174,7 +1482,7 @@ Los servicios de comando se encuentran anotados con `@Service` y aplican `@Trans
     6. Retorna `Result.success(workOrder)`.
 
 ##### 2. `WorkBayCommandService` & `WorkBayCommandServiceImpl`
-* Paquete: `com.andeva.atelier.platform.operations.application.services`
+* **Paquetes:** Interfaz pública en `com.andeva.atelier.platform.operations.application.commandservices` e implementación interna en `com.andeva.atelier.platform.operations.application.internal.commandservices`
 * Contratos y Casos de Uso:
   * `Result<WorkBay, ApplicationError> handle(CreateWorkBayCommand command)`:
     1. Valida mediante `TenancyAclService` que la sede física (`branchId`) exista y pertenezca al taller activo (`tenantId`).
@@ -1198,7 +1506,7 @@ Los servicios de comando se encuentran anotados con `@Service` y aplican `@Trans
     4. Persiste la bahía y retorna `Result.success(workBay)`.
 
 ##### 3. `ServiceCommandService` & `ServiceCommandServiceImpl`
-* Paquete: `com.andeva.atelier.platform.operations.application.services`
+* **Paquetes:** Interfaz pública en `com.andeva.atelier.platform.operations.application.commandservices` e implementación interna en `com.andeva.atelier.platform.operations.application.internal.commandservices`
 * Contratos y Casos de Uso:
   * `Result<Service, ApplicationError> handle(CreateServiceItemCommand command)`:
     1. Comprueba la unicidad de la denominación del servicio dentro del catálogo del taller mediante `ServiceRepository.findByTenantIdAndName(tenantId, command.name())`. Si ya existe, retorna `Result.failure(ServiceErrors.nameAlreadyExists())`.
@@ -1220,10 +1528,10 @@ Los servicios de comando se encuentran anotados con `@Service` y aplican `@Trans
 
 #### 6.4.2. Query Services & Implementations
 
-Los servicios de consulta se implementan bajo `@Transactional(readOnly = true)` y retornan proyecciones inmutables optimizadas sin la sobrecarga del seguimiento de cambios (*dirty checking*) de JPA:
+Los contratos de interfaz pública de servicios de consulta residen en `com.andeva.atelier.platform.operations.application.queryservices`, mientras que sus implementaciones operativas residen en `com.andeva.atelier.platform.operations.application.internal.queryservices`. Están anotadas con `@Service`, aplican transaccionalidad de solo lectura `@Transactional(readOnly = true)` y retornan proyecciones inmutables optimizadas sin la sobrecarga del seguimiento de cambios (*dirty checking*) de JPA:
 
 ##### 1. `WorkOrderQueryService` & `WorkOrderQueryServiceImpl`
-* Paquete: `com.andeva.atelier.platform.operations.application.services`
+* **Paquetes:** Interfaz pública en `com.andeva.atelier.platform.operations.application.queryservices` e implementación interna en `com.andeva.atelier.platform.operations.application.internal.queryservices`
 * Métodos:
   * `Optional<WorkOrder> handle(GetWorkOrderByIdQuery query)`: Recupera la ficha técnica integral del agregado `WorkOrder` por su identificador único universal, incluyendo sus colecciones de tareas mecánicas, propuestas técnicas periciales, repuestos y evidencias fotográficas de recepción.
   * `List<WorkOrder> handle(GetWorkOrdersByTenantQuery query)`: Consulta el conjunto completo de órdenes de trabajo asociadas al taller automotriz autenticado, soportando filtros por rango de fechas.
@@ -1237,14 +1545,14 @@ Los servicios de consulta se implementan bajo `@Transactional(readOnly = true)` 
   * `List<TaskProposal> handle(GetProposalsByWorkOrderQuery query)`: Obtiene la lista de hallazgos periciales y propuestas de tareas adicionales detectadas en foso para una orden de trabajo, filtrables por estado (`PENDING_REVIEW`, `APPROVED`, `REJECTED`).
 
 ##### 2. `WorkBayQueryService` & `WorkBayQueryServiceImpl`
-* Paquete: `com.andeva.atelier.platform.operations.application.services`
+* **Paquetes:** Interfaz pública en `com.andeva.atelier.platform.operations.application.queryservices` e implementación interna en `com.andeva.atelier.platform.operations.application.internal.queryservices`
 * Métodos:
   * `Optional<WorkBay> handle(GetWorkBayByIdQuery query)`: Recupera los detalles técnicos y estado de ocupación de una bahía física por su identificador.
   * `List<WorkBay> handle(GetWorkBaysByBranchQuery query)`: Consulta el catálogo completo de bahías físicas instaladas en una sede del taller (`branchId`), desglosando su tipología técnica (`LIFT`, `PAINT_BOOTH`, `WASHING`, `ALIGNMENT`).
   * `List<WorkBay> handle(GetAvailableWorkBaysQuery query)`: Consulta en tiempo real las bahías físicas que se encuentran desocupadas y en estado operativo `AVAILABLE` en una sucursal, con filtro opcional por tipo de infraestructura para planificar el ingreso de vehículos a foso.
 
 ##### 3. `ServiceQueryService` & `ServiceQueryServiceImpl`
-* Paquete: `com.andeva.atelier.platform.operations.application.services`
+* **Paquetes:** Interfaz pública en `com.andeva.atelier.platform.operations.application.queryservices` e implementación interna en `com.andeva.atelier.platform.operations.application.internal.queryservices`
 * Métodos:
   * `Optional<Service> handle(GetServiceByIdQuery query)`: Recupera la ficha técnica y tarifaria de un servicio maestro del catálogo por su identificador.
   * `List<Service> handle(GetServicesByTenantQuery query)`: Lista la totalidad de servicios estándar de mano de obra habilitados para el taller autenticado (`tenantId`), incluyendo sus tarifas base y tiempos estimados.
@@ -1253,7 +1561,7 @@ Los servicios de consulta se implementan bajo `@Transactional(readOnly = true)` 
 
 #### 6.4.3. Event Handlers & Listeners
 
-El desacoplamiento entre casos de uso de mutación técnica y los efectos colaterales intermodulares se instrumenta mediante manejadores de eventos especializados en el paquete `com.andeva.atelier.platform.operations.application.events`, combinando oyentes síncronos en memoria (`@EventListener`) con oyentes transaccionales posteriores a la confirmación relacional (`@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)`):
+El desacoplamiento entre casos de uso de mutación técnica y los efectos colaterales intermodulares se instrumenta mediante manejadores de eventos especializados en el paquete `com.andeva.atelier.platform.operations.application.internal.eventhandlers`, combinando oyentes síncronos en memoria (`@EventListener`) con oyentes transaccionales posteriores a la confirmación relacional (`@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)`):
 
 ##### 1. `WorkOrderDomainEventsHandler`
 Manejador transaccional responsable de transformar eventos de dominio del agregado `WorkOrder` en eventos de integración inmutables del Published Language y depositarlos en la tabla `outbox_messages`:
@@ -1290,13 +1598,13 @@ Oyente de eventos de integración generados por otros Bounded Contexts que desen
 
 #### 6.4.4. Outbound ACL Gateways
 
-Para preservar la independencia del núcleo de aplicación frente a protocolos de transporte, esquemas de bases de datos externas o SDKs propietarios de terceros, la capa define contratos puros de pasarela en el paquete `com.andeva.atelier.platform.operations.application.acl`:
+Para preservar la independencia del núcleo de aplicación frente a protocolos de transporte, esquemas de bases de datos externas o SDKs propietarios de terceros, la capa define contratos puros de pasarela en el paquete `com.andeva.atelier.platform.operations.application.internal.outbound.acl`:
 
 ##### 1. `CustomerFleetAclService`
 * **Propósito:** Consulta y validación remota hacia el Bounded Context *Customer & Fleet Management (CRM)* para verificar la existencia del vehículo automotor, su placa de rodaje, la titularidad activa del cliente civil o empresa flotillera, y los datos de contacto para la orden de trabajo.
 * **Firma e Interfaz:**
   ```java
-  package com.andeva.atelier.platform.operations.application.acl;
+  package com.andeva.atelier.platform.operations.application.internal.outbound.acl;
 
   import java.util.Optional;
   import java.util.UUID;
@@ -1334,7 +1642,7 @@ Para preservar la independencia del núcleo de aplicación frente a protocolos d
 * **Propósito:** Intermediación con el Bounded Context *IAM & Multi-Tenancy* para validar la existencia y operatividad de sucursales físicas (`branchId`) y comprobar la vigencia de membresías laborales (`tenant_memberships`) de los técnicos mecánicos antes de asignarles labores de taller.
 * **Firma e Interfaz:**
   ```java
-  package com.andeva.atelier.platform.operations.application.acl;
+  package com.andeva.atelier.platform.operations.application.internal.outbound.acl;
 
   import java.util.Optional;
   import java.util.UUID;
@@ -1361,7 +1669,7 @@ Para preservar la independencia del núcleo de aplicación frente a protocolos d
 * **Propósito:** Comunicación y orquestación con el Bounded Context *Inventory & Supply Chain* para coordinar la solicitud de reserva lógica de repuestos bajo costeo FIFO, verificación preliminar de disponibilidad de insumos en almacén, y la cancelación o ajuste de reservas físicas.
 * **Firma e Interfaz:**
   ```java
-  package com.andeva.atelier.platform.operations.application.acl;
+  package com.andeva.atelier.platform.operations.application.internal.outbound.acl;
 
   import java.math.BigDecimal;
   import java.util.Optional;
@@ -1389,7 +1697,7 @@ Para preservar la independencia del núcleo de aplicación frente a protocolos d
 * **Propósito:** Validación criptográfica, comprobación de integridad y verificación de orígenes seguros de almacenamiento bajo el patrón *Direct-to-Cloud*, garantizando que las URLs de evidencias fotográficas periciales provengan del bucket oficial de Firebase Cloud Storage configurado para Atelier (`gs://atelier-platform.firebasestorage.app`).
 * **Firma e Interfaz:**
   ```java
-  package com.andeva.atelier.platform.operations.application.acl;
+  package com.andeva.atelier.platform.operations.application.internal.outbound.acl;
 
   import java.util.Optional;
 
@@ -1408,6 +1716,48 @@ Para preservar la independencia del núcleo de aplicación frente a protocolos d
       String publicHttpsUrl
   ) {}
   ```
+
+---
+
+#### 6.4.5. Inbound ACL / Workshop Operations Facade Implementation
+
+Implementación operativa de la fachada Open Host Service (OHS), ubicada en `com.andeva.atelier.platform.operations.application.acl.WorkshopOperationsContextFacadeImpl`. Esta clase implementa la interfaz pública `WorkshopOperationsContextFacade` expuesta en `interfaces.acl`, orquestando llamadas directas en memoria hacia los servicios de consulta (`WorkOrderQueryService`, `WorkBayQueryService`) y comandos transaccionales controlados (`WorkOrderCommandService`), traduciendo los agregados de dominio hacia DTOs inmutables de ACL (`WorkOrderSummaryDto`, `WorkOrderBillingDto`, `WorkOrderConsumedProductDto`, `WorkBaySummaryDto`) para el consumo seguro de otros Bounded Contexts (Invoicing, Inventory y CRM):
+
+```java
+package com.andeva.atelier.platform.operations.application.acl;
+
+import com.andeva.atelier.platform.operations.application.commandservices.WorkOrderCommandService;
+import com.andeva.atelier.platform.operations.application.queryservices.WorkBayQueryService;
+import com.andeva.atelier.platform.operations.application.queryservices.WorkOrderQueryService;
+import com.andeva.atelier.platform.operations.interfaces.acl.WorkshopOperationsContextFacade;
+import com.andeva.atelier.platform.operations.interfaces.acl.dto.WorkBaySummaryDto;
+import com.andeva.atelier.platform.operations.interfaces.acl.dto.WorkOrderBillingDto;
+import com.andeva.atelier.platform.operations.interfaces.acl.dto.WorkOrderConsumedProductDto;
+import com.andeva.atelier.platform.operations.interfaces.acl.dto.WorkOrderSummaryDto;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+@Service
+public class WorkshopOperationsContextFacadeImpl implements WorkshopOperationsContextFacade {
+    private final WorkOrderQueryService workOrderQueryService;
+    private final WorkBayQueryService workBayQueryService;
+    private final WorkOrderCommandService workOrderCommandService;
+
+    public WorkshopOperationsContextFacadeImpl(
+            WorkOrderQueryService workOrderQueryService,
+            WorkBayQueryService workBayQueryService,
+            WorkOrderCommandService workOrderCommandService) {
+        this.workOrderQueryService = workOrderQueryService;
+        this.workBayQueryService = workBayQueryService;
+        this.workOrderCommandService = workOrderCommandService;
+    }
+
+    // Métodos de delegación operativa hacia query services y command services con mapeo a DTOs de ACL
+}
+```
 
 ---
 
@@ -1607,7 +1957,7 @@ public interface WorkOrderPersistenceRepository extends JpaRepository<WorkOrderP
 ```java
 package com.andeva.atelier.platform.operations.infrastructure.persistence.jpa.repositories;
 
-import com.andeva.atelier.platform.operations.domain.model.valueobjects.BayType;
+import com.andeva.atelier.platform.operations.domain.model.enums.BayType;
 import com.andeva.atelier.platform.operations.infrastructure.persistence.jpa.entities.WorkBayPersistenceEntity;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -1651,7 +2001,7 @@ public interface WorkBayPersistenceRepository extends JpaRepository<WorkBayPersi
 ```java
 package com.andeva.atelier.platform.operations.infrastructure.persistence.jpa.repositories;
 
-import com.andeva.atelier.platform.operations.domain.model.valueobjects.WorkOrderTaskStatus;
+import com.andeva.atelier.platform.operations.domain.model.enums.WorkOrderTaskStatus;
 import com.andeva.atelier.platform.operations.infrastructure.persistence.jpa.entities.WorkOrderTaskPersistenceEntity;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -1705,7 +2055,7 @@ public interface WorkOrderTaskProductPersistenceRepository extends JpaRepository
 ```java
 package com.andeva.atelier.platform.operations.infrastructure.persistence.jpa.repositories;
 
-import com.andeva.atelier.platform.operations.domain.model.valueobjects.ProposalStatus;
+import com.andeva.atelier.platform.operations.domain.model.enums.ProposalStatus;
 import com.andeva.atelier.platform.operations.infrastructure.persistence.jpa.entities.TaskProposalPersistenceEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -1850,7 +2200,7 @@ Cada mutación de estado ejecutada en los adaptadores de repositorio sigue un pr
 
 #### 6.5.4. Persistence Assemblers
 
-Ubicados en el paquete `com.andeva.atelier.platform.operations.infrastructure.persistence.jpa.transform`. Son componentes encargados de la transformación bidireccional entre los modelos de dominio puros (inmutables, con Value Objects y métodos de comportamiento) y las entidades de persistencia JPA:
+Ubicados en el paquete canónico `com.andeva.atelier.platform.operations.infrastructure.persistence.jpa.assemblers`. Son componentes encargados de la transformación bidireccional entre los modelos de dominio puros (inmutables, con Value Objects y métodos de comportamiento) y las entidades de persistencia JPA:
 
 ##### Principio de Aislamiento de Ciclo de Vida y Reconstitución:
 Los métodos `toDomain` emplean exclusivamente métodos estáticos de reconstitución (`reconstitute(...)`) provistos por los agregados y entidades de dominio (`WorkOrder.reconstitute(...)`, `WorkBay.reconstitute(...)`, `Service.reconstitute(...)`, `TaskProposal.reconstitute(...)`). Estos métodos rehidratan el estado interno a partir de los datos relacionales sin validar invariantes de creación ni disparar eventos de dominio espurios en el *Transactional Outbox*, asegurando que operaciones de lectura nunca contaminen la mensajería distribuida.
@@ -1933,20 +2283,20 @@ Ubicados en el paquete `com.andeva.atelier.platform.operations.infrastructure.pe
 
 #### 6.5.6. Pasarelas Externas de Infraestructura y Servicios de Integración Cloud
 
-Implementaciones de pasarelas perimetrales y adaptadores anticorrupción (ACL) ubicadas en `com.andeva.atelier.platform.operations.infrastructure.external`:
+Implementaciones de pasarelas perimetrales en la nube y adaptadores anticorrupción (ACL) segregadas canónicamente en `com.andeva.atelier.platform.operations.infrastructure.external.cloud` y `com.andeva.atelier.platform.operations.infrastructure.external.acl`:
 
 ##### 1. `FirebaseStorageDirectUploadGatewayImpl` (Google Cloud Storage / Firebase Direct-to-Cloud)
-* **Paquete:** `com.andeva.atelier.platform.operations.infrastructure.external.firebase`
+* **Paquete:** `com.andeva.atelier.platform.operations.infrastructure.external.cloud.firebase`
 * **Implementa:** `DirectUploadStorageGateway`, `DirectToCloudStorageGateway`
 * **Tecnología:** Google Cloud Storage SDK oficial para Java (`com.google.cloud:google-cloud-storage:2.42.0`).
 * **Responsabilidad y Arquitectura Direct-to-Cloud:**
   * Genera URLs pre-firmadas seguras (`Pre-signed PUT URLs`) con una ventana de expiración estricta de 15 minutos (`Storage.signUrl(blobInfo, 15, TimeUnit.MINUTES, SignUrlOption.httpMethod(HttpMethod.PUT), SignUrlOption.withContentType())`).
   * Permite que las aplicaciones móviles (`Mobile Workshop`, `Mobile Driver`) transmitan los flujos binarios de fotografías periciales de inspección y evidencias mecánicas directamente a los buckets de almacenamiento en la nube de Google (`gs://atelier-platform.firebasestorage.app`).
   * Esta arquitectura garantiza **cero consumo de memoria RAM y procesamiento de I/O en la API de Spring Boot**, erradicando los cuellos de botella por subida de archivos multipart masivos en el servidor backend.
-  * Valida estrictamente tipos MIME periciales autorizados (`image/jpeg`, `image/png`, `image/webp`), restringe el tamaño máximo por fotografía a 10 MB y verifica la integridad del archivo mediante sumas de verificación criptográfica SHA-256 antes de persistir las referencias en `work_order_images` y `work_order_task_images`.
+  * Valida estrictamente tipos MIME periciales autorizados (`image/jpeg`, `image/png`, `image/webp`), restringe el tamaño máximo por fotografía a 10 MB y verifica la integridad del archivo mediante sumas de verificación criptográfica SHA-256 antes de persistir las referencias en `work_order_images` y `work_order_task_images`. Además, comprueba el techo de fotografías por orden gobernado por el plan SaaS del taller mediante `SubscriptionContextFacade.validatePhotoUploadAllowed(tenantId, currentPhotosCount)`: en el plan **Go**, se admiten hasta 10 fotos acumuladas por orden entre peritaje general y tareas; mientras que en los planes **Pro**, **Max** y **Enterprise**, el cupo es ilimitado (`-1`).
 
 ##### 2. `CustomerFleetAclAdapter` (Adaptador Perimetral hacia CRM & Fleet)
-* **Paquete:** `com.andeva.atelier.platform.operations.infrastructure.external.crm`
+* **Paquete:** `com.andeva.atelier.platform.operations.infrastructure.external.acl.crm`
 * **Implementa:** `CustomerFleetGateway`, `CustomerFleetAclService`
 * **Tecnología:** Comunicación síncrona en memoria a través de la interfaz de fachada `CustomerFleetContextFacade` (cuando opera en modo monolito modular) o cliente HTTP seguro (`RestClient` con token JWT inter-servicio en despliegue distribuido).
 * **Responsabilidad:**
@@ -1955,7 +2305,7 @@ Implementaciones de pasarelas perimetrales y adaptadores anticorrupción (ACL) u
   * Convalida las citas de recepción agendadas (`appointmentId`), extrayendo el kilometraje inicial y motivo de ingreso pactado para precargar la orden en estado `DRAFT`.
 
 ##### 3. `TenancyAclAdapter` (Adaptador Perimetral hacia IAM & Multi-Tenancy)
-* **Paquete:** `com.andeva.atelier.platform.operations.infrastructure.external.iam`
+* **Paquete:** `com.andeva.atelier.platform.operations.infrastructure.external.acl.iam`
 * **Implementa:** `TenancyGateway`, `TenancyAclService`
 * **Tecnología:** Fachada en memoria `TenancyContextFacade` con validación estricta de aislamiento de datos por `tenant_id`.
 * **Responsabilidad:**
@@ -1963,7 +2313,7 @@ Implementaciones de pasarelas perimetrales y adaptadores anticorrupción (ACL) u
   * Audita la vigencia y rol de las membresías laborales de los técnicos mecánicos (`tenant_memberships.id`) antes de admitir su asignación en tareas mecánicas (`WorkOrderTask`), impidiendo que personal inactivo o desvinculado opere órdenes de trabajo.
 
 ##### 4. `InventoryReservationAclAdapter` (Adaptador Perimetral hacia Inventory FIFO)
-* **Paquete:** `com.andeva.atelier.platform.operations.infrastructure.external.inventory`
+* **Paquete:** `com.andeva.atelier.platform.operations.infrastructure.external.acl.inventory`
 * **Implementa:** `InventoryReservationGateway`, `InventoryReservationAclService`
 * **Tecnología:** Fachada en memoria `InventoryContextFacade` y puente de eventos transaccionales hacia el motor de inventario.
 * **Responsabilidad:**
@@ -1971,6 +2321,14 @@ Implementaciones de pasarelas perimetrales y adaptadores anticorrupción (ACL) u
   * Emite solicitudes de reserva preventiva de stock ante la incorporación de repuestos en una tarea mecánica (`ProductStockReservationRequestedIntegrationEvent`), bloqueando existencias en el lote FIFO correspondiente.
   * Cancela reservas lógicas si una tarea es retirada o anulada (`ProductStockReservationCancelledIntegrationEvent`).
   * Al completarse y liquidarse la orden de trabajo (`PAID`), coordina la deducción contable definitiva y fijación del costo real de los insumos según la valoración FIFO de los lotes consumidos.
+
+##### 5. `SubscriptionQuotaAclAdapter` (Adaptador Perimetral hacia SaaS Billing & Subscriptions)
+* **Paquete:** `com.andeva.atelier.platform.operations.infrastructure.external.acl.billing`
+* **Implementa:** `SubscriptionQuotaGateway`, `SubscriptionQuotaAclService`
+* **Tecnología:** Fachada en memoria `SubscriptionContextFacade` (< 0.05 ms vía Caffeine Cache).
+* **Responsabilidad:**
+  * Valida antes de la creación formal de una nueva orden de trabajo mensual que el taller no haya superado su cuota autorizada (`validateWorkOrderCreationAllowed(tenantId, currentMonthlyOrders)`): 50 OT/mes en Go, 180 OT/mes en Pro, e ilimitado en Max/Enterprise.
+  * Valida el techo de fotografías por orden de servicio antes de emitir la URL pre-firmada o registrar imágenes en `work_order_images` o `work_order_task_images` (`validatePhotoUploadAllowed(tenantId, currentPhotosCount)`), denegando la subida si el taller en plan Go supera las 10 fotografías por orden.
 
 ---
 

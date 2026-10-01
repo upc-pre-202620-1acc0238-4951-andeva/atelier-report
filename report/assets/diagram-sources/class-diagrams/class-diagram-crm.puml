@@ -160,16 +160,42 @@ package "crm.domain.model.entities" as entities #FDFEFE {
         - id: VehicleOwnershipId
         - vehicleId: VehicleId
         - customerId: CustomerId
+        - userId: UserId
         - startDate: LocalDate
         - endDate: LocalDate
         --
         + isCurrent(): boolean
         + terminate(terminationDate: LocalDate): void
+        + linkCustomer(customerId: CustomerId): void
+        + isOwnedByCustomer(customerId: CustomerId): boolean
+        + isOwnedByUser(userId: UserId): boolean
         + id(): VehicleOwnershipId
         + vehicleId(): VehicleId
         + customerId(): CustomerId
+        + userId(): UserId
         + startDate(): LocalDate
         + endDate(): LocalDate
+    }
+
+    class CustomerMembership <<Entity>> {
+        - id: CustomerMembershipId
+        - customerId: CustomerId
+        - userId: UserId
+        - role: FleetRole
+        - status: CustomerMembershipStatus
+        --
+        + {static} create(id: CustomerMembershipId, customerId: CustomerId, userId: UserId, role: FleetRole): CustomerMembership
+        + activate(): void
+        + suspend(): void
+        + revoke(): void
+        + changeRole(newRole: FleetRole): void
+        + isActive(): boolean
+        + hasAdminPrivileges(): boolean
+        + id(): CustomerMembershipId
+        + customerId(): CustomerId
+        + userId(): UserId
+        + role(): FleetRole
+        + status(): CustomerMembershipStatus
     }
 }
 
@@ -216,6 +242,16 @@ package "crm.domain.repositories" as repositories #FDFEFE {
         + save(ownership: VehicleOwnership): VehicleOwnership
         + findByVehicleId(vehicleId: VehicleId): List<VehicleOwnership>
         + findActiveOwnershipByVehicleId(vehicleId: VehicleId): Optional<VehicleOwnership>
+        + findByUserIdAndEndDateIsNull(userId: UserId): List<VehicleOwnership>
+    }
+
+    interface CustomerMembershipRepository <<Repository>> {
+        + save(membership: CustomerMembership): CustomerMembership
+        + findById(id: CustomerMembershipId): Optional<CustomerMembership>
+        + findByCustomerIdAndUserId(customerId: CustomerId, userId: UserId): Optional<CustomerMembership>
+        + findByCustomerId(customerId: CustomerId): List<CustomerMembership>
+        + findByUserIdAndStatus(userId: UserId, status: CustomerMembershipStatus): List<CustomerMembership>
+        + existsByCustomerIdAndUserIdAndStatus(customerId: CustomerId, userId: UserId, status: CustomerMembershipStatus): boolean
     }
 
     interface AppointmentRepository <<Repository>> {
@@ -259,6 +295,12 @@ package "crm.domain.model.ids" as ids #FDFEFE {
         + {static} of(value: UUID): AppointmentId
         + value(): UUID
     }
+
+    class CustomerMembershipId <<TypedId, record>> {
+        - value: UUID
+        + {static} of(value: UUID): CustomerMembershipId
+        + value(): UUID
+    }
 }
 
 package "crm.domain.model.valueobjects" as valueobjects #FDFEFE {
@@ -291,6 +333,17 @@ package "crm.domain.model.enums" as enums #FDFEFE {
     enum CustomerStatus <<Enum>> {
         ACTIVE
         INACTIVE
+    }
+
+    enum FleetRole <<Enum>> {
+        FLEET_ADMIN
+        FLEET_OPERATOR
+    }
+
+    enum CustomerMembershipStatus <<Enum>> {
+        ACTIVE
+        SUSPENDED
+        REVOKED
     }
 
     enum EngineType <<Enum>> {
@@ -379,6 +432,7 @@ AbstractDomainAggregateRoot <|-- Appointment
 Customer "1" o-- "1" CustomerType : "clasificación >"
 Customer "1" o-- "1" CustomerStatus : "estado >"
 Customer "1" o-- "1" CustomerId : "identificado por >"
+Customer "1" *-- "0..*" CustomerMembership : "delega gestión >"
 
 ' Composiciones y Agregaciones de Vehicle
 Vehicle "1" *-- "1..*" VehicleOwnership : "historial custodia >"
@@ -389,7 +443,13 @@ Vehicle "1" o-- "1" VehicleId : "identificado por >"
 
 ' Relaciones de VehicleOwnership
 VehicleOwnership "1" o-- "1" VehicleOwnershipId : "identificado por >"
-VehicleOwnership "1" o-- "1" CustomerId : "titular asignado >"
+VehicleOwnership "1" o-- "0..1" CustomerId : "titular asignado >"
+
+' Relaciones de CustomerMembership
+CustomerMembership "1" o-- "1" CustomerMembershipId : "identificada por >"
+CustomerMembership "1" o-- "1" FleetRole : "rol asignado >"
+CustomerMembership "1" o-- "1" CustomerMembershipStatus : "estado operativo >"
+CustomerMembership "1" o-- "1" CustomerId : "empresa titular >"
 
 ' Relaciones de Appointment
 Appointment "1" o-- "1" AppointmentStatus : "estado operativo >"
@@ -402,6 +462,7 @@ TypedId <|.. CustomerId
 TypedId <|.. VehicleId
 TypedId <|.. VehicleOwnershipId
 TypedId <|.. AppointmentId
+TypedId <|.. CustomerMembershipId
 
 ' Generalizaciones de Excepciones
 DomainException <|-- CustomerNotFoundException
@@ -421,6 +482,7 @@ DomainException <|-- AppointmentAlreadyArrivedException
 CustomerRepository ..up> Customer : "persiste"
 VehicleRepository ..up> Vehicle : "persiste"
 VehicleOwnershipRepository ..up> VehicleOwnership : "persiste"
+CustomerMembershipRepository ..up> CustomerMembership : "persiste"
 AppointmentRepository ..up> Appointment : "persiste"
 
 ' Enlaces de Servicios de Dominio
@@ -438,15 +500,17 @@ Customer -[hidden]right-> Vehicle
 Vehicle -[hidden]right-> Appointment
 
 ' Nivel 2: Entidades dependientes y Servicios de Dominio
-Customer -[hidden]down-> VehicleOwnership
+Customer -[hidden]down-> CustomerMembership
+CustomerMembership -[hidden]right-> VehicleOwnership
 VehicleOwnership -[hidden]right-> AppointmentSchedulingService
 AppointmentSchedulingService -[hidden]right-> VehicleTransferDomainService
 
 ' Nivel 3: Puertos de Repositorio (debajo de entidades y servicios)
-VehicleOwnership -[hidden]down-> CustomerRepository
+CustomerMembership -[hidden]down-> CustomerRepository
 CustomerRepository -[hidden]right-> VehicleRepository
 VehicleRepository -[hidden]right-> VehicleOwnershipRepository
-VehicleOwnershipRepository -[hidden]right-> AppointmentRepository
+VehicleOwnershipRepository -[hidden]right-> CustomerMembershipRepository
+CustomerMembershipRepository -[hidden]right-> AppointmentRepository
 
 ' Nivel 4: Typed IDs, Value Objects y Enumeraciones
 CustomerRepository -[hidden]down-> TypedId
@@ -454,12 +518,15 @@ TypedId -[hidden]down-> CustomerId
 CustomerId -[hidden]right-> VehicleId
 VehicleId -[hidden]right-> VehicleOwnershipId
 VehicleOwnershipId -[hidden]right-> AppointmentId
+AppointmentId -[hidden]right-> CustomerMembershipId
 
 VehicleRepository -[hidden]down-> LicensePlate
 LicensePlate -[hidden]right-> Vin
 
 VehicleOwnershipRepository -[hidden]down-> CustomerType
 CustomerType -[hidden]right-> CustomerStatus
+CustomerStatus -[hidden]right-> FleetRole
+FleetRole -[hidden]right-> CustomerMembershipStatus
 
 AppointmentRepository -[hidden]down-> EngineType
 EngineType -[hidden]right-> AppointmentStatus

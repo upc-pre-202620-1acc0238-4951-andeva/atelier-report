@@ -1,4 +1,4 @@
-## 9. Fase 6: Bounded Context 6 — Invoicing & Compliance Context (`com.andeva.atelier.platform.invoicing`)
+## 9. Fase 6: Bounded Context 6: Invoicing & Compliance Context (`com.andeva.atelier.platform.invoicing`)
 
 ### 9.1. Diccionario y Propósito del Contexto
 
@@ -17,9 +17,213 @@ El **Invoicing & Compliance Context** encapsula la totalidad de las reglas conta
 6. **Liquidación de Medios de Pago (`VoucherPayment`):** Registra los ingresos financieros asociados al comprobante electrónico (Efectivo, Tarjetas de Crédito/Débito, Transferencia Bancaria, Billeteras Digitales como Yape o Plin), controlando saldos pendientes y emitiendo el comprobante una vez acreditada la cancelación.
 
 #### 9.1.2. Decisiones de Diseño e Integraciones Críticas
-* **Capa Anticorrupción (ACL) hacia Nubefact:** En lugar de implementar un cliente UBL 2.1 monolítico con firma digital PKCS#12 y conexión directa por SOAP a los servidores de SUNAT —lo cual demandaría mantener certificados digitales tributarios por cada taller y lidiar con la frecuente intermitencia de los Web Services del Estado—, Atelier se integra con **Nubefact**, un Proveedor de Servicios Electrónicos (PSE) homologado. La ACL traduce el modelo de dominio puro de Atelier hacia el esquema JSON V1 de Nubefact, procesando de forma asíncrona las respuestas que contienen el hash digital de seguridad y los enlaces públicos a los archivos oficiales (`sunat_pdf_url`, `sunat_xml_url`, `sunat_cdr_url`).
+* **Capa Anticorrupción (ACL) hacia Nubefact:** En lugar de implementar un cliente UBL 2.1 monolítico con firma digital PKCS#12 y conexión directa por SOAP a los servidores de SUNAT, lo cual demandaría mantener certificados digitales tributarios por cada taller y lidiar con la frecuente intermitencia de los Web Services del Estado, Atelier se integra con **Nubefact**, un Proveedor de Servicios Electrónicos (PSE) homologado. La ACL traduce el modelo de dominio puro de Atelier hacia el esquema JSON V1 de Nubefact, procesando de forma asíncrona las respuestas que contienen el hash digital de seguridad y los enlaces públicos a los archivos oficiales (`sunat_pdf_url`, `sunat_xml_url`, `sunat_cdr_url`).
 * **Resiliencia mediante Transactional Outbox:** Si la API de Nubefact experimenta latencia o caída temporal, el comprobante se persiste localmente en la base de datos PostgreSQL en estado `ISSUED` (emitido localmente) y se encola un evento en la tabla `outbox_events`. Un worker en segundo plano reintenta el despacho con política de entrega *At-Least-Once*, garantizando que la entrega del vehículo al cliente nunca se detenga por fallos en la pasarela fiscal.
 * **Desacoplamiento con MRO mediante Fachada Open Host Service (OHS):** Cuando una orden de trabajo finaliza en el contexto MRO, este emite el evento de integración `WorkOrderCompletedIntegrationEvent` o invoca `InvoicingContextFacade.generateVoucherFromWorkOrder(...)`. El contexto de facturación extrae el detalle de servicios y repuestos consumidos, aplica los cálculos fiscales y devuelve el resumen del comprobante generado sin que MRO conozca detalles del IGV o UBL 2.1.
+
+---
+
+#### 9.1.3. Estructura de Directorios y Organización de Paquetes
+
+La siguiente estructura de directorios y archivos representa la taxonomía canónica definitiva de **Invoicing & Compliance Context** (`com.andeva.atelier.platform.invoicing`), alineada estrictamente con el estándar arquitectónico de *Learning Center* y los patrones tácticos de Domain-Driven Design (DDD) Hexagonal:
+
+```text
+com.andeva.atelier.platform.invoicing/
+├── domain/
+│   ├── exceptions/
+│   │   ├── CorrelativeExhaustedException.java
+│   │   ├── CreditNoteReferenceNotFoundException.java
+│   │   ├── CustomerFiscalDataMissingException.java
+│   │   ├── InvalidTaxIdException.java
+│   │   ├── InvalidVoucherAmountException.java
+│   │   ├── InvoicingDomainException.java
+│   │   ├── SeriesNotFoundException.java
+│   │   ├── SunatIntegrationException.java
+│   │   ├── VoucherAlreadyPaidException.java
+│   │   ├── VoucherImmutableException.java
+│   │   └── VoucherNotFoundException.java
+│   ├── model/
+│   │   ├── aggregates/
+│   │   │   ├── ElectronicVoucher.java
+│   │   │   └── SeriesConfiguration.java
+│   │   ├── commands/
+│   │   │   ├── ConfigureSeriesCommand.java
+│   │   │   ├── IssueCreditNoteCommand.java
+│   │   │   ├── IssueElectronicVoucherCommand.java
+│   │   │   ├── ProcessSunatResponseCommand.java
+│   │   │   ├── RegisterVoucherPaymentCommand.java
+│   │   │   └── VoidElectronicVoucherCommand.java
+│   │   ├── entities/
+│   │   │   ├── VoucherLine.java
+│   │   │   └── VoucherPayment.java
+│   │   ├── enums/
+│   │   │   ├── CreditNoteReason.java
+│   │   │   ├── PaymentMethod.java
+│   │   │   ├── PaymentStatus.java
+│   │   │   ├── VoucherItemType.java
+│   │   │   ├── VoucherStatus.java
+│   │   │   └── VoucherType.java
+│   │   ├── events/
+│   │   │   ├── CreditNoteIssuedEvent.java
+│   │   │   ├── ElectronicVoucherIssuedEvent.java
+│   │   │   ├── SeriesConfigurationCreatedEvent.java
+│   │   │   ├── SeriesCorrelativeIncrementedEvent.java
+│   │   │   ├── VoucherAcceptedBySunatEvent.java
+│   │   │   ├── VoucherPaymentRegisteredEvent.java
+│   │   │   ├── VoucherRejectedBySunatEvent.java
+│   │   │   └── VoucherVoidedEvent.java
+│   │   ├── ids/
+│   │   │   ├── PaymentId.java
+│   │   │   ├── SeriesConfigurationId.java
+│   │   │   ├── VoucherId.java
+│   │   │   └── VoucherLineId.java
+│   │   ├── queries/
+│   │   │   ├── GetActiveSeriesByBranchQuery.java
+│   │   │   ├── GetCashFlowReportQuery.java
+│   │   │   ├── GetVoucherByIdQuery.java
+│   │   │   ├── GetVoucherBySerieAndNumberQuery.java
+│   │   │   ├── GetVoucherPaymentsQuery.java
+│   │   │   ├── ListVouchersByTenantQuery.java
+│   │   │   └── ListVouchersByWorkOrderQuery.java
+│   │   └── valueobjects/
+│   │       ├── CashFlowMovement.java
+│   │       ├── CashFlowSummary.java
+│   │       ├── CustomerFiscalInfo.java
+│   │       ├── DigitalReceiptUrls.java
+│   │       ├── SunatResponse.java
+│   │       ├── TaxCalculation.java
+│   │       ├── VoidedInfo.java
+│   │       ├── VoucherNumber.java
+│   │       └── VoucherSerie.java
+│   ├── repositories/
+│   │   ├── ElectronicVoucherRepository.java
+│   │   ├── SeriesConfigurationRepository.java
+│   │   └── VoucherPaymentRepository.java
+│   └── services/
+│       ├── PeruvianTaxCalculationEngine.java
+│       ├── SeriesCorrelativeService.java
+│       └── VoucherValidationService.java
+├── application/
+│   ├── acl/
+│   │   └── InvoicingContextFacadeImpl.java
+│   ├── commandservices/
+│   │   ├── ElectronicVoucherCommandService.java
+│   │   ├── SeriesConfigurationCommandService.java
+│   │   └── VoucherPaymentCommandService.java
+│   ├── internal/
+│   │   ├── commandservices/
+│   │   │   ├── ElectronicVoucherCommandServiceImpl.java
+│   │   │   ├── SeriesConfigurationCommandServiceImpl.java
+│   │   │   └── VoucherPaymentCommandServiceImpl.java
+│   │   ├── eventhandlers/
+│   │   │   ├── InvoicingDomainEventsHandler.java
+│   │   │   └── InvoicingExternalEventsListener.java
+│   │   ├── outbound/
+│   │   │   └── acl/
+│   │   │       ├── CashFlowPdfGeneratorPort.java
+│   │   │       ├── CustomerFiscalValidationAclService.java
+│   │   │       ├── NubefactPseFiscalGateway.java
+│   │   │       ├── SunatCdrStorageGateway.java
+│   │   │       └── VoucherReceiptEmailGateway.java
+│   │   └── queryservices/
+│   │       ├── CashFlowQueryServiceImpl.java
+│   │       ├── ElectronicVoucherQueryServiceImpl.java
+│   │       └── VoucherPaymentQueryServiceImpl.java
+│   └── queryservices/
+│       ├── CashFlowQueryService.java
+│       ├── ElectronicVoucherQueryService.java
+│       └── VoucherPaymentQueryService.java
+├── infrastructure/
+│   ├── external/
+│   │   ├── acl/
+│   │   │   └── crm/
+│   │   │       └── CustomerFiscalValidationAclAdapter.java
+│   │   ├── cloud/
+│   │   │   └── firebase/
+│   │   │       └── FirebaseSunatCdrStorageAdapter.java
+│   │   ├── mail/
+│   │   │   └── resend/
+│   │   │       └── ResendVoucherReceiptEmailAdapter.java
+│   │   ├── messaging/
+│   │   │   └── outbox/
+│   │   │       └── InvoicingOutboxMessageRelayAdapter.java
+│   │   ├── reporting/
+│   │   │   └── openpdf/
+│   │   │       └── OpenPdfCashFlowReportAdapter.java
+│   │   └── tax/
+│   │       └── nubefact/
+│   │           └── NubefactPseFiscalAdapter.java
+│   └── persistence/
+│       └── jpa/
+│           ├── adapters/
+│           │   ├── ElectronicVoucherRepositoryImpl.java
+│           │   ├── SeriesConfigurationRepositoryImpl.java
+│           │   └── VoucherPaymentRepositoryImpl.java
+│           ├── assemblers/
+│           │   ├── ElectronicVoucherPersistenceAssembler.java
+│           │   ├── SeriesConfigurationPersistenceAssembler.java
+│           │   └── VoucherPaymentPersistenceAssembler.java
+│           ├── converters/
+│           │   ├── CreditNoteReasonConverter.java
+│           │   ├── MoneyConverter.java
+│           │   ├── PaymentMethodAttributeConverter.java
+│           │   ├── PaymentStatusAttributeConverter.java
+│           │   ├── TaxCalculationConverter.java
+│           │   ├── VoucherItemTypeAttributeConverter.java
+│           │   ├── VoucherSerieAttributeConverter.java
+│           │   ├── VoucherStatusAttributeConverter.java
+│           │   └── VoucherTypeAttributeConverter.java
+│           ├── entities/
+│           │   ├── ElectronicVoucherPersistenceEntity.java
+│           │   ├── SeriesConfigurationPersistenceEntity.java
+│           │   ├── VoucherLinePersistenceEntity.java
+│           │   └── VoucherPaymentPersistenceEntity.java
+│           └── repositories/
+│               ├── ElectronicVoucherPersistenceRepository.java
+│               ├── SeriesConfigurationPersistenceRepository.java
+│               └── VoucherPaymentPersistenceRepository.java
+└── interfaces/
+    ├── acl/
+    │   ├── InvoicingContextFacade.java
+    │   └── dto/
+    │       ├── CustomerFiscalInfoDto.java
+    │       ├── GenerateVoucherFromWorkOrderCommandDto.java
+    │       ├── VoucherGenerationResultDto.java
+    │       ├── VoucherSummaryDto.java
+    │       └── WorkOrderItemBillingDto.java
+    ├── events/
+    │   ├── ElectronicVoucherIssuedIntegrationEvent.java
+    │   ├── VoucherAcceptedBySunatIntegrationEvent.java
+    │   ├── VoucherPaymentRegisteredIntegrationEvent.java
+    │   ├── VoucherRejectedBySunatIntegrationEvent.java
+    │   └── VoucherVoidedIntegrationEvent.java
+    └── rest/
+        ├── controllers/
+        │   ├── ElectronicVouchersController.java
+        │   ├── FinancialReportsController.java
+        │   ├── SeriesConfigurationController.java
+        │   └── VoucherPaymentsController.java
+        ├── resources/
+        │   ├── requests/
+        │   │   ├── ConfigureSeriesRequest.java
+        │   │   ├── IssueCreditNoteRequest.java
+        │   │   ├── IssueVoucherRequest.java
+        │   │   ├── RegisterPaymentRequest.java
+        │   │   ├── VoidVoucherRequest.java
+        │   │   └── VoucherLineRequest.java
+        │   └── responses/
+        │       ├── CashFlowMovementResource.java
+        │       ├── CashFlowReportResource.java
+        │       ├── ElectronicVoucherResource.java
+        │       ├── SeriesConfigurationResource.java
+        │       ├── VoucherLineResource.java
+        │       └── VoucherPaymentResource.java
+        └── transform/
+            ├── CashFlowReportResourceAssembler.java
+            ├── ElectronicVoucherResourceAssembler.java
+            ├── SeriesConfigurationResourceAssembler.java
+            └── VoucherPaymentResourceAssembler.java
+```
 
 ---
 
@@ -32,32 +236,32 @@ El **Invoicing & Compliance Context** encapsula la totalidad de las reglas conta
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<ElectronicVoucher>`
 * **Propósito:** Representa un comprobante de pago electrónico formal con validez fiscal y tributaria emitido por el taller automotriz a un cliente final bajo la normativa de SUNAT y el estándar UBL 2.1. Gobierna el ciclo de vida fiscal, la composición de líneas de detalle impositivas, la amortización financiera de pagos y la conciliación telemática con el Proveedor de Servicios Electrónicos (PSE).
 * **Atributos:**
-  * `id: VoucherId` — Identificador universal inmutable del comprobante electrónico (UUID).
-  * `tenantId: TenantId` — Taller automotriz emisor del comprobante fiscal.
-  * `branchId: BranchId` — Sede física operativa emisora de la transacción.
-  * `customerId: CustomerId` — Cliente receptor de la factura, boleta o nota de crédito.
-  * `workOrderId: Optional<WorkOrderId>` — Orden de trabajo de MRO que originó el cobro (opcional en venta directa de mostrador).
-  * `voucherType: VoucherType` — Tipo legal de comprobante tributario (`FACTURA`, `BOLETA`, `NOTA_CREDITO`).
-  * `serie: VoucherSerie` — Serie autorizada de 4 caracteres alfanuméricos (`^[F|B|T][A-Z0-9]{3}$`, ej. `F001`, `B001`, `FC01`).
-  * `number: VoucherNumber` — Correlativo numérico autoincremental único por serie fiscal (`value > 0`).
-  * `taxCalculation: TaxCalculation` — Objeto de valor que consolida la base imponible (`subtotal`), el impuesto general a las ventas (`igvAmount`), la tasa impositiva legal (18%) y el precio total (`totalAmount`).
-  * `currency: Currency` — Moneda formal de la operación comercial (`PEN` para Soles, `USD` para Dólares Americanos).
-  * `status: VoucherStatus` — Estado del ciclo de vida fiscal (`DRAFT`, `ISSUED`, `ACCEPTED_SUNAT`, `REJECTED_SUNAT`, `VOIDED`).
-  * `customerFiscalInfo: CustomerFiscalInfo` — Datos fiscales del receptor (RUC/DNI, Razón Social/Nombre, Domicilio fiscal, Tipo de Documento).
-  * `digitalReceiptUrls: DigitalReceiptUrls` — URLs públicas seguras (HTTPS) de los artefactos oficiales generados (`pdfUrl`, `xmlUrl`, `cdrUrl`).
-  * `sunatResponse: Optional<SunatResponse>` — Metadatos devueltos por SUNAT/PSE (código de respuesta, glosa descriptiva y hash SHA-256 de la firma digital).
-  * `voidedInfo: Optional<VoidedInfo>` — Timestamp y causal formal de anulación o comunicación de baja ante la autoridad tributaria.
-  * `lines: List<VoucherLine>` — Colección interna de partidas detalladas de servicios de mantenimiento y piezas de repuesto facturadas.
-  * `payments: List<VoucherPayment>` — Colección interna de transacciones y abonos financieros registrados para liquidar el importe del comprobante.
+  * `id: VoucherId`: Identificador universal inmutable del comprobante electrónico (UUID).
+  * `tenantId: TenantId`: Taller automotriz emisor del comprobante fiscal.
+  * `branchId: BranchId`: Sede física operativa emisora de la transacción.
+  * `customerId: CustomerId`: Cliente receptor de la factura, boleta o nota de crédito.
+  * `workOrderId: Optional<WorkOrderId>`: Orden de trabajo de MRO que originó el cobro (opcional en venta directa de mostrador).
+  * `voucherType: VoucherType`: Tipo legal de comprobante tributario (`FACTURA`, `BOLETA`, `NOTA_CREDITO`).
+  * `serie: VoucherSerie`: Serie autorizada de 4 caracteres alfanuméricos (`^[F|B|T][A-Z0-9]{3}$`, ej. `F001`, `B001`, `FC01`).
+  * `number: VoucherNumber`: Correlativo numérico autoincremental único por serie fiscal (`value > 0`).
+  * `taxCalculation: TaxCalculation`: Objeto de valor que consolida la base imponible (`subtotal`), el impuesto general a las ventas (`igvAmount`), la tasa impositiva legal (18%) y el precio total (`totalAmount`).
+  * `currency: Currency`: Moneda formal de la operación comercial (`PEN` para Soles, `USD` para Dólares Americanos).
+  * `status: VoucherStatus`: Estado del ciclo de vida fiscal (`DRAFT`, `ISSUED`, `ACCEPTED_SUNAT`, `REJECTED_SUNAT`, `VOIDED`).
+  * `customerFiscalInfo: CustomerFiscalInfo`: Datos fiscales del receptor (RUC/DNI, Razón Social/Nombre, Domicilio fiscal, Tipo de Documento).
+  * `digitalReceiptUrls: DigitalReceiptUrls`: URLs públicas seguras (HTTPS) de los artefactos oficiales generados (`pdfUrl`, `xmlUrl`, `cdrUrl`).
+  * `sunatResponse: Optional<SunatResponse>`: Metadatos devueltos por SUNAT/PSE (código de respuesta, glosa descriptiva y hash SHA-256 de la firma digital).
+  * `voidedInfo: Optional<VoidedInfo>`: Timestamp y causal formal de anulación o comunicación de baja ante la autoridad tributaria.
+  * `lines: List<VoucherLine>`: Colección interna de partidas detalladas de servicios de mantenimiento y piezas de repuesto facturadas.
+  * `payments: List<VoucherPayment>`: Colección interna de transacciones y abonos financieros registrados para liquidar el importe del comprobante.
 * **Invariantes y Reglas de Negocio:**
   * Si el comprobante es `FACTURA` (`01`), el cliente debe poseer obligatoriamente un RUC de 11 dígitos válido que inicie en `10`, `15`, `17` o `20` con dígito verificador matemático correcto según el algoritmo Módulo 11, contar con Razón Social formal y Domicilio Fiscal obligatorio.
   * Si el comprobante es `BOLETA` (`03`) y el monto total supera los S/ 700.00 PEN, el registro de los datos de identidad formal del cliente (DNI, Carné de Extranjería o Pasaporte) es estrictamente obligatorio según la normativa de SUNAT.
   * Si el comprobante es `NOTA_CREDITO` (`07`), debe referenciar de forma obligatoria un comprobante emisor preexistente válido, especificar un código de motivo legal según el catálogo SUNAT y asociar su fecha de emisión de origen.
   * Cuadre aritmético estricto: el importe total facturado debe ser exactamente igual a la suma aritmética de los importes de todas las líneas de detalle ($\text{totalAmount} = \sum \text{totalLine}$) y la base imponible más el IGV debe cuadrar con el total general ($\text{subtotal} + \text{igvAmount} = \text{totalAmount}$).
-  * Inmutabilidad legal: un comprobante en estado `ACCEPTED_SUNAT` no puede ser modificado ni eliminado de la base de datos; su corrección o neutralización financiera debe realizarse exclusivamente mediante la emisión de una `NOTA_CREDITO` vinculada.
+  * Inmutabilidad legal: un comprobante en estado `ACCEPTED_SUNAT` no puede ser modificado ni eliminado de la base de datos. Su corrección o neutralización financiera debe realizarse exclusivamente mediante la emisión de una `NOTA_CREDITO` vinculada.
 * **Métodos:**
-  * `+ static ElectronicVoucher issue(TenantId tenantId, BranchId branchId, CustomerId customerId, Optional<WorkOrderId> workOrderId, VoucherType type, VoucherSerie serie, VoucherNumber number, CustomerFiscalInfo customerInfo, Currency currency, List<VoucherLine> lines): ElectronicVoucher`: Factoría de dominio principal; computa la liquidación impositiva mediante el motor tributario, valida las reglas fiscales peruanas, inicializa el comprobante en estado `ISSUED` y registra `ElectronicVoucherIssuedEvent`.
-  * `+ static ElectronicVoucher issueCreditNote(TenantId tenantId, BranchId branchId, CustomerId customerId, VoucherId referenceVoucherId, VoucherSerie serie, VoucherNumber number, CreditNoteReason reason, String reasonDescription, List<VoucherLine> lines): ElectronicVoucher`: Factoría de dominio para notas de crédito vinculadas; valida la existencia y estado del comprobante emisor, calcula la compensación impositiva y emite `CreditNoteIssuedEvent`.
+  * `+ static ElectronicVoucher issue(TenantId tenantId, BranchId branchId, CustomerId customerId, Optional<WorkOrderId> workOrderId, VoucherType type, VoucherSerie serie, VoucherNumber number, CustomerFiscalInfo customerInfo, Currency currency, List<VoucherLine> lines): ElectronicVoucher`: Factoría de dominio principal, computa la liquidación impositiva mediante el motor tributario, valida las reglas fiscales peruanas, inicializa el comprobante en estado `ISSUED` y registra `ElectronicVoucherIssuedEvent`.
+  * `+ static ElectronicVoucher issueCreditNote(TenantId tenantId, BranchId branchId, CustomerId customerId, VoucherId referenceVoucherId, VoucherSerie serie, VoucherNumber number, CreditNoteReason reason, String reasonDescription, List<VoucherLine> lines): ElectronicVoucher`: Factoría de dominio para notas de crédito vinculadas, valida la existencia y estado del comprobante emisor, calcula la compensación impositiva y emite `CreditNoteIssuedEvent`.
   * `+ void markAcceptedBySunat(String digitalSignatureHash, String sunatDescription, DigitalReceiptUrls urls): void`: Registra la conformidad formal devuelta por SUNAT/PSE (Constancia de Recepción - CDR), actualiza el estado a `ACCEPTED_SUNAT` y registra `VoucherAcceptedBySunatEvent`.
   * `+ void markRejectedBySunat(String errorCode, String errorMessage): void`: Registra el rechazo formal por inconsistencias tributarias o de firma, conmuta el estado a `REJECTED_SUNAT` y registra `VoucherRejectedBySunatEvent`.
   * `+ void voidVoucher(String voidReason, Instant voidTimestamp): void`: Formaliza la baja o anulación del comprobante ante la autoridad tributaria y registra `VoucherVoidedEvent`.
@@ -70,13 +274,13 @@ El **Invoicing & Compliance Context** encapsula la totalidad de las reglas conta
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<SeriesConfiguration>`
 * **Propósito:** Custodia la configuración de series fiscales autorizadas y el avance correlativo estricto e inviolable por sucursal física (`branchId`) y tipo de comprobante tributario (`voucherType`), impidiendo duplicidades o saltos de numeración.
 * **Atributos:**
-  * `id: SeriesConfigurationId` — Identificador universal de la configuración de series (UUID).
-  * `tenantId: TenantId` — Taller automotriz propietario de la serie fiscal.
-  * `branchId: BranchId` — Sucursal física autorizada para la emisión de la serie.
-  * `voucherType: VoucherType` — Tipo de comprobante tributario asociado (`FACTURA`, `BOLETA`, `NOTA_CREDITO`).
-  * `serie: VoucherSerie` — Serie autorizada de 4 caracteres alfanuméricos (`^[F|B|T][A-Z0-9]{3}$`).
-  * `currentCorrelative: int` — Último correlativo emitido de manera secuencial.
-  * `isActive: boolean` — Indicador de habilitación operativa para emisión de comprobantes.
+  * `id: SeriesConfigurationId`: Identificador universal de la configuración de series (UUID).
+  * `tenantId: TenantId`: Taller automotriz propietario de la serie fiscal.
+  * `branchId: BranchId`: Sucursal física autorizada para la emisión de la serie.
+  * `voucherType: VoucherType`: Tipo de comprobante tributario asociado (`FACTURA`, `BOLETA`, `NOTA_CREDITO`).
+  * `serie: VoucherSerie`: Serie autorizada de 4 caracteres alfanuméricos (`^[F|B|T][A-Z0-9]{3}$`).
+  * `currentCorrelative: int`: Último correlativo emitido de manera secuencial.
+  * `isActive: boolean`: Indicador de habilitación operativa para emisión de comprobantes.
 * **Invariantes y Reglas de Negocio:**
   * La serie fiscal debe respetar estrictamente el formato alfanumérico legal de SUNAT (`F` para facturas, `B` para boletas, `FC`/`BC` para notas de crédito).
   * El correlativo numérico debe ser un entero estrictamente positivo e incremental, prohibiendo reinicios o decrementos arbitrarios.
@@ -95,16 +299,16 @@ El **Invoicing & Compliance Context** encapsula la totalidad de las reglas conta
 * **Paquete:** `com.andeva.atelier.platform.invoicing.domain.model.entities`
 * **Propósito:** Partida individual imponible que integra el comprobante de pago, representando un servicio de mantenimiento preventivo/correctivo ejecutado o una pieza de repuesto entregada.
 * **Atributos:**
-  * `id: UUID` — Identificador único universal de la línea de detalle.
-  * `voucherId: VoucherId` — Identificador del comprobante electrónico padre.
-  * `itemId: Optional<UUID>` — Identificador de la pieza del catálogo de inventario (`InventoryItemId`) o servicio (`ServiceId`) facturado (nullable en partidas libres de taller).
-  * `itemType: VoucherItemType` — Clasificación técnica del concepto facturado (`PRODUCT`, `SERVICE`).
-  * `description: String` — Glosa o descripción comercial detallada del bien o servicio prestado.
-  * `quantity: Quantity` — Magnitud de unidades facturadas con precisión a dos decimales.
-  * `unitValue: Money` — Valor unitario sin IGV (exigido por el estándar UBL 2.1 y la API fiscal de Nubefact).
-  * `unitPrice: Money` — Precio unitario con IGV comercial incluido (18%).
-  * `igvAmount: Money` — Monto total de IGV atribuible a esta partida individual ($\text{totalLine} - (\text{unitValue} \times \text{quantity})$).
-  * `totalLine: Money` — Importe total monetario de la partida ($\text{quantity} \times \text{unitPrice}$).
+  * `id: VoucherLineId`: Identificador único universal inmutable de la línea de detalle.
+  * `voucherId: VoucherId`: Identificador del comprobante electrónico padre.
+  * `itemId: Optional<UUID>`: Identificador de la pieza del catálogo de inventario (`InventoryItemId`) o servicio (`ServiceId`) facturado (nullable en partidas libres de taller).
+  * `itemType: VoucherItemType`: Clasificación técnica del concepto facturado (`PRODUCT`, `SERVICE`).
+  * `description: String`: Glosa o descripción comercial detallada del bien o servicio prestado.
+  * `quantity: Quantity`: Magnitud de unidades facturadas con precisión a dos decimales.
+  * `unitValue: Money`: Valor unitario sin IGV (exigido por el estándar UBL 2.1 y la API fiscal de Nubefact).
+  * `unitPrice: Money`: Precio unitario con IGV comercial incluido (18%).
+  * `igvAmount: Money`: Monto total de IGV atribuible a esta partida individual ($\text{totalLine} - (\text{unitValue} \times \text{quantity})$).
+  * `totalLine: Money`: Importe total monetario de la partida ($\text{quantity} \times \text{unitPrice}$).
 * **Invariantes y Reglas de Negocio:**
   * El importe total de la línea debe cuadrar aritméticamente con la cantidad por el precio unitario: $\text{totalLine} = \text{quantity} \times \text{unitPrice}$.
   * El valor unitario sin impuesto debe derivarse rigurosamente del precio unitario: $\text{unitValue} = \text{unitPrice} / 1.18$.
@@ -116,15 +320,15 @@ El **Invoicing & Compliance Context** encapsula la totalidad de las reglas conta
 * **Paquete:** `com.andeva.atelier.platform.invoicing.domain.model.entities`
 * **Propósito:** Representa un asiento de amortización financiera o liquidación de caja registrado contra un comprobante electrónico para extinguir la obligación de cobro.
 * **Atributos:**
-  * `id: PaymentId` — Identificador único universal de la transacción de pago (UUID).
-  * `voucherId: VoucherId` — Identificador del comprobante electrónico asociado.
-  * `tenantId: TenantId` — Taller automotriz recaudador de los fondos.
-  * `branchId: BranchId` — Sucursal física donde se recibió el pago en efectivo o pasarela POS.
-  * `amount: Money` — Importe monetario amortizado.
-  * `paymentMethod: PaymentMethod` — Medio de pago empleado (`CASH`, `CREDIT_CARD`, `DEBIT_CARD`, `BANK_TRANSFER`, `DIGITAL_WALLET_YAPE`, `DIGITAL_WALLET_PLIN`).
-  * `transactionReference: String` — Código de transacción bancaria, número de operación POS o voucher (nullable únicamente en abonos en efectivo).
-  * `status: PaymentStatus` — Estado de la transacción financiera (`PENDING`, `COMPLETED`, `REFUNDED`).
-  * `paidAt: Instant` — Timestamp cronológico del ingreso financiero en caja.
+  * `id: PaymentId`: Identificador único universal de la transacción de pago (UUID).
+  * `voucherId: VoucherId`: Identificador del comprobante electrónico asociado.
+  * `tenantId: TenantId`: Taller automotriz recaudador de los fondos.
+  * `branchId: BranchId`: Sucursal física donde se recibió el pago en efectivo o pasarela POS.
+  * `amount: Money`: Importe monetario amortizado.
+  * `paymentMethod: PaymentMethod`: Medio de pago empleado (`CASH`, `CREDIT_CARD`, `DEBIT_CARD`, `BANK_TRANSFER`, `DIGITAL_WALLET_YAPE`, `DIGITAL_WALLET_PLIN`).
+  * `transactionReference: String`: Código de transacción bancaria, número de operación POS o voucher (nullable únicamente en abonos en efectivo).
+  * `status: PaymentStatus`: Estado de la transacción financiera (`PENDING`, `COMPLETED`, `REFUNDED`).
+  * `paidAt: Instant`: Timestamp cronológico del ingreso financiero en caja.
 * **Invariantes y Reglas de Negocio:**
   * El importe amortizado debe ser estrictamente superior a cero ($> 0$).
   * En pagos efectuados por transferencia bancaria o billetera digital (`YAPE`, `PLIN`), la referencia de transacción es estrictamente obligatoria para soporte de conciliación bancaria.
@@ -137,22 +341,32 @@ El **Invoicing & Compliance Context** encapsula la totalidad de las reglas conta
 
 #### 9.2.3. Value Objects
 
-* **`VoucherId`:** Identificador universal inmutable de comprobante electrónico (`record VoucherId(UUID value)`).
-* **`SeriesConfigurationId`:** Identificador universal inmutable de configuración de series fiscales (`record SeriesConfigurationId(UUID value)`).
-* **`PaymentId`:** Identificador universal inmutable de un abono o liquidación de cobro (`record PaymentId(UUID value)`).
-* **`VoucherSerie`:** Objeto de valor que valida el formato alfanumérico legal de 4 caracteres (`record VoucherSerie(String value)`). Impone validación estricta contra la expresión regular `^[F|B|T][A-Z0-9]{3}$`.
-* **`VoucherNumber`:** Correlativo numérico secuencial positivo (`record VoucherNumber(int value)`). Valida que `value > 0` y ofrece formateo legal a 8 dígitos (`%08d`).
-* **`TaxCalculation`:** Registro inmutable que consolida la arquitectura impositiva del comprobante (`record TaxCalculation(Money subtotal, Money igvAmount, Money totalAmount, BigDecimal igvRate)`). Garantiza la invariante $\text{subtotal} + \text{igvAmount} = \text{totalAmount}$.
-* **`CustomerFiscalInfo`:** Datos fiscales del receptor del comprobante (`record CustomerFiscalInfo(TaxId taxId, String legalName, String fiscalAddress, DocumentType documentType)`). Valida consistencia con catálogos SUNAT.
-* **`DigitalReceiptUrls`:** Enlaces públicos seguros inmutables a los artefactos generados por el PSE (`record DigitalReceiptUrls(String pdfUrl, String xmlUrl, String cdrUrl)`).
-* **`SunatResponse`:** Metadatos fiscales oficiales emitidos por el PSE/SUNAT (`record SunatResponse(String responseCode, String description, String digitalSignatureHash)`).
-* **`VoidedInfo`:** Registro formal de comunicación de baja (`record VoidedInfo(String reason, Instant voidedAt)`).
-* **`VoucherType` (Enum):** Clasificación tributaria oficial según tabla 10 de SUNAT: `FACTURA("01")`, `BOLETA("03")`, `NOTA_CREDITO("07")`.
-* **`VoucherStatus` (Enum):** Ciclo de vida del comprobante: `DRAFT`, `ISSUED`, `ACCEPTED_SUNAT`, `REJECTED_SUNAT`, `VOIDED`.
-* **`PaymentMethod` (Enum):** Canales de liquidación financiera autorizados: `CASH`, `CREDIT_CARD`, `DEBIT_CARD`, `BANK_TRANSFER`, `DIGITAL_WALLET_YAPE`, `DIGITAL_WALLET_PLIN`.
-* **`PaymentStatus` (Enum):** Situación transaccional del abono: `PENDING`, `COMPLETED`, `REFUNDED`.
-* **`VoucherItemType` (Enum):** Tipificación económica del renglón facturado: `PRODUCT` (repuesto/insumo físico), `SERVICE` (mano de obra/labor técnica).
-* **`CreditNoteReason` (Enum):** Catálogo 09 de SUNAT para motivos de nota de crédito: `ANULACION_DE_LA_OPERACION("01")`, `ANULACION_POR_ERROR_EN_EL_RUC("02")`, `CORRECCION_POR_ERROR_EN_LA_DESCRIPCION("03")`, `DESCUENTO_GLOBAL("04")`, `DEVOLUCION_TOTAL("06")`.
+Los tipos de soporte del dominio de facturación electrónica y cumplimiento fiscal se organizan formalmente en tres subpaquetes modulares según su semántica táctica de Domain-Driven Design:
+
+##### 1. Identificadores Fuertemente Tipados (`com.andeva.atelier.platform.invoicing.domain.model.ids`)
+* **`VoucherId(UUID value)`:** Identificador tipado universal inmutable del comprobante electrónico.
+* **`SeriesConfigurationId(UUID value)`:** Identificador tipado universal inmutable de configuración de series fiscales autorizadas.
+* **`PaymentId(UUID value)`:** Identificador tipado universal inmutable de un abono o liquidación financiera de caja.
+* **`VoucherLineId(UUID value)`:** Identificador tipado universal inmutable de la partida imponible de detalle.
+
+##### 2. Enumeraciones de Dominio (`com.andeva.atelier.platform.invoicing.domain.model.enums`)
+* **`VoucherType`:** Clasificación tributaria oficial según tabla 10 de SUNAT (`FACTURA`, `BOLETA`, `NOTA_CREDITO`).
+* **`VoucherStatus`:** Ciclo de vida y estados contables del comprobante fiscal (`DRAFT`, `ISSUED`, `ACCEPTED_SUNAT`, `REJECTED_SUNAT`, `VOIDED`).
+* **`PaymentMethod`:** Medios de pago y canales de liquidación financiera autorizados (`CASH`, `CREDIT_CARD`, `DEBIT_CARD`, `BANK_TRANSFER`, `DIGITAL_WALLET_YAPE`, `DIGITAL_WALLET_PLIN`).
+* **`PaymentStatus`:** Situación transaccional del abono económico (`PENDING`, `COMPLETED`, `REFUNDED`).
+* **`VoucherItemType`:** Tipificación económica del renglón facturado (`PRODUCT` para repuestos e insumos físicos, `SERVICE` para mano de obra técnica).
+* **`CreditNoteReason`:** Catálogo 09 de SUNAT para motivos de emisión de notas de crédito (`ANULACION_DE_LA_OPERACION`, `ANULACION_POR_ERROR_EN_EL_RUC`, `CORRECCION_POR_ERROR_EN_LA_DESCRIPCION`, `DESCUENTO_GLOBAL`, `DEVOLUCION_TOTAL`).
+
+##### 3. Objetos de Valor Puros (`com.andeva.atelier.platform.invoicing.domain.model.valueobjects`)
+* **`VoucherSerie(String value)`:** Serie fiscal autorizada de 4 caracteres alfanuméricos. Impone validación estricta contra la expresión regular `^[F|B|T][A-Z0-9]{3}$`.
+* **`VoucherNumber(int value)`:** Correlativo numérico secuencial positivo. Valida que el valor sea estrictamente mayor a cero y provee formateo legal oficial a 8 dígitos (`%08d`).
+* **`TaxCalculation(Money subtotal, Money igvAmount, Money totalAmount, BigDecimal igvRate)`:** Registro inmutable que consolida la base imponible, la tasa del 18% y el importe total. Garantiza la invariante $\text{subtotal} + \text{igvAmount} = \text{totalAmount}$.
+* **`CustomerFiscalInfo(TaxId taxId, String legalName, String fiscalAddress, DocumentType documentType)`:** Datos fiscales del receptor del comprobante comercial. Valida consistencia con los padrones de SUNAT.
+* **`DigitalReceiptUrls(String pdfUrl, String xmlUrl, String cdrUrl)`:** Hipervínculos públicos seguros inmutables a los artefactos oficiales generados por el proveedor electrónico homologado.
+* **`SunatResponse(String responseCode, String description, String digitalSignatureHash)`:** Metadatos fiscales oficiales emitidos por el proveedor electrónico y la autoridad tributaria.
+* **`VoidedInfo(String reason, Instant voidedAt)`:** Registro formal de comunicación de baja o anulación ante la autoridad tributaria.
+* **`CashFlowMovement(UUID transactionId, Instant movementDate, String type, String category, String concept, String referenceNumber, BigDecimal amount, BigDecimal runningBalance)`:** Registro inmutable de movimiento financiero individual consolidado en el flujo de caja del taller.
+* **`CashFlowSummary(BigDecimal totalIncome, BigDecimal totalExpenses, BigDecimal netCashFlow, Currency currency)`:** Resumen analítico consolidado de ingresos, egresos y flujo neto para el periodo consultado.
 
 ---
 
@@ -383,20 +597,23 @@ public class SeriesCorrelativeService {
 
 ---
 
-#### 9.2.9. Domain Exceptions (Jerarquía RFC 7807)
+#### 9.2.9. Excepciones Semánticas de Dominio
 
-Las excepciones de la capa de dominio heredan de `DomainException` (provista en el Shared Kernel) y encapsulan códigos de error semánticos legibles para su serialización bajo la directiva RFC 7807:
+Jerarquía de excepciones semánticas no comprobadas del dominio de facturación y cumplimiento tributario, derivadas de `InvoicingDomainException` (`com.andeva.atelier.platform.invoicing.domain.exceptions.InvoicingDomainException`) y de la raíz base `DomainException` (`com.andeva.atelier.platform.shared.domain.exceptions.DomainException`), provistas de código unívoco legible según la norma RFC 7807 y correspondencia con códigos de respuesta HTTP:
 
-* **`InvalidTaxIdException`:** Lanzada cuando el número de RUC no supera la validación algorítmica de Módulo 11 o no corresponde a una persona jurídica o natural autorizada. Código: `ERR_INVALID_TAX_ID` (HTTP 422 Unprocessable Entity).
-* **`CorrelativeExhaustedException`:** Lanzada cuando el correlativo numérico de una serie fiscal alcanza el límite máximo admisible de 99,999,999. Código: `ERR_CORRELATIVE_EXHAUSTED` (HTTP 409 Conflict).
-* **`VoucherAlreadyPaidException`:** Lanzada cuando se intenta registrar un abono financiero contra un comprobante electrónico cuyo saldo pendiente ya es cero o cuando el monto supera el total adeudado. Código: `ERR_VOUCHER_ALREADY_PAID` (HTTP 409 Conflict).
-* **`VoucherImmutableException`:** Lanzada ante cualquier intento de alteración o eliminación física de un comprobante que ya ha sido aceptado por SUNAT o se encuentra en estado emitido. Código: `ERR_VOUCHER_IMMUTABLE` (HTTP 409 Conflict).
-* **`InvalidVoucherAmountException`:** Lanzada cuando existe inconsistencia aritmética entre la sumatoria de las partidas de detalle y el total consignado en la cabecera, o cuando los montos son negativos o nulos. Código: `ERR_INVALID_VOUCHER_AMOUNT` (HTTP 422 Unprocessable Entity).
-* **`CustomerFiscalDataMissingException`:** Lanzada al intentar emitir una factura sin RUC, razón social o domicilio fiscal, o una boleta mayor a S/ 700.00 PEN sin documento receptor. Código: `ERR_CUSTOMER_FISCAL_MISSING` (HTTP 422 Unprocessable Entity).
-* **`SeriesNotFoundException`:** Lanzada cuando no existe una serie fiscal activa configurada para la combinación de taller, sucursal y tipo de comprobante solicitada. Código: `ERR_SERIES_NOT_FOUND` (HTTP 404 Not Found).
-* **`VoucherNotFoundException`:** Lanzada cuando no se localiza el comprobante electrónico en el repositorio mediante su identificador o correlativo fiscal. Código: `ERR_VOUCHER_NOT_FOUND` (HTTP 404 Not Found).
-* **`SunatIntegrationException`:** Lanzada cuando ocurre un error de comunicación de red o rechazo de trama con el Proveedor de Servicios Electrónicos (Nubefact) o con los servidores de SUNAT. Código: `ERR_SUNAT_INTEGRATION_FAILED` (HTTP 502 Bad Gateway).
-* **`CreditNoteReferenceNotFoundException`:** Lanzada cuando la nota de crédito hace referencia a un comprobante emisor preexistente que no se encuentra en el repositorio del taller. Código: `ERR_CREDIT_NOTE_REF_NOT_FOUND` (HTTP 404 Not Found).
+| Excepción de Dominio | Código RFC 7807 | Estatus HTTP | Condición de Activación en el Dominio |
+| :--- | :--- | :---: | :--- |
+| `InvoicingDomainException` | `ERR_INVOICING_DOMAIN_ROOT` | 400 Bad Request | Clase base abstracta de las excepciones de negocio del dominio de facturación electrónica y tributaria. |
+| `InvalidTaxIdException` | `ERR_INVALID_TAX_ID` | 422 Unprocessable | El número de RUC no supera la validación algorítmica de Módulo 11 o no corresponde a una persona jurídica o natural habilitada. |
+| `CorrelativeExhaustedException` | `ERR_CORRELATIVE_EXHAUSTED` | 409 Conflict | El correlativo numérico de una serie fiscal alcanza el límite máximo admisible de 99999999. |
+| `VoucherAlreadyPaidException` | `ERR_VOUCHER_ALREADY_PAID` | 409 Conflict | Se intenta registrar un abono financiero contra un comprobante electrónico cuyo saldo pendiente ya es cero o cuando el monto supera el total adeudado. |
+| `VoucherImmutableException` | `ERR_VOUCHER_IMMUTABLE` | 409 Conflict | Se intenta alterar o eliminar un comprobante que ya fue emitido o aceptado por SUNAT. |
+| `InvalidVoucherAmountException` | `ERR_INVALID_VOUCHER_AMOUNT` | 422 Unprocessable | Inconsistencia aritmética entre las partidas de detalle y el total consignado en cabecera, o montos nulos o negativos. |
+| `CustomerFiscalDataMissingException` | `ERR_CUSTOMER_FISCAL_MISSING` | 422 Unprocessable | Se intenta emitir una factura sin RUC, razón social o domicilio fiscal, o una boleta mayor a S/ 700.00 PEN sin documento receptor. |
+| `SeriesNotFoundException` | `ERR_SERIES_NOT_FOUND` | 404 Not Found | No existe una serie fiscal activa configurada para la combinación de taller, sucursal y tipo de comprobante solicitada. |
+| `VoucherNotFoundException` | `ERR_VOUCHER_NOT_FOUND` | 404 Not Found | No se localiza el comprobante electrónico en el repositorio mediante su identificador o correlativo fiscal. |
+| `SunatIntegrationException` | `ERR_SUNAT_INTEGRATION_FAILED` | 502 Bad Gateway | Fallo de comunicación de red o rechazo de trama con el Proveedor de Servicios Electrónicos Nubefact o los servidores de SUNAT. |
+| `CreditNoteReferenceNotFoundException` | `ERR_CREDIT_NOTE_REF_NOT_FOUND` | 404 Not Found | La nota de crédito referencia un comprobante emisor preexistente que no se encuentra en el repositorio del taller. |
 
 ---
 
@@ -438,39 +655,58 @@ Las excepciones de la capa de dominio heredan de `DomainException` (provista en 
     - Parámetros de consulta: `startDate` (requerido, `LocalDate`), `endDate` (requerido, `LocalDate`), `branchId` (opcional, `UUID`).
     - Unifica cronológicamente: $(+)$ Pagos cobrados en taller (`voucher_payments`), $(-)$ Facturas de compra de repuestos a proveedores (`purchase_orders` recibidas), y $(-)$ Nóminas desembolsadas a colaboradores (`payroll_payments`).
     - Retorna el balance de ingresos, egresos y el flujo neto del periodo. Responde `200 OK`.
-  * `GET /cash-flow/pdf`: Genera y descarga el informe oficial en PDF formateado como un estado de cuenta bancario corporativo. Compila la cabecera institucional del taller, el resumen financiero ejecutivo, la tabla cronológica detallada de movimientos (Fecha, Concepto, Categoría, Tipo, Monto, Saldo progresivo) y los totales consolidados. Responde `200 OK` con cabecera `Content-Disposition: attachment; filename="cash-flow-{startDate}-{endDate}.pdf"`.
+  * `GET /cash-flow/pdf`: Genera y descarga el informe oficial en PDF formateado como un estado de cuenta bancario corporativo. Compila la cabecera institucional del taller, el resumen financiero ejecutivo, la tabla cronológica detallada de movimientos (Fecha, Concepto, Categoría, Tipo, Monto, Saldo progresivo) y los totales consolidados. Responde `200 OK` con cabecera `Content-Disposition: attachment` y parámetro de archivo `cash-flow-{startDate}-{endDate}.pdf`.
 
 ---
 
 #### 9.3.2. REST Resources & DTOs (Records)
 
+##### 1. Recursos de Solicitud (`com.andeva.atelier.platform.invoicing.interfaces.rest.resources.requests`)
+
 ```java
-package com.andeva.atelier.platform.invoicing.interfaces.rest.resources;
+package com.andeva.atelier.platform.invoicing.interfaces.rest.resources.requests;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.UUID;
 
 public record IssueVoucherRequest(
     @NotNull UUID branchId,
     @NotNull UUID customerId,
     UUID workOrderId,
-    @NotBlank String voucherType, // FACTURA, BOLETA
-    @NotBlank String serie,       // F001, B001
-    @NotNull CustomerFiscalInfoDto customerInfo,
-    @NotBlank String currency,    // PEN, USD
+    @NotBlank String voucherType,
+    @NotBlank String serie,
+    @NotNull CustomerFiscalInfoRequest customerInfo,
+    @NotBlank String currency,
     @NotEmpty List<VoucherLineRequest> lines
 ) {}
 
 public record VoucherLineRequest(
     UUID itemId,
-    @NotBlank String itemType, // PRODUCT, SERVICE
+    @NotBlank String itemType,
     @NotBlank String description,
     @NotNull BigDecimal quantity,
     @NotNull BigDecimal unitPriceWithIgv
 ) {}
 
-public record CustomerFiscalInfoDto(
+public record CustomerFiscalInfoRequest(
     @NotBlank String taxId,
     @NotBlank String legalName,
     @NotBlank String fiscalAddress,
-    @NotBlank String documentType // DNI, RUC, CE
+    @NotBlank String documentType
+) {}
+
+public record IssueCreditNoteRequest(
+    @NotNull UUID branchId,
+    @NotNull UUID customerId,
+    @NotNull UUID referenceVoucherId,
+    @NotBlank String serie,
+    @NotBlank String reason,
+    @NotBlank String reasonDescription,
+    @NotEmpty List<VoucherLineRequest> lines
 ) {}
 
 public record RegisterPaymentRequest(
@@ -480,6 +716,29 @@ public record RegisterPaymentRequest(
     @NotBlank String paymentMethod,
     String transactionReference
 ) {}
+
+public record ConfigureSeriesRequest(
+    @NotNull UUID branchId,
+    @NotBlank String voucherType,
+    @NotBlank String serie,
+    int initialCorrelative
+) {}
+
+public record VoidVoucherRequest(
+    @NotBlank String reason
+) {}
+```
+
+##### 2. Recursos de Respuesta (`com.andeva.atelier.platform.invoicing.interfaces.rest.resources.responses`)
+
+```java
+package com.andeva.atelier.platform.invoicing.interfaces.rest.resources.responses;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
 
 public record ElectronicVoucherResource(
     UUID id,
@@ -495,8 +754,8 @@ public record ElectronicVoucherResource(
     BigDecimal totalAmount,
     String currency,
     String status,
-    CustomerFiscalInfoDto customerInfo,
-    DigitalReceiptUrlsDto digitalReceipts,
+    CustomerFiscalInfoResponse customerInfo,
+    DigitalReceiptUrlsResponse digitalReceipts,
     SunatResponseDto sunatResponse,
     List<VoucherLineResource> lines,
     List<VoucherPaymentResource> payments,
@@ -514,7 +773,14 @@ public record VoucherLineResource(
     BigDecimal totalLine
 ) {}
 
-public record DigitalReceiptUrlsDto(
+public record CustomerFiscalInfoResponse(
+    String taxId,
+    String legalName,
+    String fiscalAddress,
+    String documentType
+) {}
+
+public record DigitalReceiptUrlsResponse(
     String pdfUrl,
     String xmlUrl,
     String cdrUrl
@@ -537,6 +803,16 @@ public record VoucherPaymentResource(
     Instant paidAt
 ) {}
 
+public record SeriesConfigurationResource(
+    UUID id,
+    UUID tenantId,
+    UUID branchId,
+    String voucherType,
+    String serie,
+    int currentCorrelative,
+    boolean isActive
+) {}
+
 public record CashFlowReportResource(
     UUID tenantId,
     UUID branchId,
@@ -552,8 +828,8 @@ public record CashFlowReportResource(
 public record CashFlowMovementResource(
     UUID transactionId,
     Instant movementDate,
-    String type, // INCOME o EXPENSE
-    String category, // CLIENT_PAYMENT, SPARE_PARTS_PURCHASE, STAFF_PAYROLL
+    String type,
+    String category,
     String concept,
     String referenceNumber,
     BigDecimal amount,
@@ -565,21 +841,24 @@ public record CashFlowMovementResource(
 
 #### 9.3.3. REST Assemblers (Mappers)
 
-* **`ElectronicVoucherResourceAssembler`:** Mapea el agregado `ElectronicVoucher`, sus líneas de detalle, pagos y metadatos de SUNAT hacia el DTO `ElectronicVoucherResource`.
-* **`VoucherPaymentResourceAssembler`:** Transforma entidades `VoucherPayment` a `VoucherPaymentResource`.
+Ubicados en el paquete `com.andeva.atelier.platform.invoicing.interfaces.rest.transform`, convierten bidireccionalmente entre agregados de dominio y DTOs REST de respuesta:
+
+* **`ElectronicVoucherResourceAssembler`:** Mapea la raíz de agregado `ElectronicVoucher`, sus líneas de detalle, pagos y metadatos de SUNAT hacia el DTO `ElectronicVoucherResource`.
+* **`VoucherPaymentResourceAssembler`:** Transforma entidades `VoucherPayment` hacia representaciones DTO `VoucherPaymentResource`.
+* **`SeriesConfigurationResourceAssembler`:** Transforma la raíz de agregado `SeriesConfiguration` hacia `SeriesConfigurationResource`.
+* **`CashFlowReportResourceAssembler`:** Transforma proyecciones analíticas y agregaciones financieras hacia `CashFlowReportResource`.
 
 ---
 
 #### 9.3.4. Inbound ACL Facade (Open Host Service - OHS)
 
-Para permitir que el contexto de Operaciones de Taller (MRO) facture órdenes de trabajo sin acoplarse a detalles fiscales de SUNAT, Invoicing expone su fachada canónica:
+Para permitir que el contexto de Operaciones de Taller (MRO) facture órdenes de trabajo sin acoplarse a detalles fiscales de SUNAT, Invoicing expone su fachada canónica en `com.andeva.atelier.platform.invoicing.interfaces.acl`:
 
 ```java
 package com.andeva.atelier.platform.invoicing.interfaces.acl;
 
-import java.math.BigDecimal;
+import com.andeva.atelier.platform.invoicing.interfaces.acl.dto.*;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 public interface InvoicingContextFacade {
@@ -599,13 +878,23 @@ public interface InvoicingContextFacade {
      */
     boolean isWorkOrderFullySettled(UUID workOrderId);
 }
+```
+
+Los DTOs inmutables de fachada residen formalmente en el paquete `com.andeva.atelier.platform.invoicing.interfaces.acl.dto`:
+
+```java
+package com.andeva.atelier.platform.invoicing.interfaces.acl.dto;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.UUID;
 
 public record GenerateVoucherFromWorkOrderCommandDto(
     UUID tenantId,
     UUID branchId,
     UUID workOrderId,
     UUID customerId,
-    String voucherType, // FACTURA o BOLETA
+    String voucherType,
     String customerTaxId,
     String customerLegalName,
     String customerFiscalAddress,
@@ -615,7 +904,7 @@ public record GenerateVoucherFromWorkOrderCommandDto(
 
 public record WorkOrderItemBillingDto(
     UUID itemId,
-    String itemType, // PRODUCT o SERVICE
+    String itemType,
     String description,
     BigDecimal quantity,
     BigDecimal unitPriceWithIgv
@@ -623,7 +912,7 @@ public record WorkOrderItemBillingDto(
 
 public record VoucherGenerationResultDto(
     UUID voucherId,
-    String fullVoucherNumber, // Ej. "F001-000142"
+    String fullVoucherNumber,
     BigDecimal totalAmount,
     String status,
     String pdfUrl
@@ -637,19 +926,32 @@ public record VoucherSummaryDto(
     String status,
     boolean isFullyPaid
 ) {}
+
+public record CustomerFiscalInfoDto(
+    String taxId,
+    String legalName,
+    String fiscalAddress,
+    String documentType
+) {}
 ```
 
 ---
 
 #### 9.3.5. Integration Events (Published / Consumed)
 
+Los eventos de integración residen en el paquete `com.andeva.atelier.platform.invoicing.interfaces.events`:
+
 ##### 1. Eventos Publicados por Invoicing hacia otros Bounded Contexts
 * **`ElectronicVoucherIssuedIntegrationEvent`:** Emitido al crearse una factura o boleta con valor fiscal. Consumido por MRO para actualizar el estado contable de la orden de trabajo.
 * **`VoucherAcceptedBySunatIntegrationEvent`:** Emitido tras la recepción del CDR aprobatorio de SUNAT. Consumido por el módulo de notificaciones para despachar el correo con PDF y XML al cliente vía Resend.
-* **`VoucherPaymentReceivedIntegrationEvent`:** Emitido al liquidarse un abono monetario. Consumido por MRO para validar la entrega definitiva del vehículo en patio.
+* **`VoucherPaymentRegisteredIntegrationEvent`:** Emitido al liquidarse un abono monetario. Consumido por MRO para validar la entrega definitiva del vehículo en patio y desbloquear el pase de salida vehicular.
+* **`VoucherRejectedBySunatIntegrationEvent`:** Emitido cuando la autoridad tributaria o el PSE rechazan el documento por inconsistencias normativas.
+* **`VoucherVoidedIntegrationEvent`:** Emitido al formalizarse la anulación o comunicación de baja del comprobante ante SUNAT.
 
 ##### 2. Eventos Consumidos por Invoicing desde otros Bounded Contexts
 * **`WorkOrderDeliveredIntegrationEvent` (emitido por MRO):** Habilita la liquidación final y emite una alerta contable si la orden no ha sido facturada.
+* **`PurchaseOrderReceivedIntegrationEvent` (emitido por Inventory & Supply Chain):** Registra el egreso operativo comercial para la conciliación del flujo de caja.
+* **`PayrollPaidIntegrationEvent` (emitido por Human Resources):** Registra el egreso de planillas salariales en el estado financiero del taller.
 
 ---
 
@@ -669,7 +971,7 @@ El diseño táctico de la Capa de Aplicación se fundamenta en cuatro pilares de
 
 ##### 1. `ElectronicVoucherCommandService` & `ElectronicVoucherCommandServiceImpl`
 
-* **Paquete:** `com.andeva.atelier.platform.invoicing.application.services`
+* **Paquetes:** Interfaz pública en `com.andeva.atelier.platform.invoicing.application.commandservices` e implementación interna en `com.andeva.atelier.platform.invoicing.application.internal.commandservices`
 * **Transaccionalidad:** `@Transactional(isolation = Isolation.READ_COMMITTED, rollbackFor = Exception.class)`
 * **Métodos Principales:**
 
@@ -712,7 +1014,7 @@ El diseño táctico de la Capa de Aplicación se fundamenta en cuatro pilares de
 
 ##### 2. `VoucherPaymentCommandService` & `VoucherPaymentCommandServiceImpl`
 
-* **Paquete:** `com.andeva.atelier.platform.invoicing.application.services`
+* **Paquetes:** Interfaz pública en `com.andeva.atelier.platform.invoicing.application.commandservices` e implementación interna en `com.andeva.atelier.platform.invoicing.application.internal.commandservices`
 * **Transaccionalidad:** `@Transactional(isolation = Isolation.READ_COMMITTED, rollbackFor = Exception.class)`
 * **Métodos Principales:**
 
@@ -728,7 +1030,7 @@ El diseño táctico de la Capa de Aplicación se fundamenta en cuatro pilares de
 
 ##### 3. `SeriesConfigurationCommandService` & `SeriesConfigurationCommandServiceImpl`
 
-* **Paquete:** `com.andeva.atelier.platform.invoicing.application.services`
+* **Paquetes:** Interfaz pública en `com.andeva.atelier.platform.invoicing.application.commandservices` e implementación interna en `com.andeva.atelier.platform.invoicing.application.internal.commandservices`
 * **Transaccionalidad:** `@Transactional(isolation = Isolation.READ_COMMITTED, rollbackFor = Exception.class)`
 * **Métodos Principales:**
 
@@ -753,7 +1055,7 @@ El diseño táctico de la Capa de Aplicación se fundamenta en cuatro pilares de
 
 #### 9.4.2. Query Services & Implementations
 
-Los servicios de consulta se ejecutan bajo aislamiento transaccional de solo lectura (`@Transactional(readOnly = true)`), garantizando alta concurrencia sin bloqueos pesados en el motor relacional PostgreSQL:
+Los contratos de servicios de consulta se definen en `com.andeva.atelier.platform.invoicing.application.queryservices`, mientras que sus implementaciones transaccionales se ubican en `com.andeva.atelier.platform.invoicing.application.internal.queryservices`. Operan bajo aislamiento transaccional de solo lectura (`@Transactional(readOnly = true)`), garantizando alta concurrencia sin bloqueos pesados en el motor relacional PostgreSQL:
 
 ##### 1. `ElectronicVoucherQueryService` & `ElectronicVoucherQueryServiceImpl`
 
@@ -785,111 +1087,219 @@ Orquesta la consolidación analítica del estado de cuenta y flujo de caja opera
   6. **Cálculo de Agregados Globales:** Sumariza los valores consolidados del periodo: $\text{Total Ingresos}$, $\text{Total Egresos}$ y el $\text{Flujo Neto de Caja} = \text{Total Ingresos} - \text{Total Egresos}$.
   7. **Generación y Exclusión de Costos Indirectos:** Retorna la proyección analítica consolidada. Por definición y rigor contable del taller, se excluyen de este informe los costos fijos indirectos ajenos al flujo directo del taller mecánico (tales como alquiler de local, servicios de agua potable, energía eléctrica o telecomunicaciones corporativas), garantizando una visualización nítida de la rentabilidad operativa.
 
-* `byte[] handle(ExportCashFlowPdfQuery query)`: Invoca al servicio `InvoicingPdfGeneratorPort` para renderizar el informe analítico del estado de cuenta en formato binario PDF, aplicando una maquetación gráfica bancaria corporativa que incorpora logotipo del taller, cabecera con RUC y razón social, resumen ejecutivo financiero y la tabla completa de movimientos detallados.
+* `byte[] handle(ExportCashFlowPdfQuery query)`: Invoca al servicio `CashFlowPdfGeneratorPort` para renderizar el informe analítico del estado de cuenta en formato binario PDF, aplicando una maquetación gráfica bancaria corporativa que incorpora logotipo del taller, cabecera con RUC y razón social, resumen ejecutivo financiero y la tabla completa de movimientos detallados.
 
 ---
 
 #### 9.4.3. Domain Event Handlers e Integration Listeners
 
-##### 1. `VoucherDomainEventHandler`
-* **Paquete:** `com.andeva.atelier.platform.invoicing.application.events`
-* **Propósito:** Manejar el ciclo de vida de los eventos de dominio emitidos por los agregados del contexto:
-  * `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT) void on(VoucherAcceptedBySunatEvent event)`: Tras confirmarse la aceptación tributaria de un comprobante ante SUNAT, invoca a `TransactionalEmailSenderPort` (adaptado por `ResendEmailAdapter`) para remitir automáticamente al correo del cliente el comprobante de pago en formato PDF y el archivo XML UBL 2.1 firmado legalmente.
-  * `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT) void on(VoucherPaymentRegisteredEvent event)`: Cuando un comprobante alcanza su liquidación total (`isFullyPaid == true`) y está asociado a una orden de trabajo (`workOrderId`), publica el evento de integración `WorkOrderSettledIntegrationEvent` para que el Bounded Context Workshop Operations libere la orden y permita la entrega del vehículo en bahía.
-  * `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT) void on(VoucherVoidedEvent event)`: Notifica la baja del comprobante a los módulos de contabilidad y auditoría para asentar la anulación tributaria correspondiente.
+Los manejadores de eventos y escuchadores de integración se ubican en el paquete `com.andeva.atelier.platform.invoicing.application.internal.eventhandlers`:
 
-##### 2. Escuchadores de Integración (Incoming Integration Listeners)
-* **`WorkOrderDeliveredEventListener`:** Escucha `WorkOrderDeliveredIntegrationEvent` emitido por MRO tras la salida de un vehículo del taller. Si la orden no cuenta con un comprobante electrónico en estado `ISSUED` o `ACCEPTED`, emite una alerta administrativa inmediata de regularización fiscal.
-* **`PurchaseOrderReceivedEventListener`:** Escucha `PurchaseOrderReceivedIntegrationEvent` emitido por Inventory & Supply Chain al confirmarse el arribo de repuestos, habilitando la imputación inmediata del egreso comercial en el flujo de caja del taller.
-* **`PayrollPaidEventListener`:** Escucha `PayrollPaidIntegrationEvent` emitido por Human Resources & Payroll al liquidarse los sueldos del personal de taller, incorporando el egreso monetario en el estado analítico de flujo de caja.
+##### 1. `InvoicingDomainEventsHandler`
+* **Paquete:** `com.andeva.atelier.platform.invoicing.application.internal.eventhandlers`
+* **Responsabilidad:** Reaccionar ante las mutaciones del ciclo de vida fiscal y depositar los eventos de integración correspondientes en la tabla Outbox.
+* **Manejadores:**
+  * `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT) void on(ElectronicVoucherIssuedEvent event)`: Serializa y publica `ElectronicVoucherIssuedIntegrationEvent` en `outbox_messages` para sincronización con MRO.
+  * `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT) void on(VoucherAcceptedBySunatEvent event)`: Serializa `VoucherAcceptedBySunatIntegrationEvent` en `outbox_messages` e instruye a `VoucherReceiptEmailGateway` el despacho del correo al cliente.
+  * `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT) void on(VoucherPaymentRegisteredEvent event)`: Serializa `VoucherPaymentRegisteredIntegrationEvent` en `outbox_messages` para desbloquear el pase de salida vehicular en patio.
+  * `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT) void on(VoucherRejectedBySunatEvent event)`: Serializa `VoucherRejectedBySunatIntegrationEvent` en `outbox_messages` para alertas administrativas inmediatas.
+  * `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT) void on(VoucherVoidedEvent event)`: Serializa `VoucherVoidedIntegrationEvent` en `outbox_messages`.
 
-##### 3. `InvoicingTransactionalOutboxPublisher`
-* **Propósito:** Captura los eventos de integración generados dentro del contexto Invoicing & Compliance y los serializa en formato JSON dentro de la tabla física `outbox_messages` del Shared Kernel durante la misma transacción de base de datos. Un hilo despachador en segundo plano lee periódicamente estos mensajes y los publica hacia el bus de mensajería (Kafka / RabbitMQ), garantizando entrega con semántica *At-Least-Once* sin riesgo de estados inconsistentes.
+##### 2. `InvoicingExternalEventsListener`
+* **Paquete:** `com.andeva.atelier.platform.invoicing.application.internal.eventhandlers`
+* **Responsabilidad:** Escuchar eventos de integración emitidos por Bounded Contexts colaboradores y coordinar efectos financieros y de regularización fiscal.
+* **Manejadores:**
+  * `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT) void on(WorkOrderDeliveredIntegrationEvent event)`: Escucha la entrega de un vehículo en MRO y valida que la orden cuente con comprobante electrónico emitido, disparando una alerta de regularización si persiste pendiente.
+  * `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT) void on(PurchaseOrderReceivedIntegrationEvent event)`: Escucha el ingreso de piezas en Inventory & Supply Chain e imputa el egreso comercial en el flujo de caja del taller.
+  * `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT) void on(PayrollPaidIntegrationEvent event)`: Escucha el desembolso salarial en Human Resources e incorpora el gasto en el estado de flujo de caja.
+
+##### 3. Coordinación de Transactional Outbox
+* **Propósito:** Garantizar semántica de entrega al menos una vez (*At-Least-Once*) sin transacciones distribuidas 2PC, serializando los eventos de integración en la tabla `outbox_messages` dentro de la transacción relacional local de PostgreSQL 16.
 
 ---
 
 #### 9.4.4. Outbound ACL Services & Gateways
 
-##### 1. `NubefactAclService` & `NubefactFiscalGatewayPort`
-* **Paquete:** `com.andeva.atelier.platform.invoicing.application.internal.outboundservices.acl`
-* **Propósito:** Capa Anticorrupción que aísla el modelo de dominio puro `ElectronicVoucher` de la estructura técnica JSON V1 requerida por el PSE/OSE Nubefact para la generación y firma de documentos UBL 2.1:
+Puertos de salida perimetrales orientados a la integración con pasarelas tributarias, servicios cloud y módulos colaboradores, ubicados en `com.andeva.atelier.platform.invoicing.application.internal.outbound.acl`:
 
+##### 1. `NubefactPseFiscalGateway`
+* **Paquete:** `com.andeva.atelier.platform.invoicing.application.internal.outbound.acl`
+* **Propósito:** Abstrae la comunicación telemática y firma digital UBL 2.1 ante el Proveedor de Servicios Electrónicos (PSE) homologado Nubefact.
 ```java
-package com.andeva.atelier.platform.invoicing.application.internal.outboundservices.acl;
+package com.andeva.atelier.platform.invoicing.application.internal.outbound.acl;
 
 import com.andeva.atelier.platform.invoicing.domain.model.aggregates.ElectronicVoucher;
 import com.andeva.atelier.platform.invoicing.domain.model.valueobjects.DigitalReceiptUrls;
-import com.andeva.atelier.platform.invoicing.infrastructure.gateways.NubefactFiscalGatewayPort;
-import org.springframework.stereotype.Service;
 
-@Service
-public class NubefactAclService {
-    private final NubefactFiscalGatewayPort nubefactFiscalGateway;
+public interface NubefactPseFiscalGateway {
+    NubefactDispatchResult dispatchVoucher(ElectronicVoucher voucher);
+    NubefactDispatchResult dispatchCreditNote(ElectronicVoucher creditNote);
+    NubefactVoidResult voidVoucher(ElectronicVoucher voucher, String voidReason);
 
-    public NubefactAclService(NubefactFiscalGatewayPort nubefactFiscalGateway) {
-        this.nubefactFiscalGateway = nubefactFiscalGateway;
-    }
+    record NubefactDispatchResult(
+        boolean isAccepted,
+        String responseCode,
+        String description,
+        String digitalSignatureHash,
+        DigitalReceiptUrls urls
+    ) {}
 
-    public NubefactDispatchResult dispatchVoucher(ElectronicVoucher voucher) {
-        var request = NubefactPayloadMapper.toNubefactRequest(voucher);
-        var response = nubefactFiscalGateway.sendInvoice(request);
-
-        if (response.aceptadaPorSunat()) {
-            return new NubefactDispatchResult(
-                    true,
-                    response.codigoRespuesta(),
-                    response.descripcionSunat(),
-                    response.codigoHash(),
-                    new DigitalReceiptUrls(response.enlacePdf(), response.enlaceXml(), response.enlaceCdr())
-            );
-        } else {
-            return new NubefactDispatchResult(
-                    false,
-                    response.codigoRespuesta(),
-                    response.descripcionSunat(),
-                    null,
-                    null
-            );
-        }
-    }
+    record NubefactVoidResult(
+        boolean isAccepted,
+        String responseCode,
+        String description,
+        String ticketNumber
+    ) {}
 }
-
-public record NubefactDispatchResult(
-    boolean isAccepted,
-    String responseCode,
-    String description,
-    String digitalSignatureHash,
-    DigitalReceiptUrls urls
-) {}
 ```
 
-##### 2. `CustomerFiscalAclPort` & `CustomerAclService`
-* **Paquete:** `com.andeva.atelier.platform.invoicing.application.acl`
-* **Propósito:** Interfaz de puerto secundario para consultar y validar datos fiscales de clientes corporativos y particulares desde el Bounded Context CRM & Fleet Management o mediante consulta perimetral al padrón oficial de SUNAT.
-* **Operaciones Principales:** `Optional<CustomerFiscalData> getCustomerFiscalInfo(UUID customerId)`, `boolean validateTaxIdActiveStatus(String taxId)`.
+##### 2. `CustomerFiscalValidationAclService`
+* **Paquete:** `com.andeva.atelier.platform.invoicing.application.internal.outbound.acl`
+* **Propósito:** Puerto secundario para validar datos fiscales de clientes contra el Bounded Context CRM & Fleet Management y padrones web de SUNAT.
+```java
+package com.andeva.atelier.platform.invoicing.application.internal.outbound.acl;
 
-##### 3. `TransactionalEmailSenderPort` & `ResendEmailAdapter`
-* **Paquete:** `com.andeva.atelier.platform.invoicing.application.ports.outbound`
-* **Propósito:** Abstrae el servicio de mensajería transaccional para la notificación y distribución de comprobantes tributarios electrónicos a los clientes de taller automotriz a través del proveedor de infraestructura en la nube Resend.
-* **Operaciones Principales:** `void sendVoucherEmail(String recipientEmail, String customerName, String voucherCode, byte[] pdfContent, byte[] xmlContent)`.
+import com.andeva.atelier.platform.invoicing.domain.model.valueobjects.CustomerFiscalInfo;
+import java.util.Optional;
+import java.util.UUID;
 
-##### 4. `InvoicingPdfGeneratorPort`
-* **Paquete:** `com.andeva.atelier.platform.invoicing.application.ports.outbound`
-* **Propósito:** Abstracción para el renderizado programático de documentos bancarios y contables en formato PDF mediante OpenPDF / iText, materializando la maquetación del estado de cuenta de flujo de caja y la representación física de comprobantes.
-* **Operaciones Principales:** `byte[] generateCashFlowStatementPdf(CashFlowStatementProjection statement)`, `byte[] generateVoucherPdf(ElectronicVoucher voucher)`.
+public interface CustomerFiscalValidationAclService {
+    Optional<CustomerFiscalInfo> getCustomerFiscalData(UUID customerId);
+    boolean validateTaxIdStatus(String taxId);
+}
+```
 
-##### 5. `InvoicingEventPublisherPort`
-* **Paquete:** `com.andeva.atelier.platform.invoicing.application.ports.outbound`
-* **Propósito:** Puerto de infraestructura para la emisión de eventos de integración hacia el broker de mensajería asíncrona de la plataforma y el despacho hacia la tabla de Transactional Outbox.
-* **Operaciones Principales:** `void publish(InvoicingIntegrationEvent event)`.
+##### 3. `SunatCdrStorageGateway`
+* **Paquete:** `com.andeva.atelier.platform.invoicing.application.internal.outbound.acl`
+* **Propósito:** Abstracción para el almacenamiento seguro y custodia cloud de constancias de recepción (CDR) y archivos XML UBL 2.1 en Firebase Storage.
+```java
+package com.andeva.atelier.platform.invoicing.application.internal.outbound.acl;
+
+import java.util.UUID;
+
+public interface SunatCdrStorageGateway {
+    String storeCdrXml(UUID voucherId, byte[] cdrContent);
+    String storeSignedXml(UUID voucherId, byte[] xmlContent);
+    byte[] retrieveCdrXml(UUID voucherId);
+}
+```
+
+##### 4. `VoucherReceiptEmailGateway`
+* **Paquete:** `com.andeva.atelier.platform.invoicing.application.internal.outbound.acl`
+* **Propósito:** Puerto para la distribución de comprobantes electrónicos a través del servicio transaccional Resend API.
+```java
+package com.andeva.atelier.platform.invoicing.application.internal.outbound.acl;
+
+import java.util.UUID;
+
+public interface VoucherReceiptEmailGateway {
+    void sendVoucherReceiptEmail(UUID voucherId, String recipientEmail, String customerName, String voucherNumber, byte[] pdfContent, byte[] xmlContent);
+}
+```
+
+##### 5. `CashFlowPdfGeneratorPort`
+* **Paquete:** `com.andeva.atelier.platform.invoicing.application.internal.outbound.acl`
+* **Propósito:** Puerto de salida secundario para la generación y renderizado tipográfico vectorial del estado de cuenta de flujo de caja y arqueo operativo del taller con membrete institucional y balance financiero consolidado.
+```java
+package com.andeva.atelier.platform.invoicing.application.internal.outbound.acl;
+
+import com.andeva.atelier.platform.invoicing.domain.model.valueobjects.CashFlowMovement;
+import com.andeva.atelier.platform.invoicing.domain.model.valueobjects.CashFlowSummary;
+import java.util.List;
+import java.util.UUID;
+
+public interface CashFlowPdfGeneratorPort {
+    byte[] generateCashFlowPdf(UUID tenantId, CashFlowSummary summary, List<CashFlowMovement> movements);
+}
+```
+
+---
+
+#### 9.4.5. Implementación de Fachada Inbound ACL
+
+Implementación operativa de la fachada Open Host Service (OHS), ubicada en `com.andeva.atelier.platform.invoicing.application.acl.InvoicingContextFacadeImpl`. Implementa la interfaz pública `InvoicingContextFacade` expuesta en `interfaces.acl`, coordinando llamadas hacia los servicios CQRS y mapeando agregados hacia DTOs inmutables de fachada:
+
+```java
+package com.andeva.atelier.platform.invoicing.application.acl;
+
+import com.andeva.atelier.platform.invoicing.application.commandservices.ElectronicVoucherCommandService;
+import com.andeva.atelier.platform.invoicing.application.queryservices.ElectronicVoucherQueryService;
+import com.andeva.atelier.platform.invoicing.domain.model.ids.WorkOrderId;
+import com.andeva.atelier.platform.invoicing.domain.model.queries.ListVouchersByWorkOrderQuery;
+import com.andeva.atelier.platform.invoicing.interfaces.acl.InvoicingContextFacade;
+import com.andeva.atelier.platform.invoicing.interfaces.acl.dto.GenerateVoucherFromWorkOrderCommandDto;
+import com.andeva.atelier.platform.invoicing.interfaces.acl.dto.VoucherGenerationResultDto;
+import com.andeva.atelier.platform.invoicing.interfaces.acl.dto.VoucherSummaryDto;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.UUID;
+
+@Service
+@Transactional
+public class InvoicingContextFacadeImpl implements InvoicingContextFacade {
+
+    private final ElectronicVoucherCommandService commandService;
+    private final ElectronicVoucherQueryService queryService;
+
+    public InvoicingContextFacadeImpl(
+            ElectronicVoucherCommandService commandService,
+            ElectronicVoucherQueryService queryService) {
+        this.commandService = commandService;
+        this.queryService = queryService;
+    }
+
+    @Override
+    public VoucherGenerationResultDto generateVoucherFromWorkOrder(GenerateVoucherFromWorkOrderCommandDto command) {
+        var result = commandService.handleFromWorkOrder(command);
+        var voucher = result.orElseThrow();
+        return new VoucherGenerationResultDto(
+                voucher.getId().value(),
+                voucher.getSerie().value() + "-" + String.format("%08d", voucher.getNumber().value()),
+                voucher.getTaxCalculation().totalAmount().amount(),
+                voucher.getStatus().name(),
+                voucher.getDigitalReceiptUrls().pdfUrl()
+        );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<VoucherSummaryDto> getVouchersByWorkOrderId(UUID workOrderId) {
+        var query = new ListVouchersByWorkOrderQuery(new WorkOrderId(workOrderId));
+        return queryService.handle(query).stream()
+                .map(v -> new VoucherSummaryDto(
+                        v.getId().value(),
+                        v.getSerie().value() + "-" + String.format("%08d", v.getNumber().value()),
+                        v.getVoucherType().name(),
+                        v.getTaxCalculation().totalAmount().amount(),
+                        v.getStatus().name(),
+                        v.isFullyPaid()
+                ))
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isWorkOrderFullySettled(UUID workOrderId) {
+        var query = new ListVouchersByWorkOrderQuery(new WorkOrderId(workOrderId));
+        var vouchers = queryService.handle(query);
+        return !vouchers.isEmpty() && vouchers.stream().allMatch(v -> v.isFullyPaid());
+    }
+}
+```
 
 ---
 
 ### 9.5. 2.6.7.4. Infrastructure Layer
 
-#### 9.5.1. JPA Entities
+La Capa de Infraestructura del Bounded Context **Invoicing & Compliance** implementa los adaptadores técnicos y mecanismos de persistencia bajo el paquete canónico `com.andeva.atelier.platform.invoicing.infrastructure`. Materializa los repositorios de dominio sobre PostgreSQL 16 mediante Spring Data JPA y Hibernate 6.5, gestiona el mapeo bidireccional aséptico mediante ensambladores de persistencia en `infrastructure.persistence.jpa.assemblers`, conecta con el PSE homologado Nubefact para la emisión de comprobantes UBL 2.1, almacena constancias CDR en Firebase Storage, distribuye correos transaccionales con Resend API y canaliza eventos a través del Transactional Outbox.
 
-##### 1. `ElectronicVoucherJpaEntity`
+#### 9.5.1. JPA Persistence Entities
+
+Las entidades JPA residen en el paquete `com.andeva.atelier.platform.invoicing.infrastructure.persistence.jpa.entities` y heredan de `AuditableAbstractPersistenceEntity` para asegurar campos uniformes de auditoría:
+
+##### 1. `ElectronicVoucherPersistenceEntity`
 * **Tabla Relacional:** `electronic_vouchers`
 * **Mapeo:**
 ```java
@@ -911,7 +1321,7 @@ import java.util.UUID;
     @Index(name = "idx_vouchers_work_order", columnList = "work_order_id"),
     @Index(name = "idx_vouchers_customer", columnList = "customer_id")
 })
-public class ElectronicVoucherJpaEntity extends AuditableAbstractPersistenceEntity {
+public class ElectronicVoucherPersistenceEntity extends AuditableAbstractPersistenceEntity {
     @Id
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
@@ -989,16 +1399,16 @@ public class ElectronicVoucherJpaEntity extends AuditableAbstractPersistenceEnti
     private Instant voidedAt;
 
     @OneToMany(mappedBy = "voucher", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<VoucherLineJpaEntity> lines = new ArrayList<>();
+    private List<VoucherLinePersistenceEntity> lines = new ArrayList<>();
 
     @OneToMany(mappedBy = "voucher", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<VoucherPaymentJpaEntity> payments = new ArrayList<>();
+    private List<VoucherPaymentPersistenceEntity> payments = new ArrayList<>();
 
-    // Getters y Setters JPA
+    // Constructores, Getters y Setters JPA
 }
 ```
 
-##### 2. `VoucherLineJpaEntity`
+##### 2. `VoucherLinePersistenceEntity`
 * **Tabla Relacional:** `voucher_lines`
 * **Mapeo:**
 ```java
@@ -1010,14 +1420,14 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "voucher_lines")
-public class VoucherLineJpaEntity {
+public class VoucherLinePersistenceEntity {
     @Id
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "voucher_id", nullable = false)
-    private ElectronicVoucherJpaEntity voucher;
+    private ElectronicVoucherPersistenceEntity voucher;
 
     @Column(name = "item_id")
     private UUID itemId;
@@ -1043,11 +1453,11 @@ public class VoucherLineJpaEntity {
     @Column(name = "total_line", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalLine;
 
-    // Getters y Setters JPA
+    // Constructores, Getters y Setters JPA
 }
 ```
 
-##### 3. `VoucherPaymentJpaEntity`
+##### 3. `VoucherPaymentPersistenceEntity`
 * **Tabla Relacional:** `voucher_payments`
 * **Mapeo:**
 ```java
@@ -1064,14 +1474,14 @@ import java.util.UUID;
     @Index(name = "idx_payments_voucher", columnList = "voucher_id"),
     @Index(name = "idx_payments_branch_date", columnList = "branch_id, paid_at")
 })
-public class VoucherPaymentJpaEntity extends AuditableAbstractPersistenceEntity {
+public class VoucherPaymentPersistenceEntity extends AuditableAbstractPersistenceEntity {
     @Id
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "voucher_id", nullable = false)
-    private ElectronicVoucherJpaEntity voucher;
+    private ElectronicVoucherPersistenceEntity voucher;
 
     @Column(name = "tenant_id", nullable = false, updatable = false)
     private UUID tenantId;
@@ -1097,11 +1507,11 @@ public class VoucherPaymentJpaEntity extends AuditableAbstractPersistenceEntity 
     @Column(name = "paid_at", nullable = false)
     private Instant paidAt;
 
-    // Getters y Setters JPA
+    // Constructores, Getters y Setters JPA
 }
 ```
 
-##### 4. `SeriesConfigurationJpaEntity`
+##### 4. `SeriesConfigurationPersistenceEntity`
 * **Tabla Relacional:** `sunat_series_configurations`
 * **Mapeo:**
 ```java
@@ -1115,7 +1525,7 @@ import java.util.UUID;
 @Table(name = "sunat_series_configurations", uniqueConstraints = {
     @UniqueConstraint(name = "uk_series_branch_type_serie", columnNames = {"branch_id", "voucher_type", "serie"})
 })
-public class SeriesConfigurationJpaEntity extends AuditableAbstractPersistenceEntity {
+public class SeriesConfigurationPersistenceEntity extends AuditableAbstractPersistenceEntity {
     @Id
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
@@ -1138,7 +1548,7 @@ public class SeriesConfigurationJpaEntity extends AuditableAbstractPersistenceEn
     @Column(name = "is_active", nullable = false)
     private boolean isActive = true;
 
-    // Getters y Setters JPA
+    // Constructores, Getters y Setters JPA
 }
 ```
 
@@ -1146,30 +1556,46 @@ public class SeriesConfigurationJpaEntity extends AuditableAbstractPersistenceEn
 
 #### 9.5.2. Spring Data JPA Repositories
 
+Ubicados en el paquete `com.andeva.atelier.platform.invoicing.infrastructure.persistence.jpa.repositories`:
+
 ```java
 package com.andeva.atelier.platform.invoicing.infrastructure.persistence.jpa.repositories;
 
-public interface SpringDataElectronicVoucherRepository extends JpaRepository<ElectronicVoucherJpaEntity, UUID> {
-    Optional<ElectronicVoucherJpaEntity> findByTenantIdAndSerieAndNumber(UUID tenantId, String serie, int number);
-    List<ElectronicVoucherJpaEntity> findAllByWorkOrderId(UUID workOrderId);
+import com.andeva.atelier.platform.invoicing.infrastructure.persistence.jpa.entities.ElectronicVoucherPersistenceEntity;
+import com.andeva.atelier.platform.invoicing.infrastructure.persistence.jpa.entities.SeriesConfigurationPersistenceEntity;
+import com.andeva.atelier.platform.invoicing.infrastructure.persistence.jpa.entities.VoucherPaymentPersistenceEntity;
+import jakarta.persistence.LockModeType;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
-    @Query("SELECT v FROM ElectronicVoucherJpaEntity v WHERE v.tenantId = :tenantId AND v.createdAt >= :from AND v.createdAt <= :to ORDER BY v.createdAt DESC")
-    List<ElectronicVoucherJpaEntity> findAllByTenantAndDateRange(@Param("tenantId") UUID tenantId, @Param("from") Instant from, @Param("to") Instant to);
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+public interface ElectronicVoucherPersistenceRepository extends JpaRepository<ElectronicVoucherPersistenceEntity, UUID> {
+    Optional<ElectronicVoucherPersistenceEntity> findByTenantIdAndSerieAndNumber(UUID tenantId, String serie, int number);
+    List<ElectronicVoucherPersistenceEntity> findAllByWorkOrderId(UUID workOrderId);
+
+    @Query("SELECT v FROM ElectronicVoucherPersistenceEntity v WHERE v.tenantId = :tenantId AND v.createdAt >= :from AND v.createdAt <= :to ORDER BY v.createdAt DESC")
+    List<ElectronicVoucherPersistenceEntity> findAllByTenantAndDateRange(@Param("tenantId") UUID tenantId, @Param("from") Instant from, @Param("to") Instant to);
 }
 
-public interface SpringDataVoucherPaymentRepository extends JpaRepository<VoucherPaymentJpaEntity, UUID> {
-    List<VoucherPaymentJpaEntity> findAllByVoucherId(UUID voucherId);
+public interface VoucherPaymentPersistenceRepository extends JpaRepository<VoucherPaymentPersistenceEntity, UUID> {
+    List<VoucherPaymentPersistenceEntity> findAllByVoucherId(UUID voucherId);
 
-    @Query("SELECT p FROM VoucherPaymentJpaEntity p WHERE p.branchId = :branchId AND p.paidAt >= :dayStart AND p.paidAt <= :dayEnd ORDER BY p.paidAt DESC")
-    List<VoucherPaymentJpaEntity> findAllByBranchAndDate(@Param("branchId") UUID branchId, @Param("dayStart") Instant dayStart, @Param("dayEnd") Instant dayEnd);
+    @Query("SELECT p FROM VoucherPaymentPersistenceEntity p WHERE p.branchId = :branchId AND p.paidAt >= :dayStart AND p.paidAt <= :dayEnd ORDER BY p.paidAt DESC")
+    List<VoucherPaymentPersistenceEntity> findAllByBranchAndDate(@Param("branchId") UUID branchId, @Param("dayStart") Instant dayStart, @Param("dayEnd") Instant dayEnd);
 }
 
-public interface SpringDataSeriesConfigurationRepository extends JpaRepository<SeriesConfigurationJpaEntity, UUID> {
+public interface SeriesConfigurationPersistenceRepository extends JpaRepository<SeriesConfigurationPersistenceEntity, UUID> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT s FROM SeriesConfigurationJpaEntity s WHERE s.branchId = :branchId AND s.voucherType = :voucherType AND s.isActive = true")
-    Optional<SeriesConfigurationJpaEntity> findActiveForUpdate(@Param("branchId") UUID branchId, @Param("voucherType") String voucherType);
+    @Query("SELECT s FROM SeriesConfigurationPersistenceEntity s WHERE s.branchId = :branchId AND s.voucherType = :voucherType AND s.isActive = true")
+    Optional<SeriesConfigurationPersistenceEntity> findActiveForUpdate(@Param("branchId") UUID branchId, @Param("voucherType") String voucherType);
 
-    List<SeriesConfigurationJpaEntity> findAllByBranchId(UUID branchId);
+    List<SeriesConfigurationPersistenceEntity> findAllByBranchId(UUID branchId);
 }
 ```
 
@@ -1177,43 +1603,49 @@ public interface SpringDataSeriesConfigurationRepository extends JpaRepository<S
 
 #### 9.5.3. Repository Implementations & Adapters
 
+Ubicados en el paquete `com.andeva.atelier.platform.invoicing.infrastructure.persistence.jpa.adapters`:
+
 * **`ElectronicVoucherRepositoryImpl`:**
   * **Paquete:** `com.andeva.atelier.platform.invoicing.infrastructure.persistence.jpa.adapters`
-  * **Propósito:** Adapta `SpringDataElectronicVoucherRepository` al puerto de dominio `ElectronicVoucherRepository`. Gestiona la persistencia en cascada de `voucher_lines` y `voucher_payments`, extrae los eventos de dominio acumulados mediante `pullDomainEvents()` e inserta atómicamente los registros en la tabla `outbox_messages` del Shared Kernel para su despacho desacoplado.
+  * **Propósito:** Adapta `ElectronicVoucherPersistenceRepository` al puerto de dominio `ElectronicVoucherRepository`. Gestiona la persistencia en cascada de líneas y pagos, extrae eventos de dominio acumulados mediante `pullDomainEvents()` e inserta los registros en `outbox_messages` para su despacho desacoplado.
   * **Métodos Implementados:** `save(ElectronicVoucher)`, `findById(VoucherId)`, `findByTenantIdAndSerieAndNumber(TenantId, VoucherSerie, VoucherNumber)`, `findAllByWorkOrderId(WorkOrderId)`, `findAllByTenantAndDateRange(TenantId, Instant, Instant, Pageable)`.
 
 * **`VoucherPaymentRepositoryImpl`:**
   * **Paquete:** `com.andeva.atelier.platform.invoicing.infrastructure.persistence.jpa.adapters`
-  * **Propósito:** Adapta `SpringDataVoucherPaymentRepository` al puerto de dominio `VoucherPaymentRepository`, permitiendo el registro atómico de abonos parciales o totales y la auditoría de caja.
+  * **Propósito:** Adapta `VoucherPaymentPersistenceRepository` al puerto de dominio `VoucherPaymentRepository`, permitiendo el registro atómico de abonos parciales o totales y la auditoría de caja.
   * **Métodos Implementados:** `save(VoucherPayment)`, `findById(PaymentId)`, `findAllByVoucherId(VoucherId)`, `findAllByBranchAndDate(BranchId, Instant, Instant)`.
 
 * **`SeriesConfigurationRepositoryImpl`:**
   * **Paquete:** `com.andeva.atelier.platform.invoicing.infrastructure.persistence.jpa.adapters`
-  * **Propósito:** Adapta `SpringDataSeriesConfigurationRepository` al puerto `SeriesConfigurationRepository`. Implementa bloqueo pesimista en base de datos (`@Lock(LockModeType.PESSIMISTIC_WRITE)`) mediante el método `findActiveForUpdate` para reservar correlativos fiscales de manera secuencial y libre de colisiones entre cajeros concurrentes de una misma sede.
+  * **Propósito:** Adapta `SeriesConfigurationPersistenceRepository` al puerto `SeriesConfigurationRepository`. Implementa bloqueo pesimista en base de datos (`@Lock(LockModeType.PESSIMISTIC_WRITE)`) mediante el método `findActiveForUpdate` para reservar correlativos fiscales de manera secuencial y libre de colisiones entre cajeros concurrentes de una misma sede física.
   * **Métodos Implementados:** `save(SeriesConfiguration)`, `findById(SeriesConfigurationId)`, `findActiveForUpdate(BranchId, VoucherType)`, `findAllByBranchId(BranchId)`.
 
 ---
 
 #### 9.5.4. Persistence Assemblers & Data Mappers
 
+Ubicados en el paquete `com.andeva.atelier.platform.invoicing.infrastructure.persistence.jpa.assemblers`, gestionan la transformación bidireccional aséptica entre agregados de dominio y entidades de persistencia:
+
 * **`ElectronicVoucherPersistenceAssembler`:**
-  * **Paquete:** `com.andeva.atelier.platform.invoicing.infrastructure.persistence.jpa.transform`
-  * **Propósito:** Mapea bidireccionalmente entre la raíz de agregado de dominio `ElectronicVoucher` y la entidad relacional `ElectronicVoucherJpaEntity`.
+  * **Paquete:** `com.andeva.atelier.platform.invoicing.infrastructure.persistence.jpa.assemblers`
+  * **Propósito:** Mapea bidireccionalmente entre la raíz de agregado de dominio `ElectronicVoucher` y la entidad relacional `ElectronicVoucherPersistenceEntity`.
   * **Métodos:**
     * `toEntity(ElectronicVoucher domain)`: Mapea identificadores, base imponible, IGV, total, estado, datos fiscales de cliente, metadatos SUNAT y transforma las colecciones de líneas y pagos.
-    * `toDomain(ElectronicVoucherJpaEntity entity)`: Reconstituye el agregado invocando su método estático de factoría `ElectronicVoucher.reconstitute(...)`, evitando la emisión espuria de eventos de dominio durante operaciones de lectura o consulta.
+    * `toDomain(ElectronicVoucherPersistenceEntity entity)`: Reconstituye el agregado invocando su método estático de factoría `ElectronicVoucher.reconstitute(...)`, evitando la emisión espuria de eventos de dominio durante operaciones de lectura o consulta.
 
 * **`VoucherPaymentPersistenceAssembler`:**
-  * **Paquete:** `com.andeva.atelier.platform.invoicing.infrastructure.persistence.jpa.transform`
-  * **Propósito:** Convierte entre la entidad dependiente `VoucherPayment` y su correspondiente `VoucherPaymentJpaEntity`, preservando el método de pago, referencia de transacción bancaria y marca temporal `paid_at`.
+  * **Paquete:** `com.andeva.atelier.platform.invoicing.infrastructure.persistence.jpa.assemblers`
+  * **Propósito:** Convierte entre la entidad dependiente `VoucherPayment` y su correspondiente `VoucherPaymentPersistenceEntity`, preservando el medio de pago, referencia de transacción bancaria y marca temporal `paid_at`.
 
 * **`SeriesConfigurationPersistenceAssembler`:**
-  * **Paquete:** `com.andeva.atelier.platform.invoicing.infrastructure.persistence.jpa.transform`
-  * **Propósito:** Transforma configuraciones de series fiscales entre `SeriesConfiguration` y `SeriesConfigurationJpaEntity`, reconstruyendo el estado activo y el contador correlativo atómico.
+  * **Paquete:** `com.andeva.atelier.platform.invoicing.infrastructure.persistence.jpa.assemblers`
+  * **Propósito:** Transforma configuraciones de series fiscales entre `SeriesConfiguration` y `SeriesConfigurationPersistenceEntity`, reconstruyendo el estado activo y el contador correlativo atómico.
 
 ---
 
 #### 9.5.5. JPA Attribute Converters
+
+Ubicados en el paquete `com.andeva.atelier.platform.invoicing.infrastructure.persistence.jpa.converters`:
 
 * **`VoucherTypeConverter`:** Mapea el enum de dominio `VoucherType` hacia el código formal de SUNAT (`VARCHAR(10)`: `01` para Factura, `03` para Boleta, `07` para Nota de Crédito).
 * **`VoucherStatusConverter`:** Mapea el enum `VoucherStatus` (`DRAFT`, `ISSUED`, `ACCEPTED_SUNAT`, `REJECTED_SUNAT`, `VOIDED`) hacia `VARCHAR(20)`.
@@ -1225,35 +1657,52 @@ public interface SpringDataSeriesConfigurationRepository extends JpaRepository<S
 
 ---
 
-#### 9.5.6. External Gateways & Fiscal Adapters
+#### 9.5.6. External Gateways & Outbound Adapters
 
-* **`NubefactFiscalGatewayImpl`:**
-  * **Paquete:** `com.andeva.atelier.platform.invoicing.infrastructure.gateways`
-  * **Propósito:** Cliente HTTP implementado con Spring `WebClient` para comunicación segura contra la API RESTful JSON V1 de Nubefact (PSE/OSE homologado por SUNAT).
-  * **Mecanismos de Resiliencia y Seguridad:**
-    * Inyección del Token de Autorización Bearer de Nubefact mediante cabecera HTTP `Authorization: Bearer ${NUBEFACT_TOKEN}`.
-    * Timeout de conexión de 5 segundos y timeout de lectura de 15 segundos.
-    * Reintentos automáticos ante errores transitorios de red (`502 Bad Gateway`, `503 Service Unavailable`) con backoff exponencial.
+Implementaciones de adaptadores de salida y pasarelas perimetrales reorganizadas en paquetes modulares bajo `com.andeva.atelier.platform.invoicing.infrastructure.external`:
 
-* **`ResendEmailSenderAdapter`:**
-  * **Paquete:** `com.andeva.atelier.platform.invoicing.infrastructure.adapters`
-  * **Propósito:** Implementa `TransactionalEmailSenderPort` utilizando la API REST HTTPS de Resend para despachar notificaciones a los clientes finales adjuntando el comprobante PDF renderizado y el archivo XML UBL 2.1 con su correspondiente firma digital.
+##### 1. `NubefactPseFiscalAdapter` (Adaptador de Facturación Electrónica con Nubefact PSE)
+* **Paquete:** `com.andeva.atelier.platform.invoicing.infrastructure.external.tax.nubefact`
+* **Implementa:** `NubefactPseFiscalGateway`
+* **Tecnología:** Cliente HTTP implementado con Spring `WebClient` para comunicación segura contra la API RESTful JSON V1 de Nubefact (PSE/OSE homologado por SUNAT).
+* **Mecanismos de Resiliencia y Seguridad:**
+  * Inyección del Token de Autorización Bearer de Nubefact mediante cabecera HTTP `Authorization: Bearer ${NUBEFACT_TOKEN}`.
+  * Timeout de conexión de 5 segundos y timeout de lectura de 15 segundos.
+  * Reintentos automáticos ante errores transitorios de red (`502 Bad Gateway`, `503 Service Unavailable`) con backoff exponencial y protección por cortacircuitos con Resilience4j.
 
-* **`OpenPdfInvoicingGeneratorAdapter`:**
-  * **Paquete:** `com.andeva.atelier.platform.invoicing.infrastructure.adapters`
-  * **Propósito:** Implementa `InvoicingPdfGeneratorPort` mediante la biblioteca OpenPDF / iText, permitiendo generar comprobantes en formato corporativo bancario A4, tickets térmicos para punto de venta de 80 mm y la exportación analítica del estado de flujo de caja del taller.
+##### 2. `FirebaseSunatCdrStorageAdapter` (Almacenamiento Cloud de Constancias CDR)
+* **Paquete:** `com.andeva.atelier.platform.invoicing.infrastructure.external.cloud.firebase`
+* **Implementa:** `SunatCdrStorageGateway`
+* **Tecnología:** Cliente cloud Firebase Storage SDK para la custodia legal y almacenamiento seguro de artefactos XML UBL 2.1 firmados y constancias de recepción oficiales devueltas por SUNAT.
+* **Responsabilidad:** Almacena de forma inmutable los comprobantes firmados y permite la descarga pública autorizada mediante URLs firmadas con vencimiento temporal.
 
-* **`CustomerFiscalAclAdapter`:**
-  * **Paquete:** `com.andeva.atelier.platform.invoicing.infrastructure.adapters`
-  * **Propósito:** Implementa `CustomerFiscalAclPort` para consultar la identidad tributaria, razón social y domicilio fiscal de clientes desde el Bounded Context CRM o contra el padrón web de contribuyentes de SUNAT.
+##### 3. `ResendVoucherReceiptEmailAdapter` (Pasarela de Correo Transaccional con Resend API)
+* **Paquete:** `com.andeva.atelier.platform.invoicing.infrastructure.external.mail.resend`
+* **Implementa:** `VoucherReceiptEmailGateway`
+* **Tecnología:** Cliente REST HTTPS seguro sobre Spring 6 `RestClient` conectado a Resend API (`https://api.resend.com/emails`) con autenticación API Key y política de reintentos con retroceso exponencial.
+* **Responsabilidad:** Despacha asíncronamente los comprobantes de pago en formato PDF y los archivos XML UBL 2.1 con su correspondiente firma digital a los correos electrónicos de los clientes del taller.
 
-* **`InvoicingTransactionalOutboxPublisherImpl`:**
-  * **Paquete:** `com.andeva.atelier.platform.invoicing.infrastructure.messaging`
-  * **Propósito:** Implementa `InvoicingEventPublisherPort`, serializando eventos de integración en la tabla `outbox_messages` dentro de la transacción relacional local para garantizar semántica de entrega *At-Least-Once* hacia Apache Kafka o RabbitMQ sin requerir transacciones distribuidas 2PC.
+##### 4. `CustomerFiscalValidationAclAdapter` (Adaptador Anticorrupción hacia CRM y Consulta RUC)
+* **Paquete:** `com.andeva.atelier.platform.invoicing.infrastructure.external.acl.crm`
+* **Implementa:** `CustomerFiscalValidationAclService`
+* **Tecnología:** Fachada en memoria `CustomerContextFacade` y cliente web perimetral hacia la plataforma de consulta de contribuyentes de SUNAT.
+* **Responsabilidad:** Consulta y valida la identidad tributaria, razón social y domicilio fiscal de clientes corporativos y particulares desde el Bounded Context CRM o contra el padrón web oficial de SUNAT.
+
+##### 5. `InvoicingOutboxMessageRelayAdapter` (Adaptador de Mensajería Transaccional Outbox)
+* **Paquete:** `com.andeva.atelier.platform.invoicing.infrastructure.external.messaging.outbox`
+* **Implementa:** Despachador de mensajes transaccionales outbox
+* **Tecnología:** Persistencia transaccional directa sobre la tabla `outbox_messages` en PostgreSQL 16 con serialización JSONB mediante Jackson ObjectMapper.
+* **Responsabilidad:** Captura eventos de dominio e integración emitidos por los agregados de facturación (`ElectronicVoucherIssuedIntegrationEvent`, `VoucherAcceptedBySunatIntegrationEvent`, `VoucherPaymentRegisteredIntegrationEvent`, etc.) y los persiste de manera atómica dentro de la misma transacción local ACID, habilitando su retransmisión asíncrona confiable con semántica de entrega al menos una vez hacia el bus de mensajería de la plataforma.
+
+##### 6. `OpenPdfCashFlowReportAdapter` (Adaptador de Generación de Reportes PDF de Flujo de Caja)
+* **Paquete:** `com.andeva.atelier.platform.invoicing.infrastructure.external.reporting.openpdf`
+* **Implementa:** `CashFlowPdfGeneratorPort`
+* **Tecnología:** OpenPDF 2.0.3 y Thymeleaf 3.1.
+* **Responsabilidad:** Renderizado binario de informes vectoriales en formato PDF para estados de cuenta de flujo de caja y arqueos de tesorería del taller automotriz, aplicando plantillas XHTML procesadas mediante Thymeleaf y convertidas a documentos PDF tipográficos con membrete institucional, balance financiero consolidado y detalle cronológico de transacciones.
 
 ---
 
-### 9.6. 2.6.7.5. Bounded Context Component Level Diagram
+### 9.6. 2.6.7.5. Bounded Context Software Architecture Component Level Diagrams
 
 En esta sección se formaliza la descomposición arquitectónica interna del contenedor central **API Application** (`com.andeva.atelier.platform`) en relación con el Bounded Context **Invoicing & Compliance** (`com.andeva.atelier.platform.invoicing`), dando estricto cumplimiento al Nivel 3 (Component Diagram) del Modelo C4 y a las directrices metodológicas establecidas en `report/assets/diagram-sources/c4-diagrams/c4-guidelines.md`.
 
@@ -1275,13 +1724,13 @@ A continuación, se detalla la especificación técnica exhaustiva de los siete 
 
 | Componente | Tipo de Elemento | Tecnologías | Responsabilidad | Relaciones |
 | :--- | :---: | :--- | :--- | :--- |
-| **Invoicing REST Controllers & Resource Assemblers Component** | Componente | Spring MVC, SpringDoc OpenAPI, Jakarta Validation | Expone endpoints REST perimetrales para la emisión, consulta, anulación y amortización de comprobantes electrónicos (facturas, boletas, notas de crédito), registro de cobros en mostrador, arqueos de caja y parametrización de series fiscales oficiales; valida contratos DTO sintácticos y proyecta recursos enriquecidos con enlaces hipermedia HATEOAS. | Invocado por Web Application y Mobile Workshop. Despacha comandos de mutación y consultas de lectura hacia los servicios CQRS. Utiliza ensambladores de recursos REST (`ElectronicVoucherResourceAssembler`, etc.). |
+| **Invoicing REST Controllers & Resource Assemblers Component** | Componente | Spring MVC, SpringDoc OpenAPI, Jakarta Validation | Expone endpoints REST perimetrales para la emisión, consulta, anulación y amortización de comprobantes electrónicos (facturas, boletas, notas de crédito), registro de cobros en mostrador, arqueos de caja y parametrización de series fiscales oficiales, valida contratos DTO sintácticos y proyecta recursos enriquecidos con enlaces hipermedia HATEOAS. | Invocado por Web Application y Mobile Workshop. Despacha comandos de mutación y consultas de lectura hacia los servicios CQRS. Utiliza ensambladores de recursos REST (`ElectronicVoucherResourceAssembler`, etc.). |
 | **Invoicing CQRS Application Services Component** | Componente | Spring Service, Transactional, CQRS, Interfaces Funcionales | Orquesta los casos de uso de emisión tributaria, amortizaciones financieras de pagos, cómputo de flujos de caja operativos y parametrización de series bajo transacciones ACID, canalizando resultados deterministas mediante `Result<T, ApplicationError>`. | Implementa contratos de comando y consulta. Invoca reglas de negocio en el núcleo de dominio. Delega en adaptadores de persistencia JPA y pasarelas fiscales y de correo. Emite eventos de dominio hacia oyentes transaccionales. |
 | **Invoicing Event Handlers & Transactional Dispatcher Component** | Componente | Spring Events, TransactionalEventListener, Outbox Pattern | Captura eventos de dominio locales generados tras la emisión aceptada de comprobantes y la amortización total de pagos, canalizando eventos atómicos hacia la tabla `outbox_messages` para su publicación asíncrona hacia Workshop Operations, Inventory & Supply Chain y Human Resources. | Escucha eventos de dominio de servicios de aplicación. Persiste mensajes transaccionales en base de datos PostgreSQL 16 mediante puertos de repositorio. Notifica a consumidores en módulos adyacentes y bus de integración. |
 | **Invoicing Domain Model & Peruvian Tax Calculation Engines Component** | Componente | Java 24 puro, Domain Model, Records, Inmutabilidad | Encapsula invariantes de negocio, el motor algorítmico de cálculo tributario SUNAT (base imponible, 18% IGV y redondeo bancario Half-Even con escala 2), validación algorítmica de RUC bajo Módulo 11 y DNI, topes de emisión anónima y raíces de agregado inmutables (`ElectronicVoucher`, `VoucherPayment`, `SunatSeriesConfiguration`). | Contiene raíces de agregado y entidades dependientes (`VoucherLine`). Define objetos de valor (`VoucherNumber`, `TaxId`, `Money`, `ExchangeRate`, `SunatCdrInfo`). Ejecuta algoritmos en `PeruvianTaxCalculationEngine`, `VoucherValidationService` y `CashFlowAggregationEngine`. |
 | **Invoicing Persistence Repositories & JPA Adapters Component** | Componente | Jakarta Persistence 3.1, Spring Data JPA, Hibernate ORM, PostgreSQL 16 | Materializa los puertos de repositorio de dominio con Spring Data JPA e Hibernate, implementando bloqueo pesimista en series fiscales oficiales (`PESSIMISTIC_WRITE`) para evitar duplicidades correlativas, bloqueos de concurrencia optimista y despacho atómico en la tabla Outbox. | Realiza interfaces de repositorio (`ElectronicVoucherRepository`, `VoucherPaymentRepository`, `SunatSeriesConfigurationRepository`). Lee y escribe en tablas relacionales `electronic_vouchers`, `voucher_lines`, `voucher_payments`, `sunat_series_configurations` y `outbox_messages`. |
 | **Inbound ACL & Invoicing Open Host Facade Component** | Componente | Spring Service, In-Memory ACL, Published Language | Publica una interfaz Open Host Service (OHS) en memoria que atiende demandas de facturación y liquidación fiscal de órdenes de trabajo culminadas desde Workshop Operations, permitiendo validar la condición de pago para el pase de salida vehicular sin exponer entidades internas. | Invocado por Workshop Operations Module (liquidación de órdenes de trabajo y consulta de solvencia de pago). Delega la orquestación en servicios de aplicación y persistencia interna. |
-| **Invoicing External Gateways & Fiscal Cloud Integration Component** | Componente | Spring WebClient, Resilience4j, Resend API, OpenPDF, In-Memory ACL | Despacha tramas JSON V1 hacia el PSE/OSE Nubefact bajo políticas de reintento y cortacircuito (Resilience4j), transmite correos transaccionales con PDF y XML UBL 2.1 firmados mediante Resend API, renderiza comprobantes vectoriales con OpenPDF (formatos A4 y ticket 80mm) y consulta en memoria las fachadas de CRM, Inventory y HR. | Invocado por servicios de aplicación. Conecta vía HTTPS con Nubefact API RESTful JSON V1 y Resend API. Consulta en memoria las fachadas Open Host Service de CRM & Fleet, Inventory & Supply Chain y Human Resources. |
+| **Invoicing External Gateways & Fiscal Cloud Integration Component** | Componente | Spring WebClient, Resilience4j, Resend API, OpenPDF, In-Memory ACL | Despacha tramas JSON V1 hacia el PSE/OSE Nubefact bajo políticas de reintento y cortacircuito (Resilience4j), transmite correos transaccionales con PDF y XML UBL 2.1 firmados mediante Resend API, renderiza estados de cuenta de flujo de caja y arqueos con OpenPdfCashFlowReportAdapter mediante OpenPDF y Thymeleaf, y consulta en memoria las fachadas de CRM, Inventory y HR. | Invocado por servicios de aplicación. Conecta vía HTTPS con Nubefact API RESTful JSON V1 y Resend API. Alberga el adaptador OpenPdfCashFlowReportAdapter y consulta en memoria las fachadas Open Host Service de CRM & Fleet, Inventory & Supply Chain y Human Resources. |
 
 ---
 
@@ -1431,12 +1880,12 @@ El ciclo se desencadena cuando un usuario administrativo emite un comprobante tr
 
 El servicio de aplicación coordina en primer lugar la validación de la identidad fiscal del cliente invocando a **Invoicing External Gateways & Fiscal Cloud Integration**, la cual consulta en memoria al Bounded Context **Customer & Fleet (CRM)** para verificar Razón Social, RUC o DNI y domicilio fiscal habilitado. Acto seguido, transfiere el conjunto de líneas facturables (servicios de mano de obra y repuestos) a **Invoicing Domain Model & Peruvian Tax Calculation Engines Component**. El motor de dominio `PeruvianTaxCalculationEngine` calcula la base imponible neta desagregando el 18% del Impuesto General a las Ventas (IGV) y aplicando el redondeo bancario simétrico Half-Even (`RoundingMode.HALF_EVEN`), mientras que `VoucherValidationService` valida que las facturas contengan obligatoriamente un RUC de 11 dígitos con dígito verificador Módulo 11 válido y que las boletas sin identificación no superen el umbral regulatorio legal de S/ 700.00.
 
-Cumplidas las invariantes, el servicio de aplicación adquiere el siguiente correlativo consecutivo mediante **Invoicing Persistence Repositories & JPA Adapters** ejecutando una reserva con bloqueo pesimista (`PESSIMISTIC_WRITE`) sobre la tabla `sunat_series_configurations`, impidiendo cualquier colisión ante emisiones concurrentes. La entidad `ElectronicVoucher` se persiste transaccionalmente en PostgreSQL 16 con estado `ISSUED`. A continuación, el componente de pasarelas externas (`NubefactFiscalGatewayImpl`) traduce el comprobante a la estructura JSON V1 requerida por el PSE homologado **Nubefact**, despachando la petición mediante Spring `WebClient` protegido por políticas de cortacircuito (*Circuit Breaker*) y reintento con Resilience4j. Si el PSE responde favorablemente con la Constancia de Recepción (CDR) y la firma digital UBL 2.1, el agregado transiciona a `ACCEPTED`, registrando el código digest (*hash*) y el enlace de descarga oficial. Si se presenta indisponibilidad de red telemática, la orden transiciona a `PENDING_RETRY` para ser sincronizada por un trabajador en segundo plano. Finalmente, **Invoicing Event Handlers & Transactional Dispatcher** persiste el evento `ElectronicVoucherIssuedEvent` en `outbox_messages` para sincronización asíncrona, y la pasarela despacha un correo transaccional con PDF y XML adjuntos vía **Resend**, remitiendo en paralelo el formato de ticket térmico (80mm) a la impresora del mostrador.
+Cumplidas las invariantes, el servicio de aplicación adquiere el siguiente correlativo consecutivo mediante **Invoicing Persistence Repositories & JPA Adapters** ejecutando una reserva con bloqueo pesimista (`PESSIMISTIC_WRITE`) sobre la tabla `sunat_series_configurations`, impidiendo cualquier colisión ante emisiones concurrentes. La entidad `ElectronicVoucher` se persiste transaccionalmente en PostgreSQL 16 con estado `ISSUED`. A continuación, el componente de pasarelas externas (`NubefactPseFiscalAdapter`) traduce el comprobante a la estructura JSON V1 requerida por el PSE homologado **Nubefact**, despachando la petición mediante Spring `WebClient` protegido por políticas de cortacircuito (*Circuit Breaker*) y reintento con Resilience4j. Si el PSE responde favorablemente con la Constancia de Recepción (CDR) y la firma digital UBL 2.1, el agregado transiciona a `ACCEPTED`, registrando el código digest (*hash*) y el enlace de descarga oficial. Si se presenta indisponibilidad de red telemática, la orden transiciona a `PENDING_RETRY` para ser sincronizada por un trabajador en segundo plano. Finalmente, **Invoicing Event Handlers & Transactional Dispatcher** persiste el evento `ElectronicVoucherIssuedEvent` en `outbox_messages` para sincronización asíncrona, y la pasarela despacha un correo transaccional con PDF y XML adjuntos vía **Resend**, remitiendo en paralelo el formato de ticket térmico (80mm) a la impresora del mostrador.
 
 ##### 2. Ciclo de Amortización, Conciliación de Pagos y Liberación Vehicular en Taller
 El flujo inicia en el mostrador del taller o en la bahía de entrega de vehículos cuando el cliente efectúa la liquidación económica de los servicios prestados. El cajero o asesor de servicio introduce los datos del abono en la aplicación web o móvil (importe, medio de pago seleccionado entre efectivo, tarjeta de crédito, tarjeta de débito, transferencia bancaria, Yape o Plin, y código de transacción o voucher POS). La solicitud es recibida por **Invoicing REST Controllers & Resource Assemblers**, que valida los campos sintácticos mediante anotaciones Jakarta Validation y canaliza la operación hacia **Invoicing CQRS Application Services** bajo el comando `RegisterVoucherPaymentCommand`.
 
-El servicio de aplicación apertura una transacción ACID y recupera la raíz de agregado `ElectronicVoucher` junto con su historial de abonos previos desde **Invoicing Persistence Repositories & JPA Adapters**. El servicio delega la aplicación del abono en el método de dominio `ElectronicVoucher.applyPayment(...)` dentro de **Invoicing Domain Model & Peruvian Tax Calculation Engines Component**. El agregado evalúa rigurosamente la invariante de solvencia: la suma acumulada de las amortizaciones históricas más el nuevo importe no puede exceder el importe total facturado del comprobante ($\sum \text{abonos} \le \text{totalVoucher}$). Si el importe colma el saldo pendiente remanente, el estado de pago del comprobante transiciona a `PAID`; si el importe es parcial, se mantiene en `PARTIALLY_PAID` reflejando el saldo deudor actualizado.
+El servicio de aplicación apertura una transacción ACID y recupera la raíz de agregado `ElectronicVoucher` junto con su historial de abonos previos desde **Invoicing Persistence Repositories & JPA Adapters**. El servicio delega la aplicación del abono en el método de dominio `ElectronicVoucher.applyPayment(...)` dentro de **Invoicing Domain Model & Peruvian Tax Calculation Engines Component**. El agregado evalúa rigurosamente la invariante de solvencia: la suma acumulada de las amortizaciones históricas más el nuevo importe no puede exceder el importe total facturado del comprobante ($\sum \text{abonos} \le \text{totalVoucher}$). Si el importe colma el saldo pendiente remanente, el estado de pago del comprobante transiciona a `PAID`. Si el importe es parcial, se mantiene en `PARTIALLY_PAID` reflejando el saldo deudor actualizado.
 
 El adaptador de persistencia registra la nueva entidad `VoucherPayment` en la tabla `voucher_payments` y actualiza la cabecera en `electronic_vouchers`. Simultáneamente, **Invoicing Event Handlers & Transactional Dispatcher** captura el evento de dominio e inserta un registro `VoucherPaymentAppliedEvent` en la tabla `outbox_messages`. En caso de que el comprobante haya alcanzado el estado de cancelación total (`PAID`) y esté asociado a una orden de trabajo de mantenimiento automotriz, la interfaz **Inbound ACL & Invoicing Open Host Facade Component** notifica de inmediato en memoria al Bounded Context **Workshop Operations (MRO)** que la orden cuenta con conformidad financiera absoluta. Dicha señal desbloquea el pase de salida vehicular (*Gate Pass Release*), autorizando al guardia de seguridad y al jefe de patio la entrega física de la unidad al cliente propietario.
 
@@ -1452,7 +1901,7 @@ El conjunto completo de flujos de entrada y salida monetaria es transferido a **
 
 ---
 
-### 9.7. 2.6.7.6. Code Level Diagrams
+### 9.7. 2.6.7.6. Bounded Context Software Architecture Code Level Diagrams
 
 #### 9.7.1. 2.6.7.6.1. Domain Class Diagram
 
