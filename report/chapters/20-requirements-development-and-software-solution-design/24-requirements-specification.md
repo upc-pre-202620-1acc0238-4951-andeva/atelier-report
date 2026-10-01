@@ -3795,11 +3795,15 @@ El mapa de impacto del primer segmento objetivo nos ayudó a entender cómo el d
 El mapa de impacto del segundo segmento objetivo evidenció cómo el mecánico de bahía es fundamental para cumplir la meta de reducir los tiempos muertos operativos. A través de este análisis, identificamos oportunidades tecnológicas urgentes en su entorno de trabajo, como la necesidad de contar con una aplicación móvil *Offline-First* que soporte la pérdida de señal en fosas y herramientas de diagnóstico automático OBD-II. Esto nos permitió orientar los entregables hacia la inmediatez, incorporando notificaciones push para la aprobación de presupuestos y recepción de repuestos, agilizando así el flujo de servicio.
 ### 2.4.3. *Product Backlog*
 
-El *Product Backlog* consolida el catálogo priorizado y estimado de todos los incrementos funcionales (User Stories), servicios de plataforma (Technical Stories) y actividades de mitigación de incertidumbre técnica (Spikes) que componen el ecosistema Atelier. Las estimaciones relativas fueron determinadas mediante la técnica de *Planning Poker* bajo la serie de Fibonacci modificada, estableciendo como regla metodológica un límite máximo de 5 puntos de historia (1, 2, 3 o 5 SP) para asegurar un flujo de entrega continua y predecible sin historias sobredimensionadas.
+El **Product Backlog** consolida el catálogo priorizado y estimado de todos los incrementos funcionales (User Stories), servicios de plataforma (Technical Stories) y actividades de mitigación de incertidumbre técnica (Spikes) que componen el ecosistema Atelier. Las estimaciones relativas fueron determinadas mediante la técnica de *Planning Poker* bajo la serie de Fibonacci modificada, estableciendo como regla metodológica un límite máximo de 5 puntos de historia para asegurar un flujo de entrega continua y predecible sin historias sobredimensionadas.
 
-La priorización de las incidencias está determinada estrictamente por el retorno de valor de negocio (*Business Value*) percibido por los usuarios y propietarios del taller automotriz. La planificación abarca tres sprints de desarrollo. En el primer sprint se aborda con exclusividad el despliegue del portal web comercial (Landing Page) junto con los servicios fundacionales y contratos RESTful del backend. En el segundo sprint se implementan las operaciones nucleares de taller en patio, control de asistencia, ejecución en bahía y abastecimiento FIFO de repuestos sobre la aplicación móvil. Finalmente, en el tercer sprint se concluye con la telemetría vehicular OBD-II, la facturación electrónica UBL 2.1 ante SUNAT, los reportes periciales con Inteligencia Artificial y el cierre operativo.
+La priorización de las incidencias está determinada estrictamente por el retorno de valor de negocio percibido por los usuarios y propietarios del taller automotriz, posicionando en primer término las operaciones neurálgicas de recepción, diagnóstico y mantenimiento vehicular, y postergando las historias de autenticación y parametrización de soporte. La planificación abarca tres sprints de desarrollo:
 
-A continuación, la @tbl:product-backlog presenta la matriz consolidada del *Product Backlog* del ecosistema Atelier:
+- **Sprint 1:** Se implementa y despliega la totalidad de los servicios e interfaces RESTful del backend (las veinticuatro historias técnicas TS01 a TS24 que componen los ocho Bounded Contexts y el Shared Kernel) junto con el portal web comercial de captación (historias US45 a US48) y los tres spikes de mitigación tecnológica. Esta concentración estratégica asegura que los contratos y servicios de la plataforma queden operativos desde la primera iteración.
+- **Sprint 2:** El equipo se enfoca en la primera fase de la aplicación móvil Atelier Workshop Mobile, implementando el flujo de recepción en patio, control de asistencia satelital con geocerca, ejecución de tareas mecánicas en bahía y abastecimiento de repuestos bajo regla estricta FIFO.
+- **Sprint 3:** Se concluye la aplicación móvil integrando el diagnóstico telemático OBD-II, la facturación electrónica nativa UBL 2.1 ante SUNAT, los reportes periciales asistidos por Inteligencia Artificial y la liquidación transaccional de órdenes de trabajo.
+
+A continuación, la @tbl:product-backlog presenta la matriz consolidada del **Product Backlog** del ecosistema Atelier:
 
 \renewcommand{\arraystretch}{1.2}
 \begin{longtable}{| >{\centering\arraybackslash}p{1.5cm} | >{\centering\arraybackslash}p{2.2cm} | >{\raggedright\arraybackslash}p{\dimexpr\textwidth-9.5cm-10\tabcolsep-6\arrayrulewidth\relax} | >{\centering\arraybackslash}p{3.6cm} | >{\centering\arraybackslash}p{2.2cm} |}
@@ -3820,9 +3824,9 @@ A continuación, la @tbl:product-backlog presenta la matriz consolidada del *Pro
 \hline
 2 & US12 & Apertura de orden de trabajo y parametrización de tareas iniciales & 3 & Sprint 2 \\
 \hline
-3 & TS04 & Búsqueda y vinculación de clientes con verificación tributaria (\texttt{POST /api/v1/crm/customers}) & 2 & Sprint 1 \\
+3 & TS06 & Alta de clientes individuales con validación de identidad (\texttt{POST /api/v1/customers/individuals}) & 3 & Sprint 1 \\
 \hline
-4 & TS05 & Apertura transaccional de orden de trabajo (\texttt{POST /api/v1/operations/work-orders}) & 3 & Sprint 1 \\
+4 & TS10 & Apertura y parametrización de órdenes de trabajo en taller (\texttt{POST /api/v1/work-orders}) & 2 & Sprint 1 \\
 \hline
 5 & US16 & Enlace inalámbrico y sincronización de escáner OBD-II en bahía & 3 & Sprint 3 \\
 \hline
@@ -3830,9 +3834,9 @@ A continuación, la @tbl:product-backlog presenta la matriz consolidada del *Pro
 \hline
 7 & US18 & Monitoreo dinámico de parámetros telemétricos en tiempo real & 3 & Sprint 3 \\
 \hline
-8 & TS18 & Ingesta masiva y persistencia de telemetría OBD-II (\texttt{POST /api/v1/iot/telemetry/ingest}) & 3 & Sprint 1 \\
+8 & TS20 & Ingesta masiva de telemetría vehicular IoT en series temporales (\texttt{POST /api/v1/iot/telemetry/batch}) & 5 & Sprint 1 \\
 \hline
-9 & TS19 & Extracción y almacenamiento de códigos de falla DTC (\texttt{POST /api/v1/iot/vehicles/\{id\}/dtc-records}) & 3 & Sprint 1 \\
+9 & TS21 & Registro y catalogación de códigos de avería electrónica DTC (\texttt{POST /api/v1/iot/faults}) & 3 & Sprint 1 \\
 \hline
 10 & SP01 & Telemetría Bluetooth OBD-II e Inferencia Predictiva con Spring AI & 5 & Sprint 1 \\
 \hline
@@ -3840,11 +3844,11 @@ A continuación, la @tbl:product-backlog presenta la matriz consolidada del *Pro
 \hline
 12 & US27 & Cronometraje de labor efectiva, pausas operativas y sincronización con turnos laborales & 3 & Sprint 2 \\
 \hline
-13 & TS08 & Actualización y transición de estados operativos de tarea (\texttt{PATCH /api/v1/operations/tasks/\{id\}/status}) & 2 & Sprint 1 \\
+13 & TS13 & Control cronometrado y finalización técnica de faenas (\texttt{POST /api/v1/tasks/\{id\}/complete}) & 3 & Sprint 1 \\
 \hline
 14 & US31 & Búsqueda y consulta de disponibilidad de repuestos en catálogo & 2 & Sprint 2 \\
 \hline
-15 & TS10 & Búsqueda de repuestos y validación de stock disponible (\texttt{GET /api/v1/inventory/items}) & 2 & Sprint 1 \\
+15 & TS15 & Catálogo de repuestos con precio base y umbral crítico (\texttt{POST /api/v1/inventory/items}) & 3 & Sprint 1 \\
 \hline
 16 & US13 & Registro pericial de evidencias fotográficas de recepción vehicular & 2 & Sprint 2 \\
 \hline
@@ -3856,7 +3860,7 @@ A continuación, la @tbl:product-backlog presenta la matriz consolidada del *Pro
 \hline
 20 & US06 & Marcación de ingreso laboral con validación de geocerca GPS satelital & 3 & Sprint 2 \\
 \hline
-21 & TS16 & Marcación satelital de ingreso con validación Haversine (\texttt{POST /api/v1/hr/attendance/clock-in}) & 3 & Sprint 1 \\
+21 & TS17 & Marcación geodésica de jornada laboral con validación Haversine (\texttt{POST /api/v1/hr/attendances/clock-in}) & 2 & Sprint 1 \\
 \hline
 22 & US08 & Marcación de salida y liquidación de jornada laboral efectiva & 2 & Sprint 2 \\
 \hline
@@ -3870,31 +3874,31 @@ A continuación, la @tbl:product-backlog presenta la matriz consolidada del *Pro
 \hline
 27 & TS01 & Autenticación de credenciales y expedición de tokens JWT (\texttt{POST /api/v1/auth/sign-in}) & 2 & Sprint 1 \\
 \hline
-28 & TS02 & Vinculación de colaborador mediante aceptación de invitación (\texttt{POST /api/v1/iam/memberships/accept-invitation}) & 2 & Sprint 1 \\
+28 & TS02 & Registro fundacional de organización y aprovisionamiento de inquilino (\texttt{POST /api/v1/auth/sign-up}) & 2 & Sprint 1 \\
 \hline
-29 & TS03 & Registro y aprovisionamiento de sucursal de taller (\texttt{POST /api/v1/iam/workshops/\{id\}/branches}) & 2 & Sprint 1 \\
+29 & TS03 & Verificación de correo y activación mediante código OTP (\texttt{POST /api/v1/auth/verify-email}) & 2 & Sprint 1 \\
 \hline
 30 & US24 & Generación y remisión digital de proforma comercial en PDF & 3 & Sprint 2 \\
 \hline
 31 & US25 & Formalización de resolución de presupuesto tras comunicación externa & 2 & Sprint 2 \\
 \hline
-32 & TS06 & Parametrización y agregación de tareas mecánicas (\texttt{POST /api/v1/operations/work-orders/\{id\}/tasks}) & 3 & Sprint 2 \\
+32 & TS07 & Registro técnico de vehículos con homologación de placa y VIN (\texttt{POST /api/v1/vehicles}) & 3 & Sprint 1 \\
 \hline
-33 & TS07 & Formulación y cálculo de presupuesto de mantenimiento (\texttt{POST /api/v1/operations/quotes}) & 3 & Sprint 2 \\
+33 & TS08 & Agendamiento y reserva de citas de mantenimiento (\texttt{POST /api/v1/appointments}) & 2 & Sprint 1 \\
 \hline
 34 & US30 & Cierre técnico de tarea con cómputo de horas hombre efectivas & 2 & Sprint 3 \\
 \hline
-35 & TS09 & Registro de intervalos y cronometraje de horas hombre (\texttt{POST /api/v1/operations/tasks/\{id\}/time-logs}) & 2 & Sprint 2 \\
+35 & TS12 & Incorporación de tareas técnicas a la orden de trabajo (\texttt{POST /api/v1/work-orders/\{id\}/tasks}) & 5 & Sprint 1 \\
 \hline
 36 & US32 & Descargo contable y físico automatizado mediante regla estricta FIFO por lote & 5 & Sprint 2 \\
 \hline
-37 & TS11 & Descargo atómico de existencias bajo regla estricta FIFO (\texttt{POST /api/v1/inventory/movements/fifo-dispatch}) & 5 & Sprint 2 \\
+37 & TS14 & Requisición y descargo de repuestos bajo método FIFO (\texttt{POST /api/v1/tasks/\{id\}/products}) & 2 & Sprint 1 \\
 \hline
 38 & US35 & Imputación automática de precios de venta de catálogo y conciliación de margen FIFO & 3 & Sprint 3 \\
 \hline
 39 & US21 & Generación de informe pericial predictivo con inteligencia artificial y exportación en PDF & 5 & Sprint 3 \\
 \hline
-40 & TS20 & Inferencia predictiva y generación de reporte con Spring AI (\texttt{POST /api/v1/iot/vehicles/\{id\}/health-reports/generate}) & 5 & Sprint 2 \\
+40 & TS22 & Generación de informe pericial asistido por IA predictiva (\texttt{POST /api/v1/iot/vehicles/\{id\}/health-reports/generate}) & 5 & Sprint 1 \\
 \hline
 41 & US14 & Generación de propuesta de tarea adicional por hallazgo en foso & 3 & Sprint 2 \\
 \hline
@@ -3914,39 +3918,39 @@ A continuación, la @tbl:product-backlog presenta la matriz consolidada del *Pro
 \hline
 49 & US10 & Emisión y seguimiento de descargos justificatorios de tardanza & 1 & Sprint 2 \\
 \hline
-50 & TS17 & Marcación satelital de salida y cómputo de jornada (\texttt{POST /api/v1/hr/attendance/clock-out}) & 2 & Sprint 2 \\
+50 & TS16 & Ingreso y valorización de lotes por adquisición (\texttt{POST /api/v1/inventory/items/\{id\}/batches}) & 3 & Sprint 1 \\
 \hline
 51 & US36 & Liquidación económica automática en cascada de la orden de trabajo & 3 & Sprint 3 \\
 \hline
 52 & US37 & Emisión de comprobantes tributarios electrónicos UBL 2.1 ante SUNAT vía PSE & 5 & Sprint 3 \\
 \hline
-53 & TS12 & Emisión de comprobantes tributarios electrónicos UBL 2.1 (\texttt{POST /api/v1/invoicing/electronic-vouchers/issue}) & 5 & Sprint 3 \\
+53 & TS18 & Emisión y timbrado de comprobantes electrónicos UBL 2.1 (\texttt{POST /api/v1/invoicing/vouchers}) & 3 & Sprint 1 \\
 \hline
 54 & US38 & Recaudación y amortización de pagos multi-medio en mostrador y patio & 3 & Sprint 3 \\
 \hline
-55 & TS13 & Registro transaccional de pagos multi-medio y amortización (\texttt{POST /api/v1/invoicing/electronic-vouchers/\{id\}/payments}) & 3 & Sprint 3 \\
+55 & TS19 & Registro transaccional de pagos y liquidación de comprobantes (\texttt{POST /api/v1/invoicing/payments}) & 3 & Sprint 1 \\
 \hline
 56 & US39 & Transición a orden pagada, emisión de pase de salida vehicular y entrega en patio & 2 & Sprint 3 \\
 \hline
-57 & TS14 & Emisión y validación de pase de salida vehicular (\texttt{POST /api/v1/operations/work-orders/\{id\}/gate-passes}) & 2 & Sprint 3 \\
+57 & TS09 & Registro de arribo a patio y apertura automática de orden (\texttt{POST /api/v1/appointments/\{id\}/check-in}) & 2 & Sprint 1 \\
 \hline
 58 & US40 & Supervisión y reasignación de bahías de servicio en tiempo real & 3 & Sprint 3 \\
 \hline
-59 & TS15 & Consulta en tiempo real del estado de bahías de servicio (\texttt{GET /api/v1/operations/workshops/\{id\}/service-bays/live-status}) & 3 & Sprint 3 \\
+59 & TS11 & Asignación y conmutación de bahías de servicio en orden (\texttt{PUT /api/v1/work-orders/\{id\}/bay}) & 5 & Sprint 1 \\
 \hline
 60 & US41 & Exportación de reporte de flujo de caja en PDF para auditoría contable externa & 3 & Sprint 3 \\
 \hline
-61 & TS23 & Descarga documental de balance de flujo de caja en formato PDF (\texttt{GET /api/v1/invoicing/financial-reports/cash-flow/pdf}) & 2 & Sprint 3 \\
+61 & TS23 & Descarga documental de estado de flujo de caja en formato PDF (\texttt{GET /api/v1/invoicing/financial-reports/cash-flow/pdf}) & 2 & Sprint 1 \\
 \hline
 62 & US42 & Configuración de información fiscal corporativa, series SUNAT y enlace con PSE Nubefact & 3 & Sprint 3 \\
 \hline
-63 & TS21 & Configuración de series fiscales y credenciales PSE (\texttt{PUT /api/v1/invoicing/tax-configurations}) & 3 & Sprint 3 \\
+63 & TS04 & Emisión y despacho de invitaciones corporativas de personal (\texttt{POST /api/v1/tenants/\{tenantId\}/invitations}) & 2 & Sprint 1 \\
 \hline
 64 & US43 & Descarga y remisión de informe pericial de salud vehicular en PDF para clientes y flotas & 3 & Sprint 3 \\
 \hline
-65 & TS24 & Descarga documental de informe pericial de salud vehicular en formato PDF (\texttt{GET /api/v1/iot/vehicles/\{id\}/health-reports/\{reportId\}/pdf}) & 2 & Sprint 3 \\
+65 & TS24 & Descarga documental de informe pericial de salud vehicular en PDF (\texttt{GET /api/v1/iot/vehicles/\{vehicleId\}/health-reports/\{reportId\}/pdf}) & 2 & Sprint 1 \\
 \hline
-66 & TS22 & Generación de informe pericial predictivo desde orden de trabajo (\texttt{POST /api/v1/operations/work-orders/\{id\}/generate-diagnostic-report}) & 5 & Sprint 3 \\
+66 & TS05 & Alta de sucursales operativas y delimitación de geocercas (\texttt{POST /api/v1/tenants/\{tenantId\}/branches}) & 3 & Sprint 1 \\
 \hline
 67 & US19 & Almacenamiento local resiliente y sincronización diferida en fosa & 3 & Sprint 3 \\
 \hline
@@ -3976,9 +3980,9 @@ La @tbl:sprint-velocity-summary sintetiza la distribución global del esfuerzo e
 
 | Sprint | Alcance Operativo y Hito Académico | Puntos US | Puntos TS / SP | Total SP |
 |:---:|:----------|:---:|:---:|:---:|
-| Sprint 1 | Despliegue de Portal Web Comercial y Servicios Core del Backend | 10 | 35 | 45 |
-| Sprint 2 | Operaciones de Patio, Bahías de Servicio y Control de Repuestos FIFO | 57 | 20 | 77 |
-| Sprint 3 | Diagnóstico Telemático OBD-II, Facturación SUNAT y Cierre Operativo | 57 | 25 | 82 |
+| Sprint 1 | Despliegue de Portal Web Comercial y Servicios Core del Backend | 10 | 80 | 90 |
+| Sprint 2 | Operaciones de Patio, Bahías de Servicio y Control de Repuestos FIFO | 57 | 0 | 57 |
+| Sprint 3 | Diagnóstico Telemático OBD-II, Facturación SUNAT y Cierre Operativo | 57 | 0 | 57 |
 | **Total** | Consolidado del Catálogo de Producto Atelier | 124 | 80 | 204 |
 : Resumen Consolidado de Capacidad y Velocidad por Sprint {#tbl:sprint-velocity-summary}
 
