@@ -71,7 +71,7 @@ nocite: '[@*]'
     
     {\fontsize{11}{13}\selectfont
     \textbf{Período 202620} \par\vspace{-0.1cm}
-    \textbf{Septiembre 2026} \par
+    \textbf{Octubre 2026} \par
     }
 \end{titlepage}
 
