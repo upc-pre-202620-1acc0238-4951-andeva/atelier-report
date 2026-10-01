@@ -236,6 +236,272 @@ El **Identity and Access Management (IAM) & Tenancy Context** es el pilar fundac
 * **Tokens JWT Enriquecidos y Contextuales:** A diferencia de sistemas desacoplados que requieren consultas recurrentes a la base de datos para verificar membresías, el emisor de tokens (`BearerTokenService`) genera tokens JWT (`jjwt:0.12.6`) que integran en sus *claims* criptográficos el `userId`, el `tenantId` activo, el `branchId` predeterminado y la lista unificada de códigos de permisos (`authorities`), permitiendo al filtro perimetral `BearerAuthorizationRequestFilter` autorizar peticiones en memoria con coste O(1).
 * **Fachada de Contexto Abierta (Open Host Service / Inbound ACL):** Para salvaguardar la pureza del modelo de dominio e impedir acoplamientos circulares, IAM expone la interfaz `TenancyContextFacade`. Cualquier Bounded Context que requiera validar la existencia de un taller, la afiliación laboral de un mecánico o la vigencia de una sucursal física invoca esta fachada en memoria sin acceder a las entidades JPA de IAM.
 
+#### 4.1.3. Estructura Canónica de Paquetes y Archivos del Bounded Context
+
+La siguiente estructura de directorios y archivos representa la taxonomía canónica definitiva de **IAM & Tenancy Context** (`com.andeva.atelier.platform.iam`), alineada estrictamente con el estándar arquitectónico de *Learning Center* y los patrones tácticos de DDD Hexagonal:
+
+```text
+com.andeva.atelier.platform.iam/
+├── domain/
+│   ├── exceptions/
+│   │   ├── BranchNotFoundException.java
+│   │   ├── IamDomainException.java
+│   │   ├── InvalidCredentialsException.java
+│   │   ├── InvalidVerificationTokenException.java
+│   │   ├── InvitationExpiredException.java
+│   │   ├── InvitationNotFoundException.java
+│   │   ├── MembershipNotFoundException.java
+│   │   ├── RoleNotFoundException.java
+│   │   ├── TenantNotFoundException.java
+│   │   ├── UserAlreadyExistsException.java
+│   │   └── UserNotFoundException.java
+│   ├── model/
+│   │   ├── aggregates/
+│   │   │   ├── Invitation.java
+│   │   │   ├── Role.java
+│   │   │   ├── Tenant.java
+│   │   │   ├── TenantMembership.java
+│   │   │   └── User.java
+│   │   ├── commands/
+│   │   │   ├── AcceptInvitationCommand.java
+│   │   │   ├── AssignRoleToMembershipCommand.java
+│   │   │   ├── AuthenticateUserCommand.java
+│   │   │   ├── AuthenticateWithGoogleCommand.java
+│   │   │   ├── CreateBranchCommand.java
+│   │   │   ├── CreateCustomRoleCommand.java
+│   │   │   ├── CreateTenantCommand.java
+│   │   │   ├── DeactivateMembershipCommand.java
+│   │   │   ├── InviteStaffCommand.java
+│   │   │   ├── RegisterUserCommand.java
+│   │   │   ├── RequestPasswordResetCommand.java
+│   │   │   ├── ResetPasswordCommand.java
+│   │   │   ├── SeedRolesCommand.java
+│   │   │   ├── UpdateBranchLocationCommand.java
+│   │   │   ├── UpdateMembershipCompensationCommand.java
+│   │   │   ├── UpdateTenantProfileCommand.java
+│   │   │   └── VerifyEmailTokenCommand.java
+│   │   ├── entities/
+│   │   │   ├── Branch.java
+│   │   │   ├── Permission.java
+│   │   │   ├── Profile.java
+│   │   │   └── VerificationToken.java
+│   │   ├── enums/
+│   │   │   ├── AuthProvider.java
+│   │   │   ├── InvitationStatus.java
+│   │   │   ├── MembershipStatus.java
+│   │   │   ├── SalaryType.java
+│   │   │   ├── TenantStatus.java
+│   │   │   ├── TokenType.java
+│   │   │   └── UserStatus.java
+│   │   ├── events/
+│   │   │   ├── BranchCreatedEvent.java
+│   │   │   ├── PasswordResetRequestedEvent.java
+│   │   │   ├── StaffInvitationAcceptedEvent.java
+│   │   │   ├── StaffInvitedEvent.java
+│   │   │   ├── TenantMembershipCreatedEvent.java
+│   │   │   ├── TenantRegisteredEvent.java
+│   │   │   ├── UserRegisteredEvent.java
+│   │   │   └── VerificationTokenIssuedEvent.java
+│   │   ├── ids/
+│   │   │   ├── BranchId.java
+│   │   │   ├── InvitationId.java
+│   │   │   ├── PermissionId.java
+│   │   │   ├── RoleId.java
+│   │   │   ├── TenantId.java
+│   │   │   ├── TenantMembershipId.java
+│   │   │   ├── UserId.java
+│   │   │   └── VerificationTokenId.java
+│   │   ├── queries/
+│   │   │   ├── GetAllPermissionsQuery.java
+│   │   │   ├── GetBranchByIdQuery.java
+│   │   │   ├── GetBranchesByTenantIdQuery.java
+│   │   │   ├── GetMembershipByIdQuery.java
+│   │   │   ├── GetMembershipByTenantAndUserQuery.java
+│   │   │   ├── GetMembershipsByTenantIdQuery.java
+│   │   │   ├── GetRoleByIdQuery.java
+│   │   │   ├── GetRolesByTenantIdQuery.java
+│   │   │   ├── GetTenantByIdQuery.java
+│   │   │   ├── GetTenantByTaxIdQuery.java
+│   │   │   ├── GetUserByEmailQuery.java
+│   │   │   └── GetUserByIdQuery.java
+│   │   └── valueobjects/
+│   │       ├── EmailAddress.java
+│   │       ├── GeoPoint.java
+│   │       ├── Money.java
+│   │       ├── Password.java
+│   │       ├── PersonName.java
+│   │       ├── PhoneNumber.java
+│   │       └── TaxId.java
+│   └── repositories/
+│       ├── BranchRepository.java
+│       ├── InvitationRepository.java
+│       ├── PermissionRepository.java
+│       ├── RoleRepository.java
+│       ├── TenantMembershipRepository.java
+│       ├── TenantRepository.java
+│       └── UserRepository.java
+├── application/
+│   ├── acl/
+│   │   └── TenancyContextFacadeImpl.java
+│   ├── commandservices/
+│   │   ├── BranchCommandService.java
+│   │   ├── InvitationCommandService.java
+│   │   ├── MembershipCommandService.java
+│   │   ├── RoleCommandService.java
+│   │   ├── TenantCommandService.java
+│   │   └── UserCommandService.java
+│   ├── queryservices/
+│   │   ├── BranchQueryService.java
+│   │   ├── MembershipQueryService.java
+│   │   ├── RoleQueryService.java
+│   │   ├── TenantQueryService.java
+│   │   └── UserQueryService.java
+│   └── internal/
+│       ├── commandservices/
+│       │   ├── BranchCommandServiceImpl.java
+│       │   ├── InvitationCommandServiceImpl.java
+│       │   ├── MembershipCommandServiceImpl.java
+│       │   ├── RoleCommandServiceImpl.java
+│       │   ├── TenantCommandServiceImpl.java
+│       │   └── UserCommandServiceImpl.java
+│       ├── queryservices/
+│       │   ├── BranchQueryServiceImpl.java
+│       │   ├── MembershipQueryServiceImpl.java
+│       │   ├── RoleQueryServiceImpl.java
+│       │   ├── TenantQueryServiceImpl.java
+│       │   └── UserQueryServiceImpl.java
+│       ├── eventhandlers/
+│       │   ├── TenantDomainEventsHandler.java
+│       │   └── UserDomainEventsHandler.java
+│       └── outbound/acl/
+│           ├── GoogleIdentityGateway.java
+│           └── ResendEmailService.java
+├── infrastructure/
+│   ├── external/
+│   │   ├── google/
+│   │   │   └── GoogleIdentityAdapter.java
+│   │   └── resend/
+│   │       └── ResendEmailAdapter.java
+│   ├── persistence/jpa/
+│   │   ├── adapters/
+│   │   │   ├── BranchRepositoryImpl.java
+│   │   │   ├── InvitationRepositoryImpl.java
+│   │   │   ├── PermissionRepositoryImpl.java
+│   │   │   ├── RoleRepositoryImpl.java
+│   │   │   ├── TenantMembershipRepositoryImpl.java
+│   │   │   ├── TenantRepositoryImpl.java
+│   │   │   └── UserRepositoryImpl.java
+│   │   ├── assemblers/
+│   │   │   ├── BranchPersistenceAssembler.java
+│   │   │   ├── InvitationPersistenceAssembler.java
+│   │   │   ├── PermissionPersistenceAssembler.java
+│   │   │   ├── RolePersistenceAssembler.java
+│   │   │   ├── TenantMembershipPersistenceAssembler.java
+│   │   │   ├── TenantPersistenceAssembler.java
+│   │   │   └── UserPersistenceAssembler.java
+│   │   ├── converters/
+│   │   │   ├── EmailAddressAttributeConverter.java
+│   │   │   ├── MoneyAttributeConverter.java
+│   │   │   └── TaxIdAttributeConverter.java
+│   │   ├── embeddables/
+│   │   │   └── GeoPointEmbeddable.java
+│   │   ├── entities/
+│   │   │   ├── BranchPersistenceEntity.java
+│   │   │   ├── InvitationPersistenceEntity.java
+│   │   │   ├── PermissionPersistenceEntity.java
+│   │   │   ├── ProfilePersistenceEntity.java
+│   │   │   ├── RolePersistenceEntity.java
+│   │   │   ├── TenantMembershipPersistenceEntity.java
+│   │   │   ├── TenantPersistenceEntity.java
+│   │   │   ├── UserPersistenceEntity.java
+│   │   │   └── VerificationTokenPersistenceEntity.java
+│   │   └── repositories/
+│   │       ├── BranchPersistenceRepository.java
+│   │       ├── InvitationPersistenceRepository.java
+│   │       ├── PermissionPersistenceRepository.java
+│   │       ├── RolePersistenceRepository.java
+│   │       ├── TenantMembershipPersistenceRepository.java
+│   │       ├── TenantPersistenceRepository.java
+│   │       └── UserPersistenceRepository.java
+│   └── security/
+│       ├── authorization/sfs/
+│       │   ├── configuration/
+│       │   │   └── WebSecurityConfiguration.java
+│       │   ├── model/
+│       │   │   ├── CustomUserDetails.java
+│       │   │   └── UsernamePasswordAuthenticationTokenBuilder.java
+│       │   ├── pipeline/
+│       │   │   ├── BearerAuthorizationRequestFilter.java
+│       │   │   └── UnauthorizedRequestHandlerEntryPoint.java
+│       │   └── services/
+│       │       └── CustomUserDetailsService.java
+│       ├── hashing/bcrypt/
+│       │   ├── BCryptHashingService.java
+│       │   └── services/
+│       │       └── BCryptHashingServiceImpl.java
+│       └── tokens/jwt/
+│           ├── BearerTokenService.java
+│           └── services/
+│               └── BearerTokenServiceImpl.java
+└── interfaces/
+    ├── acl/
+    │   ├── TenancyContextFacade.java
+    │   └── dto/
+    │       ├── BranchAclDto.java
+    │       ├── BranchGeofenceAclDto.java
+    │       ├── TenantAclDto.java
+    │       └── UserAclDto.java
+    ├── events/
+    │   ├── BranchCreatedIntegrationEvent.java
+    │   ├── StaffInvitedIntegrationEvent.java
+    │   ├── TenantCreatedIntegrationEvent.java
+    │   ├── TenantMembershipCreatedIntegrationEvent.java
+    │   └── UserRegisteredIntegrationEvent.java
+    └── rest/
+        ├── controllers/
+        │   ├── AuthenticationController.java
+        │   ├── BranchesController.java
+        │   ├── InvitationsController.java
+        │   ├── MembershipsController.java
+        │   ├── RolesController.java
+        │   └── TenantsController.java
+        ├── resources/
+        │   ├── requests/
+        │   │   ├── AcceptInvitationResource.java
+        │   │   ├── AssignRolesResource.java
+        │   │   ├── CreateBranchResource.java
+        │   │   ├── CreateRoleResource.java
+        │   │   ├── CreateTenantResource.java
+        │   │   ├── ForgotPasswordResource.java
+        │   │   ├── GoogleSignInResource.java
+        │   │   ├── InviteStaffResource.java
+        │   │   ├── ResetPasswordResource.java
+        │   │   ├── SignInResource.java
+        │   │   ├── UpdateBranchLocationResource.java
+        │   │   ├── UpdateCompensationResource.java
+        │   │   ├── UpdateTenantProfileResource.java
+        │   │   └── VerifyEmailResource.java
+        │   └── responses/
+        │       ├── AuthenticatedUserResource.java
+        │       ├── BranchResource.java
+        │       ├── InvitationResource.java
+        │       ├── InvitationValidationResource.java
+        │       ├── MembershipResource.java
+        │       ├── MessageResponseResource.java
+        │       ├── PermissionResource.java
+        │       ├── RoleResource.java
+        │       ├── TenantResource.java
+        │       └── TenantSummaryResource.java
+        └── transform/
+            ├── BranchResourceFromEntityAssembler.java
+            ├── CreateTenantCommandFromResourceAssembler.java
+            ├── InvitationResourceFromAggregateAssembler.java
+            ├── MembershipResourceFromAggregateAssembler.java
+            ├── RoleResourceFromAggregateAssembler.java
+            ├── SignInCommandFromResourceAssembler.java
+            └── TenantResourceFromAggregateAssembler.java
+```
+
 ---
 
 ### 4.2. 2.6.1.1. Domain Layer
@@ -247,13 +513,13 @@ El **Identity and Access Management (IAM) & Tenancy Context** es el pilar fundac
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<Tenant>`
 * **Propósito:** Representa la empresa o taller mecánico titular de una cuenta en la plataforma Atelier. Es la raíz de particionamiento lógico para el aislamiento multi-tenant.
 * **Atributos:**
-  * `id: TenantId` — Identificador universal del inquilino (UUID v7/v4).
-  * `name: String` — Nombre comercial de la empresa automotriz (máx. 100 caracteres).
-  * `legalName: String` — Razón Social formal registrada ante la autoridad tributaria (SUNAT, máx. 150 caracteres).
-  * `taxId: TaxId` — Registro Único de Contribuyentes (RUC) validado formalmente (11 dígitos numéricos).
-  * `status: TenantStatus` — Estado operativo del taller (`PENDING`, `ACTIVE`, `SUSPENDED`).
-  * `stripeCustomerId: String` — Identificador de cliente asignado en la pasarela de pagos Stripe (nullable).
-  * `branches: List<Branch>` — Colección de sedes físicas administradas por el taller (entidades internas dependientes).
+  * `id: TenantId`: Identificador universal del inquilino (UUID v7/v4).
+  * `name: String`: Nombre comercial de la empresa automotriz (máx. 100 caracteres).
+  * `legalName: String`: Razón Social formal registrada ante la autoridad tributaria (SUNAT, máx. 150 caracteres).
+  * `taxId: TaxId`: Registro Único de Contribuyentes (RUC) validado formalmente (11 dígitos numéricos).
+  * `status: TenantStatus`: Estado operativo del taller (`PENDING`, `ACTIVE`, `SUSPENDED`).
+  * `stripeCustomerId: String`: Identificador de cliente asignado en la pasarela de pagos Stripe (nullable).
+  * `branches: List<Branch>`: Colección de sedes físicas administradas por el taller (entidades internas dependientes).
 * **Invariantes y Reglas de Negocio:**
   * El `name` y `legalName` no pueden ser nulos ni cadenas en blanco.
   * El `taxId` es obligatorio, inmutable tras la validación fiscal y único en toda la plataforma.
@@ -273,15 +539,15 @@ El **Identity and Access Management (IAM) & Tenancy Context** es el pilar fundac
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<User>`
 * **Propósito:** Representa la identidad de autenticación global de un individuo dentro del ecosistema Atelier (propietario de taller, recepcionista, mecánico o conductor particular).
 * **Atributos:**
-  * `id: UserId` — Identificador universal de la cuenta (UUID).
-  * `email: EmailAddress` — Dirección de correo electrónico única y canónica de acceso.
-  * `password: Password` — Contraseña cifrada mediante hash BCrypt (nullable si el proveedor es federado).
-  * `authProvider: AuthProvider` — Proveedor de identidad (`LOCAL`, `GOOGLE`).
-  * `googleId: String` — Identificador único asignado por Google OAuth2 SSO (nullable si es `LOCAL`).
-  * `fcmToken: String` — Token de registro en Firebase Cloud Messaging para notificaciones móviles (nullable).
-  * `status: UserStatus` — Estado de la cuenta (`PENDING_VERIFICATION`, `ACTIVE`, `SUSPENDED`).
-  * `profile: Profile` — Entidad 1:1 que contiene los datos demográficos del usuario.
-  * `verificationTokens: List<VerificationToken>` — Colección histórica y activa de tokens OTP o de restablecimiento de contraseña.
+  * `id: UserId`: Identificador universal de la cuenta (UUID).
+  * `email: EmailAddress`: Dirección de correo electrónico única y canónica de acceso.
+  * `password: Password`: Contraseña cifrada mediante hash BCrypt (nullable si el proveedor es federado).
+  * `authProvider: AuthProvider`: Proveedor de identidad (`LOCAL`, `GOOGLE`).
+  * `googleId: String`: Identificador único asignado por Google OAuth2 SSO (nullable si es `LOCAL`).
+  * `fcmToken: String`: Token de registro en Firebase Cloud Messaging para notificaciones móviles (nullable).
+  * `status: UserStatus`: Estado de la cuenta (`PENDING_VERIFICATION`, `ACTIVE`, `SUSPENDED`).
+  * `profile: Profile`: Entidad 1:1 que contiene los datos demográficos del usuario.
+  * `verificationTokens: List<VerificationToken>`: Colección histórica y activa de tokens OTP o de restablecimiento de contraseña.
 * **Invariantes y Reglas de Negocio:**
   * El `email` es estrictamente único en todo el ecosistema global.
   * Si `authProvider == LOCAL`, el atributo `password` es estrictamente obligatorio y debe poseer un hash BCrypt válido.
@@ -302,13 +568,13 @@ El **Identity and Access Management (IAM) & Tenancy Context** es el pilar fundac
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<TenantMembership>`
 * **Propósito:** Modela el vínculo contractual y operativo entre un `User` y un `Tenant`. Representa al "Empleado" o "Colaborador" en el taller mecánico, centralizando la configuración de remuneración y los roles de seguridad asignados.
 * **Atributos:**
-  * `id: TenantMembershipId` — Identificador único de la membresía (UUID).
-  * `tenantId: TenantId` — Inquilino o taller al que pertenece el contrato.
-  * `userId: UserId` — Cuenta de usuario global asociada a la membresía.
-  * `status: MembershipStatus` — Estado del vínculo laboral (`ACTIVE`, `INACTIVE`).
-  * `salaryType: SalaryType` — Esquema de remuneración pactado (`FIXED` para salario mensual o quincenal, `HOURLY` para pago por hora efectiva).
-  * `baseSalary: Money` — Remuneración base expresada en moneda local (ej. PEN con precisión de dos decimales).
-  * `assignedRoles: Set<Role>` — Conjunto de roles de seguridad asociados al colaborador en este taller.
+  * `id: TenantMembershipId`: Identificador único de la membresía (UUID).
+  * `tenantId: TenantId`: Inquilino o taller al que pertenece el contrato.
+  * `userId: UserId`: Cuenta de usuario global asociada a la membresía.
+  * `status: MembershipStatus`: Estado del vínculo laboral (`ACTIVE`, `INACTIVE`).
+  * `salaryType: SalaryType`: Esquema de remuneración pactado (`FIXED` para salario mensual o quincenal, `HOURLY` para pago por hora efectiva).
+  * `baseSalary: Money`: Remuneración base expresada en moneda local (ej. PEN con precisión de dos decimales).
+  * `assignedRoles: Set<Role>`: Conjunto de roles de seguridad asociados al colaborador en este taller.
 * **Invariantes y Reglas de Negocio:**
   * La tupla `(tenantId, userId)` es estrictamente única (un usuario solo puede tener un registro de membresía por taller).
   * El `baseSalary` no puede ser negativo (`amount >= 0.00`).
@@ -327,12 +593,12 @@ El **Identity and Access Management (IAM) & Tenancy Context** es el pilar fundac
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<Role>`
 * **Propósito:** Agrupador de permisos de seguridad específico por taller (RBAC multitenant) o provisto globalmente por la plataforma como plantilla de sistema.
 * **Atributos:**
-  * `id: RoleId` — Identificador único del rol (UUID).
-  * `tenantId: TenantId` — Taller propietario del rol (o `null` si es un rol semilla global del sistema como `ROLE_SUPERADMIN`).
-  * `name: String` — Nombre legible del rol (ej. "Dueño de Taller", "Mecánico Principal", "Asesor de Servicio").
-  * `description: String` — Explicación funcional de los privilegios otorgados.
-  * `isSystemRole: boolean` — Indicador booleano que protege el rol contra eliminación si es nativo de la plataforma.
-  * `permissions: Set<Permission>` — Conjunto de permisos atómicos asignados al rol.
+  * `id: RoleId`: Identificador único del rol (UUID).
+  * `tenantId: TenantId`: Taller propietario del rol (o `null` si es un rol semilla global del sistema como `ROLE_SUPERADMIN`).
+  * `name: String`: Nombre legible del rol (ej. "Dueño de Taller", "Mecánico Principal", "Asesor de Servicio").
+  * `description: String`: Explicación funcional de los privilegios otorgados.
+  * `isSystemRole: boolean`: Indicador booleano que protege el rol contra eliminación si es nativo de la plataforma.
+  * `permissions: Set<Permission>`: Conjunto de permisos atómicos asignados al rol.
 * **Invariantes y Reglas de Negocio:**
   * El `name` no puede ser nulo ni vacío, y es único en el ámbito del taller (`tenant_id, name`).
   * Los roles marcados con `isSystemRole == true` no pueden ser eliminados ni renombrados por usuarios del taller.
@@ -348,13 +614,13 @@ El **Identity and Access Management (IAM) & Tenancy Context** es el pilar fundac
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<Invitation>`
 * **Propósito:** Controla el proceso de invitación y onboarding de personal al taller, permitiendo la incorporación fluida de nuevos mecánicos y recepcionistas mediante enlaces tokenizados y seguros.
 * **Atributos:**
-  * `id: InvitationId` — Identificador de la invitación (UUID).
-  * `tenantId: TenantId` — Taller que emite la invitación de trabajo.
-  * `email: EmailAddress` — Dirección de correo a la que se envía la invitación.
-  * `token: String` — Token criptográfico único y aleatorio generado con `SecureRandom` (URL-safe).
-  * `status: InvitationStatus` — Estado de la invitación (`PENDING`, `ACCEPTED`, `EXPIRED`, `REVOKED`).
-  * `targetRoleId: RoleId` — Rol de seguridad que se le asignará al usuario tras completar su registro.
-  * `expiresAt: Instant` — Fecha y hora límite para canjear la invitación (ej. 7 días naturales).
+  * `id: InvitationId`: Identificador de la invitación (UUID).
+  * `tenantId: TenantId`: Taller que emite la invitación de trabajo.
+  * `email: EmailAddress`: Dirección de correo a la que se envía la invitación.
+  * `token: String`: Token criptográfico único y aleatorio generado con `SecureRandom` (URL-safe).
+  * `status: InvitationStatus`: Estado de la invitación (`PENDING`, `ACCEPTED`, `EXPIRED`, `REVOKED`).
+  * `targetRoleId: RoleId`: Rol de seguridad que se le asignará al usuario tras completar su registro.
+  * `expiresAt: Instant`: Fecha y hora límite para canjear la invitación (ej. 7 días naturales).
 * **Invariantes y Reglas de Negocio:**
   * No se pueden emitir múltiples invitaciones en estado `PENDING` al mismo correo dentro del mismo taller.
   * Solo una invitación en estado `PENDING` cuya fecha `expiresAt` sea estrictamente posterior al instante actual puede ser aceptada.
@@ -373,13 +639,13 @@ El **Identity and Access Management (IAM) & Tenancy Context** es el pilar fundac
 * **Paquete:** `com.andeva.atelier.platform.iam.domain.model.entities`
 * **Propósito:** Representa una sucursal o localización física de atención automotriz perteneciente al taller.
 * **Atributos:**
-  * `id: BranchId` — Identificador único de la sede (UUID).
-  * `tenantId: TenantId` — Referencia al taller propietario.
-  * `name: String` — Denominación operativa (ej. "Sede Principal - Surquillo", "Sede Miraflores").
-  * `sunatCode: String` — Código de anexo tributario de cuatro dígitos registrado ante SUNAT (ej. "0000" para matriz).
-  * `location: GeoPoint` — Coordenadas geográficas WGS84 (latitud y longitud).
-  * `geofenceRadiusMeters: int` — Radio en metros aceptado para validación de geocercas GPS (default: 50m).
-  * `isActive: boolean` — Bandera que indica si la sede está operando actualmente.
+  * `id: BranchId`: Identificador único de la sede (UUID).
+  * `tenantId: TenantId`: Referencia al taller propietario.
+  * `name: String`: Denominación operativa (ej. "Sede Principal - Surquillo", "Sede Miraflores").
+  * `sunatCode: String`: Código de anexo tributario de cuatro dígitos registrado ante SUNAT (ej. "0000" para matriz).
+  * `location: GeoPoint`: Coordenadas geográficas WGS84 (latitud y longitud).
+  * `geofenceRadiusMeters: int`: Radio en metros aceptado para validación de geocercas GPS (default: 50m).
+  * `isActive: boolean`: Bandera que indica si la sede está operando actualmente.
 * **Métodos:**
   * `+ void updateLocation(GeoPoint newLocation, int newRadiusMeters): void`: Ajusta el centroide y radio de la geocerca.
   * `+ void updateDetails(String newName, String newSunatCode): void`: Actualiza nombre y código tributario.
@@ -390,9 +656,9 @@ El **Identity and Access Management (IAM) & Tenancy Context** es el pilar fundac
 * **Paquete:** `com.andeva.atelier.platform.iam.domain.model.entities`
 * **Propósito:** Contiene los atributos personales y de contacto del individuo, desacoplados de los datos criptográficos de autenticación.
 * **Atributos:**
-  * `userId: UserId` — Clave foránea e identificador 1:1 con la cuenta de usuario.
-  * `name: PersonName` — Nombre completo del usuario (nombres y apellidos).
-  * `phone: PhoneNumber` — Teléfono o celular de contacto normalizado.
+  * `userId: UserId`: Clave foránea e identificador 1:1 con la cuenta de usuario.
+  * `name: PersonName`: Nombre completo del usuario (nombres y apellidos).
+  * `phone: PhoneNumber`: Teléfono o celular de contacto normalizado.
 * **Métodos:**
   * `+ void update(PersonName name, PhoneNumber phone): void`: Actualiza la información demográfica.
   * `+ String getFullName(): String`: Retorna la concatenación estándar de nombre y apellidos.
@@ -401,12 +667,12 @@ El **Identity and Access Management (IAM) & Tenancy Context** es el pilar fundac
 * **Paquete:** `com.andeva.atelier.platform.iam.domain.model.entities`
 * **Propósito:** Almacena tokens de un solo uso para flujos transaccionales de seguridad (OTP de 6 dígitos para validación de email o hashes URL-safe para reset de contraseña).
 * **Atributos:**
-  * `id: UUID` — Identificador del registro.
-  * `userId: UserId` — Cuenta titular del token.
-  * `tokenValue: String` — Valor del código o hash secreto.
-  * `type: TokenType` — Propósito del token (`EMAIL_VERIFICATION`, `PASSWORD_RESET`, `LOGIN_OTP`).
-  * `expiresAt: Instant` — Marca de tiempo de expiración.
-  * `isUsed: boolean` — Bandera de canje efectivo.
+  * `id: UUID`: Identificador del registro.
+  * `userId: UserId`: Cuenta titular del token.
+  * `tokenValue: String`: Valor del código o hash secreto.
+  * `type: TokenType`: Propósito del token (`EMAIL_VERIFICATION`, `PASSWORD_RESET`, `LOGIN_OTP`).
+  * `expiresAt: Instant`: Marca de tiempo de expiración.
+  * `isUsed: boolean`: Bandera de canje efectivo.
 * **Métodos:**
   * `+ boolean isValid(): boolean`: Retorna `true` si `!isUsed` y `expiresAt.isAfter(Instant.now())`.
   * `+ void consume(): void`: Marca el token como consumido e inutilizable para futuros intentos.
@@ -415,10 +681,10 @@ El **Identity and Access Management (IAM) & Tenancy Context** es el pilar fundac
 * **Paquete:** `com.andeva.atelier.platform.iam.domain.model.entities`
 * **Propósito:** Representa un privilegio atómico de autorización en el sistema (ej. `work_orders:create`, `inventory:read`).
 * **Atributos:**
-  * `id: PermissionId` — Clave primaria del permiso (UUID).
-  * `name: String` — Nombre canónico único (ej. `mro:work-orders:create`).
-  * `description: String` — Detalle del alcance del privilegio.
-  * `category: String` — Bounded context al que aplica (ej. "OPERATIONS", "INVENTORY", "BILLING").
+  * `id: PermissionId`: Clave primaria del permiso (UUID).
+  * `name: String`: Nombre canónico único (ej. `mro:work-orders:create`).
+  * `description: String`: Detalle del alcance del privilegio.
+  * `category: String`: Bounded context al que aplica (ej. "OPERATIONS", "INVENTORY", "BILLING").
 
 ---
 
@@ -547,7 +813,7 @@ Puertos de salida puros sin acoplamiento a frameworks de persistencia:
 
 #### 4.3.1. REST Controllers
 
-Controladores HTTP anotados con `@RestController`, `@RequestMapping` y especificaciones OpenAPI 3 (`@Tag`, `@Operation`, `@ApiResponses`):
+Controladores HTTP anotados con `@RestController`, `@RequestMapping` y especificaciones OpenAPI 3 (`@Tag`, `@Operation`, `@ApiResponses`), ubicados canónicamente en `com.andeva.atelier.platform.iam.interfaces.rest.controllers`:
 
 ##### 1. `AuthenticationController`
 * **Ruta Base:** `/api/v1/authentication`
@@ -606,40 +872,41 @@ Controladores HTTP anotados con `@RestController`, `@RequestMapping` y especific
 
 #### 4.3.2. Resources / DTOs
 
-Estructuras de datos inmutables (Java Records) para entrada y salida HTTP:
+Estructuras de datos inmutables (Java Records) para entrada y salida HTTP segregadas en subpaquetes dedicados:
 
-* **Peticiones (Requests):**
-  * `CreateTenantResource(String name, String legalName, String taxId, String adminEmail, String adminPassword, String adminFirstName, String adminLastName, String adminPhone)`
-  * `SignInResource(String email, String password)`
-  * `GoogleSignInResource(String idToken)`
-  * `VerifyEmailResource(String token)`
-  * `ForgotPasswordResource(String email)`
-  * `ResetPasswordResource(String token, String newPassword)`
-  * `UpdateTenantProfileResource(String name, String legalName)`
-  * `CreateBranchResource(String name, String sunatCode, Double latitude, Double longitude, int geofenceRadiusMeters)`
-  * `UpdateBranchLocationResource(Double latitude, Double longitude, int geofenceRadiusMeters)`
-  * `InviteStaffResource(String email, UUID roleId)`
-  * `AcceptInvitationResource(String token, String password, String firstName, String lastName, String phone)`
-  * `AssignRolesResource(List<UUID> roleIds)`
-  * `CreateRoleResource(String name, String description, List<UUID> permissionIds)`
-  * `UpdateCompensationResource(String salaryType, BigDecimal baseSalary, String currency)`
-* **Respuestas (Responses):**
-  * `AuthenticatedUserResource(UUID userId, String email, String fullName, String token, String tokenType, TenantSummaryResource activeTenant, List<String> permissions)`
-  * `TenantResource(UUID id, String name, String legalName, String taxId, String status, String stripeCustomerId, Instant createdAt)`
-  * `TenantSummaryResource(UUID id, String name, String taxId)`
-  * `BranchResource(UUID id, UUID tenantId, String name, String sunatCode, Double latitude, Double longitude, int geofenceRadiusMeters, boolean isActive)`
-  * `MembershipResource(UUID id, UUID tenantId, UUID userId, String employeeName, String email, String status, String salaryType, BigDecimal baseSalary, String currency, List<RoleResource> roles)`
-  * `RoleResource(UUID id, String name, String description, boolean isSystemRole, List<String> permissions)`
-  * `PermissionResource(UUID id, String name, String description, String category)`
-  * `InvitationResource(UUID id, UUID tenantId, String email, String status, Instant expiresAt)`
-  * `InvitationValidationResource(boolean valid, String email, String tenantName, String roleName)`
-  * `MessageResponseResource(String message, Instant timestamp)`
+##### 1. Peticiones HTTP (`com.andeva.atelier.platform.iam.interfaces.rest.resources.requests`)
+* `CreateTenantResource(String name, String legalName, String taxId, String adminEmail, String adminPassword, String adminFirstName, String adminLastName, String adminPhone)`
+* `SignInResource(String email, String password)`
+* `GoogleSignInResource(String idToken)`
+* `VerifyEmailResource(String token)`
+* `ForgotPasswordResource(String email)`
+* `ResetPasswordResource(String token, String newPassword)`
+* `UpdateTenantProfileResource(String name, String legalName)`
+* `CreateBranchResource(String name, String sunatCode, Double latitude, Double longitude, int geofenceRadiusMeters)`
+* `UpdateBranchLocationResource(Double latitude, Double longitude, int geofenceRadiusMeters)`
+* `InviteStaffResource(String email, UUID roleId)`
+* `AcceptInvitationResource(String token, String password, String firstName, String lastName, String phone)`
+* `AssignRolesResource(List<UUID> roleIds)`
+* `CreateRoleResource(String name, String description, List<UUID> permissionIds)`
+* `UpdateCompensationResource(String salaryType, BigDecimal baseSalary, String currency)`
+
+##### 2. Respuestas HTTP (`com.andeva.atelier.platform.iam.interfaces.rest.resources.responses`)
+* `AuthenticatedUserResource(UUID userId, String email, String fullName, String token, String tokenType, TenantSummaryResource activeTenant, List<String> permissions)`
+* `TenantResource(UUID id, String name, String legalName, String taxId, String status, String stripeCustomerId, Instant createdAt)`
+* `TenantSummaryResource(UUID id, String name, String taxId)`
+* `BranchResource(UUID id, UUID tenantId, String name, String sunatCode, Double latitude, Double longitude, int geofenceRadiusMeters, boolean isActive)`
+* `MembershipResource(UUID id, UUID tenantId, UUID userId, String employeeName, String email, String status, String salaryType, BigDecimal baseSalary, String currency, List<RoleResource> roles)`
+* `RoleResource(UUID id, String name, String description, boolean isSystemRole, List<String> permissions)`
+* `PermissionResource(UUID id, String name, String description, String category)`
+* `InvitationResource(UUID id, UUID tenantId, String email, String status, Instant expiresAt)`
+* `InvitationValidationResource(boolean valid, String email, String tenantName, String roleName)`
+* `MessageResponseResource(String message, Instant timestamp)`
 
 ---
 
 #### 4.3.3. Resource Assemblers
 
-Clases transformadoras entre Resources (DTOs) y Command/Query/Aggregate:
+Clases transformadoras entre Resources (DTOs) y Command/Query/Aggregate, ubicadas en `com.andeva.atelier.platform.iam.interfaces.rest.transform`:
 
 * `CreateTenantCommandFromResourceAssembler`: Transforma `CreateTenantResource` a `CreateTenantCommand`.
 * `SignInCommandFromResourceAssembler`: Transforma `SignInResource` a `AuthenticateUserCommand`.
@@ -653,11 +920,15 @@ Clases transformadoras entre Resources (DTOs) y Command/Query/Aggregate:
 
 #### 4.3.4. Open Host Service (OHS) / Inbound ACL Facade
 
-Interfaz pública expuesta en `com.andeva.atelier.platform.iam.interfaces.acl` para el consumo seguro de otros Bounded Contexts:
+Interfaz pública expuesta en `com.andeva.atelier.platform.iam.interfaces.acl` para el consumo seguro de otros Bounded Contexts. Su implementación operativa reside en la capa de aplicación dentro de `com.andeva.atelier.platform.iam.application.acl.TenancyContextFacadeImpl`:
 
 ```java
 package com.andeva.atelier.platform.iam.interfaces.acl;
 
+import com.andeva.atelier.platform.iam.interfaces.acl.dto.BranchAclDto;
+import com.andeva.atelier.platform.iam.interfaces.acl.dto.BranchGeofenceAclDto;
+import com.andeva.atelier.platform.iam.interfaces.acl.dto.TenantAclDto;
+import com.andeva.atelier.platform.iam.interfaces.acl.dto.UserAclDto;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -673,7 +944,7 @@ public interface TenancyContextFacade {
 }
 ```
 
-*DTOs Exportados por la Fachada:*
+*DTOs Exportados por la Fachada (`com.andeva.atelier.platform.iam.interfaces.acl.dto`):*
 * `TenantAclDto(UUID id, String name, String legalName, String taxId, String status, String stripeCustomerId)`
 * `BranchAclDto(UUID id, UUID tenantId, String name, String sunatCode)`
 * `UserAclDto(UUID id, String email, String fullName, String phone, String fcmToken)`
@@ -683,7 +954,7 @@ public interface TenancyContextFacade {
 
 #### 4.3.5. Integration Events (Published Language)
 
-Eventos asíncronos emitidos por IAM para que otros Bounded Contexts reaccionen sin acoplamiento transaccional:
+Eventos asíncronos emitidos por IAM ubicados en `com.andeva.atelier.platform.iam.interfaces.events` para que otros Bounded Contexts reaccionen sin acoplamiento transaccional:
 
 * **`TenantCreatedIntegrationEvent(UUID tenantId, String name, String legalName, String taxId, Instant occurredOn)`:** Notifica a *SaaS Billing* para preparar la cuenta de suscripción y a *Invoicing* para pre-configurar el emisor tributario.
 * **`BranchCreatedIntegrationEvent(UUID branchId, UUID tenantId, String name, String sunatCode, Double latitude, Double longitude, int geofenceRadiusMeters, Instant occurredOn)`:** Notifica a *Workshop Operations* para habilitar la creación de bahías de trabajo y a *HR* para asociar turnos presenciales.
@@ -697,7 +968,7 @@ Eventos asíncronos emitidos por IAM para que otros Bounded Contexts reaccionen 
 
 #### 4.4.1. Command Services & Implementations
 
-Servicios orquestadores que ejecutan casos de uso de escritura, coordinan transacciones (`@Transactional`), validan reglas y retornan el tipo sellado `Result<T, ApplicationError>`:
+Servicios orquestadores que ejecutan casos de uso de escritura, coordinan transacciones (`@Transactional`), validan reglas y retornan el tipo sellado `Result<T, ApplicationError>`. Siguiendo el estándar canónico de *Learning Center*, las interfaces públicas de los servicios residen en `com.andeva.atelier.platform.iam.application.commandservices`, mientras que sus clases de implementación se encapsulan dentro de `com.andeva.atelier.platform.iam.application.internal.commandservices`:
 
 ##### 1. `TenantCommandService` & `TenantCommandServiceImpl`
 * `Result<Tenant, ApplicationError> handle(CreateTenantCommand command)`:
@@ -727,6 +998,7 @@ Servicios orquestadores que ejecutan casos de uso de escritura, coordinan transa
 
 ##### 3. `BranchCommandService` & `BranchCommandServiceImpl`
 * `Result<Branch, ApplicationError> handle(CreateBranchCommand command)`: Incorpora una nueva sucursal física al taller y persiste el agregado.
+* `Result<Branch, ApplicationError> handle(UpdateBranchLocationCommand command)`: Actualiza las coordenadas GPS y el radio de geocerca perimétrica de la sede.
 
 ##### 4. `MembershipCommandService` & `MembershipCommandServiceImpl`
 * `Result<TenantMembership, ApplicationError> handle(AssignRoleToMembershipCommand command)`: Actualiza los roles del colaborador.
@@ -752,7 +1024,7 @@ Servicios orquestadores que ejecutan casos de uso de escritura, coordinan transa
 
 #### 4.4.2. Query Services & Implementations
 
-Servicios de lectura inmutables:
+Servicios de lectura inmutables. Las interfaces públicas de consulta residen en `com.andeva.atelier.platform.iam.application.queryservices`, mientras que sus implementaciones privadas se ubican en `com.andeva.atelier.platform.iam.application.internal.queryservices`:
 
 * **`TenantQueryService` & `TenantQueryServiceImpl`:**
   * `Optional<Tenant> handle(GetTenantByIdQuery query)`
@@ -768,6 +1040,7 @@ Servicios de lectura inmutables:
   * `List<TenantMembership> handle(GetMembershipsByTenantIdQuery query)`
   * `Optional<TenantMembership> handle(GetMembershipByTenantAndUserQuery query)`
 * **`RoleQueryService` & `RoleQueryServiceImpl`:**
+  * `Optional<Role> handle(GetRoleByIdQuery query)`
   * `List<Role> handle(GetRolesByTenantIdQuery query)`
   * `List<Permission> handle(GetAllPermissionsQuery query)`
 
@@ -775,7 +1048,7 @@ Servicios de lectura inmutables:
 
 #### 4.4.3. Event Handlers & Listeners
 
-Clases oyentes anotadas con `@EventListener` o `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)`:
+Clases oyentes ubicadas en `com.andeva.atelier.platform.iam.application.internal.eventhandlers`, anotadas con `@EventListener` o `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)`:
 
 * **`UserDomainEventsHandler`:**
   * `@EventListener void on(VerificationTokenIssuedEvent event)`: Invoca a `ResendEmailService.sendVerificationEmail(email, tokenValue)` con plantilla HTML responsive.
@@ -788,14 +1061,56 @@ Clases oyentes anotadas con `@EventListener` o `@TransactionalEventListener(phas
 
 #### 4.4.4. Outbound ACL Services
 
-Adaptadores de salida en la capa de aplicación que aíslan dependencias externas:
+Puertos de salida en la capa de aplicación ubicados en `com.andeva.atelier.platform.iam.application.internal.outbound.acl`, que aíslan dependencias externas de mensajería y autenticación:
 
-* **`ResendEmailService`:** Interfaz y servicio que modela las operaciones de correo saliente requeridas por el negocio:
+* **`ResendEmailService`:** Interfaz que modela las operaciones de correo transaccional requeridas por el negocio:
   * `void sendVerificationEmail(EmailAddress recipient, String otpCode)`
   * `void sendPasswordResetEmail(EmailAddress recipient, String resetToken)`
   * `void sendStaffInvitationEmail(EmailAddress recipient, String tenantName, String inviteToken)`
-* **`GoogleIdentityGateway`:** Interfaz y servicio para validación de firmas criptográficas de tokens emitidos por Google Identity Services:
+* **`GoogleIdentityGateway`:** Interfaz para validación de firmas criptográficas de tokens emitidos por Google Identity Services:
   * `Optional<GoogleUserPayload> verifyIdToken(String idTokenString)`
+
+---
+
+#### 4.4.5. Inbound ACL / Tenancy Facade Implementation
+
+Implementación operativa de la fachada Open Host Service (OHS), ubicada en `com.andeva.atelier.platform.iam.application.acl.TenancyContextFacadeImpl`. Esta clase implementa la interfaz pública `TenancyContextFacade` expuesta en `interfaces.acl`, orquestando internamente llamadas directas en memoria hacia los servicios de consulta (`TenantQueryService`, `BranchQueryService`, `UserQueryService`, `MembershipQueryService`) y traduciendo los agregados de dominio hacia DTOs inmutables de ACL (`TenantAclDto`, `BranchAclDto`, `UserAclDto`, `BranchGeofenceAclDto`) para el consumo seguro de otros Bounded Contexts (MRO, CRM, HR, Invoicing, Billing):
+
+```java
+package com.andeva.atelier.platform.iam.application.acl;
+
+import com.andeva.atelier.platform.iam.application.queryservices.BranchQueryService;
+import com.andeva.atelier.platform.iam.application.queryservices.MembershipQueryService;
+import com.andeva.atelier.platform.iam.application.queryservices.TenantQueryService;
+import com.andeva.atelier.platform.iam.application.queryservices.UserQueryService;
+import com.andeva.atelier.platform.iam.interfaces.acl.TenancyContextFacade;
+import com.andeva.atelier.platform.iam.interfaces.acl.dto.BranchAclDto;
+import com.andeva.atelier.platform.iam.interfaces.acl.dto.BranchGeofenceAclDto;
+import com.andeva.atelier.platform.iam.interfaces.acl.dto.TenantAclDto;
+import com.andeva.atelier.platform.iam.interfaces.acl.dto.UserAclDto;
+import org.springframework.stereotype.Service;
+
+@Service
+public class TenancyContextFacadeImpl implements TenancyContextFacade {
+    private final TenantQueryService tenantQueryService;
+    private final BranchQueryService branchQueryService;
+    private final UserQueryService userQueryService;
+    private final MembershipQueryService membershipQueryService;
+
+    public TenancyContextFacadeImpl(
+            TenantQueryService tenantQueryService,
+            BranchQueryService branchQueryService,
+            UserQueryService userQueryService,
+            MembershipQueryService membershipQueryService) {
+        this.tenantQueryService = tenantQueryService;
+        this.branchQueryService = branchQueryService;
+        this.userQueryService = userQueryService;
+        this.membershipQueryService = membershipQueryService;
+    }
+
+    // Implementaciones de métodos delegando a los query services y mapeando a DTOs de ACL
+}
+```
 
 ---
 
@@ -916,79 +1231,86 @@ Clases adaptadoras que implementan las interfaces del dominio, delegan en Spring
 
 #### 4.5.4. Persistence Assemblers
 
-Mapeadores bidireccionales entre modelos de dominio puro y entidades JPA de persistencia:
+Mapeadores bidireccionales entre modelos de dominio puro y entidades JPA de persistencia, ubicados en `com.andeva.atelier.platform.iam.infrastructure.persistence.jpa.assemblers`:
 
 * `TenantPersistenceAssembler`: Transforma `Tenant` <-> `TenantPersistenceEntity`.
 * `BranchPersistenceAssembler`: Transforma `Branch` <-> `BranchPersistenceEntity`.
 * `UserPersistenceAssembler`: Transforma `User` <-> `UserPersistenceEntity`.
 * `TenantMembershipPersistenceAssembler`: Transforma `TenantMembership` <-> `TenantMembershipPersistenceEntity`.
 * `RolePersistenceAssembler`: Transforma `Role` <-> `RolePersistenceEntity`.
+* `PermissionPersistenceAssembler`: Transforma `Permission` <-> `PermissionPersistenceEntity`.
 * `InvitationPersistenceAssembler`: Transforma `Invitation` <-> `InvitationPersistenceEntity`.
 
 ---
 
 #### 4.5.5. JPA Converters & Embeddables
 
-* `TaxIdAttributeConverter`: Implementa `AttributeConverter<TaxId, String>`.
-* `EmailAddressAttributeConverter`: Implementa `AttributeConverter<EmailAddress, String>`.
-* `MoneyAttributeConverter`: Implementa `AttributeConverter<Money, BigDecimal>`.
-* `GeoPointEmbeddable`: Clase `@Embeddable` con campos `latitude: Double` y `longitude: Double`.
+Mapeadores de persistencia JPA para el soporte transparente de Value Objects del dominio sin acoplamiento tecnológico:
+
+##### 1. JPA Attribute Converters (`com.andeva.atelier.platform.iam.infrastructure.persistence.jpa.converters`)
+* `TaxIdAttributeConverter`: Implementa `AttributeConverter<TaxId, String>` para serializar el RUC a `VARCHAR(20)`.
+* `EmailAddressAttributeConverter`: Implementa `AttributeConverter<EmailAddress, String>` para serializar correos a `VARCHAR(150)`.
+* `MoneyAttributeConverter`: Implementa `AttributeConverter<Money, BigDecimal>` para serializar importes monetarios a `NUMERIC(10,2)`.
+
+##### 2. JPA Embeddables (`com.andeva.atelier.platform.iam.infrastructure.persistence.jpa.embeddables`)
+* `GeoPointEmbeddable`: Clase `@Embeddable` que mapea las coordenadas satelitales (`latitude: Double`, `longitude: Double`) dentro de la tabla relacional `branches`.
 
 ---
 
 #### 4.5.6. Seguridad e Integración con Pasarelas Externas
 
-##### 1. `WebSecurityConfiguration`
-* Configura la cadena de filtros de Spring Security 6 (`SecurityFilterChain`).
-* Política de sesión estrictamente sin estado: `SessionCreationPolicy.STATELESS`.
-* Desactiva protección CSRF para APIs REST (`csrf.disable()`).
-* Configura políticas de CORS restrictivas admitiendo orígenes configurados en variables de entorno (Web SPA y Mobile apps).
-* Reglas de autorización en endpoints:
-  * Rutas públicas permitidas con `permitAll()`:
-    * `/api/v1/authentication/**`
-    * `/api/v1/invitations/validate`
-    * `/api/v1/invitations/accept`
-    * `/swagger-ui/**`, `/v3/api-docs/**`
-  * Todas las demás rutas requieren autenticación válida: `.anyRequest().authenticated()`.
-* Inyecta el filtro `BearerAuthorizationRequestFilter` antes de `UsernamePasswordAuthenticationFilter.class`.
+La infraestructura de seguridad sigue rigurosamente el diseño modular de *Learning Center*, distribuyéndose en tres subdominios técnicos dentro de `com.andeva.atelier.platform.iam.infrastructure.security`:
 
-##### 2. `BearerAuthorizationRequestFilter`
-* Extiende `OncePerRequestFilter`.
-* Extrae la cabecera HTTP `Authorization: Bearer <jwt>`.
-* Invoca a `BearerTokenService` para verificar firma criptográfica y vigencia temporal.
-* Extrae los claims del token:
-  * `subject` (`userId`).
-  * `tenant_id` (Inquilino activo).
-  * `branch_id` (Sede activa).
-  * `roles` y `permissions` (Autoridades de seguridad).
-* Construye una instancia de `UsernamePasswordAuthenticationToken` y puebla el `SecurityContextHolder`.
+##### 1. Pipeline de Autorización Spring Filter Security (SFS) (`com.andeva.atelier.platform.iam.infrastructure.security.authorization.sfs`)
+* **`configuration/WebSecurityConfiguration.java`:**
+  * Configura la cadena de filtros de Spring Security 6 (`SecurityFilterChain`).
+  * Establece la política de sesiones como estrictamente sin estado: `SessionCreationPolicy.STATELESS`.
+  * Desactiva protección CSRF para APIs REST (`csrf.disable()`).
+  * Configura políticas de CORS restrictivas para Web SPA y clientes móviles.
+  * Reglas de autorización en endpoints:
+    * Rutas públicas permitidas con `permitAll()`: `/api/v1/authentication/**`, `/api/v1/invitations/validate`, `/api/v1/invitations/accept`, `/swagger-ui/**`, `/v3/api-docs/**`.
+    * Todas las demás rutas exigen autenticación: `.anyRequest().authenticated()`.
+  * Inyecta el filtro `BearerAuthorizationRequestFilter` antes de `UsernamePasswordAuthenticationFilter.class`.
+* **`pipeline/BearerAuthorizationRequestFilter.java`:**
+  * Extiende `OncePerRequestFilter`.
+  * Intercepta la cabecera `Authorization: Bearer <jwt>`.
+  * Invoca a `BearerTokenService` para validar firma criptográfica y vigencia temporal.
+  * Extrae los claims (`userId`, `tenantId`, `branchId`, `roles`, `permissions`).
+  * Construye la autenticación con `UsernamePasswordAuthenticationTokenBuilder` y puebla el `SecurityContextHolder`.
+* **`pipeline/UnauthorizedRequestHandlerEntryPoint.java`:**
+  * Implementa `AuthenticationEntryPoint` retornando respuestas 401 Unauthorized estructuradas bajo el estándar RFC 7807 (`application/problem+json`).
+* **`model/CustomUserDetails.java`:**
+  * Implementa `UserDetails` de Spring Security, encapsulando `userId`, `username` (email), `passwordHash`, el taller activo (`tenantId`) y la colección de autoridades otorgadas.
+* **`model/UsernamePasswordAuthenticationTokenBuilder.java`:**
+  * Factoría de construcción de instancias de autenticación seguras a partir del token JWT y el contexto de la solicitud HTTP.
+* **`services/CustomUserDetailsService.java`:**
+  * Implementa `UserDetailsService`, resolviendo la carga de identidad del usuario a partir del repositorio de persistencia `UserPersistenceRepository`.
 
-##### 3. `BearerTokenService` & `BearerTokenServiceImpl`
-* Emplea la librería `jjwt:0.12.6` con algoritmo HMAC-SHA256 y clave simétrica de 256 bits (`jwt.secret`).
-* Provee métodos:
+##### 2. Servicio de Tokens JWT (`com.andeva.atelier.platform.iam.infrastructure.security.tokens.jwt`)
+* **`BearerTokenService.java`:** Interfaz del puerto de seguridad que define los contratos de generación y validación de tokens.
+* **`services/BearerTokenServiceImpl.java`:** Implementación que emplea la biblioteca `jjwt:0.12.6` con algoritmo HMAC-SHA256 y clave simétrica de 256 bits (`jwt.secret`), exponiendo:
   * `String generateToken(User user, UUID activeTenantId, UUID activeBranchId, List<String> permissions)`
   * `boolean validateToken(String token)`
   * `Claims extractClaims(String token)`
   * `UUID extractUserId(String token)`
   * `UUID extractTenantId(String token)`
 
-##### 4. `BCryptHashingService` & `BCryptHashingServiceImpl`
-* Encapsula `org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder` con factor de coste 12.
-* Métodos:
+##### 3. Servicio Criptográfico de Hashing BCrypt (`com.andeva.atelier.platform.iam.infrastructure.security.hashing.bcrypt`)
+* **`BCryptHashingService.java`:** Interfaz del puerto de derivación de claves.
+* **`services/BCryptHashingServiceImpl.java`:** Implementación que encapsula `BCryptPasswordEncoder` con factor de coste 12, exponiendo:
   * `Password encode(String rawPassword)`
   * `boolean matches(String rawPassword, Password encodedPassword)`
 
-##### 5. `ResendEmailClient` (Integración Externa Resend HTTPS API)
-* Paquete: `com.andeva.atelier.platform.iam.infrastructure.communication.resend`
-* Implementa la comunicación con la API oficial de **Resend** (`https://api.resend.com/emails`) a través de HTTPS (puerto 443) mediante Spring `RestClient` o `WebClient`.
-* Inyecta la clave de API segura mediante variable de entorno `RESEND_API_KEY`.
-* Configura timeouts de conexión (5 segundos) y de lectura (10 segundos), con reintentos automáticos mediante directiva de resiliencia.
-* Soporta despacho de correos HTML con plantillas CSS *inlined* y remitente de dominio verificado (ej. `Atelier Security <seguridad@atelier.pe>`).
-
-##### 6. `GoogleTokenVerifierGatewayImpl` (Google OAuth2 SDK)
-* Paquete: `com.andeva.atelier.platform.iam.infrastructure.identity.google`
-* Utiliza la librería oficial `com.google.api-client:google-api-client` y `GoogleIdTokenVerifier`.
-* Valida la firma del token criptográfico contra las claves públicas de Google (`certs`) y verifica que el `audience` coincida con el `google.client-id` configurado para Atelier.
+##### 4. Adaptadores de Integración Externa (`com.andeva.atelier.platform.iam.infrastructure.external`)
+* **`resend/ResendEmailAdapter.java`:**
+  * Implementa el puerto `ResendEmailService` de la capa de aplicación.
+  * Se comunica con la API REST HTTPS oficial de Resend (`https://api.resend.com/emails`) a través del puerto 443 mediante `RestClient` / `WebClient`.
+  * Inyecta la clave segura vía variable de entorno `RESEND_API_KEY`.
+  * Configura timeouts de conexión (5s) y lectura (10s), despachando plantillas HTML responsive con remitente de dominio verificado.
+* **`google/GoogleIdentityAdapter.java`:**
+  * Implementa el puerto `GoogleIdentityGateway` de la capa de aplicación.
+  * Utiliza `GoogleIdTokenVerifier` del SDK oficial de Google.
+  * Valida la firma del token criptográfico contra las claves públicas de Google (`certs`) y verifica que el `audience` coincida con el `google.client-id` configurado para Atelier.
 
 ---
 
@@ -1484,7 +1806,7 @@ erDiagram
 
 ---
 
-## 5. Fase 2: Bounded Context 2 — Customer & Fleet Management Context (CRM) (`com.andeva.atelier.platform.crm`)
+## 5. Fase 2: Bounded Context 2: Customer & Fleet Management Context (CRM) (`com.andeva.atelier.platform.crm`)
 
 ### 5.1. Diccionario y Propósito del Contexto
 
@@ -1500,6 +1822,206 @@ El **Customer & Fleet Management Context (CRM)** centraliza la gestión comercia
 * **Geocodificación con Google Places API:** Para empresas de transporte y flotas B2B, la captura de domicilios fiscales y patios de maniobras se asiste mediante la API de **Google Places**, normalizando direcciones y resolviendo coordenadas geográficas.
 * **Fachada de Dominio Abierta (Inbound ACL / OHS):** IAM y CRM no comparten repositorios. CRM expone `CustomerFleetContextFacade` para que *Workshop Operations* resuelva los datos del vehículo y propietario al aperturar una orden de trabajo, e *Invoicing* obtenga el RUC/DNI y razón social para comprobantes SUNAT.
 
+#### 5.1.3. Estructura Canónica de Paquetes y Archivos del Bounded Context
+
+La siguiente estructura de directorios y archivos representa la taxonomía canónica definitiva de **Customer & Fleet Management Context (CRM)** (`com.andeva.atelier.platform.crm`), alineada estrictamente con el estándar arquitectónico de *Learning Center* y los patrones tácticos de DDD Hexagonal:
+
+```text
+com.andeva.atelier.platform.crm/
+├── domain/
+│   ├── exceptions/
+│   │   ├── AppointmentAlreadyArrivedException.java
+│   │   ├── AppointmentInvalidStateTransitionException.java
+│   │   ├── AppointmentNotFoundException.java
+│   │   ├── AppointmentPastDateException.java
+│   │   ├── AppointmentSlotUnavailableException.java
+│   │   ├── CrmDomainException.java
+│   │   ├── CustomerAlreadyExistsException.java
+│   │   ├── CustomerInactiveException.java
+│   │   ├── CustomerNotFoundException.java
+│   │   ├── InvalidLicensePlateException.java
+│   │   ├── InvalidVinException.java
+│   │   ├── VehicleActiveOwnershipNotFoundException.java
+│   │   ├── VehicleAlreadyExistsException.java
+│   │   ├── VehicleHasOpenWorkOrdersException.java
+│   │   └── VehicleNotFoundException.java
+│   ├── model/
+│   │   ├── aggregates/
+│   │   │   ├── Appointment.java
+│   │   │   ├── Customer.java
+│   │   │   └── Vehicle.java
+│   │   ├── commands/
+│   │   │   ├── CancelAppointmentCommand.java
+│   │   │   ├── ConfirmAppointmentCommand.java
+│   │   │   ├── DeactivateCustomerCommand.java
+│   │   │   ├── MarkAppointmentArrivedCommand.java
+│   │   │   ├── RegisterCompanyCustomerCommand.java
+│   │   │   ├── RegisterIndividualCustomerCommand.java
+│   │   │   ├── RegisterVehicleCommand.java
+│   │   │   ├── RescheduleAppointmentCommand.java
+│   │   │   ├── ScheduleAppointmentCommand.java
+│   │   │   ├── TransferVehicleOwnershipCommand.java
+│   │   │   └── UpdateCustomerContactCommand.java
+│   │   ├── entities/
+│   │   │   └── VehicleOwnership.java
+│   │   ├── enums/
+│   │   │   ├── AppointmentStatus.java
+│   │   │   ├── CustomerStatus.java
+│   │   │   ├── CustomerType.java
+│   │   │   └── EngineType.java
+│   │   ├── events/
+│   │   │   ├── AppointmentArrivedEvent.java
+│   │   │   ├── AppointmentCanceledEvent.java
+│   │   │   ├── AppointmentConfirmedEvent.java
+│   │   │   ├── AppointmentRescheduledEvent.java
+│   │   │   ├── AppointmentScheduledEvent.java
+│   │   │   ├── CustomerContactUpdatedEvent.java
+│   │   │   ├── CustomerRegisteredEvent.java
+│   │   │   ├── VehicleOwnershipTransferredEvent.java
+│   │   │   └── VehicleRegisteredEvent.java
+│   │   ├── ids/
+│   │   │   ├── AppointmentId.java
+│   │   │   ├── CustomerId.java
+│   │   │   ├── VehicleId.java
+│   │   │   └── VehicleOwnershipId.java
+│   │   ├── queries/
+│   │   │   ├── GetAppointmentByIdQuery.java
+│   │   │   ├── GetAppointmentsByCustomerQuery.java
+│   │   │   ├── GetAppointmentsByDateRangeQuery.java
+│   │   │   ├── GetAppointmentsByTenantAndBranchQuery.java
+│   │   │   ├── GetAppointmentsByVehicleQuery.java
+│   │   │   ├── GetCustomerByIdQuery.java
+│   │   │   ├── GetCustomerByTaxIdQuery.java
+│   │   │   ├── GetCustomersByTenantIdQuery.java
+│   │   │   ├── GetVehicleByIdQuery.java
+│   │   │   ├── GetVehicleByPlateQuery.java
+│   │   │   ├── GetVehicleOwnershipHistoryQuery.java
+│   │   │   └── GetVehiclesByCustomerIdQuery.java
+│   │   └── valueobjects/
+│   │       ├── LicensePlate.java
+│   │       ├── PersonName.java
+│   │       ├── PhoneNumber.java
+│   │       └── Vin.java
+│   ├── repositories/
+│   │   ├── AppointmentRepository.java
+│   │   ├── CustomerRepository.java
+│   │   ├── VehicleOwnershipRepository.java
+│   │   └── VehicleRepository.java
+│   └── services/
+│       ├── AppointmentSchedulingService.java
+│       └── VehicleTransferDomainService.java
+├── application/
+│   ├── acl/
+│   │   └── CustomerFleetContextFacadeImpl.java
+│   ├── commandservices/
+│   │   ├── AppointmentCommandService.java
+│   │   ├── CustomerCommandService.java
+│   │   └── VehicleCommandService.java
+│   ├── queryservices/
+│   │   ├── AppointmentQueryService.java
+│   │   ├── CustomerQueryService.java
+│   │   └── VehicleQueryService.java
+│   └── internal/
+│       ├── commandservices/
+│       │   ├── AppointmentCommandServiceImpl.java
+│       │   ├── CustomerCommandServiceImpl.java
+│       │   └── VehicleCommandServiceImpl.java
+│       ├── queryservices/
+│       │   ├── AppointmentQueryServiceImpl.java
+│       │   ├── CustomerQueryServiceImpl.java
+│       │   └── VehicleQueryServiceImpl.java
+│       ├── eventhandlers/
+│       │   ├── AppointmentDomainEventsHandler.java
+│       │   ├── CustomerDomainEventsHandler.java
+│       │   └── VehicleDomainEventsHandler.java
+│       └── outbound/acl/
+│           ├── DriverAppPushGateway.java
+│           ├── PlacesAddressVerificationGateway.java
+│           └── SubscriptionValidationService.java
+├── infrastructure/
+│   ├── external/
+│   │   ├── billing/
+│   │   │   └── SubscriptionValidationClient.java
+│   │   ├── firebase/
+│   │   │   └── DriverAppFcmClient.java
+│   │   └── google/
+│   │       └── GooglePlacesClient.java
+│   └── persistence/jpa/
+│       ├── adapters/
+│       │   ├── AppointmentRepositoryImpl.java
+│       │   ├── CustomerRepositoryImpl.java
+│       │   ├── VehicleOwnershipRepositoryImpl.java
+│       │   └── VehicleRepositoryImpl.java
+│       ├── assemblers/
+│       │   ├── AppointmentPersistenceAssembler.java
+│       │   ├── CustomerPersistenceAssembler.java
+│       │   ├── VehicleOwnershipPersistenceAssembler.java
+│       │   └── VehiclePersistenceAssembler.java
+│       ├── converters/
+│       │   ├── AppointmentStatusAttributeConverter.java
+│       │   ├── CustomerTypeAttributeConverter.java
+│       │   ├── EmailAddressAttributeConverter.java
+│       │   ├── EngineTypeAttributeConverter.java
+│       │   ├── LicensePlateAttributeConverter.java
+│       │   ├── TaxIdAttributeConverter.java
+│       │   └── VinAttributeConverter.java
+│       ├── entities/
+│       │   ├── AppointmentPersistenceEntity.java
+│       │   ├── CustomerPersistenceEntity.java
+│       │   ├── VehicleOwnershipPersistenceEntity.java
+│       │   └── VehiclePersistenceEntity.java
+│       └── repositories/
+│           ├── AppointmentPersistenceRepository.java
+│           ├── CustomerPersistenceRepository.java
+│           ├── VehicleOwnershipPersistenceRepository.java
+│           └── VehiclePersistenceRepository.java
+└── interfaces/
+    ├── acl/
+    │   ├── CustomerFleetContextFacade.java
+    │   └── dto/
+    │       ├── AppointmentAclDto.java
+    │       ├── CustomerAclDto.java
+    │       └── VehicleAclDto.java
+    ├── events/
+    │   ├── AppointmentArrivedIntegrationEvent.java
+    │   ├── AppointmentScheduledIntegrationEvent.java
+    │   ├── CustomerCreatedIntegrationEvent.java
+    │   ├── VehicleOwnershipTransferredIntegrationEvent.java
+    │   └── VehicleRegisteredIntegrationEvent.java
+    └── rest/
+        ├── controllers/
+        │   ├── AppointmentsController.java
+        │   ├── CustomersController.java
+        │   └── VehiclesController.java
+        ├── resources/
+        │   ├── requests/
+        │   │   ├── CancelAppointmentResource.java
+        │   │   ├── CreateCompanyCustomerResource.java
+        │   │   ├── CreateIndividualCustomerResource.java
+        │   │   ├── CreateVehicleResource.java
+        │   │   ├── RescheduleAppointmentResource.java
+        │   │   ├── ScheduleAppointmentResource.java
+        │   │   ├── TransferVehicleOwnershipResource.java
+        │   │   └── UpdateCustomerContactResource.java
+        │   └── responses/
+        │       ├── AppointmentResource.java
+        │       ├── CustomerResource.java
+        │       ├── VehicleOwnershipResource.java
+        │       └── VehicleResource.java
+        └── transform/
+            ├── AppointmentResourceFromAggregateAssembler.java
+            ├── CancelAppointmentCommandFromResourceAssembler.java
+            ├── CustomerResourceFromAggregateAssembler.java
+            ├── RegisterCustomerCommandFromResourceAssembler.java
+            ├── RegisterVehicleCommandFromResourceAssembler.java
+            ├── RescheduleAppointmentCommandFromResourceAssembler.java
+            ├── ScheduleAppointmentCommandFromResourceAssembler.java
+            ├── TransferVehicleOwnershipCommandFromResourceAssembler.java
+            ├── UpdateCustomerContactCommandFromResourceAssembler.java
+            ├── VehicleOwnershipResourceFromEntityAssembler.java
+            └── VehicleResourceFromAggregateAssembler.java
+```
+
 ---
 
 ### 5.2. 2.6.2.1. Domain Layer
@@ -1511,15 +2033,15 @@ El **Customer & Fleet Management Context (CRM)** centraliza la gestión comercia
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<Customer>`
 * **Propósito:** Representa a la persona natural o jurídica titular de una cuenta de cliente dentro de la cartera comercial de un taller específico.
 * **Atributos:**
-  * `id: CustomerId` — Identificador universal del cliente (UUID).
-  * `tenantId: TenantId` — Taller mecánico al que pertenece la ficha comercial.
-  * `type: CustomerType` — Naturaleza jurídica del cliente (`INDIVIDUAL` para particulares, `COMPANY` para empresas/flotas).
-  * `name: PersonName` — Nombres y apellidos (obligatorio si `type == INDIVIDUAL`, nulo si `type == COMPANY`).
-  * `companyName: String` — Razón social o denominación comercial (obligatorio si `type == COMPANY`, nulo si `type == INDIVIDUAL`).
-  * `taxId: TaxId` — Documento de identidad tributaria (DNI de 8 dígitos para persona natural o RUC de 11 dígitos para empresa/persona jurídica).
-  * `email: EmailAddress` — Correo electrónico de contacto y notificaciones comerciales.
-  * `phone: PhoneNumber` — Teléfono o celular de contacto.
-  * `status: CustomerStatus` — Estado de la ficha comercial (`ACTIVE`, `INACTIVE`).
+  * `id: CustomerId`: Identificador universal del cliente (UUID).
+  * `tenantId: TenantId`: Taller mecánico al que pertenece la ficha comercial.
+  * `type: CustomerType`: Naturaleza jurídica del cliente (`INDIVIDUAL` para particulares, `COMPANY` para empresas/flotas).
+  * `name: PersonName`: Nombres y apellidos (obligatorio si `type == INDIVIDUAL`, nulo si `type == COMPANY`).
+  * `companyName: String`: Razón social o denominación comercial (obligatorio si `type == COMPANY`, nulo si `type == INDIVIDUAL`).
+  * `taxId: TaxId`: Documento de identidad tributaria (DNI de 8 dígitos para persona natural o RUC de 11 dígitos para empresa/persona jurídica).
+  * `email: EmailAddress`: Correo electrónico de contacto y notificaciones comerciales.
+  * `phone: PhoneNumber`: Teléfono o celular de contacto.
+  * `status: CustomerStatus`: Estado de la ficha comercial (`ACTIVE`, `INACTIVE`).
 * **Invariantes y Reglas de Negocio:**
   * Si `type == INDIVIDUAL`, el atributo `name` no puede ser nulo y el `companyName` debe ser nulo.
   * Si `type == COMPANY`, el atributo `companyName` no puede ser nulo ni vacío y el `name` debe ser nulo.
@@ -1527,8 +2049,8 @@ El **Customer & Fleet Management Context (CRM)** centraliza la gestión comercia
   * La tupla `(tenantId, taxId)` es única en el sistema (un cliente no puede duplicarse dentro del mismo taller).
   * Al menos uno entre `email` o `phone` debe estar provisto para asegurar un canal de contacto.
 * **Métodos:**
-  * `+ static Customer registerIndividual(TenantId tenantId, PersonName name, TaxId taxId, EmailAddress email, PhoneNumber phone): Customer`: Factoría de dominio para personas naturales; registra `CustomerRegisteredEvent`.
-  * `+ static Customer registerCompany(TenantId tenantId, String companyName, TaxId taxId, EmailAddress email, PhoneNumber phone): Customer`: Factoría de dominio para flotas corporativas; registra `CustomerRegisteredEvent`.
+  * `+ static Customer registerIndividual(TenantId tenantId, PersonName name, TaxId taxId, EmailAddress email, PhoneNumber phone): Customer`: Factoría de dominio para personas naturales. Registra `CustomerRegisteredEvent`.
+  * `+ static Customer registerCompany(TenantId tenantId, String companyName, TaxId taxId, EmailAddress email, PhoneNumber phone): Customer`: Factoría de dominio para flotas corporativas. Registra `CustomerRegisteredEvent`.
   * `+ void updateContact(EmailAddress newEmail, PhoneNumber newPhone): void`: Actualiza los canales de contacto del cliente.
   * `+ void updateProfile(PersonName newName): void`: Actualiza el nombre de la persona natural (solo válido para `INDIVIDUAL`).
   * `+ void updateCompanyDetails(String newCompanyName): void`: Actualiza la razón social de la empresa (solo válido para `COMPANY`).
@@ -1541,14 +2063,14 @@ El **Customer & Fleet Management Context (CRM)** centraliza la gestión comercia
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<Vehicle>`
 * **Propósito:** Representa la unidad automotriz física. Es una entidad global e independiente del `tenantId` que consolida la historia técnica y la cadena de custodia del vehículo.
 * **Atributos:**
-  * `id: VehicleId` — Identificador universal del vehículo (UUID).
-  * `plate: LicensePlate` — Placa de rodaje única a nivel nacional (ej. "ABC-123").
-  * `vin: Vin` — Número de Identificación Vehicular / Número de Chasis (17 caracteres alfanuméricos ISO 3779, nullable).
-  * `brand: String` — Marca del vehículo (ej. Toyota, Hyundai, Nissan).
-  * `model: String` — Modelo comercial (ej. Yaris, Tucson, Sentra).
-  * `year: int` — Año del modelo de fabricación (ej. 2022).
-  * `engineType: EngineType` — Tipo de motorización (`GASOLINE`, `DIESEL`, `ELECTRIC`, `HYBRID`).
-  * `ownershipHistory: List<VehicleOwnership>` — Colección histórica de propietarios que han poseído este vehículo.
+  * `id: VehicleId`: Identificador universal del vehículo (UUID).
+  * `plate: LicensePlate`: Placa de rodaje única a nivel nacional (ej. "ABC-123").
+  * `vin: Vin`: Número de Identificación Vehicular / Número de Chasis (17 caracteres alfanuméricos ISO 3779, nullable).
+  * `brand: String`: Marca del vehículo (ej. Toyota, Hyundai, Nissan).
+  * `model: String`: Modelo comercial (ej. Yaris, Tucson, Sentra).
+  * `year: int`: Año del modelo de fabricación (ej. 2022).
+  * `engineType: EngineType`: Tipo de motorización (`GASOLINE`, `DIESEL`, `ELECTRIC`, `HYBRID`).
+  * `ownershipHistory: List<VehicleOwnership>`: Colección histórica de propietarios que han poseído este vehículo.
 * **Invariantes y Reglas de Negocio:**
   * La placa `plate` es obligatoria, única globalmente y se almacena normalizada en mayúsculas sin guiones ni caracteres especiales.
   * El año `year` debe situarse entre `1950` y el año actual más uno (`Year.now().getValue() + 1`).
@@ -1566,16 +2088,16 @@ El **Customer & Fleet Management Context (CRM)** centraliza la gestión comercia
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<Appointment>`
 * **Propósito:** Modela la reserva o cita previa agendada por el cliente o recepcionista para la atención automotriz en una sucursal física determinada.
 * **Atributos:**
-  * `id: AppointmentId` — Identificador universal de la cita (UUID).
-  * `tenantId: TenantId` — Taller receptor de la cita.
-  * `branchId: BranchId` — Sede física donde se llevará a cabo la revisión.
-  * `customerId: CustomerId` — Cliente titular que solicita la atención.
-  * `vehicleId: VehicleId` — Vehículo objeto del servicio técnico.
-  * `scheduledAt: Instant` — Fecha y hora pactada para la recepción del vehículo.
-  * `estimatedDurationMinutes: int` — Tiempo estimado de recepción e inspección inicial (default: 30 minutos).
-  * `reason: String` — Motivo descriptivo de la cita (ej. "Mantenimiento preventivo 10,000 km", "Ruido en tren delantero", "Alerta predictiva OBD2 de sobrecalentamiento").
-  * `status: AppointmentStatus` — Estado del ciclo de vida de la cita (`PENDING`, `CONFIRMED`, `ARRIVED`, `CANCELED`).
-  * `cancellationReason: String` — Justificación en caso de anulación (nullable).
+  * `id: AppointmentId`: Identificador universal de la cita (UUID).
+  * `tenantId: TenantId`: Taller receptor de la cita.
+  * `branchId: BranchId`: Sede física donde se llevará a cabo la revisión.
+  * `customerId: CustomerId`: Cliente titular que solicita la atención.
+  * `vehicleId: VehicleId`: Vehículo objeto del servicio técnico.
+  * `scheduledAt: Instant`: Fecha y hora pactada para la recepción del vehículo.
+  * `estimatedDurationMinutes: int`: Tiempo estimado de recepción e inspección inicial (default: 30 minutos).
+  * `reason: String`: Motivo descriptivo de la cita (ej. "Mantenimiento preventivo 10,000 km", "Ruido en tren delantero", "Alerta predictiva OBD2 de sobrecalentamiento").
+  * `status: AppointmentStatus`: Estado del ciclo de vida de la cita (`PENDING`, `CONFIRMED`, `ARRIVED`, `CANCELED`).
+  * `cancellationReason: String`: Justificación en caso de anulación (nullable).
 * **Invariantes y Reglas de Negocio:**
   * Al crearse, la fecha `scheduledAt` debe ser posterior al instante actual (`scheduledAt.isAfter(Instant.now())`).
   * No se puede cancelar una cita que ya se encuentre en estado `ARRIVED`.
@@ -1596,11 +2118,11 @@ El **Customer & Fleet Management Context (CRM)** centraliza la gestión comercia
 * **Paquete:** `com.andeva.atelier.platform.crm.domain.model.entities`
 * **Propósito:** Modela el vínculo de titularidad y custodia entre un `Customer` y un `Vehicle` en un intervalo de tiempo específico.
 * **Atributos:**
-  * `id: VehicleOwnershipId` — Identificador de la relación (UUID).
-  * `vehicleId: VehicleId` — Vehículo en cuestión.
-  * `customerId: CustomerId` — Cliente propietario.
-  * `startDate: LocalDate` — Fecha de adquisición o inicio de custodia en el taller.
-  * `endDate: LocalDate` — Fecha de enajenación o fin de custodia (`null` si es el propietario actual).
+  * `id: VehicleOwnershipId`: Identificador de la relación (UUID).
+  * `vehicleId: VehicleId`: Vehículo en cuestión.
+  * `customerId: CustomerId`: Cliente propietario.
+  * `startDate: LocalDate`: Fecha de adquisición o inicio de custodia en el taller.
+  * `endDate: LocalDate`: Fecha de enajenación o fin de custodia (`null` si es el propietario actual).
 * **Métodos:**
   * `+ boolean isCurrent(): boolean`: Retorna `true` si `endDate == null`.
   * `+ void terminate(LocalDate terminationDate): void`: Fija la fecha de finalización de propiedad garantizando que sea posterior a `startDate`.
@@ -1704,273 +2226,1096 @@ Puertos de salida de persistencia puros:
 
 ### 5.3. 2.6.2.2. Interface Layer
 
+La Capa de Interfaz (*Interface Layer*) actúa como el adaptador primario o de entrada (*inbound adapter*) dentro de la arquitectura hexagonal de Atelier para el contexto de **Customer & Fleet Management (CRM)**. Su responsabilidad técnica es exponer los puertos de entrada del sistema ante solicitudes externas e intermodulares, aislando el núcleo de dominio y coordinando la mediación entre los protocolos de transporte y los servicios de aplicación. Esta capa implementa tres componentes esenciales:
+
+1. **Controladores RESTful (`@RestController`):** Exponen recursos HTTP bajo estándares REST de alta madurez, delegando la orquestación a los servicios de comando y consulta de la capa de aplicación.
+2. **Fachada de Contexto Abierto (*Open Host Service* / Inbound ACL):** Proporciona un contrato de servicio Java público e inmutable (`CustomerFleetContextFacade`) consumido síncronamente en memoria por otros Bounded Contexts modulares sin acoplarse a las entidades o agregados internos.
+3. **Eventos de Integración (*Published Language*):** Publica eventos canónicos inmutables mediante el patrón *Transactional Outbox* para la sincronización reactiva y asíncrona con *Workshop Operations*, *IoT Telemetry* e *Invoicing*.
+
+---
+
 #### 5.3.1. REST Controllers
+
+Los controladores web residen en el paquete `com.andeva.atelier.platform.crm.interfaces.rest.controllers`. Se encuentran anotados con `@RestController`, `@RequestMapping`, `@Validated` de Jakarta Validation, y cuentan con documentación OpenAPI 3 mediante `@Tag`, `@Operation` y `@ApiResponses`.
 
 ##### 1. `CustomersController`
 * **Ruta Base:** `/api/v1/customers`
-* **Propósito:** Gestión integral de la cartera de clientes de un taller mecánico.
+* **Propósito:** Gestión integral de la cartera de clientes de un taller mecánico en entorno multi-inquilino (*multi-tenancy*), admitiendo la distinción entre personas naturales y personas jurídicas (flotas corporativas).
 * **Endpoints:**
-  * `POST /individual`: Registro de cliente persona natural. Recibe `CreateIndividualCustomerResource`, retorna `CustomerResource` (HTTP 201 Created).
-  * `POST /company`: Registro de cliente corporativo / empresa de flota. Recibe `CreateCompanyCustomerResource`, retorna `CustomerResource` (HTTP 201 Created).
-  * `GET`: Listado de clientes adscritos al taller autenticado (`tenant_id`). Retorna `List<CustomerResource>` (HTTP 200 OK).
-  * `GET /{customerId}`: Detalle de cliente por ID. Retorna `CustomerResource` (HTTP 200 OK / 404 Not Found).
-  * `PUT /{customerId}/contact`: Actualización de teléfono y email. Recibe `UpdateCustomerContactResource`, retorna `CustomerResource` (HTTP 200 OK).
-  * `GET /{customerId}/vehicles`: Lista de vehículos actualmente bajo titularidad del cliente. Retorna `List<VehicleResource>` (HTTP 200 OK).
+  * `POST /individuals`: Registro de persona natural titular.
+    * **Cuerpo de Petición:** `CreateIndividualCustomerResource` con nombre, apellido, DNI (8 dígitos), correo electrónico y teléfono móvil.
+    * **Respuesta Exitosa:** `CustomerResource` (HTTP 201 Created con cabecera `Location: /api/v1/customers/{customerId}`).
+    * **Códigos de Error:** HTTP 400 Bad Request (errores de validación sintáctica), HTTP 409 Conflict (`CUSTOMER_TAX_ID_ALREADY_EXISTS`, `CUSTOMER_EMAIL_ALREADY_EXISTS`).
+  * `POST /companies`: Registro de cliente corporativo / empresa con flota vehicular.
+    * **Cuerpo de Petición:** `CreateCompanyCustomerResource` con razón social, RUC (11 dígitos), correo corporativo y teléfono de contacto.
+    * **Respuesta Exitosa:** `CustomerResource` (HTTP 201 Created con cabecera `Location: /api/v1/customers/{customerId}`).
+    * **Códigos de Error:** HTTP 400 Bad Request (RUC inválido o campos faltantes), HTTP 409 Conflict (`CUSTOMER_TAX_ID_ALREADY_EXISTS`).
+  * `GET`: Listado de clientes adscritos al taller autenticado (`tenantId` resuelto a través del token JWT).
+    * **Parámetros de Consulta (Query Params):** `type` (opcional: `INDIVIDUAL`, `COMPANY`), `search` (opcional: término para coincidencia parcial en nombre o documento), `status` (opcional: `ACTIVE`, `INACTIVE`), `page` (default 0), `size` (default 20).
+    * **Respuesta Exitosa:** `List<CustomerResource>` (HTTP 200 OK).
+  * `GET /{customerId}`: Detalle completo de cliente por identificador universal.
+    * **Parámetros de Ruta:** `customerId` (UUID).
+    * **Respuesta Exitosa:** `CustomerResource` (HTTP 200 OK).
+    * **Códigos de Error:** HTTP 404 Not Found (`CUSTOMER_NOT_FOUND`).
+  * `PUT /{customerId}/contact`: Actualización de canales de contacto directo del cliente (teléfono y correo electrónico).
+    * **Parámetros de Ruta:** `customerId` (UUID).
+    * **Cuerpo de Petición:** `UpdateCustomerContactResource`.
+    * **Respuesta Exitosa:** `CustomerResource` (HTTP 200 OK).
+    * **Códigos de Error:** HTTP 400 Bad Request, HTTP 404 Not Found (`CUSTOMER_NOT_FOUND`).
+  * `GET /{customerId}/vehicles`: Lista de vehículos automotores actualmente bajo titularidad activa del cliente.
+    * **Parámetros de Ruta:** `customerId` (UUID).
+    * **Respuesta Exitosa:** `List<VehicleResource>` (HTTP 200 OK).
+    * **Códigos de Error:** HTTP 404 Not Found (`CUSTOMER_NOT_FOUND`).
 
 ##### 2. `VehiclesController`
 * **Ruta Base:** `/api/v1/vehicles`
-* **Propósito:** Registro y consulta del parque automotor universal.
+* **Propósito:** Registro técnico y consulta del parque automotor universal, modelando el vehículo como un activo global independiente del inquilino y rastreando su cadena ininterrumpida de custodia y titularidad.
 * **Endpoints:**
-  * `POST`: Alta de nuevo vehículo en el catálogo global vinculándolo a su dueño inicial. Recibe `CreateVehicleResource`, retorna `VehicleResource` (HTTP 201 Created).
-  * `GET /{vehicleId}`: Consulta técnica del vehículo por ID. Retorna `VehicleResource` (HTTP 200 OK / 404 Not Found).
-  * `GET /plate/{plate}`: Búsqueda rápida por placa de rodaje. Retorna `VehicleResource` (HTTP 200 OK / 404 Not Found).
-  * `POST /{vehicleId}/transfer`: Traspaso formal de propiedad a otro cliente. Recibe `TransferVehicleResource`, retorna `VehicleResource` (HTTP 200 OK).
-  * `GET /{vehicleId}/ownership-history`: Historial completo de propietarios pasados y presente. Retorna `List<VehicleOwnershipResource>` (HTTP 200 OK).
+  * `POST`: Alta global de vehículo y asignación de su titular inicial.
+    * **Cuerpo de Petición:** `CreateVehicleResource` con placa de rodaje normalizada, número de chasis (VIN), marca, modelo, año de fabricación, tipo de motorización e identificador del cliente titular inicial (`initialOwnerId`).
+    * **Respuesta Exitosa:** `VehicleResource` (HTTP 201 Created con cabecera `Location: /api/v1/vehicles/{vehicleId}`).
+    * **Códigos de Error:** HTTP 400 Bad Request (formato de placa inválido, VIN disconforme con ISO 3779, año fuera de rango), HTTP 404 Not Found (`CUSTOMER_NOT_FOUND` para `initialOwnerId`), HTTP 409 Conflict (`VEHICLE_PLATE_ALREADY_EXISTS`, `VEHICLE_VIN_ALREADY_EXISTS`).
+  * `GET /{vehicleId}`: Consulta técnica integral del vehículo por su ID universal.
+    * **Parámetros de Ruta:** `vehicleId` (UUID).
+    * **Respuesta Exitosa:** `VehicleResource` (HTTP 200 OK).
+    * **Códigos de Error:** HTTP 404 Not Found (`VEHICLE_NOT_FOUND`).
+  * `GET /by-plate/{plate}`: Búsqueda rápida de vehículo por placa de rodaje normalizada.
+    * **Parámetros de Ruta:** `plate` (String normalizado sin guiones en mayúsculas, ej. `ABC123`).
+    * **Respuesta Exitosa:** `VehicleResource` (HTTP 200 OK).
+    * **Códigos de Error:** HTTP 404 Not Found (`VEHICLE_NOT_FOUND`).
+  * `POST /{vehicleId}/ownerships`: Traspaso de titularidad vehicular creando un nuevo periodo de custodia.
+    * **Parámetros de Ruta:** `vehicleId` (UUID).
+    * **Cuerpo de Petición:** `TransferVehicleOwnershipResource` con el identificador del nuevo propietario (`newOwnerId`) y la fecha de traspaso (`transferDate`).
+    * **Respuesta Exitosa:** `VehicleOwnershipResource` (HTTP 201 Created con cabecera `Location: /api/v1/vehicles/{vehicleId}/ownerships/{ownershipId}`).
+    * **Códigos de Error:** HTTP 400 Bad Request (`VEHICLE_ALREADY_OWNED_BY_CUSTOMER`, fecha de traspaso futura o disconforme con el historial), HTTP 404 Not Found (`VEHICLE_NOT_FOUND`, `CUSTOMER_NOT_FOUND`).
+  * `GET /{vehicleId}/ownerships`: Historial cronológico completo de propietarios pasados y custodio vigente del vehículo.
+    * **Parámetros de Ruta:** `vehicleId` (UUID).
+    * **Respuesta Exitosa:** `List<VehicleOwnershipResource>` (HTTP 200 OK).
+    * **Códigos de Error:** HTTP 404 Not Found (`VEHICLE_NOT_FOUND`).
 
 ##### 3. `AppointmentsController`
 * **Ruta Base:** `/api/v1/appointments`
-* **Propósito:** Agendamiento y ciclo de vida de citas previas.
+* **Propósito:** Agendamiento, reprogramación y seguimiento del ciclo de vida de citas previas de inspección y mantenimiento automotriz en las sedes físicas del taller.
 * **Endpoints:**
-  * `POST`: Creación de nueva cita. Recibe `ScheduleAppointmentResource`, retorna `AppointmentResource` (HTTP 201 Created).
-  * `GET`: Búsqueda de citas filtradas por sucursal y fecha. Retorna `List<AppointmentResource>` (HTTP 200 OK).
-  * `GET /{appointmentId}`: Detalle individual de la cita. Retorna `AppointmentResource` (HTTP 200 OK).
-  * `PUT /{appointmentId}/confirm`: Confirmación de cita por parte del taller. Retorna `AppointmentResource` (HTTP 200 OK).
-  * `PUT /{appointmentId}/arrived`: Registro de arribo físico del automóvil a recepción. Retorna `AppointmentResource` (HTTP 200 OK).
-  * `PUT /{appointmentId}/reschedule`: Modificación de fecha y hora pactada. Recibe `RescheduleAppointmentResource`, retorna `AppointmentResource` (HTTP 200 OK).
-  * `PUT /{appointmentId}/cancel`: Cancelación con justificación. Recibe `CancelAppointmentResource`, retorna `AppointmentResource` (HTTP 200 OK).
+  * `POST`: Agendamiento de cita previa.
+    * **Cuerpo de Petición:** `ScheduleAppointmentResource` con sede física (`branchId`), cliente (`customerId`), vehículo (`vehicleId`), fecha y hora pactada (`scheduledAt`), duración estimada y motivo descriptivo.
+    * **Respuesta Exitosa:** `AppointmentResource` (HTTP 201 Created con cabecera `Location: /api/v1/appointments/{appointmentId}`).
+    * **Códigos de Error:** HTTP 400 Bad Request (`APPOINTMENT_PAST_DATE`), HTTP 404 Not Found (`CUSTOMER_NOT_FOUND`, `VEHICLE_NOT_FOUND`, `BRANCH_NOT_FOUND`), HTTP 409 Conflict (`APPOINTMENT_SLOT_UNAVAILABLE`).
+  * `GET`: Búsqueda filtrada de citas por sede física (`branchId`), fecha de calendario (`date`) y estado opcional (`status`).
+    * **Parámetros de Consulta (Query Params):** `branchId` (UUID, opcional si el usuario tiene rol de sede fija), `date` (LocalDate en formato ISO-8601 `YYYY-MM-DD`), `status` (opcional: `PENDING`, `CONFIRMED`, `ARRIVED`, `CANCELED`).
+    * **Respuesta Exitosa:** `List<AppointmentResource>` (HTTP 200 OK).
+  * `GET /{appointmentId}`: Detalle individual de la cita por identificador.
+    * **Parámetros de Ruta:** `appointmentId` (UUID).
+    * **Respuesta Exitosa:** `AppointmentResource` (HTTP 200 OK).
+    * **Códigos de Error:** HTTP 404 Not Found (`APPOINTMENT_NOT_FOUND`).
+  * `POST /{appointmentId}/confirm`: Confirmación formal de la cita por parte del personal de recepción del taller.
+    * **Parámetros de Ruta:** `appointmentId` (UUID).
+    * **Respuesta Exitosa:** `AppointmentResource` (HTTP 200 OK, transicionando a estado `CONFIRMED`).
+    * **Códigos de Error:** HTTP 400 Bad Request (`APPOINTMENT_INVALID_STATE_TRANSITION`), HTTP 404 Not Found (`APPOINTMENT_NOT_FOUND`).
+  * `POST /{appointmentId}/arrive`: Registro de arribo físico del automóvil a recepción de patio.
+    * **Parámetros de Ruta:** `appointmentId` (UUID).
+    * **Respuesta Exitosa:** `AppointmentResource` (HTTP 200 OK, transicionando a estado `ARRIVED`). Desencadena en *Workshop Operations* la apertura de la Orden de Trabajo preliminar.
+    * **Códigos de Error:** HTTP 400 Bad Request (`APPOINTMENT_ALREADY_ARRIVED`, `APPOINTMENT_INVALID_STATE_TRANSITION`), HTTP 404 Not Found (`APPOINTMENT_NOT_FOUND`).
+  * `POST /{appointmentId}/reschedule`: Reprogramación de fecha y hora acordada.
+    * **Parámetros de Ruta:** `appointmentId` (UUID).
+    * **Cuerpo de Petición:** `RescheduleAppointmentResource` con la nueva marca temporal (`newScheduledAt`).
+    * **Respuesta Exitosa:** `AppointmentResource` (HTTP 200 OK).
+    * **Códigos de Error:** HTTP 400 Bad Request (`APPOINTMENT_PAST_DATE`, `APPOINTMENT_ALREADY_ARRIVED`), HTTP 404 Not Found (`APPOINTMENT_NOT_FOUND`).
+  * `POST /{appointmentId}/cancel`: Cancelación formal con registro de justificación.
+    * **Parámetros de Ruta:** `appointmentId` (UUID).
+    * **Cuerpo de Petición:** `CancelAppointmentResource` con motivo justificado (`reason`).
+    * **Respuesta Exitosa:** `AppointmentResource` (HTTP 200 OK, transicionando a estado `CANCELED`).
+    * **Códigos de Error:** HTTP 400 Bad Request (`APPOINTMENT_ALREADY_ARRIVED`), HTTP 404 Not Found (`APPOINTMENT_NOT_FOUND`).
 
 ---
 
 #### 5.3.2. Resources / DTOs
 
-* **Peticiones (Requests):**
-  * `CreateIndividualCustomerResource(String firstName, String lastName, String taxId, String email, String phone)`
-  * `CreateCompanyCustomerResource(String companyName, String taxId, String email, String phone)`
-  * `UpdateCustomerContactResource(String email, String phone)`
-  * `CreateVehicleResource(String plate, String vin, String brand, String model, int year, String engineType, UUID initialOwnerId)`
-  * `TransferVehicleResource(UUID newOwnerId, LocalDate transferDate)`
-  * `ScheduleAppointmentResource(UUID branchId, UUID customerId, UUID vehicleId, Instant scheduledAt, int estimatedDurationMinutes, String reason)`
-  * `RescheduleAppointmentResource(Instant newScheduledAt)`
-  * `CancelAppointmentResource(String reason)`
-* **Respuestas (Responses):**
-  * `CustomerResource(UUID id, UUID tenantId, String type, String displayName, String taxId, String email, String phone, String status)`
-  * `VehicleResource(UUID id, String plate, String vin, String brand, String model, int year, String engineType, UUID currentOwnerId, String currentOwnerName)`
-  * `VehicleOwnershipResource(UUID id, UUID vehicleId, UUID customerId, String ownerName, LocalDate startDate, LocalDate endDate, boolean isCurrent)`
-  * `AppointmentResource(UUID id, UUID tenantId, UUID branchId, UUID customerId, String customerName, UUID vehicleId, String vehiclePlate, Instant scheduledAt, int estimatedDurationMinutes, String reason, String status)`
+Estructuras de datos inmutables modeladas estrictamente como Java Records distribuidas canónicamente en los paquetes `com.andeva.atelier.platform.crm.interfaces.rest.resources.requests` y `com.andeva.atelier.platform.crm.interfaces.rest.resources.responses`. Cada record de entrada incorpora validaciones formales de Jakarta Bean Validation (`jakarta.validation.constraints.*`) para garantizar la integridad perimetral antes de invocar la capa de aplicación:
+
+##### Recursos de Petición (Requests) (`com.andeva.atelier.platform.crm.interfaces.rest.resources.requests`)
+
+1. **`CreateIndividualCustomerResource`:**
+```java
+public record CreateIndividualCustomerResource(
+    @NotBlank(message = "El nombre de pila es obligatorio")
+    @Size(min = 2, max = 100, message = "El nombre debe contener entre 2 y 100 caracteres")
+    String firstName,
+
+    @NotBlank(message = "El apellido es obligatorio")
+    @Size(min = 2, max = 100, message = "El apellido debe contener entre 2 y 100 caracteres")
+    String lastName,
+
+    @NotBlank(message = "El documento de identidad es obligatorio")
+    @Pattern(regexp = "^[0-9]{8}$", message = "El DNI debe estar compuesto exactamente por 8 dígitos numéricos")
+    String taxId,
+
+    @NotBlank(message = "El correo electrónico es obligatorio")
+    @Email(message = "El formato de correo electrónico es inválido")
+    String email,
+
+    @NotBlank(message = "El número telefónico es obligatorio")
+    @Pattern(regexp = "^\\+?[0-9]{9,15}$", message = "El teléfono debe cumplir con formato internacional E.164")
+    String phone
+) {}
+```
+
+2. **`CreateCompanyCustomerResource`:**
+```java
+public record CreateCompanyCustomerResource(
+    @NotBlank(message = "La razón social de la empresa es obligatoria")
+    @Size(min = 3, max = 150, message = "La razón social debe contener entre 3 y 150 caracteres")
+    String companyName,
+
+    @NotBlank(message = "El número de RUC es obligatorio")
+    @Pattern(regexp = "^(10|20)[0-9]{9}$", message = "El RUC corporativo debe contener exactamente 11 dígitos e iniciar con 10 o 20")
+    String taxId,
+
+    @NotBlank(message = "El correo corporativo es obligatorio")
+    @Email(message = "El formato de correo electrónico es inválido")
+    String email,
+
+    @NotBlank(message = "El teléfono corporativo es obligatorio")
+    @Pattern(regexp = "^\\+?[0-9]{9,15}$", message = "El teléfono debe cumplir con formato internacional E.164")
+    String phone
+) {}
+```
+
+3. **`UpdateCustomerContactResource`:**
+```java
+public record UpdateCustomerContactResource(
+    @NotBlank(message = "El correo electrónico es obligatorio")
+    @Email(message = "El formato de correo electrónico es inválido")
+    String email,
+
+    @NotBlank(message = "El número telefónico es obligatorio")
+    @Pattern(regexp = "^\\+?[0-9]{9,15}$", message = "El teléfono debe cumplir con formato internacional E.164")
+    String phone
+) {}
+```
+
+4. **`CreateVehicleResource`:**
+```java
+public record CreateVehicleResource(
+    @NotBlank(message = "La placa de rodaje es obligatoria")
+    @Pattern(regexp = "^[A-Z0-9]{3}-?[A-Z0-9]{3}$", message = "La placa vehicular debe tener un formato estándar alfanumérico de 6 caracteres")
+    String plate,
+
+    @Pattern(regexp = "^[A-HJ-NPR-Z0-9]{17}$", message = "El VIN debe cumplir con la norma ISO 3779 (17 caracteres alfanuméricos excluyendo I, O, Q)")
+    String vin,
+
+    @NotBlank(message = "La marca del vehículo es obligatoria")
+    @Size(min = 2, max = 50, message = "La marca debe contener entre 2 y 50 caracteres")
+    String brand,
+
+    @NotBlank(message = "El modelo del vehículo es obligatorio")
+    @Size(min = 1, max = 50, message = "El modelo debe contener entre 1 y 50 caracteres")
+    String model,
+
+    @NotNull(message = "El año del modelo de fabricación es obligatorio")
+    @Min(value = 1950, message = "El año de fabricación no puede ser anterior a 1950")
+    Integer year,
+
+    @NotBlank(message = "El tipo de motorización es obligatorio")
+    @Pattern(regexp = "^(GASOLINE|DIESEL|ELECTRIC|HYBRID)$", message = "El tipo de motorización debe ser GASOLINE, DIESEL, ELECTRIC o HYBRID")
+    String engineType,
+
+    @NotNull(message = "El identificador del cliente titular inicial es obligatorio")
+    UUID initialOwnerId
+) {}
+```
+
+5. **`TransferVehicleOwnershipResource`:**
+```java
+public record TransferVehicleOwnershipResource(
+    @NotNull(message = "El identificador del nuevo cliente titular es obligatorio")
+    UUID newOwnerId,
+
+    @NotNull(message = "La fecha formal de traspaso de custodia es obligatoria")
+    @PastOrPresent(message = "La fecha de traspaso no puede ser una fecha futura")
+    LocalDate transferDate
+) {}
+```
+
+6. **`ScheduleAppointmentResource`:**
+```java
+public record ScheduleAppointmentResource(
+    @NotNull(message = "El identificador de la sede física de atención es obligatorio")
+    UUID branchId,
+
+    @NotNull(message = "El identificador del cliente titular es obligatorio")
+    UUID customerId,
+
+    @NotNull(message = "El identificador del vehículo es obligatorio")
+    UUID vehicleId,
+
+    @NotNull(message = "La fecha y hora acordada para la cita es obligatoria")
+    @Future(message = "La cita técnica debe agendarse para una fecha y hora futura")
+    Instant scheduledAt,
+
+    @Min(value = 15, message = "La duración estimada de recepción mínima es de 15 minutos")
+    int estimatedDurationMinutes,
+
+    @NotBlank(message = "El motivo de la cita es obligatorio")
+    @Size(min = 5, max = 500, message = "El motivo debe contener entre 5 y 500 caracteres")
+    String reason
+) {}
+```
+
+7. **`RescheduleAppointmentResource`:**
+```java
+public record RescheduleAppointmentResource(
+    @NotNull(message = "La nueva fecha y hora programada es obligatoria")
+    @Future(message = "La nueva fecha de la cita debe ser futura")
+    Instant newScheduledAt
+) {}
+```
+
+8. **`CancelAppointmentResource`:**
+```java
+public record CancelAppointmentResource(
+    @NotBlank(message = "El motivo de cancelación es obligatorio")
+    @Size(min = 5, max = 250, message = "La justificación debe contener entre 5 y 250 caracteres")
+    String reason
+) {}
+```
+
+##### Recursos de Respuesta (Responses) (`com.andeva.atelier.platform.crm.interfaces.rest.resources.responses`)
+
+1. **`CustomerResource`:**
+```java
+public record CustomerResource(
+    UUID id,
+    UUID tenantId,
+    String type,
+    String displayName,
+    String taxId,
+    String email,
+    String phone,
+    String status,
+    Instant createdAt
+) {}
+```
+
+2. **`VehicleResource`:**
+```java
+public record VehicleResource(
+    UUID id,
+    String plate,
+    String vin,
+    String brand,
+    String model,
+    int year,
+    String engineType,
+    UUID currentOwnerId,
+    String currentOwnerName
+) {}
+```
+
+3. **`VehicleOwnershipResource`:**
+```java
+public record VehicleOwnershipResource(
+    UUID id,
+    UUID vehicleId,
+    UUID customerId,
+    String ownerName,
+    LocalDate startDate,
+    LocalDate endDate,
+    boolean isCurrent
+) {}
+```
+
+4. **`AppointmentResource`:**
+```java
+public record AppointmentResource(
+    UUID id,
+    UUID tenantId,
+    UUID branchId,
+    UUID customerId,
+    String customerName,
+    UUID vehicleId,
+    String vehiclePlate,
+    Instant scheduledAt,
+    int estimatedDurationMinutes,
+    String reason,
+    String status,
+    String cancellationReason
+) {}
+```
 
 ---
 
 #### 5.3.3. Resource Assemblers
 
-* `CustomerResourceAssembler`: Mapea `Customer` a `CustomerResource`.
-* `VehicleResourceAssembler`: Mapea `Vehicle` y su dueño resuelto a `VehicleResource`.
-* `AppointmentResourceAssembler`: Mapea `Appointment` a `AppointmentResource`.
-* `CreateCustomerCommandFromResourceAssembler`: Transforma recursos HTTP en comandos inmutables de dominio.
+Los ensambladores de recursos residen en el paquete `com.andeva.atelier.platform.crm.interfaces.rest.transform`. Implementan el desacoplamiento bidireccional entre los contratos de transporte REST (Resources) y el modelo de aplicación y dominio:
+
+##### Inbound Assemblers (Mapeo de Resources a Commands)
+* **`RegisterCustomerCommandFromResourceAssembler`:** Transforma `CreateIndividualCustomerResource` o `CreateCompanyCustomerResource` en `RegisterIndividualCustomerCommand` o `RegisterCompanyCustomerCommand` respectivamente, vinculando el `TenantId` del contexto de seguridad autenticado.
+* **`UpdateCustomerContactCommandFromResourceAssembler`:** Transforma `UpdateCustomerContactResource` y el identificador `CustomerId` de la ruta en un `UpdateCustomerContactCommand`.
+* **`RegisterVehicleCommandFromResourceAssembler`:** Transforma `CreateVehicleResource` en `RegisterVehicleCommand`, instanciando y validando los Value Objects correspondientes (`LicensePlate`, `Vin`, `EngineType`, `CustomerId`).
+* **`TransferVehicleOwnershipCommandFromResourceAssembler`:** Convierte `TransferVehicleOwnershipResource` y el identificador `VehicleId` de la URI en un comando `TransferVehicleOwnershipCommand`.
+* **`ScheduleAppointmentCommandFromResourceAssembler`:** Transforma `ScheduleAppointmentResource` en `ScheduleAppointmentCommand`, incorporando el identificador del taller (`TenantId`) resuelto en sesión.
+* **`RescheduleAppointmentCommandFromResourceAssembler`:** Convierte `RescheduleAppointmentResource` y el `AppointmentId` en `RescheduleAppointmentCommand`.
+* **`CancelAppointmentCommandFromResourceAssembler`:** Convierte `CancelAppointmentResource` y el `AppointmentId` en `CancelAppointmentCommand`.
+
+##### Outbound Assemblers (Mapeo de Entities/Aggregates a Resources)
+* **`CustomerResourceFromAggregateAssembler`:** Transforma la raíz de agregado `Customer` en su representación externa `CustomerResource`, calculando el nombre para mostrar (`displayName`) según el tipo de cliente.
+* **`VehicleResourceFromAggregateAssembler`:** Transforma la raíz de agregado `Vehicle`, resolviendo a través del historial de titularidad vigente (`VehicleOwnership`) los metadatos del dueño actual para componer `VehicleResource`.
+* **`VehicleOwnershipResourceFromEntityAssembler`:** Convierte la entidad de dominio `VehicleOwnership` en `VehicleOwnershipResource`, resolviendo el nombre comercial o nombre completo del titular histórico.
+* **`AppointmentResourceFromAggregateAssembler`:** Transforma la raíz de agregado `Appointment` en `AppointmentResource`, enriqueciendo la carga útil con la denominación del cliente y la placa del automóvil para su consumo inmediato en interfaces de usuario web y móvil.
 
 ---
 
 #### 5.3.4. Open Host Service (OHS) / Inbound ACL Facade
 
-Interfaz pública en `com.andeva.atelier.platform.crm.interfaces.acl`:
+La interfaz pública Java `CustomerFleetContextFacade` se expone en el paquete `com.andeva.atelier.platform.crm.interfaces.acl`. Provee un contrato de servicio abierto y estable (*Open Host Service*) para la consulta síncrona en memoria y comandos de integración por parte de otros Bounded Contexts modulares (*Workshop Operations*, *Invoicing*, *IoT Telemetry*, *SaaS Billing*), evitando que dichos módulos externos dependan directamente de los agregados de dominio de CRM:
 
 ```java
 package com.andeva.atelier.platform.crm.interfaces.acl;
 
+import com.andeva.atelier.platform.crm.interfaces.acl.dto.AppointmentAclDto;
+import com.andeva.atelier.platform.crm.interfaces.acl.dto.CustomerAclDto;
+import com.andeva.atelier.platform.crm.interfaces.acl.dto.VehicleAclDto;
+
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Open Host Service (OHS) / Inbound ACL Facade for Customer and Fleet Management (CRM).
+ * Expone operaciones de lectura síncrona en memoria y comandos transaccionales controlados
+ * para módulos clientes sin violar las invariantes del agregado ni compartir entidades JPA.
+ */
 public interface CustomerFleetContextFacade {
+
+    /**
+     * Consulta un cliente por su identificador único dentro del taller.
+     *
+     * @param customerId Identificador universal del cliente.
+     * @return DTO inmutable con datos fiscales y de contacto del cliente.
+     */
     Optional<CustomerAclDto> fetchCustomerById(UUID customerId);
+
+    /**
+     * Consulta un cliente mediante su número de documento tributario (DNI o RUC) dentro del taller.
+     *
+     * @param tenantId Identificador del taller mecánico.
+     * @param taxId    Número de documento tributario normalizado.
+     * @return DTO inmutable del cliente si existe.
+     */
+    Optional<CustomerAclDto> fetchCustomerByTenantIdAndTaxId(UUID tenantId, String taxId);
+
+    /**
+     * Consulta la ficha técnica de un vehículo por su identificador universal.
+     *
+     * @param vehicleId Identificador único del vehículo.
+     * @return DTO inmutable con especificaciones técnicas y titular actual.
+     */
     Optional<VehicleAclDto> fetchVehicleById(UUID vehicleId);
+
+    /**
+     * Consulta un vehículo a partir de su placa de rodaje nacional normalizada.
+     *
+     * @param plate Placa vehicular normalizada (sin guiones ni espacios).
+     * @return DTO inmutable del vehículo encontrado.
+     */
     Optional<VehicleAclDto> fetchVehicleByPlate(String plate);
+
+    /**
+     * Obtiene el identificador del cliente que ostenta la titularidad y custodia activa del vehículo.
+     *
+     * @param vehicleId Identificador del vehículo.
+     * @return Identificador del cliente propietario actual.
+     */
     Optional<UUID> fetchCurrentOwnerId(UUID vehicleId);
+
+    /**
+     * Lista todos los vehículos que se encuentran bajo la titularidad activa de un cliente.
+     *
+     * @param customerId Identificador del cliente.
+     * @return Colección inmutable de fichas vehiculares activas.
+     */
+    List<VehicleAclDto> fetchVehiclesByCustomerId(UUID customerId);
+
+    /**
+     * Consulta los metadatos esenciales de una cita programada.
+     *
+     * @param appointmentId Identificador de la cita técnica.
+     * @return DTO inmutable de la cita.
+     */
     Optional<AppointmentAclDto> fetchAppointmentById(UUID appointmentId);
+
+    /**
+     * Marca formalmente una cita previa como convertida a Orden de Trabajo tras el arribo a taller.
+     * Invocado transaccionalmente por Workshop Operations al consolidar la recepción del vehículo.
+     *
+     * @param appointmentId Identificador de la cita técnica.
+     * @return true si la transición de estado fue procesada exitosamente; false en caso contrario.
+     */
     boolean markAppointmentAsConvertedToWorkOrder(UUID appointmentId);
 }
 ```
 
-*DTOs Exportados por la Fachada:*
-* `CustomerAclDto(UUID id, UUID tenantId, String displayName, String taxId, String email, String phone)`
-* `VehicleAclDto(UUID id, String plate, String vin, String brand, String model, int year, String engineType, UUID currentOwnerId)`
-* `AppointmentAclDto(UUID id, UUID tenantId, UUID branchId, UUID customerId, UUID vehicleId, String scheduledAt, String status)`
+##### DTOs Exportados por la Fachada (Paquete `com.andeva.atelier.platform.crm.interfaces.acl.dto`)
+
+Estructuras de datos inmutables compartidas con otros contextos de la plataforma:
+
+1. **`CustomerAclDto`:**
+```java
+public record CustomerAclDto(
+    UUID id,
+    UUID tenantId,
+    String type,
+    String displayName,
+    String taxId,
+    String email,
+    String phone,
+    String status
+) {}
+```
+
+2. **`VehicleAclDto`:**
+```java
+public record VehicleAclDto(
+    UUID id,
+    String plate,
+    String vin,
+    String brand,
+    String model,
+    int year,
+    String engineType,
+    UUID currentOwnerId
+) {}
+```
+
+3. **`AppointmentAclDto`:**
+```java
+public record AppointmentAclDto(
+    UUID id,
+    UUID tenantId,
+    UUID branchId,
+    UUID customerId,
+    UUID vehicleId,
+    String scheduledAt,
+    int estimatedDurationMinutes,
+    String status
+) {}
+```
 
 ---
 
 #### 5.3.5. Integration Events (Published Language)
 
-* `CustomerCreatedIntegrationEvent(UUID customerId, UUID tenantId, String displayName, String taxId, Instant occurredOn)`: Notifica a *Invoicing* para pre-cargar datos fiscales de facturación.
-* `VehicleRegisteredIntegrationEvent(UUID vehicleId, String plate, String vin, UUID ownerId, Instant occurredOn)`: Notifica a *IoT Telemetry* para habilitar la vinculación de dispositivos OBD2.
-* `VehicleOwnershipTransferredIntegrationEvent(UUID vehicleId, UUID previousOwnerId, UUID newOwnerId, Instant occurredOn)`: Notifica a *IoT Telemetry* para reasignar la visualización telemétrica al nuevo usuario en Atelier Driver.
-* `AppointmentScheduledIntegrationEvent(UUID appointmentId, UUID tenantId, UUID branchId, UUID customerId, UUID vehicleId, Instant scheduledAt, Instant occurredOn)`: Notifica a *Workshop Operations* para prever capacidad en bahías.
-* `AppointmentArrivedIntegrationEvent(UUID appointmentId, UUID tenantId, UUID branchId, UUID customerId, UUID vehicleId, Instant occurredOn)`: Desencadena en *Workshop Operations* la apertura de la Orden de Trabajo de recepción.
+Los eventos de integración residen en el paquete `com.andeva.atelier.platform.crm.interfaces.events`. Constituyen el lenguaje publicado (*Published Language*) del contexto, despachados de manera atómica mediante el patrón *Transactional Outbox* para asegurar consistencia eventual entre módulos desacoplados:
+
+1. **`CustomerCreatedIntegrationEvent`:**
+   * **Atributos Inmutables:** `UUID customerId`, `UUID tenantId`, `String type`, `String displayName`, `String taxId`, `String email`, `String phone`, `Instant occurredOn`.
+   * **Propósito y Módulos Receptores:** Notifica a *Invoicing* para pre-cargar la ficha tributaria del cliente y emitir comprobantes de pago electrónicos de forma inmediata. Asimismo, notifica a *IAM & Tenancy* cuando se requiere vincular el perfil de usuario conductor con su ficha de cliente.
+
+2. **`VehicleRegisteredIntegrationEvent`:**
+   * **Atributos Inmutables:** `UUID vehicleId`, `String plate`, `String vin`, `String brand`, `String model`, `int year`, `String engineType`, `UUID ownerId`, `Instant occurredOn`.
+   * **Propósito y Módulos Receptores:** Notifica a *IoT Telemetry* para registrar la unidad automotriz en el catálogo del broker MQTT y habilitar el emparejamiento con hardware OBD2. También notifica a *Workshop Operations* para habilitar la apertura inmediata de órdenes de servicio técnico.
+
+3. **`VehicleOwnershipTransferredIntegrationEvent`:**
+   * **Atributos Inmutables:** `UUID vehicleId`, `UUID previousOwnerId`, `UUID newOwnerId`, `LocalDate transferDate`, `Instant occurredOn`.
+   * **Propósito y Módulos Receptores:** Notifica a *IoT Telemetry* para reasignar la visualización del streaming de telemetría y diagnóstico en vivo al nuevo cliente en Atelier Driver, revocando el acceso del titular anterior. Adicionalmente, notifica a *Invoicing* para dar de baja cuentas corrientes o cobros recurrentes de mantenimiento de flotas vinculados al cliente previo.
+
+4. **`AppointmentScheduledIntegrationEvent`:**
+   * **Atributos Inmutables:** `UUID appointmentId`, `UUID tenantId`, `UUID branchId`, `UUID customerId`, `UUID vehicleId`, `Instant scheduledAt`, `int estimatedDurationMinutes`, `String reason`, `Instant occurredOn`.
+   * **Propósito y Módulos Receptores:** Notifica a *Workshop Operations* para reservar el aforo operativo en las bahías de inspección física. Del mismo modo, notifica al subsistema de *Notificaciones* para programar recordatorios preventivos automatizados vía correo electrónico y push FCM hacia el conductor.
+
+5. **`AppointmentArrivedIntegrationEvent`:**
+   * **Atributos Inmutables:** `UUID appointmentId`, `UUID tenantId`, `UUID branchId`, `UUID customerId`, `UUID vehicleId`, `Instant occurredOn`.
+   * **Propósito y Módulos Receptores:** Desencadena en *Workshop Operations* la apertura automática de la Orden de Trabajo preliminar (hoja de recepción, registro fotográfico y triaje de entrada) en la sede física del taller.
 
 ---
 
 ### 5.4. 2.6.2.3. Application Layer
 
+La Capa de Aplicación (*Application Layer*) orquesta los flujos de procesos de negocio y casos de uso del Bounded Context **Customer & Fleet Management (CRM)**, actuando como mediadora directa entre la capa de interfaz y el modelo de dominio puro. Siguiendo el patrón arquitectónico **CQRS (Command Query Responsibility Segregation)**, esta capa separa con rigor las operaciones mutacionales de escritura de las proyecciones optimizadas de solo lectura.
+
+Residiendo bajo el paquete raíz `com.andeva.atelier.platform.crm.application`, sus responsabilidades se distribuyen en cinco subsistemas técnicos:
+
+1. **Servicios de Comando:** Interfaces públicas en `application.commandservices` e implementaciones encapsuladas en `application.internal.commandservices`, orquestando transacciones atómicas de escritura bajo consistencia ACID y retornando tipos de resultado sellados `Result<T, ApplicationError>`.
+2. **Servicios de Consulta:** Interfaces públicas en `application.queryservices` e implementaciones en `application.internal.queryservices`, ejecutando lecturas optimizadas decoradas con `@Transactional(readOnly = true)`.
+3. **Manejadores de Eventos:** Clases oyentes en `application.internal.eventhandlers` que reaccionan a eventos de dominio en memoria o depositan eventos de integración en el *Transactional Outbox*.
+4. **Puertos de Salida y Pasarelas:** Contratos puros en `application.internal.outbound.acl` para interactuar con servicios externos (Google Places API, Firebase Cloud Messaging, cuotas SaaS en *Billing*).
+5. **Implementación de Fachada Inbound ACL:** Clase `application.acl.CustomerFleetContextFacadeImpl` que realiza el contrato OHS público para otros Bounded Contexts.
+
+---
+
 #### 5.4.1. Command Services & Implementations
 
+Los servicios de comando se encuentran anotados con `@Service` y `@Transactional(isolation = Isolation.READ_COMMITTED, rollbackFor = Exception.class)`, garantizando consistencia transaccional ACID en cada caso de uso. Las interfaces públicas se ubican en `com.andeva.atelier.platform.crm.application.commandservices`, mientras que sus implementaciones privadas se resguardan en `com.andeva.atelier.platform.crm.application.internal.commandservices`:
+
 ##### 1. `CustomerCommandService` & `CustomerCommandServiceImpl`
-* `Result<Customer, ApplicationError> handle(RegisterIndividualCustomerCommand command)`:
-  1. Valida unicidad de `(tenantId, taxId)` mediante `CustomerRepository.existsByTenantIdAndTaxId`.
-  2. Valida formato de DNI/RUC.
-  3. Instancia el agregado `Customer` vía factoría estática `registerIndividual`.
-  4. Persiste el cliente y retorna `Result.success(customer)`.
-* `Result<Customer, ApplicationError> handle(RegisterCompanyCustomerCommand command)`: Registra empresa corporativa con validación de RUC 11 dígitos y persiste el cliente.
-* `Result<Customer, ApplicationError> handle(UpdateCustomerContactCommand command)`: Actualiza correo y teléfono del cliente.
+* Interfaces: `com.andeva.atelier.platform.crm.application.commandservices.CustomerCommandService`
+* Implementación: `com.andeva.atelier.platform.crm.application.internal.commandservices.CustomerCommandServiceImpl`
+* Contratos y Casos de Uso:
+  * `Result<Customer, ApplicationError> handle(RegisterIndividualCustomerCommand command)`:
+    1. Resuelve el taller activo (`tenantId`) a partir del contexto de seguridad autenticado.
+    2. Comprueba la unicidad del documento de identidad mediante `CustomerRepository.existsByTenantIdAndTaxId(tenantId, command.taxId())`. Si colisiona, retorna `Result.failure(CustomerErrors.taxIdAlreadyExists())`.
+    3. Comprueba la unicidad del correo electrónico mediante `CustomerRepository.existsByTenantIdAndEmail(tenantId, command.email())`. Si colisiona, retorna `Result.failure(CustomerErrors.emailAlreadyExists())`.
+    4. Consulta la cuota máxima de clientes asignada al plan SaaS del taller mediante `SubscriptionValidationService.validateCustomerQuota(tenantId)`. Si excede el límite contratado, retorna `Result.failure(CustomerErrors.quotaExceeded())`.
+    5. Instancia el agregado `Customer` mediante la factoría estática `Customer.registerIndividual(CustomerId.generate(), tenantId, new PersonName(command.firstName(), command.lastName()), new TaxId(command.taxId(), TaxIdType.DNI), new EmailAddress(command.email()), new PhoneNumber(command.phone()))`.
+    6. Persiste la entidad mediante `CustomerRepository.save(customer)` y retorna `Result.success(customer)`.
+  * `Result<Customer, ApplicationError> handle(RegisterCompanyCustomerCommand command)`:
+    1. Verifica la unicidad del RUC corporativo dentro del taller mediante `CustomerRepository.existsByTenantIdAndTaxId(tenantId, command.taxId())`.
+    2. Valida la existencia y geocodificación del domicilio fiscal de la flota a través de `PlacesAddressVerificationGateway.verifyAddress(command.address())`.
+    3. Instancia el agregado `Customer` vía `Customer.registerCompany(CustomerId.generate(), tenantId, command.companyName(), new TaxId(command.taxId(), TaxIdType.RUC), new EmailAddress(command.email()), new PhoneNumber(command.phone()))`.
+    4. Persiste el cliente y retorna `Result.success(customer)`.
+  * `Result<Customer, ApplicationError> handle(UpdateCustomerContactCommand command)`:
+    1. Recupera el cliente mediante `CustomerRepository.findByIdAndTenantId(command.customerId(), tenantId)`. Si no existe, retorna `Result.failure(CustomerErrors.notFound())`.
+    2. Ejecuta el método de dominio `customer.updateContactInfo(new EmailAddress(command.email()), new PhoneNumber(command.phone()))`.
+    3. Persiste los cambios y retorna `Result.success(customer)`.
+  * `Result<Customer, ApplicationError> handle(DeactivateCustomerCommand command)`:
+    1. Recupera el cliente por ID y taller.
+    2. Verifica mediante `AppointmentRepository.existsActiveAppointmentsByCustomerId(command.customerId())` que no existan citas previas en estado pendiente o confirmado.
+    3. Ejecuta `customer.deactivate()` y persiste la actualización.
 
 ##### 2. `VehicleCommandService` & `VehicleCommandServiceImpl`
-* `Result<Vehicle, ApplicationError> handle(RegisterVehicleCommand command)`:
-  1. Valida que la placa `plate` no exista previamente en la plataforma global (`VehicleRepository.existsByPlate`).
-  2. Verifica que el `initialOwnerId` corresponda a un cliente existente.
-  3. Instancia el agregado `Vehicle` con su primer `VehicleOwnership`.
-  4. Persiste el agregado y retorna `Result.success(vehicle)`.
-* `Result<Vehicle, ApplicationError> handle(TransferVehicleOwnershipCommand command)`:
-  1. Localiza el vehículo por ID.
-  2. Ejecuta el método de dominio `vehicle.transferOwnership(newOwnerId, transferDate)`.
-  3. Persiste el vehículo con el historial actualizado.
+* Interfaces: `com.andeva.atelier.platform.crm.application.commandservices.VehicleCommandService`
+* Implementación: `com.andeva.atelier.platform.crm.application.internal.commandservices.VehicleCommandServiceImpl`
+* Contratos y Casos de Uso:
+  * `Result<Vehicle, ApplicationError> handle(RegisterVehicleCommand command)`:
+    1. Normaliza la placa automotriz a mayúsculas sin guiones y verifica que no exista en el catálogo global mediante `VehicleRepository.existsByPlate(command.normalizedPlate())`. Si existe, retorna `Result.failure(VehicleErrors.plateAlreadyExists())`.
+    2. Si se suministró número de chasis (VIN), verifica su unicidad global mediante `VehicleRepository.existsByVin(command.vin())`.
+    3. Comprueba que el cliente titular inicial exista y pertenezca al taller activo (`CustomerRepository.findByIdAndTenantId(command.initialOwnerId(), tenantId)`).
+    4. Instancia el agregado universal `Vehicle` mediante la factoría estática `Vehicle.register(VehicleId.generate(), new LicensePlate(command.normalizedPlate()), command.vin() != null ? new Vin(command.vin()) : null, command.brand(), command.model(), command.year(), command.engineType(), command.initialOwnerId(), command.registrationDate())`.
+    5. Persiste el agregado con su primer registro en la colección de titularidades (`VehicleOwnership`) mediante `VehicleRepository.save(vehicle)`.
+    6. Retorna `Result.success(vehicle)`.
+  * `Result<Vehicle, ApplicationError> handle(TransferVehicleOwnershipCommand command)`:
+    1. Recupera el vehículo universal por ID mediante `VehicleRepository.findById(command.vehicleId())`. Si no existe, retorna `Result.failure(VehicleErrors.notFound())`.
+    2. Comprueba la existencia y vigencia del nuevo cliente titular (`CustomerRepository.findByIdAndTenantId(command.newOwnerId(), tenantId)`).
+    3. Ejecuta la transferencia formal de custodia invocando el método de negocio del agregado `vehicle.transferOwnership(command.newOwnerId(), command.transferDate())`. El agregado cierra la titularidad previa asignando `endDate` y crea una nueva instancia de `VehicleOwnership` activa.
+    4. Persiste el vehículo y propaga el evento de dominio `VehicleOwnershipTransferredEvent`.
+    5. Retorna `Result.success(vehicle)`.
 
 ##### 3. `AppointmentCommandService` & `AppointmentCommandServiceImpl`
-* `Result<Appointment, ApplicationError> handle(ScheduleAppointmentCommand command)`:
-  1. Valida la existencia del cliente y del vehículo.
-  2. Valida que la fecha y hora sean futuras.
-  3. Instancia la cita en estado `PENDING`.
-  4. Persiste y retorna `Result.success(appointment)`.
-* `Result<Appointment, ApplicationError> handle(ConfirmAppointmentCommand command)`: Transiciona la cita a `CONFIRMED` y dispara notificación push al conductor vía FCM.
-* `Result<Appointment, ApplicationError> handle(MarkAppointmentArrivedCommand command)`: Marca la llegada física del cliente (`ARRIVED`) y publica `AppointmentArrivedEvent`.
-* `Result<Appointment, ApplicationError> handle(CancelAppointmentCommand command)`: Cancela la cita con el motivo indicado.
-* `Result<Appointment, ApplicationError> handle(RescheduleAppointmentCommand command)`: Reprograma fecha pactada.
+* Interfaces: `com.andeva.atelier.platform.crm.application.commandservices.AppointmentCommandService`
+* Implementación: `com.andeva.atelier.platform.crm.application.internal.commandservices.AppointmentCommandServiceImpl`
+* Contratos y Casos de Uso:
+  * `Result<Appointment, ApplicationError> handle(ScheduleAppointmentCommand command)`:
+    1. Valida que la fecha y hora programada sea estrictamente futura y respete el horario de atención de la sede física (`command.scheduledAt().isAfter(Instant.now().plus(Duration.ofHours(2)))`).
+    2. Verifica la existencia del cliente solicitante y del vehículo asociado.
+    3. Comprueba que la sede física exista y se encuentre activa en el módulo IAM mediante `CustomerFleetContextFacade` o consulta de sede.
+    4. Verifica la disponibilidad de bahías en el horario solicitado mediante `AppointmentRepository.countOverlappingAppointments(command.branchId(), command.scheduledAt(), command.estimatedDurationMinutes())`. Si supera la capacidad simultánea, retorna `Result.failure(AppointmentErrors.slotUnavailable())`.
+    5. Instancia el agregado `Appointment` mediante `Appointment.schedule(AppointmentId.generate(), tenantId, command.branchId(), command.customerId(), command.vehicleId(), command.scheduledAt(), command.estimatedDurationMinutes(), command.reason())`.
+    6. Persiste la cita en estado `PENDING` mediante `AppointmentRepository.save(appointment)` y retorna `Result.success(appointment)`.
+  * `Result<Appointment, ApplicationError> handle(ConfirmAppointmentCommand command)`:
+    1. Recupera la cita por ID y taller. Si no existe, retorna `Result.failure(AppointmentErrors.notFound())`.
+    2. Invoca el método de transición `appointment.confirm()`.
+    3. Persiste la cita y emite `AppointmentConfirmedEvent`. Retorna `Result.success(appointment)`.
+  * `Result<Appointment, ApplicationError> handle(MarkAppointmentArrivedCommand command)`:
+    1. Recupera la cita por ID y taller.
+    2. Invoca el método de transición `appointment.markAsArrived()`.
+    3. Persiste la cita en estado `ARRIVED` y emite `AppointmentArrivedEvent`.
+    4. Retorna `Result.success(appointment)`.
+  * `Result<Appointment, ApplicationError> handle(RescheduleAppointmentCommand command)`:
+    1. Recupera la cita por ID. Valida que no se encuentre en estado `ARRIVED` o `CANCELED`.
+    2. Valida la nueva marca temporal y disponibilidad de cupo en la sede.
+    3. Ejecuta `appointment.reschedule(command.newScheduledAt())` y persiste la actualización.
+  * `Result<Appointment, ApplicationError> handle(CancelAppointmentCommand command)`:
+    1. Recupera la cita por ID. Valida que no se encuentre ya arribada a patio.
+    2. Ejecuta `appointment.cancel(command.reason())` registrando el motivo formal de anulación.
+    3. Persiste la cita en estado `CANCELED` y emite `AppointmentCanceledEvent`.
 
 ---
 
 #### 5.4.2. Query Services & Implementations
 
-* **`CustomerQueryService` & `CustomerQueryServiceImpl`:**
-  * `Optional<Customer> handle(GetCustomerByIdQuery query)`
-  * `List<Customer> handle(GetCustomersByTenantIdQuery query)`
-  * `Optional<Customer> handle(GetCustomerByTaxIdQuery query)`
-* **`VehicleQueryService` & `VehicleQueryServiceImpl`:**
-  * `Optional<Vehicle> handle(GetVehicleByIdQuery query)`
-  * `Optional<Vehicle> handle(GetVehicleByPlateQuery query)`
-  * `List<Vehicle> handle(GetVehiclesByCustomerIdQuery query)`
-* **`AppointmentQueryService` & `AppointmentQueryServiceImpl`:**
-  * `Optional<Appointment> handle(GetAppointmentByIdQuery query)`
-  * `List<Appointment> handle(GetAppointmentsByTenantAndBranchQuery query)`
-  * `List<Appointment> handle(GetAppointmentsByCustomerQuery query)`
+Los servicios de consulta se implementan bajo `@Transactional(readOnly = true)` y retornan proyecciones inmutables sin efectos colaterales sobre el estado de la base de datos. Sus interfaces públicas se ubican en `com.andeva.atelier.platform.crm.application.queryservices`, mientras que sus implementaciones privadas residen en `com.andeva.atelier.platform.crm.application.internal.queryservices`:
+
+##### 1. `CustomerQueryService` & `CustomerQueryServiceImpl`
+* Interfaces: `com.andeva.atelier.platform.crm.application.queryservices.CustomerQueryService`
+* Implementación: `com.andeva.atelier.platform.crm.application.internal.queryservices.CustomerQueryServiceImpl`
+* Métodos:
+  * `Optional<Customer> handle(GetCustomerByIdQuery query)`: Recupera un cliente por su identificador único dentro del taller autenticado.
+  * `List<Customer> handle(GetCustomersByTenantIdQuery query)`: Lista los clientes del taller aplicando filtros opcionales de tipo (`INDIVIDUAL`, `COMPANY`), criterio de búsqueda por texto y paginación.
+  * `Optional<Customer> handle(GetCustomerByTaxIdQuery query)`: Localiza un cliente a partir de su número de DNI o RUC.
+
+##### 2. `VehicleQueryService` & `VehicleQueryServiceImpl`
+* Interfaces: `com.andeva.atelier.platform.crm.application.queryservices.VehicleQueryService`
+* Implementación: `com.andeva.atelier.platform.crm.application.internal.queryservices.VehicleQueryServiceImpl`
+* Métodos:
+  * `Optional<Vehicle> handle(GetVehicleByIdQuery query)`: Recupera las especificaciones técnicas del vehículo universal por ID.
+  * `Optional<Vehicle> handle(GetVehicleByPlateQuery query)`: Resuelve un vehículo automotor a partir de su placa de rodaje normalizada.
+  * `List<Vehicle> handle(GetVehiclesByCustomerIdQuery query)`: Lista todos los vehículos que se encuentran actualmente bajo la titularidad activa del cliente.
+  * `List<VehicleOwnership> handle(GetVehicleOwnershipHistoryQuery query)`: Recupera el historial cronológico completo de transferencias de custodia de un vehículo.
+
+##### 3. `AppointmentQueryService` & `AppointmentQueryServiceImpl`
+* Interfaces: `com.andeva.atelier.platform.crm.application.queryservices.AppointmentQueryService`
+* Implementación: `com.andeva.atelier.platform.crm.application.internal.queryservices.AppointmentQueryServiceImpl`
+* Métodos:
+  * `Optional<Appointment> handle(GetAppointmentByIdQuery query)`: Recupera la ficha integral de una cita por su identificador.
+  * `List<Appointment> handle(GetAppointmentsByTenantAndBranchQuery query)`: Lista las citas agendadas para una sede física y fecha de calendario específica, con filtro opcional por estado operativo.
+  * `List<Appointment> handle(GetAppointmentsByCustomerQuery query)`: Recupera el historial de citas programadas por un cliente particular o empresa.
+  * `List<Appointment> handle(GetAppointmentsByDateRangeQuery query)`: Proyecta la demanda de citas dentro de un rango de fechas para planificación de turnos técnicos.
 
 ---
 
 #### 5.4.3. Event Handlers & Listeners
 
-* **`AppointmentDomainEventsHandler`:**
-  * `@EventListener void on(AppointmentConfirmedEvent event)`: Invoca al cliente FCM para enviar notificación push al smartphone del cliente indicando fecha y dirección de la sede.
-  * `@EventListener void on(AppointmentCanceledEvent event)`: Notifica al conductor sobre la cancelación de la cita.
-  * `@TransactionalEventListener void on(AppointmentArrivedEvent event)`: Publica `AppointmentArrivedIntegrationEvent` al bus de eventos de Spring para que *Workshop Operations* cree el borrador de la Orden de Trabajo.
+El desacoplamiento entre casos de uso mutacionales y los efectos colaterales del negocio se instrumenta a través de tres manejadores de eventos en el paquete `com.andeva.atelier.platform.crm.application.internal.eventhandlers`:
+
+##### 1. `CustomerDomainEventsHandler`
+* `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)`
+  * `void on(CustomerCreatedEvent event)`: Captura el alta de un nuevo cliente tras la confirmación exitosa de la transacción relacional, construye la carga útil inmutable `CustomerCreatedIntegrationEvent` y la registra en la tabla `outbox_messages` para su sincronización asíncrona hacia el Bounded Context de *Invoicing*.
+
+##### 2. `VehicleDomainEventsHandler`
+* `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)`
+  * `void on(VehicleRegisteredEvent event)`: Construye y deposita `VehicleRegisteredIntegrationEvent` en el *Transactional Outbox*, notificando a *IoT Telemetry* para habilitar la vinculación telemétrica de dispositivos OBD2.
+  * `void on(VehicleOwnershipTransferredEvent event)`: Construye y deposita `VehicleOwnershipTransferredIntegrationEvent` en el *Transactional Outbox*, posibilitando que *IoT Telemetry* y *Atelier Driver* reasignen la visualización del vehículo hacia el nuevo conductor titular.
+
+##### 3. `AppointmentDomainEventsHandler`
+* Manejo dual de eventos según la criticidad y naturaleza del efecto:
+  * `@EventListener void on(AppointmentConfirmedEvent event)`: Oyente sincrónico inmediato. Extrae el token FCM del cliente y despacha una notificación push a través de `DriverAppPushGateway` confirmando el agendamiento y los datos de localización de la sede física.
+  * `@EventListener void on(AppointmentCanceledEvent event)`: Oyente sincrónico inmediato. Remite una alerta push al conductor detallando la justificación de anulación de la cita.
+  * `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT) void on(AppointmentScheduledEvent event)`: Publica `AppointmentScheduledIntegrationEvent` al *Transactional Outbox* para que *Workshop Operations* anticipe la demanda de bahías técnicas.
+  * `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT) void on(AppointmentArrivedEvent event)`: Captura el arribo físico del vehículo y publica `AppointmentArrivedIntegrationEvent` al *Transactional Outbox*, desencadenando en *Workshop Operations* la apertura inmediata de la Orden de Trabajo preliminar y la generación de la hoja de recepción.
 
 ---
 
-#### 5.4.4. Outbound ACL Services
+#### 5.4.4. Outbound ACL Gateways
 
-* **`PlacesAddressVerificationGateway`:** Invoca Google Places API para validar direcciones físicas de clientes y sedes de flotas.
-* **`DriverAppPushGateway`:** Despacha notificaciones push móviles hacia **Atelier Driver** mediante Firebase Cloud Messaging (FCM).
+Para preservar la independencia del núcleo de aplicación frente a protocolos de transporte o SDKs propietarios de terceros, la capa define contratos puros de pasarela en el paquete `com.andeva.atelier.platform.crm.application.internal.outbound.acl`:
+
+##### 1. `PlacesAddressVerificationGateway`
+* **Propósito:** Validación y estandarización geográfica de domicilios corporativos para clientes empresa.
+* **Firma:**
+  ```java
+  public interface PlacesAddressVerificationGateway {
+      Optional<VerifiedAddressDto> verifyAddress(String rawAddress);
+  }
+  ```
+
+##### 2. `DriverAppPushGateway`
+* **Propósito:** Despacho de notificaciones push móviles hacia la aplicación **Atelier Driver** mediante Firebase Cloud Messaging (FCM).
+* **Firma:**
+  ```java
+  public interface DriverAppPushGateway {
+      boolean sendPushNotification(String fcmToken, String title, String body, Map<String, String> data);
+  }
+  ```
+
+##### 3. `SubscriptionValidationService`
+* **Propósito:** Consulta síncrona de cuotas activas hacia el módulo de *Billing & Subscriptions* para gobernar los límites de clientes y vehículos según el plan SaaS contratado.
+* **Firma:**
+  ```java
+  public interface SubscriptionValidationService {
+      boolean validateCustomerQuota(UUID tenantId);
+      boolean validateVehicleQuota(UUID tenantId);
+  }
+  ```
+
+---
+
+#### 5.4.5. Inbound ACL / Customer Fleet Facade Implementation
+
+Implementación operativa de la fachada Open Host Service (OHS), ubicada en `com.andeva.atelier.platform.crm.application.acl.CustomerFleetContextFacadeImpl`. Esta clase implementa la interfaz pública `CustomerFleetContextFacade` expuesta en `interfaces.acl`, orquestando llamadas directas en memoria hacia los servicios de consulta (`CustomerQueryService`, `VehicleQueryService`, `AppointmentQueryService`) y comandos transaccionales controlados (`AppointmentCommandService`), traduciendo los agregados de dominio hacia DTOs inmutables de ACL (`CustomerAclDto`, `VehicleAclDto`, `AppointmentAclDto`) para el consumo seguro de otros Bounded Contexts (Workshop Operations, Electronic Invoicing, IoT Telemetry):
+
+```java
+package com.andeva.atelier.platform.crm.application.acl;
+
+import com.andeva.atelier.platform.crm.application.commandservices.AppointmentCommandService;
+import com.andeva.atelier.platform.crm.application.queryservices.AppointmentQueryService;
+import com.andeva.atelier.platform.crm.application.queryservices.CustomerQueryService;
+import com.andeva.atelier.platform.crm.application.queryservices.VehicleQueryService;
+import com.andeva.atelier.platform.crm.interfaces.acl.CustomerFleetContextFacade;
+import com.andeva.atelier.platform.crm.interfaces.acl.dto.AppointmentAclDto;
+import com.andeva.atelier.platform.crm.interfaces.acl.dto.CustomerAclDto;
+import com.andeva.atelier.platform.crm.interfaces.acl.dto.VehicleAclDto;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+@Service
+public class CustomerFleetContextFacadeImpl implements CustomerFleetContextFacade {
+    private final CustomerQueryService customerQueryService;
+    private final VehicleQueryService vehicleQueryService;
+    private final AppointmentQueryService appointmentQueryService;
+    private final AppointmentCommandService appointmentCommandService;
+
+    public CustomerFleetContextFacadeImpl(
+            CustomerQueryService customerQueryService,
+            VehicleQueryService vehicleQueryService,
+            AppointmentQueryService appointmentQueryService,
+            AppointmentCommandService appointmentCommandService) {
+        this.customerQueryService = customerQueryService;
+        this.vehicleQueryService = vehicleQueryService;
+        this.appointmentQueryService = appointmentQueryService;
+        this.appointmentCommandService = appointmentCommandService;
+    }
+
+    // Métodos de delegación operativa hacia query services y command services con mapeo a DTOs de ACL
+}
+```
 
 ---
 
 ### 5.5. 2.6.2.4. Infrastructure Layer
 
+La Capa de Infraestructura del contexto **Customer & Fleet Management (CRM)** materializa técnicamente los puertos de persistencia y comunicación externa definidos en las capas de Dominio y Aplicación. Provee el soporte para el almacenamiento físico relacional en PostgreSQL 16 (alojado en Aiven Cloud) a través de Spring Data JPA y Hibernate ORM, encapsula la conversión de objetos de valor tipados mediante convertidores JPA estandarizados, implementa los adaptadores de repositorio con despacho atómico de eventos hacia la tabla del *Transactional Outbox* (`outbox_messages`), y gestiona la integración con pasarelas de nube externas (Google Maps Places API y Firebase Cloud Messaging) y clientes de cuotas SaaS (*Billing*).
+
+---
+
 #### 5.5.1. JPA Persistence Entities
 
-Ubicadas en `com.andeva.atelier.platform.crm.infrastructure.persistence.jpa.entities`:
+Clases mapeadas físicamente a las tablas relacionales de PostgreSQL bajo el paquete `com.andeva.atelier.platform.crm.infrastructure.persistence.jpa.entities`. Todas las entidades mutables heredan de la superclase `AuditableAbstractPersistenceEntity`, adquiriendo un identificador primario universal (`id: UUID`) y marcas temporales de auditoría gestionadas automáticamente por Hibernate (`created_at: Instant`, `updated_at: Instant`).
 
 ##### 1. `CustomerPersistenceEntity` (Tabla `customers`)
-* Extiende `AuditableAbstractPersistenceEntity`.
-* `@Column(name = "tenant_id", nullable = false)`: Referencia al taller dueño de la ficha comercial.
-* `@Column(name = "type", nullable = false, length = 20)`: `individual`, `company`.
-* `@Column(name = "first_name", length = 100)`: Nombres.
-* `@Column(name = "last_name", length = 100)`: Apellidos.
-* `@Column(name = "company_name", length = 150)`: Razón social.
-* `@Column(name = "tax_id", nullable = false, length = 20)`: DNI o RUC.
-* `@Column(name = "email", length = 150)`: Correo de contacto.
-* `@Column(name = "phone", length = 20)`: Teléfono de contacto.
-* `@Column(name = "status", nullable = false, length = 20)`: `active`, `inactive`.
+* **Paquete:** `com.andeva.atelier.platform.crm.infrastructure.persistence.jpa.entities`
+* **Herencia:** Extiende `AuditableAbstractPersistenceEntity` (clave primaria `id: UUID`, `created_at`, `updated_at`).
+* **Anotaciones de Mapeo:**
+  * `@Entity`
+  * `@Table(name = "customers", uniqueConstraints = { @UniqueConstraint(name = "uk_customers_tenant_tax_id", columnNames = {"tenant_id", "tax_id"}) }, indexes = { @Index(name = "idx_customers_tenant_type", columnList = "tenant_id, type"), @Index(name = "idx_customers_tenant_email", columnList = "tenant_id, email") })`
+* **Atributos y Columnas Físicas:**
+  * `@Column(name = "tenant_id", nullable = false)`: Identificador UUID del taller automotriz (aislamiento multitenant estricto).
+  * `@Convert(converter = CustomerTypeAttributeConverter.class) @Column(name = "type", nullable = false, length = 20)`: Discriminador de tipo de cliente (`individual`, `company`).
+  * `@Column(name = "first_name", length = 100)`: Nombres de la persona natural (nullable si el cliente es corporativo).
+  * `@Column(name = "last_name", length = 100)`: Apellidos de la persona natural (nullable si el cliente es corporativo).
+  * `@Column(name = "company_name", length = 150)`: Razón social de la empresa de flota B2B (nullable si el cliente es individual).
+  * `@Convert(converter = TaxIdAttributeConverter.class) @Column(name = "tax_id", nullable = false, length = 20)`: Número de documento de identidad fiscal (DNI de 8 dígitos o RUC de 11 dígitos). Restringido por la clave única compuesta `uk_customers_tenant_tax_id`.
+  * `@Convert(converter = EmailAddressAttributeConverter.class) @Column(name = "email", length = 150)`: Dirección canónica de correo electrónico para notificaciones comerciales y facturación.
+  * `@Column(name = "phone", length = 20)`: Número telefónico de contacto en formato internacional E.164.
+  * `@Enumerated(EnumType.STRING) @Column(name = "status", nullable = false, length = 20)`: Estado operativo de la ficha del cliente (`ACTIVE`, `INACTIVE`).
 
 ##### 2. `VehiclePersistenceEntity` (Tabla `vehicles`)
-* Extiende `AuditableAbstractPersistenceEntity`.
-* `@Column(name = "plate", nullable = false, unique = true, length = 15)`: Placa de rodaje normalizada.
-* `@Column(name = "vin", length = 17)`: Número de chasis ISO 3779.
-* `@Column(name = "brand", nullable = false, length = 50)`: Marca.
-* `@Column(name = "model", nullable = false, length = 50)`: Modelo.
-* `@Column(name = "year", nullable = false)`: Año de fabricación.
-* `@Column(name = "engine_type", nullable = false, length = 20)`: `gasoline`, `diesel`, `electric`, `hybrid`.
-* `@OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL, orphanRemoval = true)`: Historial de propiedad.
+* **Paquete:** `com.andeva.atelier.platform.crm.infrastructure.persistence.jpa.entities`
+* **Herencia:** Extiende `AuditableAbstractPersistenceEntity`.
+* **Diseño Multitenant:** Entidad global e independiente de `tenant_id`. Representa el activo físico universal en el parque automotor de la plataforma Atelier, permitiendo que una misma unidad mecánica mantenga su historial técnico inalterable si transita entre diferentes talleres de la red o cambia de titular.
+* **Anotaciones de Mapeo:**
+  * `@Entity`
+  * `@Table(name = "vehicles", uniqueConstraints = { @UniqueConstraint(name = "uk_vehicles_plate", columnNames = {"plate"}) }, indexes = { @Index(name = "idx_vehicles_vin", columnList = "vin") })`
+* **Atributos y Columnas Físicas:**
+  * `@Convert(converter = LicensePlateAttributeConverter.class) @Column(name = "plate", nullable = false, unique = true, length = 15)`: Placa de rodaje vehicular normalizada (sin guiones ni espacios, forzada a mayúsculas). Restringida por la clave única global `uk_vehicles_plate`.
+  * `@Convert(converter = VinAttributeConverter.class) @Column(name = "vin", length = 17)`: Número de Identificación Vehicular estandarizado bajo la norma internacional ISO 3779 (17 caracteres alfanuméricos, nullable).
+  * `@Column(name = "brand", nullable = false, length = 50)`: Marca del fabricante del automóvil (ej. Toyota, Hyundai, Nissan).
+  * `@Column(name = "model", nullable = false, length = 50)`: Modelo comercial o línea de producción (ej. Yaris, Tucson, Sentra).
+  * `@Column(name = "year", nullable = false)`: Año del modelo de fabricación (entero de 4 dígitos entre 1950 y el año en curso más uno).
+  * `@Convert(converter = EngineTypeAttributeConverter.class) @Column(name = "engine_type", nullable = false, length = 20)`: Tipo de tren motriz (`gasoline`, `diesel`, `electric`, `hybrid`).
+  * `@OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY) @OrderBy("startDate DESC")`: Colección relacional bidireccional de registros de custodia y propiedad histórica (`List<VehicleOwnershipPersistenceEntity>`). Las transferencias de titularidad persisten automáticamente a través del ciclo de vida del agregado `Vehicle`.
 
 ##### 3. `VehicleOwnershipPersistenceEntity` (Tabla `vehicle_ownerships`)
-* Extiende `AuditableAbstractPersistenceEntity`.
-* `@ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "vehicle_id", nullable = false)`: Vehículo asociado.
-* `@Column(name = "customer_id", nullable = false)`: Cliente propietario.
-* `@Column(name = "start_date", nullable = false)`: Fecha de inicio de titularidad.
-* `@Column(name = "end_date")`: Fecha de finalización (`null` si es el propietario actual).
+* **Paquete:** `com.andeva.atelier.platform.crm.infrastructure.persistence.jpa.entities`
+* **Herencia:** Extiende `AuditableAbstractPersistenceEntity`.
+* **Anotaciones de Mapeo:**
+  * `@Entity`
+  * `@Table(name = "vehicle_ownerships", indexes = { @Index(name = "idx_vo_vehicle_dates", columnList = "vehicle_id, start_date, end_date"), @Index(name = "idx_vo_customer_active", columnList = "customer_id, end_date") })`
+* **Índice Parcial en Base de Datos:** `idx_vo_active` definido a nivel de DDL (`CREATE UNIQUE INDEX idx_vo_active ON vehicle_ownerships (vehicle_id) WHERE end_date IS NULL`), garantizando a nivel de motor relacional la invariante de que un vehículo automotor solo puede ostentar un único propietario activo simultáneamente.
+* **Atributos y Columnas Físicas:**
+  * `@Column(name = "customer_id", nullable = false)`: Identificador UUID del cliente titular (asociación lógica hacia `customers.id`).
+  * `@ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "vehicle_id", nullable = false, foreignKey = @ForeignKey(name = "fk_vo_vehicle"))`: Asociación relacional hacia la entidad física de persistencia `VehiclePersistenceEntity`.
+  * `@Column(name = "start_date", nullable = false)`: Fecha de inicio de titularidad y custodia del vehículo (`DATE`).
+  * `@Column(name = "end_date")`: Fecha de culminación o transferencia de la titularidad (`DATE`, nullable, donde el valor `null` explicita que es el custodio vigente).
 
 ##### 4. `AppointmentPersistenceEntity` (Tabla `appointments`)
-* Extiende `AuditableAbstractPersistenceEntity`.
-* `@Column(name = "tenant_id", nullable = false)`: Taller receptor.
-* `@Column(name = "branch_id", nullable = false)`: Sede física.
-* `@Column(name = "customer_id", nullable = false)`: Cliente.
-* `@Column(name = "vehicle_id", nullable = false)`: Vehículo.
-* `@Column(name = "scheduled_at", nullable = false)`: Fecha y hora programada.
-* `@Column(name = "estimated_duration_minutes", nullable = false)`: Minutos estimados.
-* `@Column(name = "reason", length = 2000)`: Motivo de la cita.
-* `@Column(name = "status", nullable = false, length = 20)`: `pending`, `confirmed`, `arrived`, `canceled`.
-* `@Column(name = "cancellation_reason", length = 500)`: Justificación de anulación.
+* **Paquete:** `com.andeva.atelier.platform.crm.infrastructure.persistence.jpa.entities`
+* **Herencia:** Extiende `AuditableAbstractPersistenceEntity`.
+* **Anotaciones de Mapeo:**
+  * `@Entity`
+  * `@Table(name = "appointments", indexes = { @Index(name = "idx_appt_tenant_branch_date", columnList = "tenant_id, branch_id, scheduled_at"), @Index(name = "idx_appt_customer", columnList = "customer_id"), @Index(name = "idx_appt_vehicle", columnList = "vehicle_id") })`
+* **Atributos y Columnas Físicas:**
+  * `@Column(name = "tenant_id", nullable = false)`: Identificador UUID del taller mecánico receptor.
+  * `@Column(name = "branch_id", nullable = false)`: Sede física operativa donde se materializará la recepción técnica.
+  * `@Column(name = "customer_id", nullable = false)`: Identificador UUID del cliente solicitante de la cita.
+  * `@Column(name = "vehicle_id", nullable = false)`: Identificador UUID del vehículo que ingresará a inspección.
+  * `@Column(name = "scheduled_at", nullable = false)`: Marca temporal pactada de la cita con precisión UTC (`TIMESTAMP WITH TIME ZONE` / `Instant`).
+  * `@Column(name = "estimated_duration_minutes", nullable = false)`: Duración proyectada para la recepción y prediagnóstico en minutos (por defecto 30 minutos).
+  * `@Column(name = "reason", length = 2000)`: Exposición de motivos, requerimientos de mantenimiento preventivo o fallas reportadas por el cliente.
+  * `@Convert(converter = AppointmentStatusAttributeConverter.class) @Column(name = "status", nullable = false, length = 20)`: Estado operativo del ciclo de vida (`pending`, `confirmed`, `arrived`, `canceled`).
+  * `@Column(name = "cancellation_reason", length = 500)`: Justificación formal requerida ante la anulación de una reserva (nullable).
 
 ---
 
 #### 5.5.2. JPA Persistence Repositories
 
-* `CustomerPersistenceRepository extends JpaRepository<CustomerPersistenceEntity, UUID>`
-* `VehiclePersistenceRepository extends JpaRepository<VehiclePersistenceEntity, UUID>`
-* `VehicleOwnershipPersistenceRepository extends JpaRepository<VehicleOwnershipPersistenceEntity, UUID>`
-* `AppointmentPersistenceRepository extends JpaRepository<AppointmentPersistenceEntity, UUID>`
+Interfaces Spring Data JPA ubicadas en `com.andeva.atelier.platform.crm.infrastructure.persistence.jpa.repositories`. Extienden `JpaRepository<T, UUID>` y definen métodos de consulta derivados optimizados junto con sentencias JPQL para satisfacer las invariantes de consulta y reglas operativas del dominio:
+
+##### 1. `CustomerPersistenceRepository`
+```java
+public interface CustomerPersistenceRepository extends JpaRepository<CustomerPersistenceEntity, UUID> {
+
+    boolean existsByTenantIdAndTaxId(UUID tenantId, String taxId);
+
+    boolean existsByTenantIdAndEmail(UUID tenantId, String email);
+
+    Optional<CustomerPersistenceEntity> findByIdAndTenantId(UUID id, UUID tenantId);
+
+    Optional<CustomerPersistenceEntity> findByTenantIdAndTaxId(UUID tenantId, String taxId);
+
+    Page<CustomerPersistenceEntity> findAllByTenantId(UUID tenantId, Pageable pageable);
+
+    @Query("SELECT c FROM CustomerPersistenceEntity c " +
+           "WHERE c.tenantId = :tenantId " +
+           "AND (:type IS NULL OR c.type = :type) " +
+           "AND (:searchTerm IS NULL OR " +
+           "     LOWER(c.firstName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
+           "     LOWER(c.lastName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
+           "     LOWER(c.companyName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
+           "     c.taxId LIKE CONCAT('%', :searchTerm, '%'))")
+    Page<CustomerPersistenceEntity> searchCustomers(
+        @Param("tenantId") UUID tenantId,
+        @Param("type") CustomerType type,
+        @Param("searchTerm") String searchTerm,
+        Pageable pageable
+    );
+}
+```
+
+##### 2. `VehiclePersistenceRepository`
+```java
+public interface VehiclePersistenceRepository extends JpaRepository<VehiclePersistenceEntity, UUID> {
+
+    boolean existsByPlate(String plate);
+
+    boolean existsByVin(String vin);
+
+    Optional<VehiclePersistenceEntity> findByPlate(String plate);
+
+    Optional<VehiclePersistenceEntity> findByVin(String vin);
+
+    @Query("SELECT v FROM VehiclePersistenceEntity v " +
+           "JOIN v.ownershipHistory o " +
+           "WHERE o.customerId = :customerId AND o.endDate IS NULL")
+    List<VehiclePersistenceEntity> findAllActiveByCustomerId(@Param("customerId") UUID customerId);
+}
+```
+
+##### 3. `VehicleOwnershipPersistenceRepository`
+```java
+public interface VehicleOwnershipPersistenceRepository extends JpaRepository<VehicleOwnershipPersistenceEntity, UUID> {
+
+    @Query("SELECT o FROM VehicleOwnershipPersistenceEntity o " +
+           "WHERE o.vehicle.id = :vehicleId AND o.endDate IS NULL")
+    Optional<VehicleOwnershipPersistenceEntity> findActiveByVehicleId(@Param("vehicleId") UUID vehicleId);
+
+    List<VehicleOwnershipPersistenceEntity> findAllByVehicleIdOrderByStartDateDesc(UUID vehicleId);
+
+    List<VehicleOwnershipPersistenceEntity> findAllByCustomerIdAndEndDateIsNull(UUID customerId);
+
+    boolean existsByVehicleIdAndCustomerIdAndEndDateIsNull(UUID vehicleId, UUID customerId);
+}
+```
+
+##### 4. `AppointmentPersistenceRepository`
+```java
+public interface AppointmentPersistenceRepository extends JpaRepository<AppointmentPersistenceEntity, UUID> {
+
+    @Query("SELECT a FROM AppointmentPersistenceEntity a " +
+           "WHERE a.tenantId = :tenantId " +
+           "AND a.branchId = :branchId " +
+           "AND a.scheduledAt >= :startOfDay " +
+           "AND a.scheduledAt <= :endOfDay " +
+           "ORDER BY a.scheduledAt ASC")
+    List<AppointmentPersistenceEntity> findAllByTenantIdAndBranchIdAndDate(
+        @Param("tenantId") UUID tenantId,
+        @Param("branchId") UUID branchId,
+        @Param("startOfDay") Instant startOfDay,
+        @Param("endOfDay") Instant endOfDay
+    );
+
+    @Query("SELECT COUNT(a) FROM AppointmentPersistenceEntity a " +
+           "WHERE a.tenantId = :tenantId " +
+           "AND a.branchId = :branchId " +
+           "AND a.status IN ('PENDING', 'CONFIRMED') " +
+           "AND a.scheduledAt < :slotEnd " +
+           "AND FUNCTION('dateadd', 'minute', a.estimatedDurationMinutes, a.scheduledAt) > :slotStart")
+    long countOverlappingAppointments(
+        @Param("tenantId") UUID tenantId,
+        @Param("branchId") UUID branchId,
+        @Param("slotStart") Instant slotStart,
+        @Param("slotEnd") Instant slotEnd
+    );
+
+    @Query("SELECT COUNT(a) > 0 FROM AppointmentPersistenceEntity a " +
+           "WHERE a.customerId = :customerId " +
+           "AND a.status IN ('PENDING', 'CONFIRMED')")
+    boolean existsActiveAppointmentsByCustomerId(@Param("customerId") UUID customerId);
+
+    List<AppointmentPersistenceEntity> findByCustomerIdOrderByScheduledAtDesc(UUID customerId);
+
+    List<AppointmentPersistenceEntity> findByVehicleIdOrderByScheduledAtDesc(UUID vehicleId);
+}
+```
 
 ---
 
 #### 5.5.3. JPA Adapters (`*RepositoryImpl`)
 
-* `CustomerRepositoryImpl implements CustomerRepository`
-* `VehicleRepositoryImpl implements VehicleRepository`
-* `VehicleOwnershipRepositoryImpl implements VehicleOwnershipRepository`
-* `AppointmentRepositoryImpl implements AppointmentRepository`
+Ubicadas en `com.andeva.atelier.platform.crm.infrastructure.persistence.jpa.adapters`. Son las clases adaptadoras de salida (*Outbound Secondary Adapters*) que implementan las interfaces de repositorio del núcleo de Dominio (`CustomerRepository`, `VehicleRepository`, `VehicleOwnershipRepository`, `AppointmentRepository`). Conectan los contratos de dominio con los repositorios Spring Data JPA, orquestan el mapeo bidireccional mediante los ensambladores de persistencia y extraen los eventos de dominio para su almacenamiento en el *Transactional Outbox*:
+
+##### Mecánica de Despacho Transaccional a `outbox_messages`:
+Cada operación de escritura en los adaptadores sigue un flujo estricto y atómico:
+1. Convierte el agregado inmutable a su entidad de persistencia JPA mediante `assembler.toPersistence(aggregate)`.
+2. Persiste y sincroniza la entidad físicamente en PostgreSQL ejecutando `persistenceRepository.saveAndFlush(entity)`.
+3. Extrae la lista de eventos de dominio acumulados en el agregado raíz (`aggregate.getDomainEvents()`).
+4. Para cada evento de dominio, crea un registro en la tabla `outbox_messages` que contiene:
+   * `id`: UUID autogenerado.
+   * `aggregate_type`: Nombre canónico del agregado (`Customer`, `Vehicle`, `Appointment`).
+   * `aggregate_id`: UUID identificador de la entidad raíz.
+   * `event_type`: Nombre calificado de la clase del evento (ej. `CustomerRegisteredEvent`, `AppointmentScheduledEvent`).
+   * `payload`: Representación JSON serializada del evento inmutable.
+   * `occurred_on`: Marca temporal UTC de ocurrencia.
+   * `status`: Estado inicial `'PENDING'`.
+5. Limpia los eventos acumulados del agregado invocando `aggregate.clearDomainEvents()`.
+6. Retorna el agregado reconstitudo hacia la capa de aplicación.
+
+##### 1. `CustomerRepositoryImpl`
+* **Implementa:** `CustomerRepository`
+* **Dependencias:** `CustomerPersistenceRepository`, `CustomerPersistenceAssembler`, `OutboxMessageRepository`
+* **Métodos Implementados:**
+  * `Customer save(Customer customer)`: Mapea a `CustomerPersistenceEntity`, guarda en base de datos relacional, persiste eventos en `outbox_messages` y limpia la cola del agregado.
+  * `Optional<Customer> findById(CustomerId id)`: Resuelve la entidad por UUID y la reconstituye a `Customer` de dominio.
+  * `Optional<Customer> findByTenantIdAndTaxId(TenantId tenantId, TaxId taxId)`: Consulta aislada por inquilino y documento tributario.
+  * `List<Customer> findByTenantId(TenantId tenantId)`: Lista todos los clientes pertenecientes a un taller.
+  * `boolean existsByTenantIdAndTaxId(TenantId tenantId, TaxId taxId)`: Comprobación rápida para prevenir duplicados fiscales.
+  * `boolean existsByTenantIdAndEmail(TenantId tenantId, EmailAddress email)`: Verificación de disponibilidad de correo comercial.
+
+##### 2. `VehicleRepositoryImpl`
+* **Implementa:** `VehicleRepository`
+* **Dependencias:** `VehiclePersistenceRepository`, `VehiclePersistenceAssembler`, `OutboxMessageRepository`
+* **Métodos Implementados:**
+  * `Vehicle save(Vehicle vehicle)`: Persiste el agregado vehicular junto a toda su colección de titularidades históricas en cascada (`CascadeType.ALL`), registra eventos como `VehicleRegisteredEvent` o `VehicleOwnershipTransferredEvent` en `outbox_messages` y limpia los eventos del agregado.
+  * `Optional<Vehicle> findById(VehicleId id)`: Reconstituye la ficha técnica del automóvil e hidrata su historial de custodia cronológica.
+  * `Optional<Vehicle> findByPlate(LicensePlate plate)`: Búsqueda unívoca por placa normalizada.
+  * `Optional<Vehicle> findByVin(Vin vin)`: Búsqueda unívoca por número de chasis ISO 3779.
+  * `boolean existsByPlate(LicensePlate plate)`: Comprobación perimetral de no duplicidad de placa vehicular.
+  * `boolean existsByVin(Vin vin)`: Validación de unicidad de VIN.
+  * `List<Vehicle> findByCurrentOwnerId(CustomerId customerId)`: Recupera los vehículos cuya titularidad activa coincide con el cliente.
+
+##### 3. `VehicleOwnershipRepositoryImpl`
+* **Implementa:** `VehicleOwnershipRepository`
+* **Dependencias:** `VehicleOwnershipPersistenceRepository`, `VehicleOwnershipPersistenceAssembler`
+* **Métodos Implementados:**
+  * `VehicleOwnership save(VehicleOwnership ownership)`: Persiste la relación de propiedad individual de manera atómica.
+  * `List<VehicleOwnership> findByVehicleId(VehicleId vehicleId)`: Consulta cronológica completa de custodia para un vehículo.
+  * `Optional<VehicleOwnership> findActiveOwnershipByVehicleId(VehicleId vehicleId)`: Resuelve el titular vigente (`endDate == null`).
+  * `List<VehicleOwnership> findActiveByCustomerId(CustomerId customerId)`: Lista las titularidades vigentes asociadas a un cliente.
+
+##### 4. `AppointmentRepositoryImpl`
+* **Implementa:** `AppointmentRepository`
+* **Dependencias:** `AppointmentPersistenceRepository`, `AppointmentPersistenceAssembler`, `OutboxMessageRepository`
+* **Métodos Implementados:**
+  * `Appointment save(Appointment appointment)`: Persiste la cita en la tabla `appointments`, serializa eventos (`AppointmentScheduledEvent`, `AppointmentConfirmedEvent`, `AppointmentArrivedEvent`, `AppointmentCanceledEvent`) en `outbox_messages` y limpia el agregado.
+  * `Optional<Appointment> findById(AppointmentId id)`: Reconstituye la cita técnica en su estado operativo actual.
+  * `List<Appointment> findByTenantIdAndBranchIdAndDate(TenantId tenantId, BranchId branchId, Instant startOfDay, Instant endOfDay)`: Proyecta la grilla de citas para una sede y rango de fechas.
+  * `List<Appointment> findByCustomerId(CustomerId customerId)`: Historial de citas agendadas por un cliente.
+  * `List<Appointment> findByVehicleId(VehicleId vehicleId)`: Historial de citas vinculadas a un vehículo.
+  * `long countActiveByBranchAndSlot(TenantId tenantId, BranchId branchId, Instant slotStart, Instant slotEnd)`: Cuantifica citas solapadas en la ventana de tiempo para gobernar la capacidad de recepción técnica.
 
 ---
 
 #### 5.5.4. Persistence Assemblers
 
-* `CustomerPersistenceAssembler`: Transforma `Customer` <-> `CustomerPersistenceEntity`.
-* `VehiclePersistenceAssembler`: Transforma `Vehicle` <-> `VehiclePersistenceEntity`.
-* `VehicleOwnershipPersistenceAssembler`: Transforma `VehicleOwnership` <-> `VehicleOwnershipPersistenceEntity`.
-* `AppointmentPersistenceAssembler`: Transforma `Appointment` <-> `AppointmentPersistenceEntity`.
+Ubicados en `com.andeva.atelier.platform.crm.infrastructure.persistence.jpa.assemblers`. Son clases especializadas en la traducción bidireccional entre los modelos de dominio puros (inmutables, con Value Objects y lógica encapsulada) y las entidades de persistencia JPA mutables:
+
+##### Principio de Aislamiento del Ciclo de Vida:
+Los métodos `toDomain` reconstituyen los agregados y entidades sin invocar métodos de negocio que alteren el estado ni factorías de creación que emitan eventos de dominio (`domainEvents`). Se garantiza así que la simple lectura desde base de datos no genere eventos de integración espurios en el *Transactional Outbox*.
+
+##### 1. `CustomerPersistenceAssembler`
+* **`CustomerPersistenceEntity toPersistence(Customer domain)`:**
+  * Extrae los valores escalares primitivos de los Value Objects del agregado (`id.value()`, `tenantId.value()`, `taxId.value()`, `email.value()`, `phone.value()`, `status`).
+  * Discrimina según el tipo (`INDIVIDUAL` mapea `firstName` y `lastName`, mientras que `COMPANY` mapea `companyName`).
+  * Si la entidad JPA ya existe, actualiza sus campos mutables preservando la versión e identidad de Hibernate.
+* **`Customer toDomain(CustomerPersistenceEntity entity)`:**
+  * Reconstituye el agregado `Customer` mediante su factoría estática de reconstitución interna (`Customer.reconstitute(...)`), instanciando de forma segura los Value Objects (`CustomerId`, `TenantId`, `PersonName`, `TaxId`, `EmailAddress`, `PhoneNumber`, `CustomerStatus`).
+
+##### 2. `VehiclePersistenceAssembler`
+* **`VehiclePersistenceEntity toPersistence(Vehicle domain)`:**
+  * Transfiere placa normalizada, VIN alfanumérico, marca, modelo, año y tipo de motorización a columnas JPA.
+  * Mapea en cascada cada elemento de `domain.getOwnershipHistory()` a `VehicleOwnershipPersistenceEntity` mediante `VehicleOwnershipPersistenceAssembler`.
+* **`Vehicle toDomain(VehiclePersistenceEntity entity)`:**
+  * Reconstituye el agregado raíz `Vehicle` e hidrata su colección inmutable `ownershipHistory` a partir de las entidades JPA hijas ordenadas cronológicamente, sin disparar `VehicleRegisteredEvent`.
+
+##### 3. `VehicleOwnershipPersistenceAssembler`
+* **`VehicleOwnershipPersistenceEntity toPersistence(VehicleOwnership domain, VehiclePersistenceEntity vehicleEntity)`:**
+  * Asocia la clave foránea hacia la entidad de persistencia del vehículo (`vehicleEntity`), el identificador del cliente (`domain.customerId().value()`), `startDate` y `endDate`.
+* **`VehicleOwnership toDomain(VehicleOwnershipPersistenceEntity entity)`:**
+  * Reconstituye la entidad de dominio `VehicleOwnership` instanciando `VehicleOwnershipId`, `VehicleId`, `CustomerId`, `startDate` y `endDate`.
+
+##### 4. `AppointmentPersistenceAssembler`
+* **`AppointmentPersistenceEntity toPersistence(Appointment domain)`:**
+  * Mapea los identificadores foráneos (`tenantId`, `branchId`, `customerId`, `vehicleId`), la fecha `scheduledAt`, duración en minutos, motivo, estado y motivo de cancelación.
+* **`Appointment toDomain(AppointmentPersistenceEntity entity)`:**
+  * Reconstituye el agregado `Appointment` mediante su factoría de reconstitución (`Appointment.reconstitute(...)`), asignando el estado operativo actual sin emitir eventos iniciales de agendamiento.
 
 ---
 
-#### 5.5.5. JPA Converters
+#### 5.5.5. JPA Attribute Converters
 
-* `LicensePlateAttributeConverter`: Convierte `LicensePlate` a `varchar(15)`.
-* `VinAttributeConverter`: Convierte `Vin` a `varchar(17)`.
-* `CustomerTypeAttributeConverter`: Convierte `CustomerType` a `varchar(20)`.
-* `EngineTypeAttributeConverter`: Convierte `EngineType` a `varchar(20)`.
-* `AppointmentStatusAttributeConverter`: Convierte `AppointmentStatus` a `varchar(20)`.
+Ubicados en `com.andeva.atelier.platform.crm.infrastructure.persistence.jpa.converters`. Clases que implementan `jakarta.persistence.AttributeConverter<X, Y>` para garantizar la serialización segura y transparente entre Value Objects tipados de Java y columnas escalares de PostgreSQL:
+
+##### 1. `LicensePlateAttributeConverter`
+* **Implementa:** `AttributeConverter<LicensePlate, String>`
+* **`convertToDatabaseColumn(LicensePlate attribute)`:** Retorna la placa vehicular como cadena limpia en mayúsculas sin guiones ni espacios (ej. `"ABC123"`), o `null` si el atributo es nulo. Mapeado a columna `VARCHAR(15)`.
+* **`convertToEntityAttribute(String dbData)`:** Retorna `dbData != null ? new LicensePlate(dbData) : null`, validando el formato reglamentario peruano.
+
+##### 2. `VinAttributeConverter`
+* **Implementa:** `AttributeConverter<Vin, String>`
+* **`convertToDatabaseColumn(Vin attribute)`:** Retorna el código de 17 caracteres alfanuméricos ISO 3779 o `null`. Mapeado a columna `VARCHAR(17)`.
+* **`convertToEntityAttribute(String dbData)`:** Retorna `dbData != null ? new Vin(dbData) : null`.
+
+##### 3. `CustomerTypeAttributeConverter`
+* **Implementa:** `AttributeConverter<CustomerType, String>`
+* **`convertToDatabaseColumn(CustomerType attribute)`:** Mapea el enum `CustomerType` a valor escalar en minúsculas (`"individual"`, `"company"`). Mapeado a columna `VARCHAR(20)`.
+* **`convertToEntityAttribute(String dbData)`:** Realiza una resolución insensible a mayúsculas/minúsculas hacia `CustomerType.valueOf(dbData.toUpperCase())`.
+
+##### 4. `EngineTypeAttributeConverter`
+* **Implementa:** `AttributeConverter<EngineType, String>`
+* **`convertToDatabaseColumn(EngineType attribute)`:** Mapea el enum `EngineType` a su representación escalar en minúsculas (`"gasoline"`, `"diesel"`, `"electric"`, `"hybrid"`). Mapeado a columna `VARCHAR(20)`.
+* **`convertToEntityAttribute(String dbData)`:** Resuelve la cadena de base de datos hacia la constante correspondiente del enum `EngineType`.
+
+##### 5. `AppointmentStatusAttributeConverter`
+* **Implementa:** `AttributeConverter<AppointmentStatus, String>`
+* **`convertToDatabaseColumn(AppointmentStatus attribute)`:** Mapea el estado operativo a valor escalar en minúsculas (`"pending"`, `"confirmed"`, `"arrived"`, `"canceled"`). Mapeado a columna `VARCHAR(20)`.
+* **`convertToEntityAttribute(String dbData)`:** Convierte el valor de base de datos hacia el enum tipado `AppointmentStatus`.
+
+##### 6. `TaxIdAttributeConverter`
+* **Implementa:** `AttributeConverter<TaxId, String>`
+* **`convertToDatabaseColumn(TaxId attribute)`:** Extrae el valor numérico del documento tributario (`attribute.value()`), almacenándolo en columna `VARCHAR(20)`.
+* **`convertToEntityAttribute(String dbData)`:** Retorna `dbData != null ? new TaxId(dbData) : null`, aplicando la validación de 8 dígitos para DNI o 11 dígitos para RUC.
+
+##### 7. `EmailAddressAttributeConverter`
+* **Implementa:** `AttributeConverter<EmailAddress, String>`
+* **`convertToDatabaseColumn(EmailAddress attribute)`:** Retorna el correo electrónico canónico en minúsculas (`attribute.value()`), mapeado a columna `VARCHAR(150)`.
+* **`convertToEntityAttribute(String dbData)`:** Retorna `dbData != null ? new EmailAddress(dbData) : null`.
 
 ---
 
 #### 5.5.6. Pasarelas Externas de Infraestructura
 
-##### 1. `GooglePlacesClient` (Google Maps Places API)
-* Paquete: `com.andeva.atelier.platform.crm.infrastructure.external.places`
-* Invoca la API REST de Google Places vía HTTPS con API Key para validación de direcciones de flotas comerciales B2B y cálculo de geocodificación inversa.
+Implementaciones técnicas de los puertos de salida de la Capa de Aplicación (`PlacesAddressVerificationGateway`, `DriverAppPushGateway`, `SubscriptionValidationService`), ubicadas bajo el paquete `com.andeva.atelier.platform.crm.infrastructure.external`:
+
+##### 1. `GooglePlacesClient` (Google Maps Places API Gateway)
+* **Paquete:** `com.andeva.atelier.platform.crm.infrastructure.external.google`
+* **Implementa:** `PlacesAddressVerificationGateway`
+* **Tecnología:** Spring 6 `RestClient` sobre protocolo seguro HTTPS (puerto 443), invocando los endpoints oficiales de Google Places API (`/maps/api/place/findplacefromtext/json` y `/maps/api/place/details/json`).
+* **Responsabilidad:** Validación, estandarización y enriquecimiento de domicilios fiscales y bases operativas de flotas comerciales B2B. Obtiene las coordenadas geográficas de precisión (latitud y longitud en formato WGS 84), componentes estructurados de dirección (calle, numeración, distrito, provincia, departamento) y código postal.
+* **Resiliencia y Seguridad:** Autenticación mediante API Key de Google Cloud inyectada desde la variable de entorno protegida `GOOGLE_MAPS_API_KEY`. Configura una política de tiempos límite estrictos (timeout de conexión de 3 segundos y timeout de lectura de 5 segundos) y un patrón de *fallback* resiliente que preserva la dirección original no verificada en caso de degradación temporal del servicio de Google.
 
 ##### 2. `DriverAppFcmClient` (Firebase Cloud Messaging Gateway)
-* Paquete: `com.andeva.atelier.platform.crm.infrastructure.external.fcm`
-* Emplea el SDK oficial de **Firebase Admin** para despachar tramas push seguras hacia dispositivos móviles Android/iOS donde corre **Atelier Driver**. Notifica confirmación de citas y recordatorios 24 horas antes de la llegada al taller.
+* **Paquete:** `com.andeva.atelier.platform.crm.infrastructure.external.firebase`
+* **Implementa:** `DriverAppPushGateway`
+* **Tecnología:** SDK oficial de **Firebase Admin** (`com.google.firebase:firebase-admin:9.3.0`).
+* **Responsabilidad:** Construcción, empaquetado y despacho seguro de notificaciones push móviles hacia las instancias de la aplicación **Atelier Driver** desplegadas en dispositivos Android e iOS de los conductores y propietarios de vehículos.
+* **Casos de Despacho:**
+  * Notificación push inmediata tras la confirmación de la cita técnica (`AppointmentConfirmedEvent`), adjuntando nombre de la sede física y coordenadas GPS.
+  * Recordatorio automático preventivo 24 horas antes del horario programado de atención.
+  * Notificación push tras el arribo formal a patio de recepción (`AppointmentArrivedEvent`), informando que la inspección preliminar ha comenzado.
+  * Alerta de anulación con exposición del motivo (`AppointmentCanceledEvent`).
+* **Seguridad y Gestión de Tokens:** Se autentica mediante credenciales de cuenta de servicio de Google Cloud (`service-account.json`) inyectadas de forma segura. Captura excepciones de tokens caducados o revocados (`FirebaseMessagingException` con códigos `UNREGISTERED` o `INVALID_ARGUMENT`) para solicitar la invalidación asíncrona del token en el perfil móvil del usuario.
+
+##### 3. `SubscriptionValidationClient` (Cliente de Integración de Cuotas SaaS Billing)
+* **Paquete:** `com.andeva.atelier.platform.crm.infrastructure.external.billing`
+* **Implementa:** `SubscriptionValidationService`
+* **Tecnología:** Integración síncrona en memoria a través de la interfaz de fachada `BillingContextFacade` (cuando opera en modo monolito modular) o cliente HTTP seguro (`RestClient` con token de servicio JWT inter-servicio en despliegue distribuido).
+* **Responsabilidad:** Verificación en tiempo real de las cuotas contractuales del plan de suscripción SaaS contratado por el taller (`tenantId`) antes de admitir operaciones mutacionales de alta en el CRM:
+  * `boolean validateCustomerQuota(UUID tenantId)`: Comprueba si el taller ha alcanzado el límite máximo de clientes permitidos según su plan activo (ej. Plan Básico con tope de 100 clientes, Plan Pro hasta 500 clientes, Plan Enterprise ilimitado).
+  * `boolean validateVehicleQuota(UUID tenantId)`: Verifica que la cantidad de vehículos bajo custodia activa del taller no sobrepase el umbral contratado.
+* **Gobernanza:** Si la cuota contratada ha sido superada, bloquea de forma preventiva el registro lanzando una excepción de negocio (`QuotaExceededException`), asegurando la integridad del modelo de monetización SaaS de la plataforma Atelier.
 
 ---
 
@@ -2343,19 +3688,19 @@ El **Workshop Operations Context (MRO - Maintenance, Repair, and Operations)** e
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<WorkOrder>`
 * **Propósito:** Representa la orden de servicio automotriz. Es el agregado raíz que custodia la integridad del diagnóstico, la asignación de bahía, las tareas mecánicas y los repuestos demandados.
 * **Atributos:**
-  * `id: WorkOrderId` — Identificador único universal de la orden (UUID).
-  * `tenantId: TenantId` — Taller mecánico propietario.
-  * `appointmentId: AppointmentId` — Cita previa de la cual deriva la orden (nullable si es ingreso directo de emergencia).
-  * `vehicleId: VehicleId` — Vehículo objeto de intervención mecánica.
-  * `internalNumber: Integer` — Correlativo numérico secuencial legible por el cliente (ej. 1042).
-  * `currentBayId: WorkBayId` — Bahía física donde se encuentra estacionado el vehículo (nullable).
-  * `mileageIn: Mileage` — Kilometraje del vehículo al momento de ingresar a recepción.
-  * `diagnosticSummary: DiagnosticSummary` — Diagnóstico y fallas reportadas (máx. 2000 caracteres).
-  * `totalAmount: Money` — Importe total calculado de la orden (mano de obra + repuestos consumidos).
-  * `status: WorkOrderStatus` — Estado operativo (`DRAFT`, `IN_PROGRESS`, `COMPLETED`, `PAID`, `CANCELED`).
-  * `tasks: List<WorkOrderTask>` — Colección interna de tareas de mano de obra.
-  * `proposals: List<TaskProposal>` — Colección interna de hallazgos periciales y propuestas de tareas adicionales detectadas en foso.
-  * `intakeImages: List<WorkOrderImage>` — Colección de evidencias fotográficas de recepción.
+  * `id: WorkOrderId`: Identificador único universal de la orden (UUID).
+  * `tenantId: TenantId`: Taller mecánico propietario.
+  * `appointmentId: AppointmentId`: Cita previa de la cual deriva la orden (nullable si es ingreso directo de emergencia).
+  * `vehicleId: VehicleId`: Vehículo objeto de intervención mecánica.
+  * `internalNumber: Integer`: Correlativo numérico secuencial legible por el cliente (ej. 1042).
+  * `currentBayId: WorkBayId`: Bahía física donde se encuentra estacionado el vehículo (nullable).
+  * `mileageIn: Mileage`: Kilometraje del vehículo al momento de ingresar a recepción.
+  * `diagnosticSummary: DiagnosticSummary`: Diagnóstico y fallas reportadas (máx. 2000 caracteres).
+  * `totalAmount: Money`: Importe total calculado de la orden (mano de obra + repuestos consumidos).
+  * `status: WorkOrderStatus`: Estado operativo (`DRAFT`, `IN_PROGRESS`, `COMPLETED`, `PAID`, `CANCELED`).
+  * `tasks: List<WorkOrderTask>`: Colección interna de tareas de mano de obra.
+  * `proposals: List<TaskProposal>`: Colección interna de hallazgos periciales y propuestas de tareas adicionales detectadas en foso.
+  * `intakeImages: List<WorkOrderImage>`: Colección de evidencias fotográficas de recepción.
 * **Invariantes y Reglas de Negocio:**
   * El kilometraje de ingreso `mileageIn` no puede ser negativo (`value >= 0`).
   * No se pueden agregar, modificar ni eliminar tareas o repuestos si la orden está en estado `COMPLETED`, `PAID` o `CANCELED`.
@@ -2386,13 +3731,13 @@ El **Workshop Operations Context (MRO - Maintenance, Repair, and Operations)** e
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<WorkBay>`
 * **Propósito:** Representa un espacio físico o puesto de trabajo habilitado en una sucursal del taller (elevador de dos columnas, fosa mecánica, cabina de pintura, etc.).
 * **Atributos:**
-  * `id: WorkBayId` — Identificador único de la bahía (UUID).
-  * `tenantId: TenantId` — Taller propietario.
-  * `branchId: BranchId` — Sede física donde se ubica la bahía.
-  * `name: String` — Denominación identificatoria (ej. "Elevador 1", "Bahía Rápida A").
-  * `type: BayType` — Clasificación técnica (`LIFT`, `PAINT_BOOTH`, `WASHING`, `ALIGNMENT`).
-  * `status: BayStatus` — Estado de ocupación física (`AVAILABLE`, `OCCUPIED`, `MAINTENANCE`).
-  * `currentWorkOrderId: WorkOrderId` — Orden de trabajo que ocupa actualmente la bahía (nullable).
+  * `id: WorkBayId`: Identificador único de la bahía (UUID).
+  * `tenantId: TenantId`: Taller propietario.
+  * `branchId: BranchId`: Sede física donde se ubica la bahía.
+  * `name: String`: Denominación identificatoria (ej. "Elevador 1", "Bahía Rápida A").
+  * `type: BayType`: Clasificación técnica (`LIFT`, `PAINT_BOOTH`, `WASHING`, `ALIGNMENT`).
+  * `status: BayStatus`: Estado de ocupación física (`AVAILABLE`, `OCCUPIED`, `MAINTENANCE`).
+  * `currentWorkOrderId: WorkOrderId`: Orden de trabajo que ocupa actualmente la bahía (nullable).
 * **Invariantes y Reglas de Negocio:**
   * No se puede ocupar una bahía que ya se encuentre en estado `OCCUPIED` o `MAINTENANCE`.
   * Solo una bahía ocupada puede ser liberada.
@@ -2408,11 +3753,11 @@ El **Workshop Operations Context (MRO - Maintenance, Repair, and Operations)** e
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<Service>`
 * **Propósito:** Modela el catálogo de servicios estándar y paquetes de mano de obra que ofrece el taller automotriz a sus clientes.
 * **Atributos:**
-  * `id: ServiceId` — Identificador del servicio (UUID).
-  * `tenantId: TenantId` — Taller dueño del catálogo.
-  * `name: String` — Denominación del servicio (ej. "Alineamiento y Balanceo Computarizado", "Cambio de Pastillas de Freno").
-  * `basePrice: Money` — Tarifa base sugerida por concepto de mano de obra.
-  * `estimatedDurationMinutes: int` — Tiempo promedio estimado de ejecución técnica (default: 60 minutos).
+  * `id: ServiceId`: Identificador del servicio (UUID).
+  * `tenantId: TenantId`: Taller dueño del catálogo.
+  * `name: String`: Denominación del servicio (ej. "Alineamiento y Balanceo Computarizado", "Cambio de Pastillas de Freno").
+  * `basePrice: Money`: Tarifa base sugerida por concepto de mano de obra.
+  * `estimatedDurationMinutes: int`: Tiempo promedio estimado de ejecución técnica (default: 60 minutos).
 * **Métodos:**
   * `+ static Service create(TenantId tenantId, String name, Money basePrice, int estimatedMinutes): Service`: Factoría de dominio.
   * `+ void updateDetails(String newName, Money newBasePrice, int newEstimatedMinutes): void`: Actualiza tarifa y tiempos estándar.
@@ -2425,21 +3770,21 @@ El **Workshop Operations Context (MRO - Maintenance, Repair, and Operations)** e
 * **Paquete:** `com.andeva.atelier.platform.operations.domain.model.entities`
 * **Propósito:** Representa una actividad concreta de mano de obra dentro del plan de reparación vehicular.
 * **Atributos:**
-  * `id: WorkOrderTaskId` — Identificador único de la tarea (UUID).
-  * `workOrderId: WorkOrderId` — Orden de trabajo a la que pertenece.
-  * `serviceId: ServiceId` — Servicio de catálogo asociado.
-  * `mechanicId: UUID` — Identificador de membresía del mecánico asignado (referencia a `tenant_memberships`, nullable).
-  * `status: WorkOrderTaskStatus` — Estado de la labor (`PENDING`, `ASSIGNED`, `IN_PROGRESS`, `ON_HOLD`, `COMPLETED`, `CANCELLED`).
-  * `description: String` — Detalle del procedimiento mecánico o diagnóstico específico.
-  * `price: Money` — Costo cobrado por la mano de obra de esta tarea específica.
-  * `holdReason: HoldReason` — Causal objetiva de detención temporal (`WAITING_PARTS`, nullable).
-  * `missingItemDescription: String` — Descripción pericial del repuesto o insumo faltante que motiva la detención (nullable).
-  * `pausedAt: Instant` — Marca temporal exacta en que la labor fue pausada en foso (nullable).
-  * `totalPausedSeconds: Long` — Tiempo acumulado de inactividad técnica en segundos.
-  * `startedAt: Instant` — Marca de tiempo en que el mecánico inició la tarea.
-  * `completedAt: Instant` — Marca de tiempo en que el mecánico finalizó la labor.
-  * `consumedProducts: List<WorkOrderTaskProduct>` — Colección de repuestos utilizados en esta tarea.
-  * `taskImages: List<WorkOrderTaskImage>` — Evidencias fotográficas específicas de esta labor.
+  * `id: WorkOrderTaskId`: Identificador único de la tarea (UUID).
+  * `workOrderId: WorkOrderId`: Orden de trabajo a la que pertenece.
+  * `serviceId: ServiceId`: Servicio de catálogo asociado.
+  * `mechanicId: UUID`: Identificador de membresía del mecánico asignado (referencia a `tenant_memberships`, nullable).
+  * `status: WorkOrderTaskStatus`: Estado de la labor (`PENDING`, `ASSIGNED`, `IN_PROGRESS`, `ON_HOLD`, `COMPLETED`, `CANCELLED`).
+  * `description: String`: Detalle del procedimiento mecánico o diagnóstico específico.
+  * `price: Money`: Costo cobrado por la mano de obra de esta tarea específica.
+  * `holdReason: HoldReason`: Causal objetiva de detención temporal (`WAITING_PARTS`, nullable).
+  * `missingItemDescription: String`: Descripción pericial del repuesto o insumo faltante que motiva la detención (nullable).
+  * `pausedAt: Instant`: Marca temporal exacta en que la labor fue pausada en foso (nullable).
+  * `totalPausedSeconds: Long`: Tiempo acumulado de inactividad técnica en segundos.
+  * `startedAt: Instant`: Marca de tiempo en que el mecánico inició la tarea.
+  * `completedAt: Instant`: Marca de tiempo en que el mecánico finalizó la labor.
+  * `consumedProducts: List<WorkOrderTaskProduct>`: Colección de repuestos utilizados en esta tarea.
+  * `taskImages: List<WorkOrderTaskImage>`: Evidencias fotográficas específicas de esta labor.
 * **Métodos:**
   * `+ void assignMechanic(UUID mechanicMembershipId): void`: Asocia el técnico responsable de la intervención y transiciona a `ASSIGNED`.
   * `+ void start(): void`: Registra `startedAt = Instant.now()`, fija `status = IN_PROGRESS` y dispara `WorkOrderTaskStartedEvent`.
@@ -2456,12 +3801,12 @@ El **Workshop Operations Context (MRO - Maintenance, Repair, and Operations)** e
 * **Paquete:** `com.andeva.atelier.platform.operations.domain.model.entities`
 * **Propósito:** Cuantifica el consumo de un repuesto, insumo o lubricante físico para una tarea determinada.
 * **Atributos:**
-  * `id: WorkOrderTaskProductId` — Identificador único del ítem (UUID).
-  * `taskId: WorkOrderTaskId` — Tarea que demanda el repuesto.
-  * `productId: UUID` — Identificador del ítem en catálogo (`inventory_items`).
-  * `quantity: Quantity` — Cantidad solicitada (con precisión de dos decimales).
-  * `unitPrice: Money` — Precio unitario de venta pactado al momento de su incorporación.
-  * `totalAmount: Money` — Subtotal calculado (`quantity * unitPrice`).
+  * `id: WorkOrderTaskProductId`: Identificador único del ítem (UUID).
+  * `taskId: WorkOrderTaskId`: Tarea que demanda el repuesto.
+  * `productId: UUID`: Identificador del ítem en catálogo (`inventory_items`).
+  * `quantity: Quantity`: Cantidad solicitada (con precisión de dos decimales).
+  * `unitPrice: Money`: Precio unitario de venta pactado al momento de su incorporación.
+  * `totalAmount: Money`: Subtotal calculado (`quantity * unitPrice`).
 * **Métodos:**
   * `+ void updateQuantity(Quantity newQuantity): void`: Modifica la cantidad consumida y recalcula `totalAmount`.
 
@@ -2469,39 +3814,39 @@ El **Workshop Operations Context (MRO - Maintenance, Repair, and Operations)** e
 * **Paquete:** `com.andeva.atelier.platform.operations.domain.model.entities`
 * **Propósito:** Registra evidencias visuales del peritaje de ingreso a recepción del taller bajo el patrón Direct-to-Cloud.
 * **Atributos:**
-  * `id: UUID` — Identificador del registro fotográfico.
-  * `workOrderId: WorkOrderId` — Orden de trabajo vinculada.
-  * `imageUrl: StorageUrl` — URL pública inmutable del objeto alojado en Firebase Cloud Storage.
-  * `description: String` — Nota explicativa del perito (ej. "Abolladura previa en parachoque delantero").
-  * `uploadedAt: Instant` — Marca de tiempo de registro.
+  * `id: UUID`: Identificador del registro fotográfico.
+  * `workOrderId: WorkOrderId`: Orden de trabajo vinculada.
+  * `imageUrl: StorageUrl`: URL pública inmutable del objeto alojado en Firebase Cloud Storage.
+  * `description: String`: Nota explicativa del perito (ej. "Abolladura previa en parachoque delantero").
+  * `uploadedAt: Instant`: Marca de tiempo de registro.
 
 ##### 4. `WorkOrderTaskImage` (Entidad Dependiente de `WorkOrderTask`)
 * **Paquete:** `com.andeva.atelier.platform.operations.domain.model.entities`
 * **Propósito:** Registra evidencias visuales del procedimiento técnico ejecutado por el mecánico en foso.
 * **Atributos:**
-  * `id: UUID` — Identificador del registro.
-  * `taskId: WorkOrderTaskId` — Tarea mecánica asociada.
-  * `imageUrl: StorageUrl` — URL pública inmutable en Firebase Cloud Storage.
-  * `evidenceType: EvidenceType` — Tipología pericial (`INITIAL_INSPECTION`, `DEFECT`, `IN_PROGRESS`, `COMPLETED`).
-  * `description: String` — Descripción técnica (ej. "Disco de freno fisurado vs disco ventilado nuevo").
-  * `uploadedAt: Instant` — Marca de tiempo.
+  * `id: UUID`: Identificador del registro.
+  * `taskId: WorkOrderTaskId`: Tarea mecánica asociada.
+  * `imageUrl: StorageUrl`: URL pública inmutable en Firebase Cloud Storage.
+  * `evidenceType: EvidenceType`: Tipología pericial (`INITIAL_INSPECTION`, `DEFECT`, `IN_PROGRESS`, `COMPLETED`).
+  * `description: String`: Descripción técnica (ej. "Disco de freno fisurado vs disco ventilado nuevo").
+  * `uploadedAt: Instant`: Marca de tiempo.
 
 ##### 5. `TaskProposal` (Entidad Dependiente de `WorkOrder`)
 * **Paquete:** `com.andeva.atelier.platform.operations.domain.model.entities`
 * **Propósito:** Modela hallazgos periciales y averías imprevistas detectadas por el mecánico en foso o elevador. El mecánico reporta la falla técnica objetiva sin calcular montos financieros; el Asesor de Servicio presupuesta y acuerda con el cliente antes de crear la tarea formal.
 * **Atributos:**
-  * `id: UUID` — Identificador del hallazgo / propuesta.
-  * `workOrderId: WorkOrderId` — Orden de trabajo vinculada.
-  * `taskId: WorkOrderTaskId` — Tarea durante la cual se detectó la falla (nullable).
-  * `serviceId: ServiceId` — Servicio de catálogo sugerido (nullable).
-  * `mechanicId: UUID` — Técnico que detectó el hallazgo.
-  * `description: String` — Detalle técnico de la falla.
-  * `severity: ProposalSeverity` — Severidad técnica (`LOW`, `MEDIUM`, `CRITICAL`).
-  * `imageUrl: StorageUrl` — Evidencia fotográfica pericial en Firebase Storage.
-  * `status: ProposalStatus` — Estado (`PENDING_REVIEW`, `APPROVED`, `REJECTED`).
-  * `customerNotes: String` — Motivo de aprobación o rechazo concertado con el cliente.
-  * `createdAt: Instant` — Fecha de detección.
-  * `updatedAt: Instant` — Fecha de resolución por el asesor.
+  * `id: UUID`: Identificador del hallazgo / propuesta.
+  * `workOrderId: WorkOrderId`: Orden de trabajo vinculada.
+  * `taskId: WorkOrderTaskId`: Tarea durante la cual se detectó la falla (nullable).
+  * `serviceId: ServiceId`: Servicio de catálogo sugerido (nullable).
+  * `mechanicId: UUID`: Técnico que detectó el hallazgo.
+  * `description: String`: Detalle técnico de la falla.
+  * `severity: ProposalSeverity`: Severidad técnica (`LOW`, `MEDIUM`, `CRITICAL`).
+  * `imageUrl: StorageUrl`: Evidencia fotográfica pericial en Firebase Storage.
+  * `status: ProposalStatus`: Estado (`PENDING_REVIEW`, `APPROVED`, `REJECTED`).
+  * `customerNotes: String`: Motivo de aprobación o rechazo concertado con el cliente.
+  * `createdAt: Instant`: Fecha de detección.
+  * `updatedAt: Instant`: Fecha de resolución por el asesor.
 * **Métodos:**
   * `+ void approve(String notes): void`: Transiciona a `APPROVED`.
   * `+ void reject(String reason): void`: Transiciona a `REJECTED`.
@@ -3496,16 +4841,16 @@ El **Inventory & Supply Chain Context** opera como el núcleo logístico y finan
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<InventoryItem>`
 * **Propósito:** Representa un tipo de repuesto, líquido o consumible comercializado o utilizado en el taller. Es la raíz del agregado que custodia la suma virtual de existencias y sus lotes FIFO asociados.
 * **Atributos:**
-  * `id: InventoryItemId` — Identificador universal del repuesto (UUID).
-  * `tenantId: TenantId` — Taller mecánico dueño del inventario.
-  * `name: String` — Denominación comercial (ej. "Filtro de Aceite Bosch PH3614", "Aceite Sintético 5W-30 Mobil 1").
-  * `sku: Sku` — Código interno o número de parte de fabricante (único por taller).
-  * `category: ItemCategory` — Categoría técnica (`LUBRICANTS`, `BRAKES`, `SUSPENSION`, `ENGINE`, `ELECTRICAL`, `TIRES`, `FILTERS`).
-  * `basePrice: Money` — Precio unitario de venta sugerido al cliente final.
-  * `totalStock: Quantity` — Cantidad total de existencias disponibles (suma virtual de `remaining_qty` de todos los lotes activos).
-  * `minimumStock: Quantity` — Umbral mínimo de existencias para disparo de alertas de reorden.
-  * `status: InventoryItemStatus` — Estado del ítem (`ACTIVE`, `INACTIVE`, `DISCONTINUED`).
-  * `batches: List<InventoryBatch>` — Colección interna de lotes físicos ordenados cronológicamente.
+  * `id: InventoryItemId`: Identificador universal del repuesto (UUID).
+  * `tenantId: TenantId`: Taller mecánico dueño del inventario.
+  * `name: String`: Denominación comercial (ej. "Filtro de Aceite Bosch PH3614", "Aceite Sintético 5W-30 Mobil 1").
+  * `sku: Sku`: Código interno o número de parte de fabricante (único por taller).
+  * `category: ItemCategory`: Categoría técnica (`LUBRICANTS`, `BRAKES`, `SUSPENSION`, `ENGINE`, `ELECTRICAL`, `TIRES`, `FILTERS`).
+  * `basePrice: Money`: Precio unitario de venta sugerido al cliente final.
+  * `totalStock: Quantity`: Cantidad total de existencias disponibles (suma virtual de `remaining_qty` de todos los lotes activos).
+  * `minimumStock: Quantity`: Umbral mínimo de existencias para disparo de alertas de reorden.
+  * `status: InventoryItemStatus`: Estado del ítem (`ACTIVE`, `INACTIVE`, `DISCONTINUED`).
+  * `batches: List<InventoryBatch>`: Colección interna de lotes físicos ordenados cronológicamente.
 * **Invariantes y Reglas de Negocio:**
   * El `sku` debe ser único en el ámbito del `tenantId`.
   * El `totalStock` no puede ser negativo y siempre debe ser exactamente igual a la suma aritmética de los `remainingQuantity` de los lotes de la colección interna.
@@ -3530,15 +4875,15 @@ El **Inventory & Supply Chain Context** opera como el núcleo logístico y finan
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<Supplier>`
 * **Propósito:** Modela al proveedor comercial de repuestos, lubricantes y consumibles del taller.
 * **Atributos:**
-  * `id: SupplierId` — Identificador único del proveedor (UUID).
-  * `tenantId: TenantId` — Taller propietario del registro de proveedor.
-  * `businessName: String` — Razón Social o nombre comercial formal.
-  * `taxId: TaxId` — RUC de 11 dígitos de la empresa proveedora (validado formalmente).
-  * `contactName: String` — Nombre de la persona o asesor de ventas de contacto.
-  * `phone: PhoneNumber` — Teléfono de contacto.
-  * `email: EmailAddress` — Correo electrónico para cotizaciones y órdenes de compra.
-  * `address: String` — Dirección fiscal o almacén principal del proveedor.
-  * `isActive: boolean` — Estado operativo del proveedor en el taller.
+  * `id: SupplierId`: Identificador único del proveedor (UUID).
+  * `tenantId: TenantId`: Taller propietario del registro de proveedor.
+  * `businessName: String`: Razón Social o nombre comercial formal.
+  * `taxId: TaxId`: RUC de 11 dígitos de la empresa proveedora (validado formalmente).
+  * `contactName: String`: Nombre de la persona o asesor de ventas de contacto.
+  * `phone: PhoneNumber`: Teléfono de contacto.
+  * `email: EmailAddress`: Correo electrónico para cotizaciones y órdenes de compra.
+  * `address: String`: Dirección fiscal o almacén principal del proveedor.
+  * `isActive: boolean`: Estado operativo del proveedor en el taller.
 * **Invariantes y Reglas de Negocio:**
   * El `taxId` (RUC) es obligatorio y único dentro del mismo taller (`tenant_id, tax_id`).
   * `businessName` no puede ser vacío.
@@ -3553,17 +4898,17 @@ El **Inventory & Supply Chain Context** opera como el núcleo logístico y finan
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<PurchaseOrder>`
 * **Propósito:** Representa la orden formal de adquisición de repuestos emitida a un proveedor y su posterior recepción física con comprobante.
 * **Atributos:**
-  * `id: PurchaseOrderId` — Identificador universal de la orden de compra (UUID).
-  * `tenantId: TenantId` — Taller emisor.
-  * `supplierId: SupplierId` — Proveedor seleccionado.
-  * `branchId: BranchId` — Sede física que recibirá la mercadería.
-  * `orderNumber: String` — Correlativo interno de compra (ej. "OC-2026-0042").
-  * `status: PurchaseOrderStatus` — Estado (`DRAFT`, `ISSUED`, `RECEIVED`, `CANCELED`).
-  * `totalCost: Money` — Costo total de adquisición de la orden.
-  * `receiptImageUrl: ImageUrl` — URL de la factura o boleta escaneada en Firebase Storage (nullable hasta recepción).
-  * `receiptNumber: String` — Número del comprobante fiscal del proveedor (ej. "F001-004928", nullable hasta recepción).
-  * `receivedAt: Instant` — Fecha y hora de recepción física y conformidad (nullable hasta recepción).
-  * `items: List<PurchaseOrderItem>` — Colección de repuestos y cantidades compradas.
+  * `id: PurchaseOrderId`: Identificador universal de la orden de compra (UUID).
+  * `tenantId: TenantId`: Taller emisor.
+  * `supplierId: SupplierId`: Proveedor seleccionado.
+  * `branchId: BranchId`: Sede física que recibirá la mercadería.
+  * `orderNumber: String`: Correlativo interno de compra (ej. "OC-2026-0042").
+  * `status: PurchaseOrderStatus`: Estado (`DRAFT`, `ISSUED`, `RECEIVED`, `CANCELED`).
+  * `totalCost: Money`: Costo total de adquisición de la orden.
+  * `receiptImageUrl: ImageUrl`: URL de la factura o boleta escaneada en Firebase Storage (nullable hasta recepción).
+  * `receiptNumber: String`: Número del comprobante fiscal del proveedor (ej. "F001-004928", nullable hasta recepción).
+  * `receivedAt: Instant`: Fecha y hora de recepción física y conformidad (nullable hasta recepción).
+  * `items: List<PurchaseOrderItem>`: Colección de repuestos y cantidades compradas.
 * **Invariantes y Reglas de Negocio:**
   * No se pueden modificar ítems si la orden se encuentra en estado `RECEIVED` o `CANCELED`.
   * Solo una orden en estado `ISSUED` puede ser recibida (`RECEIVED`).
@@ -3588,16 +4933,16 @@ El **Inventory & Supply Chain Context** opera como el núcleo logístico y finan
 * **Paquete:** `com.andeva.atelier.platform.inventory.domain.model.entities`
 * **Propósito:** Modela el lote físico específico ingresado al taller, portador del costo de adquisición histórico para el algoritmo FIFO.
 * **Atributos:**
-  * `id: InventoryBatchId` — Identificador único del lote (UUID).
-  * `tenantId: TenantId` — Taller propietario.
-  * `itemId: InventoryItemId` — Repuesto al que pertenece el lote.
-  * `supplierId: SupplierId` — Proveedor de procedencia (nullable si es stock inicial).
-  * `batchNumber: String` — Código de lote provisto por el fabricante o proveedor.
-  * `initialQuantity: Quantity` — Cantidad original ingresada al almacén.
-  * `remainingQuantity: Quantity` — Cantidad remanente disponible para consumo.
-  * `unitCost: Money` — Costo unitario real de adquisición de este lote.
-  * `arrivalDate: Instant` — Marca de tiempo exacta de recepción (clave del ordenamiento FIFO).
-  * `receiptImageUrl: ImageUrl` — Enlace a la fotografía de la factura de compra en Firebase Storage.
+  * `id: InventoryBatchId`: Identificador único del lote (UUID).
+  * `tenantId: TenantId`: Taller propietario.
+  * `itemId: InventoryItemId`: Repuesto al que pertenece el lote.
+  * `supplierId: SupplierId`: Proveedor de procedencia (nullable si es stock inicial).
+  * `batchNumber: String`: Código de lote provisto por el fabricante o proveedor.
+  * `initialQuantity: Quantity`: Cantidad original ingresada al almacén.
+  * `remainingQuantity: Quantity`: Cantidad remanente disponible para consumo.
+  * `unitCost: Money`: Costo unitario real de adquisición de este lote.
+  * `arrivalDate: Instant`: Marca de tiempo exacta de recepción (clave del ordenamiento FIFO).
+  * `receiptImageUrl: ImageUrl`: Enlace a la fotografía de la factura de compra en Firebase Storage.
 * **Métodos:**
   * `+ boolean hasStock(): boolean`: Retorna `true` si `remainingQuantity.isGreaterThan(Quantity.ZERO)`.
   * `+ Quantity deduct(Quantity requestedQuantity): Quantity`: Deduce hasta el máximo de `remainingQuantity` disponible y retorna la cantidad efectivamente consumida de este lote.
@@ -3607,12 +4952,12 @@ El **Inventory & Supply Chain Context** opera como el núcleo logístico y finan
 * **Paquete:** `com.andeva.atelier.platform.inventory.domain.model.entities`
 * **Propósito:** Línea de detalle de compra de un repuesto específico.
 * **Atributos:**
-  * `id: PurchaseOrderItemId` — Identificador del ítem (UUID).
-  * `orderId: PurchaseOrderId` — Orden de compra padre.
-  * `itemId: InventoryItemId` — Repuesto solicitado.
-  * `quantity: Quantity` — Cantidad demandada.
-  * `unitCost: Money` — Costo unitario pactado con el proveedor.
-  * `totalCost: Money` — Subtotal calculado (`quantity * unitCost`).
+  * `id: PurchaseOrderItemId`: Identificador del ítem (UUID).
+  * `orderId: PurchaseOrderId`: Orden de compra padre.
+  * `itemId: InventoryItemId`: Repuesto solicitado.
+  * `quantity: Quantity`: Cantidad demandada.
+  * `unitCost: Money`: Costo unitario pactado con el proveedor.
+  * `totalCost: Money`: Subtotal calculado (`quantity * unitCost`).
 * **Métodos:**
   * `+ void updateQuantity(Quantity newQuantity): void`: Modifica cantidad y recalcula `totalCost`.
 
@@ -4394,12 +5739,12 @@ El **Human Resources Management (HR) Context** administra los aspectos laborales
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<WorkShift>`
 * **Propósito:** Representa un turno de trabajo laboral configurado para una empresa automotriz. Define los horarios oficiales de inicio y término, así como la tolerancia horaria para el ingreso del personal.
 * **Atributos:**
-  * `id: ShiftId` — Identificador universal del turno de trabajo (UUID).
-  * `tenantId: TenantId` — Identificador del taller automotriz propietario del turno.
-  * `name: String` — Denominación del turno (ej. "Turno Mañana Mecánicos", "Turno Integral Taller", "Guardia Nocturna").
-  * `schedule: ShiftSchedule` — Objeto de valor que encapsula la hora de inicio (`startTime`) y la hora de fin (`endTime`), contemplando soporte para cruce de medianoche.
-  * `gracePeriod: GracePeriod` — Objeto de valor que especifica los minutos de tolerancia permitidos antes de clasificar una marcación como tardanza (ej. 15 minutos).
-  * `isActive: boolean` — Bandera de disponibilidad operativa del turno.
+  * `id: ShiftId`: Identificador universal del turno de trabajo (UUID).
+  * `tenantId: TenantId`: Identificador del taller automotriz propietario del turno.
+  * `name: String`: Denominación del turno (ej. "Turno Mañana Mecánicos", "Turno Integral Taller", "Guardia Nocturna").
+  * `schedule: ShiftSchedule`: Objeto de valor que encapsula la hora de inicio (`startTime`) y la hora de fin (`endTime`), contemplando soporte para cruce de medianoche.
+  * `gracePeriod: GracePeriod`: Objeto de valor que especifica los minutos de tolerancia permitidos antes de clasificar una marcación como tardanza (ej. 15 minutos).
+  * `isActive: boolean`: Bandera de disponibilidad operativa del turno.
 * **Invariantes y Reglas de Negocio:**
   * El nombre del turno no puede ser nulo ni estar en blanco, y su longitud máxima es de 50 caracteres.
   * La hora de inicio y la hora de fin no pueden ser idénticas.
@@ -4417,19 +5762,19 @@ El **Human Resources Management (HR) Context** administra los aspectos laborales
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<AttendanceRecord>`
 * **Propósito:** Representa la evidencia de asistencia laboral de un empleado en una fecha y turno determinados. Custodia la marcación de ingreso, la marcación de egreso, la geolocalización satelital obtenida del smartphone y la distancia calculada contra la sucursal.
 * **Atributos:**
-  * `id: AttendanceId` — Identificador universal de la marcación (UUID).
-  * `tenantId: TenantId` — Taller propietario de la operación.
-  * `branchId: BranchId` — Sucursal física donde el empleado presta servicios.
-  * `membershipId: TenantMembershipId` — Identificador del empleado/mecánico en el sistema.
-  * `shiftId: ShiftId` — Turno de trabajo bajo el cual se evalúa la asistencia.
-  * `clockIn: Instant` — Timestamp exacto de registro de ingreso presencial.
-  * `clockOut: Instant` — Timestamp de registro de salida laboral (nullable hasta que el empleado finalice su jornada).
-  * `status: AttendanceStatus` — Clasificación del estado de asistencia (`ON_TIME`, `LATE`, `EXCUSED`, `ABSENT`).
-  * `checkInLocation: GeoCoordinates` — Coordenadas GPS satelitales (latitud, longitud) emitidas por el smartphone al momento del ingreso.
-  * `distanceToBranch: HaversineDistance` — Distancia física en metros calculada matemáticamente entre el smartphone y la sucursal.
-  * `justificationReason: String` — Descripción justificatoria aprobada por supervisión (nullable, requerida si el estado es `EXCUSED`).
-  * `justifiedBy: TenantMembershipId` — Identificador del supervisor o administrador que aprobó la excepción (nullable).
-  * `justifiedAt: Instant` — Momento cronológico de la justificación administrativa (nullable).
+  * `id: AttendanceId`: Identificador universal de la marcación (UUID).
+  * `tenantId: TenantId`: Taller propietario de la operación.
+  * `branchId: BranchId`: Sucursal física donde el empleado presta servicios.
+  * `membershipId: TenantMembershipId`: Identificador del empleado/mecánico en el sistema.
+  * `shiftId: ShiftId`: Turno de trabajo bajo el cual se evalúa la asistencia.
+  * `clockIn: Instant`: Timestamp exacto de registro de ingreso presencial.
+  * `clockOut: Instant`: Timestamp de registro de salida laboral (nullable hasta que el empleado finalice su jornada).
+  * `status: AttendanceStatus`: Clasificación del estado de asistencia (`ON_TIME`, `LATE`, `EXCUSED`, `ABSENT`).
+  * `checkInLocation: GeoCoordinates`: Coordenadas GPS satelitales (latitud, longitud) emitidas por el smartphone al momento del ingreso.
+  * `distanceToBranch: HaversineDistance`: Distancia física en metros calculada matemáticamente entre el smartphone y la sucursal.
+  * `justificationReason: String`: Descripción justificatoria aprobada por supervisión (nullable, requerida si el estado es `EXCUSED`).
+  * `justifiedBy: TenantMembershipId`: Identificador del supervisor o administrador que aprobó la excepción (nullable).
+  * `justifiedAt: Instant`: Momento cronológico de la justificación administrativa (nullable).
 * **Invariantes y Reglas de Negocio:**
   * La hora de salida (`clockOut`) no puede ser cronológicamente anterior a la hora de entrada (`clockIn`).
   * Las coordenadas GPS deben encontrarse en rangos geográficos válidos (latitud entre -90 y 90, longitud entre -180 y 180).
@@ -4456,19 +5801,19 @@ El **Human Resources Management (HR) Context** administra los aspectos laborales
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<PayrollPayment>`
 * **Propósito:** Representa la liquidación salarial o boleta de pago emitida a un empleado para un intervalo temporal contable determinado. Orquesta las deducciones por incidencias y bonificaciones operativas.
 * **Atributos:**
-  * `id: PayrollPaymentId` — Identificador universal de la boleta de pago (UUID).
-  * `tenantId: TenantId` — Taller emisor del pago.
-  * `membershipId: TenantMembershipId` — Empleado beneficiario de la liquidación.
-  * `period: PayPeriod` — Objeto de valor con fecha de inicio (`periodStart`) y fecha de fin (`periodEnd`).
-  * `baseAmount: Money` — Salario base mensual o proporcional estipulado en el contrato laboral.
-  * `deductions: Money` — Suma consolidada de descuentos monetarios aplicados (tardanzas, inasistencias, retenciones).
-  * `bonuses: Money` — Suma consolidada de bonificaciones económicas asignadas (productividad de patio, horas extras).
-  * `totalPaid: Money` — Importe neto a transferir al colaborador (`baseAmount - deductions + bonuses`).
-  * `status: PayrollStatus` — Ciclo de vida de la boleta (`DRAFT`, `APPROVED`, `PAID`, `CANCELLED`).
-  * `deductionItems: List<PayrollDeductionItem>` — Entidades hijas con el desglose pormenorizado de descuentos.
-  * `bonusItems: List<PayrollBonusItem>` — Entidades hijas con el desglose pormenorizado de bonificaciones.
-  * `paidAt: Instant` — Fecha y hora del desembolso financiero (nullable hasta concretar el pago).
-  * `paymentReference: String` — Número de operación bancaria o comprobante de transferencia (nullable).
+  * `id: PayrollPaymentId`: Identificador universal de la boleta de pago (UUID).
+  * `tenantId: TenantId`: Taller emisor del pago.
+  * `membershipId: TenantMembershipId`: Empleado beneficiario de la liquidación.
+  * `period: PayPeriod`: Objeto de valor con fecha de inicio (`periodStart`) y fecha de fin (`periodEnd`).
+  * `baseAmount: Money`: Salario base mensual o proporcional estipulado en el contrato laboral.
+  * `deductions: Money`: Suma consolidada de descuentos monetarios aplicados (tardanzas, inasistencias, retenciones).
+  * `bonuses: Money`: Suma consolidada de bonificaciones económicas asignadas (productividad de patio, horas extras).
+  * `totalPaid: Money`: Importe neto a transferir al colaborador (`baseAmount - deductions + bonuses`).
+  * `status: PayrollStatus`: Ciclo de vida de la boleta (`DRAFT`, `APPROVED`, `PAID`, `CANCELLED`).
+  * `deductionItems: List<PayrollDeductionItem>`: Entidades hijas con el desglose pormenorizado de descuentos.
+  * `bonusItems: List<PayrollBonusItem>`: Entidades hijas con el desglose pormenorizado de bonificaciones.
+  * `paidAt: Instant`: Fecha y hora del desembolso financiero (nullable hasta concretar el pago).
+  * `paymentReference: String`: Número de operación bancaria o comprobante de transferencia (nullable).
 * **Invariantes y Reglas de Negocio:**
   * La fecha de inicio del periodo no puede ser posterior a la fecha de fin.
   * El importe neto (`totalPaid`) no puede ser negativo; si las deducciones superan el salario base más bonos, el total pagado se ajusta al límite mínimo reglamentario o genera deuda controlada.
@@ -4487,15 +5832,15 @@ El **Human Resources Management (HR) Context** administra los aspectos laborales
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<EmployeeProfile>`
 * **Propósito:** Modela la ficha laboral y contractual del empleado dentro del contexto de Recursos Humanos, asociándolo a su sede de adscripción, turno asignado y esquema salarial.
 * **Atributos:**
-  * `id: EmployeeProfileId` — Identificador unívoco del perfil operativo (UUID).
-  * `tenantId: TenantId` — Taller automotriz empleador.
-  * `branchId: BranchId` — Sede física donde cumple sus funciones laborales.
-  * `membershipId: TenantMembershipId` — Enlace unívoco con la identidad de membresía en IAM.
-  * `assignedShiftId: ShiftId` — Turno regular predeterminado para el empleado.
-  * `baseSalary: Money` — Remuneración ordinaria pactada.
-  * `salaryType: SalaryType` — Tipo de esquema salarial (`MONTHLY_FIXED`, `HOURLY_RATE`).
-  * `jobTitle: String` — Cargo u ocupación técnica (ej. "Mecánico Senior de Motor", "Electricista Automotriz", "Asesor de Servicio").
-  * `employmentStatus: EmploymentStatus` — Situación contractual activa (`ACTIVE`, `ON_LEAVE`, `TERMINATED`).
+  * `id: EmployeeProfileId`: Identificador unívoco del perfil operativo (UUID).
+  * `tenantId: TenantId`: Taller automotriz empleador.
+  * `branchId: BranchId`: Sede física donde cumple sus funciones laborales.
+  * `membershipId: TenantMembershipId`: Enlace unívoco con la identidad de membresía en IAM.
+  * `assignedShiftId: ShiftId`: Turno regular predeterminado para el empleado.
+  * `baseSalary: Money`: Remuneración ordinaria pactada.
+  * `salaryType: SalaryType`: Tipo de esquema salarial (`MONTHLY_FIXED`, `HOURLY_RATE`).
+  * `jobTitle: String`: Cargo u ocupación técnica (ej. "Mecánico Senior de Motor", "Electricista Automotriz", "Asesor de Servicio").
+  * `employmentStatus: EmploymentStatus`: Situación contractual activa (`ACTIVE`, `ON_LEAVE`, `TERMINATED`).
 * **Métodos:**
   * `+ static EmployeeProfile register(TenantId tenantId, BranchId branchId, TenantMembershipId membershipId, ShiftId shiftId, Money baseSalary, SalaryType salaryType, String jobTitle): EmployeeProfile`: Factoría que registra el perfil y emite `EmployeeProfileRegisteredEvent`.
   * `+ void assignShift(ShiftId newShiftId): void`: Actualiza el turno regular del colaborador.
@@ -4511,21 +5856,21 @@ El **Human Resources Management (HR) Context** administra los aspectos laborales
 * **Paquete:** `com.andeva.atelier.platform.hr.domain.model.entities`
 * **Propósito:** Representa una partida individual de descuento monetario aplicada dentro de una boleta de pago.
 * **Atributos:**
-  * `id: UUID` — Identificador del ítem de descuento.
-  * `concept: String` — Descripción del motivo del descuento (ej. "Descuento por 3 tardanzas acumuladas (45 min)", "Inasistencia injustificada 14/08/2026").
-  * `amount: Money` — Importe monetario deducido.
-  * `deductionType: DeductionType` — Categoría (`TARDINESS`, `UNJUSTIFIED_ABSENCE`, `EQUIPMENT_DAMAGE`, `LOAN_REPAYMENT`, `OTHER`).
-  * `appliedDate: LocalDate` — Fecha en que se originó la causal de la deducción.
+  * `id: UUID`: Identificador del ítem de descuento.
+  * `concept: String`: Descripción del motivo del descuento (ej. "Descuento por 3 tardanzas acumuladas (45 min)", "Inasistencia injustificada 14/08/2026").
+  * `amount: Money`: Importe monetario deducido.
+  * `deductionType: DeductionType`: Categoría (`TARDINESS`, `UNJUSTIFIED_ABSENCE`, `EQUIPMENT_DAMAGE`, `LOAN_REPAYMENT`, `OTHER`).
+  * `appliedDate: LocalDate`: Fecha en que se originó la causal de la deducción.
 
 ##### 2. `PayrollBonusItem` (Entity)
 * **Paquete:** `com.andeva.atelier.platform.hr.domain.model.entities`
 * **Propósito:** Representa una partida individual de bonificación o incentivo económico sumado a una boleta de pago.
 * **Atributos:**
-  * `id: UUID` — Identificador del ítem de bonificación.
-  * `concept: String` — Descripción del motivo de la bonificación (ej. "Bono de productividad: 25 órdenes cerradas", "Comisión por alineamiento y balanceo").
-  * `amount: Money` — Importe monetario otorgado.
-  * `bonusType: BonusType` — Categoría (`PRODUCTIVITY`, `OVERTIME_HOURS`, `SPECIAL_MERIT`, `HOLIDAY_ALLOWANCE`).
-  * `awardedDate: LocalDate` — Fecha en que se concedió la bonificación.
+  * `id: UUID`: Identificador del ítem de bonificación.
+  * `concept: String`: Descripción del motivo de la bonificación (ej. "Bono de productividad: 25 órdenes cerradas", "Comisión por alineamiento y balanceo").
+  * `amount: Money`: Importe monetario otorgado.
+  * `bonusType: BonusType`: Categoría (`PRODUCTIVITY`, `OVERTIME_HOURS`, `SPECIAL_MERIT`, `HOLIDAY_ALLOWANCE`).
+  * `awardedDate: LocalDate`: Fecha en que se concedió la bonificación.
 
 ---
 
@@ -5740,23 +7085,23 @@ El **Invoicing & Compliance Context** encapsula la totalidad de las reglas conta
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<ElectronicVoucher>`
 * **Propósito:** Representa un comprobante de pago electrónico formal con validez fiscal y tributaria emitido por el taller a un cliente final.
 * **Atributos:**
-  * `id: VoucherId` — Identificador universal del comprobante (UUID).
-  * `tenantId: TenantId` — Taller emisor del comprobante.
-  * `branchId: BranchId` — Sede física emisora de la transacción.
-  * `customerId: CustomerId` — Cliente receptor de la factura o boleta.
-  * `workOrderId: Optional<WorkOrderId>` — Orden de trabajo de MRO que originó el cobro (nullable si es venta directa de mostrador).
-  * `voucherType: VoucherType` — Tipo legal de comprobante (`FACTURA`, `BOLETA`, `NOTA_CREDITO`).
-  * `serie: VoucherSerie` — Serie autorizada de 4 caracteres alfanuméricos (ej. `F001`, `B001`).
-  * `number: VoucherNumber` — Correlativo numérico autoincremental único por serie.
-  * `taxCalculation: TaxCalculation` — Objeto de valor que consolida la base imponible (`subtotal`), el monto total de IGV (`igvAmount`), la tasa aplicada (18%) y el total general (`totalAmount`).
-  * `currency: Currency` — Moneda formal de la operación (`PEN` para Soles, `USD` para Dólares Americanos).
-  * `status: VoucherStatus` — Estado del comprobante (`DRAFT`, `ISSUED`, `ACCEPTED_SUNAT`, `REJECTED_SUNAT`, `VOIDED`).
-  * `customerFiscalInfo: CustomerFiscalInfo` — Datos fiscales del receptor (RUC/DNI, Razón Social/Nombre, Dirección fiscal).
-  * `digitalReceiptUrls: DigitalReceiptUrls` — URLs públicas de los archivos generados por SUNAT/Nubefact (`pdfUrl`, `xmlUrl`, `cdrUrl`).
-  * `sunatResponse: Optional<SunatResponse>` — Código de respuesta oficial de SUNAT, glosa descriptiva y hash SHA-256 de la firma digital.
-  * `voidedInfo: Optional<VoidedInfo>` — Timestamp y motivo de anulación formal (requerido si el estado es `VOIDED`).
-  * `lines: List<VoucherLine>` — Colección interna de partidas detalladas de servicios y repuestos.
-  * `payments: List<VoucherPayment>` — Colección interna de pagos y transacciones registradas para saldar el comprobante.
+  * `id: VoucherId`: Identificador universal del comprobante (UUID).
+  * `tenantId: TenantId`: Taller emisor del comprobante.
+  * `branchId: BranchId`: Sede física emisora de la transacción.
+  * `customerId: CustomerId`: Cliente receptor de la factura o boleta.
+  * `workOrderId: Optional<WorkOrderId>`: Orden de trabajo de MRO que originó el cobro (nullable si es venta directa de mostrador).
+  * `voucherType: VoucherType`: Tipo legal de comprobante (`FACTURA`, `BOLETA`, `NOTA_CREDITO`).
+  * `serie: VoucherSerie`: Serie autorizada de 4 caracteres alfanuméricos (ej. `F001`, `B001`).
+  * `number: VoucherNumber`: Correlativo numérico autoincremental único por serie.
+  * `taxCalculation: TaxCalculation`: Objeto de valor que consolida la base imponible (`subtotal`), el monto total de IGV (`igvAmount`), la tasa aplicada (18%) y el total general (`totalAmount`).
+  * `currency: Currency`: Moneda formal de la operación (`PEN` para Soles, `USD` para Dólares Americanos).
+  * `status: VoucherStatus`: Estado del comprobante (`DRAFT`, `ISSUED`, `ACCEPTED_SUNAT`, `REJECTED_SUNAT`, `VOIDED`).
+  * `customerFiscalInfo: CustomerFiscalInfo`: Datos fiscales del receptor (RUC/DNI, Razón Social/Nombre, Dirección fiscal).
+  * `digitalReceiptUrls: DigitalReceiptUrls`: URLs públicas de los archivos generados por SUNAT/Nubefact (`pdfUrl`, `xmlUrl`, `cdrUrl`).
+  * `sunatResponse: Optional<SunatResponse>`: Código de respuesta oficial de SUNAT, glosa descriptiva y hash SHA-256 de la firma digital.
+  * `voidedInfo: Optional<VoidedInfo>`: Timestamp y motivo de anulación formal (requerido si el estado es `VOIDED`).
+  * `lines: List<VoucherLine>`: Colección interna de partidas detalladas de servicios y repuestos.
+  * `payments: List<VoucherPayment>`: Colección interna de pagos y transacciones registradas para saldar el comprobante.
 * **Invariantes y Reglas de Negocio:**
   * Si el comprobante es `FACTURA` (`01`), el cliente debe poseer obligatoriamente un RUC de 11 dígitos válido que inicie en `10`, `15`, `17` o `20` con dígito verificador matemático correcto, y contar con Razón Social y Domicilio Fiscal.
   * Si el comprobante es `BOLETA` (`03`) y el monto total supera los S/ 700.00 PEN, el número de documento de identidad (DNI o similar) del cliente es estrictamente obligatorio según directiva de SUNAT.
@@ -5776,15 +7121,15 @@ El **Invoicing & Compliance Context** encapsula la totalidad de las reglas conta
 * **Paquete:** `com.andeva.atelier.platform.invoicing.domain.model.entities`
 * **Propósito:** Representa un abono o liquidación financiera registrada contra un comprobante electrónico para saldar el consumo del taller.
 * **Atributos:**
-  * `id: PaymentId` — Identificador universal del pago (UUID).
-  * `voucherId: VoucherId` — Comprobante electrónico asociado.
-  * `tenantId: TenantId` — Taller recaudador.
-  * `branchId: BranchId` — Sede física donde se recibió el dinero o transferencia.
-  * `amount: Money` — Importe monetario recibido.
-  * `paymentMethod: PaymentMethod` — Canal de pago (`CASH`, `CREDIT_CARD`, `DEBIT_CARD`, `BANK_TRANSFER`, `YAPE`, `PLIN`).
-  * `transactionReference: String` — Número de operación bancaria, voucher POS o código de transacción (nullable para efectivo).
-  * `status: PaymentStatus` — Estado del pago (`PENDING`, `COMPLETED`, `REFUNDED`).
-  * `paidAt: Instant` — Timestamp exacto del ingreso financiero.
+  * `id: PaymentId`: Identificador universal del pago (UUID).
+  * `voucherId: VoucherId`: Comprobante electrónico asociado.
+  * `tenantId: TenantId`: Taller recaudador.
+  * `branchId: BranchId`: Sede física donde se recibió el dinero o transferencia.
+  * `amount: Money`: Importe monetario recibido.
+  * `paymentMethod: PaymentMethod`: Canal de pago (`CASH`, `CREDIT_CARD`, `DEBIT_CARD`, `BANK_TRANSFER`, `YAPE`, `PLIN`).
+  * `transactionReference: String`: Número de operación bancaria, voucher POS o código de transacción (nullable para efectivo).
+  * `status: PaymentStatus`: Estado del pago (`PENDING`, `COMPLETED`, `REFUNDED`).
+  * `paidAt: Instant`: Timestamp exacto del ingreso financiero.
 * **Invariantes y Reglas de Negocio:**
   * El monto del pago debe ser estrictamente superior a cero.
   * Si el método es transferencia bancaria o billetera digital (`YAPE`/`PLIN`), la referencia de transacción es obligatoria para conciliación de caja.
@@ -5794,13 +7139,13 @@ El **Invoicing & Compliance Context** encapsula la totalidad de las reglas conta
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<SeriesConfiguration>`
 * **Propósito:** Custodia la configuración de series fiscales autorizadas y el avance correlativo estricto para una sucursal y tipo de comprobante.
 * **Atributos:**
-  * `id: SeriesConfigurationId` — Identificador de la configuración (UUID).
-  * `tenantId: TenantId` — Taller propietario.
-  * `branchId: BranchId` — Sucursal física asignada.
-  * `voucherType: VoucherType` — Tipo de comprobante (`FACTURA`, `BOLETA`, `NOTA_CREDITO`).
-  * `serie: VoucherSerie` — Serie autorizada (ej. `F001`, `B001`, `FC01`).
-  * `currentCorrelative: int` — Último correlativo emitido.
-  * `isActive: boolean` — Estado operativo de la serie.
+  * `id: SeriesConfigurationId`: Identificador de la configuración (UUID).
+  * `tenantId: TenantId`: Taller propietario.
+  * `branchId: BranchId`: Sucursal física asignada.
+  * `voucherType: VoucherType`: Tipo de comprobante (`FACTURA`, `BOLETA`, `NOTA_CREDITO`).
+  * `serie: VoucherSerie`: Serie autorizada (ej. `F001`, `B001`, `FC01`).
+  * `currentCorrelative: int`: Último correlativo emitido.
+  * `isActive: boolean`: Estado operativo de la serie.
 * **Métodos:**
   * `+ static SeriesConfiguration create(TenantId tenantId, BranchId branchId, VoucherType type, VoucherSerie serie, int initialCorrelative): SeriesConfiguration`: Factoría que inicializa la serie fiscal.
   * `+ VoucherNumber nextCorrelative(): VoucherNumber`: Incrementa de forma atómica y segura el contador interno y retorna el nuevo número correlativo.
@@ -5813,16 +7158,16 @@ El **Invoicing & Compliance Context** encapsula la totalidad de las reglas conta
 * **Paquete:** `com.andeva.atelier.platform.invoicing.domain.model.entities`
 * **Propósito:** Partida individual que compone el comprobante de pago, representando un servicio mecánico ejecutado o un repuesto entregado.
 * **Atributos:**
-  * `id: UUID` — Identificador único de la línea.
-  * `voucherId: VoucherId` — Identificador del comprobante padre.
-  * `itemId: Optional<UUID>` — Identificador del repuesto (`InventoryItemId`) o servicio (`ServiceId`) facturado (nullable para ítems libres).
-  * `itemType: VoucherItemType` — Clasificación del concepto (`PRODUCT`, `SERVICE`).
-  * `description: String` — Descripción clara del bien o servicio prestado (ej. "Cambio de pastillas de freno delanteras Bosch", "Mano de obra: Afinamiento electrónico").
-  * `quantity: Quantity` — Cantidad de unidades facturadas.
-  * `unitValue: Money` — Valor unitario sin IGV (exigido formalmente por el estándar UBL 2.1 y la API de Nubefact).
-  * `unitPrice: Money` — Precio unitario con IGV incluido.
-  * `igvAmount: Money` — Monto total del IGV correspondiente a esta línea (`(unitPrice - unitValue) * quantity`).
-  * `totalLine: Money` — Importe total de la línea (`quantity * unitPrice`).
+  * `id: UUID`: Identificador único de la línea.
+  * `voucherId: VoucherId`: Identificador del comprobante padre.
+  * `itemId: Optional<UUID>`: Identificador del repuesto (`InventoryItemId`) o servicio (`ServiceId`) facturado (nullable para ítems libres).
+  * `itemType: VoucherItemType`: Clasificación del concepto (`PRODUCT`, `SERVICE`).
+  * `description: String`: Descripción clara del bien o servicio prestado (ej. "Cambio de pastillas de freno delanteras Bosch", "Mano de obra: Afinamiento electrónico").
+  * `quantity: Quantity`: Cantidad de unidades facturadas.
+  * `unitValue: Money`: Valor unitario sin IGV (exigido formalmente por el estándar UBL 2.1 y la API de Nubefact).
+  * `unitPrice: Money`: Precio unitario con IGV incluido.
+  * `igvAmount: Money`: Monto total del IGV correspondiente a esta línea (`(unitPrice - unitValue) * quantity`).
+  * `totalLine: Money`: Importe total de la línea (`quantity * unitPrice`).
 
 ---
 
@@ -6927,11 +8272,17 @@ erDiagram
 #### 10.1.1. Propósito y Límites de Responsabilidad
 El **SaaS Billing & Subscriptions Context** administra el modelo de ingresos comerciales B2B y el aprovisionamiento de membresías de la plataforma Atelier hacia los talleres mecánicos abonados. Su delimitación responde a tres principios fundamentales de gobernanza de software:
 1. **Desacoplamiento Estricto entre Facturación B2B (Andeva -> Taller) vs. Facturación Local (Taller -> Conductor):** En la versión previa (v1), los conceptos de facturación se encontraban severamente acoplados con cotizaciones y comprobantes fiscales locales. En la arquitectura v2, este contexto administra exclusivamente los planes comerciales contratados por el taller automotriz con la empresa *Andeva*, mientras que el contexto de **Invoicing & Compliance** gestiona la emisión de comprobantes fiscales tributarios (Facturas y Boletas UBL 2.1 ante SUNAT) del taller a sus clientes particulares.
-2. **Ciclo de Vida de Planes y Membresías Recurrentes (`SubscriptionPlan` y `TenantSubscription`):** Administra el catálogo de planes comerciales (`STARTER`, `PROFESSIONAL`, `ENTERPRISE`), sus ciclos de cobro (mensual o anual) y los estados del ciclo de vida de la suscripción (`TRIALING`, `ACTIVE`, `PAST_DUE`, `CANCELED`, `UNPAID`).
+2. **Ciclo de Vida de Planes y Membresías Recurrentes (`SubscriptionPlan` y `TenantSubscription`):** Administra el catálogo de planes comerciales (`GO`, `PRO`, `MAX`, `ENTERPRISE`), sus ciclos de cobro (mensual o anual) y los estados del ciclo de vida de la suscripción (`TRIALING`, `ACTIVE`, `PAST_DUE`, `CANCELED`, `UNPAID`).
 3. **Gobernanza de Cuotas y Límites de Plataforma (*Tenant Quota Limits*):** Determina qué capacidades operativas tiene habilitadas cada taller en función de su plan activo:
-   * Cantidad máxima de sucursales físicas permitidas (`maxBranches`).
-   * Límite máximo de mecánicos y personal de taller activos simultáneamente (`maxActiveStaff`).
-   * Habilitación de funcionalidades avanzadas como la ingesta y alertas predictivas de telemetría IoT OBD-II (`iotTelemetryEnabled`) o reportes ejecutivos de rentabilidad financiera.
+   * Cantidad máxima de sucursales físicas permitidas (`maxBranches`: 1 en Go, 2 en Pro, 5 en Max, elástico en Enterprise).
+   * Límite máximo de mecánicos y personal de taller activos simultáneamente (`maxActiveStaff`: 5 en Go, 10 en Pro, 25 en Max, elástico en Enterprise).
+   * Cupo mensual de órdenes de trabajo (`maxMonthlyWorkOrders`: 100 en Go, 300 en Pro, 1000 en Max, ilimitado en Enterprise).
+   * Techo de dispositivos telemáticos OBD-II activos vinculados (`maxActiveObd2Devices`: 0 en Go, 5 en Pro, 15 en Max, elástico en Enterprise).
+   * Techo de evidencias fotográficas por orden de trabajo (`maxPhotosPerWorkOrder`: 10 en Go, ilimitado en Pro, Max y Enterprise).
+   * Cupo mensual de Reportes PDF de Salud Vehicular asistidos por IA (*Spring AI*) (`maxMonthlyAiReports`: 0 en Go/Pro, 60 en Max, elástico en Enterprise).
+   * Autorización para registrar clientes corporativos y flotas `CustomerType.COMPANY` (`companyRegistrationAllowed`: habilitado en Max y Enterprise).
+   * Habilitación de gestión multi-almacén FIFO inter-sede (`multiWarehouseAllowed`: habilitado en Max y Enterprise; Go y Pro operan en almacén único con costeo FIFO estricto por lote).
+   * Presencia y verificación en el marketplace B2B *Atelier Bussiness* (`marketplaceListed`: exclusivo de Max y Enterprise).
 4. **Cumplimiento Estricto de Seguridad PCI-DSS:** Para certificar el cumplimiento de los estándares internacionales de la industria de tarjetas de pago (**PCI-DSS Nivel 1**), el backend de Atelier **jamás procesa, transmite ni almacena números de tarjeta de crédito (PAN), códigos de seguridad CVV ni fechas de caducidad**. Todo el intercambio sensible de datos bancarios se delega al frontend mediante componentes seguros de **Stripe Elements** y el **SDK Móvil de Stripe**, intercambiando únicamente identificadores de clientes y métodos de pago tokenizados (`stripe_customer_id`, `stripe_sub_id`, `stripe_price_id`).
 5. **Idempotencia Garantizada en Webhooks (*Webhook Idempotency*):** Cuando la pasarela de pagos ejecuta una operación asíncrona de cobro recurrente o renovación, notifica a los servidores de Atelier mediante solicitudes HTTP Webhook. Ante fluctuaciones de conectividad, Stripe reintenta el despacho del mismo evento hasta por 72 horas. Para evitar cobros duplicados, renovaciones espurias o inconsistencias de saldo, la tabla `stripe_events` registra unívocamente cada identificador de evento (`stripe_event_id` con restricción `UNIQUE`), descartando de forma inmediata cualquier procesamiento repetido.
 6. **Aceleración de Lectura mediante Caché en Memoria (`Caffeine Cache`):** Dado que cada invocación a endpoints protegidos del ERP en cualquier Bounded Context requiere verificar si la suscripción del taller sigue activa y si no ha sobrepasado sus límites de uso, consultar PostgreSQL en cada petición crearía un cuello de botella de latencia inaceptable. Se implementa una capa de caché de ultra alta velocidad en memoria local JVM con **Caffeine Cache** (TTL de 5 minutos e invalidación reactiva inmediata ante webhooks de Stripe).
@@ -6952,13 +8303,13 @@ El **SaaS Billing & Subscriptions Context** administra el modelo de ingresos com
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<SubscriptionPlan>`
 * **Propósito:** Representa un paquete comercial de software ofrecido por Andeva a los talleres mecánicos, definiendo precio, periodicidad y límites de recursos autorizados.
 * **Atributos:**
-  * `id: PlanId` — Identificador universal del plan (UUID).
-  * `stripePriceId: StripePriceId` — Identificador del precio recurrente en Stripe (ej. `price_1N2M3...`).
-  * `name: String` — Denominación del plan (ej. "Plan Profesional - Hasta 3 Sucursales", "Plan Taller Inicial").
-  * `tier: PlanTier` — Nivel del plan (`STARTER`, `PROFESSIONAL`, `ENTERPRISE`).
-  * `pricing: PlanPricing` — Objeto de valor que agrupa el precio monetario (`Money price`) y el ciclo de facturación (`BillingCycle billingCycle` [`MONTHLY`, `YEARLY`]).
-  * `quotaLimits: TenantQuotaLimits` — Objeto de valor con las cuotas máximas autorizadas (`maxBranches`, `maxActiveStaff`, `iotTelemetryEnabled`, `aiDiagnosticsEnabled`).
-  * `isActive: boolean` — Bandera que determina si el plan está disponible para nuevas contrataciones comerciales.
+  * `id: PlanId`: Identificador universal del plan (UUID).
+  * `stripePriceId: StripePriceId`: Identificador del precio recurrente en Stripe (ej. `price_1N2M3...`).
+  * `name: String`: Denominación del plan (ej. "Go", "Pro", "Max", "Enterprise").
+  * `tier: PlanTier`: Nivel del plan (`GO`, `PRO`, `MAX`, `ENTERPRISE`).
+  * `pricing: PlanPricing`: Objeto de valor que agrupa el precio monetario (`Money price`) y el ciclo de facturación (`BillingCycle billingCycle` [`MONTHLY`, `YEARLY`]).
+  * `quotaLimits: TenantQuotaLimits`: Objeto de valor con las cuotas máximas y autorizaciones del plan (`maxBranches`, `maxActiveStaff`, `maxActiveObd2Devices`, `maxPhotosPerWorkOrder`, `maxMonthlyAiReports`, `companyRegistrationAllowed`, `multiWarehouseAllowed`, `marketplaceListed`, `maxMonthlyWorkOrders`, `iotTelemetryEnabled`, `aiDiagnosticsEnabled`).
+  * `isActive: boolean`: Bandera que determina si el plan está disponible para nuevas contrataciones comerciales.
 * **Invariantes y Reglas de Negocio:**
   * El identificador de precio en Stripe (`stripePriceId`) debe comenzar con el prefijo `price_` y no puede ser nulo ni estar vacío.
   * El precio monetario no puede ser negativo.
@@ -6974,16 +8325,16 @@ El **SaaS Billing & Subscriptions Context** administra el modelo de ingresos com
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<TenantSubscription>`
 * **Propósito:** Representa el contrato de suscripción SaaS activo o histórico de un taller automotriz con la plataforma Atelier.
 * **Atributos:**
-  * `id: SubscriptionId` — Identificador universal de la suscripción (UUID).
-  * `tenantId: TenantId` — Taller mecánico titular del contrato.
-  * `planId: PlanId` — Plan comercial contratado.
-  * `stripeCustomerId: StripeCustomerId` — Identificador de cliente en Stripe (ej. `cus_...`).
-  * `stripeSubscriptionId: StripeSubscriptionId` — Identificador unívoco de suscripción en Stripe (ej. `sub_...`).
-  * `status: SubscriptionStatus` — Estado del ciclo de vida (`TRIALING`, `ACTIVE`, `PAST_DUE`, `CANCELED`, `UNPAID`, `INCOMPLETE`).
-  * `currentPeriod: SubscriptionPeriod` — Periodo actual de cobertura (`startDate: Instant`, `endDate: Instant`).
-  * `cancelAtPeriodEnd: boolean` — Bandera que indica si la suscripción se cancelará automáticamente al concluir el periodo vigente.
-  * `canceledAt: Optional<Instant>` — Fecha y hora formal de cancelación (nullable).
-  * `trialEndDate: Optional<Instant>` — Fecha límite de prueba gratuita (nullable).
+  * `id: SubscriptionId`: Identificador universal de la suscripción (UUID).
+  * `tenantId: TenantId`: Taller mecánico titular del contrato.
+  * `planId: PlanId`: Plan comercial contratado.
+  * `stripeCustomerId: StripeCustomerId`: Identificador de cliente en Stripe (ej. `cus_...`).
+  * `stripeSubscriptionId: StripeSubscriptionId`: Identificador unívoco de suscripción en Stripe (ej. `sub_...`).
+  * `status: SubscriptionStatus`: Estado del ciclo de vida (`TRIALING`, `ACTIVE`, `PAST_DUE`, `CANCELED`, `UNPAID`, `INCOMPLETE`).
+  * `currentPeriod: SubscriptionPeriod`: Periodo actual de cobertura (`startDate: Instant`, `endDate: Instant`).
+  * `cancelAtPeriodEnd: boolean`: Bandera que indica si la suscripción se cancelará automáticamente al concluir el periodo vigente.
+  * `canceledAt: Optional<Instant>`: Fecha y hora formal de cancelación (nullable).
+  * `trialEndDate: Optional<Instant>`: Fecha límite de prueba gratuita (nullable).
 * **Invariantes y Reglas de Negocio:**
   * No puede existir más de una suscripción activa o en periodo de prueba (`ACTIVE`, `TRIALING`, `PAST_DUE`) simultáneamente para el mismo `tenant_id`.
   * La fecha de inicio del periodo no puede ser posterior a la fecha de fin del periodo.
@@ -7003,15 +8354,15 @@ El **SaaS Billing & Subscriptions Context** administra el modelo de ingresos com
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<SaasInvoice>`
 * **Propósito:** Representa el recibo o factura formal emitida por Andeva hacia el taller por el uso de la suscripción mensual o anual.
 * **Atributos:**
-  * `id: SaasInvoiceId` — Identificador universal interno de la factura SaaS (UUID).
-  * `subscriptionId: SubscriptionId` — Suscripción vinculada.
-  * `tenantId: TenantId` — Taller pagador.
-  * `stripeInvoiceId: StripeInvoiceId` — Identificador de factura en Stripe (ej. `in_...`).
-  * `amountPaid: Money` — Monto efectivamente debitado a la tarjeta de crédito o cuenta bancaria.
-  * `status: InvoiceStatus` — Estado de la factura (`PAID`, `OPEN`, `VOID`, `UNCOLLECTIBLE`).
-  * `invoicePdfUrl: String` — Enlace seguro provisto por Stripe para la descarga del comprobante en PDF.
-  * `hostedInvoiceUrl: String` — Enlace a la página web interactiva de pago de Stripe.
-  * `paidAt: Optional<Instant>` — Momento cronológico del débito bancario exitoso.
+  * `id: SaasInvoiceId`: Identificador universal interno de la factura SaaS (UUID).
+  * `subscriptionId: SubscriptionId`: Suscripción vinculada.
+  * `tenantId: TenantId`: Taller pagador.
+  * `stripeInvoiceId: StripeInvoiceId`: Identificador de factura en Stripe (ej. `in_...`).
+  * `amountPaid: Money`: Monto efectivamente debitado a la tarjeta de crédito o cuenta bancaria.
+  * `status: InvoiceStatus`: Estado de la factura (`PAID`, `OPEN`, `VOID`, `UNCOLLECTIBLE`).
+  * `invoicePdfUrl: String`: Enlace seguro provisto por Stripe para la descarga del comprobante en PDF.
+  * `hostedInvoiceUrl: String`: Enlace a la página web interactiva de pago de Stripe.
+  * `paidAt: Optional<Instant>`: Momento cronológico del débito bancario exitoso.
 * **Métodos:**
   * `+ static SaasInvoice recordPaid(SubscriptionId subscriptionId, TenantId tenantId, StripeInvoiceId stripeInvoiceId, Money amountPaid, String pdfUrl, String hostedUrl, Instant paidAt): SaasInvoice`: Registra el pago exitoso y emite `SaasInvoicePaymentSucceededEvent`.
   * `+ void markPaymentFailed(String reason): void`: Registra el fallo de cobro bancario y emite `SaasInvoicePaymentFailedEvent`.
@@ -7020,13 +8371,13 @@ El **SaaS Billing & Subscriptions Context** administra el modelo de ingresos com
 * **Paquete:** `com.andeva.atelier.platform.billing.domain.model.aggregates`
 * **Propósito:** Garantiza el procesamiento exactamente una vez (*Exactly-Once Processing*) de las notificaciones asíncronas de Stripe, actuando como escudo contra duplicidades de red.
 * **Atributos:**
-  * `id: UUID` — Identificador de base de datos interno.
-  * `stripeEventId: StripeEventId` — Identificador unívoco del evento emitido por Stripe (`evt_...`). **Restricción UNIQUE a nivel de BD**.
-  * `eventType: String` — Tipo de evento (ej. `invoice.payment_succeeded`, `customer.subscription.deleted`).
-  * `eventPayload: String` — Contenido serializado en formato JSON de la notificación para auditoría forense.
-  * `status: WebhookProcessingStatus` — Estado del procesamiento (`PENDING`, `PROCESSED`, `FAILED`, `IGNORED`).
-  * `processedAt: Instant` — Timestamp de resolución en el backend.
-  * `errorMessage: Optional<String>` — Detalle del error en caso de fallo durante el procesamiento.
+  * `id: UUID`: Identificador de base de datos interno.
+  * `stripeEventId: StripeEventId`: Identificador unívoco del evento emitido por Stripe (`evt_...`). **Restricción UNIQUE a nivel de BD**.
+  * `eventType: String`: Tipo de evento (ej. `invoice.payment_succeeded`, `customer.subscription.deleted`).
+  * `eventPayload: String`: Contenido serializado en formato JSON de la notificación para auditoría forense.
+  * `status: WebhookProcessingStatus`: Estado del procesamiento (`PENDING`, `PROCESSED`, `FAILED`, `IGNORED`).
+  * `processedAt: Instant`: Timestamp de resolución en el backend.
+  * `errorMessage: Optional<String>`: Detalle del error en caso de fallo durante el procesamiento.
 * **Métodos:**
   * `+ static StripeWebhookEvent receive(StripeEventId eventId, String type, String payload): StripeWebhookEvent`: Registra la recepción inicial en estado `PENDING`.
   * `+ void markProcessed(): void`: Marca el evento como resuelto con éxito.
@@ -7040,10 +8391,10 @@ El **SaaS Billing & Subscriptions Context** administra el modelo de ingresos com
 * **Paquete:** `com.andeva.atelier.platform.billing.domain.model.entities`
 * **Propósito:** Representa una característica funcional o módulo individual paquetizado dentro de un plan comercial de suscripción.
 * **Atributos:**
-  * `id: UUID` — Identificador de la característica.
-  * `featureKey: String` — Clave alfanumérica única (ej. `FEATURE_OBD2_TELEMETRY`, `FEATURE_AI_PREDICTIONS`, `FEATURE_MULTI_BRANCH`).
-  * `description: String` — Descripción para el catálogo comercial.
-  * `isEnabled: boolean` — Disponibilidad en el plan actual.
+  * `id: UUID`: Identificador de la característica.
+  * `featureKey: String`: Clave alfanumérica única (ej. `FEATURE_OBD2_TELEMETRY`, `FEATURE_AI_PREDICTIONS`, `FEATURE_MULTI_BRANCH`).
+  * `description: String`: Descripción para el catálogo comercial.
+  * `isEnabled: boolean`: Disponibilidad en el plan actual.
 
 ---
 
@@ -7059,9 +8410,9 @@ El **SaaS Billing & Subscriptions Context** administra el modelo de ingresos com
 * **`BillingCycle`:** Enumeración del ciclo de cobro recurrente (`MONTHLY`, `YEARLY`).
 * **`SubscriptionStatus`:** Enumeración de estados de suscripción (`TRIALING`, `ACTIVE`, `PAST_DUE`, `CANCELED`, `UNPAID`, `INCOMPLETE`).
 * **`InvoiceStatus`:** Enumeración del estado de factura SaaS (`PAID`, `OPEN`, `VOID`, `UNCOLLECTIBLE`).
-* **`PlanTier`:** Nivel del paquete de software (`STARTER`, `PROFESSIONAL`, `ENTERPRISE`).
+* **`PlanTier`:** Nivel del paquete de software (`GO`, `PRO`, `MAX`, `ENTERPRISE`).
 * **`PlanPricing`:** Objeto de valor que asocia el precio y su ciclo (`record PlanPricing(Money price, BillingCycle billingCycle)`).
-* **`TenantQuotaLimits`:** Cuotas máximas autorizadas por el plan (`record TenantQuotaLimits(int maxBranches, int maxActiveStaff, boolean iotTelemetryEnabled, boolean aiDiagnosticsEnabled, int maxMonthlyWorkOrders)`).
+* **`TenantQuotaLimits`:** Cuotas máximas y autorizaciones del plan (`record TenantQuotaLimits(int maxBranches, int maxActiveStaff, int maxActiveObd2Devices, int maxPhotosPerWorkOrder, int maxMonthlyAiReports, boolean companyRegistrationAllowed, boolean multiWarehouseAllowed, boolean marketplaceListed, int maxMonthlyWorkOrders, boolean iotTelemetryEnabled, boolean aiDiagnosticsEnabled)`).
 * **`SubscriptionPeriod`:** Intervalo temporal de cobertura pagada (`record SubscriptionPeriod(Instant startDate, Instant endDate)`).
 * **`WebhookProcessingStatus`:** Estado del despacho de webhooks (`PENDING`, `PROCESSED`, `FAILED`, `IGNORED`).
 
@@ -7161,9 +8512,9 @@ public class SubscriptionQuotaEnforcementService {
             throw new QuotaExceededException("La suscripción del taller se encuentra inactiva o suspendida.");
         }
         TenantQuotaLimits limits = plan.getQuotaLimits();
-        if (currentBranchCount >= limits.maxBranches()) {
+        if (limits.maxBranches() != -1 && currentBranchCount >= limits.maxBranches()) {
             throw new QuotaExceededException(String.format(
-                "Límite de sucursales alcanzado (%d/%d). Actualice su plan a Professional o Enterprise para abrir nuevas sedes.",
+                "Límite de sucursales alcanzado (%d/%d sedes autorizadas). Actualice su plan para abrir nuevas sedes.",
                 currentBranchCount, limits.maxBranches()
             ));
         }
@@ -7174,11 +8525,97 @@ public class SubscriptionQuotaEnforcementService {
             throw new QuotaExceededException("La suscripción del taller se encuentra inactiva o suspendida.");
         }
         TenantQuotaLimits limits = plan.getQuotaLimits();
-        if (currentStaffCount >= limits.maxActiveStaff()) {
+        if (limits.maxActiveStaff() != -1 && currentStaffCount >= limits.maxActiveStaff()) {
             throw new QuotaExceededException(String.format(
-                "Límite de personal alcanzado (%d/%d). Actualice su plan para registrar más mecánicos y asesores.",
+                "Capacidad máxima de personal operativo alcanzada (%d/%d colaboradores activos). Actualice su plan para sumar más personal.",
                 currentStaffCount, limits.maxActiveStaff()
             ));
+        }
+    }
+
+    public void validateWorkOrderCreationAllowed(TenantSubscription subscription, SubscriptionPlan plan, int currentMonthlyWorkOrders) {
+        if (!subscription.isAccessGranted()) {
+            throw new QuotaExceededException("La suscripción del taller no cuenta con acceso activo para abrir nuevas órdenes de trabajo.");
+        }
+        TenantQuotaLimits limits = plan.getQuotaLimits();
+        if (limits.maxMonthlyWorkOrders() != -1 && currentMonthlyWorkOrders >= limits.maxMonthlyWorkOrders()) {
+            throw new QuotaExceededException(String.format(
+                "Cupo mensual de órdenes de trabajo copado (%d/%d OTs). Actualice su nivel de suscripción para continuar recibiendo vehículos este mes.",
+                currentMonthlyWorkOrders, limits.maxMonthlyWorkOrders()
+            ));
+        }
+    }
+
+    public void validateObd2DeviceRegistrationAllowed(TenantSubscription subscription, SubscriptionPlan plan, int currentActiveObd2Devices) {
+        if (!subscription.isAccessGranted()) {
+            throw new QuotaExceededException("La suscripción del taller no cuenta con acceso activo.");
+        }
+        TenantQuotaLimits limits = plan.getQuotaLimits();
+        if (limits.maxActiveObd2Devices() <= 0) {
+            throw new QuotaExceededException(
+                "El plan " + plan.getName() + " no incluye telemetría vehicular IoT OBD-II. Actualice a Pro o Max para vincular dispositivos telemáticos."
+            );
+        }
+        if (limits.maxActiveObd2Devices() != -1 && currentActiveObd2Devices >= limits.maxActiveObd2Devices()) {
+            throw new QuotaExceededException(String.format(
+                "Límite de dispositivos telemáticos OBD-II activos alcanzado (%d/%d dispositivos vinculados). Actualice su plan a Max o Enterprise para ampliar su flota de monitoreo.",
+                currentActiveObd2Devices, limits.maxActiveObd2Devices()
+            ));
+        }
+    }
+
+    public void validatePhotoUploadAllowed(TenantSubscription subscription, SubscriptionPlan plan, int currentPhotosInWorkOrder) {
+        if (!subscription.isAccessGranted()) {
+            throw new QuotaExceededException("La suscripción del taller no cuenta con acceso activo.");
+        }
+        TenantQuotaLimits limits = plan.getQuotaLimits();
+        if (limits.maxPhotosPerWorkOrder() != -1 && currentPhotosInWorkOrder >= limits.maxPhotosPerWorkOrder()) {
+            throw new QuotaExceededException(String.format(
+                "Límite de evidencias fotográficas por orden de trabajo alcanzado (%d/%d fotos). Actualice a Pro o Max para adjuntar fotos ilimitadas por peritaje.",
+                currentPhotosInWorkOrder, limits.maxPhotosPerWorkOrder()
+            ));
+        }
+    }
+
+    public void validateCompanyCustomerRegistrationAllowed(TenantSubscription subscription, SubscriptionPlan plan) {
+        if (!subscription.isAccessGranted()) {
+            throw new QuotaExceededException("La suscripción del taller no cuenta con acceso activo.");
+        }
+        TenantQuotaLimits limits = plan.getQuotaLimits();
+        if (!limits.companyRegistrationAllowed()) {
+            throw new QuotaExceededException(
+                "El registro de clientes con personería jurídica (empresas y flotas comerciales) requiere el plan Max o Enterprise. Su plan actual solo permite clientes individuales (DNI/CE)."
+            );
+        }
+    }
+
+    public void validateAiReportGenerationAllowed(TenantSubscription subscription, SubscriptionPlan plan, int currentMonthlyAiReports) {
+        if (!subscription.isAccessGranted()) {
+            throw new QuotaExceededException("La suscripción del taller no cuenta con acceso activo.");
+        }
+        TenantQuotaLimits limits = plan.getQuotaLimits();
+        if (limits.maxMonthlyAiReports() <= 0) {
+            throw new QuotaExceededException(
+                "La generación de Informes Ejecutivos de Salud Vehicular asistidos por IA predictiva requiere el plan Max o Enterprise."
+            );
+        }
+        if (limits.maxMonthlyAiReports() != -1 && currentMonthlyAiReports >= limits.maxMonthlyAiReports()) {
+            throw new QuotaExceededException(String.format(
+                "Cupo mensual de informes predictivos con IA alcanzado (%d/%d informes generados este mes).",
+                currentMonthlyAiReports, limits.maxMonthlyAiReports()
+            ));
+        }
+    }
+
+    public void validateMultiWarehouseTransferAllowed(TenantSubscription subscription, SubscriptionPlan plan) {
+        if (!subscription.isAccessGranted()) {
+            throw new QuotaExceededException("La suscripción del taller no cuenta con acceso activo.");
+        }
+        TenantQuotaLimits limits = plan.getQuotaLimits();
+        if (!limits.multiWarehouseAllowed()) {
+            throw new QuotaExceededException(
+                "La gestión de múltiples almacenes y transferencias inter-sede requiere el plan Max o Enterprise con ERP Suite. Los planes Go y Pro operan en almacén único con costeo FIFO estricto por lote."
+            );
         }
     }
 
@@ -7256,9 +8693,15 @@ public record SubscriptionPlanResource(
 public record TenantQuotaLimitsDto(
     int maxBranches,
     int maxActiveStaff,
+    int maxActiveObd2Devices,
+    int maxPhotosPerWorkOrder,
+    int maxMonthlyAiReports,
+    boolean companyRegistrationAllowed,
+    boolean multiWarehouseAllowed,
+    boolean marketplaceListed,
+    int maxMonthlyWorkOrders,
     boolean iotTelemetryEnabled,
-    boolean aiDiagnosticsEnabled,
-    int maxMonthlyWorkOrders
+    boolean aiDiagnosticsEnabled
 ) {}
 
 public record CreateCheckoutSessionRequest(
@@ -8049,13 +9492,20 @@ erDiagram
     plans {
         uuid id PK "uuid_generate_v4()"
         varchar(100) stripe_price_id UK "ID oficial de precio en Stripe (price_...)"
-        varchar(100) name "Nombre comercial (Plan Starter, Pro, Enterprise)"
-        varchar(20) tier "starter | professional | enterprise"
-        decimal(10_2) price "Monto recurrente (USD o PEN)"
-        varchar(3) currency "Moneda formal (USD, PEN)"
-        varchar(20) billing_cycle "monthly | yearly"
+        varchar(100) name "Nombre comercial (Go, Pro, Max, Enterprise)"
+        varchar(20) tier "GO | PRO | MAX | ENTERPRISE"
+        decimal(10_2) price "Monto recurrente (PEN o USD)"
+        varchar(3) currency "Moneda formal (PEN, USD)"
+        varchar(20) billing_cycle "MONTHLY | YEARLY"
         int max_branches "Límite máximo de sucursales autorizadas"
         int max_active_staff "Límite de mecánicos y personal activo"
+        int max_active_obd2_devices "Límite de dispositivos OBD-II activos vinculados"
+        int max_photos_per_work_order "Límite de fotos por orden (-1 ilimitado)"
+        int max_monthly_ai_reports "Cupo mensual de reportes IA predictivos"
+        boolean company_registration_allowed "Permite registrar empresas y flotas"
+        boolean multi_warehouse_allowed "Habilita gestión multi-almacén FIFO"
+        boolean marketplace_listed "Listado en marketplace Atelier Bussiness"
+        int max_monthly_work_orders "Límite mensual de órdenes de trabajo"
         boolean iot_telemetry_enabled "Acceso habilitado a telemetría OBD-II"
         boolean ai_diagnostics_enabled "Acceso habilitado a predicción con IA"
         boolean is_active "Estado comercial del plan"
@@ -8139,13 +9589,13 @@ El **IoT Telemetry & Predictive Maintenance Context** constituye el núcleo de i
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<Obd2Device>`
 * **Propósito:** Representa el equipo físico de hardware de diagnóstico a bordo (OBD-II) perteneciente al taller.
 * **Atributos:**
-  * `id: DeviceId` — Identificador universal interno del dispositivo (UUID).
-  * `tenantId: TenantId` — Taller automotriz propietario del hardware.
-  * `deviceIdentifier: DeviceIdentifier` — Identificador unívoco del hardware: Dirección MAC Bluetooth (ej. `00:1A:7D:DA:71:13`) o código IMEI de 15 dígitos para módems celulares. **Restricción UNIQUE a nivel de base de datos**.
-  * `connectionType: ConnectionType` — Canal de enlace (`BLUETOOTH_BLE`, `SIM_CELLULAR`, `WIFI`).
-  * `status: DeviceStatus` — Situación operativa (`ACTIVE`, `INACTIVE`, `LOST`, `BROKEN`).
-  * `hardwareModel: String` — Denominación del modelo (ej. "ELM327 v2.1 BLE", "Teltonika FMB920 OBD").
-  * `firmwareVersion: String` — Versión del software embebido.
+  * `id: DeviceId`: Identificador universal interno del dispositivo (UUID).
+  * `tenantId: TenantId`: Taller automotriz propietario del hardware.
+  * `deviceIdentifier: DeviceIdentifier`: Identificador unívoco del hardware: Dirección MAC Bluetooth (ej. `00:1A:7D:DA:71:13`) o código IMEI de 15 dígitos para módems celulares. **Restricción UNIQUE a nivel de base de datos**.
+  * `connectionType: ConnectionType`: Canal de enlace (`BLUETOOTH_BLE`, `SIM_CELLULAR`, `WIFI`).
+  * `status: DeviceStatus`: Situación operativa (`ACTIVE`, `INACTIVE`, `LOST`, `BROKEN`).
+  * `hardwareModel: String`: Denominación del modelo (ej. "ELM327 v2.1 BLE", "Teltonika FMB920 OBD").
+  * `firmwareVersion: String`: Versión del software embebido.
 * **Invariantes y Reglas de Negocio:**
   * El identificador del dispositivo debe respetar el formato estricto de MAC Address (6 pares hexadecimales) o IMEI (15 dígitos numéricos).
   * No puede registrarse dos veces el mismo `deviceIdentifier` en toda la plataforma.
@@ -8160,14 +9610,14 @@ El **IoT Telemetry & Predictive Maintenance Context** constituye el núcleo de i
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<DeviceInstallation>`
 * **Propósito:** Representa la vinculación operativa y física de un escáner OBD-II en el puerto de diagnóstico de un vehículo automotriz.
 * **Atributos:**
-  * `id: InstallationId` — Identificador universal de la instalación (UUID).
-  * `deviceId: DeviceId` — Escáner OBD-II utilizado.
-  * `vehicleId: VehicleId` — Vehículo intervenido.
-  * `tenantId: TenantId` — Taller prestador del servicio de telemetría.
-  * `installedAt: Instant` — Timestamp de inicio de la instalación y monitoreo.
-  * `uninstalledAt: Optional<Instant>` — Timestamp de desconexión física (nullable hasta que culmine el servicio).
-  * `initialOdometerKm: int` — Kilometraje registrado al momento de la conexión.
-  * `finalOdometerKm: Optional<Integer>` — Kilometraje al desinstalar.
+  * `id: InstallationId`: Identificador universal de la instalación (UUID).
+  * `deviceId: DeviceId`: Escáner OBD-II utilizado.
+  * `vehicleId: VehicleId`: Vehículo intervenido.
+  * `tenantId: TenantId`: Taller prestador del servicio de telemetría.
+  * `installedAt: Instant`: Timestamp de inicio de la instalación y monitoreo.
+  * `uninstalledAt: Optional<Instant>`: Timestamp de desconexión física (nullable hasta que culmine el servicio).
+  * `initialOdometerKm: int`: Kilometraje registrado al momento de la conexión.
+  * `finalOdometerKm: Optional<Integer>`: Kilometraje al desinstalar.
 * **Invariantes y Reglas de Negocio:**
   * Un dispositivo no puede tener más de una instalación activa simultáneamente (`uninstalledAt == null`).
   * Un vehículo no puede tener más de un escáner instalado al mismo tiempo.
@@ -8181,15 +9631,15 @@ El **IoT Telemetry & Predictive Maintenance Context** constituye el núcleo de i
 * **Paquete:** `com.andeva.atelier.platform.iot.domain.model.aggregates`
 * **Propósito:** Modela una lectura instantánea de telemetría vehicular capturada por el escáner y persistida en la Hipertabla de TimescaleDB.
 * **Atributos:**
-  * `timestamp: Instant` — Momento cronológico de captura satelital/vehicular (Clave de particionamiento temporal en TimescaleDB).
-  * `vehicleId: VehicleId` — Vehículo emisor (Clave primaria compuesta junto con timestamp).
-  * `tenantId: TenantId` — Taller desnormalizado para consultas analíticas de alto rendimiento.
-  * `location: Optional<GeoCoordinates>` — Coordenadas GPS satelitales (latitud, longitud) provistas por el smartphone o módem.
-  * `speed: VehicleSpeed` — Velocidad instantánea en km/h reportada por la ECU.
-  * `engineTemperature: EngineTemperature` — Temperatura del refrigerante del motor en grados Celsius ($^\circ\text{C}$).
-  * `engineRpm: EngineRpm` — Revoluciones por minuto del cigüeñal.
-  * `fuelLevel: Optional<FuelLevel>` — Porcentaje de combustible remanente (0% a 100%).
-  * `batteryVoltage: Optional<BatteryVoltage>` — Tensión eléctrica en voltios del alternador/batería.
+  * `timestamp: Instant`: Momento cronológico de captura satelital/vehicular (Clave de particionamiento temporal en TimescaleDB).
+  * `vehicleId: VehicleId`: Vehículo emisor (Clave primaria compuesta junto con timestamp).
+  * `tenantId: TenantId`: Taller desnormalizado para consultas analíticas de alto rendimiento.
+  * `location: Optional<GeoCoordinates>`: Coordenadas GPS satelitales (latitud, longitud) provistas por el smartphone o módem.
+  * `speed: VehicleSpeed`: Velocidad instantánea en km/h reportada por la ECU.
+  * `engineTemperature: EngineTemperature`: Temperatura del refrigerante del motor en grados Celsius ($^\circ\text{C}$).
+  * `engineRpm: EngineRpm`: Revoluciones por minuto del cigüeñal.
+  * `fuelLevel: Optional<FuelLevel>`: Porcentaje de combustible remanente (0% a 100%).
+  * `batteryVoltage: Optional<BatteryVoltage>`: Tensión eléctrica en voltios del alternador/batería.
 * **Invariantes y Reglas de Negocio:**
   * Las lecturas son de naturaleza inmutable y de solo inserción (*Append-Only*).
   * La velocidad no puede ser negativa ni exceder 350 km/h.
@@ -8200,15 +9650,15 @@ El **IoT Telemetry & Predictive Maintenance Context** constituye el núcleo de i
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<VehicleFault>`
 * **Propósito:** Representa un código de error de diagnóstico (**DTC**) emitido por la computadora a bordo del automóvil.
 * **Atributos:**
-  * `id: FaultId` — Identificador universal del fallo (UUID).
-  * `vehicleId: VehicleId` — Vehículo afectado.
-  * `tenantId: TenantId` — Taller que supervisa la unidad.
-  * `dtcCode: DtcCode` — Código alfanumérico normalizado SAE J2019 / ISO 15031 (ej. `P0300`, `P0420`, `B0001`).
-  * `severity: FaultSeverity` — Gravedad del problema (`LOW`, `MEDIUM`, `CRITICAL`).
-  * `description: String` — Glosa técnica explicativa del subsistema comprometido.
-  * `detectedAt: Instant` — Momento exacto de emisión por el escáner.
-  * `isResolved: boolean` — Bandera que indica si el código fue subsanado o limpiado (*cleared*).
-  * `resolvedAt: Optional<Instant>` — Momento de resolución mecánica en taller (nullable).
+  * `id: FaultId`: Identificador universal del fallo (UUID).
+  * `vehicleId: VehicleId`: Vehículo afectado.
+  * `tenantId: TenantId`: Taller que supervisa la unidad.
+  * `dtcCode: DtcCode`: Código alfanumérico normalizado SAE J2019 / ISO 15031 (ej. `P0300`, `P0420`, `B0001`).
+  * `severity: FaultSeverity`: Gravedad del problema (`LOW`, `MEDIUM`, `CRITICAL`).
+  * `description: String`: Glosa técnica explicativa del subsistema comprometido.
+  * `detectedAt: Instant`: Momento exacto de emisión por el escáner.
+  * `isResolved: boolean`: Bandera que indica si el código fue subsanado o limpiado (*cleared*).
+  * `resolvedAt: Optional<Instant>`: Momento de resolución mecánica en taller (nullable).
 * **Métodos:**
   * `+ static VehicleFault detect(VehicleId vehicleId, TenantId tenantId, DtcCode dtcCode, FaultSeverity severity, String description): VehicleFault`: Factoría de dominio; registra `VehicleFaultDetectedEvent`.
   * `+ void resolve(): void`: Marca el código como reparado tras intervención en foso de servicio.
@@ -8218,16 +9668,16 @@ El **IoT Telemetry & Predictive Maintenance Context** constituye el núcleo de i
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<PredictiveAlert>`
 * **Propósito:** Representa una advertencia proactiva generada por el motor de inteligencia de telemetría anticipando una avería mecánica grave.
 * **Atributos:**
-  * `id: AlertId` — Identificador universal de la alerta (UUID).
-  * `vehicleId: VehicleId` — Vehículo en riesgo.
-  * `tenantId: TenantId` — Taller automotriz responsable.
-  * `recommendedServiceId: Optional<ServiceId>` — Servicio mecánico preventivo sugerido del catálogo de MRO.
-  * `alertType: AlertType` — Tipo de riesgo (`ENGINE_OVERHEATING_RISK`, `BATTERY_FAILURE_RISK`, `CATALYTIC_SYSTEM_DEGRADATION`, `CYLINDER_MISFIRE_HAZARD`).
-  * `confidenceScore: ConfidenceScore` — Probabilidad porcentual estimada del fallo inminente (ej. 89.50%).
-  * `message: String` — Mensaje preventivo comprensible para el conductor.
-  * `status: AlertStatus` — Estado de la alerta (`DISPATCHED`, `ACKNOWLEDGED`, `RESOLVED`, `DISMISSED`).
-  * `fcmMessageId: Optional<String>` — Identificador de mensaje retornado por Firebase Cloud Messaging.
-  * `createdAt: Instant` — Momento de formulación matemática de la alerta.
+  * `id: AlertId`: Identificador universal de la alerta (UUID).
+  * `vehicleId: VehicleId`: Vehículo en riesgo.
+  * `tenantId: TenantId`: Taller automotriz responsable.
+  * `recommendedServiceId: Optional<ServiceId>`: Servicio mecánico preventivo sugerido del catálogo de MRO.
+  * `alertType: AlertType`: Tipo de riesgo (`ENGINE_OVERHEATING_RISK`, `BATTERY_FAILURE_RISK`, `CATALYTIC_SYSTEM_DEGRADATION`, `CYLINDER_MISFIRE_HAZARD`).
+  * `confidenceScore: ConfidenceScore`: Probabilidad porcentual estimada del fallo inminente (ej. 89.50%).
+  * `message: String`: Mensaje preventivo comprensible para el conductor.
+  * `status: AlertStatus`: Estado de la alerta (`DISPATCHED`, `ACKNOWLEDGED`, `RESOLVED`, `DISMISSED`).
+  * `fcmMessageId: Optional<String>`: Identificador de mensaje retornado por Firebase Cloud Messaging.
+  * `createdAt: Instant`: Momento de formulación matemática de la alerta.
 * **Métodos:**
   * `+ static PredictiveAlert generate(VehicleId vehicleId, TenantId tenantId, Optional<ServiceId> serviceId, AlertType type, ConfidenceScore score, String message): PredictiveAlert`: Factoría que inicializa la alerta en estado `DISPATCHED` y registra `PredictiveAlertDispatchedEvent`.
   * `+ void markDispatched(String fcmMessageId): void`: Registra el ID de entrega del push de Firebase.
@@ -8243,10 +9693,10 @@ El **IoT Telemetry & Predictive Maintenance Context** constituye el núcleo de i
 * **Paquete:** `com.andeva.atelier.platform.iot.domain.model.entities`
 * **Propósito:** Catálogo maestro estandarizado de códigos DTC de automoción (SAE/ISO) para enriquecimiento semántico de descripciones técnicas y gravedades predeterminadas.
 * **Atributos:**
-  * `code: DtcCode` — Código alfanumérico (ej. `P0171`).
-  * `category: DtcCategory` — Subsistema (`POWERTRAIN_P`, `CHASSIS_C`, `BODY_B`, `NETWORK_U`).
-  * `standardDescription: String` — Glosa oficial (ej. "Sistema de combustible demasiado pobre (Banco 1)").
-  * `defaultSeverity: FaultSeverity` — Gravedad estimada estándar.
+  * `code: DtcCode`: Código alfanumérico (ej. `P0171`).
+  * `category: DtcCategory`: Subsistema (`POWERTRAIN_P`, `CHASSIS_C`, `BODY_B`, `NETWORK_U`).
+  * `standardDescription: String`: Glosa oficial (ej. "Sistema de combustible demasiado pobre (Banco 1)").
+  * `defaultSeverity: FaultSeverity`: Gravedad estimada estándar.
 
 ---
 

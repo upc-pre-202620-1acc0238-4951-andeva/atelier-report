@@ -1,0 +1,40 @@
+/**
+ * Atelier Workshop Design System — Theme & Colors (Tailwind CSS v4)
+ */
+
+@theme {
+  --font-sans: 'Satoshi', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-imagotipo: 'Albert Sans', 'Satoshi', sans-serif;
+
+  /* Colores Primarios (Atelier Electric Blue & Deep Navy) */
+  --color-primary: #0071EB;
+  --color-primary-dark: #031A6B;
+  --color-primary-soft: #69B1FF;
+
+  /* Colores de Acento (Atelier Amber Orange & Gold) */
+  --color-accent: #F68B01;
+  --color-accent-dark: #D87900;
+  --color-accent-soft: #FFCD69;
+
+  /* Superficies (Fondos) */
+  --color-surface-black: #262626;
+  --color-surface-white: #F8F8FA;
+
+  /* Tarjetas y Paneles (Cards) */
+  --color-card-black: #272727;
+  --color-card-white: #FFFFFF;
+
+  /* Textos */
+  --color-text-black: #262626;
+  --color-text-white: #FFFFFF;
+  --color-text-subtitles: #C6C6C6;
+
+  /* Bordes de Tarjetas */
+  --color-border-card-dark: #EBEBEB;
+  --color-border-card-light: #C6C6C6;
+
+  /* Estados Funcionales del Sistema */
+  --color-success: #3AC530;
+  --color-error: #FB2C36;
+  --color-warning: #F0B100;
+}

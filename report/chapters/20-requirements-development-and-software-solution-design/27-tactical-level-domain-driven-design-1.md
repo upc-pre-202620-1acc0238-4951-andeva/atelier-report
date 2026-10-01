@@ -2987,7 +2987,7 @@ Constructor & Generalización de \textbf{DomainException}. Lanza ante incompatib
 A partir de la estructura plasmada en la @fig:class-diagram-shared y descrita en la @tbl:shared-domain-classes-members, se identifican tres fundamentos de ingeniería de software que sustentan la solidez del modelo de dominio:
 
 - **Inmutabilidad Absoluta y Ausencia de Mutadores:** Al adoptar los Java Records para todos los objetos de valor y tipos de identidad, se elimina completamente la posibilidad de mutación no autorizada de estado. Cada instancia es inmutable por definición de compilador, garantizando seguridad en entornos concurrentes y simplificando el razonamiento sobre la consistencia de los datos.
-- **Verificación Algorítmica Rigurosa en Tiempo de Instanciación:** Las validaciones críticas no se delegan a servicios externos ni a controladores perimetrales; residen en los constructores compactos de los objetos de valor. Destacan dos algoritmos fundamentales:
+- **Verificación Algorítmica Rigurosa en Tiempo de Instanciación:** Las validaciones críticas no se delegan a servicios externos ni a controladores perimetrales, sino que residen en los constructores compactos de los objetos de valor. Destacan dos algoritmos fundamentales:
   - **Cálculo de Distancia Ortodrómica:** Para la evaluación de geocercas en la marcación de asistencia de mecánicos y la asignación de auxilio en ruta, el método *distanceTo()* calcula la distancia geodésica entre dos puntos sobre una esfera de radio medio terrestre *R* = 6,371,000 m mediante:
     $$d = 2 R \arcsin \left( \sqrt{\sin^2\left(\frac{\Delta\phi}{2}\right) + \cos(\phi_1)\cos(\phi_2)\sin^2\left(\frac{\Delta\lambda}{2}\right)} \right)$$
     donde $\phi_1, \phi_2$ corresponden a las latitudes y $\Delta\lambda$ a la diferencia de longitudes en radianes.
@@ -3330,36 +3330,6 @@ AuthProvider & Mecanismo de procedencia y autenticación de la cuenta (LOCAL, GO
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
-TenantRegistrationDomainService & Orquesta la creación atómica de taller, sede matriz, usuario administrador, membresía y rol de propietario. \\*
-\hline
-\textbf{Categoría} & Servicio de Dominio \\*
-\hline
-\textbf{Relaciones} & Coordina Tenant, Branch, User, Profile, Role y TenantMembership. \\*
-\hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak services} \\
-\hline
-\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
-\hline
-PasswordEncryptionDomainService & Encapsula el algoritmo de derivación de claves BCrypt y la verificación de solidez de contraseñas. \\*
-\hline
-\textbf{Categoría} & Servicio de Dominio \\*
-\hline
-\textbf{Relaciones} & Empleado en registro y cambio de credenciales de User. \\*
-\hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak services} \\
-\hline
-\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
-\hline
-TokenGeneratorDomainService & Algoritmo criptográfico seguro para la generación de OTPs decimales y tokens URL-safe de onboarding. \\*
-\hline
-\textbf{Categoría} & Servicio de Dominio \\*
-\hline
-\textbf{Relaciones} & Empleado por User, VerificationToken e Invitation. \\*
-\hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak services} \\
-\hline
-\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
-\hline
 TenantRepository & Contrato de persistencia agnóstico para la raíz de agregado Tenant. \\*
 \hline
 \textbf{Categoría} & Puerto de Salida \\*
@@ -3680,7 +3650,17 @@ RoleNotFoundException & Señaliza la inexistencia del rol asignado en el context
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
-SystemRoleImmutableException & Impide la alteración o eliminación de roles semilla globales del sistema. \\*
+SystemRoleImmutableException & Impide la eliminación física o lógica de roles protegidos de fábrica. \\*
+\hline
+\textbf{Categoría} & Excepción de Dominio \\*
+\hline
+\textbf{Relaciones} & Especialización de DomainException. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak domain.\allowbreak exceptions} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+RoleInUseException & Impide la eliminación de un rol que se encuentra asignado a colaboradores activos en el taller. \\*
 \hline
 \textbf{Categoría} & Excepción de Dominio \\*
 \hline
@@ -4361,9 +4341,17 @@ id (Role) & Identificador universal único del rol de seguridad. \\*
 \hline
 \thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
 \hline
-tenantId (Role) & Identificador del taller propietario (nulo en roles globales del sistema). \\*
+tenantId (Role) & Identificador del taller titular del rol soberano. \\*
 \hline
 \textbf{Tipo o Firma} & \texttt{TenantId} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+code (Role) & Código canónico inmutable de la plantilla de origen. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
 \hline
 \textbf{Ámbito de Acceso} & Privado \\
 \hline
@@ -4377,7 +4365,15 @@ name (Role) & Denominación funcional del rol (única dentro del ámbito del tal
 \hline
 \thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
 \hline
-isSystemRole & Bandera de inmutabilidad para roles nativos provistos por la plataforma. \\*
+description (Role) & Descripción funcional de las atribuciones operativas del rol. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{String} \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+isSystemRole & Bandera indicativa de proveniencia de plantilla de fábrica protegida contra supresión. \\*
 \hline
 \textbf{Tipo o Firma} & \texttt{boolean} \\*
 \hline
@@ -4393,7 +4389,23 @@ permissions & Conjunto de permisos atómicos asignados al rol. \\*
 \hline
 \thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
 \hline
-grantPermission & Incorpora un permiso al rol asegurando que no se encuentre protegido por el sistema. \\*
+updatePermissions & Actualiza en bloque los privilegios atómicos verificando inmutabilidad en roles protegidos. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void updatePermissions(Set<\allowbreak Permission>\allowbreak  newPermissions)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+resetToTemplate & Restaura la colección de permisos a la plantilla predeterminada del sistema. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void resetToTemplate(RoleTemplate template)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+grantPermission & Incorpora un permiso individual al conjunto de privilegios del rol. \\*
 \hline
 \textbf{Tipo o Firma} & \texttt{void grantPermission(Permission permission)} \\*
 \hline
@@ -4401,7 +4413,7 @@ grantPermission & Incorpora un permiso al rol asegurando que no se encuentre pro
 \hline
 \thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
 \hline
-revokePermission & Remueve un permiso del conjunto verificando la mutabilidad del rol. \\*
+revokePermission & Remueve un permiso individual del conjunto de privilegios. \\*
 \hline
 \textbf{Tipo o Firma} & \texttt{void revokePermission(PermissionId id)} \\*
 \hline
@@ -4631,48 +4643,7 @@ En la @tbl:iam-value-objects se especifican los objetos de valor y enumeraciones
 
 **Servicios de Dominio de IAM & Tenancy**
 
-Los servicios de dominio encapsulan operaciones de lógica de negocio pura y algoritmos criptográficos que operan sobre múltiples raíces de agregado o que no pertenecen por cohesión a una sola entidad:
-
-- **TenantRegistrationDomainService**: Orquesta el caso de negocio fundacional de Atelier: el alta integral de una empresa automotriz. Esta operación atómica comprende la validación tributaria del RUC mediante el objeto de valor **TaxId**, la creación de la raíz **Tenant**, la apertura automática de la sede matriz inicial con código de anexo "0000", la creación de la cuenta **User** del propietario con su entidad dependiente **Profile**, la provisión de la plantilla de roles del sistema para el nuevo taller, la concesión del rol de administrador y la formalización de la primera membresía **TenantMembership**. Asimismo, vincula el identificador de cliente en Stripe si se encuentra disponible.
-
-- **PasswordEncryptionDomainService**: Servicio puro que encapsula el algoritmo criptográfico BCrypt con factor de costo computacional de 12 rondas. Provee el método *hashPassword(String rawPassword)* para derivar resúmenes criptográficos seguros e impone la política de complejidad de contraseñas de Atelier: longitud mínima de 8 caracteres, al menos una letra mayúscula, una letra minúscula, un dígito numérico y un símbolo especial. Ofrece también el método *verifyPassword(String rawPassword, Password hashedPassword)* para la evaluación segura de credenciales sin riesgos de ataques de sincronización temporal.
-
-- **TokenGeneratorDomainService**: Servicio criptográfico responsable de generar valores aleatorios de alta entropía empleando la clase segura **SecureRandom**. Suministra el método *generateNumericOtp(int digits)*, el cual produce secuencias decimales uniformemente distribuidas de 6 dígitos para validación rápida en canales móviles y correo electrónico, y el método *generateSecureToken(int byteLength)*, que produce cadenas alfanuméricas seguras codificadas en Base64 URL-safe.
-
-En la @tbl:iam-domain-services se exponen las interfaces de estos tres servicios de dominio.
-
-\renewcommand{\arraystretch}{1.25}
-\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
-\caption{Servicios de Dominio del Bounded Context IAM \& Tenancy} \label{tbl:iam-domain-services} \\
-\hline
-\thfirst{Aspecto de Servicio} & \thcell{Especificación Técnica y Responsabilidad} \\
-\hline
-\endfirsthead
-\hline
-\thfirst{Aspecto de Servicio} & \thcell{Especificación Técnica y Responsabilidad} \\
-\hline
-\endhead
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Dominio:} TenantRegistrationDomainService} \\*
-\hline
-\textbf{Métodos Principales} & \texttt{registerTenant(...)} \\*
-\hline
-\textbf{Responsabilidad} & Orquesta la creación atómica de taller, sede matriz, usuario titular y membresía inicial. \\
-\hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Dominio:} PasswordEncryptionDomainService} \\*
-\hline
-\textbf{Métodos Principales} & - \texttt{hashPassword(...)} \newline - \texttt{verifyPassword(...)} \newline - \texttt{validatePolicy(...)} \\*
-\hline
-\textbf{Responsabilidad} & Cifrado seguro BCrypt y verificación de políticas de complejidad de credenciales. \\
-\hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Dominio:} TokenGeneratorDomainService} \\*
-\hline
-\textbf{Métodos Principales} & - \texttt{generateNumericOtp(...)} \newline - \texttt{generateSecureToken(...)} \\*
-\hline
-\textbf{Responsabilidad} & Generación de números OTP de 6 dígitos y tokens criptográficos Base64 URL-safe. \\
-\hline
-\end{longtable}
-\renewcommand{\arraystretch}{1.0}
-*Nota.* Componentes ubicados en el paquete com.andeva.atelier.platform.iam.domain.services.
+El Bounded Context de IAM & Tenancy no requiere servicios de dominio independientes en memoria (`domain.services`). Las políticas de seguridad y complejidad de credenciales se encapsulan como invariantes atómicas en el Value Object inmutable **HashedPassword**. Asimismo, la generación de identificadores criptográficos, tokens OTP y derivación de hashes se delega a adaptadores especializados de infraestructura de seguridad (`infrastructure.security.tokens.jwt` e `infrastructure.security.hashing.bcrypt`) a través de contratos de puertos de salida de la capa de aplicación, garantizando que el núcleo de dominio permanezca 100% puro y centrado en sus 5 agregados.
 
 **Puertos de Repositorio de la Capa de Dominio**
 
@@ -4725,9 +4696,9 @@ En la @tbl:iam-repository-ports se detallan las operaciones provistas por estos 
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Repositorio:} RoleRepository} \\*
 \hline
-\textbf{Métodos Principales} & - \texttt{save} \newline - \texttt{findById} \newline - \texttt{findByTenantIdAndName} \newline - \texttt{findSystemRoles} \\*
+\textbf{Métodos Principales} & - \texttt{save} \newline - \texttt{findById} \newline - \texttt{findByTenantIdAndName} \newline - \texttt{findByTenantIdAndCode} \newline - \texttt{findByTenantId} \\*
 \hline
-\textbf{Responsabilidad de Dominio} & Administración de roles de seguridad personalizados de taller y roles globales. \\
+\textbf{Responsabilidad de Dominio} & Administración y persistencia de roles de seguridad soberanos y personalizados por taller. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Repositorio:} PermissionRepository} \\*
 \hline
@@ -4755,13 +4726,13 @@ En la @tbl:iam-repository-ports se detallan las operaciones provistas por estos 
 
 La sincronización entre el Bounded Context IAM y los demás módulos de negocio de Atelier Platform se articula mediante eventos de dominio inmutables que implementan el contrato base **DomainEvent**. Estos eventos se publican transaccionalmente mediante el patrón Transactional Outbox, asegurando entrega con semántica at-least-once:
 
-- **Eventos de taller**: **TenantRegisteredEvent** notifica el alta inicial de la empresa automotriz para provisionar su catálogo inicial en Inventario y Facturación; **TenantActivatedEvent** señala la rehabilitación de operaciones; **TenantSuspendedEvent** notifica la revocación inmediata de accesos y la suspensión de servicios por morosidad o infracción contractual.
+- **Eventos de taller**: **TenantRegisteredEvent** notifica el alta inicial de la empresa automotriz para provisionar su catálogo inicial en Inventario y Facturación. **TenantActivatedEvent** señala la rehabilitación de operaciones. **TenantSuspendedEvent** notifica la revocación inmediata de accesos y la suspensión de servicios por morosidad o infracción contractual.
 
-- **Eventos de sede física**: **BranchCreatedEvent** notifica la delimitación de una nueva sucursal con sus coordenadas satelitales WGS84 para la apertura de turnos en Human Resources; **BranchUpdatedEvent** transporta ajustes en nombre o perímetro; **BranchDeactivatedEvent** notifica el cese operativo de la sede.
+- **Eventos de sede física**: **BranchCreatedEvent** notifica la delimitación de una nueva sucursal con sus coordenadas satelitales WGS84 para la apertura de turnos en Human Resources. **BranchUpdatedEvent** transporta ajustes en nombre o perímetro. **BranchDeactivatedEvent** notifica el cese operativo de la sede.
 
-- **Eventos de identidad y credenciales**: **UserRegisteredEvent** notifica el alta de una cuenta para iniciar la verificación de correo electrónico; **UserVerifiedEvent** confirma la activación plena del usuario; **UserPasswordResetRequestedEvent** transporta el token OTP para su despacho mediante la API REST de Resend; **UserPasswordChangedEvent** registra la renovación de credenciales; **UserSuspendedEvent** revoca las sesiones activas en todos los clientes móviles y web.
+- **Eventos de identidad y credenciales**: **UserRegisteredEvent** notifica el alta de una cuenta para iniciar la verificación de correo electrónico. **UserVerifiedEvent** confirma la activación plena del usuario. **UserPasswordResetRequestedEvent** transporta el token OTP para su despacho mediante la API REST de Resend. **UserPasswordChangedEvent** registra la renovación de credenciales. **UserSuspendedEvent** revoca las sesiones activas en todos los clientes móviles y web.
 
-- **Eventos de contratación y onboarding**: **TenantMembershipCreatedEvent** notifica la adscripción de un trabajador al taller para el registro de su legajo en Recursos Humanos; **TenantMembershipDeactivatedEvent** notifica la baja laboral; **StaffInvitedEvent** transporta el token de invitación para el envío del correo de bienvenida; **StaffInvitationAcceptedEvent** formaliza la incorporación del colaborador al equipo operativo del taller.
+- **Eventos de contratación y onboarding**: **TenantMembershipCreatedEvent** notifica la adscripción de un trabajador al taller para el registro de su legajo en Recursos Humanos. **TenantMembershipDeactivatedEvent** notifica la baja laboral. **StaffInvitedEvent** transporta el token de invitación para el envío del correo de bienvenida. **StaffInvitationAcceptedEvent** formaliza la incorporación del colaborador al equipo operativo del taller.
 
 En la @tbl:iam-domain-events se sintetiza la taxonomía de eventos de dominio de este contexto.
 
@@ -4872,13 +4843,13 @@ En la @tbl:iam-domain-events se sintetiza la taxonomía de eventos de dominio de
 
 Por último, el manejo determinista de anomalías de negocio se implementa mediante excepciones semánticas fuertemente tipadas que heredan de la clase base **DomainException** provista por el Bounded Context Shared. Al producirse la transgresión de una regla o invariante, la capa de dominio interrumpe la operación arrojando una de estas anomalías, las cuales son interceptadas por los manejadores de comandos de la Capa de Aplicación y transformadas en resultados de falla **Result.Failure** o formateadas como problemas estándar bajo la RFC 7807:
 
-- **Anomalías de taller**: **TenantNotFoundException** ante identificadores de taller inexistentes; **TenantAlreadyExistsException** ante intentos de duplicar un RUC registrado; **TenantSuspendedException** si se intenta operar sobre una empresa con actividades comerciales suspendidas.
+- **Anomalías de taller**: **TenantNotFoundException** ante identificadores de taller inexistentes. **TenantAlreadyExistsException** ante intentos de duplicar un RUC registrado. **TenantSuspendedException** si se intenta operar sobre una empresa con actividades comerciales suspendidas.
 
-- **Anomalías de usuario y credenciales**: **UserNotFoundException** ante cuentas inexistentes; **UserAlreadyExistsException** cuando una dirección de correo ya se encuentra en uso; **UserSuspendedException** al detectar accesos de cuentas suspendidas; **InvalidCredentialsException** ante contraseñas incorrectas; **InvalidVerificationTokenException** ante códigos OTP erróneos, vencidos o previamente consumidos.
+- **Anomalías de usuario y credenciales**: **UserNotFoundException** ante cuentas inexistentes. **UserAlreadyExistsException** cuando una dirección de correo ya se encuentra en uso. **UserSuspendedException** al detectar accesos de cuentas suspendidas. **InvalidCredentialsException** ante contraseñas incorrectas. **InvalidVerificationTokenException** ante códigos OTP erróneos, vencidos o previamente consumidos.
 
-- **Anomalías de membresía y roles**: **MembershipNotFoundException** cuando un usuario no posee contrato en un taller consultado; **MembershipAlreadyExistsException** al intentar duplicar el contrato de un trabajador en el mismo taller; **RoleNotFoundException** si se hace referencia a un rol no catalogado; **SystemRoleImmutableException** si se intenta modificar o eliminar un rol predefinido de la plataforma.
+- **Anomalías de membresía y roles**: **MembershipNotFoundException** cuando un usuario no posee contrato en un taller consultado. **MembershipAlreadyExistsException** al intentar duplicar el contrato de un trabajador en el mismo taller. **RoleNotFoundException** si se hace referencia a un rol no catalogado. **SystemRoleImmutableException** si se intenta modificar o eliminar un rol predefinido de la plataforma.
 
-- **Anomalías de onboarding**: **InvitationNotFoundException** si el token de invitación no corresponde a ningún registro; **InvitationExpiredException** cuando se sobrepasa el plazo de 72 horas; **InvitationAlreadyAcceptedException** si se intenta canjear un enlace previamente utilizado.
+- **Anomalías de onboarding**: **InvitationNotFoundException** si el token de invitación no corresponde a ningún registro. **InvitationExpiredException** cuando se sobrepasa el plazo de 72 horas. **InvitationAlreadyAcceptedException** si se intenta canjear un enlace previamente utilizado.
 
 En la @tbl:iam-domain-exceptions se sintetiza la jerarquía de excepciones de dominio y sus códigos de error semánticos asociados.
 
@@ -4935,7 +4906,11 @@ En la @tbl:iam-domain-exceptions se sintetiza la jerarquía de excepciones de do
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} SystemRoleImmutableException} \\*
 \hline
-\texttt{SYSTEM\_ROLE\_IMMUTABLE} & Se intentó modificar o dar de baja un rol semilla global del sistema. \\
+\texttt{SYSTEM\_ROLE\_IMMUTABLE} & Se intentó dar de baja un rol protegido de fábrica del sistema. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} RoleInUseException} \\*
+\hline
+\texttt{ROLE\_IN\_USE} & Se intentó dar de baja un rol que se encuentra asignado a colaboradores en el taller. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} InvitationNotFoundException} \\*
 \hline
@@ -4961,15 +4936,15 @@ En la @tbl:iam-domain-exceptions se sintetiza la jerarquía de excepciones de do
 
 La capa de interfaz del Bounded Context Identity and Access Management (IAM) & Tenancy constituye el adaptador primario de entrada para la autenticación perimetral, la administración de talleres automotrices, la configuración de sedes físicas, la gestión de colaboradores y el control de acceso basado en roles en Atelier Platform.
 
-Ubicada en el paquete canónico **com.andeva.atelier.platform.iam.interfaces**, su concepción arquitectónica responde a cuatro directrices esenciales de diseño táctico:
+Ubicada en el paquete canónico **com.andeva.atelier.platform.iam.interfaces**, su concepción arquitectónica se estructura en torno a tres componentes esenciales: los Controladores RESTful bajo el paquete **interfaces.rest.controllers** acompañados de sus recursos DTO y ensambladores de transformación, la Fachada de Contexto Abierto e Inbound ACL materializada en la interfaz **TenancyContextFacade** bajo **interfaces.acl**, y los Eventos de Integración publicados bajo **interfaces.events** para la propagación asíncrona hacia otros Bounded Contexts. Esta organización responde a directrices tácticas fundamentales:
 
-- **Desacoplamiento perimetral y traducción determinista:** Los controladores REST nunca interactúan de forma directa con los agregados de dominio ni capturan excepciones de bajo nivel. Toda comunicación se canaliza hacia los servicios de aplicación mediante comandos y consultas, recibiendo como respuesta el tipo de resultado sellado **Result<T, ApplicationError>**. La conversión hacia respuestas HTTP se delega en ensambladores especializados y en el componente transversal **ResponseEntityAssembler**.
+- **Desacoplamiento perimetral y mediación determinista:** Los controladores REST nunca interactúan de forma directa con los agregados de dominio ni capturan excepciones de bajo nivel. Toda comunicación se canaliza hacia los servicios de aplicación mediante comandos y consultas, recibiendo como respuesta el tipo de resultado sellado **Result<T, ApplicationError>**. La conversión hacia respuestas HTTP se delega en ensambladores especializados y en el componente transversal **ResponseEntityAssembler**.
 
-- **Tokens de seguridad contextuales y enriquecidos:** El emisor de tokens genera credenciales JWT que integran en sus declaraciones criptográficas el identificador de usuario, el taller activo, la sucursal predeterminada y el conjunto consolidado de autoridades de seguridad. Este esquema permite que los filtros perimetrales autoricen peticiones en memoria con complejidad de tiempo constante, eliminando consultas repetitivas a la base de datos relacional.
+- **Segregación estricta de recursos DTO:** Las peticiones y respuestas HTTP se desacoplan en modelos inmutables independientes con validación declarativa mediante Jakarta Bean Validation en las peticiones de entrada y proyecciones optimizadas para clientes web y móviles en las respuestas.
 
 - **Verificación perimetral de fronteras multi-inquilino:** Los controladores que exponen rutas parametrizadas por taller verifican que el identificador suministrado en la ruta coincida con el taller autenticado en el contexto de seguridad. Esta validación previene vulnerabilidades de acceso horizontal entre distintos talleres mecánicos que coexisten en la plataforma.
 
-- **Fachada de contexto abierto para integración intermodular:** Para posibilitar que otros módulos consulten la vigencia de talleres, la afiliación de mecánicos o la ubicación de sedes sin acoplamientos circulares, la capa expone la interfaz **TenancyContextFacade**, resguardando la pureza interna de los agregados de identidad.
+- **Fachada de contexto abierto y eventos de integración:** Para posibilitar que otros módulos consulten la vigencia de talleres, la afiliación de mecánicos o la ubicación de sedes sin acoplamientos circulares, la capa expone la interfaz **TenancyContextFacade**, resguardando la pureza interna de los agregados de identidad. Asimismo, notifica cambios de estado del taller y membresías mediante eventos de integración bajo el paquete **interfaces.events**.
 
 En la @tbl:iam-interface-types se presenta el catálogo consolidado de los componentes que integran la Capa de Interfaz de IAM & Tenancy.
 
@@ -5050,7 +5025,7 @@ CreateTenantResource & Carga útil para registro simultáneo de taller, sede mat
 \hline
 \textbf{Relaciones} & Mapeado por CreateTenantCommandFromResourceAssembler. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -5060,7 +5035,7 @@ SignInResource & Credenciales de acceso local mediante correo electrónico y con
 \hline
 \textbf{Relaciones} & Mapeado por SignInCommandFromResourceAssembler. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -5070,7 +5045,7 @@ GoogleSignInResource & Credencial federada compuesta por el token de identidad p
 \hline
 \textbf{Relaciones} & Procesado en AuthenticationController para autenticación SSO. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -5080,7 +5055,7 @@ VerifyEmailResource & Código OTP numérico de 6 dígitos para validación y act
 \hline
 \textbf{Relaciones} & Consumido en el endpoint de verificación de correo. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -5090,7 +5065,7 @@ ForgotPasswordResource & Dirección de correo electrónico receptora del enlace 
 \hline
 \textbf{Relaciones} & Dispara la generación de token y despacho transaccional por Resend. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -5100,7 +5075,7 @@ ResetPasswordResource & Token de seguridad y nueva contraseña para restablecimi
 \hline
 \textbf{Relaciones} & Procesado para la actualización segura de contraseña. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -5110,7 +5085,7 @@ UpdateTenantProfileResource & Datos modificables de denominación comercial y ra
 \hline
 \textbf{Relaciones} & Consumido en el endpoint de actualización de perfil de taller. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -5120,7 +5095,7 @@ CreateBranchResource & Datos para apertura de sede: nombre, anexo SUNAT, coorden
 \hline
 \textbf{Relaciones} & Mapeado por CreateBranchCommandFromResourceAssembler. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -5130,7 +5105,7 @@ UpdateBranchLocationResource & Nuevas coordenadas geográficas y radio en metros
 \hline
 \textbf{Relaciones} & Consumido en el endpoint de actualización de geocerca satelital. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -5140,7 +5115,7 @@ InviteStaffResource & Correo electrónico de destino y rol asignado para invitac
 \hline
 \textbf{Relaciones} & Mapeado por InviteStaffCommandFromResourceAssembler. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -5150,7 +5125,7 @@ AcceptInvitationResource & Token de invitación, contraseña elegida y datos bio
 \hline
 \textbf{Relaciones} & Mapeado por AcceptInvitationCommandFromResourceAssembler. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -5160,7 +5135,7 @@ AssignRolesResource & Lista de identificadores de roles concedidos a un colabora
 \hline
 \textbf{Relaciones} & Consumido en el endpoint de asignación de roles. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -5170,7 +5145,17 @@ CreateRoleResource & Denominación, descripción y conjunto de permisos para un 
 \hline
 \textbf{Relaciones} & Mapeado por CreateRoleCommandFromResourceAssembler. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+UpdateRolePermissionsResource & Conjunto de identificadores de permisos atómicos a conceder al rol especificado. \\*
+\hline
+\textbf{Categoría} & Recurso de Petición \\*
+\hline
+\textbf{Relaciones} & Consumido en el endpoint de actualización de permisos de rol. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -5180,7 +5165,7 @@ UpdateCompensationResource & Esquema de retribución económica e importe salari
 \hline
 \textbf{Relaciones} & Consumido en el endpoint de ajuste de remuneración laboral. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -5190,7 +5175,7 @@ AuthenticatedUserResource & Token JWT emitido, datos de usuario, taller activo y
 \hline
 \textbf{Relaciones} & Retornado tras el inicio de sesión o aceptación de invitación. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -5200,7 +5185,7 @@ TenantResource & Representación pública inmutable de los datos corporativos de
 \hline
 \textbf{Relaciones} & Producido por TenantResourceFromAggregateAssembler. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -5210,7 +5195,7 @@ TenantSummaryResource & Resumen ligero del taller titular para inclusión en res
 \hline
 \textbf{Relaciones} & Incluido dentro de AuthenticatedUserResource. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -5220,7 +5205,7 @@ BranchResource & Representación inmutable de una sede física, su código SUNAT
 \hline
 \textbf{Relaciones} & Producido por BranchResourceFromEntityAssembler. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -5230,7 +5215,7 @@ MembershipResource & Ficha contractual del colaborador con datos de usuario, rol
 \hline
 \textbf{Relaciones} & Producido por MembershipResourceFromAggregateAssembler. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -5240,7 +5225,7 @@ RoleResource & Definición de rol de seguridad con su indicador de sistema y lis
 \hline
 \textbf{Relaciones} & Producido por RoleResourceFromAggregateAssembler. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -5250,7 +5235,7 @@ PermissionResource & Detalle de un permiso atómico con código canónico de rec
 \hline
 \textbf{Relaciones} & Producido por PermissionResourceFromEntityAssembler. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -5260,7 +5245,7 @@ InvitationResource & Estado, correo destinatario y marca temporal límite de vig
 \hline
 \textbf{Relaciones} & Producido por InvitationResourceFromAggregateAssembler. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -5270,7 +5255,7 @@ InvitationValidationResource & Estado de vigencia de token y metadatos de bienve
 \hline
 \textbf{Relaciones} & Retornado en la pantalla de pre-registro de colaboradores. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -5342,26 +5327,7 @@ StaffInvitedIntegrationEvent & Registro de auditoría de invitación emitida par
 \hline
 \textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak events} \\
 \hline
-\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
-\hline
-BearerAuthorizationRequestFilter & Filtro web que valida el token JWT e inyecta la autenticación en Spring Security. \\*
-\hline
-\textbf{Categoría} & Filtro Perimetral \\*
-\hline
-\textbf{Relaciones} & Extrae claims de usuario, taller y permisos para autorización en memoria. \\*
-\hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak filters} \\
-\hline
-\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
-\hline
-TenantContextResolver & Verificador de frontera que comprueba concordancia entre URL y taller activo. \\*
-\hline
-\textbf{Categoría} & Validador Perimetral \\*
-\hline
-\textbf{Relaciones} & Previene accesos horizontales no autorizados entre talleres. \\*
-\hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak interfaces.\allowbreak rest.\allowbreak filters} \\
-\hline
+
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
 *Nota.* Componentes pertenecientes al paquete canónico com.andeva.atelier.platform.iam.interfaces.
@@ -5505,6 +5471,18 @@ En la @tbl:iam-controllers-and-endpoints se detallan los controladores REST, rut
 \hline
 \textbf{Petición:} \texttt{CreateRoleResource} & \textbf{Respuesta:} 201 CREATED (\texttt{RoleResource}) \\
 \hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{PUT} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak tenants/\allowbreak \{tenantId\}/\allowbreak roles/\allowbreak \{roleId\}/\allowbreak permissions}} \\*
+\hline
+\textbf{Petición:} \texttt{UpdateRolePermissionsResource} & \textbf{Respuesta:} 200 OK (\texttt{RoleResource}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak tenants/\allowbreak \{tenantId\}/\allowbreak roles/\allowbreak \{roleId\}/\allowbreak reset-defaults}} \\*
+\hline
+\textbf{Petición:} Ninguno & \textbf{Respuesta:} 200 OK (\texttt{RoleResource}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{DELETE} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak tenants/\allowbreak \{tenantId\}/\allowbreak roles/\allowbreak \{roleId\}}} \\*
+\hline
+\textbf{Petición:} Ninguno & \textbf{Respuesta:} 204 NO CONTENT \\
+\hline
 \multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak permissions}} \\*
 \hline
 \textbf{Petición:} Ninguno & \textbf{Respuesta:} 200 OK (\texttt{List\textless PermissionResource\textgreater}) \\
@@ -5517,11 +5495,11 @@ En sus relaciones de colaboración, estos controladores inyectan los servicios d
 
 **Recursos DTO de Petición y Respuesta HTTP**
 
-Para impedir la exposición directa de las entidades de persistencia y asegurar la validación sintáctica de las peticiones en el perímetro, la capa define un catálogo de registros inmutables estructurados como objetos de transferencia de datos.
+Para impedir la exposición directa de las entidades de persistencia y asegurar la validación sintáctica de las peticiones en el perímetro, la capa define un catálogo de registros inmutables segregados canónicamente en dos paquetes especializados: el paquete de peticiones **com.andeva.atelier.platform.iam.interfaces.rest.resources.requests** (14 DTOs con Jakarta Bean Validation) y el paquete de respuestas **com.andeva.atelier.platform.iam.interfaces.rest.resources.responses** (8 DTOs de proyección).
 
 Los recursos de petición se implementan como registros inmutables de Java decorados con anotaciones de Jakarta Bean Validation. Componentes como **CreateTenantResource**, **SignInResource**, **CreateBranchResource** e **InviteStaffResource** validan de forma defensiva la no nulidad de cadenas, la sintaxis de correos bajo la RFC 5322, la estructura numérica del RUC fiscal y longitudes de contraseña antes de alcanzar los servicios de aplicación.
 
-Por su parte, los recursos de respuesta encapsulan las cargas útiles entregadas a los clientes web y móviles mediante estructuras inmutables. Destacan **AuthenticatedUserResource**, portador del token Bearer JWT y autoridades de seguridad; **TenantResource** y **BranchResource**, que exponen los datos corporativos y de geocercas satelitales; y **MembershipResource**, que consolida la ficha contractual del colaborador en el taller.
+Por su parte, los recursos de respuesta encapsulan las cargas útiles entregadas a los clientes web y móviles mediante estructuras inmutables. Destacan **AuthenticatedUserResource**, portador del token Bearer JWT y autoridades de seguridad, **TenantResource** y **BranchResource**, que exponen los datos corporativos y de geocercas satelitales, y **MembershipResource**, que consolida la ficha contractual del colaborador en el taller.
 
 En la @tbl:iam-resources-dtos se especifican los atributos y restricciones de validación de estos recursos DTO.
 
@@ -5614,6 +5592,12 @@ En la @tbl:iam-resources-dtos se especifican los atributos y restricciones de va
 \hline
 \textbf{Validación de Integridad} & Anotaciones \texttt{@NotBlank} y \texttt{@NotEmpty} para el conjunto de permisos. \\
 \hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} UpdateRolePermissionsResource \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{permissionIds} \\*
+\hline
+\textbf{Validación de Integridad} & Anotación \texttt{@NotEmpty} para el conjunto de identificadores de permisos. \\
+\hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} UpdateCompensationResource \quad (\textit{Categoría:} Petición)} \\*
 \hline
 \textbf{Atributos Principales} & \texttt{salaryType}, \texttt{baseSalary}, \texttt{currency} \\*
@@ -5664,7 +5648,7 @@ En la @tbl:iam-resources-dtos se especifican los atributos y restricciones de va
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-*Nota.* Componentes ubicados en el paquete com.andeva.atelier.platform.iam.interfaces.rest.resources.
+*Nota.* Recursos DTO segregados en los paquetes com.andeva.atelier.platform.iam.interfaces.rest.resources.requests y responses.
 
 **Ensambladores y Transformadores de Recursos**
 
@@ -5850,7 +5834,7 @@ En la @tbl:iam-tenancy-facade se especifican los métodos y tipos de la fachada 
 
 Para la sincronización asíncrona intermodular sin incurrir en consistencia transaccional inmediata ni bloqueos de concurrencia, el Bounded Context IAM define un lenguaje publicado compuesto por cinco eventos de integración inmutables.
 
-Dichos eventos notifican hitos relevantes del ciclo de vida: **TenantCreatedIntegrationEvent** y **BranchCreatedIntegrationEvent** permiten a Facturación, Suscripciones y Operaciones inicializar catálogos y bahías; **UserRegisteredIntegrationEvent** sincroniza fichas vehiculares en CRM; y **TenantMembershipCreatedIntegrationEvent** apertura el legajo laboral en Recursos Humanos para el control de asistencia presencial.
+Dichos eventos notifican hitos relevantes del ciclo de vida: **TenantCreatedIntegrationEvent** y **BranchCreatedIntegrationEvent** permiten a Facturación, Suscripciones y Operaciones inicializar catálogos y bahías, **UserRegisteredIntegrationEvent** sincroniza fichas vehiculares en CRM, y **TenantMembershipCreatedIntegrationEvent** apertura el legajo laboral en Recursos Humanos para el control de asistencia presencial.
 
 En la @tbl:iam-integration-events se sintetiza la estructura de estos eventos de integración.
 
@@ -5909,43 +5893,6 @@ En la @tbl:iam-integration-events se sintetiza la estructura de estos eventos de
 \renewcommand{\arraystretch}{1.0}
 *Nota.* Registros inmutables pertenecientes al paquete com.andeva.atelier.platform.iam.interfaces.events.
 
-**Filtros Perimetrales de Seguridad y Validación Multi-Tenant**
-
-La protección perimetral del ecosistema Atelier se ejecuta antes de que las solicitudes alcancen los controladores web, gobernada por dos filtros de seguridad especializados.
-
-El componente **BearerAuthorizationRequestFilter** extiende de `OncePerRequestFilter` y valida criptográficamente los tokens JWT mediante la biblioteca Jjwt. Al verificar la firma, extrae los identificadores de usuario, taller, sucursal y la lista de autoridades concedidas, inyectando la autenticación en el **SecurityContextHolder** para posibilitar autorizaciones en memoria con coste temporal constante.
-
-Por su parte, el filtro **TenantContextResolver** comprueba que el identificador de taller especificado en rutas relativas de tipo `/api/v1/tenants/{tenantId}/**` concuerde estrictamente con el inquilino activo autenticado en el token JWT. Esta validación perimetral neutraliza de forma preventiva ataques de escalamiento horizontal entre talleres mecánicos independientes.
-
-En la @tbl:iam-security-filters se especifican los métodos y reglas de estos componentes perimetrales de seguridad.
-
-\renewcommand{\arraystretch}{1.25}
-\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
-\caption{Filtros Perimetrales de Seguridad de IAM \& Tenancy} \label{tbl:iam-security-filters} \\
-\hline
-\thfirst{Aspecto del Filtro} & \thcell{Especificación Técnica y Responsabilidad} \\
-\hline
-\endfirsthead
-\hline
-\thfirst{Aspecto del Filtro} & \thcell{Especificación Técnica y Responsabilidad} \\
-\hline
-\endhead
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Filtro Perimetral:} BearerAuthorizationRequestFilter \quad (\textit{Tipo:} OncePerRequestFilter)} \\*
-\hline
-\textbf{Orden de Ejecución} & Filtro de Seguridad perimetral \\*
-\hline
-\textbf{Responsabilidad} & Valida firma JWT, extrae claims de tenencia y pobla el SecurityContext. \\
-\hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Filtro Perimetral:} TenantContextResolver \quad (\textit{Tipo:} OncePerRequestFilter)} \\*
-\hline
-\textbf{Orden de Ejecución} & Previo a controladores REST \\*
-\hline
-\textbf{Responsabilidad} & Verifica coincidencia entre tenantId de ruta y taller autenticado en JWT. \\
-\hline
-\end{longtable}
-\renewcommand{\arraystretch}{1.0}
-*Nota.* Componentes pertenecientes al paquete com.andeva.atelier.platform.iam.interfaces.rest.filters.
-
 #### 2.6.2.3. Application Layer
 
 La capa de aplicación del Bounded Context de Identity and Access Management (IAM) &
@@ -5953,10 +5900,13 @@ Tenancy orquesta los casos de uso transaccionales de alta empresarial, autentica
 credenciales, administración de sedes físicas, membresías de personal, invitaciones y
 roles de seguridad en la plataforma Atelier.
 
-Ubicada en el paquete canónico com.andeva.atelier.platform.iam.application, su concepción
-arquitectónica implementa una separación rigurosa bajo el patrón CQRS, desacoplando los
-flujos mutacionales de escritura de las proyecciones de solo lectura a través de cuatro
-directrices esenciales de diseño:
+Ubicada en el paquete canónico **com.andeva.atelier.platform.iam.application**, su concepción
+arquitectónica implementa una separación rigurosa bajo el patrón CQRS, organizando sus
+responsabilidades en cinco subsistemas técnicos fundamentales: contratos públicos e
+implementaciones internas de comandos, contratos públicos e implementaciones internas de
+consultas, manejadores de eventos en memoria, puertos de salida hacia adaptadores externos, y
+la implementación de la fachada de contexto abierto Inbound ACL. Esta organización se rige
+por directrices esenciales de diseño:
 
 - **Orquestación Transaccional Atómica:** Delimitación de fronteras de consistencia
 mediante la anotación de servicio transaccional con nivel de aislamiento de lectura
@@ -5975,10 +5925,11 @@ oyentes locales para tareas accesorias sincrónicas y oyentes posteriores a la c
 transaccional para la propagación de eventos de integración hacia el Transactional Outbox,
 evitando inconsistencias entre la base de datos y la mensajería asíncrona.
 
-- **Inversión de Dependencias y Aislamiento Perimetral:** Abstracción de servicios de
-infraestructura externos mediante puertos de salida específicos para mensajería
-transaccional vía HTTPS, validación de identidades federadas, derivación criptográfica de
-contraseñas y emisión de tokens de seguridad enriquecidos.
+- **Inversión de Dependencias y Aislamiento Perimetral:** Abstracción de dependencias
+externas mediante puertos de salida para mensajería transaccional vía HTTPS y validación de
+identidades federadas, delegando los servicios criptográficos y de tokens a la capa de
+infraestructura, y materializando la fachada **TenancyContextFacadeImpl** para proveer
+información de tenencia a contextos consumidores sin exponer agregados JPA.
 
 A fin de ofrecer una visión sistemática de estos componentes, en la
 @tbl:iam-application-types se presenta el catálogo consolidado de las clases, interfaces y
@@ -6001,7 +5952,7 @@ TenantCommandService & Contrato de casos de uso de escritura para talleres y sed
 \hline
 \textbf{Relaciones} & Implementado por TenantCommandServiceImpl. \\*
 \hline
-\textbf{Paquete} & \texttt{...application.services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak application.\allowbreak commandservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -6011,7 +5962,7 @@ TenantCommandServiceImpl & Orquesta la creación atómica de empresas, sedes ini
 \hline
 \textbf{Relaciones} & Coordina agregados Tenant y User con persistencia ACID. \\*
 \hline
-\textbf{Paquete} & \texttt{...application.services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak application.\allowbreak internal.\allowbreak commandservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -6021,7 +5972,7 @@ UserCommandService & Contrato de casos de uso para autenticación, registro y co
 \hline
 \textbf{Relaciones} & Implementado por UserCommandServiceImpl. \\*
 \hline
-\textbf{Paquete} & \texttt{...application.services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak application.\allowbreak commandservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -6029,9 +5980,9 @@ UserCommandServiceImpl & Ejecuta validación de credenciales, derivación cripto
 \hline
 \textbf{Categoría} & Implementación de Comando \\*
 \hline
-\textbf{Relaciones} & Utiliza BCryptHashingService y BearerTokenService. \\*
+\textbf{Relaciones} & Coordina autenticación, hashing BCrypt y emisión de tokens. \\*
 \hline
-\textbf{Paquete} & \texttt{...application.services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak application.\allowbreak internal.\allowbreak commandservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -6041,7 +5992,7 @@ BranchCommandService & Contrato para incorporación y actualización de sedes f�
 \hline
 \textbf{Relaciones} & Implementado por BranchCommandServiceImpl. \\*
 \hline
-\textbf{Paquete} & \texttt{...application.services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak application.\allowbreak commandservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -6051,7 +6002,7 @@ BranchCommandServiceImpl & Gestiona geocercas satelitales y códigos anexos de s
 \hline
 \textbf{Relaciones} & Modifica la colección interna de sedes en Tenant. \\*
 \hline
-\textbf{Paquete} & \texttt{...application.services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak application.\allowbreak internal.\allowbreak commandservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -6061,7 +6012,7 @@ MembershipCommandService & Contrato para gestión laboral y esquemas remunerativ
 \hline
 \textbf{Relaciones} & Implementado por MembershipCommandServiceImpl. \\*
 \hline
-\textbf{Paquete} & \texttt{...application.services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak application.\allowbreak commandservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -6071,7 +6022,7 @@ MembershipCommandServiceImpl & Actualiza roles y condiciones contractuales de co
 \hline
 \textbf{Relaciones} & Coordina agregados TenantMembership y Role. \\*
 \hline
-\textbf{Paquete} & \texttt{...application.services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak application.\allowbreak internal.\allowbreak commandservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -6081,7 +6032,7 @@ InvitationCommandService & Contrato de onboarding y bienvenida de nuevos colabor
 \hline
 \textbf{Relaciones} & Implementado por InvitationCommandServiceImpl. \\*
 \hline
-\textbf{Paquete} & \texttt{...application.services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak application.\allowbreak commandservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -6091,7 +6042,7 @@ InvitationCommandServiceImpl & Emite y valida tokens de invitación despachados 
 \hline
 \textbf{Relaciones} & Interactúa con ResendEmailService y emite eventos. \\*
 \hline
-\textbf{Paquete} & \texttt{...application.services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak application.\allowbreak internal.\allowbreak commandservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -6101,17 +6052,17 @@ RoleCommandService & Contrato para administración de roles y privilegios RBAC. 
 \hline
 \textbf{Relaciones} & Implementado por RoleCommandServiceImpl. \\*
 \hline
-\textbf{Paquete} & \texttt{...application.services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak application.\allowbreak commandservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
-RoleCommandServiceImpl & Configura roles por taller y realiza el semillero inicial del sistema. \\*
+RoleCommandServiceImpl & Aprovisiona roles soberanos por taller, edita privilegios y gestiona roles personalizados. \\*
 \hline
 \textbf{Categoría} & Implementación de Comando \\*
 \hline
 \textbf{Relaciones} & Administra entidades Role y Permission. \\*
 \hline
-\textbf{Paquete} & \texttt{...application.services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak application.\allowbreak internal.\allowbreak commandservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -6121,7 +6072,7 @@ TenantQueryService & Contrato de recuperación de datos de talleres mecánicos. 
 \hline
 \textbf{Relaciones} & Implementado por TenantQueryServiceImpl. \\*
 \hline
-\textbf{Paquete} & \texttt{...application.services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak application.\allowbreak queryservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -6131,7 +6082,7 @@ TenantQueryServiceImpl & Consultas de lectura optimizada de empresas y razones s
 \hline
 \textbf{Relaciones} & Accede a TenantRepository en modo de solo lectura. \\*
 \hline
-\textbf{Paquete} & \texttt{...application.services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak application.\allowbreak internal.\allowbreak queryservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -6141,7 +6092,7 @@ UserQueryService & Contrato de búsqueda y proyección de cuentas de usuario. \\
 \hline
 \textbf{Relaciones} & Implementado por UserQueryServiceImpl. \\*
 \hline
-\textbf{Paquete} & \texttt{...application.services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak application.\allowbreak queryservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -6151,7 +6102,7 @@ UserQueryServiceImpl & Consultas de identidad por identificador único o correo 
 \hline
 \textbf{Relaciones} & Accede a UserRepository en modo de solo lectura. \\*
 \hline
-\textbf{Paquete} & \texttt{...application.services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak application.\allowbreak internal.\allowbreak queryservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -6161,7 +6112,7 @@ BranchQueryService & Contrato de consulta de sucursales y geocercas activas. \\*
 \hline
 \textbf{Relaciones} & Implementado por BranchQueryServiceImpl. \\*
 \hline
-\textbf{Paquete} & \texttt{...application.services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak application.\allowbreak queryservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -6171,7 +6122,7 @@ BranchQueryServiceImpl & Recupera listados y detalles de sedes físicas por tall
 \hline
 \textbf{Relaciones} & Accede a BranchRepository en modo de solo lectura. \\*
 \hline
-\textbf{Paquete} & \texttt{...application.services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak application.\allowbreak internal.\allowbreak queryservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -6181,7 +6132,7 @@ MembershipQueryService & Contrato de lectura de contratos y personal del taller.
 \hline
 \textbf{Relaciones} & Implementado por MembershipQueryServiceImpl. \\*
 \hline
-\textbf{Paquete} & \texttt{...application.services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak application.\allowbreak queryservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -6191,7 +6142,7 @@ MembershipQueryServiceImpl & Proyecta listas de colaboradores, roles asignados y
 \hline
 \textbf{Relaciones} & Accede a TenantMembershipRepository de solo lectura. \\*
 \hline
-\textbf{Paquete} & \texttt{...application.services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak application.\allowbreak internal.\allowbreak queryservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -6201,7 +6152,7 @@ RoleQueryService & Contrato de consulta de catálogo de roles y permisos. \\*
 \hline
 \textbf{Relaciones} & Implementado por RoleQueryServiceImpl. \\*
 \hline
-\textbf{Paquete} & \texttt{...application.services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak application.\allowbreak queryservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -6211,7 +6162,7 @@ RoleQueryServiceImpl & Consulta roles configurados y catálogo transversal de pe
 \hline
 \textbf{Relaciones} & Accede a RoleRepository y PermissionRepository. \\*
 \hline
-\textbf{Paquete} & \texttt{...application.services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak application.\allowbreak internal.\allowbreak queryservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -6221,7 +6172,7 @@ InvitationQueryService & Contrato de verificación de tokens y solicitudes de on
 \hline
 \textbf{Relaciones} & Implementado por InvitationQueryServiceImpl. \\*
 \hline
-\textbf{Paquete} & \texttt{...application.services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak application.\allowbreak queryservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -6231,7 +6182,7 @@ InvitationQueryServiceImpl & Comprueba vigencia y datos de invitaciones emitidas
 \hline
 \textbf{Relaciones} & Accede a InvitationRepository en modo de solo lectura. \\*
 \hline
-\textbf{Paquete} & \texttt{...application.services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak application.\allowbreak internal.\allowbreak queryservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -6241,7 +6192,7 @@ UserDomainEventsHandler & Suscriptor en memoria de eventos emitidos por usuarios
 \hline
 \textbf{Relaciones} & Despacha notificaciones de correo mediante Resend. \\*
 \hline
-\textbf{Paquete} & \texttt{...application.events} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak application.\allowbreak internal.\allowbreak eventhandlers} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -6251,7 +6202,7 @@ TenantDomainEventsHandler & Suscriptor de ciclo de vida corporativo y publicaci�
 \hline
 \textbf{Relaciones} & Transforma eventos locales a eventos de integración. \\*
 \hline
-\textbf{Paquete} & \texttt{...application.events} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak application.\allowbreak internal.\allowbreak eventhandlers} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -6261,7 +6212,7 @@ ResendEmailService & Interfaz para el despacho transaccional de correos vía RES
 \hline
 \textbf{Relaciones} & Implementado en la Capa de Infraestructura. \\*
 \hline
-\textbf{Paquete} & \texttt{...application.acl} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak application.\allowbreak internal.\allowbreak outbound.\allowbreak acl} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -6271,27 +6222,17 @@ GoogleIdentityGateway & Interfaz para validación de firmas de identidad federad
 \hline
 \textbf{Relaciones} & Consumido por casos de uso de inicio de sesión social. \\*
 \hline
-\textbf{Paquete} & \texttt{...application.acl} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak application.\allowbreak internal.\allowbreak outbound.\allowbreak acl} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
-BearerTokenService & Interfaz para generación y extracción de tokens JWT enriquecidos. \\*
+TenancyContextFacadeImpl & Implementa la fachada de contexto abierto para la consulta intercontextual de tenencia. \\*
 \hline
-\textbf{Categoría} & Servicio de Seguridad \\*
+\textbf{Categoría} & Implementación ACL \\*
 \hline
-\textbf{Relaciones} & Inyecta identificadores de tenencia y autoridades. \\*
+\textbf{Relaciones} & Implementa TenancyContextFacade orquestando consultas directas en memoria. \\*
 \hline
-\textbf{Paquete} & \texttt{...application.acl} \\
-\hline
-\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
-\hline
-BCryptHashingService & Interfaz para derivación y confrontación segura de contraseñas. \\*
-\hline
-\textbf{Categoría} & Servicio Criptográfico \\*
-\hline
-\textbf{Relaciones} & Aplica funciones criptográficas de derivación de claves. \\*
-\hline
-\textbf{Paquete} & \texttt{...application.acl} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak application.\allowbreak acl} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -6301,7 +6242,7 @@ AuthenticatedUser & Registro inmutable de sesión que agrupa usuario, token y pe
 \hline
 \textbf{Relaciones} & Entregado como resultado exitoso de autenticación. \\*
 \hline
-\textbf{Paquete} & \texttt{...application.model} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak application.\allowbreak model} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -6311,17 +6252,73 @@ GoogleUserPayload & Registro con datos biográficos extraídos de credenciales f
 \hline
 \textbf{Relaciones} & Utilizado en aprovisionamiento de cuentas federadas. \\*
 \hline
-\textbf{Paquete} & \texttt{...application.model} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak application.\allowbreak model} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+AssignRolesToMembershipCommand & Encapsula los identificadores de roles a conceder a una membresía laboral en un taller. \\*
+\hline
+\textbf{Categoría} & Comando de Aplicación \\*
+\hline
+\textbf{Relaciones} & Procesado por MembershipCommandService. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak application.\allowbreak commands} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+ProvisionTenantRolesCommand & Desencadena la clonación e inicialización soberana de los roles canónicos para un nuevo taller. \\*
+\hline
+\textbf{Categoría} & Comando de Aplicación \\*
+\hline
+\textbf{Relaciones} & Procesado por RoleCommandService. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak application.\allowbreak commands} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+UpdateRolePermissionsCommand & Conduce la mutación soberana del conjunto de privilegios asociados a un rol específico del taller. \\*
+\hline
+\textbf{Categoría} & Comando de Aplicación \\*
+\hline
+\textbf{Relaciones} & Procesado por RoleCommandService. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak application.\allowbreak commands} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+ResetRoleToDefaultsCommand & Restablece la colección de permisos de un rol protegido a su plantilla original de plataforma. \\*
+\hline
+\textbf{Categoría} & Comando de Aplicación \\*
+\hline
+\textbf{Relaciones} & Procesado por RoleCommandService. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak application.\allowbreak commands} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+DeleteCustomRoleCommand & Solicita la supresión de un rol personalizado verificando ausencia de dependencias laborales activas. \\*
+\hline
+\textbf{Categoría} & Comando de Aplicación \\*
+\hline
+\textbf{Relaciones} & Procesado por RoleCommandService. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak application.\allowbreak commands} \\
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-*Nota.* Componentes implementados en Java 26 bajo el paquete canónico com.andeva.atelier.platform.iam.application.
+*Nota.* Componentes pertenecientes al paquete canónico com.andeva.atelier.platform.iam.application.
 
 **Servicios de Comandos y Orquestación Transaccional**
 
 Los flujos de modificación de estado se implementan mediante servicios orquestadores
 decorados con anotaciones transaccionales que delimitan el alcance de persistencia y
 garantizan el cumplimiento de invariantes de negocio en el modelo.
+
+Siguiendo las directrices tácticas de Domain-Driven Design, las interfaces públicas de los
+servicios de comandos se definen en el paquete
+**com.andeva.atelier.platform.iam.application.commandservices**, mientras que sus clases
+de implementación correspondientes se encapsulan de forma privada dentro de
+**com.andeva.atelier.platform.iam.application.internal.commandservices**.
 
 El servicio **TenantCommandServiceImpl** centraliza el caso de uso de alta integral de
 talleres mecánicos. Al procesar el comando **CreateTenantCommand**, el orquestador valida
@@ -6350,8 +6347,9 @@ contractual de los colaboradores del taller mecánico.
 
 Dichos servicios gobiernan la asignación de roles de seguridad, la actualización de
 esquemas de remuneración fija o por horas y la emisión de invitaciones tokenizadas con
-plazo de expiración de siete días. Finalmente, **RoleCommandServiceImpl** respalda la
-creación de roles personalizados y ejecuta la inicialización canónica de permisos.
+plazo de expiración de siete días. Finalmente, **RoleCommandServiceImpl** respalda el
+aprovisionamiento automático de roles soberanos por taller, la edición de permisos atómicos,
+la restauración a valores predeterminados y la baja de roles personalizados.
 
 Para sintetizar los flujos mutacionales, en la @tbl:iam-command-services se detallan las
 operaciones, comandos de entrada, invariantes de consistencia transaccional y tipos de
@@ -6372,13 +6370,13 @@ retorno de los servicios de comandos.
 \hline
 \textbf{Comando y Retorno} & \texttt{CreateTenantCommand} $\longrightarrow$ \texttt{Result<\allowbreak Tenant,\allowbreak  ApplicationError>\allowbreak } \\*
 \hline
-\textbf{Reglas de Consistencia} & Valida RUC y email únicos. crea User, Tenant, Sede 0000 y asigna rol de taller. \\
+\textbf{Reglas de Consistencia} & Valida RUC y email únicos. Crea User, Tenant, Sede 0000 y asigna rol de taller. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} TenantCommandService \quad (\texttt{handle})} \\*
 \hline
 \textbf{Comando y Retorno} & \texttt{UpdateTenantProfileCommand} $\longrightarrow$ \texttt{Result<\allowbreak Tenant,\allowbreak  ApplicationError>\allowbreak } \\*
 \hline
-\textbf{Reglas de Consistencia} & Verifica existencia del taller. actualiza razón social y nombre comercial. \\
+\textbf{Reglas de Consistencia} & Verifica existencia del taller. Actualiza razón social y nombre comercial. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} TenantCommandService \quad (\texttt{handle})} \\*
 \hline
@@ -6390,7 +6388,7 @@ retorno de los servicios de comandos.
 \hline
 \textbf{Comando y Retorno} & \texttt{CreateBranchCommand} $\longrightarrow$ \texttt{Result<\allowbreak Branch,\allowbreak  ApplicationError>\allowbreak } \\*
 \hline
-\textbf{Reglas de Consistencia} & Valida código SUNAT no repetido. agrega sede con geocerca satelital. \\
+\textbf{Reglas de Consistencia} & Valida código SUNAT no repetido. Agrega sede con geocerca satelital. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} BranchCommandService \quad (\texttt{handle})} \\*
 \hline
@@ -6402,25 +6400,25 @@ retorno de los servicios de comandos.
 \hline
 \textbf{Comando y Retorno} & \texttt{RegisterUserCommand} $\longrightarrow$ \texttt{Result<\allowbreak User,\allowbreak  ApplicationError>\allowbreak } \\*
 \hline
-\textbf{Reglas de Consistencia} & Valida correo disponible. emite token OTP numérico de seis dígitos. \\
+\textbf{Reglas de Consistencia} & Valida correo disponible. Emite token OTP numérico de seis dígitos. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} UserCommandService \quad (\texttt{handle})} \\*
 \hline
 \textbf{Comando y Retorno} & \texttt{AuthenticateUserCommand} $\longrightarrow$ \texttt{Result<\allowbreak AuthenticatedUser,\allowbreak  ApplicationError>\allowbreak } \\*
 \hline
-\textbf{Reglas de Consistencia} & Valida hash BCrypt. resuelve tenencia activa y genera token Bearer JWT. \\
+\textbf{Reglas de Consistencia} & Valida hash BCrypt. Resuelve tenencia activa y genera token Bearer JWT. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} UserCommandService \quad (\texttt{handle})} \\*
 \hline
 \textbf{Comando y Retorno} & \texttt{AuthenticateWithGoogleCommand} $\longrightarrow$ \texttt{Result<\allowbreak AuthenticatedUser,\allowbreak  ApplicationError>\allowbreak } \\*
 \hline
-\textbf{Reglas de Consistencia} & Valida firma del token con Google. aprovisiona cuenta si es nueva y emite JWT. \\
+\textbf{Reglas de Consistencia} & Valida firma del token con Google. Aprovisiona cuenta si es nueva y emite JWT. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} UserCommandService \quad (\texttt{handle})} \\*
 \hline
 \textbf{Comando y Retorno} & \texttt{VerifyEmailTokenCommand} $\longrightarrow$ \texttt{Result<\allowbreak Void,\allowbreak  ApplicationError>\allowbreak } \\*
 \hline
-\textbf{Reglas de Consistencia} & Valida código OTP vigente. transiciona estado de cuenta a verificado. \\
+\textbf{Reglas de Consistencia} & Valida código OTP vigente. Transiciona estado de cuenta a verificado. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} UserCommandService \quad (\texttt{handle})} \\*
 \hline
@@ -6432,47 +6430,71 @@ retorno de los servicios de comandos.
 \hline
 \textbf{Comando y Retorno} & \texttt{ResetPasswordCommand} $\longrightarrow$ \texttt{Result<\allowbreak Void,\allowbreak  ApplicationError>\allowbreak } \\*
 \hline
-\textbf{Reglas de Consistencia} & Valida token de reseteo. actualiza el resumen criptográfico de clave. \\
+\textbf{Reglas de Consistencia} & Valida token de reseteo. Actualiza el resumen criptográfico de clave. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} MembershipCommandService \quad (\texttt{handle})} \\*
 \hline
-\textbf{Comando y Retorno} & \texttt{AssignRoleToMembershipCommand} $\longrightarrow$ \texttt{Result<\allowbreak TenantMembership,\allowbreak  ApplicationError>\allowbreak } \\*
+\textbf{Comando y Retorno} & \texttt{AssignRolesToMembershipCommand} $\longrightarrow$ \texttt{Result<\allowbreak TenantMembership,\allowbreak  ApplicationError>\allowbreak } \\*
 \hline
-\textbf{Reglas de Consistencia} & Verifica pertenencia de roles al taller. garantiza al menos un rol asignado. \\
+\textbf{Reglas de Consistencia} & Verifica pertenencia de roles al taller. Garantiza al menos un rol asignado. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} MembershipCommandService \quad (\texttt{handle})} \\*
 \hline
 \textbf{Comando y Retorno} & \texttt{UpdateMembershipCompensationCommand} $\longrightarrow$ \texttt{Result<\allowbreak TenantMembership,\allowbreak  ApplicationError>\allowbreak } \\*
 \hline
-\textbf{Reglas de Consistencia} & Valida importe mayor o igual a cero. actualiza esquema salarial fijo o por hora. \\
+\textbf{Reglas de Consistencia} & Valida importe mayor o igual a cero. Actualiza esquema salarial fijo o por hora. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} InvitationCommandService \quad (\texttt{handle})} \\*
 \hline
 \textbf{Comando y Retorno} & \texttt{InviteStaffCommand} $\longrightarrow$ \texttt{Result<\allowbreak Invitation,\allowbreak  ApplicationError>\allowbreak } \\*
 \hline
-\textbf{Reglas de Consistencia} & Comprueba ausencia de invitación pendiente. genera token URL de siete días. \\
+\textbf{Reglas de Consistencia} & Comprueba ausencia de invitación pendiente. Genera token URL de siete días. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} InvitationCommandService \quad (\texttt{handle})} \\*
 \hline
 \textbf{Comando y Retorno} & \texttt{AcceptInvitationCommand} $\longrightarrow$ \texttt{Result<\allowbreak AuthenticatedUser,\allowbreak  ApplicationError>\allowbreak } \\*
 \hline
-\textbf{Reglas de Consistencia} & Valida token vigente. crea cuenta User, membresía en taller y sesión JWT. \\
+\textbf{Reglas de Consistencia} & Valida token vigente. Crea cuenta User, membresía en taller y sesión JWT. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} RoleCommandService \quad (\texttt{handle})} \\*
 \hline
 \textbf{Comando y Retorno} & \texttt{CreateCustomRoleCommand} $\longrightarrow$ \texttt{Result<\allowbreak Role,\allowbreak  ApplicationError>\allowbreak } \\*
 \hline
-\textbf{Reglas de Consistencia} & Valida unicidad de nombre en el taller. enlaza permisos del catálogo. \\
+\textbf{Reglas de Consistencia} & Valida unicidad de nombre en el taller. Enlaza permisos del catálogo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} RoleCommandService \quad (\texttt{provisionDefaultRolesForTenant})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{ProvisionTenantRolesCommand} $\longrightarrow$ \texttt{Result<\allowbreak List<\allowbreak Role>\allowbreak ,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Clona las plantillas canónicas de la plataforma asignando el identificador del nuevo taller de forma idempotente. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} RoleCommandService \quad (\texttt{updateRolePermissions})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{UpdateRolePermissionsCommand} $\longrightarrow$ \texttt{Result<\allowbreak Role,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Valida pertenencia del rol al taller. Aplica la nueva colección de permisos atómicos garantizando consistencia RBAC. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} RoleCommandService \quad (\texttt{resetRoleToDefaults})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{ResetRoleToDefaultsCommand} $\longrightarrow$ \texttt{Result<\allowbreak Role,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Comprueba que el rol sea de sistema. Restaura la matriz de permisos a la plantilla predeterminada de plataforma. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} RoleCommandService \quad (\texttt{deleteCustomRole})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{DeleteCustomRoleCommand} $\longrightarrow$ \texttt{Result<\allowbreak Void,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Rechaza la baja si el rol es de sistema. Verifica que no existan colaboradores activos vinculados al rol en el taller. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} RoleCommandService \quad (\texttt{seedDefaultRolesAndPermissions})} \\*
 \hline
 \textbf{Comando y Retorno} & \texttt{Ninguno} $\longrightarrow$ \texttt{void} \\*
 \hline
-\textbf{Reglas de Consistencia} & Inicializa roles canónicos globales y matriz de privilegios en el arranque. \\
+\textbf{Reglas de Consistencia} & Inicializa el catálogo global de permisos y plantillas estándar en el arranque de la plataforma. \\
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-*Nota.* Componentes ubicados en el paquete com.andeva.atelier.platform.iam.application.services.
+*Nota.* Operaciones definidas en com.andeva.atelier.platform.iam.application.commandservices e implementadas en internal.commandservices.
 
 **Servicios de Consulta y Proyección de Datos**
 
@@ -6480,15 +6502,21 @@ Las operaciones de recuperación de información se estructuran mediante servici
 consulta especializados anotados con transaccionalidad de solo lectura, permitiendo a la
 infraestructura relacional omitir la gestión de instantáneas de detección de cambios.
 
-Los seis servicios de consulta abarcan la totalidad de requisitos del contexto:
-**TenantQueryServiceImpl** recupera fichas corporativas por identificador o RUC;
-**UserQueryServiceImpl** provee consultas demográficas y de credenciales; mientras que
-**BranchQueryServiceImpl** lista las sedes físicas y geocercas satelitales.
+Las interfaces públicas de consulta residen en el paquete canónico
+**com.andeva.atelier.platform.iam.application.queryservices**, mientras que sus
+implementaciones privadas se encapsulan en
+**com.andeva.atelier.platform.iam.application.internal.queryservices**.
+
+Los seis servicios de consulta abarcan la totalidad de requisitos del contexto.
+El componente **TenantQueryServiceImpl** recupera fichas corporativas por identificador
+o por número de RUC. A su vez, **UserQueryServiceImpl** provee consultas demográficas
+y de credenciales de acceso, mientras que **BranchQueryServiceImpl** lista las sedes físicas
+y verifica geocercas satelitales.
 
 De forma complementaria, **MembershipQueryServiceImpl** consolida el legajo de personal y
-esquemas remunerativos; **RoleQueryServiceImpl** expone la matriz de privilegios de
-seguridad; e **InvitationQueryServiceImpl** valida la vigencia de solicitudes de
-onboarding previas a la visualización del formulario web de registro.
+esquemas remunerativos. Por su parte, **RoleQueryServiceImpl** expone la matriz de privilegios
+de seguridad, en tanto que **InvitationQueryServiceImpl** valida la vigencia de solicitudes
+de onboarding previas a la visualización del formulario web de registro.
 
 Con el propósito de ilustrar las vías de recuperación de datos, en la
 @tbl:iam-query-services se presentan los métodos, parámetros de consulta y tipos
@@ -6579,13 +6607,17 @@ proyectados por los servicios de consulta.
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-*Nota.* Métodos configurados con transaccionalidad de solo lectura en el paquete com.andeva.atelier.platform.iam.application.services.
+*Nota.* Métodos de solo lectura definidos en com.andeva.atelier.platform.iam.application.queryservices e implementados en internal.queryservices.
 
 **Manejadores de Eventos de Dominio y Publicación Asíncrona**
 
 El desacoplamiento entre casos de uso mutacionales y sus efectos secundarios se articula a
 través de dos manejadores de eventos especializados en memoria que responden a las
 mutaciones confirmadas de las entidades del dominio.
+
+Dichos componentes residen en el paquete canónico
+**com.andeva.atelier.platform.iam.application.internal.eventhandlers**, implementando
+oyentes locales y oyentes transaccionales.
 
 La clase **UserDomainEventsHandler** captura los eventos de identidad mediante oyentes de
 eventos convencionales. Cuando se emite **VerificationTokenIssuedEvent**, extrae el código
@@ -6667,34 +6699,39 @@ la capa.
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-*Nota.* Clases ubicadas bajo el paquete com.andeva.atelier.platform.iam.application.events.
+*Nota.* Clases ubicadas bajo el paquete com.andeva.atelier.platform.iam.application.internal.eventhandlers.
 
 **Puertos de Salida y Modelos Inmutables de Sesión**
 
 Para preservar la independencia de la lógica de negocio respecto a bibliotecas
 propietarias y servicios en la nube, la capa define puertos de salida que establecen
-contratos semánticos puros para interactuar con proveedores perimetrales.
+contratos semánticos puros para interactuar con proveedores perimetrales. Dichos puertos
+se ubican en el paquete canónico
+**com.andeva.atelier.platform.iam.application.internal.outbound.acl**, aislando
+dependencias externas de mensajería transaccional y autenticación federada.
 
 El puerto **ResendEmailService** sustituye la pila de despacho SMTP tradicional por
 peticiones HTTPS asíncronas sobre el puerto 443, neutralizando fallos de conexión en
 plataformas en la nube. A su vez, **GoogleIdentityGateway** encapsula la verificación de
-tokens criptográficos emitidos por el proveedor de inicio de sesión federado.
+tokens criptográficos emitidos por el proveedor de inicio de sesión federado Google OAuth2.
 
-En el ámbito criptográfico y de seguridad, **BCryptHashingService** gestiona las funciones
-de resumen unidireccional con coste computacional configurable, mientras que
-**BearerTokenService** administra la conformación y análisis de firmas de tokens JWT
-enriquecidos con atributos de tenencia y autoridades.
+Por otra parte, los servicios de seguridad puros como **BearerTokenService**, enfocado en
+la generación y lectura de tokens JWT enriquecidos, y **BCryptHashingService**, dedicado
+a la derivación de contraseñas, se estructuran canónicamente en la capa de infraestructura
+bajo **com.andeva.atelier.platform.iam.infrastructure.security**, siendo inyectados en los
+servicios de comando como dependencias externas de seguridad.
 
-Finalmente, los registros inmutables **AuthenticatedUser** y **GoogleUserPayload**
-consolidan las cargas útiles de sesión y perfiles federados, protegiendo las entidades
-internas de dominio contra exposiciones involuntarias hacia capas externas.
+Asimismo, los registros inmutables **AuthenticatedUser** y **GoogleUserPayload**, ubicados
+en **com.andeva.atelier.platform.iam.application.model**, consolidan las cargas útiles de
+sesión y perfiles federados, protegiendo las entidades internas de dominio contra
+exposiciones involuntarias hacia capas externas.
 
 Con el objeto de sistematizar las dependencias perimetrales, en la @tbl:iam-outbound-ports
 se describen los métodos y responsabilidades técnicas de estos puertos de salida y modelos
 de sesión.
 
 \renewcommand{\arraystretch}{1.25}
-\begin{longtable}{| >{\centering\arraybackslash}p{5.1cm} | >{\raggedright\arraybackslash}p{10.3cm} |}
+\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
 \caption{Puertos de Salida y Modelos de la Capa de Aplicación de IAM \& Tenancy} \label{tbl:iam-outbound-ports} \\
 \hline
 \thfirst{Aspecto del Componente} & \thcell{Especificación Técnica y Responsabilidad} \\
@@ -6710,7 +6747,7 @@ de sesión.
 \hline
 \textbf{Responsabilidad Técnica} & Despacho de correos transaccionales vía HTTPS REST sin bloqueos SMTP. \\*
 \hline
-\textbf{Paquete Canónico} & \texttt{...application.acl} \\
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak application.\allowbreak internal.\allowbreak outbound.\allowbreak acl} \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} GoogleIdentityGateway \quad (\textit{Categoría:} Puerto de Salida)} \\*
 \hline
@@ -6718,43 +6755,47 @@ de sesión.
 \hline
 \textbf{Responsabilidad Técnica} & Validación criptográfica de firmas de tokens emitidos por Google OAuth2. \\*
 \hline
-\textbf{Paquete Canónico} & \texttt{...application.acl} \\
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak application.\allowbreak internal.\allowbreak outbound.\allowbreak acl} \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} BearerTokenService \quad (\textit{Categoría:} Servicio de Seguridad)} \\*
-\hline
-\textbf{Métodos Principales} & \texttt{generateToken}, \texttt{validateToken}, \texttt{extractClaims} \\*
-\hline
-\textbf{Responsabilidad Técnica} & Generación y lectura de tokens Bearer JWT con tenencia y permisos. \\*
-\hline
-\textbf{Paquete Canónico} & \texttt{...application.acl} \\
-\hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} BCryptHashingService \quad (\textit{Categoría:} Servicio Criptográfico)} \\*
-\hline
-\textbf{Métodos Principales} & \texttt{hash}, \texttt{matches} \\*
-\hline
-\textbf{Responsabilidad Técnica} & Derivación y validación de contraseñas mediante función hash adaptativa. \\*
-\hline
-\textbf{Paquete Canónico} & \texttt{...application.acl} \\
-\hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} AuthenticatedUser \quad (\textit{Categoría:} Modelo de Sesión)} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Modelo Inmutable:} AuthenticatedUser \quad (\textit{Categoría:} Modelo de Sesión)} \\*
 \hline
 \textbf{Métodos Principales} & \texttt{userId}, \texttt{email}, \texttt{token}, \texttt{activeTenant}, \texttt{permissions} \\*
 \hline
 \textbf{Responsabilidad Técnica} & Registro inmutable representativo de una sesión autenticada válida. \\*
 \hline
-\textbf{Paquete Canónico} & \texttt{...application.model} \\
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak application.\allowbreak model} \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} GoogleUserPayload \quad (\textit{Categoría:} Modelo de Identidad)} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Modelo Inmutable:} GoogleUserPayload \quad (\textit{Categoría:} Modelo de Identidad)} \\*
 \hline
 \textbf{Métodos Principales} & \texttt{sub}, \texttt{email}, \texttt{givenName}, \texttt{familyName}, \texttt{pictureUrl} \\*
 \hline
 \textbf{Responsabilidad Técnica} & Carga útil demográfica validada proveniente de Google Identity Services. \\*
 \hline
-\textbf{Paquete Canónico} & \texttt{...application.model} \\
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak application.\allowbreak model} \\
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-*Nota.* Componentes pertenecientes al paquete com.andeva.atelier.platform.iam.application.
+*Nota.* Componentes pertenecientes a com.andeva.atelier.platform.iam.application.internal.outbound.acl y application.model.
+
+**Implementación de Fachada de Contexto Abierto (Inbound ACL)**
+
+La materialización operativa del patrón Open Host Service y la capa anticorrupción de
+entrada se implementa mediante la clase **TenancyContextFacadeImpl**, ubicada en el
+paquete canónico **com.andeva.atelier.platform.iam.application.acl**.
+
+Esta clase materializa el contrato público **TenancyContextFacade** expuesto en la capa
+de interfaces bajo **com.andeva.atelier.platform.iam.interfaces.acl**. Su responsabilidad
+consiste en atender requerimientos provenientes de otros Bounded Contexts de la plataforma,
+tales como MRO, CRM, Facturación o Recursos Humanos, que precisan validar la existencia de
+talleres, consultar identidades de usuarios o verificar la afiliación activa de colaboradores.
+
+Para asegurar un riguroso desacoplamiento táctico y evitar el acceso directo a entidades
+persistentes, **TenancyContextFacadeImpl** orquesta llamadas directas en memoria hacia los
+servicios de consulta internos: **TenantQueryService**, **BranchQueryService**,
+**UserQueryService** y **MembershipQueryService**. Posteriormente, traduce las entidades
+recuperadas hacia los registros inmutables de frontera definidos en la interfaz
+(**TenantAclDto**, **BranchAclDto**, **UserAclDto** y **BranchGeofenceAclDto**),
+preservando la integridad del modelo de dominio y garantizando fronteras de contexto herméticas.
 
 #### 2.6.2.4 Infrastructure Layer
 
@@ -6809,7 +6850,7 @@ TenantPersistenceEntity & Mapeo relacional de talleres automotrices a la tabla f
 \hline
 \textbf{Relaciones} & Hereda de AuditableAbstractPersistenceEntity. 1:N con sedes. \\*
 \hline
-\textbf{Paquete} & \texttt{...persistence.jpa.entities} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak entities} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
@@ -6817,9 +6858,9 @@ BranchPersistenceEntity & Mapeo relacional de sedes físicas y geocercas satelit
 \hline
 \textbf{Categoría} & Entidad JPA \\*
 \hline
-\textbf{Relaciones} & Pertenece a un taller específico mediante clave foránea. \\*
+\textbf{Relaciones} & Clave foránea al taller y coordenadas satelitales WGS84. \\*
 \hline
-\textbf{Paquete} & \texttt{...persistence.jpa.entities} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak entities} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
@@ -6829,7 +6870,7 @@ UserPersistenceEntity & Mapeo relacional de credenciales e identidad a la tabla 
 \hline
 \textbf{Relaciones} & 1:1 con perfiles biográficos y 1:N con tokens OTP. \\*
 \hline
-\textbf{Paquete} & \texttt{...persistence.jpa.entities} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak entities} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
@@ -6837,9 +6878,9 @@ ProfilePersistenceEntity & Mapeo de datos biográficos a la tabla relacional pro
 \hline
 \textbf{Categoría} & Entidad JPA \\*
 \hline
-\textbf{Relaciones} & Comparte clave primaria compartida con la cuenta de usuario. \\*
+\textbf{Relaciones} & Comparte clave primaria compartida MapsId con UserPersistenceEntity. \\*
 \hline
-\textbf{Paquete} & \texttt{...persistence.jpa.entities} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak entities} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
@@ -6847,9 +6888,9 @@ VerificationTokenPersistenceEntity & Mapeo de tokens de verificación y reseteo 
 \hline
 \textbf{Categoría} & Entidad JPA \\*
 \hline
-\textbf{Relaciones} & Vinculado a usuarios con control de caducidad temporal. \\*
+\textbf{Relaciones} & Clave foránea al usuario titular con índice en expires\_at. \\*
 \hline
-\textbf{Paquete} & \texttt{...persistence.jpa.entities} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak entities} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
@@ -6857,9 +6898,9 @@ TenantMembershipPersistenceEntity & Mapeo de contratos laborales a la tabla tena
 \hline
 \textbf{Categoría} & Entidad JPA \\*
 \hline
-\textbf{Relaciones} & Relación N:M con roles mediante membership\_roles. \\*
+\textbf{Relaciones} & Clave foránea doble hacia talleres y usuarios. N:M con roles. \\*
 \hline
-\textbf{Paquete} & \texttt{...persistence.jpa.entities} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak entities} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
@@ -6869,7 +6910,7 @@ InvitationPersistenceEntity & Mapeo de invitaciones de onboarding a la tabla inv
 \hline
 \textbf{Relaciones} & Clave foránea al taller emisor y token URL seguro. \\*
 \hline
-\textbf{Paquete} & \texttt{...persistence.jpa.entities} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak entities} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
@@ -6879,7 +6920,7 @@ RolePersistenceEntity & Mapeo relacional de roles de seguridad a la tabla roles.
 \hline
 \textbf{Relaciones} & Relación N:M con permisos mediante role\_permissions. \\*
 \hline
-\textbf{Paquete} & \texttt{...persistence.jpa.entities} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak entities} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
@@ -6889,7 +6930,7 @@ PermissionPersistenceEntity & Mapeo relacional del catálogo atómico a la tabla
 \hline
 \textbf{Relaciones} & Entidad de catálogo transversal referenciada por roles. \\*
 \hline
-\textbf{Paquete} & \texttt{...persistence.jpa.entities} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak entities} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
@@ -6899,7 +6940,7 @@ GeoPointEmbeddable & Estructura embebible con coordenadas de latitud y longitud 
 \hline
 \textbf{Relaciones} & Integrada en BranchPersistenceEntity para geocercas. \\*
 \hline
-\textbf{Paquete} & \texttt{...persistence.jpa.entities} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak embeddables} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
@@ -6909,7 +6950,7 @@ TaxIdAttributeConverter & Conversión bidireccional entre TaxId y columna VARCHA
 \hline
 \textbf{Relaciones} & Aplica sobre RUC fiscal en la entidad de taller. \\*
 \hline
-\textbf{Paquete} & \texttt{...persistence.jpa.converters} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak converters} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
@@ -6919,7 +6960,7 @@ EmailAddressAttributeConverter & Conversión bidireccional entre EmailAddress y 
 \hline
 \textbf{Relaciones} & Normaliza correos electrónicos canónicos a minúsculas. \\*
 \hline
-\textbf{Paquete} & \texttt{...persistence.jpa.converters} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak converters} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
@@ -6929,7 +6970,7 @@ MoneyAttributeConverter & Conversión bidireccional entre Money y columna NUMERI
 \hline
 \textbf{Relaciones} & Mapea salario base en membresías de colaboradores. \\*
 \hline
-\textbf{Paquete} & \texttt{...persistence.jpa.converters} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak converters} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
@@ -6939,7 +6980,7 @@ TenantPersistenceRepository & Operaciones de persistencia física y consultas de
 \hline
 \textbf{Relaciones} & Extiende \texttt{JpaRepository<\allowbreak TenantPersistenceEntity,\allowbreak  UUID>\allowbreak }. \\*
 \hline
-\textbf{Paquete} & \texttt{...persistence.jpa.repositories} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak repositories} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
@@ -6949,7 +6990,7 @@ BranchPersistenceRepository & Consultas de sedes físicas y geocercas satelitale
 \hline
 \textbf{Relaciones} & Extiende \texttt{JpaRepository<\allowbreak BranchPersistenceEntity,\allowbreak  UUID>\allowbreak }. \\*
 \hline
-\textbf{Paquete} & \texttt{...persistence.jpa.repositories} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak repositories} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
@@ -6959,7 +7000,7 @@ UserPersistenceRepository & Consultas de cuentas de usuario por correo canónico
 \hline
 \textbf{Relaciones} & Extiende \texttt{JpaRepository<\allowbreak UserPersistenceEntity,\allowbreak  UUID>\allowbreak }. \\*
 \hline
-\textbf{Paquete} & \texttt{...persistence.jpa.repositories} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak repositories} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
@@ -6969,17 +7010,17 @@ TenantMembershipPersistenceRepository & Consultas de afiliación laboral y nómi
 \hline
 \textbf{Relaciones} & Extiende \texttt{JpaRepository<\allowbreak TenantMembershipPersistenceEntity,\allowbreak  UUID>\allowbreak }. \\*
 \hline
-\textbf{Paquete} & \texttt{...persistence.jpa.repositories} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak repositories} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
-RolePersistenceRepository & Consultas de roles configurados en el taller y roles globales. \\*
+RolePersistenceRepository & Consultas y persistencia de roles soberanos y personalizados por taller. \\*
 \hline
 \textbf{Categoría} & Repositorio Spring Data \\*
 \hline
 \textbf{Relaciones} & Extiende \texttt{JpaRepository<\allowbreak RolePersistenceEntity,\allowbreak  UUID>\allowbreak }. \\*
 \hline
-\textbf{Paquete} & \texttt{...persistence.jpa.repositories} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak repositories} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
@@ -6989,7 +7030,7 @@ PermissionPersistenceRepository & Consultas del catálogo de permisos de segurid
 \hline
 \textbf{Relaciones} & Extiende \texttt{JpaRepository<\allowbreak PermissionPersistenceEntity,\allowbreak  UUID>\allowbreak }. \\*
 \hline
-\textbf{Paquete} & \texttt{...persistence.jpa.repositories} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak repositories} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
@@ -6999,7 +7040,7 @@ InvitationPersistenceRepository & Búsqueda y validación de tokens secretos de 
 \hline
 \textbf{Relaciones} & Extiende \texttt{JpaRepository<\allowbreak InvitationPersistenceEntity,\allowbreak  UUID>\allowbreak }. \\*
 \hline
-\textbf{Paquete} & \texttt{...persistence.jpa.repositories} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak repositories} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
@@ -7009,7 +7050,7 @@ TenantPersistenceAssembler & Transforma agregados Tenant hacia y desde entidades
 \hline
 \textbf{Relaciones} & Traduce identificadores fuertemente tipados a UUID. \\*
 \hline
-\textbf{Paquete} & \texttt{...persistence.jpa.transform} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak assemblers} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
@@ -7019,7 +7060,7 @@ BranchPersistenceAssembler & Transforma entidades Branch hacia y desde entidades
 \hline
 \textbf{Relaciones} & Mapea coordenadas geográficas y radios de geocerca. \\*
 \hline
-\textbf{Paquete} & \texttt{...persistence.jpa.transform} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak assemblers} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
@@ -7029,7 +7070,7 @@ UserPersistenceAssembler & Transforma agregados User hacia y desde entidades JPA
 \hline
 \textbf{Relaciones} & Reconstituye perfiles demográficos y tokens asociados. \\*
 \hline
-\textbf{Paquete} & \texttt{...persistence.jpa.transform} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak assemblers} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
@@ -7039,7 +7080,7 @@ TenantMembershipPersistenceAssembler & Transforma agregados TenantMembership a e
 \hline
 \textbf{Relaciones} & Mapea esquemas remunerativos y roles vinculados. \\*
 \hline
-\textbf{Paquete} & \texttt{...persistence.jpa.transform} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak assemblers} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
@@ -7049,7 +7090,7 @@ RolePersistenceAssembler & Transforma agregados Role hacia y desde entidades JPA
 \hline
 \textbf{Relaciones} & Hidrata el conjunto inmutable de permisos del rol. \\*
 \hline
-\textbf{Paquete} & \texttt{...persistence.jpa.transform} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak assemblers} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
@@ -7059,7 +7100,7 @@ InvitationPersistenceAssembler & Transforma agregados Invitation a entidades JPA
 \hline
 \textbf{Relaciones} & Preserva el token criptográfico y fecha de expiración. \\*
 \hline
-\textbf{Paquete} & \texttt{...persistence.jpa.transform} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak assemblers} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
@@ -7069,7 +7110,7 @@ TenantRepositoryImpl & Implementación del puerto de dominio TenantRepository. \
 \hline
 \textbf{Relaciones} & Persiste entidades y despacha eventos al Outbox. \\*
 \hline
-\textbf{Paquete} & \texttt{...persistence.jpa.adapters} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak adapters} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
@@ -7079,7 +7120,7 @@ BranchRepositoryImpl & Implementación del puerto de dominio BranchRepository. \
 \hline
 \textbf{Relaciones} & Coordina consultas y mutaciones de sucursales físicas. \\*
 \hline
-\textbf{Paquete} & \texttt{...persistence.jpa.adapters} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak adapters} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
@@ -7089,7 +7130,7 @@ UserRepositoryImpl & Implementación del puerto de dominio UserRepository. \\*
 \hline
 \textbf{Relaciones} & Gestiona almacenamiento de identidades y credenciales. \\*
 \hline
-\textbf{Paquete} & \texttt{...persistence.jpa.adapters} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak adapters} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
@@ -7099,7 +7140,7 @@ TenantMembershipRepositoryImpl & Implementación del puerto TenantMembershipRepo
 \hline
 \textbf{Relaciones} & Sincroniza vínculos laborales y extrae eventos de dominio. \\*
 \hline
-\textbf{Paquete} & \texttt{...persistence.jpa.adapters} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak adapters} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
@@ -7109,7 +7150,7 @@ RoleRepositoryImpl & Implementación del puerto de dominio RoleRepository. \\*
 \hline
 \textbf{Relaciones} & Gestiona persistencia de esquemas RBAC personalizados. \\*
 \hline
-\textbf{Paquete} & \texttt{...persistence.jpa.adapters} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak adapters} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
@@ -7119,7 +7160,7 @@ PermissionRepositoryImpl & Implementación del puerto PermissionRepository. \\*
 \hline
 \textbf{Relaciones} & Provee acceso de lectura al catálogo atómico de permisos. \\*
 \hline
-\textbf{Paquete} & \texttt{...persistence.jpa.adapters} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak adapters} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
@@ -7129,27 +7170,27 @@ InvitationRepositoryImpl & Implementación del puerto InvitationRepository. \\*
 \hline
 \textbf{Relaciones} & Almacena invitaciones y garantiza unicidad de token. \\*
 \hline
-\textbf{Paquete} & \texttt{...persistence.jpa.adapters} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak adapters} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
-ResendEmailClient & Cliente REST HTTPS que despacha correos vía Resend API. \\*
+ResendEmailAdapter & Adaptador REST HTTPS que despacha correos vía Resend API. \\*
 \hline
 \textbf{Categoría} & Adaptador de Salida \\*
 \hline
 \textbf{Relaciones} & Implementa el puerto de aplicación ResendEmailService. \\*
 \hline
-\textbf{Paquete} & \texttt{...communication.resend} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak external.\allowbreak resend} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
-GoogleTokenVerifierGatewayImpl & Pasarela que verifica tokens Google OAuth2 con certificados. \\*
+GoogleIdentityAdapter & Adaptador que verifica tokens Google OAuth2 con certificados. \\*
 \hline
 \textbf{Categoría} & Adaptador de Salida \\*
 \hline
 \textbf{Relaciones} & Implementa el puerto de aplicación GoogleIdentityGateway. \\*
 \hline
-\textbf{Paquete} & \texttt{...identity.google} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak external.\allowbreak google} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
@@ -7159,7 +7200,7 @@ BearerTokenServiceImpl & Genera y valida tokens JWT enriquecidos mediante JJWT. 
 \hline
 \textbf{Relaciones} & Implementa el puerto de aplicación BearerTokenService. \\*
 \hline
-\textbf{Paquete} & \texttt{...security.jwt} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak security.\allowbreak tokens.\allowbreak jwt} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
@@ -7169,7 +7210,7 @@ BCryptHashingServiceImpl & Cifra y confronta contraseñas con factor de coste 12
 \hline
 \textbf{Relaciones} & Implementa el puerto de aplicación BCryptHashingService. \\*
 \hline
-\textbf{Paquete} & \texttt{...security.crypto} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak security.\allowbreak hashing.\allowbreak bcrypt} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
@@ -7179,7 +7220,47 @@ WebSecurityConfiguration & Configuración perimetral de filtros, CORS y rutas en
 \hline
 \textbf{Relaciones} & Publica la cadena de filtros SecurityFilterChain. \\*
 \hline
-\textbf{Paquete} & \texttt{...security.configuration} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak security.\allowbreak authorization.\allowbreak sfs} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+BearerAuthorizationRequestFilter & Intercepta peticiones HTTP, valida JWT y fija el contexto de seguridad. \\*
+\hline
+\textbf{Categoría} & Filtro Perimetral \\*
+\hline
+\textbf{Relaciones} & Extiende OncePerRequestFilter e interactúa con BearerTokenService. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak security.\allowbreak authorization.\allowbreak sfs} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+UnauthorizedRequestHandlerEntryPoint & Gestiona respuestas de error 401 estructuradas bajo RFC 7807. \\*
+\hline
+\textbf{Categoría} & Manejador de Excepción Perimetral \\*
+\hline
+\textbf{Relaciones} & Implementa AuthenticationEntryPoint de Spring Security. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak security.\allowbreak authorization.\allowbreak sfs} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+CustomUserDetailsService & Carga detalles de identidad de usuario desde la persistencia relacional. \\*
+\hline
+\textbf{Categoría} & Servicio de Autenticación \\*
+\hline
+\textbf{Relaciones} & Implementa UserDetailsService y consulta UserPersistenceRepository. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak security.\allowbreak authorization.\allowbreak sfs} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+CustomUserDetails & Encapsula identidad, credencial hash, inquilino y autoridades. \\*
+\hline
+\textbf{Categoría} & Modelo de Seguridad \\*
+\hline
+\textbf{Relaciones} & Implementa la interfaz UserDetails de Spring Security. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iam.\allowbreak infrastructure.\allowbreak security.\allowbreak authorization.\allowbreak sfs} \\
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
@@ -7289,9 +7370,9 @@ relacionales.
 \hline
 \textbf{Clave Primaria} & \texttt{id (UUID)} \\*
 \hline
-\textbf{Columnas Principales} & \texttt{tenant\_id}, \texttt{name}, \texttt{description}, \texttt{is\_system\_role} \\*
+\textbf{Columnas Principales} & \texttt{tenant\_id}, \texttt{code}, \texttt{name}, \texttt{description}, \texttt{is\_system\_role} \\*
 \hline
-\textbf{Restricciones e Índices} & Clave foránea nullable a tenants. índice en tenant\_id y name. \\
+\textbf{Restricciones e Índices} & Clave foránea obligatoria a tenants con restricciones únicas uk\_roles\_tenant\_name y uk\_roles\_tenant\_code. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} PermissionPersistenceEntity \quad (\textit{Tabla:} \texttt{permissions})} \\*
 \hline
@@ -7303,7 +7384,7 @@ relacionales.
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-*Nota.* Tablas físicas alojadas en el motor PostgreSQL 16 con motor InnoDB equivalente relacional.
+*Nota.* Tablas físicas alojadas en el motor PostgreSQL 16 con integridad referencial y restricciones ACID.
 
 **Repositorios Spring Data JPA y Adaptadores de Persistencia**
 
@@ -7401,9 +7482,10 @@ datos.
 **Ensambladores de Persistencia y Convertidores JPA**
 
 La correspondencia entre estructuras inmutables del dominio y modelos relacionales
-mutables se resuelve a través de siete ensambladores de persistencia dedicados,
+mutables se resuelve a través de seis ensambladores de persistencia dedicados bajo el
+paquete canónico com.andeva.atelier.platform.iam.infrastructure.persistence.jpa.assemblers,
 garantizando que los agregados se hidraten sin disparar eventos de dominio espurios
-durante la lectura.
+durante las consultas de lectura.
 
 Los ensambladores extraen los valores escalares de objetos de valor representativos de
 identificadores fuertemente tipados, números de documento tributario y coordenadas
@@ -7411,9 +7493,12 @@ geográficas para poblar las entidades JPA, reconstituyendo las raíces de agreg
 constructores de dominio controlados que validan exhaustivamente las invariantes.
 
 De forma complementaria, los convertidores de atributos JPA **TaxIdAttributeConverter**,
-**EmailAddressAttributeConverter** y **MoneyAttributeConverter** efectúan la normalización
-automática a tipos VARCHAR y NUMERIC, mientras que **GeoPointEmbeddable** estructura
-coordenadas de latitud y longitud satelital de forma embebida.
+**EmailAddressAttributeConverter** y **MoneyAttributeConverter**, organizados bajo el
+paquete canónico com.andeva.atelier.platform.iam.infrastructure.persistence.jpa.converters,
+efectúan la normalización bidireccional automática hacia tipos VARCHAR y NUMERIC en
+PostgreSQL. A su vez, el componente **GeoPointEmbeddable**, ubicado en el paquete canónico
+com.andeva.atelier.platform.iam.infrastructure.persistence.jpa.embeddables, estructura
+coordenadas de latitud y longitud satelital de forma embebida para las sedes de taller.
 
 Con el propósito de ilustrar estas transformaciones bidireccionales, en la
 @tbl:iam-persistence-assemblers se describen los ensambladores de persistencia,
@@ -7434,7 +7519,7 @@ convertidores de tipos, estructuras de entrada y reglas de mapeo relacional.
 \hline
 \textbf{Mapeo de Tipos} & \texttt{Tenant} $\longleftrightarrow$ \texttt{TenantPersistenceEntity} \\*
 \hline
-\textbf{Transformación} & Traduce TenantId a UUID. mapea sedes hijas y atributos corporativos. \\
+\textbf{Transformación} & Traduce TenantId a UUID, mapea sedes hijas y atributos corporativos. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} BranchPersistenceAssembler} \\*
 \hline
@@ -7446,7 +7531,7 @@ convertidores de tipos, estructuras de entrada y reglas de mapeo relacional.
 \hline
 \textbf{Mapeo de Tipos} & \texttt{User} $\longleftrightarrow$ \texttt{UserPersistenceEntity} \\*
 \hline
-\textbf{Transformación} & Traduce UserId a UUID. mapea entidad Profile y tokens de verificación. \\
+\textbf{Transformación} & Traduce UserId a UUID, mapea entidad Profile y tokens de verificación. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} TenantMembershipPersistenceAssembler} \\*
 \hline
@@ -7492,33 +7577,54 @@ convertidores de tipos, estructuras de entrada y reglas de mapeo relacional.
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-*Nota.* Componentes ubicados en los paquetes transform y converters de la capa de infraestructura.
+*Nota.* Componentes ubicados en los paquetes assemblers, converters y embeddables de la capa de infraestructura.
 
 **Seguridad Perimetral, Criptografía y Pasarelas de Nube**
 
 La protección perimetral del sistema y la comunicación con servicios externos se consolida
-en componentes de infraestructura desacoplados que materializan los puertos de aplicación
-bajo estrictos estándares de seguridad informática.
+en cuatro subsistemas de infraestructura desacoplados que materializan los puertos de
+aplicación bajo estrictos estándares de seguridad informática y alta disponibilidad:
 
-La clase de configuración **WebSecurityConfiguration** establece una cadena de filtros de
-seguridad estrictamente sin estado en Spring Security 6. Deshabilita la protección contra
-CSRF por tratarse de una API REST consumida mediante tokens de autorización Bearer,
-configura políticas de CORS restrictivas e inyecta los filtros perimetrales
-especializados.
+- **Pipeline de Autorización y Filtros Perimetrales:** Ubicado en el paquete canónico
+  com.andeva.atelier.platform.iam.infrastructure.security.authorization.sfs, se estructura
+  alrededor de **WebSecurityConfiguration**, clase que define una cadena de filtros
+  estrictamente sin estado en Spring Security 6. Deshabilita la protección contra CSRF al
+  tratarse de una API REST consumida mediante credenciales Bearer, restringe los accesos
+  CORS e inyecta el filtro perimetral **BearerAuthorizationRequestFilter** antes de la
+  autenticación estándar. Dicho filtro intercepta cada solicitud HTTP, valida el token con
+  el servicio de emisión e hidrata el contexto de seguridad. Complementariamente,
+  **UnauthorizedRequestHandlerEntryPoint** retorna respuestas de error 401 estructuradas
+  bajo el estándar RFC 7807, mientras que **CustomUserDetailsService** y el modelo
+  **CustomUserDetails** articulan la carga y resolución de identidades de usuario desde la
+  persistencia relacional.
 
-En el plano criptográfico, **BearerTokenServiceImpl** administra la emisión y verificación
-de firmas HMAC-SHA256 mediante JJWT 0.12.6, inyectando claims contextuales que posibilitan
-autorizaciones en memoria de coste constante. Por su parte, **BCryptHashingServiceImpl**
-aplica funciones hash adaptativas con factor de coste 12 para contraseñas de acceso.
+- **Servicio de Tokens JWT:** Agrupado bajo el paquete canónico
+  com.andeva.atelier.platform.iam.infrastructure.security.tokens.jwt, el componente
+  **BearerTokenServiceImpl** materializa el puerto de aplicación BearerTokenService.
+  Administra la emisión y comprobación de firmas criptográficas HMAC-SHA256 con claves
+  simétricas de 256 bits mediante la biblioteca JJWT 0.12.6, inyectando claims de usuario,
+  taller activo y catálogo de autoridades para respaldar decisiones de control de acceso en
+  memoria de coste algorítmico constante.
 
-Finalmente, la integración externa comprende el cliente **ResendEmailClient**, que efectúa
-peticiones REST HTTPS sobre el puerto 443 hacia la API de Resend para el despacho de
-correos transaccionales, y la pasarela **GoogleTokenVerifierGatewayImpl**, que comprueba
-las firmas de Google Identity Services frente a certificados criptográficos rotativos.
+- **Servicio Criptográfico de Hashing BCrypt:** Localizado en el paquete canónico
+  com.andeva.atelier.platform.iam.infrastructure.security.hashing.bcrypt, el componente
+  **BCryptHashingServiceImpl** implementa el puerto BCryptHashingService. Aplica
+  funciones hash adaptativas de derivación de claves con factor de trabajo 12 mediante
+  Spring Security Crypto, asegurando resistencia ante ataques de fuerza bruta y ataques por
+  tablas arcoíris sobre contraseñas de cuentas locales.
+
+- **Adaptadores de Integración Externa:** Centralizados bajo el paquete canónico
+  com.andeva.atelier.platform.iam.infrastructure.external, desglosan la comunicación con
+  plataformas de nube de terceros. Por un lado, **ResendEmailAdapter**, dentro de
+  external.resend, implementa el puerto de aplicación ResendEmailService ejecutando llamadas
+  REST HTTPS sobre el puerto 443 hacia la API de Resend para el despacho seguro de correos
+  transaccionales con plantillas HTML responsivas. Por otro lado, **GoogleIdentityAdapter**,
+  en external.google, materializa el puerto GoogleIdentityGateway comprobando las firmas de
+  tokens Google OAuth2 frente a certificados públicos rotativos mediante el SDK oficial.
 
 A fin de resumir la arquitectura de seguridad y servicios perimetrales, en la
 @tbl:iam-security-infrastructure se especifican las responsabilidades de estos
-componentes.
+componentes técnicos.
 
 \renewcommand{\arraystretch}{1.25}
 \begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
@@ -7531,23 +7637,29 @@ componentes.
 \thfirst{Aspecto Técnico} & \thcell{Tecnología y Responsabilidad de Seguridad} \\
 \hline
 \endhead
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente Técnico:} WebSecurityConfiguration \quad (\textit{Categoría:} Configuración)} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente Técnico:} WebSecurityConfiguration \quad (\textit{Categoría:} Configuración de Seguridad)} \\*
 \hline
 \textbf{Tecnología Subyacente} & Spring Security 6 \\*
 \hline
-\textbf{Responsabilidad} & Publica SecurityFilterChain sin estado, deshabilita CSRF y gestiona CORS. \\
+\textbf{Responsabilidad} & Publica SecurityFilterChain sin estado, deshabilita CSRF y gestiona CORS restrictivo. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente Técnico:} BearerAuthorizationRequestFilter \quad (\textit{Categoría:} Filtro Perimetral)} \\*
 \hline
 \textbf{Tecnología Subyacente} & OncePerRequestFilter \\*
 \hline
-\textbf{Responsabilidad} & Extrae token Bearer, verifica firma e inyecta el SecurityContext. \\
+\textbf{Responsabilidad} & Intercepta peticiones HTTP, valida firma HMAC-SHA256 e hidrata el SecurityContext. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente Técnico:} TenantContextResolver \quad (\textit{Categoría:} Filtro Perimetral)} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente Técnico:} UnauthorizedRequestHandlerEntryPoint \quad (\textit{Categoría:} Manejador de Excepción)} \\*
 \hline
-\textbf{Tecnología Subyacente} & OncePerRequestFilter \\*
+\textbf{Tecnología Subyacente} & AuthenticationEntryPoint (RFC 7807) \\*
 \hline
-\textbf{Responsabilidad} & Comprueba que el tenant\_id de la ruta coincida con el inquilino en JWT. \\
+\textbf{Responsabilidad} & Emite respuestas 401 estructuradas en application/problem+json ante credenciales inválidas. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente Técnico:} CustomUserDetailsService \quad (\textit{Categoría:} Servicio de Autenticación)} \\*
+\hline
+\textbf{Tecnología Subyacente} & UserDetailsService \\*
+\hline
+\textbf{Responsabilidad} & Carga detalles de identidad y autoridades delegando en UserPersistenceRepository. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente Técnico:} BearerTokenServiceImpl \quad (\textit{Categoría:} Servicio Criptográfico)} \\*
 \hline
@@ -7561,13 +7673,13 @@ componentes.
 \hline
 \textbf{Responsabilidad} & Derivación unidireccional de contraseñas con factor de trabajo adaptativo 12. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente Técnico:} ResendEmailClient \quad (\textit{Categoría:} Adaptador de Salida)} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente Técnico:} ResendEmailAdapter \quad (\textit{Categoría:} Adaptador de Salida)} \\*
 \hline
 \textbf{Tecnología Subyacente} & Spring RestClient (HTTPS 443) \\*
 \hline
-\textbf{Responsabilidad} & Despacho de correos transaccionales vía Resend API con plantillas HTML. \\
+\textbf{Responsabilidad} & Despacho de correos transaccionales vía Resend API con plantillas HTML responsivas. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente Técnico:} GoogleTokenVerifierGatewayImpl \quad (\textit{Categoría:} Adaptador de Salida)} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente Técnico:} GoogleIdentityAdapter \quad (\textit{Categoría:} Adaptador de Salida)} \\*
 \hline
 \textbf{Tecnología Subyacente} & Google API Client SDK \\*
 \hline
@@ -7575,7 +7687,7 @@ componentes.
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-*Nota.* Componentes configurados bajo los paquetes security, communication e identity.
+*Nota.* Componentes configurados bajo los paquetes com.andeva.atelier.platform.iam.infrastructure.security y external.
 
 #### 2.6.2.5. Bounded Context Software Architecture Component Level Diagrams
 
@@ -7602,19 +7714,19 @@ En la @tbl:iam-c4-components se presenta el catálogo estructurado de los ocho c
 \hline
 \textbf{Tecnologías} & Spring Security 6, OncePerRequestFilter, JJWT \\*
 \hline
-\textbf{Responsabilidad} & Intercepta solicitudes HTTP entrantes, valida la firma HMAC-SHA256 de tokens Bearer JWT, extrae identificadores de inquilino y usuario, y establece el contexto de seguridad. \\*
+\textbf{Responsabilidad} & Ubicado en infrastructure.security.authorization.sfs, intercepta solicitudes HTTP entrantes, valida la firma HMAC-SHA256 de tokens Bearer JWT, extrae identificadores de inquilino y usuario, y establece el contexto de seguridad. \\*
 \hline
-\textbf{Relaciones} & Entrada desde clientes HTTP. invoca servicio de tokens. canaliza peticiones hacia controladores REST y módulos de negocio. \\
+\textbf{Relaciones} & Entrada desde clientes HTTP, invoca servicio de tokens, canaliza peticiones hacia controladores REST y módulos de negocio. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} REST Controllers \& Inbound Interface} \\*
 \hline
 \textbf{Tipo de Elemento} & Componente \\*
 \hline
-\textbf{Tecnologías} & Spring MVC, SpringDoc OpenAPI, Jakarta Validation \\*
+\textbf{Tecnologías} & Spring MVC, SpringDoc OpenAPI, Jakarta Bean Validation \\*
 \hline
-\textbf{Responsabilidad} & Expone endpoints REST para autenticación local y federada, administración de talleres, sedes físicas con geocercas, invitaciones de personal y roles RBAC. \\*
+\textbf{Responsabilidad} & Endpoints en interfaces.rest.controllers para autenticación local y federada, administración de talleres, sedes físicas con geocercas, invitaciones de personal y roles RBAC, con validación sintáctica mediante Jakarta Bean Validation y serialización con ensambladores en interfaces.rest.assemblers. \\*
 \hline
-\textbf{Relaciones} & Invocado por WebApp y aplicaciones móviles. delega en servicios de aplicación CQRS. utiliza ensambladores de respuesta. \\
+\textbf{Relaciones} & Invocado por WebApp y aplicaciones móviles, delega en servicios de aplicación CQRS y utiliza ensambladores de respuesta. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} IAM CQRS Application Services} \\*
 \hline
@@ -7622,17 +7734,17 @@ En la @tbl:iam-c4-components se presenta el catálogo estructurado de los ocho c
 \hline
 \textbf{Tecnologías} & Spring Service, Transactional, Interfaces Funcionales \\*
 \hline
-\textbf{Responsabilidad} & Orquesta los casos de uso de registro, incorporación de talleres, emisión de invitaciones y asignación de permisos bajo demarcación transaccional estricta. \\*
+\textbf{Responsabilidad} & Orquesta los casos de uso de registro, incorporación de talleres, emisión de invitaciones y asignación de permisos bajo demarcación transaccional estricta. Contratos en application.commandservices y application.queryservices, implementaciones en application.internal.commandservices y application.internal.queryservices. \\*
 \hline
-\textbf{Relaciones} & Implementa contratos de comando y consulta. orquesta modelos de dominio. delega en adaptadores de persistencia JPA. \\
+\textbf{Relaciones} & Implementa contratos de comando y consulta, orquesta modelos de dominio y delega en adaptadores de persistencia JPA. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} Security \& Cryptographic Services} \\*
 \hline
 \textbf{Tipo de Elemento} & Componente \\*
 \hline
-\textbf{Tecnologías} & JJWT 0.12.6, Spring Security Crypto \\*
+\textbf{Tecnologías} & JJWT 0.12.6, Spring Security Crypto, BCrypt \\*
 \hline
-\textbf{Responsabilidad} & Emite y valida tokens JWT sin estado con asertos de usuario, taller y permisos. efectúa el cifrado unidireccional y verificación de contraseñas mediante algoritmo BCrypt. \\*
+\textbf{Responsabilidad} & Servicios en infrastructure.security.tokens.jwt (BearerTokenServiceImpl) para emisión y validación de tokens Bearer JWT sin estado, y en infrastructure.security.hashing.bcrypt (BCryptHashingServiceImpl) para cifrado unidireccional y verificación de contraseñas. \\*
 \hline
 \textbf{Relaciones} & Consumido por filtros perimetrales, servicios de comando y controladores de autenticación. \\
 \hline
@@ -7642,9 +7754,9 @@ En la @tbl:iam-c4-components se presenta el catálogo estructurado de los ocho c
 \hline
 \textbf{Tecnologías} & Dominio puro Java 26, AbstractDomainAggregateRoot \\*
 \hline
-\textbf{Responsabilidad} & Encapsula las invariantes de negocio, validación de RUC bajo Módulo 11 de la SUNAT, delimitación de geocercas Haversine y acumulación de eventos de dominio en memoria. \\*
+\textbf{Responsabilidad} & Encapsula las invariantes de negocio, validación de RUC bajo Módulo 11 de la SUNAT, delimitación de geocercas Haversine y acumulación de eventos de dominio en memoria, mediante raíces y tipos puros en domain.model. \\*
 \hline
-\textbf{Relaciones} & Raíces Tenant, User, TenantMembership, Role, Invitation. entidades y objetos de valor inmutables. \\
+\textbf{Relaciones} & Raíces Tenant, User, TenantMembership, Role e Invitation, junto a entidades y objetos de valor inmutables. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} Persistence Repositories \& JPA Adapters} \\*
 \hline
@@ -7652,9 +7764,9 @@ En la @tbl:iam-c4-components se presenta el catálogo estructurado de los ocho c
 \hline
 \textbf{Tecnologías} & Jakarta Persistence 3.1, Spring Data JPA, Hibernate \\*
 \hline
-\textbf{Responsabilidad} & Materializa los puertos de repositorio del dominio mediante adaptadores JPA, gobernando el mapeo relacional bidireccional y la persistencia en PostgreSQL 16. \\*
+\textbf{Responsabilidad} & Materializa los puertos de repositorio del dominio mediante adaptadores en infrastructure.persistence.jpa.adapters, ensambladores en infrastructure.persistence.jpa.assemblers y entidades en infrastructure.persistence.jpa.entities, gobernando la persistencia en PostgreSQL 16. \\*
 \hline
-\textbf{Relaciones} & Realiza interfaces de repositorio del dominio. interactúa directamente con el esquema relacional de la base de datos. \\
+\textbf{Relaciones} & Realiza interfaces de repositorio del dominio e interactúa directamente con el esquema relacional de la base de datos. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} Inbound ACL \& Tenancy Facade} \\*
 \hline
@@ -7662,9 +7774,9 @@ En la @tbl:iam-c4-components se presenta el catálogo estructurado de los ocho c
 \hline
 \textbf{Tecnologías} & Spring Service, Capa Anticorrupción en Memoria \\*
 \hline
-\textbf{Responsabilidad} & Publica una fachada de servicio abierto para que bounded contexts externos consulten la validez de inquilinos, membresías laborales y permisos sin acoplamiento. \\*
+\textbf{Responsabilidad} & Publica una fachada de servicio abierto implementada por TenancyContextFacadeImpl en application.acl, realizando el contrato TenancyContextFacade de interfaces.acl para que bounded contexts externos consulten la validez de inquilinos, membresías laborales y permisos sin acoplamiento. \\*
 \hline
-\textbf{Relaciones} & Invocado por Workshop Operations, HR, CRM, Invoicing y SaaS Billing. delega lecturas en repositorios JPA. \\
+\textbf{Relaciones} & Invocado por Workshop Operations, HR, CRM, Invoicing y SaaS Billing, delega lecturas en repositorios JPA. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} External Gateways \& Outbound Integration} \\*
 \hline
@@ -7672,9 +7784,9 @@ En la @tbl:iam-c4-components se presenta el catálogo estructurado de los ocho c
 \hline
 \textbf{Tecnologías} & Spring RestClient, Google API Client SDK \\*
 \hline
-\textbf{Responsabilidad} & Comunica con pasarelas de nube mediante canales seguros HTTPS en puerto 443, gestionando el despacho de correos transaccionales y la verificación de identidad federada. \\*
+\textbf{Responsabilidad} & Implementado por ResendEmailAdapter en infrastructure.external.resend y GoogleIdentityAdapter en infrastructure.external.google, satisfaciendo los contratos de application.internal.outbound.acl para despacho de correos transaccionales y verificación de identidad federada vía HTTPS en puerto 443. \\*
 \hline
-\textbf{Relaciones} & Invocado por servicios de aplicación. conecta con Resend API y Google Identity Services. \\
+\textbf{Relaciones} & Invocado por servicios de aplicación, conecta con Resend API y Google Identity Services. \\
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
@@ -7693,7 +7805,7 @@ Para comprender la colaboración entre los componentes de IAM & Tenancy y los m�
 - **Ciclo de Autenticación Perimetral y Control de Acceso:**
   Cuando un usuario transmite sus credenciales desde la interfaz web o móvil, el componente **Perimeter Security & Tenancy Filter** intercepta la petición HTTP. Al reconocer una ruta pública de ingreso, la cadena de filtros autoriza el paso hacia el controlador de autenticación en **REST Controllers & Inbound Interface**, el cual valida el contrato de entrada y despacha el comando correspondiente hacia **IAM CQRS Application Services**.
 
-  El servicio de aplicación recupera el usuario mediante **Persistence Repositories & JPA Adapters** y delega en **Security & Cryptographic Services** la verificación de la contraseña mediante el cotejo del hash BCrypt. Comprobada la identidad, se determina el taller activo y se solicita la generación de un token Bearer JWT con los identificadores requeridos y la lista inmutable de permisos autorizados, retornándolo al cliente con estado satisfactorio.
+  El servicio de aplicación recupera el usuario mediante **Persistence Repositories & JPA Adapters** y delega en **Security & Cryptographic Services** la verificación de la contraseña mediante el cotejo del hash BCrypt implementado por **BCryptHashingServiceImpl**. Comprobada la identidad, se determina el taller activo y se solicita la generación de un token Bearer JWT con los identificadores requeridos y la lista inmutable de permisos autorizados a través de **BearerTokenServiceImpl**, retornándolo al cliente con estado satisfactorio.
 
   En solicitudes protegidas subsecuentes, el filtro perimetral extrae el token del encabezado Authorization, verifica la firma criptográfica HMAC-SHA256 en memoria sin consultar la base de datos e inyecta la autenticación en el contexto de seguridad. Adicionalmente, comprueba que el identificador de taller de la ruta coincida con el inquilino autorizado en el token, rechazando intentos de acceso no autorizados entre talleres.
 
@@ -7702,10 +7814,10 @@ Para comprender la colaboración entre los componentes de IAM & Tenancy y los m�
 
   Posteriormente, el servicio instancia la raíz de agregado **Tenant** en el componente **IAM Domain Aggregate Roots & Core Models**, junto con su sucursal inicial validada mediante coordenadas geoespaciales. De manera simultánea, se crea el usuario administrador con contraseña cifrada, se configura el rol con privilegios globales de taller y se materializa la membresía contractual que vincula al usuario con la empresa.
 
-  El componente **Persistence Repositories & JPA Adapters** persiste atómicamente la constelación de entidades en las tablas relacionales de PostgreSQL 16. La raíz de agregado registra el evento de aprovisionamiento en memoria, y el servicio delega en **External Gateways & Outbound Integration** la emisión de un correo electrónico de bienvenida mediante la API REST de Resend a través de HTTPS en el puerto 443, garantizando entrega confiable sin bloqueos de red.
+  El componente **Persistence Repositories & JPA Adapters** persiste atómicamente la constelación de entidades en las tablas relacionales de PostgreSQL 16. La raíz de agregado registra el evento de aprovisionamiento en memoria, y el servicio delega en **External Gateways & Outbound Integration** la emisión de un correo electrónico de bienvenida mediante el adaptador **ResendEmailAdapter** sobre la API REST de Resend a través de HTTPS en el puerto 443, garantizando entrega confiable sin bloqueos de red.
 
 - **Ciclo de Consumo Intercontextual mediante Fachada de Control de Acceso:**
-  Cuando los módulos de operaciones de taller, recursos humanos o facturación requieren verificar la vigencia de una sucursal o los permisos de un operario, no acceden a las tablas de usuarios ni a los repositorios de seguridad. En su lugar, invocan la interfaz en memoria provista por **Inbound ACL & Tenancy Facade**, la cual implementa el patrón de servicio abierto y capa anticorrupción.
+  Cuando los módulos de operaciones de taller, recursos humanos o facturación requieren verificar la vigencia de una sucursal o los permisos de un operario, no acceden a las tablas de usuarios ni a los repositorios de seguridad. En su lugar, invocan la interfaz en memoria provista por **Inbound ACL & Tenancy Facade**, materializada por **TenancyContextFacadeImpl** en la capa de aplicación, la cual implementa el patrón de servicio abierto y capa anticorrupción.
 
   La fachada recibe los identificadores inmutables de consulta y delega en **Persistence Repositories & JPA Adapters** una lectura optimizada de solo lectura. Los datos recuperados se proyectan hacia contratos inmutables del lenguaje publicado, tales como registros de transferencia de datos de inquilino o membresía, los cuales exponen únicamente los atributos pertinentes para la operación solicitada.
 
@@ -7715,7 +7827,7 @@ Para comprender la colaboración entre los componentes de IAM & Tenancy y los m�
 
 En esta sección se profundiza en el nivel de mayor detalle técnico para la arquitectura de software del Bounded Context IAM & Tenancy, trasladando las fronteras conceptuales y las responsabilidades tácticas hacia especificaciones estáticas que guían la codificación de la plataforma. Mediante esta aproximación, se asegura que las reglas de negocio, los contratos de seguridad y el aislamiento multi-inquilino se ejecuten de manera determinista y tipificada.
 
-Esta perspectiva abarca dos representaciones complementarias: el Diagrama de Clases de la Capa de Dominio, que modela las entidades, raíces de agregado, objetos de valor y puertos de persistencia en memoria; y el Diagrama de Base de Datos, que formaliza el esquema físico relacional en PostgreSQL 16 con claves de particionamiento lógico, restricciones de unicidad e integridad referencial.
+Esta perspectiva abarca dos representaciones complementarias: el Diagrama de Clases de la Capa de Dominio, que modela las entidades, raíces de agregado, objetos de valor y puertos de persistencia en memoria, mientras que el Diagrama de Base de Datos formaliza el esquema físico relacional en PostgreSQL 16 con claves de particionamiento lógico, restricciones de unicidad e integridad referencial.
 
 ##### 2.6.2.6.1. *Bounded Context Domain Layer Class Diagrams*
 
@@ -7729,13 +7841,13 @@ En la @fig:class-diagram-iam se expone el Diagrama de Clases UML detallado para 
 
 La organización interna del diagrama se estructura en siete paquetes lógicos que agrupan las responsabilidades del dominio de seguridad:
 
-- **Raíces de Agregado (`iam.domain.model.aggregates`):** Modela las entidades maestras que preservan la consistencia transaccional: **Tenant** para la gestión del taller y sus sedes físicas; **User** para la cuenta universal de usuario; **TenantMembership** para la relación contractual y asignación de roles; **Role** para la definición de privilegios RBAC; e **Invitation** para la incorporación controlada de colaboradores. Todas las raíces heredan de **AbstractDomainAggregateRoot<T>**.
-- **Entidades Internas (`iam.domain.model.entities`):** Define entidades dependientes que carecen de existencia autónoma fuera de su raíz: **Branch** para las sedes operativas del taller; **Profile** para los datos biográficos del usuario; **VerificationToken** para la validación de credenciales efímeras; y **Permission** para privilegios atómicos de autorización.
-- **Identificadores Fuertemente Tipados (`iam.domain.model.ids`):** Implementa la interfaz **TypedId<UUID>** mediante registros inmutables (**BranchId**, **TenantMembershipId**, **RoleId**, **PermissionId**, **InvitationId**), complementando las identidades universales del Shared Kernel (**TenantId**, **UserId**).
-- **Objetos de Valor de Seguridad (`iam.domain.model.valueobjects`):** Encapsula conceptos inmutables como la credencial cifrada (**Password**) y la identidad nominal (**PersonName**), vinculando tipos del Shared Kernel para coordenadas satelitales (**GeoPoint**), identificación tributaria (**TaxId**), mensajería (**EmailAddress**, **PhoneNumber**) y cuantías económicas (**Money**).
-- **Enumeraciones de Dominio (`iam.domain.model.enums`):** Estandariza los estados de ciclo de vida y modalidades operativas (**TenantStatus**, **UserStatus**, **AuthProvider**, **TokenType**, **MembershipStatus**, **SalaryType**, **InvitationStatus**).
-- **Puertos de Persistencia (`iam.domain.repositories`):** Establece contratos de persistencia pura (**TenantRepository**, **UserRepository**, **BranchRepository**, **TenantMembershipRepository**, **RoleRepository**, **PermissionRepository**, **InvitationRepository**) sin dependencias de infraestructura.
-- **Jerarquía de Excepciones Semánticas (`iam.domain.exceptions`):** Provee clases no comprobadas que heredan de **DomainException**, asignando códigos de error legibles por máquina para incidentes de autenticación, unicidad o autorización.
+- **Raíces de Agregado (iam.domain.model.aggregates):** Modela las entidades maestras que preservan la consistencia transaccional: **Tenant** para la gestión del taller y sus sedes físicas, **User** para la cuenta universal de usuario, **TenantMembership** para la relación contractual y asignación de roles, **Role** para la definición de privilegios RBAC, e **Invitation** para la incorporación controlada de colaboradores. Todas las raíces heredan de **AbstractDomainAggregateRoot<T>**.
+- **Entidades Internas (iam.domain.model.entities):** Define entidades dependientes que carecen de existencia autónoma fuera de su raíz: **Branch** para las sedes operativas del taller, **Profile** para los datos biográficos del usuario, **VerificationToken** para la validación de credenciales efímeras, y **Permission** para privilegios atómicos de autorización.
+- **Identificadores Fuertemente Tipados (iam.domain.model.ids):** Implementa la interfaz **TypedId<UUID>** mediante registros inmutables (**BranchId**, **TenantMembershipId**, **RoleId**, **PermissionId**, **InvitationId**), complementando las identidades universales del Shared Kernel (**TenantId**, **UserId**).
+- **Objetos de Valor de Seguridad (iam.domain.model.valueobjects):** Encapsula conceptos inmutables como la credencial cifrada (**Password**) y la identidad nominal (**PersonName**), vinculando tipos del Shared Kernel para coordenadas satelitales (**GeoPoint**), identificación tributaria (**TaxId**), mensajería (**EmailAddress**, **PhoneNumber**) y cuantías económicas (**Money**).
+- **Enumeraciones de Dominio (iam.domain.model.enums):** Estandariza los estados de ciclo de vida y modalidades operativas (**TenantStatus**, **UserStatus**, **AuthProvider**, **TokenType**, **MembershipStatus**, **SalaryType**, **InvitationStatus**).
+- **Puertos de Persistencia (iam.domain.repositories):** Establece contratos de persistencia pura (**TenantRepository**, **UserRepository**, **BranchRepository**, **TenantMembershipRepository**, **RoleRepository**, **PermissionRepository**, **InvitationRepository**) sin dependencias de infraestructura.
+- **Jerarquía de Excepciones Semánticas (iam.domain.exceptions):** Provee clases no comprobadas que heredan de **DomainException**, asignando códigos de error legibles por máquina para incidentes de autenticación, unicidad o autorización.
 
 En la @tbl:iam-domain-classes-members se detalla la especificación formal de atributos, firmas de métodos, modificadores de acceso y reglas de negocio para cada elemento de la Capa de Dominio.
 
@@ -7760,7 +7872,7 @@ Atributos & Raíz de agregado. Administra razón social, RUC y sedes operativas.
 \hline
 \thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
 \hline
-Métodos factoría y estado & Invariantes: estado inicial PENDING. activación sujeta a RUC válido y sede principal. Transiciones semánticas de estado. \\*
+Métodos factoría y estado & Invariantes: estado inicial PENDING, activación sujeta a RUC válido y sede principal. Transiciones semánticas de estado. \\*
 \hline
 \textbf{Firma o Tipo} & - \texttt{Tenant create(...)} \newline - \texttt{void activate()} \newline - \texttt{void suspend(String reason)} \\*
 \hline
@@ -7864,17 +7976,17 @@ Métodos contractuales & Invariantes: compensación monetaria no negativa. Gesti
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} Role} \\*
 \hline
-Atributos & Raíz de agregado de seguridad RBAC. Identificador \texttt{tenantId} nulo indica rol global. Agregación 1 a 1..* con \textbf{Permission}. \\*
+Atributos & Raíz de agregado de seguridad RBAC. Aprovisionado soberanamente por taller con código inmutable de plantilla origen. Agregación 1 a 1..* con \textbf{Permission}. \\*
 \hline
-\textbf{Firma o Tipo} & - \texttt{RoleId id} \newline - \texttt{TenantId tenantId} \newline - \texttt{String name} \newline - \texttt{String description} \newline - \texttt{boolean isSystemRole} \newline - \texttt{Set<\allowbreak Permission>\allowbreak  permissions} \\*
+\textbf{Firma o Tipo} & - \texttt{RoleId id} \newline - \texttt{TenantId tenantId} \newline - \texttt{String code} \newline - \texttt{String name} \newline - \texttt{String description} \newline - \texttt{boolean isSystemRole} \newline - \texttt{Set<\allowbreak Permission>\allowbreak  permissions} \\*
 \hline
 \textbf{Ámbito} & Privado \\
 \hline
 \thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
 \hline
-Métodos operativos & Invariantes: roles predefinidos del sistema son inmutables frente a supresión. Roles locales gestionados por el taller. \\*
+Métodos operativos & Invariantes: roles de fábrica protegidos contra baja pero editables. Permisos mutables mediante actualización masiva o restauración a plantilla estándar. Factorías para aprovisionamiento inicial y roles personalizados. \\*
 \hline
-\textbf{Firma o Tipo} & - \texttt{Role defineTenantRole(...)} \newline - \texttt{Role defineSystemRole(...)} \newline - \texttt{void grantPermission(Permission)} \newline - \texttt{void revokePermission(PermissionId)} \\*
+\textbf{Firma o Tipo} & - \texttt{Role createCustom(...)} \newline - \texttt{Role provisionFromTemplate(...)} \newline - \texttt{void updatePermissions(Set<\allowbreak Permission>\allowbreak )} \newline - \texttt{void resetToTemplate(RoleTemplate)} \newline - \texttt{void grantPermission(Permission)} \newline - \texttt{void revokePermission(PermissionId)} \\*
 \hline
 \textbf{Ámbito} & Público \\
 \hline
@@ -8058,11 +8170,11 @@ A partir de la arquitectura relacional definida en el diagrama de persistencia, 
 \hline
 \textbf{Motor y Producto} & PostgreSQL 16 (API) \\*
 \hline
-\textbf{Propósito y Aislamiento} & Definición de roles de seguridad. Roles de sistema con tenant\_id nulo compartidos. roles personalizados aislados por tenant\_id. \\*
+\textbf{Propósito y Aislamiento} & Definición de roles de seguridad aprovisionados de forma soberana por taller. Todo rol pertenece a un taller específico mediante tenant\_id obligatorio. \\*
 \hline
-\textbf{Columnas Clave y Tipos} & \texttt{id (UUID)}, \texttt{tenant\_id (UUID)}, \texttt{name (VARCHAR)}, \texttt{description (VARCHAR)}, \texttt{is\_system\_role (BOOLEAN)}, auditoría transversal. \\*
+\textbf{Columnas Clave y Tipos} & \texttt{id (UUID)}, \texttt{tenant\_id (UUID NOT NULL)}, \texttt{code (VARCHAR(50))}, \texttt{name (VARCHAR(100))}, \texttt{description (VARCHAR(255))}, \texttt{is\_system\_role (BOOLEAN)}, auditoría transversal. \\*
 \hline
-\textbf{Constraints e Índices} & - PK: pk\_roles (id) \newline - FK: fk\_roles\_tenant\_id con ON DELETE CASCADE \newline - CHECK: chk\_roles\_tenant\_or\_system \newline - Índice B-Tree: idx\_roles\_tenant\_name \\
+\textbf{Constraints e Índices} & - PK: pk\_roles (id) \newline - FK: fk\_roles\_tenant\_id (tenant\_id) con ON DELETE CASCADE \newline - UK: uk\_roles\_tenant\_name (tenant\_id, name) \newline - UK: uk\_roles\_tenant\_code (tenant\_id, code) \newline - Índices B-Tree: idx\_roles\_tenant\_name, idx\_roles\_tenant\_code \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{permissions}} \\*
 \hline
@@ -8088,7 +8200,7 @@ A partir de la arquitectura relacional definida en el diagrama de persistencia, 
 \hline
 \textbf{Motor y Producto} & PostgreSQL 16 (API) \\*
 \hline
-\textbf{Propósito y Aislamiento} & Tabla asociativa que vincula permisos canónicos a roles de sistema o específicos de taller. \\*
+\textbf{Propósito y Aislamiento} & Tabla asociativa que vincula permisos canónicos a roles soberanos o personalizados de taller. \\*
 \hline
 \textbf{Columnas Clave y Tipos} & \texttt{role\_id (UUID)}, \texttt{permission\_id (UUID)}, \texttt{granted\_at (TIMESTAMPTZ).} \\*
 \hline
@@ -8159,19 +8271,21 @@ Dentro del sector automotriz, los talleres mecánicos atienden a dos perfiles de
 
 - **Flotas corporativas (B2B):** Empresas de transporte, distribución, logística o servicios que gestionan decenas o cientos de vehículos comerciales. Para estos clientes corporativos, el sistema requiere registrar la razón social y el número de RUC ante la autoridad tributaria, permitiendo administrar una flota heterogénea con condiciones comerciales preferenciales.
 
-El diseño táctico resuelve estos requisitos mediante la raíz de agregado **Customer**, la cual modela de forma polimórfica a ambos perfiles bajo un estricto aislamiento por taller (**TenantId**). A su vez, el automóvil físico se representa mediante la raíz de agregado global **Vehicle**, cuya existencia es independiente de cualquier taller particular para consolidar una historia clínica automotriz universal. La titularidad sobre las unidades se gobierna a través de la entidad dependiente **VehicleOwnership**, registrando el inicio y cese de custodia sin duplicar registros de chasis ni desvincular diagnósticos históricos.
+El diseño táctico resuelve estos requisitos mediante la raíz de agregado **Customer**, la cual modela de forma polimórfica a ambos perfiles bajo un estricto aislamiento por taller (**TenantId**). A su vez, el automóvil físico se representa mediante la raíz de agregado global **Vehicle**, cuya existencia es independiente de cualquier taller particular para consolidar una historia clínica automotriz universal. La titularidad sobre las unidades se gobierna a través de la entidad dependiente **VehicleOwnership**, implementando una tenencia flexible que vincula los vehículos tanto a clientes comerciales en taller (**CustomerId**) como a conductores registrados en la aplicación móvil (**UserId**), conciliando la custodia al ingresar al taller. Asimismo, las empresas clientes gestionan y delegan la administración de sus flotas a través de la entidad dependiente **CustomerMembership**, asignando roles específicos de administración u operación a los usuarios de la plataforma.
 
 Adicionalmente, el contexto modela la raíz de agregado **Appointment** para coordinar el ingreso ordenado de vehículos a las sedes físicas del taller (**BranchId**). La gestión de citas actúa como la antesala al proceso operativo de MRO, garantizando que la demanda de servicios no sobrepase la capacidad física instalada de bahías ni la disponibilidad de personal técnico en cada sucursal.
 
 #### 2.6.3.1. Domain Layer
 
-La capa de dominio de Customer and Fleet Management encapsula los modelos conceptuales, las invariantes transaccionales de la cartera comercial y las reglas de custodia automotriz sin establecer dependencia con bibliotecas tecnológicas ni motores de persistencia. Residiendo bajo el paquete canónico **com.andeva.atelier.platform.crm.domain**, su diseño táctico se estructura sobre cuatro pilares fundamentales:
+La capa de dominio de Customer and Fleet Management encapsula los modelos conceptuales, las invariantes transaccionales de la cartera comercial y las reglas de custodia automotriz sin establecer dependencia con bibliotecas tecnológicas ni motores de persistencia. Residiendo bajo el paquete canónico **com.andeva.atelier.platform.crm.domain**, su diseño táctico se estructura sobre cinco pilares fundamentales:
 
 - **Aislamiento multi-inquilino de la cartera comercial:** Las fichas comerciales de clientes particulares y corporativos pertenecen a un taller determinado mediante **TenantId**, garantizando la confidencialidad de la base de clientes y la autonomía operativa de cada negocio mecánico adscrito a la plataforma.
 
 - **Parque automotor universal e independiente del taller:** Las unidades vehiculares se modelan como raíces de agregado globales que carecen de **TenantId**. Un automóvil existe en el mundo físico y puede recibir atención en múltiples talleres a lo largo de su ciclo de vida, lo que permite consolidar una hoja clínica técnica y un historial de telemetría continuos e integrados en la nube.
 
-- **Cadena de custodia y trazabilidad temporal:** La relación entre clientes y automóviles se gobierna mediante la entidad dependiente **VehicleOwnership**, registrando fechas formales de inicio y cese de custodia. Este desacoplamiento permite efectuar transferencias de titularidad vehicular sin alterar ni duplicar los historiales mecánicos ni diagnósticos previos.
+- **Cadena de custodia y trazabilidad temporal flexible:** La relación entre clientes o usuarios conductores y automóviles se gobierna mediante la entidad dependiente **VehicleOwnership**, registrando fechas formales de inicio y cese de custodia, con soporte para conciliación de fichas comerciales en taller sin perder la historia técnica previa.
+
+- **Membresías corporativas y delegación de flota B2B:** La entidad dependiente **CustomerMembership** modela la delegación de permisos de empresas clientes hacia usuarios del sistema, habilitando la administración y agendamiento técnico de vehículos corporativos bajo roles definidos.
 
 - **Orquestación del agendamiento y transición operativa hacia MRO:** La raíz de agregado **Appointment** administra la reserva de capacidad en sedes físicas (**BranchId**). Al alcanzar el estado de arribo físico a patio, la cita dispara eventos de dominio que despiertan la generación automática de la orden de trabajo en el contexto operativo.
 
@@ -8208,11 +8322,21 @@ Vehicle & Unidad automotriz física universal. Mantiene placa de rodaje única, 
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
-VehicleOwnership & Vínculo temporal de titularidad y custodia vehicular entre un cliente y un vehículo físico. \\*
+VehicleOwnership & Vínculo temporal de titularidad y custodia vehicular entre un cliente o usuario conductor y un vehículo físico. \\*
 \hline
 \textbf{Categoría} & Entidad Dependiente \\*
 \hline
-\textbf{Relaciones} & Dependiente subordinada a Vehicle. Referencia a VehicleId, CustomerId y fechas de vigencia. \\*
+\textbf{Relaciones} & Dependiente subordinada a Vehicle. Referencia a VehicleId, CustomerId opcional, UserId opcional y fechas de vigencia. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak model.\allowbreak entities} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Customer\allowbreak Membership & Esquema de autorización y delegación para la administración de flotas comerciales B2B. \\*
+\hline
+\textbf{Categoría} & Entidad Dependiente \\*
+\hline
+\textbf{Relaciones} & Dependiente subordinada a Customer. Referencia a CustomerId, UserId, FleetRole y CustomerMembershipStatus. \\*
 \hline
 \textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak model.\allowbreak entities} \\
 \hline
@@ -8234,7 +8358,7 @@ CustomerId & Identificador único universal fuertemente tipado para clientes del
 \hline
 \textbf{Relaciones} & Registro inmutable de identidad basado en UUID. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak model.\allowbreak ids} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
@@ -8244,7 +8368,7 @@ VehicleId & Identificador único universal fuertemente tipado para unidades del 
 \hline
 \textbf{Relaciones} & Registro inmutable de identidad basado en UUID. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak model.\allowbreak ids} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
@@ -8254,7 +8378,17 @@ VehicleOwnershipId & Identificador único universal fuertemente tipado para el r
 \hline
 \textbf{Relaciones} & Registro inmutable de identidad basado en UUID. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak model.\allowbreak ids} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Customer\allowbreak MembershipId & Identificador único universal fuertemente tipado para membresías corporativas de flota. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor (ID) \\*
+\hline
+\textbf{Relaciones} & Registro inmutable de identidad basado en UUID. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak model.\allowbreak ids} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
@@ -8264,7 +8398,7 @@ AppointmentId & Identificador único universal fuertemente tipado para citas pro
 \hline
 \textbf{Relaciones} & Registro inmutable de identidad basado en UUID. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak model.\allowbreak ids} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
@@ -8294,7 +8428,7 @@ CustomerType & Modalidad jurídica y comercial del cliente (INDIVIDUAL, COMPANY)
 \hline
 \textbf{Relaciones} & Utilizada por la raíz de agregado Customer. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak model.\allowbreak enums} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
@@ -8304,7 +8438,27 @@ CustomerStatus & Estados operativos de la ficha del cliente en el taller (ACTIVE
 \hline
 \textbf{Relaciones} & Utilizada por la raíz de agregado Customer. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak model.\allowbreak enums} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+FleetRole & Roles de autorización corporativa en flotas B2B (FLEET\_ADMIN, FLEET\_OPERATOR). \\*
+\hline
+\textbf{Categoría} & Enumeración de Dominio \\*
+\hline
+\textbf{Relaciones} & Empleado por CustomerMembership para definir facultades de administración u operación. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak model.\allowbreak enums} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Customer\allowbreak Membership\allowbreak Status & Estados del ciclo de vida de una delegación corporativa (ACTIVE, SUSPENDED, REVOKED). \\*
+\hline
+\textbf{Categoría} & Enumeración de Dominio \\*
+\hline
+\textbf{Relaciones} & Utilizado por CustomerMembership para controlar la vigencia del acceso a la flota. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak model.\allowbreak enums} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
@@ -8314,7 +8468,7 @@ EngineType & Tipología de motorización electromecánica del vehículo (GASOLIN
 \hline
 \textbf{Relaciones} & Utilizada por la raíz de agregado Vehicle. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak model.\allowbreak enums} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
@@ -8324,7 +8478,7 @@ AppointmentStatus & Estados del ciclo de vida de la cita técnica (PENDING, CONF
 \hline
 \textbf{Relaciones} & Utilizada por la raíz de agregado Appointment. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak model.\allowbreak enums} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
@@ -8373,6 +8527,16 @@ Vehicle\allowbreak Ownership\allowbreak Repository & Contrato de persistencia y 
 \textbf{Categoría} & Puerto de Salida \\*
 \hline
 \textbf{Relaciones} & Implementado en la capa de infraestructura. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Customer\allowbreak Membership\allowbreak Repository & Contrato de persistencia agnóstico para la entidad de membresía corporativa de flota. \\*
+\hline
+\textbf{Categoría} & Puerto de Persistencia \\*
+\hline
+\textbf{Relaciones} & Define operaciones de almacenamiento y recuperación de CustomerMembership. \\*
 \hline
 \textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak domain.\allowbreak repositories} \\
 \hline
@@ -8527,7 +8691,7 @@ type & Naturaleza jurídica del cliente (INDIVIDUAL o COMPANY). \\*
 \hline
 \thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
 \hline
-name & Nombres y apellidos estructurados (obligatorio en INDIVIDUAL; nulo en COMPANY). \\*
+name & Nombres y apellidos estructurados (obligatorio en INDIVIDUAL y nulo en COMPANY). \\*
 \hline
 \textbf{Tipo o Firma} & \texttt{PersonName} \\*
 \hline
@@ -8535,7 +8699,7 @@ name & Nombres y apellidos estructurados (obligatorio en INDIVIDUAL; nulo en COM
 \hline
 \thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
 \hline
-companyName & Razón social o denominación comercial (obligatorio en COMPANY; nulo en INDIVIDUAL). \\*
+companyName & Razón social o denominación comercial (obligatorio en COMPANY y nulo en INDIVIDUAL). \\*
 \hline
 \textbf{Tipo o Firma} & \texttt{String} \\*
 \hline
@@ -8575,7 +8739,7 @@ status & Estado operativo de la ficha del cliente en el taller (ACTIVE o INACTIV
 \hline
 \thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
 \hline
-registerIndividual & Factoría para personas naturales; valida invariantes y emite CustomerRegisteredEvent. \\*
+registerIndividual & Factoría para personas naturales, valida invariantes y emite CustomerRegisteredEvent. \\*
 \hline
 \textbf{Tipo o Firma} & \texttt{static Customer registerIndividual(TenantId t,\allowbreak  PersonName n,\allowbreak  TaxId x,\allowbreak  EmailAddress e,\allowbreak  PhoneNumber p)} \\*
 \hline
@@ -8583,7 +8747,7 @@ registerIndividual & Factoría para personas naturales; valida invariantes y emi
 \hline
 \thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
 \hline
-registerCompany & Factoría para flotas corporativas con RUC validado; emite CustomerRegisteredEvent. \\*
+registerCompany & Factoría para flotas corporativas con RUC validado y emite CustomerRegisteredEvent. \\*
 \hline
 \textbf{Tipo o Firma} & \texttt{static Customer registerCompany(TenantId t,\allowbreak  String comp,\allowbreak  TaxId x,\allowbreak  EmailAddress e,\allowbreak  PhoneNumber p)} \\*
 \hline
@@ -8599,7 +8763,7 @@ updateContact & Actualiza los canales de contacto exigiendo al menos un medio de
 \hline
 \thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
 \hline
-updateProfile & Actualiza nombres y apellidos; admisible exclusivamente en clientes de tipo INDIVIDUAL. \\*
+updateProfile & Actualiza nombres y apellidos, admisible exclusivamente en clientes de tipo INDIVIDUAL. \\*
 \hline
 \textbf{Tipo o Firma} & \texttt{void updateProfile(PersonName newName)} \\*
 \hline
@@ -8607,7 +8771,7 @@ updateProfile & Actualiza nombres y apellidos; admisible exclusivamente en clien
 \hline
 \thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
 \hline
-updateCompanyDetails & Actualiza la denominación comercial; admisible exclusivamente en clientes de tipo COMPANY. \\*
+updateCompanyDetails & Actualiza la denominación comercial, admisible exclusivamente en clientes de tipo COMPANY. \\*
 \hline
 \textbf{Tipo o Firma} & \texttt{void updateCompanyDetails(String newCompanyName)} \\*
 \hline
@@ -8728,9 +8892,25 @@ ownershipHistory & Colección histórica de propietarios que han poseído o cust
 \hline
 \thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
 \hline
-register & Factoría que matricula el vehículo, crea la titularidad activa y emite evento. \\*
+register & Factoría que matricula el vehículo, crea la titularidad activa admitiendo CustomerId o UserId y emite evento. \\*
 \hline
-\textbf{Tipo o Firma} & \texttt{static Vehicle register(LicensePlate p,\allowbreak  Vin v,\allowbreak  String b,\allowbreak  String m,\allowbreak  int y,\allowbreak  EngineType e,\allowbreak  CustomerId o)} \\*
+\textbf{Tipo o Firma} & \texttt{static Vehicle register(LicensePlate p,\allowbreak  Vin v,\allowbreak  String b,\allowbreak  String m,\allowbreak  int y,\allowbreak  EngineType e,\allowbreak  Optional<CustomerId> o,\allowbreak  Optional<UserId> u)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+linkCustomer & Asocia la ficha de cliente en taller al registro de titularidad vigente originado desde la app móvil. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void linkCustomer(CustomerId customerId)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+getCurrentUserId & Retorna el identificador del conductor que ostenta la custodia vigente si existe. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Optional<\allowbreak UserId>\allowbreak  getCurrentUserId()} \\*
 \hline
 \textbf{Ámbito de Acceso} & Público \\
 \hline
@@ -8784,9 +8964,17 @@ vehicleId & Identificador del vehículo físico asociado a este período de cust
 \hline
 \thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
 \hline
-customerId & Identificador del cliente propietario durante el lapso de vigencia. \\*
+customerId & Identificador del cliente propietario durante el lapso de vigencia (opcional si proviene de la app móvil). \\*
 \hline
-\textbf{Tipo o Firma} & \texttt{CustomerId} \\*
+\textbf{Tipo o Firma} & \texttt{Optional<\allowbreak CustomerId>\allowbreak } \\*
+\hline
+\textbf{Ámbito de Acceso} & Privado \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+userId & Identificador del usuario conductor registrado en la app móvil (opcional si proviene de registro en taller). \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{Optional<\allowbreak UserId>\allowbreak } \\*
 \hline
 \textbf{Ámbito de Acceso} & Privado \\
 \hline
@@ -8800,7 +8988,7 @@ startDate & Fecha de adquisición o inicio de custodia en la red del taller mec�
 \hline
 \thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
 \hline
-endDate & Fecha de enajenación o fin de custodia (nula si es el propietario actual). \\*
+endDate & Fecha de enajenación o fin de custodia (nula si es el custodio actual). Invariante: customerId o userId presente. \\*
 \hline
 \textbf{Tipo o Firma} & \texttt{LocalDate} \\*
 \hline
@@ -8819,6 +9007,30 @@ isCurrent & Comprueba si el registro corresponde a la titularidad vigente (endDa
 terminate & Fija la fecha de finalización exigiendo que sea posterior o igual a startDate. \\*
 \hline
 \textbf{Tipo o Firma} & \texttt{void terminate(LocalDate terminationDate)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+linkCustomer & Concilia la titularidad enlazando la ficha del cliente en taller, exigiendo titular previo nulo y vigencia activa. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{void linkCustomer(CustomerId newCustomerId)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+isOwnedByCustomer & Verifica si el registro de titularidad corresponde al cliente provisto. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{boolean isOwnedByCustomer(CustomerId customerId)} \\*
+\hline
+\textbf{Ámbito de Acceso} & Público \\
+\hline
+\thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+isOwnedByUser & Verifica si el registro de titularidad corresponde al usuario conductor provisto. \\*
+\hline
+\textbf{Tipo o Firma} & \texttt{boolean isOwnedByUser(UserId userId)} \\*
 \hline
 \textbf{Ámbito de Acceso} & Público \\
 \hline
@@ -8979,7 +9191,7 @@ Para erradicar la obsesión por tipos primitivos y resguardar la inmutabilidad d
 
 - **Especificaciones automotrices tipadas**: El objeto de valor **LicensePlate** normaliza automáticamente las matrículas vehiculares suprimiendo espacios o guiones y transformando el texto a mayúsculas, validando su sintaxis contra los patrones oficiales del Ministerio de Transportes y Comunicaciones (MTC). Por su parte, **Vin** encapsula el número de chasis internacional conforme al estándar ISO 3779, verificando una longitud exacta de 17 caracteres alfanuméricos y vetando caracteres ambiguos.
 
-- **Enumeraciones de control**: Las enumeraciones **CustomerType** y **CustomerStatus** regulan la personería jurídica y la viabilidad comercial del cliente; **EngineType** clasifica las variantes de tren motriz vehicular; y **AppointmentStatus** gobierna los estados secuenciales de agendamiento en taller.
+- **Enumeraciones de control**: Las enumeraciones **CustomerType** y **CustomerStatus** regulan la personería jurídica y la viabilidad comercial del cliente, **EngineType** clasifica las variantes de tren motriz vehicular y **AppointmentStatus** gobierna los estados secuenciales de agendamiento en taller.
 
 En la @tbl:crm-value-objects se especifican los objetos de valor y enumeraciones propios de este contexto.
 
@@ -9018,6 +9230,12 @@ En la @tbl:crm-value-objects se especifican los objetos de valor y enumeraciones
 \hline
 \textbf{Restricciones y Reglas} & Identificador unívoco universal de cita técnica de taller. no nulo. \\
 \hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} CustomerMembershipId} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{value: UUID} \\*
+\hline
+\textbf{Restricciones y Reglas} & Identificador unívoco universal de membresía corporativa de flota. no nulo. \\
+\hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} LicensePlate} \\*
 \hline
 \textbf{Atributos Clave} & \texttt{value: String} \\*
@@ -9041,6 +9259,18 @@ En la @tbl:crm-value-objects se especifican los objetos de valor y enumeraciones
 \textbf{Valores Admisibles} & \texttt{ACTIVE}, \texttt{INACTIVE} \\*
 \hline
 \textbf{Restricciones y Reglas} & Estados operativos de la ficha comercial del cliente en el taller mecánico. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Enumeración de Dominio:} FleetRole} \\*
+\hline
+\textbf{Valores Admisibles} & \texttt{FLEET\_ADMIN}, \texttt{FLEET\_OPERATOR} \\*
+\hline
+\textbf{Restricciones y Reglas} & Roles de gestión y operación delegada sobre flotas automotrices corporativas B2B. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Enumeración de Dominio:} CustomerMembershipStatus} \\*
+\hline
+\textbf{Valores Admisibles} & \texttt{ACTIVE}, \texttt{SUSPENDED}, \texttt{REVOKED} \\*
+\hline
+\textbf{Restricciones y Reglas} & Estados del ciclo de vida de la membresía y autorización corporativa en una flota B2B. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Enumeración de Dominio:} EngineType} \\*
 \hline
@@ -9134,9 +9364,15 @@ En la @tbl:crm-repository-ports se detallan las operaciones provistas por estos 
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Repositorio:} VehicleOwnershipRepository} \\*
 \hline
-\textbf{Métodos Principales} & - \texttt{save} \newline - \texttt{findByVehicleId} \newline - \texttt{findActiveOwnershipByVehicleId} \\*
+\textbf{Métodos Principales} & - \texttt{save} \newline - \texttt{findByVehicleId} \newline - \texttt{findActiveOwnershipByVehicleId} \newline - \texttt{findByUserIdAndEndDateIsNull} \\*
 \hline
 \textbf{Responsabilidad de Dominio} & Trazabilidad y recuperación histórica de la cadena de custodia y titularidad vehicular. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Repositorio:} CustomerMembershipRepository} \\*
+\hline
+\textbf{Métodos Principales} & - \texttt{save} \newline - \texttt{findById} \newline - \texttt{findByCustomerIdAndUserId} \newline - \texttt{findByCustomerId} \newline - \texttt{findByUserIdAndStatus} \newline - \texttt{existsByCustomerIdAndUserIdAndStatus} \\*
+\hline
+\textbf{Responsabilidad de Dominio} & Persistencia de membresías corporativas, verificación de unicidad de delegación y consulta de flotas por usuario o cliente. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Repositorio:} AppointmentRepository} \\*
 \hline
@@ -9233,11 +9469,11 @@ En la @tbl:crm-domain-events se sintetiza la taxonomía de eventos de dominio de
 
 El resguardo de las invariantes y el tratamiento predecible de anomalías de negocio se articula mediante excepciones semánticas fuertemente tipadas que extienden de **DomainException**. Al detectarse la vulneración de una condición de consistencia, la capa de dominio interrumpe la operación arrojando una de estas anomalías, las cuales son capturadas en los servicios de aplicación y transformadas en resultados de fallo tipados **Result.Failure** o formateadas bajo el estándar de problemas RFC 7807:
 
-- **Anomalías de clientes**: **CustomerNotFoundException** ante identificadores o documentos inexistentes en el taller; **CustomerAlreadyExistsException** si se intenta duplicar un documento tributario en la misma empresa; **CustomerInactiveException** ante intentos de operar comercialmente con una ficha dada de baja.
+- **Anomalías de clientes**: **CustomerNotFoundException** ante identificadores o documentos inexistentes en el taller, **CustomerAlreadyExistsException** si se intenta duplicar un documento tributario en la misma empresa y **CustomerInactiveException** ante intentos de operar comercialmente con una ficha dada de baja.
 
-- **Anomalías de parque automotor y custodia**: **VehicleNotFoundException** ante unidades no catalogadas; **VehicleAlreadyExistsException** si la matrícula vehicular ya se encuentra registrada en el sistema; **InvalidLicensePlateException** e **InvalidVinException** si las cadenas suministradas no satisfacen los formatos oficiales MTC e ISO 3779; **VehicleActiveOwnershipNotFoundException** si el automóvil carece de un titular activo; **VehicleHasOpenWorkOrdersException** al intentar transferir un vehículo que mantiene órdenes de trabajo activas en taller.
+- **Anomalías de parque automotor y custodia**: **VehicleNotFoundException** ante unidades no catalogadas, **VehicleAlreadyExistsException** si la matrícula vehicular ya se encuentra registrada en el sistema, **InvalidLicensePlateException** e **InvalidVinException** si las cadenas suministradas no satisfacen los formatos oficiales MTC e ISO 3779, **VehicleActiveOwnershipNotFoundException** si el automóvil carece de un titular activo y **VehicleHasOpenWorkOrdersException** al intentar transferir un vehículo que mantiene órdenes de trabajo activas en taller.
 
-- **Anomalías de agendamiento**: **AppointmentNotFoundException** ante citas inexistentes; **AppointmentSlotUnavailableException** si la sucursal ha alcanzado el aforo máximo de recepción técnica; **AppointmentInvalidStateTransitionException** ante mutaciones incompatibles con la máquina de estados; **AppointmentAlreadyArrivedException** si se pretende cancelar o reprogramar una cita ya ingresada a taller; **AppointmentPastDateException** si se intenta programar una reserva en una marca temporal pretérita.
+- **Anomalías de agendamiento**: **AppointmentNotFoundException** ante citas inexistentes, **AppointmentSlotUnavailableException** si la sucursal ha alcanzado el aforo máximo de recepción técnica, **AppointmentInvalidStateTransitionException** ante mutaciones incompatibles con la máquina de estados, **AppointmentAlreadyArrivedException** si se pretende cancelar o reprogramar una cita ya ingresada a taller y **AppointmentPastDateException** si se intenta programar una reserva en una marca temporal pretérita.
 
 En la @tbl:crm-domain-exceptions se sintetiza la jerarquía de excepciones de dominio y sus códigos de error semánticos asociados.
 
@@ -9369,13 +9605,23 @@ AppointmentsController & Endpoints REST para reserva, confirmación, registro de
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
+Customer\allowbreak Memberships\allowbreak Controller & Endpoints REST para gestión de miembros, invitaciones corporativas y delegación de roles de flota. \\*
+\hline
+\textbf{Categoría} & Controlador REST \\*
+\hline
+\textbf{Relaciones} & Invoca CustomerMembershipCommandService y CustomerMembershipQueryService. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak rest.\allowbreak controllers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
 Create\allowbreak Individual\allowbreak Customer\allowbreak Resource & Carga útil inmutable para registro de clientes persona natural con DNI y datos de contacto. \\*
 \hline
 \textbf{Categoría} & Recurso de Petición \\*
 \hline
 \textbf{Relaciones} & Mapeado por RegisterCustomerCommandFromResourceAssembler. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -9385,7 +9631,7 @@ Create\allowbreak Company\allowbreak Customer\allowbreak Resource & Carga útil 
 \hline
 \textbf{Relaciones} & Mapeado por RegisterCustomerCommandFromResourceAssembler. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -9395,7 +9641,7 @@ Update\allowbreak Customer\allowbreak Contact\allowbreak Resource & Carga útil 
 \hline
 \textbf{Relaciones} & Mapeado por UpdateCustomerContactCommandFromResourceAssembler. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -9405,7 +9651,7 @@ Create\allowbreak Vehicle\allowbreak Resource & Carga útil para incorporación 
 \hline
 \textbf{Relaciones} & Mapeado por RegisterVehicleCommandFromResourceAssembler. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -9415,7 +9661,7 @@ Transfer\allowbreak Vehicle\allowbreak Ownership\allowbreak Resource & Carga út
 \hline
 \textbf{Relaciones} & Mapeado por TransferVehicleOwnershipCommandFromResourceAssembler. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -9425,7 +9671,7 @@ Schedule\allowbreak Appointment\allowbreak Resource & Carga útil para reserva d
 \hline
 \textbf{Relaciones} & Mapeado por ScheduleAppointmentCommandFromResourceAssembler. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -9435,7 +9681,7 @@ Reschedule\allowbreak Appointment\allowbreak Resource & Carga útil para reprogr
 \hline
 \textbf{Relaciones} & Mapeado por RescheduleAppointmentCommandFromResourceAssembler. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -9449,13 +9695,23 @@ Cancel\allowbreak Appointment\allowbreak Resource & Carga útil con motivo expl�
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
+Invite\allowbreak Customer\allowbreak Member\allowbreak Resource & Contrato DTO para invitar y asignar roles de administración u operación a un usuario en una flota B2B. \\*
+\hline
+\textbf{Categoría} & Recurso de Petición \\*
+\hline
+\textbf{Relaciones} & Recibido en endpoints de delegación corporativa de CustomerMembershipsController. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
 CustomerResource & Representación inmutable de la ficha comercial de cliente con denominación resuelta y estado. \\*
 \hline
 \textbf{Categoría} & Recurso de Respuesta \\*
 \hline
 \textbf{Relaciones} & Producido por CustomerResourceFromAggregateAssembler. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -9465,7 +9721,7 @@ VehicleResource & Representación inmutable de la ficha técnica de un automóvi
 \hline
 \textbf{Relaciones} & Producido por VehicleResourceFromAggregateAssembler. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -9475,7 +9731,7 @@ VehicleOwnershipResource & Representación inmutable de un segmento temporal de 
 \hline
 \textbf{Relaciones} & Producido por VehicleOwnershipResourceFromEntityAssembler. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -9484,6 +9740,16 @@ AppointmentResource & Representación inmutable de una cita técnica con nombres
 \textbf{Categoría} & Recurso de Respuesta \\*
 \hline
 \textbf{Relaciones} & Producido por AppointmentResourceFromAggregateAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Customer\allowbreak Membership\allowbreak Resource & Representación pública de una membresía corporativa activa, suspendida o revocada en una flota. \\*
+\hline
+\textbf{Categoría} & Recurso de Respuesta \\*
+\hline
+\textbf{Relaciones} & Retornado por CustomerMembershipsController en consultas y mutaciones de delegación. \\*
 \hline
 \textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
 \hline
@@ -9499,13 +9765,13 @@ Customer\allowbreak Fleet\allowbreak Context\allowbreak Facade & Interfaz públi
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
-Customer\allowbreak Fleet\allowbreak Context\allowbreak FacadeImpl & Implementación de la fachada que consulta repositorios y preserva la pureza de los agregados. \\*
+Customer\allowbreak Fleet\allowbreak Context\allowbreak FacadeImpl & Implementación de la fachada en application.acl que consulta repositorios y preserva la pureza de los agregados. \\*
 \hline
 \textbf{Categoría} & Implementación ACL \\*
 \hline
 \textbf{Relaciones} & Implementa CustomerFleetContextFacade desacoplando el modelo interno. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak interfaces.\allowbreak acl} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak acl} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -9559,19 +9825,19 @@ Appointment\allowbreak Arrived\allowbreak Integration\allowbreak Event & Notific
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-*Nota.* Componentes pertenecientes al paquete canónico com.andeva.atelier.platform.crm.interfaces.
+*Nota.* Componentes pertenecientes al paquete canónico com.andeva.atelier.platform.crm.interfaces (con implementación de fachada en application.acl).
 
 A continuación, se profundiza en la especificación a manera de diccionario de cada una de las clases, controladores, contratos DTO y ensambladores que conforman esta capa.
 
 **Controladores REST y Endpoints de Comunicación**
 
-La exposición perimetral de los servicios web se organiza en tres controladores anotados con `@RestController`, delimitando con precisión las fronteras operativas del dominio:
+La exposición perimetral de los servicios web se organiza en tres controladores anotados con @RestController, delimitando con precisión las fronteras operativas del dominio:
 
-- **CustomersController**: Centraliza la administración de la cartera comercial del taller automotriz bajo la ruta base `/api/v1/customers`. Provee rutas semánticamente diferenciadas para el alta de personas naturales (`/individuals`) y empresas de flotas (`/companies`), evitando estructuras polimórficas ambiguas. Asimismo, implementa endpoints para la consulta paginada de clientes filtrada por taller, la inspección detallada por identificador, la actualización idempotente de canales de contacto directo y el listado del parque vehicular bajo titularidad activa del cliente.
+- **CustomersController**: Centraliza la administración de la cartera comercial del taller automotriz bajo la ruta base /api/v1/customers. Provee rutas semánticamente diferenciadas para el alta de personas naturales (/individuals) y empresas de flotas (/companies), evitando estructuras polimórficas ambiguas. Asimismo, implementa endpoints para la consulta paginada de clientes filtrada por taller, la inspección detallada por identificador, la actualización idempotente de canales de contacto directo y el listado del parque vehicular bajo titularidad activa del cliente.
 
-- **VehiclesController**: Expone las operaciones vinculadas al parque automotor global bajo `/api/v1/vehicles`. Gestiona el alta técnica de automóviles validando la placa de rodaje y el número de chasis ISO 3779, la consulta técnica por identificador único y la búsqueda por placa normalizada. Para modelar el cambio de custodio sin recurrir a verbos en las rutas, implementa el traspaso de propiedad mediante la creación de un nuevo recurso de custodia bajo `/api/v1/vehicles/{vehicleId}/ownerships`, permitiendo adicionalmente consultar la trazabilidad cronológica de dueños pasados y vigentes.
+- **VehiclesController**: Expone las operaciones vinculadas al parque automotor global bajo /api/v1/vehicles. Gestiona el alta técnica de automóviles validando la placa de rodaje y el número de chasis ISO 3779, la consulta técnica por identificador único y la búsqueda por placa normalizada. Para modelar el cambio de custodio sin recurrir a verbos en las rutas, implementa el traspaso de propiedad mediante la creación de un nuevo recurso de custodia bajo /api/v1/vehicles/{vehicleId}/ownerships, permitiendo adicionalmente consultar la trazabilidad cronológica de dueños pasados y vigentes.
 
-- **AppointmentsController**: Gobierna el agendamiento y la máquina de estados de las citas previas bajo `/api/v1/appointments`. Ofrece la reserva de atenciones técnicas en sedes físicas, la búsqueda de citas filtradas por sucursal, fecha y estado, y la inspección individual de cada solicitud. Asimismo, expone endpoints de acción mediante peticiones POST para materializar transiciones de estado explícitas con efectos colaterales, tales como la confirmación formal de la cita, el registro de arribo físico a recepción (haciendo que el módulo de operaciones abra automáticamente la orden de trabajo), la reprogramación temporal y la anulación con justificación obligatoria.
+- **AppointmentsController**: Gobierna el agendamiento y la máquina de estados de las citas previas bajo /api/v1/appointments. Ofrece la reserva de atenciones técnicas en sedes físicas, la búsqueda de citas filtradas por sucursal, fecha y estado, y la inspección individual de cada solicitud. Asimismo, expone endpoints de acción mediante peticiones POST para materializar transiciones de estado explícitas con efectos colaterales, tales como la confirmación formal de la cita, el registro de arribo físico a recepción (haciendo que el módulo de operaciones abra automáticamente la orden de trabajo), la reprogramación temporal y la anulación con justificación obligatoria.
 
 En la @tbl:crm-controllers-and-endpoints se detallan los controladores REST, rutas, verbos HTTP y tipos de respuesta asociados.
 
@@ -9634,6 +9900,10 @@ En la @tbl:crm-controllers-and-endpoints se detallan los controladores REST, rut
 \hline
 \textbf{Petición:} Variable de ruta (\texttt{vehicleId}) & \textbf{Respuesta:} 200 OK (\texttt{List\textless VehicleOwnershipResource\textgreater}) \\
 \hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak vehicles/\allowbreak my-vehicles}} \\*
+\hline
+\textbf{Petición:} Ninguno (extrae \texttt{userId} del token JWT) & \textbf{Respuesta:} 200 OK (\texttt{List\textless VehicleResource\textgreater}) \\
+\hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Controlador REST:} AppointmentsController} \\*
 \hline
 \multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak appointments}} \\*
@@ -9664,6 +9934,20 @@ En la @tbl:crm-controllers-and-endpoints se detallan los controladores REST, rut
 \hline
 \textbf{Petición:} \texttt{CancelAppointmentResource} & \textbf{Respuesta:} 200 OK (\texttt{AppointmentResource}) \\
 \hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Controlador REST:} CustomerMembershipsController} \\*
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak customers/\allowbreak \{customerId\}/\allowbreak members}} \\*
+\hline
+\textbf{Petición:} Variable de ruta (\texttt{customerId}) & \textbf{Respuesta:} 200 OK (\texttt{List\textless CustomerMembershipResource\textgreater}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak customers/\allowbreak \{customerId\}/\allowbreak members}} \\*
+\hline
+\textbf{Petición:} \texttt{InviteCustomerMemberResource} & \textbf{Respuesta:} 201 CREATED (\texttt{CustomerMembershipResource}) \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{DELETE} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak customers/\allowbreak \{customerId\}/\allowbreak members/\allowbreak \{membershipId\}}} \\*
+\hline
+\textbf{Petición:} Variables de ruta (\texttt{customerId}, \texttt{membershipId}) & \textbf{Respuesta:} 204 NO CONTENT \\
+\hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
 *Nota.* Controladores REST ubicados en com.andeva.atelier.platform.crm.interfaces.rest.controllers.
@@ -9676,7 +9960,7 @@ Para impedir la exposición directa de las entidades de persistencia y garantiza
 
 Los recursos de petición incorporan restricciones de integridad declarativas mediante anotaciones de Jakarta Bean Validation. Componentes como **CreateIndividualCustomerResource**, **CreateCompanyCustomerResource**, **CreateVehicleResource** y **ScheduleAppointmentResource** comprueban de forma defensiva la no vaciedad de cadenas, la conformidad de documentos de identidad con estándares nacionales (DNI de 8 dígitos y RUC de 11 dígitos), la estructura de placas vehiculares, el cumplimiento de la norma ISO 3779 para números VIN y marcas temporales en tiempo futuro para citas antes de alcanzar los servicios de aplicación.
 
-Por su parte, los recursos de respuesta encapsulan las cargas útiles entregadas a las aplicaciones cliente mediante estructuras estables y optimizadas. Destacan **CustomerResource**, portador del estado comercial y nombre resuelto del cliente; **VehicleResource**, que expone la ficha técnica del vehículo junto con la identidad de su titular vigente; **VehicleOwnershipResource**, representativo del periodo de custodia; y **AppointmentResource**, que provee los metadatos consolidados de la cita para facilitar su renderización en paneles web y dispositivos móviles.
+Por su parte, los recursos de respuesta encapsulan las cargas útiles entregadas a las aplicaciones cliente mediante estructuras estables y optimizadas. Entre ellos destacan **CustomerResource**, portador del estado comercial y nombre resuelto del cliente, junto con **VehicleResource**, que expone la ficha técnica del vehículo y la identidad de su titular vigente. Asimismo, se integran **VehicleOwnershipResource**, representativo del periodo de custodia, y **AppointmentResource**, que provee los metadatos consolidados de la cita para facilitar su renderización en paneles web y dispositivos móviles.
 
 En la @tbl:crm-resources-dtos se especifican los atributos y restricciones de validación de estos recursos DTO.
 
@@ -9711,9 +9995,9 @@ En la @tbl:crm-resources-dtos se especifican los atributos y restricciones de va
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} CreateVehicleResource \quad (\textit{Categoría:} Petición)} \\*
 \hline
-\textbf{Atributos Principales} & \texttt{plate}, \texttt{vin}, \texttt{brand}, \texttt{model}, \texttt{year}, \texttt{engineType}, \texttt{initialOwnerId} \\*
+\textbf{Atributos Principales} & \texttt{plate}, \texttt{vin}, \texttt{brand}, \texttt{model}, \texttt{year}, \texttt{engineType}, \texttt{initialOwnerId}, \texttt{userId} \\*
 \hline
-\textbf{Validación de Integridad} & Anotaciones \texttt{@NotBlank}, patrón placa alfanumérica, VIN ISO 3779, \texttt{@Min(1950)} y \texttt{@NotNull}. \\
+\textbf{Validación de Integridad} & Anotaciones \texttt{@NotBlank}, patrón placa alfanumérica, VIN ISO 3779, \texttt{@Min(1950)} y al menos un titular entre \texttt{initialOwnerId} o \texttt{userId}. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} TransferVehicleOwnershipResource \quad (\textit{Categoría:} Petición)} \\*
 \hline
@@ -9739,6 +10023,12 @@ En la @tbl:crm-resources-dtos se especifican los atributos y restricciones de va
 \hline
 \textbf{Validación de Integridad} & Anotaciones \texttt{@NotBlank} y \texttt{@Size(min = 5, max = 250)} para justificación de cancelación. \\
 \hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} InviteCustomerMemberResource \quad (\textit{Categoría:} Petición)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{userId}, \texttt{role} \\*
+\hline
+\textbf{Validación de Integridad} & Anotaciones \texttt{@NotNull} en identificador de usuario delegado y rol corporativo \texttt{FleetRole}. \\
+\hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} CustomerResource \quad (\textit{Categoría:} Respuesta)} \\*
 \hline
 \textbf{Atributos Principales} & \texttt{id}, \texttt{tenantId}, \texttt{type}, \texttt{displayName}, \texttt{taxId}, \texttt{email}, \texttt{phone}, \texttt{status}, \texttt{createdAt} \\*
@@ -9763,9 +10053,15 @@ En la @tbl:crm-resources-dtos se especifican los atributos y restricciones de va
 \hline
 \textbf{Validación de Integridad} & Ficha operativa de cita previa con nombres y placas resueltos para visualización cliente. \\
 \hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} CustomerMembershipResource \quad (\textit{Categoría:} Respuesta)} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{id}, \texttt{customerId}, \texttt{userId}, \texttt{role}, \texttt{status}, \texttt{createdAt} \\*
+\hline
+\textbf{Validación de Integridad} & Proyección inmutable de delegación corporativa para interfaces de gestión de flotas y control de acceso. \\
+\hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-*Nota.* Componentes ubicados en el paquete com.andeva.atelier.platform.crm.interfaces.rest.resources.
+*Nota.* Recursos DTO segregados en los paquetes com.andeva.atelier.platform.crm.interfaces.rest.resources.requests y responses.
 
 **Ensambladores y Transformadores de Recursos**
 
@@ -9915,6 +10211,18 @@ En la @tbl:crm-customer-fleet-facade se especifican los métodos y tipos de la f
 \hline
 \textbf{Módulos Consumidores} & Workshop Operations (MRO registro de ingreso físico a bahía) \\
 \hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método de Fachada:} \texttt{fetchActiveMembershipsByUserId}} \\*
+\hline
+\textbf{Parámetros y Retorno} & \texttt{UUID userId} $\longrightarrow$ \texttt{List<\allowbreak CustomerMembershipAclDto>\allowbreak } \\*
+\hline
+\textbf{Módulos Consumidores} & Atelier Business (Portal B2B), IAM (Resolución de permisos de flota), Workshop Operations \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método de Fachada:} \texttt{hasFleetRole}} \\*
+\hline
+\textbf{Parámetros y Retorno} & \texttt{UUID customerId,\allowbreak  UUID userId,\allowbreak  String requiredRole} $\longrightarrow$ \texttt{boolean} \\*
+\hline
+\textbf{Módulos Consumidores} & Security Filter (Autorización en endpoints de flota), Workshop Operations (Validación técnica) \\
+\hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
 *Nota.* Componentes pertenecientes al paquete com.andeva.atelier.platform.crm.interfaces.acl.
@@ -9923,7 +10231,7 @@ En la @tbl:crm-customer-fleet-facade se especifican los métodos y tipos de la f
 
 Para la sincronización reactiva e intermodular sin acoplamiento temporal ni dependencias de persistencia directa, el Bounded Context CRM define un lenguaje publicado conformado por cinco eventos de integración inmutables.
 
-Estos eventos notifican hitos sustanciales del ciclo de vida del negocio: **CustomerCreatedIntegrationEvent** permite a Facturación Electrónica precargar perfiles fiscales de clientes; **VehicleRegisteredIntegrationEvent** y **VehicleOwnershipTransferredIntegrationEvent** posibilitan a IoT Telemetry provisionar dispositivos OBD2 y reasignar privilegios telemétricos hacia la aplicación móvil del nuevo custodio; finalmente, **AppointmentScheduledIntegrationEvent** y **AppointmentArrivedIntegrationEvent** informan a Workshop Operations sobre la demanda esperada y desencadenan la apertura de órdenes de trabajo preliminares ante la llegada física del automóvil.
+Estos eventos notifican hitos sustanciales del ciclo de vida del negocio. Por un lado, **CustomerCreatedIntegrationEvent** permite a Facturación Electrónica precargar perfiles fiscales de clientes. En el ámbito telemétrico, **VehicleRegisteredIntegrationEvent** y **VehicleOwnershipTransferredIntegrationEvent** posibilitan a IoT Telemetry provisionar dispositivos OBD2 y reasignar privilegios telemétricos hacia la aplicación móvil del nuevo custodio. Finalmente, **AppointmentScheduledIntegrationEvent** y **AppointmentArrivedIntegrationEvent** informan a Workshop Operations sobre la demanda esperada y desencadenan la apertura de órdenes de trabajo preliminares ante la llegada física del automóvil.
 
 En la @tbl:crm-integration-events se sintetiza la estructura de estos eventos de integración.
 
@@ -10038,7 +10346,7 @@ Customer\allowbreak Command\allowbreak Service & Contrato de casos de uso de esc
 \hline
 \textbf{Relaciones} & Implementado por CustomerCommandServiceImpl. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak commandservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -10048,7 +10356,7 @@ Customer\allowbreak Command\allowbreak ServiceImpl & Orquesta el alta, actualiza
 \hline
 \textbf{Relaciones} & Coordina agregado Customer y repositorios con persistencia ACID. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak internal.\allowbreak commandservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -10058,7 +10366,7 @@ Vehicle\allowbreak Command\allowbreak Service & Contrato para registro universal
 \hline
 \textbf{Relaciones} & Implementado por VehicleCommandServiceImpl. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak commandservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -10068,7 +10376,7 @@ Vehicle\allowbreak Command\allowbreak ServiceImpl & Administra el catálogo glob
 \hline
 \textbf{Relaciones} & Coordina agregados Vehicle y VehicleOwnership. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak internal.\allowbreak commandservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -10078,7 +10386,7 @@ Appointment\allowbreak Command\allowbreak Service & Contrato de casos de uso par
 \hline
 \textbf{Relaciones} & Implementado por AppointmentCommandServiceImpl. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak commandservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -10088,7 +10396,27 @@ Appointment\allowbreak Command\allowbreak ServiceImpl & Orquesta la máquina de 
 \hline
 \textbf{Relaciones} & Coordina agregado Appointment y emite eventos de dominio. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak internal.\allowbreak commandservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Customer\allowbreak Membership\allowbreak Command\allowbreak Service & Contrato público para casos de uso de asignación, actualización y revocación de membresías en flotas B2B. \\*
+\hline
+\textbf{Categoría} & Servicio de Comando \\*
+\hline
+\textbf{Relaciones} & Implementado por CustomerMembershipCommandServiceImpl. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak commandservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Customer\allowbreak Membership\allowbreak Command\allowbreak ServiceImpl & Orquesta la invitación, activación y revocación de delegaciones corporativas verificando cliente empresa. \\*
+\hline
+\textbf{Categoría} & Implementación de Comando \\*
+\hline
+\textbf{Relaciones} & Coordina entidad CustomerMembership y CustomerMembershipRepository con transaccionalidad ACID. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak internal.\allowbreak commandservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -10098,7 +10426,7 @@ Customer\allowbreak Query\allowbreak Service & Contrato de recuperación de clie
 \hline
 \textbf{Relaciones} & Implementado por CustomerQueryServiceImpl. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak queryservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -10108,7 +10436,7 @@ Customer\allowbreak Query\allowbreak ServiceImpl & Consultas de lectura optimiza
 \hline
 \textbf{Relaciones} & Accede a CustomerRepository en modo de solo lectura. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak internal.\allowbreak queryservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -10118,7 +10446,7 @@ Vehicle\allowbreak Query\allowbreak Service & Contrato de consulta técnica de v
 \hline
 \textbf{Relaciones} & Implementado por VehicleQueryServiceImpl. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak queryservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -10128,7 +10456,7 @@ Vehicle\allowbreak Query\allowbreak ServiceImpl & Proyecta fichas automotrices y
 \hline
 \textbf{Relaciones} & Accede a VehicleRepository y VehicleOwnershipRepository. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak internal.\allowbreak queryservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -10138,7 +10466,7 @@ Appointment\allowbreak Query\allowbreak Service & Contrato de lectura para agend
 \hline
 \textbf{Relaciones} & Implementado por AppointmentQueryServiceImpl. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak queryservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -10148,7 +10476,27 @@ Appointment\allowbreak Query\allowbreak ServiceImpl & Proyecciones de citas prev
 \hline
 \textbf{Relaciones} & Accede a AppointmentRepository en modo de solo lectura. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak internal.\allowbreak queryservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Customer\allowbreak Membership\allowbreak Query\allowbreak Service & Contrato público para consultas de membresías corporativas y resolución de roles delegados en flotas B2B. \\*
+\hline
+\textbf{Categoría} & Servicio de Consulta \\*
+\hline
+\textbf{Relaciones} & Implementado por CustomerMembershipQueryServiceImpl. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak queryservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Customer\allowbreak Membership\allowbreak Query\allowbreak ServiceImpl & Ejecuta la recuperación y proyección de miembros corporativos y validación de permisos de flota. \\*
+\hline
+\textbf{Categoría} & Implementación de Consulta \\*
+\hline
+\textbf{Relaciones} & Accede a CustomerMembershipRepository sin alterar estado transaccional. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak internal.\allowbreak queryservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -10158,7 +10506,7 @@ Customer\allowbreak Domain\allowbreak Events\allowbreak Handler & Suscriptor de 
 \hline
 \textbf{Relaciones} & Construye eventos de integración para el Transactional Outbox. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak events} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak internal.\allowbreak eventhandlers} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -10168,7 +10516,7 @@ Vehicle\allowbreak Domain\allowbreak Events\allowbreak Handler & Suscriptor de e
 \hline
 \textbf{Relaciones} & Deposita eventos de integración en el Transactional Outbox. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak events} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak internal.\allowbreak eventhandlers} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -10178,7 +10526,7 @@ Appointment\allowbreak Domain\allowbreak Events\allowbreak Handler & Suscriptor 
 \hline
 \textbf{Relaciones} & Despacha push vía FCM y publica eventos de integración. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak events} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak internal.\allowbreak eventhandlers} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -10188,7 +10536,7 @@ Places\allowbreak Address\allowbreak Verification\allowbreak Gateway & Interfaz 
 \hline
 \textbf{Relaciones} & Implementado en la Capa de Infraestructura vía Google Places API. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak acl} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak internal.\allowbreak outbound.\allowbreak acl} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -10198,7 +10546,7 @@ Driver\allowbreak App\allowbreak Push\allowbreak Gateway & Interfaz de pasarela 
 \hline
 \textbf{Relaciones} & Implementado en Infraestructura mediante Firebase Cloud Messaging. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak acl} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak internal.\allowbreak outbound.\allowbreak acl} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -10207,6 +10555,16 @@ Subscription\allowbreak Validation\allowbreak Service & Interfaz para verificaci
 \textbf{Categoría} & Puerto de Salida \\*
 \hline
 \textbf{Relaciones} & Consulta al Bounded Context Billing para gobernanza de límites. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak internal.\allowbreak outbound.\allowbreak acl} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Customer\allowbreak Fleet\allowbreak Context\allowbreak Facade\allowbreak Impl & Implementa la fachada de contexto abierto para la consulta intercontextual de clientes, flotas y citas. \\*
+\hline
+\textbf{Categoría} & Implementación ACL \\*
+\hline
+\textbf{Relaciones} & Implementa CustomerFleetContextFacade orquestando consultas directas en memoria. \\*
 \hline
 \textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak acl} \\
 \hline
@@ -10226,9 +10584,13 @@ Verified\allowbreak Address\allowbreak Dto & Registro inmutable portador de la d
 
 **Servicios de Comandos y Orquestación Transaccional**
 
-Los flujos de modificación de estado se implementan mediante servicios orquestadores
+Los flujos de modificación de estado se estructuran mediante servicios orquestadores
 decorados con anotaciones transaccionales que delimitan el alcance de persistencia y
-garantizan el cumplimiento de invariantes de negocio en el modelo.
+garantizan el cumplimiento de invariantes de negocio en el modelo. Siguiendo la
+arquitectura canónica de segregación, los contratos públicos de los casos de uso
+residen en el paquete **com.andeva.atelier.platform.crm.application.commandservices**,
+mientras que sus clases de implementación se confinan de manera privada en
+**com.andeva.atelier.platform.crm.application.internal.commandservices**.
 
 El servicio **CustomerCommandServiceImpl** centraliza el alta y gestión de clientes. Al
 procesar **RegisterIndividualCustomerCommand**, verifica la unicidad del documento nacional
@@ -10306,7 +10668,7 @@ retorno de los servicios de comandos.
 \hline
 \textbf{Comando y Retorno} & \texttt{RegisterVehicleCommand} $\longrightarrow$ \texttt{Result<\allowbreak Vehicle,\allowbreak  ApplicationError>\allowbreak } \\*
 \hline
-\textbf{Reglas de Consistencia} & Valida placa normalizada única, formato VIN ISO 3779 y vincula el primer titular en historial. \\
+\textbf{Reglas de Consistencia} & Valida placa normalizada única, formato VIN ISO 3779 y vincula titularidad flexible por CustomerId o UserId. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} VehicleCommandService \quad (\texttt{handle})} \\*
 \hline
@@ -10344,15 +10706,31 @@ retorno de los servicios de comandos.
 \hline
 \textbf{Reglas de Consistencia} & Valida que vehículo no esté en patio, registra motivo de anulación y transiciona a CANCELED. \\
 \hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} CustomerMembershipCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{InviteCustomerMemberCommand} $\longrightarrow$ \texttt{Result<\allowbreak CustomerMembership,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Comprueba que el cliente sea de tipo COMPANY, verifica existencia del usuario y valida ausencia de membresía activa previa. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} CustomerMembershipCommandService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Comando y Retorno} & \texttt{RevokeCustomerMemberCommand} $\longrightarrow$ \texttt{Result<\allowbreak CustomerMembership,\allowbreak  ApplicationError>\allowbreak } \\*
+\hline
+\textbf{Reglas de Consistencia} & Verifica la existencia de la membresía activa en la empresa cliente y transiciona el estado a REVOKED de forma inmediata. \\
+\hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-*Nota.* Componentes ubicados en el paquete com.andeva.atelier.platform.crm.application.services.
+*Nota.* Operaciones definidas en com.andeva.atelier.platform.crm.application.commandservices e implementadas en internal.commandservices.
 
 **Servicios de Consulta y Proyección de Datos**
 
 Las operaciones de recuperación de información se estructuran mediante servicios de
 consulta especializados anotados con transaccionalidad de solo lectura, permitiendo a la
-infraestructura relacional omitir la gestión de instantáneas de detección de cambios.
+infraestructura relacional omitir la gestión de instantáneas de detección de cambios. Sus
+interfaces se definen en el paquete
+**com.andeva.atelier.platform.crm.application.queryservices**, confinando sus
+implementaciones técnicas bajo
+**com.andeva.atelier.platform.crm.application.internal.queryservices**.
 
 Los tres servicios de consulta atienden las necesidades de visualización y filtrado del
 contexto: **CustomerQueryServiceImpl** recupera fichas individuales de clientes por
@@ -10425,6 +10803,12 @@ proyectados por los servicios de consulta.
 \hline
 \textbf{Propósito de Consulta} & Historial cronológico completo de transferencias y custodios del vehículo. \\
 \hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} VehicleQueryService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Parámetro y Proyección} & \texttt{GetVehiclesByUserIdQuery} $\longrightarrow$ \texttt{List<\allowbreak Vehicle>\allowbreak } \\*
+\hline
+\textbf{Propósito de Consulta} & Flota de vehículos actualmente asociados a la custodia o propiedad activa del usuario autenticado. \\
+\hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} AppointmentQueryService \quad (\texttt{handle})} \\*
 \hline
 \textbf{Parámetro y Proyección} & \texttt{GetAppointmentByIdQuery} $\longrightarrow$ \texttt{Optional<\allowbreak Appointment>\allowbreak } \\*
@@ -10443,15 +10827,28 @@ proyectados por los servicios de consulta.
 \hline
 \textbf{Propósito de Consulta} & Historial de solicitudes de atención técnica agendadas por un cliente. \\
 \hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} CustomerMembershipQueryService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Parámetro y Proyección} & \texttt{GetCustomerMembershipsByUserIdQuery} $\longrightarrow$ \texttt{List<\allowbreak CustomerMembership>\allowbreak } \\*
+\hline
+\textbf{Propósito de Consulta} & Recuperación de membresías corporativas y roles de flota activos asociados a un usuario en la plataforma. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio:} CustomerMembershipQueryService \quad (\texttt{handle})} \\*
+\hline
+\textbf{Parámetro y Proyección} & \texttt{GetCustomerMembersByCustomerIdQuery} $\longrightarrow$ \texttt{List<\allowbreak CustomerMembership>\allowbreak } \\*
+\hline
+\textbf{Propósito de Consulta} & Directorio de miembros delegados y operadores asignados a la flota de una empresa cliente. \\
+\hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-*Nota.* Métodos configurados con transaccionalidad de solo lectura en el paquete com.andeva.atelier.platform.crm.application.services.
+*Nota.* Métodos de solo lectura definidos en com.andeva.atelier.platform.crm.application.queryservices e implementados en internal.queryservices.
 
 **Manejadores de Eventos de Dominio y Publicación Asíncrona**
 
-El desacoplamiento entre casos de uso mutacionales y sus efectos secundarios se articula a
-través de tres manejadores de eventos en memoria que responden a las mutaciones
-confirmadas de las entidades del dominio.
+El desacoplamiento entre casos de uso mutacionales y sus efectos secundarios se articula
+a través de tres manejadores de eventos ubicados en el paquete
+**com.andeva.atelier.platform.crm.application.internal.eventhandlers**, los cuales
+responden a las mutaciones confirmadas de las entidades del dominio en memoria.
 
 El componente **CustomerDomainEventsHandler** captura la emisión de **CustomerCreatedEvent**
 tras la confirmación transaccional en la base de datos, estructurando y depositando el
@@ -10546,13 +10943,16 @@ la capa.
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-*Nota.* Clases ubicadas bajo el paquete com.andeva.atelier.platform.crm.application.events.
+*Nota.* Clases ubicadas bajo el paquete com.andeva.atelier.platform.crm.application.internal.eventhandlers.
 
 **Puertos de Salida y Pasarelas de Integración**
 
 Para preservar la independencia de la lógica de negocio respecto a bibliotecas
-propietarias y servicios perimetrales, la capa define contratos de puertos de salida que
-aíslan al dominio de dependencias de infraestructura externa.
+propietarias y servicios perimetrales, la capa define contratos de puertos de salida bajo
+el paquete canónico
+**com.andeva.atelier.platform.crm.application.internal.outbound.acl** y modelos de
+transporte en **com.andeva.atelier.platform.crm.application.model**, aislando al dominio
+de dependencias de infraestructura externa.
 
 El puerto **PlacesAddressVerificationGateway** encapsula la interacción con servicios de
 geocodificación externa, resolviendo la estandarización de direcciones y coordenadas
@@ -10592,7 +10992,7 @@ de frontera.
 \hline
 \textbf{Responsabilidad Técnica} & Validación, georreferenciación y normalización de direcciones corporativas vía Google Places API. \\*
 \hline
-\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak acl} \\
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak internal.\allowbreak outbound.\allowbreak acl} \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} DriverAppPushGateway \quad (\textit{Categoría:} Puerto de Salida)} \\*
 \hline
@@ -10600,7 +11000,7 @@ de frontera.
 \hline
 \textbf{Responsabilidad Técnica} & Emisión de notificaciones push móviles hacia Atelier Driver mediante Firebase Cloud Messaging (FCM). \\*
 \hline
-\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak acl} \\
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak internal.\allowbreak outbound.\allowbreak acl} \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} SubscriptionValidationService \quad (\textit{Categoría:} Puerto de Salida)} \\*
 \hline
@@ -10608,7 +11008,7 @@ de frontera.
 \hline
 \textbf{Responsabilidad Técnica} & Consulta síncrona de cuotas activas hacia el módulo de Billing para gobernar límites del plan SaaS. \\*
 \hline
-\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak acl} \\
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak application.\allowbreak internal.\allowbreak outbound.\allowbreak acl} \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} VerifiedAddressDto \quad (\textit{Categoría:} Modelo de Frontera)} \\*
 \hline
@@ -10620,7 +11020,28 @@ de frontera.
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-*Nota.* Interfaces y registros ubicados en com.andeva.atelier.platform.crm.application.acl y model.
+*Nota.* Componentes pertenecientes a com.andeva.atelier.platform.crm.application.internal.outbound.acl y application.model.
+
+**Implementación de Fachada de Contexto Abierto (Inbound ACL)**
+
+La materialización operativa del patrón Open Host Service y la capa anticorrupción de
+entrada se implementa mediante la clase **CustomerFleetContextFacadeImpl**, ubicada en el
+paquete canónico **com.andeva.atelier.platform.crm.application.acl**.
+
+Esta clase materializa el contrato público **CustomerFleetContextFacade** expuesto en la
+capa de interfaz bajo **com.andeva.atelier.platform.crm.interfaces.acl**. Su responsabilidad
+consiste en atender requerimientos provenientes de otros Bounded Contexts de la plataforma,
+tales como Workshop Operations (MRO), Facturación Electrónica (Invoicing) e IoT Telemetry,
+que precisan validar la existencia de clientes, consultar especificaciones vehiculares por
+placa de rodaje o verificar el estado de una cita técnica.
+
+Para asegurar un riguroso desacoplamiento táctico y evitar el acceso directo a entidades
+persistentes, **CustomerFleetContextFacadeImpl** orquesta consultas directas en memoria
+hacia los servicios de consulta internos: **CustomerQueryService**,
+**VehicleQueryService** y **AppointmentQueryService**. Posteriormente, traduce las entidades
+recuperadas hacia los registros inmutables de frontera definidos en la interfaz
+(**CustomerAclDto**, **VehicleAclDto** y **AppointmentAclDto**), preservando la integridad
+del modelo de dominio y garantizando fronteras de contexto herméticas.
 
 #### 2.6.3.4. Infrastructure Layer
 
@@ -10686,6 +11107,16 @@ Appointment\allowbreak Persistence\allowbreak Entity & Mapeo relacional de citas
 \textbf{Categoría} & Entidad JPA \\*
 \hline
 \textbf{Relaciones} & Claves foráneas hacia talleres, sedes físicas, clientes y vehículos. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak entities} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Customer\allowbreak Membership\allowbreak Persistence\allowbreak Entity & Entidad JPA vinculada a la tabla customer\_memberships con mapeo relacional de delegación de flota. \\*
+\hline
+\textbf{Categoría} & Entidad JPA \\*
+\hline
+\textbf{Relaciones} & Hereda de AuditableAbstractEntity. Claves foráneas hacia customers y users. \\*
 \hline
 \textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak entities} \\
 \hline
@@ -10799,6 +11230,16 @@ Appointment\allowbreak Persistence\allowbreak Repository & Consultas de agenda d
 \hline
 \textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak repositories} \\
 \hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Customer\allowbreak Membership\allowbreak Persistence\allowbreak Repository & Repositorio Spring Data JPA con consultas JPQL para membresías corporativas y verificación de roles. \\*
+\hline
+\textbf{Categoría} & Repositorio Spring Data \\*
+\hline
+\textbf{Relaciones} & Extiende \texttt{JpaRepository<\allowbreak CustomerMembershipPersistenceEntity,\allowbreak  UUID>\allowbreak }. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak repositories} \\
+\hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
 Customer\allowbreak Persistence\allowbreak Assembler & Transforma agregados Customer hacia y desde entidades JPA. \\*
@@ -10807,7 +11248,7 @@ Customer\allowbreak Persistence\allowbreak Assembler & Transforma agregados Cust
 \hline
 \textbf{Relaciones} & Traduce CustomerId y TenantId a UUID y reconstituye datos de contacto. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak transform} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak assemblers} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
@@ -10817,7 +11258,7 @@ Vehicle\allowbreak Persistence\allowbreak Assembler & Transforma agregados Vehic
 \hline
 \textbf{Relaciones} & Mapea especificaciones automotrices y colección de titularidades. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak transform} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak assemblers} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
@@ -10827,7 +11268,7 @@ Vehicle\allowbreak Ownership\allowbreak Persistence\allowbreak Assembler & Trans
 \hline
 \textbf{Relaciones} & Preserva fechas de intervalo temporal y vinculación con vehículos. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak transform} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak assemblers} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
@@ -10837,7 +11278,17 @@ Appointment\allowbreak Persistence\allowbreak Assembler & Transforma agregados A
 \hline
 \textbf{Relaciones} & Mapea marcas temporales, sedes físicas y motivos de cita. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak transform} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak assemblers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Customer\allowbreak Membership\allowbreak Persistence\allowbreak Assembler & Ensamblador bidireccional entre la entidad del dominio CustomerMembership y la entidad relacional JPA. \\*
+\hline
+\textbf{Categoría} & Ensamblador \\*
+\hline
+\textbf{Relaciones} & Transforma identificadores tipados UUID y mapea tipos enumerados de rol y estado. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak assemblers} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
@@ -10877,7 +11328,17 @@ Appointment\allowbreak Repository\allowbreak Impl & Implementación del puerto d
 \hline
 \textbf{Relaciones} & Persiste citas previas y emite eventos de arribo para el taller. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak adapters} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Customer\allowbreak Membership\allowbreak Repository\allowbreak Impl & Adaptador secundario que implementa el puerto CustomerMembershipRepository mediante JPA y Outbox. \\*
+\hline
+\textbf{Categoría} & Adaptador de Persistencia \\*
+\hline
+\textbf{Relaciones} & Implementa interfaz de dominio. Inyecta CustomerMembershipPersistenceRepository. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak crm.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak repositories} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
@@ -10958,9 +11419,17 @@ Con el propósito de especificar la correlación física y estructural del model
 \hline
 \textbf{Clave Primaria} & \texttt{id (UUID)} \\*
 \hline
-\textbf{Columnas Principales} & \texttt{customer\_id}, \texttt{vehicle\_id}, \texttt{start\_date}, \texttt{end\_date} \\*
+\textbf{Columnas Principales} & \texttt{customer\_id (nullable)}, \texttt{user\_id (nullable)}, \texttt{vehicle\_id}, \texttt{start\_date}, \texttt{end\_date} \\*
 \hline
-\textbf{Restricciones e Índices} & Claves foráneas fk\_vo\_customer y fk\_vo\_vehicle. índice parcial idx\_vo\_active en vehicle\_id donde end\_date es nulo. \\
+\textbf{Restricciones e Índices} & Claves foráneas fk\_vo\_customer, fk\_vo\_vehicle y fk\_ownerships\_user\_id. Restricción chk\_ownership\_owner. Índice parcial uk\_vehicle\_active\_ownership en vehicle\_id donde end\_date es nulo e índice idx\_ownerships\_user. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} CustomerMembershipPersistenceEntity \quad (\textit{Tabla:} \texttt{customer\_memberships})} \\*
+\hline
+\textbf{Clave Primaria} & \texttt{id (UUID)} \\*
+\hline
+\textbf{Columnas Principales} & \texttt{customer\_id}, \texttt{user\_id}, \texttt{role}, \texttt{status} \\*
+\hline
+\textbf{Restricciones e Índices} & Claves foráneas fk\_memberships\_customer\_id hacia customers(id) y fk\_memberships\_user\_id hacia users(id). Restricción de unicidad compuesta uk\_membership\_customer\_user (customer\_id, user\_id). Restricciones CHECK chk\_membership\_role y chk\_membership\_status. Índices físicos idx\_memberships\_customer y idx\_memberships\_user\_status. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} AppointmentPersistenceEntity \quad (\textit{Tabla:} \texttt{appointments})} \\*
 \hline
@@ -11026,7 +11495,7 @@ A fin de sistematizar las responsabilidades y contratos de persistencia, en la @
 \hline
 \textbf{Repositorio Inyectado} & \texttt{VehicleOwnershipPersistenceRepository} \\*
 \hline
-\textbf{Operaciones Clave} & save, findActiveByVehicleId, findAllByVehicleIdOrderByStartDateDesc, findAllByCustomerIdAndEndDateIsNull. \\
+\textbf{Operaciones Clave} & save, findActiveByVehicleId, findAllByVehicleIdOrderByStartDateDesc, findAllByCustomerIdAndEndDateIsNull, findAllByUserIdAndEndDateIsNull. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} AppointmentRepositoryImpl} \\*
 \hline
@@ -11035,6 +11504,14 @@ A fin de sistematizar las responsabilidades y contratos de persistencia, en la @
 \textbf{Repositorio Inyectado} & \texttt{AppointmentPersistenceRepository} \\*
 \hline
 \textbf{Operaciones Clave} & save con emisión de eventos al Outbox, findById, findByIdAndTenantId, findAllByTenantIdAndBranchIdAndDate, countOverlappingAppointments, existsActiveAppointmentsByCustomerId. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} CustomerMembershipRepositoryImpl} \\*
+\hline
+\textbf{Puerto de Dominio} & \texttt{CustomerMembershipRepository} \\*
+\hline
+\textbf{Repositorio Inyectado} & \texttt{CustomerMembershipPersistenceRepository} \\*
+\hline
+\textbf{Operaciones Clave} & save con extracción de eventos al Outbox, findById, findByCustomerIdAndUserId, findByCustomerId, findByUserIdAndStatus, existsByCustomerIdAndUserIdAndStatus. \\
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
@@ -11075,7 +11552,7 @@ Para sintetizar las reglas de transformación y correspondencia estructural, en 
 \hline
 \textbf{Mapeo de Tipos} & \texttt{Customer} $\longleftrightarrow$ \texttt{CustomerPersistenceEntity} \\*
 \hline
-\textbf{Transformación} & Traduce CustomerId y TenantId a UUID. mapea PersonName, TaxId, EmailAddress y PhoneNumber. \\
+\textbf{Transformación} & Traduce CustomerId y TenantId a UUID, mapea PersonName, TaxId, EmailAddress y PhoneNumber. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} VehiclePersistenceAssembler} \\*
 \hline
@@ -11087,7 +11564,13 @@ Para sintetizar las reglas de transformación y correspondencia estructural, en 
 \hline
 \textbf{Mapeo de Tipos} & \texttt{VehicleOwnership} $\longleftrightarrow$ \texttt{VehicleOwnershipPersistenceEntity} \\*
 \hline
-\textbf{Transformación} & Mapea VehicleOwnershipId a UUID, customer\_id, fechas de inicio y término, y enlace a Vehicle. \\
+\textbf{Transformación} & Mapea VehicleOwnershipId a UUID, customer\_id (nullable), user\_id (nullable), fechas de inicio y término, y enlace a Vehicle. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} CustomerMembershipPersistenceAssembler} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{CustomerMembership} $\longleftrightarrow$ \texttt{CustomerMembershipPersistenceEntity} \\*
+\hline
+\textbf{Transformación} & Mapea CustomerMembershipId, CustomerId y UserId a UUID, y convierte enumeraciones FleetRole y CustomerMembershipStatus a literales de base de datos. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} AppointmentPersistenceAssembler} \\*
 \hline
@@ -11139,7 +11622,7 @@ Para sintetizar las reglas de transformación y correspondencia estructural, en 
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-*Nota.* Componentes ubicados en los paquetes transform y converters de la capa de infraestructura.
+*Nota.* Componentes ubicados en los paquetes assemblers y converters de la capa de infraestructura.
 
 **Pasarelas Externas de Infraestructura e Integración Cloud**
 
@@ -11314,7 +11797,7 @@ Para comprender la colaboración dinámica y el flujo de control entre los compo
 
 En esta sección se aborda el nivel de mayor granularidad y rigor técnico dentro de la arquitectura de software del Bounded Context Customer & Fleet Management (CRM), traduciendo los límites tácticos y responsabilidades funcionales hacia especificaciones estáticas que orientan la codificación de la plataforma. Mediante este enfoque, se garantiza que la gestión de clientes, la historia clínica automotriz y la recepción en taller se ejecuten bajo tipado estricto y consistencia determinista.
 
-Esta dimensión arquitectónica se estructura en dos perspectivas complementarias: el Diagrama de Clases de la Capa de Dominio, que modela en memoria las raíces de agregado, entidades dependientes, objetos de valor y puertos de repositorio; y el Diagrama de Base de Datos, que define la persistencia física en PostgreSQL 16 con aislamiento multi-inquilino mediante discriminador de taller, restricciones de unicidad e índices B-Tree de alta velocidad.
+Esta dimensión arquitectónica se estructura en dos perspectivas complementarias: el Diagrama de Clases de la Capa de Dominio, que modela en memoria las raíces de agregado, entidades dependientes, objetos de valor y puertos de repositorio, mientras que el Diagrama de Base de Datos define la persistencia física en PostgreSQL 16 con aislamiento multi-inquilino mediante discriminador de taller, restricciones de unicidad e índices B-Tree de alta velocidad.
 
 ##### 2.6.3.6.1. *Bounded Context Domain Layer Class Diagrams*
 
@@ -11328,14 +11811,14 @@ En la @fig:class-diagram-crm se expone el Diagrama de Clases UML detallado para 
 
 La organización interna del diagrama se estructura en ocho paquetes lógicos que agrupan las responsabilidades tácticas del subsistema comercial y de flota:
 
-- **Raíces de Agregado (`crm.domain.model.aggregates`):** Modela las entidades principales que delimitan las fronteras transaccionales: **Customer** para la ficha comercial y fiscal del cliente; **Vehicle** para la ficha técnica del automotor; y **Appointment** para la reserva y recepción de servicios en sede física. Todas las raíces heredan de **AbstractDomainAggregateRoot<T>**.
-- **Entidades Internas (`crm.domain.model.entities`):** Define entidades dependientes subordinadas al ciclo de vida de su raíz: **VehicleOwnership** para modelar la titularidad y periodos de custodia entre clientes y vehículos a lo largo del tiempo.
-- **Identificadores Fuertemente Tipados (`crm.domain.model.ids`):** Implementa la interfaz **TypedId<UUID>** mediante registros inmutables (**CustomerId**, **VehicleId**, **VehicleOwnershipId**, **AppointmentId**), reutilizando **TenantId** y **BranchId** de los módulos de soporte.
-- **Objetos de Valor Automotrices (`crm.domain.model.valueobjects`):** Encapsula conceptos inmutables como la placa vehicular normalizada (**LicensePlate**) y el número de chasis estandarizado (**Vin**), complementados por los tipos de contacto y tributarios provistos por el Shared Kernel.
-- **Enumeraciones de Dominio (`crm.domain.model.enums`):** Define los estados operativos y modalidades de negocio (**CustomerType**, **CustomerStatus**, **EngineType**, **AppointmentStatus**).
-- **Servicios de Dominio (`crm.domain.services`):** Incorpora lógica de negocio transversal que coordina múltiples agregados: **AppointmentSchedulingService** para el control de aforo y antelación en citas, y **VehicleTransferDomainService** para la orquestación atómica del traspaso vehicular.
-- **Puertos de Persistencia (`crm.domain.repositories`):** Establece contratos de persistencia pura (**CustomerRepository**, **VehicleRepository**, **VehicleOwnershipRepository**, **AppointmentRepository**) desacoplados de los motores de bases de datos.
-- **Jerarquía de Excepciones Semánticas (`crm.domain.exceptions`):** Provee clases no comprobadas que heredan de **DomainException**, asignando códigos de error unificados para infracciones de unicidad, estados inválidos o capacidad desbordada.
+- **Raíces de Agregado (crm.domain.model.aggregates):** Modela las entidades principales que delimitan las fronteras transaccionales, integrando a **Customer** para la ficha comercial y fiscal del cliente, **Vehicle** para la ficha técnica del automotor y **Appointment** para la reserva y recepción de servicios en sede física. Todas las raíces heredan de **AbstractDomainAggregateRoot<T>**.
+- **Entidades Internas (crm.domain.model.entities):** Define entidades dependientes subordinadas al ciclo de vida de su raíz: **VehicleOwnership** para modelar la titularidad y periodos de custodia entre clientes y vehículos a lo largo del tiempo.
+- **Identificadores Fuertemente Tipados (crm.domain.model.ids):** Implementa la interfaz **TypedId<UUID>** mediante registros inmutables (**CustomerId**, **VehicleId**, **VehicleOwnershipId**, **AppointmentId**), reutilizando **TenantId** y **BranchId** de los módulos de soporte.
+- **Objetos de Valor Automotrices (crm.domain.model.valueobjects):** Encapsula conceptos inmutables como la placa vehicular normalizada (**LicensePlate**) y el número de chasis estandarizado (**Vin**), complementados por los tipos de contacto y tributarios provistos por el Shared Kernel.
+- **Enumeraciones de Dominio (crm.domain.model.enums):** Define los estados operativos y modalidades de negocio (**CustomerType**, **CustomerStatus**, **EngineType**, **AppointmentStatus**).
+- **Servicios de Dominio (crm.domain.services):** Incorpora lógica de negocio transversal que coordina múltiples agregados: **AppointmentSchedulingService** para el control de aforo y antelación en citas, y **VehicleTransferDomainService** para la orquestación atómica del traspaso vehicular.
+- **Puertos de Persistencia (crm.domain.repositories):** Establece contratos de persistencia pura (**CustomerRepository**, **VehicleRepository**, **VehicleOwnershipRepository**, **AppointmentRepository**) desacoplados de los motores de bases de datos.
+- **Jerarquía de Excepciones Semánticas (crm.domain.exceptions):** Provee clases no comprobadas que heredan de **DomainException**, asignando códigos de error unificados para infracciones de unicidad, estados inválidos o capacidad desbordada.
 
 En la @tbl:crm-domain-classes-members se detalla la especificación formal de atributos, firmas de métodos, modificadores de acceso y reglas de negocio para cada elemento de la Capa de Dominio.
 
@@ -11386,15 +11869,23 @@ Atributos & Raíz de agregado automotriz. Registro universal del vehículo indep
 \hline
 Métodos factoría y custodia & Composición 1 a 1..* con \textbf{VehicleOwnership}. Invariantes: año entre 1950 y año actual más uno. Exactamente un custodio activo con fecha de fin nula. \\*
 \hline
-\textbf{Firma o Tipo} & - \texttt{Vehicle register(...)} \newline - \texttt{VehicleOwnership transferOwnership(CustomerId,\allowbreak  LocalDate)} \newline - \texttt{Optional<\allowbreak VehicleOwnership>\allowbreak  getActiveOwnership()} \newline - \texttt{Optional<\allowbreak CustomerId>\allowbreak  getCurrentOwnerId()} \newline - \texttt{void updateTechnicalDetails(Vin,\allowbreak  EngineType)} \\*
+\textbf{Firma o Tipo} & - \texttt{Vehicle register(...)} \newline - \texttt{void linkCustomer(CustomerId)} \newline - \texttt{Optional<\allowbreak UserId>\allowbreak  getCurrentUserId()} \newline - \texttt{VehicleOwnership transferOwnership(CustomerId,\allowbreak  LocalDate)} \newline - \texttt{Optional<\allowbreak VehicleOwnership>\allowbreak  getActiveOwnership()} \newline - \texttt{Optional<\allowbreak CustomerId>\allowbreak  getCurrentOwnerId()} \newline - \texttt{void updateTechnicalDetails(Vin,\allowbreak  EngineType)} \\*
 \hline
 \textbf{Ámbito} & Público \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} VehicleOwnership} \\*
 \hline
-Atributos y métodos & Entidad dependiente de custodia. Modela el periodo de titularidad vehicular. Invariante: fecha de fin posterior a fecha de inicio. \\*
+Atributos y métodos & Entidad dependiente de custodia. Modela el periodo de titularidad vehicular. Invariantes: al menos un titular entre customerId o userId presente, y fecha de fin posterior a fecha de inicio. \\*
 \hline
-\textbf{Firma o Tipo} & - \texttt{VehicleOwnershipId id} \newline - \texttt{VehicleId vehicleId} \newline - \texttt{CustomerId customerId} \newline - \texttt{LocalDate startDate} \newline - \texttt{LocalDate endDate} \newline - \texttt{boolean isCurrent()} \newline - \texttt{void terminate(LocalDate)} \\*
+\textbf{Firma o Tipo} & - \texttt{VehicleOwnershipId id} \newline - \texttt{VehicleId vehicleId} \newline - \texttt{CustomerId customerId} \newline - \texttt{UserId userId} \newline - \texttt{LocalDate startDate} \newline - \texttt{LocalDate endDate} \newline - \texttt{boolean isCurrent()} \newline - \texttt{void terminate(LocalDate)} \newline - \texttt{void linkCustomer(CustomerId)} \newline - \texttt{boolean isOwnedByCustomer(CustomerId)} \newline - \texttt{boolean isOwnedByUser(UserId)} \\*
+\hline
+\textbf{Ámbito} & Privado / Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} CustomerMembership} \\*
+\hline
+Atributos y métodos & Entidad dependiente de autorización y delegación de flota corporativa B2B. Invariante: únicamente clientes de tipo COMPANY pueden conceder membresías. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{CustomerMembershipId id} \newline - \texttt{CustomerId customerId} \newline - \texttt{UserId userId} \newline - \texttt{FleetRole role} \newline - \texttt{CustomerMembershipStatus status} \newline - \texttt{void activate()} \newline - \texttt{void suspend()} \newline - \texttt{void revoke()} \newline - \texttt{boolean hasRole(FleetRole)} \newline - \texttt{boolean isActive()} \\*
 \hline
 \textbf{Ámbito} & Privado / Público \\
 \hline
@@ -11414,7 +11905,7 @@ Métodos de ciclo de vida & Invariantes: agendamiento con antelación mínima de
 \hline
 \textbf{Ámbito} & Público \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} CustomerId, VehicleId, VehicleOwnershipId, AppointmentId} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} CustomerId, VehicleId, VehicleOwnershipId, AppointmentId, CustomerMembershipId} \\*
 \hline
 Atributo value y factoría & Registros inmutables que realizan la interfaz \texttt{TypedId<\allowbreak UUID>\allowbreak }, confiriendo tipado estricto a las identidades del dominio. \\*
 \hline
@@ -11430,7 +11921,7 @@ Atributos y validaciones & Objetos de valor inmutables. \textbf{LicensePlate} no
 \hline
 \textbf{Ámbito} & Privado / Público \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} CustomerType, CustomerStatus, EngineType, AppointmentStatus} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} CustomerType, CustomerStatus, EngineType, AppointmentStatus, FleetRole, CustomerMembershipStatus} \\*
 \hline
 Valores constantes & Tipos enumerados que gobiernan la clasificación legal, vigencia comercial, tecnología de motorización y estados de citas. \\*
 \hline
@@ -11446,7 +11937,7 @@ Servicios de dominio & Lógica pura sin estado. Validan aforo simultáneo de rec
 \hline
 \textbf{Ámbito} & Público \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} CustomerRepository, VehicleRepository, VehicleOwnershipRepository, AppointmentRepository} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} CustomerRepository, VehicleRepository, VehicleOwnershipRepository, CustomerMembershipRepository, AppointmentRepository} \\*
 \hline
 Firmas de acceso persistente & Puertos secundarios para operaciones de persistencia agnóstica de agregados y resolución de consultas operativas de flota. \\*
 \hline
@@ -11487,13 +11978,16 @@ En la @fig:database-diagram-crm se presenta el Diagrama Entidad-Relación físic
 
 *Nota.* Elaboración propia en base al diseño físico de persistencia y el estándar PlantUML ERD.
 
-A partir del modelo entidad-relación ilustrado, la arquitectura de datos se descompone en cuatro subsistemas relacionales especializados:
+A partir del modelo entidad-relación ilustrado, la arquitectura de datos se descompone en cinco subsistemas relacionales especializados:
 
 - **Subsistema de Gestión Comercial y Cartera de Clientes:**
   Formaliza el registro de clientes particulares y corporativos en la tabla **customers**, vinculada a la entidad raíz organizacional **tenants** mediante la clave foránea **tenant_id**. La tabla incorpora un discriminador semántico de tipo y restricciones de unicidad compuestas sobre el documento tributario, garantizando que cada taller administre su cartera de clientes con estricta confidencialidad comercial y sin duplicidad de registros fiscales.
 
 - **Subsistema de Parque Automotor e Historial de Tenencia:**
-  Estructura el catálogo físico vehicular a través de las tablas **vehicles** y **vehicle_ownerships**. La tabla **vehicles** modela el activo automotriz de forma universal sin asociarlo a un inquilino particular, normalizando placas de rodaje y números de chasis bajo estándares internacionales. A su vez, **vehicle_ownerships** preserva la trazabilidad cronológica de custodia mediante fechas de inicio y cese de propiedad, respaldada por un índice único parcial que restringe la titularidad vigente a un único custodio activo.
+  Estructura el catálogo físico vehicular a través de las tablas **vehicles** y **vehicle_ownerships**. La tabla **vehicles** modela el activo automotriz de forma universal sin asociarlo a un inquilino particular, normalizando placas de rodaje y números de chasis bajo estándares internacionales. A su vez, **vehicle_ownerships** preserva la trazabilidad cronológica de custodia mediante fechas de inicio y cese de propiedad, admitiendo tanto a clientes comerciales del taller como a usuarios conductores registrados en la aplicación móvil, respaldada por una restricción de verificación que exige al menos un titular y un índice único parcial que restringe la titularidad vigente a un único custodio activo.
+
+- **Subsistema de Membresías Corporativas y Delegación B2B:**
+  Gestiona la administración y delegación de flotas corporativas mediante la tabla **customer_memberships**. Permite a las empresas clientes conceder autorizaciones operativas y de gestión a usuarios de la plataforma sobre sus unidades vehiculares y citas técnicas, resguardada por restricciones de unicidad compuesta sobre el par cliente y usuario, junto a validaciones de roles y estados operativos.
 
 - **Subsistema de Agendamiento y Recepción Operativa:**
   Administra el flujo de reservas técnicas e ingreso a bahías mediante la tabla **appointments**. Cada registro articula las relaciones foráneas hacia el taller empleador, la sede física receptora, el cliente titular y el vehículo a inspeccionar. Su ciclo de vida es gobernado por restricciones de verificación de estados, facilitando la transición ordenada desde la reserva preliminar hasta la confirmación de arribo que dispara la apertura de órdenes de trabajo en el contexto de taller.
@@ -11538,11 +12032,21 @@ A partir de la arquitectura relacional definida en el diagrama de persistencia, 
 \hline
 \textbf{Motor y Producto} & PostgreSQL 16 (API) \\*
 \hline
-\textbf{Propósito y Aislamiento} & Trazabilidad temporal de custodia y propiedad legal del vehículo. Desacopla la unidad física del titular y permite transferencias de tenencia inmutables. \\*
+\textbf{Propósito y Aislamiento} & Trazabilidad temporal de custodia y propiedad legal del vehículo. Desacopla la unidad física del titular y permite transferencias de tenencia inmutables entre clientes y usuarios. \\*
 \hline
-\textbf{Columnas Clave y Tipos} & \texttt{id (UUID)}, \texttt{customer\_id (UUID)}, \texttt{vehicle\_id (UUID)}, \texttt{start\_date (DATE)}, \texttt{end\_date (DATE)}, auditoría transversal. \\*
+\textbf{Columnas Clave y Tipos} & \texttt{id (UUID)}, \texttt{customer\_id (UUID, nullable)}, \texttt{user\_id (UUID, nullable)}, \texttt{vehicle\_id (UUID)}, \texttt{start\_date (DATE)}, \texttt{end\_date (DATE)}, auditoría transversal. \\*
 \hline
-\textbf{Constraints e Índices} & - PK: pk\_vehicle\_ownerships (id) \newline - FK: fk\_ownerships\_customer\_id, fk\_ownerships\_vehicle\_id \newline - CHECK: chk\_ownership\_dates \newline - UK parcial: uk\_vehicle\_active\_ownership (vehicle\_id) WHERE end\_date IS NULL \newline - Índices: idx\_ownerships\_customer, idx\_ownerships\_vehicle \\
+\textbf{Constraints e Índices} & - PK: pk\_vehicle\_ownerships (id) \newline - FK: fk\_ownerships\_customer\_id, fk\_ownerships\_vehicle\_id, fk\_ownerships\_user\_id \newline - CHECK: chk\_ownership\_dates, chk\_ownership\_owner \newline - UK parcial: uk\_vehicle\_active\_ownership (vehicle\_id) WHERE end\_date IS NULL \newline - Índices: idx\_ownerships\_customer, idx\_ownerships\_vehicle, idx\_ownerships\_user \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{customer\_memberships}} \\*
+\hline
+\textbf{Motor y Producto} & PostgreSQL 16 (API) \\*
+\hline
+\textbf{Propósito y Aislamiento} & Esquema de delegación y membresías de flotas corporativas B2B. Concede privilegios de administración y operación a usuarios sobre activos de clientes empresa. \\*
+\hline
+\textbf{Columnas Clave y Tipos} & \texttt{id (UUID)}, \texttt{customer\_id (UUID)}, \texttt{user\_id (UUID)}, \texttt{role (VARCHAR)}, \texttt{status (VARCHAR)}, auditoría transversal. \\*
+\hline
+\textbf{Constraints e Índices} & - PK: pk\_customer\_memberships (id) \newline - FK: fk\_memberships\_customer\_id hacia customers(id), fk\_memberships\_user\_id hacia users(id) \newline - UK: uk\_membership\_customer\_user (customer\_id, user\_id) \newline - CHECK: chk\_membership\_role, chk\_membership\_status \newline - Índices B-Tree: idx\_memberships\_customer, idx\_memberships\_user\_status \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{appointments}} \\*
 \hline

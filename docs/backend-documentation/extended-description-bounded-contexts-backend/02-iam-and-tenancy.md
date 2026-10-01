@@ -13,6 +13,278 @@ El **Identity and Access Management (IAM) & Tenancy Context** es el pilar fundac
 * **Tokens JWT Enriquecidos y Contextuales:** A diferencia de sistemas desacoplados que requieren consultas recurrentes a la base de datos para verificar membresías, el emisor de tokens (`BearerTokenService`) genera tokens JWT (`jjwt:0.12.6`) que integran en sus *claims* criptográficos el `userId`, el `tenantId` activo, el `branchId` predeterminado y la lista unificada de códigos de permisos (`authorities`), permitiendo al filtro perimetral `BearerAuthorizationRequestFilter` autorizar peticiones en memoria con coste O(1).
 * **Fachada de Contexto Abierta (Open Host Service / Inbound ACL):** Para salvaguardar la pureza del modelo de dominio e impedir acoplamientos circulares, IAM expone la interfaz `TenancyContextFacade`. Cualquier Bounded Context que requiera validar la existencia de un taller, la afiliación laboral de un mecánico o la vigencia de una sucursal física invoca esta fachada en memoria sin acceder a las entidades JPA de IAM.
 
+#### 4.1.3. Estructura Canónica de Paquetes y Archivos del Bounded Context
+
+La siguiente estructura de directorios y archivos representa la taxonomía canónica definitiva de **IAM & Tenancy Context** (`com.andeva.atelier.platform.iam`), alineada estrictamente con el estándar arquitectónico de *Learning Center* y los patrones tácticos de DDD Hexagonal:
+
+```text
+com.andeva.atelier.platform.iam/
+├── domain/
+│   ├── exceptions/
+│   │   ├── BranchNotFoundException.java
+│   │   ├── IamDomainException.java
+│   │   ├── InvalidCredentialsException.java
+│   │   ├── InvalidVerificationTokenException.java
+│   │   ├── InvitationExpiredException.java
+│   │   ├── InvitationNotFoundException.java
+│   │   ├── MembershipNotFoundException.java
+│   │   ├── RoleInUseException.java
+│   │   ├── RoleNotFoundException.java
+│   │   ├── SystemRoleImmutableException.java
+│   │   ├── TenantNotFoundException.java
+│   │   ├── UserAlreadyExistsException.java
+│   │   └── UserNotFoundException.java
+│   ├── model/
+│   │   ├── aggregates/
+│   │   │   ├── Invitation.java
+│   │   │   ├── Role.java
+│   │   │   ├── Tenant.java
+│   │   │   ├── TenantMembership.java
+│   │   │   └── User.java
+│   │   ├── commands/
+│   │   │   ├── AcceptInvitationCommand.java
+│   │   │   ├── AssignRolesToMembershipCommand.java
+│   │   │   ├── AuthenticateUserCommand.java
+│   │   │   ├── AuthenticateWithGoogleCommand.java
+│   │   │   ├── CreateBranchCommand.java
+│   │   │   ├── CreateCustomRoleCommand.java
+│   │   │   ├── CreateTenantCommand.java
+│   │   │   ├── DeactivateMembershipCommand.java
+│   │   │   ├── DeleteCustomRoleCommand.java
+│   │   │   ├── InviteStaffCommand.java
+│   │   │   ├── ProvisionTenantRolesCommand.java
+│   │   │   ├── RegisterUserCommand.java
+│   │   │   ├── RequestPasswordResetCommand.java
+│   │   │   ├── ResetPasswordCommand.java
+│   │   │   ├── ResetRoleToDefaultsCommand.java
+│   │   │   ├── UpdateBranchLocationCommand.java
+│   │   │   ├── UpdateMembershipCompensationCommand.java
+│   │   │   ├── UpdateRolePermissionsCommand.java
+│   │   │   ├── UpdateTenantProfileCommand.java
+│   │   │   └── VerifyEmailTokenCommand.java
+│   │   ├── entities/
+│   │   │   ├── Branch.java
+│   │   │   ├── Permission.java
+│   │   │   ├── Profile.java
+│   │   │   └── VerificationToken.java
+│   │   ├── enums/
+│   │   │   ├── AuthProvider.java
+│   │   │   ├── InvitationStatus.java
+│   │   │   ├── MembershipStatus.java
+│   │   │   ├── SalaryType.java
+│   │   │   ├── TenantStatus.java
+│   │   │   ├── TokenType.java
+│   │   │   └── UserStatus.java
+│   │   ├── events/
+│   │   │   ├── BranchCreatedEvent.java
+│   │   │   ├── PasswordResetRequestedEvent.java
+│   │   │   ├── StaffInvitationAcceptedEvent.java
+│   │   │   ├── StaffInvitedEvent.java
+│   │   │   ├── TenantMembershipCreatedEvent.java
+│   │   │   ├── TenantRegisteredEvent.java
+│   │   │   ├── UserRegisteredEvent.java
+│   │   │   └── VerificationTokenIssuedEvent.java
+│   │   ├── ids/
+│   │   │   ├── BranchId.java
+│   │   │   ├── InvitationId.java
+│   │   │   ├── PermissionId.java
+│   │   │   ├── RoleId.java
+│   │   │   ├── TenantId.java
+│   │   │   ├── TenantMembershipId.java
+│   │   │   ├── UserId.java
+│   │   │   └── VerificationTokenId.java
+│   │   ├── queries/
+│   │   │   ├── GetAllPermissionsQuery.java
+│   │   │   ├── GetBranchByIdQuery.java
+│   │   │   ├── GetBranchesByTenantIdQuery.java
+│   │   │   ├── GetMembershipByIdQuery.java
+│   │   │   ├── GetMembershipByTenantAndUserQuery.java
+│   │   │   ├── GetMembershipsByTenantIdQuery.java
+│   │   │   ├── GetRoleByIdQuery.java
+│   │   │   ├── GetRolesByTenantIdQuery.java
+│   │   │   ├── GetTenantByIdQuery.java
+│   │   │   ├── GetTenantByTaxIdQuery.java
+│   │   │   ├── GetUserByEmailQuery.java
+│   │   │   └── GetUserByIdQuery.java
+│   │   └── valueobjects/
+│   │       ├── EmailAddress.java
+│   │       ├── GeoPoint.java
+│   │       ├── Money.java
+│   │       ├── Password.java
+│   │       ├── PersonName.java
+│   │       ├── PhoneNumber.java
+│   │       └── TaxId.java
+│   └── repositories/
+│       ├── BranchRepository.java
+│       ├── InvitationRepository.java
+│       ├── PermissionRepository.java
+│       ├── RoleRepository.java
+│       ├── TenantMembershipRepository.java
+│       ├── TenantRepository.java
+│       └── UserRepository.java
+├── application/
+│   ├── acl/
+│   │   └── TenancyContextFacadeImpl.java
+│   ├── commandservices/
+│   │   ├── BranchCommandService.java
+│   │   ├── InvitationCommandService.java
+│   │   ├── MembershipCommandService.java
+│   │   ├── RoleCommandService.java
+│   │   ├── TenantCommandService.java
+│   │   └── UserCommandService.java
+│   ├── queryservices/
+│   │   ├── BranchQueryService.java
+│   │   ├── MembershipQueryService.java
+│   │   ├── RoleQueryService.java
+│   │   ├── TenantQueryService.java
+│   │   └── UserQueryService.java
+│   └── internal/
+│       ├── commandservices/
+│       │   ├── BranchCommandServiceImpl.java
+│       │   ├── InvitationCommandServiceImpl.java
+│       │   ├── MembershipCommandServiceImpl.java
+│       │   ├── RoleCommandServiceImpl.java
+│       │   ├── TenantCommandServiceImpl.java
+│       │   └── UserCommandServiceImpl.java
+│       ├── queryservices/
+│       │   ├── BranchQueryServiceImpl.java
+│       │   ├── MembershipQueryServiceImpl.java
+│       │   ├── RoleQueryServiceImpl.java
+│       │   ├── TenantQueryServiceImpl.java
+│       │   └── UserQueryServiceImpl.java
+│       ├── eventhandlers/
+│       │   ├── TenantDomainEventsHandler.java
+│       │   └── UserDomainEventsHandler.java
+│       └── outbound/acl/
+│           ├── GoogleIdentityGateway.java
+│           └── ResendEmailService.java
+├── infrastructure/
+│   ├── external/
+│   │   ├── google/
+│   │   │   └── GoogleIdentityAdapter.java
+│   │   └── resend/
+│   │       └── ResendEmailAdapter.java
+│   ├── persistence/jpa/
+│   │   ├── adapters/
+│   │   │   ├── BranchRepositoryImpl.java
+│   │   │   ├── InvitationRepositoryImpl.java
+│   │   │   ├── PermissionRepositoryImpl.java
+│   │   │   ├── RoleRepositoryImpl.java
+│   │   │   ├── TenantMembershipRepositoryImpl.java
+│   │   │   ├── TenantRepositoryImpl.java
+│   │   │   └── UserRepositoryImpl.java
+│   │   ├── assemblers/
+│   │   │   ├── BranchPersistenceAssembler.java
+│   │   │   ├── InvitationPersistenceAssembler.java
+│   │   │   ├── PermissionPersistenceAssembler.java
+│   │   │   ├── RolePersistenceAssembler.java
+│   │   │   ├── TenantMembershipPersistenceAssembler.java
+│   │   │   ├── TenantPersistenceAssembler.java
+│   │   │   └── UserPersistenceAssembler.java
+│   │   ├── converters/
+│   │   │   ├── EmailAddressAttributeConverter.java
+│   │   │   ├── MoneyAttributeConverter.java
+│   │   │   └── TaxIdAttributeConverter.java
+│   │   ├── embeddables/
+│   │   │   └── GeoPointEmbeddable.java
+│   │   ├── entities/
+│   │   │   ├── BranchPersistenceEntity.java
+│   │   │   ├── InvitationPersistenceEntity.java
+│   │   │   ├── PermissionPersistenceEntity.java
+│   │   │   ├── ProfilePersistenceEntity.java
+│   │   │   ├── RolePersistenceEntity.java
+│   │   │   ├── TenantMembershipPersistenceEntity.java
+│   │   │   ├── TenantPersistenceEntity.java
+│   │   │   ├── UserPersistenceEntity.java
+│   │   │   └── VerificationTokenPersistenceEntity.java
+│   │   └── repositories/
+│   │       ├── BranchPersistenceRepository.java
+│   │       ├── InvitationPersistenceRepository.java
+│   │       ├── PermissionPersistenceRepository.java
+│   │       ├── RolePersistenceRepository.java
+│   │       ├── TenantMembershipPersistenceRepository.java
+│   │       ├── TenantPersistenceRepository.java
+│   │       └── UserPersistenceRepository.java
+│   └── security/
+│       ├── authorization/sfs/
+│       │   ├── configuration/
+│       │   │   └── WebSecurityConfiguration.java
+│       │   ├── model/
+│       │   │   ├── CustomUserDetails.java
+│       │   │   └── UsernamePasswordAuthenticationTokenBuilder.java
+│       │   ├── pipeline/
+│       │   │   ├── BearerAuthorizationRequestFilter.java
+│       │   │   └── UnauthorizedRequestHandlerEntryPoint.java
+│       │   └── services/
+│       │       └── CustomUserDetailsService.java
+│       ├── hashing/bcrypt/
+│       │   ├── BCryptHashingService.java
+│       │   └── services/
+│       │       └── BCryptHashingServiceImpl.java
+│       └── tokens/jwt/
+│           ├── BearerTokenService.java
+│           └── services/
+│               └── BearerTokenServiceImpl.java
+└── interfaces/
+    ├── acl/
+    │   ├── TenancyContextFacade.java
+    │   └── dto/
+    │       ├── BranchAclDto.java
+    │       ├── BranchGeofenceAclDto.java
+    │       ├── TenantAclDto.java
+    │       └── UserAclDto.java
+    ├── events/
+    │   ├── BranchCreatedIntegrationEvent.java
+    │   ├── StaffInvitedIntegrationEvent.java
+    │   ├── TenantCreatedIntegrationEvent.java
+    │   ├── TenantMembershipCreatedIntegrationEvent.java
+    │   └── UserRegisteredIntegrationEvent.java
+    └── rest/
+        ├── controllers/
+        │   ├── AuthenticationController.java
+        │   ├── BranchesController.java
+        │   ├── InvitationsController.java
+        │   ├── MembershipsController.java
+        │   ├── RolesController.java
+        │   └── TenantsController.java
+        ├── resources/
+        │   ├── requests/
+        │   │   ├── AcceptInvitationResource.java
+        │   │   ├── AssignRolesResource.java
+        │   │   ├── CreateBranchResource.java
+        │   │   ├── CreateRoleResource.java
+        │   │   ├── CreateTenantResource.java
+        │   │   ├── ForgotPasswordResource.java
+        │   │   ├── GoogleSignInResource.java
+        │   │   ├── InviteStaffResource.java
+        │   │   ├── ResetPasswordResource.java
+        │   │   ├── SignInResource.java
+        │   │   ├── UpdateBranchLocationResource.java
+        │   │   ├── UpdateCompensationResource.java
+        │   │   ├── UpdateRolePermissionsResource.java
+        │   │   ├── UpdateTenantProfileResource.java
+        │   │   └── VerifyEmailResource.java
+        │   └── responses/
+        │       ├── AuthenticatedUserResource.java
+        │       ├── BranchResource.java
+        │       ├── InvitationResource.java
+        │       ├── InvitationValidationResource.java
+        │       ├── MembershipResource.java
+        │       ├── MessageResponseResource.java
+        │       ├── PermissionResource.java
+        │       ├── RoleResource.java
+        │       ├── TenantResource.java
+        │       └── TenantSummaryResource.java
+        └── transform/
+            ├── BranchResourceFromEntityAssembler.java
+            ├── CreateTenantCommandFromResourceAssembler.java
+            ├── InvitationResourceFromAggregateAssembler.java
+            ├── MembershipResourceFromAggregateAssembler.java
+            ├── RoleResourceFromAggregateAssembler.java
+            ├── SignInCommandFromResourceAssembler.java
+            └── TenantResourceFromAggregateAssembler.java
+```
+
 ---
 
 ### 4.2. 2.6.1.1. Domain Layer
@@ -102,23 +374,29 @@ El **Identity and Access Management (IAM) & Tenancy Context** es el pilar fundac
 ##### 4. `Role` (Aggregate Root)
 * **Paquete:** `com.andeva.atelier.platform.iam.domain.model.aggregates`
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<Role>`
-* **Propósito:** Agrupador de permisos de seguridad específico por taller (RBAC multitenant) o provisto globalmente por la plataforma como plantilla de sistema.
+* **Propósito:** Agrupador soberano de permisos de seguridad específico por taller (RBAC multitenant). Modela tanto los roles de fábrica aprovisionados automáticamente a cada taller al registrarse como los roles personalizados formulados a medida.
 * **Atributos:**
-  * `id: RoleId` — Identificador único del rol (UUID).
-  * `tenantId: TenantId` — Taller propietario del rol (o `null` si es un rol semilla global del sistema como `ROLE_SUPERADMIN`).
-  * `name: String` — Nombre legible del rol (ej. "Dueño de Taller", "Mecánico Principal", "Asesor de Servicio").
-  * `description: String` — Explicación funcional de los privilegios otorgados.
-  * `isSystemRole: boolean` — Indicador booleano que protege el rol contra eliminación si es nativo de la plataforma.
-  * `permissions: Set<Permission>` — Conjunto de permisos atómicos asignados al rol.
+  * `id: RoleId`: Identificador único del rol (UUID).
+  * `tenantId: TenantId`: Taller propietario del rol (obligatorio, no nulo).
+  * `code: String`: Código canónico de fábrica (ej. `ROLE_WORKSHOP_OWNER`, `ROLE_MECHANIC`), nulo para roles personalizados.
+  * `name: String`: Nombre legible del rol (ej. "Dueño de Taller", "Técnico Mecánico", "Asesor de Servicio").
+  * `description: String`: Explicación funcional de los privilegios otorgados.
+  * `isSystemRole: boolean`: Indicador booleano que protege el rol contra eliminación si fue aprovisionado a partir de una plantilla de fábrica, permitiendo la edición soberana de sus permisos.
+  * `permissions: Set<Permission>`: Conjunto de permisos atómicos asignados al rol.
 * **Invariantes y Reglas de Negocio:**
   * El `name` no puede ser nulo ni vacío, y es único en el ámbito del taller (`tenant_id, name`).
-  * Los roles marcados con `isSystemRole == true` no pueden ser eliminados ni renombrados por usuarios del taller.
+  * El `code` es único en el ámbito del taller cuando está presente (`tenant_id, code`).
+  * Todo rol pertenece estrictamente a un `TenantId`.
+  * Los roles marcados con `isSystemRole == true` no pueden ser eliminados (su intento de borrado dispara `SystemRoleImmutableException`), pero sus permisos son plenamente editables de forma soberana y pueden restablecerse a la plantilla original de plataforma.
+  * Los roles personalizados creados por el taller (`isSystemRole == false`) solo pueden ser eliminados si no cuentan con colaboradores activos asignados en `membership_roles` (en caso contrario, dispara `RoleInUseException`).
 * **Métodos:**
-  * `+ static Role defineTenantRole(TenantId tenantId, String name, String description, Set<Permission> permissions): Role`: Factoría para roles personalizados de un taller.
-  * `+ static Role defineSystemRole(String name, String description, Set<Permission> permissions): Role`: Factoría para roles canónicos del sistema.
-  * `+ void grantPermission(Permission permission): void`: Asocia un permiso al rol.
-  * `+ void revokePermission(PermissionId permissionId): void`: Remueve un permiso del conjunto.
-  * `+ void updateDetails(String name, String description): void`: Modifica los metadatos descriptivos del rol.
+  * `+ static Role createCustom(TenantId tenantId, String name, String description, Set<Permission> permissions): Role`: Factoría para instanciar roles personalizados propios de un taller.
+  * `+ static Role provisionFromTemplate(TenantId tenantId, RoleTemplate template, Set<Permission> permissions): Role`: Factoría para aprovisionar un rol de fábrica en un taller específico durante el onboarding.
+  * `+ void updatePermissions(Set<Permission> newPermissions): void`: Actualiza soberanamente el conjunto integral de permisos concedidos al rol.
+  * `+ void resetToTemplate(RoleTemplate template): void`: Restablece los permisos del rol de fábrica a la configuración recomendada de la plantilla de plataforma.
+  * `+ void grantPermission(Permission permission): void`: Asocia un permiso individual al rol.
+  * `+ void revokePermission(PermissionId permissionId): void`: Remueve un permiso individual del conjunto.
+  * `+ void updateDetails(String name, String description): void`: Modifica los metadatos descriptivos de un rol personalizado.
 
 ##### 5. `Invitation` (Aggregate Root)
 * **Paquete:** `com.andeva.atelier.platform.iam.domain.model.aggregates`
@@ -241,8 +519,12 @@ Comandos inmutables que encapsulan la intención de mutar el estado en el contex
 * `CreateBranchCommand(TenantId tenantId, String name, String sunatCode, Double latitude, Double longitude, int geofenceRadiusMeters)`
 * `InviteStaffCommand(TenantId tenantId, String email, RoleId roleId)`
 * `AcceptInvitationCommand(String token, String password, String firstName, String lastName, String phone)`
-* `AssignRoleToMembershipCommand(TenantMembershipId membershipId, RoleId roleId)`
+* `AssignRolesToMembershipCommand(TenantMembershipId membershipId, List<RoleId> roleIds)`
 * `CreateCustomRoleCommand(TenantId tenantId, String name, String description, List<PermissionId> permissionIds)`
+* `UpdateRolePermissionsCommand(TenantId tenantId, RoleId roleId, List<PermissionId> permissionIds)`
+* `ResetRoleToDefaultsCommand(TenantId tenantId, RoleId roleId)`
+* `DeleteCustomRoleCommand(TenantId tenantId, RoleId roleId)`
+* `ProvisionTenantRolesCommand(TenantId tenantId)`
 * `UpdateMembershipCompensationCommand(TenantMembershipId membershipId, SalaryType salaryType, BigDecimal baseSalary, String currency)`
 
 ---
@@ -324,7 +606,7 @@ Puertos de salida puros sin acoplamiento a frameworks de persistencia:
 
 #### 4.3.1. REST Controllers
 
-Controladores HTTP anotados con `@RestController`, `@RequestMapping` y especificaciones OpenAPI 3 (`@Tag`, `@Operation`, `@ApiResponses`):
+Controladores HTTP anotados con `@RestController`, `@RequestMapping` y especificaciones OpenAPI 3 (`@Tag`, `@Operation`, `@ApiResponses`), ubicados canónicamente en `com.andeva.atelier.platform.iam.interfaces.rest.controllers`:
 
 ##### 1. `AuthenticationController`
 * **Ruta Base:** `/api/v1/authentication`
@@ -373,50 +655,55 @@ Controladores HTTP anotados con `@RestController`, `@RequestMapping` y especific
 
 ##### 6. `RolesController`
 * **Ruta Base:** `/api/v1/tenants/{tenantId}/roles`
-* **Propósito:** Gestión del esquema dinámico de seguridad RBAC.
+* **Propósito:** Gestión del esquema dinámico de seguridad RBAC, administración soberana de permisos y aprovisionamiento de roles del taller.
 * **Endpoints:**
-  * `GET`: Listado de roles disponibles en el taller. Retorna `List<RoleResource>` (HTTP 200 OK).
-  * `POST`: Creación de un rol personalizado con selección de permisos. Recibe `CreateRoleResource`, retorna `RoleResource` (HTTP 201 Created).
-  * `GET /api/v1/permissions`: Consulta del catálogo transversal de permisos del sistema. Retorna `List<PermissionResource>` (HTTP 200 OK).
+  * `GET /api/v1/tenants/{tenantId}/roles`: Listado de roles disponibles en el taller con sus permisos y estado de rol de sistema. Retorna `List<RoleResource>` (HTTP 200 OK).
+  * `POST /api/v1/tenants/{tenantId}/roles`: Creación de un rol personalizado con selección de permisos. Recibe `CreateRoleResource`, retorna `RoleResource` (HTTP 201 Created).
+  * `PUT /api/v1/tenants/{tenantId}/roles/{roleId}/permissions`: Actualización soberana de permisos concedidos a un rol (de fábrica o personalizado). Recibe `UpdateRolePermissionsResource`, retorna `RoleResource` (HTTP 200 OK).
+  * `POST /api/v1/tenants/{tenantId}/roles/{roleId}/reset-defaults`: Restablecimiento de un rol de fábrica a sus permisos predeterminados recomendados por la plataforma. Retorna `RoleResource` (HTTP 200 OK).
+  * `DELETE /api/v1/tenants/{tenantId}/roles/{roleId}`: Eliminación de un rol personalizado no asignado. Retorna HTTP 204 No Content. Rechaza con código HTTP 409 Conflict si `is_system_role == true` o si posee membresías laborales activas asociadas.
+  * `GET /api/v1/permissions`: Consulta del catálogo transversal de permisos atómicos del sistema. Retorna `List<PermissionResource>` (HTTP 200 OK).
 
 ---
 
 #### 4.3.2. Resources / DTOs
 
-Estructuras de datos inmutables (Java Records) para entrada y salida HTTP:
+Estructuras de datos inmutables (Java Records) para entrada y salida HTTP segregadas en subpaquetes dedicados:
 
-* **Peticiones (Requests):**
-  * `CreateTenantResource(String name, String legalName, String taxId, String adminEmail, String adminPassword, String adminFirstName, String adminLastName, String adminPhone)`
-  * `SignInResource(String email, String password)`
-  * `GoogleSignInResource(String idToken)`
-  * `VerifyEmailResource(String token)`
-  * `ForgotPasswordResource(String email)`
-  * `ResetPasswordResource(String token, String newPassword)`
-  * `UpdateTenantProfileResource(String name, String legalName)`
-  * `CreateBranchResource(String name, String sunatCode, Double latitude, Double longitude, int geofenceRadiusMeters)`
-  * `UpdateBranchLocationResource(Double latitude, Double longitude, int geofenceRadiusMeters)`
-  * `InviteStaffResource(String email, UUID roleId)`
-  * `AcceptInvitationResource(String token, String password, String firstName, String lastName, String phone)`
-  * `AssignRolesResource(List<UUID> roleIds)`
-  * `CreateRoleResource(String name, String description, List<UUID> permissionIds)`
-  * `UpdateCompensationResource(String salaryType, BigDecimal baseSalary, String currency)`
-* **Respuestas (Responses):**
-  * `AuthenticatedUserResource(UUID userId, String email, String fullName, String token, String tokenType, TenantSummaryResource activeTenant, List<String> permissions)`
-  * `TenantResource(UUID id, String name, String legalName, String taxId, String status, String stripeCustomerId, Instant createdAt)`
-  * `TenantSummaryResource(UUID id, String name, String taxId)`
-  * `BranchResource(UUID id, UUID tenantId, String name, String sunatCode, Double latitude, Double longitude, int geofenceRadiusMeters, boolean isActive)`
-  * `MembershipResource(UUID id, UUID tenantId, UUID userId, String employeeName, String email, String status, String salaryType, BigDecimal baseSalary, String currency, List<RoleResource> roles)`
-  * `RoleResource(UUID id, String name, String description, boolean isSystemRole, List<String> permissions)`
-  * `PermissionResource(UUID id, String name, String description, String category)`
-  * `InvitationResource(UUID id, UUID tenantId, String email, String status, Instant expiresAt)`
-  * `InvitationValidationResource(boolean valid, String email, String tenantName, String roleName)`
-  * `MessageResponseResource(String message, Instant timestamp)`
+##### 1. Peticiones HTTP (`com.andeva.atelier.platform.iam.interfaces.rest.resources.requests`)
+* `CreateTenantResource(String name, String legalName, String taxId, String adminEmail, String adminPassword, String adminFirstName, String adminLastName, String adminPhone)`
+* `SignInResource(String email, String password)`
+* `GoogleSignInResource(String idToken)`
+* `VerifyEmailResource(String token)`
+* `ForgotPasswordResource(String email)`
+* `ResetPasswordResource(String token, String newPassword)`
+* `UpdateTenantProfileResource(String name, String legalName)`
+* `CreateBranchResource(String name, String sunatCode, Double latitude, Double longitude, int geofenceRadiusMeters)`
+* `UpdateBranchLocationResource(Double latitude, Double longitude, int geofenceRadiusMeters)`
+* `InviteStaffResource(String email, UUID roleId)`
+* `AcceptInvitationResource(String token, String password, String firstName, String lastName, String phone)`
+* `AssignRolesResource(List<UUID> roleIds)`
+* `CreateRoleResource(String name, String description, List<UUID> permissionIds)`
+* `UpdateRolePermissionsResource(List<UUID> permissionIds)`
+* `UpdateCompensationResource(String salaryType, BigDecimal baseSalary, String currency)`
+
+##### 2. Respuestas HTTP (`com.andeva.atelier.platform.iam.interfaces.rest.resources.responses`)
+* `AuthenticatedUserResource(UUID userId, String email, String fullName, String token, String tokenType, TenantSummaryResource activeTenant, List<String> permissions)`
+* `TenantResource(UUID id, String name, String legalName, String taxId, String status, String stripeCustomerId, Instant createdAt)`
+* `TenantSummaryResource(UUID id, String name, String taxId)`
+* `BranchResource(UUID id, UUID tenantId, String name, String sunatCode, Double latitude, Double longitude, int geofenceRadiusMeters, boolean isActive)`
+* `MembershipResource(UUID id, UUID tenantId, UUID userId, String employeeName, String email, String status, String salaryType, BigDecimal baseSalary, String currency, List<RoleResource> roles)`
+* `RoleResource(UUID id, String name, String description, boolean isSystemRole, List<String> permissions)`
+* `PermissionResource(UUID id, String name, String description, String category)`
+* `InvitationResource(UUID id, UUID tenantId, String email, String status, Instant expiresAt)`
+* `InvitationValidationResource(boolean valid, String email, String tenantName, String roleName)`
+* `MessageResponseResource(String message, Instant timestamp)`
 
 ---
 
 #### 4.3.3. Resource Assemblers
 
-Clases transformadoras entre Resources (DTOs) y Command/Query/Aggregate:
+Clases transformadoras entre Resources (DTOs) y Command/Query/Aggregate, ubicadas en `com.andeva.atelier.platform.iam.interfaces.rest.transform`:
 
 * `CreateTenantCommandFromResourceAssembler`: Transforma `CreateTenantResource` a `CreateTenantCommand`.
 * `SignInCommandFromResourceAssembler`: Transforma `SignInResource` a `AuthenticateUserCommand`.
@@ -430,11 +717,15 @@ Clases transformadoras entre Resources (DTOs) y Command/Query/Aggregate:
 
 #### 4.3.4. Open Host Service (OHS) / Inbound ACL Facade
 
-Interfaz pública expuesta en `com.andeva.atelier.platform.iam.interfaces.acl` para el consumo seguro de otros Bounded Contexts:
+Interfaz pública expuesta en `com.andeva.atelier.platform.iam.interfaces.acl` para el consumo seguro de otros Bounded Contexts. Su implementación operativa reside en la capa de aplicación dentro de `com.andeva.atelier.platform.iam.application.acl.TenancyContextFacadeImpl`:
 
 ```java
 package com.andeva.atelier.platform.iam.interfaces.acl;
 
+import com.andeva.atelier.platform.iam.interfaces.acl.dto.BranchAclDto;
+import com.andeva.atelier.platform.iam.interfaces.acl.dto.BranchGeofenceAclDto;
+import com.andeva.atelier.platform.iam.interfaces.acl.dto.TenantAclDto;
+import com.andeva.atelier.platform.iam.interfaces.acl.dto.UserAclDto;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -450,7 +741,7 @@ public interface TenancyContextFacade {
 }
 ```
 
-*DTOs Exportados por la Fachada:*
+*DTOs Exportados por la Fachada (`com.andeva.atelier.platform.iam.interfaces.acl.dto`):*
 * `TenantAclDto(UUID id, String name, String legalName, String taxId, String status, String stripeCustomerId)`
 * `BranchAclDto(UUID id, UUID tenantId, String name, String sunatCode)`
 * `UserAclDto(UUID id, String email, String fullName, String phone, String fcmToken)`
@@ -460,7 +751,7 @@ public interface TenancyContextFacade {
 
 #### 4.3.5. Integration Events (Published Language)
 
-Eventos asíncronos emitidos por IAM para que otros Bounded Contexts reaccionen sin acoplamiento transaccional:
+Eventos asíncronos emitidos por IAM ubicados en `com.andeva.atelier.platform.iam.interfaces.events` para que otros Bounded Contexts reaccionen sin acoplamiento transaccional:
 
 * **`TenantCreatedIntegrationEvent(UUID tenantId, String name, String legalName, String taxId, Instant occurredOn)`:** Notifica a *SaaS Billing* para preparar la cuenta de suscripción y a *Invoicing* para pre-configurar el emisor tributario.
 * **`BranchCreatedIntegrationEvent(UUID branchId, UUID tenantId, String name, String sunatCode, Double latitude, Double longitude, int geofenceRadiusMeters, Instant occurredOn)`:** Notifica a *Workshop Operations* para habilitar la creación de bahías de trabajo y a *HR* para asociar turnos presenciales.
@@ -474,7 +765,7 @@ Eventos asíncronos emitidos por IAM para que otros Bounded Contexts reaccionen 
 
 #### 4.4.1. Command Services & Implementations
 
-Servicios orquestadores que ejecutan casos de uso de escritura, coordinan transacciones (`@Transactional`), validan reglas y retornan el tipo sellado `Result<T, ApplicationError>`:
+Servicios orquestadores que ejecutan casos de uso de escritura, coordinan transacciones (`@Transactional`), validan reglas y retornan el tipo sellado `Result<T, ApplicationError>`. Siguiendo el estándar canónico de *Learning Center*, las interfaces públicas de los servicios residen en `com.andeva.atelier.platform.iam.application.commandservices`, mientras que sus clases de implementación se encapsulan dentro de `com.andeva.atelier.platform.iam.application.internal.commandservices`:
 
 ##### 1. `TenantCommandService` & `TenantCommandServiceImpl`
 * `Result<Tenant, ApplicationError> handle(CreateTenantCommand command)`:
@@ -503,18 +794,22 @@ Servicios orquestadores que ejecutan casos de uso de escritura, coordinan transa
 * `Result<Void, ApplicationError> handle(ResetPasswordCommand command)`: Valida el token de restablecimiento y aplica el nuevo hash de contraseña.
 
 ##### 3. `BranchCommandService` & `BranchCommandServiceImpl`
-* `Result<Branch, ApplicationError> handle(CreateBranchCommand command)`: Incorpora una nueva sucursal física al taller y persiste el agregado.
+* `Result<Branch, ApplicationError> handle(CreateBranchCommand command)`:
+  1. Comprueba la cuota de sedes físicas autorizadas mediante `SubscriptionContextFacade.validateBranchCreationAllowed(tenantId, currentBranchCount)`: 1 sede en **Go** y **Pro**, hasta 3 sedes en **Max**, e ilimitadas o elásticas en **Enterprise**. Si el taller intenta superar su cuota, deniega la creación arrojando `QuotaExceededException` (HTTP 403 Forbidden).
+  2. Incorpora la nueva sucursal física al taller y persiste el agregado `Branch`.
+* `Result<Branch, ApplicationError> handle(UpdateBranchLocationCommand command)`: Actualiza las coordenadas GPS y el radio de geocerca perimétrica de la sede.
 
 ##### 4. `MembershipCommandService` & `MembershipCommandServiceImpl`
-* `Result<TenantMembership, ApplicationError> handle(AssignRoleToMembershipCommand command)`: Actualiza los roles del colaborador.
+* `Result<TenantMembership, ApplicationError> handle(AssignRolesToMembershipCommand command)`: Actualiza los roles del colaborador.
 * `Result<TenantMembership, ApplicationError> handle(UpdateMembershipCompensationCommand command)`: Modifica el salario base y tipo de remuneración.
 * `Result<Void, ApplicationError> handle(DeactivateMembershipCommand command)`: Desactiva el vínculo laboral.
 
 ##### 5. `InvitationCommandService` & `InvitationCommandServiceImpl`
 * `Result<Invitation, ApplicationError> handle(InviteStaffCommand command)`:
-  1. Valida que no exista una invitación pendiente previa al mismo correo en el taller.
-  2. Genera un token criptográfico seguro de 32 bytes en base64 URL-safe con validez de 7 días.
-  3. Persiste la invitación y dispara `StaffInvitedEvent`, el cual desencadena el envío del correo electrónico vía Resend.
+  1. Comprueba el cupo de colaboradores autorizados mediante `SubscriptionContextFacade.validateStaffAdditionAllowed(tenantId, currentStaffCount)`: hasta 5 miembros en **Go**, 10 miembros en **Pro**, 25 miembros en **Max**, e ilimitado en **Enterprise**. Ante excesos, deniega la invitación arrojando `QuotaExceededException` (HTTP 403 Forbidden).
+  2. Valida que no exista una invitación pendiente previa al mismo correo en el taller.
+  3. Genera un token criptográfico seguro de 32 bytes en base64 URL-safe con validez de 7 días.
+  4. Persiste la invitación y dispara `StaffInvitedEvent`, el cual desencadena el envío del correo electrónico vía Resend.
 * `Result<AuthenticatedUser, ApplicationError> handle(AcceptInvitationCommand command)`:
   1. Valida y consume el token de invitación.
   2. Crea la cuenta `User` con la contraseña y datos del colaborador.
@@ -522,14 +817,17 @@ Servicios orquestadores que ejecutan casos de uso de escritura, coordinan transa
   4. Genera y retorna la sesión autenticada con su JWT.
 
 ##### 6. `RoleCommandService` & `RoleCommandServiceImpl`
-* `Result<Role, ApplicationError> handle(CreateCustomRoleCommand command)`: Resuelve los permisos solicitados del catálogo y persiste el nuevo rol.
-* `void seedDefaultRolesAndPermissions()`: Ejecutado durante el arranque de la aplicación para asegurar que el catálogo base de permisos y roles del sistema existan en la base de datos.
+* `Result<Role, ApplicationError> handle(CreateCustomRoleCommand command)`: Resuelve los permisos solicitados del catálogo y persiste el nuevo rol personalizado para el taller.
+* `Result<Role, ApplicationError> handle(UpdateRolePermissionsCommand command)`: Reemplaza soberanamente el conjunto de permisos del rol por la nueva colección validada.
+* `Result<Role, ApplicationError> handle(ResetRoleToDefaultsCommand command)`: Restaura los permisos originales de plantilla de fábrica para un rol del sistema en el taller.
+* `Result<Void, ApplicationError> handle(DeleteCustomRoleCommand command)`: Elimina un rol personalizado validando que no sea rol de fábrica y no posea membresías activas.
+* `Result<List<Role>, ApplicationError> handle(ProvisionTenantRolesCommand command)`: Clona y persiste los ocho roles canónicos de fábrica con sus permisos base al registrarse un nuevo taller.
 
 ---
 
 #### 4.4.2. Query Services & Implementations
 
-Servicios de lectura inmutables:
+Servicios de lectura inmutables. Las interfaces públicas de consulta residen en `com.andeva.atelier.platform.iam.application.queryservices`, mientras que sus implementaciones privadas se ubican en `com.andeva.atelier.platform.iam.application.internal.queryservices`:
 
 * **`TenantQueryService` & `TenantQueryServiceImpl`:**
   * `Optional<Tenant> handle(GetTenantByIdQuery query)`
@@ -545,6 +843,7 @@ Servicios de lectura inmutables:
   * `List<TenantMembership> handle(GetMembershipsByTenantIdQuery query)`
   * `Optional<TenantMembership> handle(GetMembershipByTenantAndUserQuery query)`
 * **`RoleQueryService` & `RoleQueryServiceImpl`:**
+  * `Optional<Role> handle(GetRoleByIdQuery query)`
   * `List<Role> handle(GetRolesByTenantIdQuery query)`
   * `List<Permission> handle(GetAllPermissionsQuery query)`
 
@@ -552,7 +851,7 @@ Servicios de lectura inmutables:
 
 #### 4.4.3. Event Handlers & Listeners
 
-Clases oyentes anotadas con `@EventListener` o `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)`:
+Clases oyentes ubicadas en `com.andeva.atelier.platform.iam.application.internal.eventhandlers`, anotadas con `@EventListener` o `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)`:
 
 * **`UserDomainEventsHandler`:**
   * `@EventListener void on(VerificationTokenIssuedEvent event)`: Invoca a `ResendEmailService.sendVerificationEmail(email, tokenValue)` con plantilla HTML responsive.
@@ -565,14 +864,56 @@ Clases oyentes anotadas con `@EventListener` o `@TransactionalEventListener(phas
 
 #### 4.4.4. Outbound ACL Services
 
-Adaptadores de salida en la capa de aplicación que aíslan dependencias externas:
+Puertos de salida en la capa de aplicación ubicados en `com.andeva.atelier.platform.iam.application.internal.outbound.acl`, que aíslan dependencias externas de mensajería y autenticación:
 
-* **`ResendEmailService`:** Interfaz y servicio que modela las operaciones de correo saliente requeridas por el negocio:
+* **`ResendEmailService`:** Interfaz que modela las operaciones de correo transaccional requeridas por el negocio:
   * `void sendVerificationEmail(EmailAddress recipient, String otpCode)`
   * `void sendPasswordResetEmail(EmailAddress recipient, String resetToken)`
   * `void sendStaffInvitationEmail(EmailAddress recipient, String tenantName, String inviteToken)`
-* **`GoogleIdentityGateway`:** Interfaz y servicio para validación de firmas criptográficas de tokens emitidos por Google Identity Services:
+* **`GoogleIdentityGateway`:** Interfaz para validación de firmas criptográficas de tokens emitidos por Google Identity Services:
   * `Optional<GoogleUserPayload> verifyIdToken(String idTokenString)`
+
+---
+
+#### 4.4.5. Inbound ACL / Tenancy Facade Implementation
+
+Implementación operativa de la fachada Open Host Service (OHS), ubicada en `com.andeva.atelier.platform.iam.application.acl.TenancyContextFacadeImpl`. Esta clase implementa la interfaz pública `TenancyContextFacade` expuesta en `interfaces.acl`, orquestando internamente llamadas directas en memoria hacia los servicios de consulta (`TenantQueryService`, `BranchQueryService`, `UserQueryService`, `MembershipQueryService`) y traduciendo los agregados de dominio hacia DTOs inmutables de ACL (`TenantAclDto`, `BranchAclDto`, `UserAclDto`, `BranchGeofenceAclDto`) para el consumo seguro de otros Bounded Contexts (MRO, CRM, HR, Invoicing, Billing):
+
+```java
+package com.andeva.atelier.platform.iam.application.acl;
+
+import com.andeva.atelier.platform.iam.application.queryservices.BranchQueryService;
+import com.andeva.atelier.platform.iam.application.queryservices.MembershipQueryService;
+import com.andeva.atelier.platform.iam.application.queryservices.TenantQueryService;
+import com.andeva.atelier.platform.iam.application.queryservices.UserQueryService;
+import com.andeva.atelier.platform.iam.interfaces.acl.TenancyContextFacade;
+import com.andeva.atelier.platform.iam.interfaces.acl.dto.BranchAclDto;
+import com.andeva.atelier.platform.iam.interfaces.acl.dto.BranchGeofenceAclDto;
+import com.andeva.atelier.platform.iam.interfaces.acl.dto.TenantAclDto;
+import com.andeva.atelier.platform.iam.interfaces.acl.dto.UserAclDto;
+import org.springframework.stereotype.Service;
+
+@Service
+public class TenancyContextFacadeImpl implements TenancyContextFacade {
+    private final TenantQueryService tenantQueryService;
+    private final BranchQueryService branchQueryService;
+    private final UserQueryService userQueryService;
+    private final MembershipQueryService membershipQueryService;
+
+    public TenancyContextFacadeImpl(
+            TenantQueryService tenantQueryService,
+            BranchQueryService branchQueryService,
+            UserQueryService userQueryService,
+            MembershipQueryService membershipQueryService) {
+        this.tenantQueryService = tenantQueryService;
+        this.branchQueryService = branchQueryService;
+        this.userQueryService = userQueryService;
+        this.membershipQueryService = membershipQueryService;
+    }
+
+    // Implementaciones de métodos delegando a los query services y mapeando a DTOs de ACL
+}
+```
 
 ---
 
@@ -648,10 +989,11 @@ Clases mapeadas físicamente a la base de datos PostgreSQL, ubicadas en `com.and
 
 ##### 8. `RolePersistenceEntity` (Tabla `roles`)
 * Extiende `AuditableAbstractPersistenceEntity`.
-* `@ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "tenant_id")`: Taller dueño (nullable si es rol global del sistema).
+* `@ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "tenant_id", nullable = false)`: Taller dueño al que pertenece el rol de forma soberana.
+* `@Column(name = "code", length = 50)`: Código canónico de fábrica (ej. `ROLE_WORKSHOP_OWNER`, `ROLE_MECHANIC`), nulo para roles personalizados.
 * `@Column(name = "name", nullable = false, length = 100)`: Nombre del rol.
-* `@Column(name = "description", length = 255)`: Descripción.
-* `@Column(name = "is_system_role", nullable = false)`: Bandera de rol protegido.
+* `@Column(name = "description", length = 255)`: Descripción funcional de las facultades del rol.
+* `@Column(name = "is_system_role", nullable = false)`: Bandera que indica si el rol proviene de una plantilla de fábrica protegida contra eliminación.
 * `@ManyToMany(fetch = FetchType.EAGER)`
   `@JoinTable(name = "role_permissions", joinColumns = @JoinColumn(name = "role_id"), inverseJoinColumns = @JoinColumn(name = "permission_id"))`: Relación N:M de permisos.
 
@@ -693,79 +1035,86 @@ Clases adaptadoras que implementan las interfaces del dominio, delegan en Spring
 
 #### 4.5.4. Persistence Assemblers
 
-Mapeadores bidireccionales entre modelos de dominio puro y entidades JPA de persistencia:
+Mapeadores bidireccionales entre modelos de dominio puro y entidades JPA de persistencia, ubicados en `com.andeva.atelier.platform.iam.infrastructure.persistence.jpa.assemblers`:
 
 * `TenantPersistenceAssembler`: Transforma `Tenant` <-> `TenantPersistenceEntity`.
 * `BranchPersistenceAssembler`: Transforma `Branch` <-> `BranchPersistenceEntity`.
 * `UserPersistenceAssembler`: Transforma `User` <-> `UserPersistenceEntity`.
 * `TenantMembershipPersistenceAssembler`: Transforma `TenantMembership` <-> `TenantMembershipPersistenceEntity`.
 * `RolePersistenceAssembler`: Transforma `Role` <-> `RolePersistenceEntity`.
+* `PermissionPersistenceAssembler`: Transforma `Permission` <-> `PermissionPersistenceEntity`.
 * `InvitationPersistenceAssembler`: Transforma `Invitation` <-> `InvitationPersistenceEntity`.
 
 ---
 
 #### 4.5.5. JPA Converters & Embeddables
 
-* `TaxIdAttributeConverter`: Implementa `AttributeConverter<TaxId, String>`.
-* `EmailAddressAttributeConverter`: Implementa `AttributeConverter<EmailAddress, String>`.
-* `MoneyAttributeConverter`: Implementa `AttributeConverter<Money, BigDecimal>`.
-* `GeoPointEmbeddable`: Clase `@Embeddable` con campos `latitude: Double` y `longitude: Double`.
+Mapeadores de persistencia JPA para el soporte transparente de Value Objects del dominio sin acoplamiento tecnológico:
+
+##### 1. JPA Attribute Converters (`com.andeva.atelier.platform.iam.infrastructure.persistence.jpa.converters`)
+* `TaxIdAttributeConverter`: Implementa `AttributeConverter<TaxId, String>` para serializar el RUC a `VARCHAR(20)`.
+* `EmailAddressAttributeConverter`: Implementa `AttributeConverter<EmailAddress, String>` para serializar correos a `VARCHAR(150)`.
+* `MoneyAttributeConverter`: Implementa `AttributeConverter<Money, BigDecimal>` para serializar importes monetarios a `NUMERIC(10,2)`.
+
+##### 2. JPA Embeddables (`com.andeva.atelier.platform.iam.infrastructure.persistence.jpa.embeddables`)
+* `GeoPointEmbeddable`: Clase `@Embeddable` que mapea las coordenadas satelitales (`latitude: Double`, `longitude: Double`) dentro de la tabla relacional `branches`.
 
 ---
 
 #### 4.5.6. Seguridad e Integración con Pasarelas Externas
 
-##### 1. `WebSecurityConfiguration`
-* Configura la cadena de filtros de Spring Security 6 (`SecurityFilterChain`).
-* Política de sesión estrictamente sin estado: `SessionCreationPolicy.STATELESS`.
-* Desactiva protección CSRF para APIs REST (`csrf.disable()`).
-* Configura políticas de CORS restrictivas admitiendo orígenes configurados en variables de entorno (Web SPA y Mobile apps).
-* Reglas de autorización en endpoints:
-  * Rutas públicas permitidas con `permitAll()`:
-    * `/api/v1/authentication/**`
-    * `/api/v1/invitations/validate`
-    * `/api/v1/invitations/accept`
-    * `/swagger-ui/**`, `/v3/api-docs/**`
-  * Todas las demás rutas requieren autenticación válida: `.anyRequest().authenticated()`.
-* Inyecta el filtro `BearerAuthorizationRequestFilter` antes de `UsernamePasswordAuthenticationFilter.class`.
+La infraestructura de seguridad sigue rigurosamente el diseño modular de *Learning Center*, distribuyéndose en tres subdominios técnicos dentro de `com.andeva.atelier.platform.iam.infrastructure.security`:
 
-##### 2. `BearerAuthorizationRequestFilter`
-* Extiende `OncePerRequestFilter`.
-* Extrae la cabecera HTTP `Authorization: Bearer <jwt>`.
-* Invoca a `BearerTokenService` para verificar firma criptográfica y vigencia temporal.
-* Extrae los claims del token:
-  * `subject` (`userId`).
-  * `tenant_id` (Inquilino activo).
-  * `branch_id` (Sede activa).
-  * `roles` y `permissions` (Autoridades de seguridad).
-* Construye una instancia de `UsernamePasswordAuthenticationToken` y puebla el `SecurityContextHolder`.
+##### 1. Pipeline de Autorización Spring Filter Security (SFS) (`com.andeva.atelier.platform.iam.infrastructure.security.authorization.sfs`)
+* **`configuration/WebSecurityConfiguration.java`:**
+  * Configura la cadena de filtros de Spring Security 6 (`SecurityFilterChain`).
+  * Establece la política de sesiones como estrictamente sin estado: `SessionCreationPolicy.STATELESS`.
+  * Desactiva protección CSRF para APIs REST (`csrf.disable()`).
+  * Configura políticas de CORS restrictivas para Web SPA y clientes móviles.
+  * Reglas de autorización en endpoints:
+    * Rutas públicas permitidas con `permitAll()`: `/api/v1/authentication/**`, `/api/v1/invitations/validate`, `/api/v1/invitations/accept`, `/swagger-ui/**`, `/v3/api-docs/**`.
+    * Todas las demás rutas exigen autenticación: `.anyRequest().authenticated()`.
+  * Inyecta el filtro `BearerAuthorizationRequestFilter` antes de `UsernamePasswordAuthenticationFilter.class`.
+* **`pipeline/BearerAuthorizationRequestFilter.java`:**
+  * Extiende `OncePerRequestFilter`.
+  * Intercepta la cabecera `Authorization: Bearer <jwt>`.
+  * Invoca a `BearerTokenService` para validar firma criptográfica y vigencia temporal.
+  * Extrae los claims (`userId`, `tenantId`, `branchId`, `roles`, `permissions`).
+  * Construye la autenticación con `UsernamePasswordAuthenticationTokenBuilder` y puebla el `SecurityContextHolder`.
+* **`pipeline/UnauthorizedRequestHandlerEntryPoint.java`:**
+  * Implementa `AuthenticationEntryPoint` retornando respuestas 401 Unauthorized estructuradas bajo el estándar RFC 7807 (`application/problem+json`).
+* **`model/CustomUserDetails.java`:**
+  * Implementa `UserDetails` de Spring Security, encapsulando `userId`, `username` (email), `passwordHash`, el taller activo (`tenantId`) y la colección de autoridades otorgadas.
+* **`model/UsernamePasswordAuthenticationTokenBuilder.java`:**
+  * Factoría de construcción de instancias de autenticación seguras a partir del token JWT y el contexto de la solicitud HTTP.
+* **`services/CustomUserDetailsService.java`:**
+  * Implementa `UserDetailsService`, resolviendo la carga de identidad del usuario a partir del repositorio de persistencia `UserPersistenceRepository`.
 
-##### 3. `BearerTokenService` & `BearerTokenServiceImpl`
-* Emplea la librería `jjwt:0.12.6` con algoritmo HMAC-SHA256 y clave simétrica de 256 bits (`jwt.secret`).
-* Provee métodos:
+##### 2. Servicio de Tokens JWT (`com.andeva.atelier.platform.iam.infrastructure.security.tokens.jwt`)
+* **`BearerTokenService.java`:** Interfaz del puerto de seguridad que define los contratos de generación y validación de tokens.
+* **`services/BearerTokenServiceImpl.java`:** Implementación que emplea la biblioteca `jjwt:0.12.6` con algoritmo HMAC-SHA256 y clave simétrica de 256 bits (`jwt.secret`), exponiendo:
   * `String generateToken(User user, UUID activeTenantId, UUID activeBranchId, List<String> permissions)`
   * `boolean validateToken(String token)`
   * `Claims extractClaims(String token)`
   * `UUID extractUserId(String token)`
   * `UUID extractTenantId(String token)`
 
-##### 4. `BCryptHashingService` & `BCryptHashingServiceImpl`
-* Encapsula `org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder` con factor de coste 12.
-* Métodos:
+##### 3. Servicio Criptográfico de Hashing BCrypt (`com.andeva.atelier.platform.iam.infrastructure.security.hashing.bcrypt`)
+* **`BCryptHashingService.java`:** Interfaz del puerto de derivación de claves.
+* **`services/BCryptHashingServiceImpl.java`:** Implementación que encapsula `BCryptPasswordEncoder` con factor de coste 12, exponiendo:
   * `Password encode(String rawPassword)`
   * `boolean matches(String rawPassword, Password encodedPassword)`
 
-##### 5. `ResendEmailClient` (Integración Externa Resend HTTPS API)
-* Paquete: `com.andeva.atelier.platform.iam.infrastructure.communication.resend`
-* Implementa la comunicación con la API oficial de **Resend** (`https://api.resend.com/emails`) a través de HTTPS (puerto 443) mediante Spring `RestClient` o `WebClient`.
-* Inyecta la clave de API segura mediante variable de entorno `RESEND_API_KEY`.
-* Configura timeouts de conexión (5 segundos) y de lectura (10 segundos), con reintentos automáticos mediante directiva de resiliencia.
-* Soporta despacho de correos HTML con plantillas CSS *inlined* y remitente de dominio verificado (ej. `Atelier Security <seguridad@atelier.pe>`).
-
-##### 6. `GoogleTokenVerifierGatewayImpl` (Google OAuth2 SDK)
-* Paquete: `com.andeva.atelier.platform.iam.infrastructure.identity.google`
-* Utiliza la librería oficial `com.google.api-client:google-api-client` y `GoogleIdTokenVerifier`.
-* Valida la firma del token criptográfico contra las claves públicas de Google (`certs`) y verifica que el `audience` coincida con el `google.client-id` configurado para Atelier.
+##### 4. Adaptadores de Integración Externa (`com.andeva.atelier.platform.iam.infrastructure.external`)
+* **`resend/ResendEmailAdapter.java`:**
+  * Implementa el puerto `ResendEmailService` de la capa de aplicación.
+  * Se comunica con la API REST HTTPS oficial de Resend (`https://api.resend.com/emails`) a través del puerto 443 mediante `RestClient` / `WebClient`.
+  * Inyecta la clave segura vía variable de entorno `RESEND_API_KEY`.
+  * Configura timeouts de conexión (5s) y lectura (10s), despachando plantillas HTML responsive con remitente de dominio verificado.
+* **`google/GoogleIdentityAdapter.java`:**
+  * Implementa el puerto `GoogleIdentityGateway` de la capa de aplicación.
+  * Utiliza `GoogleIdTokenVerifier` del SDK oficial de Google.
+  * Valida la firma del token criptográfico contra las claves públicas de Google (`certs`) y verifica que el `audience` coincida con el `google.client-id` configurado para Atelier.
 
 ---
 
@@ -1076,7 +1425,9 @@ A continuación se detalla la taxonomía de los tipos estructurados que constitu
 * **`UserAlreadyExistsException` (Clase):** Lanzada si se intenta registrar una cuenta con un correo ya en uso.
 * **`InvalidCredentialsException` (Clase):** Lanzada en caso de discrepancia en contraseña o fallo de validación OAuth2.
 * **`MembershipNotFoundException` (Clase):** Lanzada al consultar una vinculación laboral inexistente para un taller y usuario.
-* **`RoleNotFoundException` (Clase):** Lanzada cuando se referencia un `RoleId` no matriculado en el catálogo.
+* **`RoleNotFoundException` (Clase):** Lanzada cuando se referencia un `RoleId` no matriculado en el catálogo del taller.
+* **`SystemRoleImmutableException` (Clase):** Lanzada al intentar eliminar un rol de fábrica protegido de la plataforma (`is_system_role == true`).
+* **`RoleInUseException` (Clase):** Lanzada al intentar eliminar un rol personalizado que cuenta con membresías laborales activas asignadas.
 * **`InvitationNotFoundException` (Clase):** Lanzada al intentar canjear un token de invitación inexistente o revocado.
 
 ##### 3. Diccionario Completo de Atributos, Métodos y Relaciones de Dominio
@@ -1099,8 +1450,8 @@ En la siguiente tabla se consolidan exhaustivamente los elementos estructurales,
 | TenantMembership | Atributos | `TenantMembershipId id`, `TenantId tenantId`, `UserId userId`, `MembershipStatus status`, `SalaryType salaryType`, `Money baseSalary`, `Set<Role> assignedRoles` | Privado | Raíz de agregado de contratación laboral. Enlaza un **Tenant** con un **User**. Agregación 1 a 1..* con **Role**. |
 | TenantMembership | Métodos de gestión de roles | `void assignRole(Role)`, `void revokeRole(RoleId)`, `boolean hasPermission(String)` | Público | Invariantes: asignación de roles restringe a roles de alcance global o pertenecientes al mismo inquilino. Evalúa pertenencia atómica de permisos. |
 | TenantMembership | Métodos contractuales | `void updateCompensation(SalaryType, Money)`, `void activate()`, `void deactivate()` | Público | Modifica esquema remunerativo validando que el importe monetario no sea negativo. Gestiona vigencia laboral en el taller. |
-| Role | Atributos | `RoleId id`, `TenantId tenantId`, `String name`, `String description`, `boolean isSystemRole`, `Set<Permission> permissions` | Privado | Raíz de agregado de seguridad RBAC. `tenantId` nulo denota alcance de sistema transversal. Agregación 1 a 1..* con **Permission**. |
-| Role | Métodos de permisos | `Role defineTenantRole(...)`, `Role defineSystemRole(...)`, `void grantPermission(Permission)`, `void revokePermission(PermissionId)` | Público | Invariantes: roles de sistema inmutables frente a eliminación o revocación estructural. Roles de inquilino editables por administradores locales. |
+| Role | Atributos | `RoleId id`, `TenantId tenantId`, `String code`, `String name`, `String description`, `boolean isSystemRole`, `Set<Permission> permissions` | Privado | Raíz de agregado de seguridad RBAC soberano. `tenantId` obligatorio. `code` opcional para roles de fábrica. Agregación 1 a 1..* con **Permission**. |
+| Role | Métodos de permisos | `Role createCustom(...)`, `Role provisionFromTemplate(...)`, `void updatePermissions(Set<Permission>)`, `void resetToTemplate(RoleTemplate)`, `void grantPermission(Permission)`, `void revokePermission(PermissionId)` | Público | Invariantes: roles de fábrica protegidos contra eliminación física o lógica pero con permisos editables y restablecibles a plantilla. Roles personalizados eliminables solo si no poseen miembros asignados. |
 | Permission | Atributos y métodos | `PermissionId id`, `String name`, `String description`, `String category`, `Permission of(...)` | Privado / Público | Entidad inmutable de privilegio atómico. Modela el recurso y acción bajo formato jerárquico. |
 | Invitation | Atributos y métodos | `InvitationId id`, `TenantId tenantId`, `EmailAddress email`, `RoleId roleId`, `String token`, `InvitationStatus status`, `Instant expiresAt`, `void accept()`, `void revoke()` | Privado / Público | Raíz de agregado para onboarding. Invariante: transición a ACCEPTED valida que la fecha actual no exceda *expiresAt* y que el estado sea PENDING. |
 | Password | Atributo y métodos | `String hashedValue`, `Password fromHash(String)` | Privado / Público | Objeto de valor inmutable (Java Record). Encapsula hash criptográfico BCrypt. Previene la exposición de contraseñas en memoria. |
@@ -1270,18 +1621,22 @@ package "iam.domain.model.aggregates" as aggregates #FDFEFE {
     class Role <<AggregateRoot>> {
         - id: RoleId
         - tenantId: TenantId
+        - code: String
         - name: String
         - description: String
         - isSystemRole: boolean
         - permissions: Set<Permission>
         --
-        + {static} defineTenantRole(tenantId: TenantId, name: String, desc: String, perms: Set<Permission>): Role
-        + {static} defineSystemRole(name: String, desc: String, perms: Set<Permission>): Role
+        + {static} createCustom(tenantId: TenantId, name: String, desc: String, perms: Set<Permission>): Role
+        + {static} provisionFromTemplate(tenantId: TenantId, template: RoleTemplate, perms: Set<Permission>): Role
+        + updatePermissions(newPermissions: Set<Permission>): void
+        + resetToTemplate(template: RoleTemplate): void
         + grantPermission(permission: Permission): void
         + revokePermission(permissionId: PermissionId): void
         + updateDetails(name: String, desc: String): void
         + id(): RoleId
         + tenantId(): TenantId
+        + code(): String
         + isSystemRole(): boolean
         + permissions(): Set<Permission>
     }
@@ -1567,6 +1922,14 @@ package "iam.domain.exceptions" as exceptions #FDFEFE {
         + RoleNotFoundException(roleId: RoleId)
     }
 
+    class SystemRoleImmutableException <<Exception>> {
+        + SystemRoleImmutableException(roleId: RoleId)
+    }
+
+    class RoleInUseException <<Exception>> {
+        + RoleInUseException(roleId: RoleId, count: long)
+    }
+
     class InvitationNotFoundException <<Exception>> {
         + InvitationNotFoundException(token: String)
     }
@@ -1627,6 +1990,8 @@ DomainException <|-- UserAlreadyExistsException
 DomainException <|-- InvalidCredentialsException
 DomainException <|-- MembershipNotFoundException
 DomainException <|-- RoleNotFoundException
+DomainException <|-- SystemRoleImmutableException
+DomainException <|-- RoleInUseException
 DomainException <|-- InvitationNotFoundException
 
 ' Enlaces de uso con Repositorios
@@ -1832,17 +2197,21 @@ classDiagram
     class Role {
         -id: RoleId
         -tenantId: TenantId
+        -code: String
         -name: String
         -description: String
         -isSystemRole: boolean
         -permissions: Set~Permission~
-        +defineTenantRole(tenantId: TenantId, name: String, desc: String, perms: Set~Permission~)$ Role
-        +defineSystemRole(name: String, desc: String, perms: Set~Permission~)$ Role
+        +createCustom(tenantId: TenantId, name: String, desc: String, perms: Set~Permission~)$ Role
+        +provisionFromTemplate(tenantId: TenantId, template: RoleTemplate, perms: Set~Permission~)$ Role
+        +updatePermissions(newPermissions: Set~Permission~) void
+        +resetToTemplate(template: RoleTemplate) void
         +grantPermission(permission: Permission) void
         +revokePermission(permissionId: PermissionId) void
         +updateDetails(name: String, desc: String) void
         +id() RoleId
         +tenantId() TenantId
+        +code() String
         +isSystemRole() boolean
         +permissions() Set~Permission~
     }
@@ -2182,15 +2551,16 @@ Representa la relación contractual formal entre un usuario y un taller automotr
 
 **8. Tabla Física: `roles` (Roles de Seguridad RBAC y Alcance Organizacional)**
 
-Define las agrupaciones de privilegios de acceso al sistema, diferenciando roles nativos de plataforma de roles personalizados creados por cada taller.
+Define las agrupaciones de privilegios de acceso al sistema, conteniendo tanto los roles aprovisionados de fábrica como los roles personalizados formulados soberanamente por cada taller.
 
 | Columna | Tipo de Dato Físico | Nulidad | Valor por Defecto | Rol / Restricción | Descripción Técnica y Regla de Persistencia |
 | :--- | :--- | :---: | :--- | :--- | :--- |
 | `id` | `UUID` | NOT NULL | `gen_random_uuid()` | Clave Primaria (`pk_roles`) | Identificador único del rol de seguridad. |
-| `tenant_id` | `UUID` | NULL | Ninguno | Clave Foránea (`fk_roles_tenant_id`) | Taller propietario en `tenants(id)` (`ON DELETE CASCADE`). Es `NULL` si es un rol global de sistema. |
+| `tenant_id` | `UUID` | NOT NULL | Ninguno | Clave Foránea (`fk_roles_tenant_id`) | Taller propietario en `tenants(id)` (`ON DELETE CASCADE`). Obligatorio para todos los roles. |
+| `code` | `VARCHAR(50)` | NULL | Ninguno | Código Canónico de Fábrica | Identificador canónico para roles aprovisionados de fábrica (ej. ROLE_WORKSHOP_OWNER, ROLE_MECHANIC), null para roles personalizados. |
 | `name` | `VARCHAR(100)` | NOT NULL | Ninguno | Denominación de Rol | Nombre legible del rol (ej. "Administrador de Taller", "Mecánico de Patio", "Jefe de Almacén"). |
 | `description` | `VARCHAR(255)` | NOT NULL | Ninguno | Alcance Operativo | Glosa descriptiva que especifica las facultades y responsabilidades asignadas al rol. |
-| `is_system_role` | `BOOLEAN` | NOT NULL | `FALSE` | Bandera de Sistema | Si es `TRUE`, representa un rol predeterminado de plataforma protegido contra mutación o borrado. |
+| `is_system_role` | `BOOLEAN` | NOT NULL | `FALSE` | Bandera de Sistema | Si es `TRUE`, representa un rol aprovisionado a partir de la plantilla de fábrica, protegido contra eliminación pero con permisos soberanamente editables. |
 | `created_at` | `TIMESTAMPTZ` | NOT NULL | `clock_timestamp()` | Auditoría Inmutable | Marca temporal UTC de registro del rol. |
 | `updated_at` | `TIMESTAMPTZ` | NOT NULL | `clock_timestamp()` | Auditoría Mutable | Marca temporal UTC de última modificación del rol. |
 | `version` | `BIGINT` | NOT NULL | `0` | Bloqueo Optimista | Versión de control concurrente. |
@@ -2199,8 +2569,10 @@ Define las agrupaciones de privilegios de acceso al sistema, diferenciando roles
 *Restricciones e Índices Físicos:*
 * `pk_roles`: PRIMARY KEY (`id`).
 * `fk_roles_tenant_id`: FOREIGN KEY (`tenant_id`) REFERENCES `tenants` (`id`) ON DELETE CASCADE.
-* `chk_roles_tenant_or_system`: CHECK ((`is_system_role` = TRUE AND `tenant_id` IS NULL) OR (`is_system_role` = FALSE AND `tenant_id` IS NOT NULL)).
+* `uk_roles_tenant_name`: UNIQUE (`tenant_id`, `name`).
+* `uk_roles_tenant_code`: UNIQUE (`tenant_id`, `code`) WHERE `code IS NOT NULL`.
 * `idx_roles_tenant_name`: CREATE INDEX `idx_roles_tenant_name` ON `roles` (`tenant_id`, `name`). Optimiza la resolución y validación de nombres de rol por taller.
+* `idx_roles_tenant_code`: CREATE INDEX `idx_roles_tenant_code` ON `roles` (`tenant_id`, `code`) WHERE `code IS NOT NULL`. Acelera la búsqueda de roles de fábrica por código en el taller.
 
 **9. Tabla Física: `permissions` (Catálogo Canónico de Permisos del Sistema)**
 
@@ -2522,7 +2894,8 @@ package "PostgreSQL 16 (API Application - Backend Central)" as pg_backend #F8F9F
     entity "roles" as roles <<table, PostgreSQL>> #FFFFFF {
         * id : UUID <<PK>>
         --
-        tenant_id : UUID <<FK>>
+        * tenant_id : UUID <<FK>>
+        code : VARCHAR(50)
         * name : VARCHAR(100)
         * description : VARCHAR(255)
         * is_system_role : BOOLEAN
@@ -2534,10 +2907,12 @@ package "PostgreSQL 16 (API Application - Backend Central)" as pg_backend #F8F9F
         <b>Restricciones (Constraints):</b>
         + pk_roles : PRIMARY KEY (id)
         + fk_roles_tenant_id : FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
-        + chk_roles_tenant_or_system : CHECK ((is_system_role = TRUE AND tenant_id IS NULL) OR (is_system_role = FALSE AND tenant_id IS NOT NULL))
+        + uk_roles_tenant_name : UNIQUE (tenant_id, name)
+        + uk_roles_tenant_code : UNIQUE (tenant_id, code) WHERE code IS NOT NULL
         --
         <b>Índices Físicos (B-Tree):</b>
         + idx_roles_tenant_name : (tenant_id, name)
+        + idx_roles_tenant_code : (tenant_id, code) WHERE code IS NOT NULL
     }
 
     entity "role_permissions" as role_permissions <<table, PostgreSQL>> #FFFFFF {
@@ -2840,7 +3215,8 @@ erDiagram
 
     roles {
         uuid id PK "Identificador de rol de seguridad"
-        uuid tenant_id FK "Taller propietario o null si es sistema"
+        uuid tenant_id FK "Taller propietario"
+        varchar code "Codigo canonico de fabrica o null"
         varchar name "Nombre legible del rol"
         varchar description "Alcance de los privilegios"
         boolean is_system_role "Proteccion contra borrado"
@@ -2933,10 +3309,8 @@ La arquitectura de persistencia de Atelier adopta el patrón de base de datos co
    ```
    Si el identificador no pertenece al taller en sesión, la base de datos retorna un conjunto vacío de resultados y la capa de aplicación dispara una excepción de tipo `EntityNotFoundException` (código HTTP 404), evitando revelar si el recurso existe en la plataforma y mitigando vectores de enumeración de recursos.
 
-3. **Convivencia Segura de Roles Globales de Sistema y Roles de Inquilino:**
-   La tabla `roles` implementa la restricción de integridad declarativa `chk_roles_tenant_or_system`:
-   $$\left( \text{is\_system\_role} = \text{TRUE} \land \text{tenant\_id IS NULL} \right) \lor \left( \text{is\_system\_role} = \text{FALSE} \land \text{tenant\_id IS NOT NULL} \right)$$
-   Esta regla física garantiza que los roles estándar provistos por la plataforma (tales como "Administrador de Plataforma" o "Mecánico Base") posean alcance transversal sin pertenecer a ningún taller específico, mientras que los roles personalizados definidos por los propietarios del taller queden rígidamente confinados a su respectivo `tenant_id` con borrado en cascada ante una baja contractual.
+3. **Aprovisionamiento Automático y Soberanía de Roles por Taller:**
+   La tabla `roles` implementa un modelo de aislamiento multi-inquilino estricto donde la columna `tenant_id` es obligatoria para cada registro. Al darse de alta un taller mediante `POST /api/v1/auth/sign-up`, el servicio `RoleProvisioningService` clona automáticamente las ocho plantillas de fábrica de la plataforma asignándoles el identificador `tenant_id` del taller e inicializando sus permisos predeterminados en `role_permissions`. Esta arquitectura asegura que cada taller sea soberano sobre sus roles, pudiendo personalizar permisos o restablecerlos a los valores recomendados de fábrica mediante `POST /api/v1/tenants/{tenantId}/roles/{roleId}/reset-defaults` sin alterar la configuración de los demás inquilinos de la plataforma.
 
 ###### 5.2. Resguardo Criptográfico de Credenciales y Ciclo de Vida de Tokens Efímeros
 

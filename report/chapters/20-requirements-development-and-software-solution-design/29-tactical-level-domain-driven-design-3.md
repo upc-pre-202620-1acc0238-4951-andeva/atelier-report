@@ -74,31 +74,41 @@ Voucher\allowbreak Payment & Asiento de amortización financiera del comprobante
 \hline
 VoucherId & Identificador único universal fuertemente tipado para el comprobante electrónico. \\*
 \hline
-\textbf{Categoría} & Objeto de Valor (ID) \\*
+\textbf{Categoría} & Identificador Fuertemente Tipado \\*
 \hline
 \textbf{Relaciones} & Registro inmutable de identidad basado en UUID. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak domain.\allowbreak model.\allowbreak ids} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
 Series\allowbreak ConfigurationId & Identificador único universal fuertemente tipado para la configuración de series fiscales. \\*
 \hline
-\textbf{Categoría} & Objeto de Valor (ID) \\*
+\textbf{Categoría} & Identificador Fuertemente Tipado \\*
 \hline
 \textbf{Relaciones} & Registro inmutable de identidad basado en UUID. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak domain.\allowbreak model.\allowbreak ids} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
 PaymentId & Identificador único universal fuertemente tipado para asientos de amortización financiera. \\*
 \hline
-\textbf{Categoría} & Objeto de Valor (ID) \\*
+\textbf{Categoría} & Identificador Fuertemente Tipado \\*
 \hline
 \textbf{Relaciones} & Registro inmutable de identidad basado en UUID. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak domain.\allowbreak model.\allowbreak ids} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Voucher\allowbreak LineId & Identificador único universal fuertemente tipado para partidas individuales del comprobante. \\*
+\hline
+\textbf{Categoría} & Identificador Fuertemente Tipado \\*
+\hline
+\textbf{Relaciones} & Registro inmutable de identidad basado en UUID. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak domain.\allowbreak model.\allowbreak ids} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
@@ -162,13 +172,43 @@ SunatResponse & Metadatos fiscales del dictamen del PSE y SUNAT con código de r
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
+Voided\allowbreak Info & Registro probatorio formal de la causal justificada y timestamp de la anulación o comunicación de baja. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor \\*
+\hline
+\textbf{Relaciones} & Registro inmutable referenciado por ElectronicVoucher. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Cash\allowbreak Flow\allowbreak Movement & Registro inmutable de movimiento financiero individual consolidado en el flujo de caja del taller. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor \\*
+\hline
+\textbf{Relaciones} & Registro inmutable referenciado en liquidaciones y reportes de tesorería. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Cash\allowbreak Flow\allowbreak Summary & Consolidado analítico de ingresos, egresos y balance neto en el cierre de caja de la sucursal. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor \\*
+\hline
+\textbf{Relaciones} & Registro inmutable producido por servicios de agregación de flujo monetario. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
 VoucherType & Catálogo oficial de tipos de comprobante según tabla 10 de SUNAT (Factura 01, Boleta 03, Nota de Crédito 07). \\*
 \hline
 \textbf{Categoría} & Enumeración de Dominio \\*
 \hline
 \textbf{Relaciones} & Utilizada por ElectronicVoucher y SeriesConfiguration. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak domain.\allowbreak model.\allowbreak enums} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
@@ -178,7 +218,7 @@ VoucherStatus & Estados del ciclo de vida tributario del comprobante (DRAFT, ISS
 \hline
 \textbf{Relaciones} & Utilizada por la raíz de agregado ElectronicVoucher. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak domain.\allowbreak model.\allowbreak enums} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
@@ -188,7 +228,7 @@ PaymentMethod & Medios de pago autorizados para liquidación en caja (CASH, CRED
 \hline
 \textbf{Relaciones} & Utilizada por la entidad dependiente VoucherPayment. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak domain.\allowbreak model.\allowbreak enums} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
@@ -198,7 +238,7 @@ PaymentStatus & Estados de la transacción financiera de liquidación (PENDING, 
 \hline
 \textbf{Relaciones} & Utilizada por la entidad dependiente VoucherPayment. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak domain.\allowbreak model.\allowbreak enums} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
@@ -208,7 +248,7 @@ VoucherItemType & Clasificación comercial del renglón facturado entre repuesto
 \hline
 \textbf{Relaciones} & Utilizada por la entidad dependiente VoucherLine. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak domain.\allowbreak model.\allowbreak enums} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
@@ -218,7 +258,7 @@ Credit\allowbreak NoteReason & Catálogo 09 de SUNAT para causales legales de em
 \hline
 \textbf{Relaciones} & Utilizada en emisión y validación de notas de crédito. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak domain.\allowbreak model.\allowbreak enums} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
@@ -606,7 +646,7 @@ En la @tbl:invoicing-lines-payments-members se detallan los miembros, tipos y re
 \hline
 id & Identificador único universal de la línea de detalle. \\*
 \hline
-\textbf{Tipo o Firma} & \texttt{UUID} \\*
+\textbf{Tipo o Firma} & \texttt{VoucherLineId} \\*
 \hline
 \textbf{Ámbito de Acceso} & Privado \\
 \hline
@@ -906,16 +946,16 @@ activate & Restablece la operatividad de la serie para nuevos comprobantes en la
 \renewcommand{\arraystretch}{1.0}
 *Nota.* Especificación de miembros y métodos de la raíz de agregado SeriesConfiguration del paquete com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak invoicing.\allowbreak domain.\allowbreak model.\allowbreak aggregates.
 
-**Objetos de Valor y Enumeraciones de Invoicing & Compliance**
+**Identificadores Tipados, Objetos de Valor y Enumeraciones de Invoicing & Compliance**
 
-La consistencia y semántica de las magnitudes tributarias y financieras se salvaguardan mediante objetos de valor inmutables implementados como registros de Java. Al centralizar la validación de formato y rango en sus constructores compactos, estos componentes erradican la presencia de estados inválidos en el dominio. Destaca **TaxCalculation**, el cual consolida la base imponible neta, el débito fiscal de IGV y el importe total facturado, verificando la estricta concordancia aritmética de sus importes.
+La consistencia y semántica de las magnitudes tributarias y financieras se salvaguardan mediante identificadores fuertemente tipados y objetos de valor inmutables implementados como registros de Java. Al centralizar la validación de formato y rango en sus constructores compactos, estos componentes erradican la presencia de estados inválidos en el dominio. Destaca **TaxCalculation**, el cual consolida la base imponible neta, el débito fiscal de IGV y el importe total facturado, verificando la estricta concordancia aritmética de sus importes.
 
 Complementariamente, el dominio tipifica las dimensiones normativas mediante enumeraciones que reflejan los catálogos oficiales de la SUNAT. Entre ellas, **VoucherType** categoriza los comprobantes autorizados (código 01 para facturas, 03 para boletas y 07 para notas de crédito), **CreditNoteReason** sistematiza las causales admitidas para rectificaciones comerciales, **VoucherStatus** delimita la máquina de estados del documento y **PaymentMethod** clasifica los canales de liquidación aceptados en caja.
 
-En la @tbl:invoicing-value-objects se detallan los objetos de valor inmutables y las enumeraciones reglamentarias que vertebran la semántica fiscal del contexto.
+En la @tbl:invoicing-value-objects se detallan los identificadores tipados, los objetos de valor inmutables y las enumeraciones reglamentarias que vertebran la semántica fiscal del contexto.
 
 \renewcommand{\arraystretch}{1.25}\begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
-\caption{Objetos de Valor y Enumeraciones de Invoicing \& Compliance} \label{tbl:invoicing-value-objects} \\
+\caption{Identificadores Tipados, Objetos de Valor y Enumeraciones de Invoicing \& Compliance} \label{tbl:invoicing-value-objects} \\
 \hline
 \thfirst{Componente Inmutable} & \thcell{Definición de Atributos y Reglas de Validación} \\
 \hline
@@ -924,23 +964,29 @@ En la @tbl:invoicing-value-objects se detallan los objetos de valor inmutables y
 \thfirst{Componente Inmutable} & \thcell{Definición de Atributos y Reglas de Validación} \\
 \hline
 \endhead
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} VoucherId} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Identificador Tipado:} VoucherId} \\*
 \hline
 \textbf{Atributos Clave} & \texttt{value: UUID} \\*
 \hline
 \textbf{Restricciones y Reglas} & Identificador unívoco universal del comprobante electrónico de pago. Inmutable y no nulo. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} SeriesConfigurationId} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Identificador Tipado:} SeriesConfigurationId} \\*
 \hline
 \textbf{Atributos Clave} & \texttt{value: UUID} \\*
 \hline
 \textbf{Restricciones y Reglas} & Identificador unívoco universal de la configuración de series fiscales. Inmutable y no nulo. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} PaymentId} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Identificador Tipado:} PaymentId} \\*
 \hline
 \textbf{Atributos Clave} & \texttt{value: UUID} \\*
 \hline
 \textbf{Restricciones y Reglas} & Identificador unívoco universal del asiento de pago financiero en caja. Inmutable y no nulo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Identificador Tipado:} VoucherLineId} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{value: UUID} \\*
+\hline
+\textbf{Restricciones y Reglas} & Identificador unívoco universal de la partida individual del comprobante. Inmutable y no nulo. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} VoucherSerie} \\*
 \hline
@@ -984,6 +1030,18 @@ En la @tbl:invoicing-value-objects se detallan los objetos de valor inmutables y
 \hline
 \textbf{Restricciones y Reglas} & Registro probatorio formal de la causal justificada y timestamp de la anulación o comunicación de baja. \\
 \hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} CashFlowMovement} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{movementId: UUID}, \texttt{voucherId: VoucherId}, \texttt{amount: Money}, \texttt{type: String}, \texttt{method: PaymentMethod}, \texttt{occurredAt: Instant} \\*
+\hline
+\textbf{Restricciones y Reglas} & Registro inmutable que condensa un movimiento financiero individual en el flujo de caja del taller. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} CashFlowSummary} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{tenantId: TenantId}, \texttt{branchId: BranchId}, \texttt{period: LocalDate}, \texttt{totalIncome: Money}, \texttt{totalRefunds: Money}, \texttt{netBalance: Money} \\*
+\hline
+\textbf{Restricciones y Reglas} & Registro inmutable que condensa el balance analítico de ingresos, reembolsos y saldo neto para el periodo consultado. \\
+\hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Enumeración de Dominio:} VoucherType} \\*
 \hline
 \textbf{Atributos Clave} & Constantes con código oficial de SUNAT \\*
@@ -1022,7 +1080,7 @@ En la @tbl:invoicing-value-objects se detallan los objetos de valor inmutables y
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-*Nota.* Componentes inmutables y enumeraciones legales de SUNAT del paquete com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak invoicing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects.
+*Nota.* Componentes inmutables organizados en los subpaquetes modulares ids, valueobjects y enums de com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak invoicing.\allowbreak domain.\allowbreak model.
 
 **Servicios de Dominio de Invoicing & Compliance**
 
@@ -1318,7 +1376,7 @@ Issue\allowbreak Voucher\allowbreak Request & Carga útil inmutable para la emis
 \hline
 \textbf{Relaciones} & Mapeado por ElectronicVoucherResourceAssembler hacia IssueElectronicVoucherCommand. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -1328,7 +1386,7 @@ Issue\allowbreak Credit\allowbreak Note\allowbreak Request & Carga útil inmutab
 \hline
 \textbf{Relaciones} & Mapeado por ElectronicVoucherResourceAssembler hacia IssueCreditNoteCommand. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -1338,7 +1396,7 @@ Void\allowbreak Voucher\allowbreak Request & Carga útil inmutable para comunica
 \hline
 \textbf{Relaciones} & Mapeado por ElectronicVoucherResourceAssembler hacia VoidElectronicVoucherCommand. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -1348,7 +1406,7 @@ Register\allowbreak Payment\allowbreak Request & Carga útil inmutable para regi
 \hline
 \textbf{Relaciones} & Mapeado por VoucherPaymentResourceAssembler hacia RegisterVoucherPaymentCommand. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -1358,7 +1416,17 @@ Configure\allowbreak Series\allowbreak Request & Carga útil inmutable para el a
 \hline
 \textbf{Relaciones} & Mapeado por SeriesConfigurationResourceAssembler hacia ConfigureSeriesCommand. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Voucher\allowbreak Line\allowbreak Request & Carga útil inmutable para detallar una partida individual gravada de repuesto o servicio dentro de la emisión o rectificación del comprobante. \\*
+\hline
+\textbf{Categoría} & Recurso de Petición \\*
+\hline
+\textbf{Relaciones} & Componente subordinado de IssueVoucherRequest e IssueCreditNoteRequest. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -1368,7 +1436,7 @@ Electronic\allowbreak Voucher\allowbreak Resource & Representación pública int
 \hline
 \textbf{Relaciones} & Producido por ElectronicVoucherResourceAssembler desde ElectronicVoucher. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -1378,7 +1446,7 @@ Electronic\allowbreak Voucher\allowbreak Summary\allowbreak Resource & Proyecci�
 \hline
 \textbf{Relaciones} & Producido por ElectronicVoucherResourceAssembler desde ElectronicVoucher. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -1388,7 +1456,7 @@ Voucher\allowbreak Line\allowbreak Resource & Detalle monetario y tributario de 
 \hline
 \textbf{Relaciones} & Producido por ElectronicVoucherResourceAssembler desde VoucherLine. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -1398,7 +1466,7 @@ Voucher\allowbreak Payment\allowbreak Resource & Constancia inmutable de amortiz
 \hline
 \textbf{Relaciones} & Producido por VoucherPaymentResourceAssembler desde VoucherPayment. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -1408,7 +1476,7 @@ Daily\allowbreak Cash\allowbreak Summary\allowbreak Resource & Balance financier
 \hline
 \textbf{Relaciones} & Producido por VoucherPaymentResourceAssembler desde agregaciones de VoucherPayment. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -1418,7 +1486,7 @@ Series\allowbreak Configuration\allowbreak Resource & Representación pública d
 \hline
 \textbf{Relaciones} & Producido por SeriesConfigurationResourceAssembler desde SeriesConfiguration. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -1428,7 +1496,7 @@ Cash\allowbreak Flow\allowbreak Report\allowbreak Resource & Estado consolidado 
 \hline
 \textbf{Relaciones} & Producido por FinancialReportResourceAssembler desde CashFlowReport del servicio de consulta. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -1438,7 +1506,7 @@ Cash\allowbreak Flow\allowbreak Movement\allowbreak Resource & Registro cronoló
 \hline
 \textbf{Relaciones} & Componente subordinado de CashFlowReportResource. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -1492,6 +1560,56 @@ Invoicing\allowbreak Context\allowbreak Facade & Interfaz de contexto abierto pa
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
+Generate\allowbreak Voucher\allowbreak From\allowbreak Work\allowbreak Order\allowbreak Command\allowbreak Dto & Contrato inmutable para solicitar la emisión y despacho fiscal de un comprobante a partir de una orden de trabajo liquidada. \\*
+\hline
+\textbf{Categoría} & DTO de Integración de Fachada \\*
+\hline
+\textbf{Relaciones} & Consumido por el método generateVoucherFromWorkOrder de InvoicingContextFacade. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak interfaces.\allowbreak acl.\allowbreak dto} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Work\allowbreak Order\allowbreak Item\allowbreak Billing\allowbreak Dto & Detalle inmutable de ítem o labor facturable dentro del comando de liquidación de la orden de trabajo. \\*
+\hline
+\textbf{Categoría} & DTO de Integración de Fachada \\*
+\hline
+\textbf{Relaciones} & Componente subordinado de GenerateVoucherFromWorkOrderCommandDto. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak interfaces.\allowbreak acl.\allowbreak dto} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Voucher\allowbreak Generation\allowbreak Result\allowbreak Dto & Respuesta inmutable que confirma el resultado de la facturación electrónica con identificadores y enlace PDF. \\*
+\hline
+\textbf{Categoría} & DTO de Integración de Fachada \\*
+\hline
+\textbf{Relaciones} & Producido por el método generateVoucherFromWorkOrder de InvoicingContextFacade. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak interfaces.\allowbreak acl.\allowbreak dto} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Voucher\allowbreak Summary\allowbreak Dto & Proyección inmutable con el resumen del estado y pagos de un comprobante vinculado a una orden de trabajo. \\*
+\hline
+\textbf{Categoría} & DTO de Integración de Fachada \\*
+\hline
+\textbf{Relaciones} & Retornado por el método getVouchersByWorkOrderId de InvoicingContextFacade. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak interfaces.\allowbreak acl.\allowbreak dto} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Customer\allowbreak Fiscal\allowbreak Info\allowbreak Dto & Datos fiscales y tributarios del cliente consumidor para consignación formal en el comprobante electrónico. \\*
+\hline
+\textbf{Categoría} & DTO de Integración de Fachada \\*
+\hline
+\textbf{Relaciones} & Utilizado por los contratos de integración de la fachada InvoicingContextFacade. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak interfaces.\allowbreak acl.\allowbreak dto} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
 Electronic\allowbreak Voucher\allowbreak Issued\allowbreak Integration\allowbreak Event & Notifica la emisión legal formal del comprobante con su numeración fiscal correlativa para actualización contable de la orden de trabajo. \\*
 \hline
 \textbf{Categoría} & Evento de Integración \\*
@@ -1522,7 +1640,17 @@ Voucher\allowbreak Rejected\allowbreak By\allowbreak Sunat\allowbreak Integratio
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
-Voucher\allowbreak Payment\allowbreak Received\allowbreak Integration\allowbreak Event & Notifica el asentamiento de una amortización monetaria para verificar si se alcanzó la cancelación total y habilitar salida del vehículo. \\*
+Voucher\allowbreak Voided\allowbreak Integration\allowbreak Event & Notifica la anulación formal o comunicación de baja del comprobante ante SUNAT para reversión contable intermodular. \\*
+\hline
+\textbf{Categoría} & Evento de Integración \\*
+\hline
+\textbf{Relaciones} & Publicado vía Outbox. Consumido por Workshop Operations (MRO) y Contabilidad. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak interfaces.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Voucher\allowbreak Payment\allowbreak Registered\allowbreak Integration\allowbreak Event & Notifica el asentamiento de una amortización monetaria para verificar si se alcanzó la cancelación total y habilitar salida del vehículo. \\*
 \hline
 \textbf{Categoría} & Evento de Integración \\*
 \hline
@@ -1562,7 +1690,7 @@ Payroll\allowbreak Paid\allowbreak Integration\allowbreak Event & Notifica la di
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-*Nota.* Catálogo consolidado de componentes pertenecientes al paquete canónico com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak invoicing.\allowbreak interfaces.
+*Nota.* Catálogo consolidado de componentes pertenecientes a los subpaquetes controllers, resources (requests y responses), transform, acl (y dto) y events de com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak invoicing.\allowbreak interfaces.
 
 **Controladores REST y Endpoints de Comunicación de Invoicing & Compliance**
 
@@ -1668,7 +1796,7 @@ En la @tbl:invoicing-controllers-and-endpoints se detallan los recursos de petic
 
 **Recursos DTO de Petición y Respuesta del Perímetro Fiscal**
 
-La transferencia de información entre el perímetro exterior y el núcleo transaccional se modela a través de objetos de transferencia de datos inmutables estructurados como registros de Java. En las operaciones de mutación, componentes como **IssueVoucherRequest**, **IssueCreditNoteRequest**, **VoidVoucherRequest**, **RegisterPaymentRequest** y **ConfigureSeriesRequest** aplican validaciones semánticas tempranas sobre importes monetarios positivos, formatos de serie reglamentarios y completitud de datos tributarios.
+La transferencia de información entre el perímetro exterior y el núcleo transaccional se modela a través de objetos de transferencia de datos inmutables estructurados como registros de Java. En las operaciones de mutación, componentes como **IssueVoucherRequest**, **IssueCreditNoteRequest**, **VoidVoucherRequest**, **VoucherLineRequest**, **RegisterPaymentRequest** y **ConfigureSeriesRequest** aplican validaciones semánticas tempranas sobre importes monetarios positivos, formatos de serie reglamentarios y completitud de datos tributarios.
 
 En los flujos de respuesta, **ElectronicVoucherResource** proporciona la vista integral del comprobante fiscal consolidando los importes desglosados de subtotal e impuesto, el catálogo de partidas gravadas y los enlaces seguros a los entregables oficiales de la SUNAT. Complementariamente, proyecciones como **ElectronicVoucherSummaryResource**, **DailyCashSummaryResource** y **CashFlowReportResource** suministran datos agregados y optimizados para cuadrículas de consulta interactiva y balances financieros en tiempo real.
 
@@ -1708,7 +1836,7 @@ En la @tbl:invoicing-resources-dtos se especifican los atributos clave, tipos fu
 \hline
 \textbf{Validación de Integridad} & Anotación \texttt{@NotBlank} y patrón \texttt{@Pattern(regexp = "\textasciicircum(PRODUCT|SERVICE)\$")} para naturaleza del ítem, \texttt{@NotBlank} y \texttt{@Size(max = 250)} para denominación y \texttt{@NotNull} junto a \texttt{@Positive} para cantidad física e importe unitario con IGV incluido. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Customer\allowbreak Fiscal\allowbreak Info\allowbreak Dto \quad (\textit{Categoría:} Petición)} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Customer\allowbreak Fiscal\allowbreak Info\allowbreak Request \quad (\textit{Categoría:} Petición)} \\*
 \hline
 \textbf{Atributos Principales} & \texttt{taxId}, \texttt{legalName}, \texttt{fiscalAddress}, \texttt{documentType} \\*
 \hline
@@ -1744,7 +1872,7 @@ En la @tbl:invoicing-resources-dtos se especifican los atributos clave, tipos fu
 \hline
 \textbf{Validación de Integridad} & Representación inmutable de partida gravada con desglose de valor unitario sin impuesto, cuota de IGV e importe liquidado al consumidor. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Digital\allowbreak Receipt\allowbreak Urls\allowbreak Dto \quad (\textit{Categoría:} Respuesta)} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Digital\allowbreak Receipt\allowbreak Urls\allowbreak Response \quad (\textit{Categoría:} Respuesta)} \\*
 \hline
 \textbf{Atributos Principales} & \texttt{pdfUrl}, \texttt{xmlUrl}, \texttt{cdrUrl} \\*
 \hline
@@ -1788,7 +1916,7 @@ En la @tbl:invoicing-resources-dtos se especifican los atributos clave, tipos fu
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-*Nota.* Componentes ubicados en el paquete com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak invoicing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.
+*Nota.* Componentes ubicados en com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak invoicing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources (subpaquetes requests y responses).
 
 **Ensambladores de Recursos y Transformación de Tipos**
 
@@ -1932,21 +2060,13 @@ En la @tbl:invoicing-facade-methods se exponen las signaturas de operaciones, pa
 \hline
 \textbf{Propósito} & Verificación perimetral de cancelación total del importe facturado para autorizar el pase de salida física del automóvil. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método de Fachada:} \texttt{getDailyRevenueSummary}} \\*
-\hline
-\textbf{Parámetros y Retorno} & \texttt{UUID tenantId,\allowbreak  UUID branchId,\allowbreak  LocalDate date} $\longrightarrow$ \allowbreak \texttt{Daily\allowbreak Revenue\allowbreak Summary\allowbreak Dto} \\*
-\hline
-\textbf{Módulos Consumidores} & Dashboard Ejecutivo, Inteligencia de Negocio \\*
-\hline
-\textbf{Propósito} & Agregación en memoria de cobros y facturación diaria de la sucursal para monitorización gerencial en tiempo real. \\
-\hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
 *Nota.* Componentes pertenecientes al paquete com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak invoicing.\allowbreak interfaces.\allowbreak acl.
 
 **Eventos de Integración y Coordinación Asíncrona Intermodular**
 
-La coordinación transaccional desacoplada con el ecosistema de Atelier Platform se articula a través de un lenguaje publicado compuesto por eventos de integración inmutables. El contexto publica hechos fiscales concluidos que notifican la emisión de comprobantes, la obtención de resoluciones CDR aprobatorias o rechazadas por la SUNAT y el registro de recaudaciones de fondos en caja, asegurando que módulos como CRM, MRO y Notificaciones reaccionen de manera eventual y autónoma.
+La coordinación transaccional desacoplada con el ecosistema de Atelier Platform se articula a través de un lenguaje publicado compuesto por eventos de integración inmutables. El contexto publica hechos fiscales concluidos que notifican la emisión de comprobantes, la obtención de resoluciones CDR aprobatorias o rechazadas por la SUNAT, la anulación formal de comprobantes y el registro de recaudaciones de fondos en caja, asegurando que módulos como CRM, MRO y Notificaciones reaccionen de manera eventual y autónoma.
 
 De forma complementaria, el contexto suscribe eventos de integración emitidos por otros dominios para mantener la fidelidad de sus balances contables. La recepción de **PurchaseOrderReceivedIntegrationEvent** proveniente de inventario y de **PayrollPaidIntegrationEvent** procedente de recursos humanos permite imputar de forma automática los egresos operativos por compra de piezas y nóminas en el reporte consolidado de flujo de caja, logrando una visión financiera integral de las operaciones del taller.
 
@@ -1986,7 +2106,15 @@ En la @tbl:invoicing-integration-events se sintetiza la taxonomía de los evento
 \hline
 \textbf{Efecto Arquitectónico} & Genera una alerta operativa inmediata en la consola de supervisión de caja para la subsanación de discrepancias tributarias o refacturación. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Integración:} Voucher\allowbreak Payment\allowbreak Received\allowbreak Integration\allowbreak Event \quad (\textit{Tipo:} Publicado)} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Integración:} Voucher\allowbreak Voided\allowbreak Integration\allowbreak Event \quad (\textit{Tipo:} Publicado)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{voucherId}, \texttt{tenantId}, \texttt{branchId}, \texttt{fullVoucherNumber}, \texttt{voidReason}, \texttt{occurredOn} \\*
+\hline
+\textbf{Módulos Receptores} & Workshop Operations (MRO), Contabilidad \\*
+\hline
+\textbf{Efecto Arquitectónico} & Notifica la anulación legal o comunicación de baja del comprobante ante SUNAT para la reversión contable y reactivación operativa de la orden de trabajo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Integración:} Voucher\allowbreak Payment\allowbreak Registered\allowbreak Integration\allowbreak Event \quad (\textit{Tipo:} Publicado)} \\*
 \hline
 \textbf{Atributos Transportados} & \texttt{paymentId}, \texttt{tenantId}, \texttt{voucherId}, \texttt{workOrderId}, \texttt{amount}, \texttt{currency}, \texttt{paymentMethod}, \texttt{isFullyPaid}, \texttt{occurredOn} \\*
 \hline
@@ -2041,7 +2169,7 @@ Para garantizar la coherencia tributaria y la resiliencia operativa en las estac
 - **Coreografía reactiva de eventos y garantía de entrega At-Least-Once mediante Transactional Outbox:** Los eventos de dominio se propagan tras la confirmación atómica en base de datos, mientras que los eventos de integración se serializan en el Transactional Outbox para su publicación asíncrona hacia el bus de mensajería, blindando la consistencia intermodular frente a caídas temporales de red.
 - **Inversión de dependencias y aislamiento perimetral mediante puertos ACL y pasarelas cloud:** La comunicación con la pasarela tributaria de Nubefact, el motor de correo transaccional, el generador de reportes en PDF y el padrón de contribuyentes de SUNAT se abstrae mediante puertos secundarios y adaptadores anticorrupción, preservando la pureza conceptual del modelo de dominio.
 
-En la @tbl:invoicing-application-types se sintetiza el catálogo consolidado de servicios de comando, servicios de consulta, escuchadores de eventos y puertos de salida que articulan la Capa de Aplicación de Invoicing & Compliance.
+En la @tbl:invoicing-application-types se sintetiza el catálogo consolidado de servicios de comando, servicios de consulta, fachada de contexto, escuchadores de eventos y puertos de salida que articulan la Capa de Aplicación de Invoicing & Compliance.
 
 \renewcommand{\arraystretch}{1.25}\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
 \caption{Catálogo Consolidado de la Capa de Aplicación de Invoicing \& Compliance} \label{tbl:invoicing-application-types} \\
@@ -2059,7 +2187,7 @@ Electronic\allowbreak Voucher\allowbreak Command\allowbreak Service & Contrato d
 \hline
 \textbf{Relaciones} & Implementado por ElectronicVoucherCommandServiceImpl. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak commandservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -2069,7 +2197,7 @@ Electronic\allowbreak Voucher\allowbreak Command\allowbreak ServiceImpl & Orques
 \hline
 \textbf{Relaciones} & Coordina agregados ElectronicVoucher, SeriesConfiguration y repositorios bajo transacci\'on ACID. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak internal.\allowbreak commandservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -2079,7 +2207,7 @@ Voucher\allowbreak Payment\allowbreak Command\allowbreak Service & Contrato de o
 \hline
 \textbf{Relaciones} & Implementado por VoucherPaymentCommandServiceImpl. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak commandservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -2089,7 +2217,7 @@ Voucher\allowbreak Payment\allowbreak Command\allowbreak ServiceImpl & Gestiona 
 \hline
 \textbf{Relaciones} & Coordina entidad VoucherPayment y agregado ElectronicVoucher con repositorios. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak internal.\allowbreak commandservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -2099,7 +2227,7 @@ Series\allowbreak Configuration\allowbreak Command\allowbreak Service & Contrato
 \hline
 \textbf{Relaciones} & Implementado por SeriesConfigurationCommandServiceImpl. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak commandservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -2109,7 +2237,7 @@ Series\allowbreak Configuration\allowbreak Command\allowbreak ServiceImpl & Admi
 \hline
 \textbf{Relaciones} & Coordina agregado SeriesConfiguration con persistencia JPA. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak internal.\allowbreak commandservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -2119,7 +2247,7 @@ Electronic\allowbreak Voucher\allowbreak Query\allowbreak Service & Contrato de 
 \hline
 \textbf{Relaciones} & Implementado por ElectronicVoucherQueryServiceImpl. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak queryservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -2129,7 +2257,7 @@ Electronic\allowbreak Voucher\allowbreak Query\allowbreak ServiceImpl & Ejecuta 
 \hline
 \textbf{Relaciones} & Consulta repositorios bajo aislamiento de solo lectura. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak internal.\allowbreak queryservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -2139,7 +2267,7 @@ Voucher\allowbreak Payment\allowbreak Query\allowbreak Service & Contrato de con
 \hline
 \textbf{Relaciones} & Implementado por VoucherPaymentQueryServiceImpl. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak queryservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -2149,7 +2277,7 @@ Voucher\allowbreak Payment\allowbreak Query\allowbreak ServiceImpl & Proyecta ab
 \hline
 \textbf{Relaciones} & Consulta repositorios y vistas JPA de recaudaci\'on. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak internal.\allowbreak queryservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -2159,7 +2287,7 @@ Cash\allowbreak Flow\allowbreak Query\allowbreak Service & Contrato de consulta 
 \hline
 \textbf{Relaciones} & Implementado por CashFlowQueryServiceImpl. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak queryservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -2167,9 +2295,19 @@ Cash\allowbreak Flow\allowbreak Query\allowbreak ServiceImpl & Ejecuta algoritmo
 \hline
 \textbf{Categoría} & Implementaci\'on de Servicio de Consulta \\*
 \hline
-\textbf{Relaciones} & Coordina fachadas de Inventory y HR, y el puerto InvoicingPdfGeneratorPort. \\*
+\textbf{Relaciones} & Coordina fachadas de Inventory y HR, y el puerto CashFlowPdfGeneratorPort. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak internal.\allowbreak queryservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Invoicing\allowbreak Context\allowbreak Facade\allowbreak Impl & Implementa la fachada de contexto abierto para atender requerimientos de facturaci\'on y liquidaci\'on fiscal desde operaciones de taller. \\*
+\hline
+\textbf{Categoría} & Implementaci\'on de Fachada de Contexto Abierto \\*
+\hline
+\textbf{Relaciones} & Coordina ElectronicVoucherCommandService y ElectronicVoucherQueryService mapeando agregados hacia DTO inmutables de fachada. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak acl} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -2179,7 +2317,7 @@ Voucher\allowbreak Domain\allowbreak Event\allowbreak Handler & Manejador transa
 \hline
 \textbf{Relaciones} & Despacha correos v\'ia Resend, emite alertas a MRO y coordina con Transactional Outbox. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak events} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak internal.\allowbreak eventhandlers} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -2189,7 +2327,7 @@ Work\allowbreak Order\allowbreak Delivered\allowbreak Event\allowbreak Listener 
 \hline
 \textbf{Relaciones} & Verifica emisi\'on previa de comprobante y genera advertencia administrativa en omisiones fiscales. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak events} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak internal.\allowbreak eventhandlers} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -2199,7 +2337,7 @@ Purchase\allowbreak Order\allowbreak Received\allowbreak Event\allowbreak Listen
 \hline
 \textbf{Relaciones} & Asienta facturas de compra recibidas como egreso comercial en el flujo de caja del taller. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak events} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak internal.\allowbreak eventhandlers} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -2209,7 +2347,7 @@ Payroll\allowbreak Paid\allowbreak Event\allowbreak Listener & Escuchador de int
 \hline
 \textbf{Relaciones} & Incorpora dispersi\'on salarial del personal t\'ecnico como egreso laboral en el flujo de caja. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak events} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak internal.\allowbreak eventhandlers} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -2219,61 +2357,60 @@ Invoicing\allowbreak Transactional\allowbreak Outbox\allowbreak Publisher & Publ
 \hline
 \textbf{Relaciones} & Intercepta eventos del dominio y los almacena en base de datos para despacho as\'incrono confiable. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak events} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak internal.\allowbreak eventhandlers} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
-Nubefact\allowbreak Acl\allowbreak Service & Capa Anticorrupci\'on que transforma ElectronicVoucher a trama JSON V1 para Nubefact PSE/OSE. \\*
+Nubefact\allowbreak Pse\allowbreak Fiscal\allowbreak Gateway & Puerto de salida para comunicaci\'on telem\'atica y firma digital UBL 2.1 ante el Proveedor de Servicios Electr\'onicos Nubefact. \\*
 \hline
-\textbf{Categoría} & Capa Anticorrupci\'on (ACL) \\*
+\textbf{Categoría} & Puerto de Salida Pasarela Fiscal \\*
 \hline
-\textbf{Relaciones} & Implementa la adaptaci\'on perimetral hacia NubefactFiscalGatewayPort. \\*
+\textbf{Relaciones} & Consumido por ElectronicVoucherCommandServiceImpl e implementado por NubefactPseFiscalAdapter. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak acl} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak internal.\allowbreak outbound.\allowbreak acl} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
-Customer\allowbreak Fiscal\allowbreak Acl\allowbreak Port & Puerto de salida para recuperar datos fiscales y consultar vigencia de RUC/DNI en CRM o SUNAT. \\*
+Customer\allowbreak Fiscal\allowbreak Validation\allowbreak Acl\allowbreak Service & Puerto de salida para recuperar datos fiscales y consultar vigencia de RUC o DNI en CRM o padr\'on tributario de SUNAT. \\*
 \hline
 \textbf{Categoría} & Puerto de Salida ACL \\*
 \hline
-\textbf{Relaciones} & Consumido por ElectronicVoucherCommandServiceImpl e implementado en infraestructura. \\*
+\textbf{Relaciones} & Consumido por ElectronicVoucherCommandServiceImpl e implementado por CustomerFiscalValidationAclAdapter. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak acl} \\
-\hline
-\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
-\hline
-Transactional\allowbreak Email\allowbreak Sender\allowbreak Port & Puerto de salida para distribuci\'on de comprobantes por correo con adjuntos binarios (PDF/XML). \\*
-\hline
-\textbf{Categoría} & Puerto de Salida Gateway \\*
-\hline
-\textbf{Relaciones} & Consumido por VoucherDomainEventHandler e implementado por ResendEmailAdapter. \\*
-\hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak ports.\allowbreak outbound} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak internal.\allowbreak outbound.\allowbreak acl} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
-Invoicing\allowbreak Pdf\allowbreak Generator\allowbreak Port & Puerto de salida para renderizado de documentos bancarios PDF de flujo de caja y comprobantes. \\*
+Sunat\allowbreak Cdr\allowbreak Storage\allowbreak Gateway & Puerto de salida para almacenamiento inmutable y custodia cloud de constancias de recepci\'on CDR y tramas XML UBL 2.1 firmadas. \\*
 \hline
-\textbf{Categoría} & Puerto de Salida Gateway \\*
+\textbf{Categoría} & Puerto de Salida Pasarela Cloud \\*
 \hline
-\textbf{Relaciones} & Consumido por CashFlowQueryServiceImpl y ElectronicVoucherQueryServiceImpl. \\*
+\textbf{Relaciones} & Consumido por servicios de comando y consulta e implementado por FirebaseSunatCdrStorageAdapter. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak ports.\allowbreak outbound} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak internal.\allowbreak outbound.\allowbreak acl} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
-Invoicing\allowbreak Event\allowbreak Publisher\allowbreak Port & Puerto de infraestructura para publicar eventos hacia el bus de mensajer\'ia y la tabla outbox. \\*
+Voucher\allowbreak Receipt\allowbreak Email\allowbreak Gateway & Puerto de salida para distribuci\'on as\'incrona de comprobantes electr\'onicos a clientes con adjuntos binarios PDF y XML UBL 2.1. \\*
 \hline
-\textbf{Categoría} & Puerto de Salida Event Bus \\*
+\textbf{Categoría} & Puerto de Salida Pasarela Cloud \\*
 \hline
-\textbf{Relaciones} & Consumido por servicios de comando y manejadores transaccionales. \\*
+\textbf{Relaciones} & Consumido por VoucherDomainEventHandler e implementado por ResendVoucherReceiptEmailAdapter. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak ports.\allowbreak outbound} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak internal.\allowbreak outbound.\allowbreak acl} \\
 \hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Cash\allowbreak Flow\allowbreak Pdf\allowbreak Generator\allowbreak Port & Puerto de salida para renderizado tipogr\'afico vectorial del estado de cuenta de flujo de caja y arqueo operativo del taller con membrete y balance financiero. \\*
+\hline
+\textbf{Categoría} & Puerto de Salida (Outbound Port) \\*
+\hline
+\textbf{Relaciones} & Consumido por CashFlowQueryServiceImpl e implementado por OpenPdfCashFlowReportAdapter. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak internal.\allowbreak outbound.\allowbreak acl} \\
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-*Nota.* Estructura modular consolidada de la capa de aplicación bajo el paquete com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak invoicing.\allowbreak application.
+*Nota.* Organización modular canónica en commandservices, internal.commandservices, queryservices, internal.queryservices, internal.eventhandlers, internal.outbound.acl y acl.
 
 **Servicios de Comandos de la Capa de Aplicación**
 
@@ -2343,7 +2480,7 @@ En la @tbl:invoicing-command-services se detallan las signaturas operativas, con
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-*Nota.* Métodos transaccionales orquestados con aislamiento de lectura confirmada bajo el paquete com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak invoicing.\allowbreak application.\allowbreak services.
+*Nota.* Métodos transaccionales segregados entre contratos en commandservices e implementaciones en internal.commandservices.
 
 **Servicios de Consultas y Consolidación de Flujo de Caja**
 
@@ -2425,7 +2562,7 @@ En la @tbl:invoicing-query-services se exponen los métodos de consulta, paráme
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-*Nota.* Métodos de consulta de solo lectura ejecutados bajo el paquete com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak invoicing.\allowbreak application.\allowbreak services.
+*Nota.* Métodos de consulta de solo lectura, segregados entre contratos en queryservices e implementaciones en internal.queryservices.
 
 **Manejadores de Eventos de Dominio y de Integración**
 
@@ -2503,13 +2640,13 @@ En la @tbl:invoicing-event-handlers se especifican los manejadores de eventos, l
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-*Nota.* Suscripción y despacho transaccional desacoplado bajo el paquete com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak invoicing.\allowbreak application.\allowbreak events.
+*Nota.* Suscripción y despacho transaccional desacoplado bajo el paquete canónico application.\allowbreak internal.\allowbreak eventhandlers.
 
 **Puertos de Salida, Pasarelas y Adaptadores Anticorrupción**
 
-El aislamiento arquitectónico de Invoicing & Compliance respecto a servicios en la nube y pasarelas de terceros se formaliza a través de puertos de salida especializados ubicados en los paquetes de infraestructura y control de acceso. El contrato **NubefactFiscalGatewayPort**, coordinado por el adaptador **NubefactAclService**, encapsula la serialización hacia la pasarela tributaria del proveedor autorizado por SUNAT y aísla la estructura técnica JSON requerida para la homologación de comprobantes UBL 2.1.
+El aislamiento arquitectónico de Invoicing & Compliance respecto a servicios en la nube y pasarelas de terceros se formaliza a través de puertos de salida especializados ubicados en el subpaquete com.andeva.atelier.platform.invoicing.application.internal.outbound.acl. El contrato **NubefactPseFiscalGateway** encapsula la comunicación telemática hacia el proveedor autorizado por SUNAT y aísla la estructura técnica JSON requerida para la homologación de comprobantes UBL 2.1.
 
-Por su parte, **CustomerFiscalAclPort** recupera y valida datos tributarios desde el contexto de clientes, **TransactionalEmailSenderPort** canaliza el envío de comprobantes mediante Resend, **InvoicingPdfGeneratorPort** maqueta reportes bancarios y representaciones impresas, e **InvoicingEventPublisherPort** gobierna la persistencia y despacho hacia el bus de eventos del Transactional Outbox.
+Por su parte, **CustomerFiscalValidationAclService** recupera y valida datos tributarios desde el contexto de clientes, **VoucherReceiptEmailGateway** canaliza el envío de comprobantes mediante Resend, **SunatCdrStorageGateway** custodia las constancias de recepción y XML firmados en almacenamiento seguro en la nube, mientras que **CashFlowPdfGeneratorPort** maqueta reportes tipográficos de flujo de caja con membrete y balance financiero.
 
 En la @tbl:invoicing-outbound-ports se detallan las interfaces de salida, signaturas clave, tecnologías empleadas y propósitos arquitectónicos de las pasarelas del contexto.
 
@@ -2523,53 +2660,54 @@ En la @tbl:invoicing-outbound-ports se detallan las interfaces de salida, signat
 \thfirst{Puerto o Pasarela} & \thcell{Métodos Principales, Tecnología y Propósito} \\
 \hline
 \endhead
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} Nubefact\allowbreak Fiscal\allowbreak Gateway\allowbreak Port \quad (\textit{Categoría:} Pasarela Fiscal REST)} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} Nubefact\allowbreak Pse\allowbreak Fiscal\allowbreak Gateway \quad (\textit{Categoría:} Pasarela Fiscal REST)} \\*
 \hline
-\textbf{Métodos Principales} & \texttt{sendInvoice}, \texttt{sendCreditNote}, \texttt{sendVoidedDocument}, \texttt{queryDocumentStatus} \\*
+\textbf{Métodos Principales} & \texttt{dispatchVoucher}, \texttt{dispatchCreditNote}, \texttt{voidVoucher} \\*
 \hline
 \textbf{Propósito Técnico} & Despacho perimetral de tramas JSON V1 al PSE/OSE Nubefact para generación de XML UBL 2.1, firma con certificado digital y obtención de CDR de SUNAT. \\*
 \hline
-\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak infrastructure.\allowbreak gateways} \\
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak internal.\allowbreak outbound.\allowbreak acl} \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} Customer\allowbreak Fiscal\allowbreak Acl\allowbreak Port \quad (\textit{Categoría:} Puerto ACL de Dominio)} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} Customer\allowbreak Fiscal\allowbreak Validation\allowbreak Acl\allowbreak Service \quad (\textit{Categoría:} Puerto ACL de Dominio)} \\*
 \hline
-\textbf{Métodos Principales} & \texttt{getCustomerFiscalInfo}, \texttt{validateTaxIdActiveStatus} \\*
+\textbf{Métodos Principales} & \texttt{getCustomerFiscalData}, \texttt{validateTaxIdStatus} \\*
 \hline
 \textbf{Propósito Técnico} & Consulta desacoplada de identidad fiscal, padrón de RUC activo y domicilio fiscal de clientes comerciales y particulares desde CRM o padrón tributario. \\*
 \hline
-\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak acl} \\
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak internal.\allowbreak outbound.\allowbreak acl} \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} Transactional\allowbreak Email\allowbreak Sender\allowbreak Port \quad (\textit{Categoría:} Puerto de Notificación Cloud)} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} Sunat\allowbreak Cdr\allowbreak Storage\allowbreak Gateway \quad (\textit{Categoría:} Pasarela de Custodia Cloud)} \\*
 \hline
-\textbf{Métodos Principales} & \texttt{sendVoucherEmail}, \texttt{sendCreditNoteNotification}, \texttt{sendCashSummaryReport} \\*
+\textbf{Métodos Principales} & \texttt{storeCdrXml}, \texttt{storeSignedXml}, \texttt{retrieveCdrXml} \\*
+\hline
+\textbf{Propósito Técnico} & Almacenamiento inmutable y custodia cloud de constancias de recepción CDR y tramas XML UBL 2.1 firmadas en Firebase Storage. \\*
+\hline
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak internal.\allowbreak outbound.\allowbreak acl} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} Voucher\allowbreak Receipt\allowbreak Email\allowbreak Gateway \quad (\textit{Categoría:} Pasarela de Notificación Cloud)} \\*
+\hline
+\textbf{Métodos Principales} & \texttt{sendVoucherReceiptEmail} \\*
 \hline
 \textbf{Propósito Técnico} & Despacho asíncrono de comprobantes tributarios a los clientes con archivos binarios PDF y XML UBL 2.1 incrustados como adjuntos seguros vía Resend. \\*
 \hline
-\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak ports.\allowbreak outbound} \\
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak internal.\allowbreak outbound.\allowbreak acl} \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} Invoicing\allowbreak Pdf\allowbreak Generator\allowbreak Port \quad (\textit{Categoría:} Puerto de Renderizado Documental)} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} Cash\allowbreak Flow\allowbreak Pdf\allowbreak Generator\allowbreak Port \quad (\textit{Categoría:} Puerto de Salida (Outbound Port))} \\*
 \hline
-\textbf{Métodos Principales} & \texttt{generateCashFlowStatementPdf}, \texttt{generateVoucherPdf}, \texttt{generateDailyCashReportPdf} \\*
+\textbf{Métodos Principales} & \texttt{byte[] generateCashFlowPdf(UUID tenantId, CashFlowSummary summary, List<CashFlowMovement> movements)} \\*
 \hline
-\textbf{Propósito Técnico} & Renderizado binario de reportes de flujo de caja con diseño bancario corporativo y emisión gráfica de comprobantes con código de respuesta rápida QR. \\*
+\textbf{Tecnología} & OpenPDF / Thymeleaf \\*
 \hline
-\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak ports.\allowbreak outbound} \\
+\textbf{Propósito Técnico} & Renderizado tipográfico vectorial del estado de cuenta de flujo de caja y arqueo operativo del taller con membrete y balance financiero. \\*
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} Invoicing\allowbreak Event\allowbreak Publisher\allowbreak Port \quad (\textit{Categoría:} Puerto de Mensajería y Outbox)} \\*
-\hline
-\textbf{Métodos Principales} & \texttt{publish}, \texttt{publishToOutbox}, \texttt{publishAll} \\*
-\hline
-\textbf{Propósito Técnico} & Publicación de eventos de dominio locales hacia oyentes de contexto y persistencia atómica en outbox\_messages para propagación intermodular. \\*
-\hline
-\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak ports.\allowbreak outbound} \\
-\hline
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak invoicing.\allowbreak application.\allowbreak internal.\allowbreak outbound.\allowbreak acl} \\
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-*Nota.* Puertos e interfaces de salida ubicados bajo los paquetes acl y ports.outbound en Invoicing \& Compliance.
+*Nota.* Puertos e interfaces de salida organizados bajo el subpaquete canónico application.\allowbreak internal.\allowbreak outbound.\allowbreak acl.
 
 La concepción arquitectónica de la Capa de Aplicación de Invoicing & Compliance consolida tres fundamentos de ingeniería de software que afianzan la exactitud tributaria y la resiliencia operativa en Atelier Platform:
 
-En primer lugar, la disciplina tributaria, el determinismo matemático y la inmutabilidad legal de los comprobantes electrónicos garantizan un cumplimiento riguroso de la normativa SUNAT UBL 2.1. Al orquestar la reserva atómica de correlativos antes de la persistencia local y canalizar el despacho hacia el proveedor telemático con contingencia en el Transactional Outbox, el sistema asegura que cada comprobante emitido mantenga inviolabilidad probatoria y cuadre exacto en sus partidas gravadas, eliminando riesgos de multas o nulidades fiscales para el taller automotriz.
+En primer lugar, la disciplina tributaria, el determinismo matemático y la inmutabilidad legal de los comprobantes electrónicos garantizan un cumplimiento riguroso de la normativa SUNAT UBL 2.1. Al orquestar la reserva atómica de correlativos antes de la persistencia local y canalizar el despacho hacia el proveedor telemático con contingencia en el Transactional Outbox, el sistema asegura que cada comprobante emitido mantenga inviolabilidad probatoria y cuadre exacto en sus partidas gravadas, eliminando riesgos de contingencias fiscales para el taller automotriz.
 
 En segundo término, la soberanía financiera alcanzada mediante la consolidación en memoria del flujo de caja operativo proporciona una inteligencia de negocio integral para la administración del taller. La capacidad de unificar transaccionalmente los cobros de facturación con los egresos devengados por abastecimiento de repuestos en inventario y dispersión de planillas salariales en recursos humanos faculta a los gerentes de sede para auditar su rentabilidad neta en tiempo real y exportar estados de cuenta con rigor bancario sin acoplamiento a nivel de esquemas relacionales.
 
@@ -2583,7 +2721,7 @@ Las directrices técnicas fundamentales que rigen el diseño de la Capa de Infra
 
 - **Garantía de unicidad y concurrencia serial mediante bloqueo pesimista en base de datos:** Reserva atómica y sin condiciones de carrera de números correlativos tributarios mediante consultas bloqueantes sobre configuraciones de series fiscales, impidiendo huecos y colisiones de numeración entre múltiples cajas de cobro.
 - **Persistencia físico-relacional auditada y ciclo de vida inmutable de comprobantes:** Mapeo de agregados a tablas normalizadas con claves compuestas, integridad referencial en cascada sobre líneas y pagos, y protección estricta ante modificaciones arbitrarias de registros fiscales ya informados ante la autoridad tributaria.
-- **Reconstitución pura del modelo de dominio y transformación desacoplada:** Ensambladores de persistencia que invocan el método estático de fábrica de las entidades de dominio para restaurar su estado sin emitir eventos de dominio espurios durante consultas, complementados con convertidores JPA para tipos complejos y valores enumerados.
+- **Reconstitución pura del modelo de dominio y ensamblaje desacoplado:** Ensambladores de persistencia que invocan el método estático de fábrica de las entidades de dominio para restaurar su estado sin emitir eventos de dominio espurios durante consultas, complementados con convertidores JPA para tipos complejos y valores enumerados.
 - **Aislamiento perimetral y resiliencia de integración telemática en la nube:** Pasarelas secundarias resilientes para la transmisión de tramas tributarias estructuradas hacia proveedores autorizados con circuit breaker y reintentos exponenciales, despacho de notificaciones con comprobantes digitales adjuntos y publicación atómica de eventos en la tabla de mensajería transaccional.
 
 En la @tbl:invoicing-infrastructure-types se sintetiza el catálogo consolidado de clases, adaptadores de persistencia, ensambladores, convertidores y pasarelas de infraestructura que estructuran este perímetro técnico.
@@ -2599,7 +2737,7 @@ En la @tbl:invoicing-infrastructure-types se sintetiza el catálogo consolidado 
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\
 \hline
 \endhead
-Electronic\allowbreak Voucher\allowbreak JpaEntity & Mapeo relacional de comprobantes electrónicos fiscales como facturas, boletas y notas de crédito a la tabla física electronic\_vouchers. \\*
+Electronic\allowbreak Voucher\allowbreak Persistence\allowbreak Entity & Mapeo relacional de comprobantes electrónicos fiscales como facturas, boletas y notas de crédito a la tabla física electronic\_vouchers. \\*
 \hline
 \textbf{Categoría} & Entidad JPA \\*
 \hline
@@ -2609,7 +2747,7 @@ Electronic\allowbreak Voucher\allowbreak JpaEntity & Mapeo relacional de comprob
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
-Voucher\allowbreak Line\allowbreak JpaEntity & Mapeo relacional de ítems, servicios y repuestos facturados a la tabla física voucher\_lines. \\*
+Voucher\allowbreak Line\allowbreak Persistence\allowbreak Entity & Mapeo relacional de ítems, servicios y repuestos facturados a la tabla física voucher\_lines. \\*
 \hline
 \textbf{Categoría} & Entidad JPA \\*
 \hline
@@ -2619,7 +2757,7 @@ Voucher\allowbreak Line\allowbreak JpaEntity & Mapeo relacional de ítems, servi
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
-Voucher\allowbreak Payment\allowbreak JpaEntity & Mapeo relacional de transacciones de amortización, cobros y medios de pago a la tabla física voucher\_payments. \\*
+Voucher\allowbreak Payment\allowbreak Persistence\allowbreak Entity & Mapeo relacional de transacciones de amortización, cobros y medios de pago a la tabla física voucher\_payments. \\*
 \hline
 \textbf{Categoría} & Entidad JPA \\*
 \hline
@@ -2629,7 +2767,7 @@ Voucher\allowbreak Payment\allowbreak JpaEntity & Mapeo relacional de transaccio
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
-Series\allowbreak Configuration\allowbreak JpaEntity & Mapeo relacional de rangos y contadores correlativos de series fiscales por sucursal a la tabla sunat\_series\_configurations. \\*
+Series\allowbreak Configuration\allowbreak Persistence\allowbreak Entity & Mapeo relacional de rangos y contadores correlativos de series fiscales por sucursal a la tabla sunat\_series\_configurations. \\*
 \hline
 \textbf{Categoría} & Entidad JPA \\*
 \hline
@@ -2639,7 +2777,7 @@ Series\allowbreak Configuration\allowbreak JpaEntity & Mapeo relacional de rango
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
-SpringData\allowbreak Electronic\allowbreak Voucher\allowbreak Repository & Interfaz Spring Data JPA para operaciones relacionales y consultas derivadas sobre comprobantes electrónicos. \\*
+Electronic\allowbreak Voucher\allowbreak Persistence\allowbreak Repository & Interfaz Spring Data JPA para operaciones relacionales y consultas derivadas sobre comprobantes electrónicos. \\*
 \hline
 \textbf{Categoría} & Repositorio JPA \\*
 \hline
@@ -2649,7 +2787,7 @@ SpringData\allowbreak Electronic\allowbreak Voucher\allowbreak Repository & Inte
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
-SpringData\allowbreak Voucher\allowbreak Payment\allowbreak Repository & Interfaz Spring Data JPA para administración relacional y trazabilidad de pagos y amortizaciones. \\*
+Voucher\allowbreak Payment\allowbreak Persistence\allowbreak Repository & Interfaz Spring Data JPA para administración relacional y trazabilidad de pagos y amortizaciones. \\*
 \hline
 \textbf{Categoría} & Repositorio JPA \\*
 \hline
@@ -2659,7 +2797,7 @@ SpringData\allowbreak Voucher\allowbreak Payment\allowbreak Repository & Interfa
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
-SpringData\allowbreak Series\allowbreak Configuration\allowbreak Repository & Interfaz Spring Data JPA con bloqueo pesimista en base de datos para la reserva atómica de correlativos fiscales. \\*
+Series\allowbreak Configuration\allowbreak Persistence\allowbreak Repository & Interfaz Spring Data JPA con bloqueo pesimista en base de datos para la reserva atómica de correlativos fiscales. \\*
 \hline
 \textbf{Categoría} & Repositorio JPA \\*
 \hline
@@ -2699,33 +2837,33 @@ Series\allowbreak Configuration\allowbreak Repository\allowbreak Impl & Adaptado
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
-Electronic\allowbreak Voucher\allowbreak Persistence\allowbreak Assembler & Mapeo y transformación bidireccional entre la raíz de agregado ElectronicVoucher y la entidad relacional. \\*
+Electronic\allowbreak Voucher\allowbreak Persistence\allowbreak Assembler & Mapeo y ensamblaje bidireccional entre la raíz de agregado ElectronicVoucher y la entidad relacional. \\*
 \hline
 \textbf{Categoría} & Ensamblador de Persistencia \\*
 \hline
 \textbf{Relaciones} & Reconstituye el agregado puro mediante método estático reconstitute() sin emitir eventos de dominio espurios. \\*
 \hline
-\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak transform} \\
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak assemblers} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
-Voucher\allowbreak Payment\allowbreak Persistence\allowbreak Assembler & Transformación bidireccional entre la entidad de dominio VoucherPayment y VoucherPaymentJpaEntity. \\*
+Voucher\allowbreak Payment\allowbreak Persistence\allowbreak Assembler & Mapeo y ensamblaje bidireccional entre la entidad de dominio VoucherPayment y la entidad relacional de persistencia. \\*
 \hline
 \textbf{Categoría} & Ensamblador de Persistencia \\*
 \hline
 \textbf{Relaciones} & Mapea montos monetarios, medios de pago, referencias bancarias y marcas temporales de recaudación. \\*
 \hline
-\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak transform} \\
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak assemblers} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
-Series\allowbreak Configuration\allowbreak Persistence\allowbreak Assembler & Transformación bidireccional entre la entidad pura SeriesConfiguration y SeriesConfigurationJpaEntity. \\*
+Series\allowbreak Configuration\allowbreak Persistence\allowbreak Assembler & Mapeo y ensamblaje bidireccional entre la entidad pura SeriesConfiguration y la entidad relacional de persistencia. \\*
 \hline
 \textbf{Categoría} & Ensamblador de Persistencia \\*
 \hline
 \textbf{Relaciones} & Restaura configuraciones de series fiscales sincronizando estado operativo y contador secuencial de emisión. \\*
 \hline
-\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak transform} \\
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak assemblers} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
@@ -2799,63 +2937,73 @@ Voucher\allowbreak Serie\allowbreak Converter & Convertidor JPA para mapeo del o
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
-Nubefact\allowbreak Fiscal\allowbreak Gateway\allowbreak Impl & Pasarela telemática externa que interactúa con la API RESTful JSON V1 del PSE homologado Nubefact. \\*
+Nubefact\allowbreak Pse\allowbreak Fiscal\allowbreak Adapter & Pasarela telemática externa que interactúa con la API RESTful JSON V1 del PSE homologado Nubefact. \\*
 \hline
 \textbf{Categoría} & Pasarela Perimetral Fiscal \\*
 \hline
-\textbf{Relaciones} & Implementa NubefactFiscalGatewayPort mediante Spring WebClient, autenticación Bearer y reintentos con backoff exponencial. \\*
+\textbf{Relaciones} & Implementa NubefactPseFiscalGateway mediante Spring WebClient, autenticación Bearer y reintentos con backoff exponencial. \\*
 \hline
-\textbf{Paquete} & \texttt{...\allowbreak infrastructure.\allowbreak gateways} \\
-\hline
-\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
-\hline
-Resend\allowbreak Email\allowbreak Sender\allowbreak Adapter & Pasarela de notificaciones transaccionales que despacha correos con comprobantes electrónicos adjuntos vía Resend. \\*
-\hline
-\textbf{Categoría} & Pasarela Cloud de Mensajería \\*
-\hline
-\textbf{Relaciones} & Implementa TransactionalEmailSenderPort adjuntando representaciones PDF renderizadas y XML UBL 2.1 con firma digital. \\*
-\hline
-\textbf{Paquete} & \texttt{...\allowbreak infrastructure.\allowbreak adapters} \\
+\textbf{Paquete} & \texttt{...\allowbreak infrastructure.\allowbreak external.\allowbreak tax.\allowbreak nubefact} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
-OpenPdf\allowbreak Invoicing\allowbreak Generator\allowbreak Adapter & Motor documental para renderizado vectorial de facturas, boletas, tickets de punto de venta y estados de caja. \\*
+Resend\allowbreak Voucher\allowbreak Receipt\allowbreak Email\allowbreak Adapter & Pasarela de notificaciones transaccionales que despacha correos con comprobantes electrónicos adjuntos vía Resend API. \\*
 \hline
-\textbf{Categoría} & Pasarela Documental \\*
+\textbf{Categoría} & Pasarela Cloud de Notificaciones \\*
 \hline
-\textbf{Relaciones} & Implementa InvoicingPdfGeneratorPort mediante la biblioteca OpenPDF para generar formatos corporativos A4 y tiras de 80 mm. \\*
+\textbf{Relaciones} & Implementa VoucherReceiptEmailGateway adjuntando representaciones PDF renderizadas y XML UBL 2.1 con firma digital. \\*
 \hline
-\textbf{Paquete} & \texttt{...\allowbreak infrastructure.\allowbreak adapters} \\
+\textbf{Paquete} & \texttt{...\allowbreak infrastructure.\allowbreak external.\allowbreak mail.\allowbreak resend} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
-Customer\allowbreak Fiscal\allowbreak Acl\allowbreak Adapter & Adaptador anticorrupción de salida hacia el contexto CRM y padrones web de contribuyentes. \\*
+Firebase\allowbreak Sunat\allowbreak Cdr\allowbreak Storage\allowbreak Adapter & Almacenamiento cloud y custodia probatoria inmutable de constancias oficiales CDR y XML UBL 2.1. \\*
+\hline
+\textbf{Categoría} & Pasarela Cloud de Almacenamiento \\*
+\hline
+\textbf{Relaciones} & Implementa SunatCdrStorageGateway mediante Firebase Storage SDK y generación de enlaces de descarga temporales. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak infrastructure.\allowbreak external.\allowbreak cloud.\allowbreak firebase} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Customer\allowbreak Fiscal\allowbreak Validation\allowbreak Acl\allowbreak Adapter & Adaptador anticorrupción de salida hacia el contexto CRM y padrones web de contribuyentes. \\*
 \hline
 \textbf{Categoría} & Adaptador ACL de Salida \\*
 \hline
-\textbf{Relaciones} & Implementa CustomerFiscalAclPort resolviendo razón social, condición tributaria y domicilio fiscal oficial. \\*
+\textbf{Relaciones} & Implementa CustomerFiscalValidationAclService resolviendo razón social, condición tributaria y domicilio fiscal oficial. \\*
 \hline
-\textbf{Paquete} & \texttt{...\allowbreak infrastructure.\allowbreak adapters} \\
+\textbf{Paquete} & \texttt{...\allowbreak infrastructure.\allowbreak external.\allowbreak acl.\allowbreak crm} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
-Invoicing\allowbreak Transactional\allowbreak Outbox\allowbreak Publisher\allowbreak Impl & Publicador transaccional que inserta eventos de dominio en la tabla outbox\_messages para despacho confiable. \\*
+Invoicing\allowbreak Outbox\allowbreak Message\allowbreak Relay\allowbreak Adapter & Despachador transaccional que inserta eventos de integración en la tabla outbox\_messages para publicación desacoplada. \\*
 \hline
-\textbf{Categoría} & Adaptador de Mensajería Transaccional \\*
+\textbf{Categoría} & Adaptador de Mensajería Outbox \\*
 \hline
-\textbf{Relaciones} & Implementa InvoicingEventPublisherPort serializando eventos JSONB para propagación asíncrona hacia Kafka o RabbitMQ. \\*
+\textbf{Relaciones} & Persiste eventos JSONB atómicamente en PostgreSQL 16 para retransmisión confiable con semántica de entrega al menos una vez. \\*
 \hline
-\textbf{Paquete} & \texttt{...\allowbreak infrastructure.\allowbreak messaging} \\
+\textbf{Paquete} & \texttt{...\allowbreak infrastructure.\allowbreak external.\allowbreak messaging.\allowbreak outbox} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Open\allowbreak Pdf\allowbreak Cash\allowbreak Flow\allowbreak Report\allowbreak Adapter & Renderizado binario de informes vectoriales en formato PDF para estados de cuenta de flujo de caja y arqueos de tesorería del taller. \\*
+\hline
+\textbf{Categoría} & Adaptador de Infraestructura Externa \\*
+\hline
+\textbf{Relaciones} & Implementa CashFlowPdfGeneratorPort compilando plantillas Thymeleaf con OpenPDF 2.0.3. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak infrastructure.\allowbreak external.\allowbreak reporting.\allowbreak openpdf} \\
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-*Nota.* Componentes pertenecientes al paquete canónico com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak invoicing.\allowbreak infrastructure.
+*Nota.* Componentes organizados bajo los subpaquetes canónicos persistence.jpa (entities, repositories, adapters, assemblers, converters) y los módulos de integración perimetral external (tax, mail, cloud, acl, messaging, reporting).
 
 **Entidades de Persistencia JPA y Modelado Relacional Físico**
 
-El modelado relacional de persistencia reproduce fielmente la topología legal y financiera del dominio tributario mediante cuatro entidades JPA mapeadas a sus respectivas tablas físicas en PostgreSQL 16. La raíz de persistencia **ElectronicVoucherJpaEntity** se vincula a la tabla **electronic_vouchers**, encapsulando la numeración de serie, base imponible gravada, monto de impuesto general a las ventas, importe total, estado de ciclo de vida, datos fiscales del cliente receptor y metadatos probatorios telemáticos devueltos por la entidad tributaria.
+El modelado relacional de persistencia reproduce fielmente la topología legal y financiera del dominio tributario mediante cuatro entidades JPA mapeadas a sus respectivas tablas físicas en PostgreSQL 16. La raíz de persistencia **ElectronicVoucherPersistenceEntity** se vincula a la tabla **electronic_vouchers**, encapsulando la numeración de serie, base imponible gravada, monto de impuesto general a las ventas, importe total, estado de ciclo de vida, datos fiscales del cliente receptor y metadatos probatorios telemáticos devueltos por la entidad tributaria.
 
-Por su parte, la entidad **VoucherLineJpaEntity** estructura los ítems, repuestos y servicios gravados en la tabla **voucher_lines**, mientras que **VoucherPaymentJpaEntity** custodia los abonos monetarios y medios de pago en la tabla **voucher_payments**. Finalmente, la entidad **SeriesConfigurationJpaEntity** gestiona los contadores correlativos atómicos por sede y tipo de comprobante en la tabla **sunat_series_configurations**. En la @tbl:invoicing-jpa-entities se detallan los esquemas físico-relacionales, claves primarias, índices B-Tree y restricciones de verificación de estas entidades.
+Por su parte, la entidad **VoucherLinePersistenceEntity** estructura los ítems, repuestos y servicios gravados en la tabla **voucher_lines**, mientras que **VoucherPaymentPersistenceEntity** custodia los abonos monetarios y medios de pago en la tabla **voucher_payments**. Finalmente, la entidad **SeriesConfigurationPersistenceEntity** gestiona los contadores correlativos atómicos por sede y tipo de comprobante en la tabla **sunat_series_configurations**. En la @tbl:invoicing-jpa-entities se detallan los esquemas físico-relacionales, claves primarias, índices B-Tree y restricciones de verificación de estas entidades.
 
 \renewcommand{\arraystretch}{1.25}
 \begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
@@ -2868,7 +3016,7 @@ Por su parte, la entidad **VoucherLineJpaEntity** estructura los ítems, repuest
 \thfirst{Aspecto de Persistencia} & \thcell{Especificación Físico-Relacional} \\
 \hline
 \endhead
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} ElectronicVoucherJpaEntity \quad (\textit{Tabla:} \texttt{electronic\_vouchers})} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} ElectronicVoucherPersistenceEntity \quad (\textit{Tabla:} \texttt{electronic\_vouchers})} \\*
 \hline
 \textbf{Clave Primaria} & \texttt{id (UUID)} \\*
 \hline
@@ -2876,7 +3024,7 @@ Por su parte, la entidad **VoucherLineJpaEntity** estructura los ítems, repuest
 \hline
 \textbf{Restricciones e Índices} & Restricción única uk\_vouchers\_tenant\_serie\_number sobre (tenant\_id, serie, number). Claves foráneas fk\_vouchers\_tenant hacia tenants, fk\_vouchers\_branch hacia branches, fk\_vouchers\_customer hacia customers y fk\_vouchers\_work\_order hacia work\_orders. Restricciones de verificación chk\_voucher\_amounts\_positive sobre subtotal, igv\_amount y total\_amount no negativos. Índices B-Tree idx\_vouchers\_tenant\_created sobre (tenant\_id, created\_at DESC), idx\_vouchers\_work\_order sobre work\_order\_id e idx\_vouchers\_customer sobre (tenant\_id, customer\_id). Relación en cascada total con eliminación de huérfanos hacia líneas y pagos. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} VoucherLineJpaEntity \quad (\textit{Tabla:} \texttt{voucher\_lines})} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} VoucherLinePersistenceEntity \quad (\textit{Tabla:} \texttt{voucher\_lines})} \\*
 \hline
 \textbf{Clave Primaria} & \texttt{id (UUID)} \\*
 \hline
@@ -2884,7 +3032,7 @@ Por su parte, la entidad **VoucherLineJpaEntity** estructura los ítems, repuest
 \hline
 \textbf{Restricciones e Índices} & Clave foránea fk\_voucher\_lines\_voucher hacia electronic\_vouchers con eliminación en cascada. Clave foránea opcional fk\_voucher\_lines\_item hacia el catálogo de repuestos de inventario. Restricciones de verificación chk\_line\_quantity\_positive para cantidad mayor a cero y chk\_line\_amounts\_positive para valores unitarios y totales no negativos. Índices B-Tree idx\_voucher\_lines\_voucher sobre voucher\_id e idx\_voucher\_lines\_item sobre item\_id. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} VoucherPaymentJpaEntity \quad (\textit{Tabla:} \texttt{voucher\_payments})} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} VoucherPaymentPersistenceEntity \quad (\textit{Tabla:} \texttt{voucher\_payments})} \\*
 \hline
 \textbf{Clave Primaria} & \texttt{id (UUID)} \\*
 \hline
@@ -2892,7 +3040,7 @@ Por su parte, la entidad **VoucherLineJpaEntity** estructura los ítems, repuest
 \hline
 \textbf{Restricciones e Índices} & Claves foráneas fk\_voucher\_payments\_voucher hacia electronic\_vouchers, fk\_payments\_tenant hacia tenants y fk\_payments\_branch hacia branches. Restricción de verificación chk\_payment\_amount\_positive para importes monetarios mayores a cero. Índices B-Tree idx\_payments\_voucher sobre voucher\_id e idx\_payments\_branch\_date sobre (branch\_id, paid\_at DESC) para cuadres de caja y auditoría financiera de cobros por sede. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} SeriesConfigurationJpaEntity \quad (\textit{Tabla:} \texttt{sunat\_series\_configurations})} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} SeriesConfigurationPersistenceEntity \quad (\textit{Tabla:} \texttt{sunat\_series\_configurations})} \\*
 \hline
 \textbf{Clave Primaria} & \texttt{id (UUID)} \\*
 \hline
@@ -2925,15 +3073,15 @@ Asimismo, el adaptador **SeriesConfigurationRepositoryImpl** implementa el puert
 \hline
 \textbf{Puerto de Dominio} & \texttt{ElectronicVoucherRepository} \\*
 \hline
-\textbf{Repositorio Inyectado} & \texttt{SpringDataElectronicVoucherRepository} \\*
+\textbf{Repositorio Inyectado} & \texttt{ElectronicVoucherPersistenceRepository} \\*
 \hline
-\textbf{Operaciones Clave} & Transforma el agregado puro **ElectronicVoucher** hacia **ElectronicVoucherJpaEntity** mediante **ElectronicVoucherPersistenceAssembler**. Persiste en PostgreSQL 16 coordinando la cascada de líneas de detalle y cobros mediante *saveAndFlush()*. Extrae eventos de integración acumulados con *pullDomainEvents()* y los inserta de manera atómica en la tabla outbox\_messages. Ejecuta *findById()* con hidratación de colecciones dependientes, *findByTenantIdAndSerieAndNumber()* para recuperación canónica de comprobantes fiscales, *findAllByWorkOrderId()* para auditoría de facturación asociada a órdenes de trabajo y *findAllByTenantAndDateRange()* con paginación optimizada para reportes contables. \\
+\textbf{Operaciones Clave} & Mapea el agregado puro **ElectronicVoucher** hacia **ElectronicVoucherPersistenceEntity** mediante **ElectronicVoucherPersistenceAssembler** bajo el subpaquete persistence.jpa.assemblers. Persiste en PostgreSQL 16 coordinando la cascada de líneas de detalle y cobros mediante *saveAndFlush()*. Extrae eventos de integración acumulados con *pullDomainEvents()* y los inserta de manera atómica en la tabla outbox\_messages. Ejecuta *findById()* con hidratación de colecciones dependientes, *findByTenantIdAndSerieAndNumber()* para recuperación canónica de comprobantes fiscales, *findAllByWorkOrderId()* para auditoría de facturación asociada a órdenes de trabajo y *findAllByTenantAndDateRange()* con segmentación optimizada para reportes contables. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} VoucherPaymentRepositoryImpl} \\*
 \hline
 \textbf{Puerto de Dominio} & \texttt{VoucherPaymentRepository} \\*
 \hline
-\textbf{Repositorio Inyectado} & \texttt{SpringDataVoucherPaymentRepository} \\*
+\textbf{Repositorio Inyectado} & \texttt{VoucherPaymentPersistenceRepository} \\*
 \hline
 \textbf{Operaciones Clave} & Persiste transacciones individuales de pago y amortizaciones financieras vinculadas a comprobantes. Registra la referencia bancaria, método de pago y marca temporal de recaudación. Despacha eventos **VoucherPaymentRegisteredEvent** hacia outbox\_messages para notificar la liberación del vehículo en taller. Ejecuta *findById()* para auditoría transaccional, *findAllByVoucherId()* para consultar el historial completo de amortizaciones y *findAllByBranchAndDate()* para consolidar el arqueo de caja diario de la sucursal física. \\
 \hline
@@ -2941,7 +3089,7 @@ Asimismo, el adaptador **SeriesConfigurationRepositoryImpl** implementa el puert
 \hline
 \textbf{Puerto de Dominio} & \texttt{SeriesConfigurationRepository} \\*
 \hline
-\textbf{Repositorio Inyectado} & \texttt{SpringDataSeriesConfigurationRepository} \\*
+\textbf{Repositorio Inyectado} & \texttt{SeriesConfigurationPersistenceRepository} \\*
 \hline
 \textbf{Operaciones Clave} & Administra la asignación estrictamente secuencial de números correlativos tributarios por serie y sucursal. Implementa el método *findActiveForUpdate()* aplicando la anotación LockModeType.PESSIMISTIC\_WRITE de JPA, forzando una instrucción SELECT ... FOR UPDATE en PostgreSQL que bloquea la fila de configuración durante la transacción, eliminando condiciones de carrera y saltos de numeración ante emisiones concurrentes. Ejecuta *save()* para incrementar el contador atómico y *findAllByBranchId()* para la parametrización de puntos de emisión. \\
 \hline
@@ -2951,90 +3099,90 @@ Asimismo, el adaptador **SeriesConfigurationRepositoryImpl** implementa el puert
 
 **Ensambladores de Persistencia y Convertidores de Atributos JPA**
 
-El desacoplamiento entre las estructuras relacionales de base de datos y los tipos puros del dominio se materializa mediante ensambladores de persistencia y convertidores de atributos JPA. El ensamblador **ElectronicVoucherPersistenceAssembler** transforma bidireccionalmente los comprobantes electrónicos, reconstruyendo el agregado puro mediante el método estático *reconstitute()* sin desencadenar emisiones espurias de eventos de integración durante operaciones de lectura o consulta analítica. De modo semejante, los ensambladores **VoucherPaymentPersistenceAssembler** y **SeriesConfigurationPersistenceAssembler** preservan la integridad dimensional de pagos y configuraciones de series.
+El desacoplamiento entre las estructuras relacionales de base de datos y los tipos puros del dominio se materializa mediante ensambladores de persistencia y convertidores de atributos JPA. El ensamblador **ElectronicVoucherPersistenceAssembler** mapea bidireccionalmente los comprobantes electrónicos, reconstruyendo el agregado puro mediante el método estático *reconstitute()* sin desencadenar emisiones espurias de eventos de integración durante operaciones de lectura o consulta analítica. De modo semejante, los ensambladores **VoucherPaymentPersistenceAssembler** y **SeriesConfigurationPersistenceAssembler** preservan la integridad dimensional de pagos y configuraciones de series.
 
-Este esquema de transformación se complementa con siete convertidores de atributos JPA que serializan enumeraciones de dominio y objetos de valor hacia tipos columnares estándar de SQL. Entre ellos destacan **VoucherTypeConverter**, que traduce el tipo de comprobante hacia códigos formales reglamentados; **TaxCalculationConverter**, que garantiza la consistencia porcentual del impuesto; y **MoneyConverter**, que asegura exactitud a dos decimales con redondeo bancario *Half-Even*. En la @tbl:invoicing-persistence-assemblers se describen las transformaciones y mapeos de tipos implementados por estos componentes.
+Este esquema de ensamble y conversión se complementa con siete convertidores de atributos JPA que serializan enumeraciones de dominio y objetos de valor hacia tipos columnares estándar de SQL. Entre ellos destacan **VoucherTypeConverter**, que traduce el tipo de comprobante hacia códigos formales reglamentados, **TaxCalculationConverter**, que garantiza la consistencia porcentual del impuesto, y **MoneyConverter**, que asegura exactitud a dos decimales con redondeo bancario *Half-Even*. En la @tbl:invoicing-persistence-assemblers se describen las conversiones y mapeos de tipos implementados por estos componentes.
 
 \renewcommand{\arraystretch}{1.25}
 \begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
 \caption{Ensambladores de Persistencia y Convertidores JPA de Invoicing \& Compliance} \label{tbl:invoicing-persistence-assemblers} \\
 \hline
-\thfirst{Aspecto de Mapeo} & \thcell{Tipos Relacionados y Transformación} \\
+\thfirst{Aspecto de Mapeo} & \thcell{Tipos Relacionados y Mapeo} \\
 \hline
 \endfirsthead
 \hline
-\thfirst{Aspecto de Mapeo} & \thcell{Tipos Relacionados y Transformación} \\
+\thfirst{Aspecto de Mapeo} & \thcell{Tipos Relacionados y Mapeo} \\
 \hline
 \endhead
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} ElectronicVoucherPersistenceAssembler} \\*
 \hline
-\textbf{Mapeo de Tipos} & \texttt{ElectronicVoucher} $\longleftrightarrow$ \texttt{ElectronicVoucherJpaEntity} \\*
+\textbf{Mapeo de Tipos} & \texttt{ElectronicVoucher} $\longleftrightarrow$ \texttt{ElectronicVoucherPersistenceEntity} \\*
 \hline
-\textbf{Transformación} & Traduce VoucherId a UUID y descompone los objetos de valor VoucherSerie, VoucherType, TaxCalculation y CustomerFiscalInfo hacia campos relacionales planos. Mapea metadatos devueltos por SUNAT como URLs de PDF, XML y constancia CDR, hash de firma digital y código de respuesta. Reconstituye el agregado puro mediante el método estático de fábrica *ElectronicVoucher.reconstitute()*, hidratando colecciones de líneas y pagos sin disparar eventos de dominio espurios durante consultas. \\
+\textbf{Mapeo y Conversión} & Traduce VoucherId a UUID y descompone los objetos de valor VoucherSerie, VoucherType, TaxCalculation y CustomerFiscalInfo hacia campos relacionales planos. Mapea metadatos devueltos por SUNAT como URLs de PDF, XML y constancia CDR, hash de firma digital y código de respuesta. Reconstituye el agregado puro mediante el método estático de fábrica *ElectronicVoucher.reconstitute()*, hidratando colecciones de líneas y pagos sin disparar eventos de dominio espurios durante consultas. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} VoucherPaymentPersistenceAssembler} \\*
 \hline
-\textbf{Mapeo de Tipos} & \texttt{VoucherPayment} $\longleftrightarrow$ \texttt{VoucherPaymentJpaEntity} \\*
+\textbf{Mapeo de Tipos} & \texttt{VoucherPayment} $\longleftrightarrow$ \texttt{VoucherPaymentPersistenceEntity} \\*
 \hline
-\textbf{Transformación} & Mapea PaymentId a UUID, importe monetario Money, método de pago PaymentMethod y referencia bancaria externa. Reconstituye la entidad de pago mediante *VoucherPayment.reconstitute()* preservando la marca temporal inmutable paid\_at y garantizando la coherencia financiera del saldo insoluto. \\
+\textbf{Mapeo y Conversión} & Mapea PaymentId a UUID, importe monetario Money, método de pago PaymentMethod y referencia bancaria externa. Reconstituye la entidad de pago mediante *VoucherPayment.reconstitute()* preservando la marca temporal inmutable paid\_at y garantizando la coherencia financiera del saldo insoluto. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} SeriesConfigurationPersistenceAssembler} \\*
 \hline
-\textbf{Mapeo de Tipos} & \texttt{SeriesConfiguration} $\longleftrightarrow$ \texttt{SeriesConfigurationJpaEntity} \\*
+\textbf{Mapeo de Tipos} & \texttt{SeriesConfiguration} $\longleftrightarrow$ \texttt{SeriesConfigurationPersistenceEntity} \\*
 \hline
-\textbf{Transformación} & Traduce SeriesConfigurationId a UUID, serie alfanumérica y tipo de comprobante. Invoca *SeriesConfiguration.reconstitute()* para restaurar el contador correlativo actual y el indicador booleano de operatividad sin generar efectos secundarios transaccionales. \\
+\textbf{Mapeo y Conversión} & Traduce SeriesConfigurationId a UUID, serie alfanumérica y tipo de comprobante. Invoca *SeriesConfiguration.reconstitute()* para restaurar el contador correlativo actual y el indicador booleano de operatividad sin generar efectos secundarios transaccionales. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} VoucherTypeConverter} \\*
 \hline
 \textbf{Mapeo de Tipos} & \texttt{VoucherType} $\longleftrightarrow$ \texttt{VARCHAR(10)} \\*
 \hline
-\textbf{Transformación} & Convierte la enumeración de dominio hacia los códigos formales de tipo de documento reglamentados por SUNAT como código 01 para Factura, código 03 para Boleta de Venta y código 07 para Nota de Crédito. Reconstituye el tipo tipificado en lecturas relacionales. \\
+\textbf{Mapeo y Conversión} & Convierte la enumeración de dominio hacia los códigos formales de tipo de documento reglamentados por SUNAT como código 01 para Factura, código 03 para Boleta de Venta y código 07 para Nota de Crédito. Reconstituye el tipo tipificado en lecturas relacionales. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} VoucherStatusConverter} \\*
 \hline
 \textbf{Mapeo de Tipos} & \texttt{VoucherStatus} $\longleftrightarrow$ \texttt{VARCHAR(20)} \\*
 \hline
-\textbf{Transformación} & Serializa los estados del ciclo de vida del comprobante DRAFT, ISSUED, ACCEPTED\_SUNAT, REJECTED\_SUNAT y VOIDED a cadenas normalizadas en mayúsculas. Reconstituye la enumeración correspondiente con validación de transiciones de estado permitidas. \\
+\textbf{Mapeo y Conversión} & Serializa los estados del ciclo de vida del comprobante DRAFT, ISSUED, ACCEPTED\_SUNAT, REJECTED\_SUNAT y VOIDED a cadenas normalizadas en mayúsculas. Reconstituye la enumeración correspondiente con validación de transiciones de estado permitidas. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} PaymentMethodConverter} \\*
 \hline
 \textbf{Mapeo de Tipos} & \texttt{PaymentMethod} $\longleftrightarrow$ \texttt{VARCHAR(30)} \\*
 \hline
-\textbf{Transformación} & Mapea modalidades de cobro comerciales CASH, CREDIT\_CARD, DEBIT\_CARD, BANK\_TRANSFER, DIGITAL\_WALLET\_YAPE y DIGITAL\_WALLET\_PLIN a columnas de texto plano. Reconstituye la opción de cobro garantizando compatibilidad retroactiva. \\
+\textbf{Mapeo y Conversión} & Mapea modalidades de cobro comerciales CASH, CREDIT\_CARD, DEBIT\_CARD, BANK\_TRANSFER, DIGITAL\_WALLET\_YAPE y DIGITAL\_WALLET\_PLIN a columnas de texto plano. Reconstituye la opción de cobro garantizando compatibilidad retroactiva. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} PaymentStatusConverter} \\*
 \hline
 \textbf{Mapeo de Tipos} & \texttt{PaymentStatus} $\longleftrightarrow$ \texttt{VARCHAR(20)} \\*
 \hline
-\textbf{Transformación} & Serializa estados financieros de transacciones de amortización PENDING, COMPLETED y REFUNDED a columnas relacionales. Reconstituye el estado asegurando consistencia con el saldo del comprobante. \\
+\textbf{Mapeo y Conversión} & Serializa estados financieros de transacciones de amortización PENDING, COMPLETED y REFUNDED a columnas relacionales. Reconstituye el estado asegurando consistencia con el saldo del comprobante. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} MoneyConverter} \\*
 \hline
 \textbf{Mapeo de Tipos} & \texttt{Money} $\longleftrightarrow$ \texttt{NUMERIC(10,\allowbreak 2)} \\*
 \hline
-\textbf{Transformación} & Extrae el valor decimal BigDecimal preservando una escala fija de dos decimales con redondeo bancario Half-Even. Reconstituye el objeto de valor asignando la divisa oficial PEN o USD según la moneda del comprobante. \\
+\textbf{Mapeo y Conversión} & Extrae el valor decimal BigDecimal preservando una escala fija de dos decimales con redondeo bancario Half-Even. Reconstituye el objeto de valor asignando la divisa oficial PEN o USD según la moneda del comprobante. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} TaxCalculationConverter} \\*
 \hline
 \textbf{Mapeo de Tipos} & \texttt{TaxCalculation} $\longleftrightarrow$ \texttt{NUMERIC(10,\allowbreak 2)} \\*
 \hline
-\textbf{Transformación} & Extrae la cuota tributaria calculada de IGV al 18\% sobre el valor gravado de venta. Reconstituye el objeto de valor auditando que la suma de valor neto y tributo coincida exactamente con el importe total liquidado. \\
+\textbf{Mapeo y Conversión} & Extrae la cuota tributaria calculada de IGV al 18\% sobre el valor gravado de venta. Reconstituye el objeto de valor auditando que la suma de valor neto y tributo coincida exactamente con el importe total liquidado. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} VoucherSerieConverter} \\*
 \hline
 \textbf{Mapeo de Tipos} & \texttt{VoucherSerie} $\longleftrightarrow$ \texttt{VARCHAR(4)} \\*
 \hline
-\textbf{Transformación} & Serializa la serie alfanumérica a cadenas fijas de cuatro caracteres en mayúsculas. Reconstituye el objeto de valor aplicando la regla de validación de formato establecida por SUNAT para comprobantes electrónicos. \\
+\textbf{Mapeo y Conversión} & Serializa la serie alfanumérica a cadenas fijas de cuatro caracteres en mayúsculas. Reconstituye el objeto de valor aplicando la regla de validación de formato establecida por SUNAT para comprobantes electrónicos. \\
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-*Nota.* Componentes configurados bajo los paquetes transform y converters de la capa de infraestructura.
+*Nota.* Componentes configurados bajo los subpaquetes persistence.jpa.assemblers y persistence.jpa.converters de la capa de infraestructura.
 
 **Pasarelas Fiscales Externas e Integración en la Nube**
 
-La comunicación hacia proveedores telemáticos y servicios en la nube se canaliza a través de pasarelas perimetrales y adaptadores anticorrupción que blindan el núcleo transaccional frente a especificaciones externas. La pasarela **NubefactFiscalGatewayImpl** interactúa con la interfaz web del proveedor de servicios electrónicos homologado para la generación del documento estructurado en formato UBL 2.1 y su firma con certificado digital tributario, incorporando políticas de tolerancia a fallos con reintentos exponenciales y aislamiento ante anomalías de red.
+La comunicación hacia proveedores telemáticos y servicios en la nube se canaliza a través de pasarelas perimetrales y adaptadores anticorrupción que blindan el núcleo transaccional frente a especificaciones externas. La pasarela **NubefactPseFiscalAdapter** interactúa con la interfaz web del proveedor de servicios electrónicos homologado para la generación del documento estructurado en formato UBL 2.1 y su firma con certificado digital tributario, incorporando políticas de tolerancia a fallos con reintentos exponenciales y aislamiento ante anomalías de red.
 
-Adicionalmente, el adaptador **ResendEmailSenderAdapter** despacha notificaciones transaccionales al correo electrónico del cliente adjuntando las representaciones oficiales en formato PDF y XML firmado con constancia de recepción, mientras que **OpenPdfInvoicingGeneratorAdapter** genera dinámicamente representaciones gráficas vectoriales A4 y tickets térmicos para punto de venta. Por último, **CustomerFiscalAclAdapter** valida la condición de contribuyente ante el padrón tributario y **InvoicingTransactionalOutboxPublisherImpl** asegura la entrega confiable de eventos mediante el patrón Transactional Outbox. En la @tbl:invoicing-external-infrastructure se exponen las tecnologías y responsabilidades de estas pasarelas.
+Adicionalmente, el adaptador **ResendVoucherReceiptEmailAdapter** despacha notificaciones transaccionales al correo electrónico del cliente adjuntando las representaciones oficiales en formato PDF y XML firmado con constancia de recepción, **FirebaseSunatCdrStorageAdapter** asegura la custodia inmutable de los archivos XML UBL 2.1 y constancias CDR oficiales devueltas por la autoridad tributaria, y **OpenPdfCashFlowReportAdapter** genera los reportes vectoriales de flujo de caja y tesorería con OpenPDF y Thymeleaf. Por último, **CustomerFiscalValidationAclAdapter** valida la condición de contribuyente ante el padrón tributario y **InvoicingOutboxMessageRelayAdapter** asegura la entrega confiable de eventos mediante el patrón Transactional Outbox. En la @tbl:invoicing-external-infrastructure se exponen las tecnologías y responsabilidades de estas pasarelas.
 
 \renewcommand{\arraystretch}{1.25}
 \begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
@@ -3047,39 +3195,45 @@ Adicionalmente, el adaptador **ResendEmailSenderAdapter** despacha notificacione
 \thfirst{Aspecto Técnico} & \thcell{Tecnología y Responsabilidad de Integración} \\
 \hline
 \endhead
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Pasarela Externa:} NubefactFiscalGatewayImpl \quad (\textit{Categoría:} Pasarela Perimetral Fiscal)} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Pasarela Externa:} NubefactPseFiscalAdapter \quad (\textit{Categoría:} Pasarela Perimetral Fiscal)} \\*
 \hline
 \textbf{Tecnología Subyacente} & Spring WebClient con TLS 1.3, Cabeceras Bearer Token y Circuit Breaker Resilience4j \\*
 \hline
-\textbf{Responsabilidad} & Transmite la trama de datos estructurada JSON V1 hacia los servicios web del PSE homologado Nubefact para su transformación a UBL 2.1 y firma digital con certificado tributario. Configura timeout de conexión de cinco segundos, timeout de lectura de quince segundos y política de tres reintentos con retroceso exponencial ante errores HTTP 502 o 503. Extrae URLs del PDF generado, XML firmado y constancia CDR devuelta por SUNAT. Implementa NubefactFiscalGatewayPort. \\
+\textbf{Responsabilidad} & Transmite la trama de datos estructurada JSON V1 hacia los servicios web del PSE homologado Nubefact para su conversión a UBL 2.1 y firma digital con certificado tributario. Configura timeout de conexión de cinco segundos, timeout de lectura de quince segundos y política de tres reintentos con retroceso exponencial ante errores HTTP 502 o 503. Extrae URLs del PDF generado, XML firmado y constancia CDR devuelta por SUNAT. Implementa el puerto NubefactPseFiscalGateway bajo el subpaquete infrastructure.external.tax.nubefact. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Pasarela Externa:} ResendEmailSenderAdapter \quad (\textit{Categoría:} Pasarela Cloud de Notificaciones)} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Pasarela Externa:} ResendVoucherReceiptEmailAdapter \quad (\textit{Categoría:} Pasarela Cloud de Notificaciones)} \\*
 \hline
 \textbf{Tecnología Subyacente} & Resend Cloud REST API vía Spring RestClient con Autenticación API Key \\*
 \hline
-\textbf{Responsabilidad} & Despacha notificaciones transaccionales a la dirección electrónica del cliente final tras la validación exitosa del comprobante. Adjunta de manera automatizada la representación impresa en formato PDF vectorial y el archivo XML UBL 2.1 con su constancia de recepción de SUNAT, garantizando entrega confiable y trazabilidad de recepción. Implementa TransactionalEmailSenderPort. \\
+\textbf{Responsabilidad} & Despacha notificaciones transaccionales a la dirección electrónica del cliente final tras la validación exitosa del comprobante. Adjunta de manera automatizada la representación impresa en formato PDF vectorial y el archivo XML UBL 2.1 con su constancia de recepción de SUNAT, garantizando entrega confiable y trazabilidad de recepción. Implementa el puerto VoucherReceiptEmailGateway bajo el subpaquete infrastructure.external.mail.resend. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Pasarela Externa:} OpenPdfInvoicingGeneratorAdapter \quad (\textit{Categoría:} Pasarela Documental PDF)} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Pasarela Externa:} FirebaseSunatCdrStorageAdapter \quad (\textit{Categoría:} Pasarela Cloud de Almacenamiento)} \\*
 \hline
-\textbf{Tecnología Subyacente} & Biblioteca OpenPDF 1.3.39 con Renderizado Gráfico Vectorial \\*
+\textbf{Tecnología Subyacente} & Firebase Storage SDK con Autenticación Cloud IAM y URLs Firmadas Temporales \\*
 \hline
-\textbf{Responsabilidad} & Renderiza documentos imprimibles en formato bancario estándar A4 con código de barras PDF417 bidimensional y tickets térmicos de punto de venta de 80 mm para entrega en mostrador. Genera asimismo los informes de recaudación diaria y estados de flujo de caja consolidados en PDF sin sobrecargar la CPU del servidor central. Implementa InvoicingPdfGeneratorPort. \\
+\textbf{Responsabilidad} & Custodia legalmente los archivos XML UBL 2.1 firmados y las constancias de recepción oficiales CDR emitidas por SUNAT de manera inmutable. Facilita la descarga autorizada de artefactos probatorios tributarios mediante generación de enlaces seguros temporales con caducidad parametrizable. Implementa el puerto SunatCdrStorageGateway bajo el subpaquete infrastructure.external.cloud.firebase. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Pasarela Externa:} CustomerFiscalAclAdapter \quad (\textit{Categoría:} Adaptador ACL Datos Tributarios)} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Pasarela Externa:} CustomerFiscalValidationAclAdapter \quad (\textit{Categoría:} Adaptador ACL Datos Tributarios)} \\*
 \hline
 \textbf{Tecnología Subyacente} & Fachada de Módulo en Memoria hacia CRM y Caché Caffeine con TTL de 24 Horas \\*
 \hline
-\textbf{Responsabilidad} & Obtiene y certifica en tiempo real la identificación tributaria como RUC de 11 dígitos o DNI de 8 dígitos, razón social o denominación civil y domicilio fiscal del cliente desde el contexto Customer \& Fleet Management o contra los padrones web de SUNAT, validando la condición de contribuyente habido antes de la emisión del comprobante. Implementa CustomerFiscalAclPort. \\
+\textbf{Responsabilidad} & Obtiene y certifica en tiempo real la identificación tributaria como RUC de 11 dígitos o DNI de 8 dígitos, razón social o denominación civil y domicilio fiscal del cliente desde el contexto Customer \& Fleet Management o contra los padrones web de SUNAT, validando la condición de contribuyente habido antes de la emisión del comprobante. Implementa el puerto CustomerFiscalValidationAclService bajo el subpaquete infrastructure.external.acl.crm. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Pasarela Externa:} InvoicingTransactionalOutboxPublisherImpl \quad (\textit{Categoría:} Adaptador de Mensajería Transaccional)} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Pasarela Externa:} InvoicingOutboxMessageRelayAdapter \quad (\textit{Categoría:} Adaptador de Mensajería Outbox)} \\*
 \hline
 \textbf{Tecnología Subyacente} & PostgreSQL 16 con Serialización JSONB vía Jackson ObjectMapper \\*
 \hline
-\textbf{Responsabilidad} & Persiste eventos de dominio en la tabla outbox\_messages dentro de la misma transacción relacional de base de datos donde se almacena el comprobante o cobro. Garantiza semántica de publicación confiable con entrega al menos una vez hacia intermediarios de mensajería Apache Kafka o RabbitMQ mediante Debezium CDC, eliminando transacciones distribuidas 2PC. Implementa InvoicingEventPublisherPort. \\
+\textbf{Responsabilidad} & Persiste eventos de dominio en la tabla outbox\_messages dentro de la misma transacción relacional de base de datos donde se almacena el comprobante o cobro. Garantiza semántica de publicación confiable con entrega al menos una vez hacia intermediarios de mensajería Apache Kafka o RabbitMQ mediante Debezium CDC, eliminando transacciones distribuidas 2PC. Implementa el despachador de eventos bajo el subpaquete infrastructure.external.messaging.outbox. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Pasarela Externa:} Open\allowbreak Pdf\allowbreak Cash\allowbreak Flow\allowbreak Report\allowbreak Adapter \quad (\textit{Categoría:} Adaptador de Infraestructura Externa)} \\*
+\hline
+\textbf{Tecnología Subyacente} & OpenPDF 2.0.3, Thymeleaf 3.1 \\*
+\hline
+\textbf{Responsabilidad} & Renderizado binario de informes vectoriales en formato PDF para estados de cuenta de flujo de caja y arqueos de tesorería del taller. Procesa plantillas XHTML tipográficas con Thymeleaf y las compila en flujos binarios PDF con membrete institucional, balance consolidado y detalle de movimientos. Implementa el puerto CashFlowPdfGeneratorPort bajo el subpaquete infrastructure.external.reporting.openpdf. \\
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-*Nota.* Componentes configurados bajo los paquetes gateways, adapters y messaging de la capa de infraestructura.
+*Nota.* Adaptadores de integración configurados bajo los subpaquetes modulares tax.nubefact, cloud.firebase, mail.resend, acl.crm, messaging.outbox y reporting.openpdf dentro de infrastructure.external.
 
 En primer término, el determinismo fiscal y la erradicación de condiciones de carrera en la reserva correlativa mediante bloqueo pesimista en base de datos constituyen la salvaguarda de cumplimiento normativo del taller automotriz. La ejecución de consultas bloqueantes sobre el registro de serie en PostgreSQL garantiza que cada cajero u operador de servicio obtenga una numeración estrictamente secuencial y libre de huecos o duplicidades, satisfaciendo las exigencias legales del reglamento de comprobantes de pago sin degradar el rendimiento global del sistema gracias a la brevedad del ciclo de transacción.
 
@@ -3134,9 +3288,9 @@ En la @tbl:invoicing-c4-components se presenta el catálogo estructurado de los 
 \hline
 \textbf{Tecnologías} & Spring Events, TransactionalEventListener, Outbox Pattern \\*
 \hline
-\textbf{Responsabilidad} & Captura eventos de dominio atómicos y señales de finalización de órdenes de trabajo desde Workshop Operations, persistiendo cargas útiles serializadas en la tabla outbox\_messages dentro de la misma transacción de base de datos para entrega garantizada al menos una vez hacia consumidores asíncronos. \\*
+\textbf{Responsabilidad} & Captura eventos de dominio atómicos y señales de finalización de órdenes de trabajo desde Workshop Operations, persistiendo cargas útiles serializadas en la tabla invoicing\_outbox\_events dentro de la misma transacción de base de datos para entrega garantizada al menos una vez hacia consumidores asíncronos. \\*
 \hline
-\textbf{Relaciones} & Escucha eventos de dominio emitidos por los servicios de aplicación de facturación. Persiste registros en la tabla outbox\_messages mediante adaptadores de infraestructura. Notifica a consumidores de eventos en Workshop Operations, CRM y contabilidad general. \\
+\textbf{Relaciones} & Escucha eventos de dominio emitidos por los servicios de aplicación de facturación. Persiste registros en la tabla invoicing\_outbox\_events mediante adaptadores de infraestructura. Notifica a consumidores de eventos en Workshop Operations, CRM y contabilidad general. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} Invoicing Domain Model \& Peruvian Tax Calculation Engines} \\*
 \hline
@@ -3154,9 +3308,9 @@ En la @tbl:invoicing-c4-components se presenta el catálogo estructurado de los 
 \hline
 \textbf{Tecnologías} & Jakarta Persistence 3.1, Spring Data JPA, Hibernate ORM, PostgreSQL 16, LockModeType \\*
 \hline
-\textbf{Responsabilidad} & Materializa los puertos de repositorio del dominio mediante adaptadores JPA, gestionando el bloqueo pesimista en base de datos para la reserva atómica de correlativos sin carreras, el mapeo bidireccional de entidades relacionales y el despacho transaccional en outbox\_messages. \\*
+\textbf{Responsabilidad} & Materializa los puertos de repositorio del dominio mediante adaptadores JPA, gestionando el bloqueo pesimista en base de datos para la reserva atómica de correlativos sin carreras, el mapeo bidireccional de entidades relacionales y el despacho transaccional en invoicing\_outbox\_events. \\*
 \hline
-\textbf{Relaciones} & Realiza los contratos de repositorio ElectronicVoucherRepository, VoucherPaymentRepository y SeriesConfigurationRepository. Lee y escribe en las tablas electronic\_vouchers, voucher\_lines, voucher\_payments, sunat\_series\_configurations y outbox\_messages. \\
+\textbf{Relaciones} & Realiza los contratos de repositorio ElectronicVoucherRepository, VoucherPaymentRepository y SeriesConfigurationRepository. Lee y escribe en las tablas electronic\_vouchers, voucher\_lines, voucher\_payments, sunat\_series\_configurations y invoicing\_outbox\_events. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} Inbound ACL \& Invoicing Open Host Facade} \\*
 \hline
@@ -3172,12 +3326,11 @@ En la @tbl:invoicing-c4-components se presenta el catálogo estructurado de los 
 \hline
 \textbf{Tipo de Elemento} & Componente \\*
 \hline
-\textbf{Tecnologías} & Spring WebClient, Resilience4j, Resend Cloud API, OpenPDF, Caffeine Cache \\*
+\textbf{Tecnologías} & Spring WebClient, Resilience4j, Resend Cloud API, OpenPDF 2.0.3, Thymeleaf 3.1, Caffeine Cache \\*
 \hline
-\textbf{Responsabilidad} & Conecta con la API RESTful JSON V1 del PSE homologado Nubefact para generación y firma digital de comprobantes UBL 2.1, despacha correos transaccionales con PDF y XML adjuntos vía Resend, renderiza comprobantes vectoriales con OpenPDF y consulta datos fiscales de clientes en CRM o SUNAT. \\*
+\textbf{Responsabilidad} & Conecta con la API RESTful JSON V1 del PSE homologado Nubefact para generación y firma digital de comprobantes UBL 2.1, despacha correos transaccionales con PDF y XML adjuntos vía Resend, genera reportes de flujo de caja y arqueos de tesorería mediante el adaptador OpenPdfCashFlowReportAdapter con OpenPDF y Thymeleaf, y consulta datos fiscales de clientes en CRM o SUNAT. \\*
 \hline
-\textbf{Relaciones} & Invocado por servicios de aplicación. Conecta vía HTTPS con la API de Nubefact y con Resend. Consulta en memoria las fachadas de Customer \& Fleet Management, Inventory \& Supply Chain y Human Resources para el estado de flujo de caja. \\
-\hline
+\textbf{Relaciones} & Invocado por servicios de aplicación. Conecta vía HTTPS con la API de Nubefact y con Resend. Integra el adaptador OpenPdfCashFlowReportAdapter para exportación documental y consulta en memoria las fachadas de Customer \& Fleet Management, Inventory \& Supply Chain y Human Resources para el estado de flujo de caja. \\
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
 *Nota.* Componentes pertenecientes al contenedor API Application en com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak invoicing.
@@ -3197,21 +3350,21 @@ Para formalizar la colaboración sincronizada entre los componentes internos del
 
   El servicio de aplicación coordina la consulta de datos fiscales del receptor invocando a **Invoicing External Gateways & Fiscal Cloud Integration**, la cual se comunica en memoria con la fachada de **Customer & Fleet** para verificar la razón social, el número de documento y el domicilio fiscal registrado. Seguidamente, transfiere las partidas individuales de repuestos y mano de obra a **Invoicing Domain Model & Peruvian Tax Calculation Engines Component**, donde **PeruvianTaxCalculationEngine** determina la base imponible y el 18% del Impuesto General a las Ventas mediante redondeo simétrico Half-Even a dos decimales, al tiempo que **VoucherValidationService** audita el dígito verificador de RUC bajo Módulo 11.
 
-  Una vez comprobadas las invariantes de dominio, el servicio de aplicación solicita la reserva del número correlativo a **Invoicing Persistence Repositories & JPA Adapters**, ejecutando un bloqueo pesimista de escritura sobre el registro de serie en PostgreSQL 16 para impedir carreras o duplicidades. La entidad **ElectronicVoucher** se almacena en la base de datos en estado emitido, tras lo cual la pasarela externa despacha la trama JSON V1 estructurada hacia la API de Nubefact mediante Spring WebClient protegido por Resilience4j. Finalmente, **Invoicing Event Handlers & Transactional Dispatcher** persiste el evento **ElectronicVoucherIssuedEvent** en la tabla **outbox_messages** para notificación asíncrona, mientras la pasarela transmite el comprobante en formato PDF y XML firmado al correo del cliente mediante Resend.
+  Una vez comprobadas las invariantes de dominio, el servicio de aplicación solicita la reserva del número correlativo a **Invoicing Persistence Repositories & JPA Adapters**, ejecutando un bloqueo pesimista de escritura sobre el registro de serie en PostgreSQL 16 para impedir carreras o duplicidades. La entidad **ElectronicVoucher** se almacena en la base de datos en estado emitido, tras lo cual la pasarela externa despacha la trama JSON V1 estructurada hacia la API de Nubefact mediante Spring WebClient protegido por Resilience4j. Finalmente, **Invoicing Event Handlers & Transactional Dispatcher** persiste el evento **ElectronicVoucherIssuedEvent** en la tabla **invoicing_outbox_events** para notificación asíncrona, mientras la pasarela transmite el comprobante en formato PDF y XML firmado al correo del cliente mediante Resend.
 
 - **Ciclo de Amortización, Conciliación de Pagos y Liberación Vehicular en Taller:**
   Este flujo se origina en la bahía de entrega de vehículos o mostrador de atención cuando el conductor efectúa la amortización o cancelación de la deuda por los servicios prestados. El cajero ingresa los datos de recaudación a través de la aplicación móvil o web, especificando el monto amortizado, el medio formal de pago y el identificador de la transacción. El componente **Invoicing REST Controllers & Resource Assemblers** intercepta la petición, verifica los tipos de datos y despacha el comando **RegisterVoucherPaymentCommand** hacia **Invoicing CQRS Application Services**.
 
   El servicio de aplicación recupera la raíz de agregado **ElectronicVoucher** junto a sus pagos previos a través de **Invoicing Persistence Repositories & JPA Adapters**, invocando la operación de dominio *applyPayment()* en **Invoicing Domain Model & Peruvian Tax Calculation Engines Component**. La raíz de agregado evalúa la regla de solvencia contable, constatando que el acumulado de amortizaciones no sobrepase el total facturado del comprobante. Si el abono liquida la totalidad del saldo exigible, el comprobante transiciona al estado cancelado, mientras que abonos parciales mantienen la obligación en estado pendiente reflejando el saldo deudor remanente.
 
-  El adaptador de persistencia almacena el nuevo registro en la tabla relacional **voucher_payments** y consolida la actualización del comprobante en **electronic_vouchers**. Inmediatamente después, **Invoicing Event Handlers & Transactional Dispatcher** captura el suceso e inserta el evento de integración **VoucherPaymentAppliedEvent** en **outbox_messages** dentro de la misma transacción ACID. Al alcanzarse la cancelación integral de la deuda, el componente **Inbound ACL & Invoicing Open Host Facade Component** notifica de forma sincrónica a **Workshop Operations** la liberación financiera de la orden de servicio, habilitando la generación del pase de salida vehicular para la entrega física de la unidad al propietario.
+  El adaptador de persistencia almacena el nuevo registro en la tabla relacional **voucher_payments** y consolida la actualización del comprobante en **electronic_vouchers**. Inmediatamente después, **Invoicing Event Handlers & Transactional Dispatcher** captura el suceso e inserta el evento de integración **VoucherPaymentAppliedEvent** en **invoicing_outbox_events** dentro de la misma transacción ACID. Al alcanzarse la cancelación integral de la deuda, el componente **Inbound ACL & Invoicing Open Host Facade Component** notifica de forma sincrónica a **Workshop Operations** la liberación financiera de la orden de servicio, habilitando la generación del pase de salida vehicular para la entrega física de la unidad al propietario.
 
 - **Ciclo de Consolidación Multimodular del Estado de Flujo de Caja Operativo:**
   Para ejercer la gobernanza financiera del taller automotriz, el gerente administrativo solicita el arqueo consolidado de ingresos y egresos para un intervalo cronológico específico desde la interfaz analítica web. La petición arriba a **Invoicing REST Controllers & Resource Assemblers**, que valida los parámetros temporales y despacha la consulta **GetOperationalCashFlowQuery** hacia **Invoicing CQRS Application Services**.
 
   El servicio de aplicación orquesta una consulta federada respetando los límites de contexto mediante **Invoicing External Gateways & Fiscal Cloud Integration**. En primer término, recupera de **Invoicing Persistence Repositories & JPA Adapters** la totalidad de cobros reales registrados en **voucher_payments** durante las fechas solicitadas, desglosándolos por canal de pago. En segundo término, consulta en memoria la fachada de **Inventory & Supply Chain** para consolidar los desembolsos correspondientes a órdenes de compra de repuestos y lubricantes recibidas físicamente. En tercer término, invoca la fachada de **Human Resources** para cuantificar las erogaciones por planillas laborales y comisiones de mecánicos efectivamente liquidadas.
 
-  La totalidad de registros monetarios es trasladada a **Invoicing Domain Model & Peruvian Tax Calculation Engines Component**, donde el motor especializado **CashFlowAggregationEngine** totaliza los ingresos brutos, cuantifica la estructura de costos y deduce el saldo neto de tesorería del taller. El servicio de aplicación estructura la respuesta en un recurso DTO inmutable con enlaces HATEOAS y metadatos de auditoría, retornando la proyección analítica a la aplicación web para su renderizado visual en tablas y gráficas ejecutivas o su descarga documental en formato PDF formal.
+  La totalidad de registros monetarios es trasladada a **Invoicing Domain Model & Peruvian Tax Calculation Engines Component**, donde el motor especializado **CashFlowAggregationEngine** totaliza los ingresos brutos, cuantifica la estructura de costos y deduce el saldo neto de tesorería del taller. El servicio de aplicación estructura la respuesta en un recurso DTO inmutable con enlaces HATEOAS y metadatos de auditoría, retornando la proyección analítica a la aplicación web para su renderizado visual en tablas y gráficas ejecutivas o su descarga documental en formato PDF formal mediante el adaptador OpenPdfCashFlowReportAdapter.
 
 En primer término, la alta cohesión de las responsabilidades funcionales y el estricto desacoplamiento modular alcanzados mediante el principio de inversión de dependencias permiten que el motor tributario peruano opere como un núcleo de cálculo puro libre de bibliotecas de infraestructura. Dicha segregación formaliza un modelo donde las variaciones normativas de la autoridad fiscal o las adaptaciones de esquemas tributarios se resuelven de forma autocontenida en la capa de dominio, garantizando que los módulos operativos de taller, inventario y recursos humanos permanezcan inmunes ante alteraciones en las reglas impositivas de comprobantes.
 
@@ -3223,7 +3376,7 @@ Por último, el blindaje perimetral conferido por las pasarelas externas y la ge
 
 En esta sección se desarrolla la especificación técnica de menor nivel de abstracción para la arquitectura de software del Bounded Context Invoicing & Compliance, trasladando los modelos conceptuales y las responsabilidades tácticas hacia contratos estáticos de código ejecutable. Mediante esta formalización, se asegura que las reglas tributarias de la legislación peruana, los contratos de facturación electrónica bajo el estándar UBL 2.1 y las restricciones de consistencia transaccional se materialicen con rigurosa seguridad de tipos y determinismo computacional.
 
-Esta perspectiva de diseño abarca dos representaciones arquitectónicas complementarias: el Diagrama de Clases de la Capa de Dominio, que modela en memoria las entidades maestras, raíces de agregado, objetos de valor inmutables, motores algorítmicos de cálculo de impuestos y puertos de persistencia; y el Diagrama de Base de Datos, que formaliza el esquema físico relacional en PostgreSQL 16 con discriminadores de aislamiento multi-inquilino, llaves foráneas y mecanismos de concurrencia optimista.
+Esta perspectiva de diseño abarca dos representaciones arquitectónicas complementarias: el Diagrama de Clases de la Capa de Dominio, que modela en memoria las entidades maestras, raíces de agregado, objetos de valor inmutables, motores algorítmicos de cálculo de impuestos y puertos de persistencia, y el Diagrama de Base de Datos, que formaliza el esquema físico relacional en PostgreSQL 16 con discriminadores de aislamiento multi-inquilino, llaves foráneas y mecanismos de concurrencia optimista.
 
 ##### 2.6.7.6.1. *Bounded Context Domain Layer Class Diagrams*
 
@@ -3237,14 +3390,14 @@ En la @fig:class-diagram-invoicing se expone el Diagrama de Clases UML detallado
 
 La organización interna del modelo estático se estructura en ocho paquetes cohesivos que encapsulan las responsabilidades del dominio fiscal:
 
-- **Raíces de Agregado (`invoicing.domain.model.aggregates`):** Gobierna las entidades maestras que delimitan las fronteras de consistencia transaccional: **ElectronicVoucher** para el ciclo de vida, tributación y recaudación del comprobante de pago; **SeriesConfiguration** para la reserva atómica y correlatividad secuencial de series autorizadas por sede; y **VoucherPayment** para la amortización y conciliación multimoneda de caja. Todas las raíces extienden de **AbstractDomainAggregateRoot<T>**.
-- **Entidades Internas (`invoicing.domain.model.entities`):** Modela las partes dependientes subordinadas al ciclo del comprobante: **VoucherLine** para la especificación detallada de bienes o servicios atendidos en taller, desagregando base imponible, alícuota e impuesto liquidado.
-- **Identificadores Fuertemente Tipados (`invoicing.domain.model.ids`):** Implementa el contrato **TypedId<UUID>** mediante registros inmutables (**VoucherId**, **SeriesConfigurationId**, **PaymentId**), asociando identidades transversales del Shared Kernel (**TenantId**, **BranchId**, **CustomerId**, **WorkOrderId**).
-- **Objetos de Valor Fiscales y Financieros (`invoicing.domain.model.valueobjects`):** Encapsula estructuras inmutables con validación de invariantes: **VoucherSerie** para el formato alfanumérico reglamentario, **VoucherNumber** para el correlativo positivo, **TaxCalculation** para la liquidación de subtotal e IGV, **CustomerFiscalInfo** para la identidad tributaria receptora, **DigitalReceiptUrls** para las constancias telemáticas seguras, **SunatResponse** para las respuestas fiscales y **VoidedInfo** para los motivos de anulación, enlazando tipos monetarios (**Money**, **Currency**, **Quantity**, **TaxId**).
-- **Enumeraciones de Dominio (`invoicing.domain.model.enums`):** Normaliza el vocabulario operativo y tributario (**VoucherType**, **VoucherStatus**, **PaymentMethod**, **PaymentStatus**, **CreditNoteReason**, **VoucherItemType**, **DocumentType**).
-- **Servicios de Dominio Tributario y Conciliación (`invoicing.domain.services`):** Provee motores de cálculo puro sin acoplamiento a infraestructura: **PeruvianTaxCalculationEngine** para la liquidación matemática del IGV al 18% con redondeo bancario Half-Even, **VoucherValidationService** para la verificación de RUC por módulo 11 y topes legales de boleta, **SeriesCorrelativeService** para la gobernanza de numeraciones consecutivas y **CashFlowAggregationEngine** para la consolidación de tesorería operativa.
-- **Puertos de Persistencia (`invoicing.domain.repositories`):** Define los contratos abstractos de almacenamiento y consulta (**ElectronicVoucherRepository**, **SeriesConfigurationRepository**, **VoucherPaymentRepository**) desacoplados de motores relacionales.
-- **Eventos de Dominio y Excepciones Semánticas (`invoicing.domain.events` e `invoicing.domain.exceptions`):** Formaliza mutaciones del estado contable para el Transactional Outbox (**ElectronicVoucherIssuedEvent**, **VoucherAcceptedBySunatEvent**, **VoucherVoidedEvent**) y jerarquiza excepciones no comprobadas derivadas de **DomainException** bajo la norma RFC 7807 (**InvalidTaxIdException**, **CorrelativeExhaustedException**, **VoucherImmutableException**).
+- **Raíces de Agregado (invoicing.domain.model.aggregates):** Gobierna las entidades maestras que delimitan las fronteras de consistencia transaccional: **ElectronicVoucher** para el ciclo de vida, tributación y recaudación del comprobante de pago, **SeriesConfiguration** para la reserva atómica y correlatividad secuencial de series autorizadas por sede, y **VoucherPayment** para la amortización y conciliación multimoneda de caja. Todas las raíces extienden de **AbstractDomainAggregateRoot<T>**.
+- **Entidades Internas (invoicing.domain.model.entities):** Modela las partes dependientes subordinadas al ciclo del comprobante: **VoucherLine** para la especificación detallada de bienes o servicios atendidos en taller, desagregando base imponible, alícuota e impuesto liquidado.
+- **Identificadores Fuertemente Tipados (invoicing.domain.model.ids):** Implementa el contrato **TypedId<UUID>** mediante registros inmutables (**VoucherId**, **VoucherLineId**, **SeriesConfigurationId**, **PaymentId**), asociando identidades transversales del Shared Kernel (**TenantId**, **BranchId**, **CustomerId**, **WorkOrderId**).
+- **Objetos de Valor Fiscales y Financieros (invoicing.domain.model.valueobjects):** Encapsula estructuras inmutables con validación de invariantes: **VoucherSerie** para el formato alfanumérico reglamentario, **VoucherNumber** para el correlativo positivo, **TaxCalculation** para la liquidación de subtotal e IGV, **CustomerFiscalInfo** para la identidad tributaria receptora, **DigitalReceiptUrls** para las constancias telemáticas seguras, **SunatResponse** para las respuestas fiscales y **VoidedInfo** para los motivos de anulación, enlazando tipos analíticos y monetarios (**CashFlowMovement**, **CashFlowSummary**, **Money**, **Currency**, **Quantity**, **TaxId**).
+- **Enumeraciones de Dominio (invoicing.domain.model.enums):** Normaliza el vocabulario operativo y tributario (**VoucherType**, **VoucherStatus**, **PaymentMethod**, **PaymentStatus**, **CreditNoteReason**, **VoucherItemType**, **DocumentType**).
+- **Servicios de Dominio Tributario y Conciliación (invoicing.domain.services):** Provee motores de cálculo puro sin acoplamiento a infraestructura: **PeruvianTaxCalculationEngine** para la liquidación matemática del IGV al 18% con redondeo bancario Half-Even, **VoucherValidationService** para la verificación de RUC por módulo 11 y topes legales de boleta, **SeriesCorrelativeService** para la gobernanza de numeraciones consecutivas y **CashFlowAggregationEngine** para la consolidación de tesorería operativa.
+- **Puertos de Persistencia (invoicing.domain.repositories):** Define los contratos abstractos de almacenamiento y consulta (**ElectronicVoucherRepository**, **SeriesConfigurationRepository**, **VoucherPaymentRepository**) desacoplados de motores relacionales.
+- **Eventos de Dominio y Excepciones Semánticas (invoicing.domain.events e invoicing.domain.exceptions):** Formaliza mutaciones del estado contable para el Transactional Outbox (**ElectronicVoucherIssuedEvent**, **VoucherAcceptedBySunatEvent**, **VoucherVoidedEvent**) y jerarquiza excepciones no comprobadas derivadas de **DomainException** bajo la norma RFC 7807 (**InvalidTaxIdException**, **CorrelativeExhaustedException**, **VoucherImmutableException**).
 
 En la @tbl:invoicing-domain-classes-members se detalla la especificación formal de atributos, firmas de métodos, modificadores de acceso y reglas de negocio para cada componente de la Capa de Dominio.
 
@@ -3327,7 +3480,7 @@ Abono y ciclo financiero & Invariantes: importe monetario estrictamente mayor a 
 \hline
 Atributos de partida fiscal & Entidad dependiente subordinada a ElectronicVoucher. Representa una partida individual facturada por concepto de servicio mecánico o repuesto de almacén, preservando la desagregación de valor venta unitario e impuesto general a las ventas. \\*
 \hline
-\textbf{Firma o Tipo} & - \texttt{UUID id} \newline - \texttt{VoucherId voucherId} \newline - \texttt{Optional<\allowbreak UUID>\allowbreak  itemId} \newline - \texttt{VoucherItemType itemType} \newline - \texttt{String description} \newline - \texttt{Quantity quantity} \newline - \texttt{Money unitValue} \newline - \texttt{Money unitPrice} \newline - \texttt{Money igvAmount} \newline - \texttt{Money totalLine} \\*
+\textbf{Firma o Tipo} & - \texttt{VoucherLineId id} \newline - \texttt{VoucherId voucherId} \newline - \texttt{Optional<\allowbreak UUID>\allowbreak  itemId} \newline - \texttt{VoucherItemType itemType} \newline - \texttt{String description} \newline - \texttt{Quantity quantity} \newline - \texttt{Money unitValue} \newline - \texttt{Money unitPrice} \newline - \texttt{Money igvAmount} \newline - \texttt{Money totalLine} \\*
 \hline
 \textbf{Ámbito} & Privado \\
 \hline
@@ -3335,7 +3488,7 @@ Atributos de partida fiscal & Entidad dependiente subordinada a ElectronicVouche
 \hline
 Factoría y totalización & Invariantes: cantidad estrictamente positiva. Descripción no vacía. Coherencia matemática entre valor unitario sin IGV y precio unitario gravado. El total de línea es igual al producto de cantidad por precio unitario. \\*
 \hline
-\textbf{Firma o Tipo} & - \texttt{VoucherLine create(VoucherId,\allowbreak  Optional<\allowbreak UUID>\allowbreak ,\allowbreak  VoucherItemType,\allowbreak  String,\allowbreak  Quantity,\allowbreak  Money,\allowbreak  Money,\allowbreak  Money)} \newline - \texttt{Money calculateLineTotal()} \newline - \texttt{UUID id()} \newline - \texttt{VoucherItemType itemType()} \newline - \texttt{Quantity quantity()} \newline - \texttt{Money totalLine()} \\*
+\textbf{Firma o Tipo} & - \texttt{VoucherLine create(VoucherId,\allowbreak  Optional<\allowbreak UUID>\allowbreak ,\allowbreak  VoucherItemType,\allowbreak  String,\allowbreak  Quantity,\allowbreak  Money,\allowbreak  Money,\allowbreak  Money)} \newline - \texttt{Money calculateLineTotal()} \newline - \texttt{VoucherLineId id()} \newline - \texttt{VoucherItemType itemType()} \newline - \texttt{Quantity quantity()} \newline - \texttt{Money totalLine()} \\*
 \hline
 \textbf{Ámbito} & Público \\
 \hline
@@ -3431,7 +3584,7 @@ Persistencia de pagos & Puerto de persistencia para asientos de amortización y 
 \hline
 Identificadores tipados & Registros inmutables en Java que realizan \texttt{TypedId<\allowbreak UUID>\allowbreak }. Erradican la obsesión por primitivos y previenen intercambios accidentales de identificadores en tiempo de compilación. \\*
 \hline
-\textbf{Firma o Tipo} & - \texttt{record VoucherId(UUID value)} \newline - \texttt{record SeriesConfigurationId(UUID value)} \newline - \texttt{record PaymentId(UUID value)} \newline - \texttt{static of(UUID)} \newline - \texttt{static generate()} \\*
+\textbf{Firma o Tipo} & - \texttt{record VoucherId(UUID value)} \newline - \texttt{record VoucherLineId(UUID value)} \newline - \texttt{record SeriesConfigurationId(UUID value)} \newline - \texttt{record PaymentId(UUID value)} \newline - \texttt{static of(UUID)} \newline - \texttt{static generate()} \\*
 \hline
 \textbf{Ámbito} & Privado / Público \\
 \hline
@@ -3456,6 +3609,14 @@ Liquidación y receptor fiscal & Objetos de valor inmutables. \textbf{TaxCalcula
 Evidencia digital y anulación & Objetos de valor inmutables. \textbf{DigitalReceiptUrls} almacena enlaces web seguros HTTPS a los archivos PDF, XML firmado y constancia CDR. \textbf{SunatResponse} custodia código, glosa descriptiva y hash SHA-256. \textbf{VoidedInfo} preserva motivo y marca temporal de baja. \\*
 \hline
 \textbf{Firma o Tipo} & - \texttt{record DigitalReceiptUrls(String pdfUrl,\allowbreak  String xmlUrl,\allowbreak  String cdrUrl)} \newline - \texttt{record SunatResponse(String responseCode,\allowbreak  String description,\allowbreak  String digitalSignatureHash)} \newline - \texttt{record VoidedInfo(String reason,\allowbreak  Instant voidedAt)} \\*
+\hline
+\textbf{Ámbito} & Privado / Público \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Flujo de caja y tesorería & Objetos de valor inmutables. \textbf{CashFlowMovement} formaliza cada movimiento financiero individual consolidado en el balance de taller. \textbf{CashFlowSummary} condensa el resumen analítico de ingresos operativos, compras de insumos, planillas laborales y saldo neto de tesorería. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{record CashFlowMovement(UUID transactionId,\allowbreak  Instant movementDate,\allowbreak  String type,\allowbreak  String category,\allowbreak  String concept,\allowbreak  String referenceNumber,\allowbreak  BigDecimal amount,\allowbreak  BigDecimal runningBalance)} \newline - \texttt{record CashFlowSummary(Money grossRevenue,\allowbreak  Money purchaseExpenses,\allowbreak  Money payrollExpenses,\allowbreak  Money netCashFlow)} \\*
 \hline
 \textbf{Ámbito} & Privado / Público \\
 \hline
@@ -3637,11 +3798,13 @@ El Bounded Context de SaaS Billing & Subscriptions administra de forma integral 
 
 En el diseño arquitectónico de Atelier, este contexto mantiene un desacoplamiento estricto respecto al módulo de facturación local (Invoicing & Compliance): mientras que Invoicing gobierna los comprobantes fiscales que el taller extiende a los conductores conforme a las normas de SUNAT, SaaS Billing rige el contrato comercial que vincula al taller como cliente corporativo con Andeva. Mezclar estas dos dimensiones en un único modelo de facturación induciría a severos acoplamientos, contaminando la lógica contable internacional con particularidades tributarias peruanas.
 
-El dominio modela la raíz de agregado `SubscriptionPlan`, la cual define los niveles comerciales del catálogo (`STARTER`, `PROFESSIONAL`, `ENTERPRISE`), las periodicidades de facturación (`MONTHLY`, `YEARLY`) y los límites de consumo estipulados (`TenantQuotaLimits`). Por su parte, la raíz de agregado `TenantSubscription` gobierna el ciclo de vida contractual de cada taller a través de los estados `TRIALING`, `ACTIVE`, `PAST_DUE`, `CANCELED` y `UNPAID`. Cuando un taller se afilia, la suscripción controla los periodos de gracia ante fallos bancarios y autoriza de forma estricta el acceso al sistema.
+El dominio modela la raíz de agregado `SubscriptionPlan`, la cual define los niveles comerciales del catálogo (`GO`, `PRO`, `MAX`, `ENTERPRISE`), las periodicidades de facturación (`MONTHLY`, `YEARLY`) y los límites de consumo estipulados (`TenantQuotaLimits`). Por su parte, la raíz de agregado `TenantSubscription` gobierna el ciclo de vida contractual de cada taller a través de los estados `TRIALING`, `ACTIVE`, `PAST_DUE`, `CANCELED` y `UNPAID`. Cuando un taller se afilia, la suscripción controla los periodos de gracia ante fallos bancarios y autoriza de forma estricta el acceso al sistema.
 
-Un componente arquitectónico distintivo de este contexto es su adhesión estricta a la certificación de seguridad PCI-DSS (*Payment Card Industry Data Security Standard*). El backend de Atelier jamás procesa, transfiere ni persiste números de tarjetas de crédito o códigos de seguridad bancarios; delega la captura sensible al frontend mediante Stripe Elements y el SDK móvil oficial de Stripe, custodiando únicamente identificadores de recursos tokenizados (`stripe_customer_id`, `stripe_subscription_id`, `stripe_price_id`). 
+Un componente arquitectónico distintivo de este contexto es su adhesión estricta a la certificación de seguridad PCI-DSS (*Payment Card Industry Data Security Standard*). El backend de Atelier jamás procesa, transfiere ni persiste números de tarjetas de crédito o códigos de seguridad bancarios, delegando la captura sensible al frontend mediante Stripe Elements y el SDK móvil oficial de Stripe, custodiando únicamente identificadores de recursos tokenizados (`stripe_customer_id`, `stripe_subscription_id`, `stripe_price_id`). 
 
-Asimismo, para garantizar la consistencia en el procesamiento de eventos asíncronos provenientes de Stripe (cobros de facturas, cancelaciones por falta de pago o cambios de plan), el contexto modela el agregado `StripeWebhookEvent`, el cual asegura un procesamiento exactamente una vez (*Exactly-Once Processing*) mediante restricciones de unicidad e idempotencia estricta. Para optimizar el rendimiento del ERP y evitar consultas repetitivas a la base de datos relacional cada vez que un usuario interactúa con la plataforma, la validación de vigencia de suscripciones se acelera mediante una capa de caché de ultra alta velocidad implementada con Caffeine Cache, con invalidación reactiva ante eventos de webhook.
+Asimismo, para garantizar la consistencia en el procesamiento de eventos asíncronos provenientes de Stripe (cobros de facturas, cancelaciones por falta de pago o cambios de plan), el contexto modela el agregado `StripeWebhookEvent`, el cual asegura un procesamiento exactamente una vez (*Exactly-Once Processing*) mediante restricciones de unicidad e idempotencia estricta.
+
+En cuanto a la soberanía de acceso, la plataforma implementa una arquitectura de Autorización Forzada en Backend (*Backend-Enforced Authorization*). Las interfaces visuales en Angular y Android actúan como compuertas informativas y de experiencia progresiva mediante candados o modales de actualización. Sin embargo, la seguridad del modelo de negocio reside exclusivamente en el servidor central. Toda petición que implique creación de sedes, registro de personal, apertura de órdenes de trabajo, vinculación de dispositivos telemáticos OBD-II, carga de evidencias fotográficas, registro de clientes corporativos, transferencias entre múltiples almacenes o generación de reportes predictivos con inteligencia artificial es fiscalizada por el servicio de dominio puro `SubscriptionQuotaEnforcementService`. Para erradicar la sobrecarga en la base de datos relacional y mantener tiempos de respuesta inferiores a 0.05 milisegundos, la fachada pública del contexto opera sobre una capa de memoria local de alta velocidad estructurada con Caffeine Cache, cuya invalidación se produce de forma reactiva e inmediata tras la recepción conforme de eventos webhooks de Stripe.
 
 #### 2.6.8.1. Domain Layer
 
@@ -3713,7 +3876,7 @@ Plan\allowbreak Feature & Módulo funcional empaquetado en un plan comercial. Mo
 \hline
 \textbf{Categoría} & Entidad Dependiente \\*
 \hline
-\textbf{Relaciones} & Subordinada a SubscriptionPlan con clave alfanumérica unívoca de funcionalidad. \\*
+\textbf{Relaciones} & Pertenece por composición a SubscriptionPlan con clave alfanumérica unívoca de funcionalidad. \\*
 \hline
 \textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak entities} \\
 \hline
@@ -3721,71 +3884,61 @@ Plan\allowbreak Feature & Módulo funcional empaquetado en un plan comercial. Mo
 \hline
 PlanId & Identificador único universal fuertemente tipado para planes comerciales de software. \\*
 \hline
-\textbf{Categoría} & Identificador de Dominio \\*
+\textbf{Categoría} & Identificador Fuertemente Tipado \\*
 \hline
 \textbf{Relaciones} & Registro inmutable de identidad basado en UUID. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak ids} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
 SubscriptionId & Identificador único universal fuertemente tipado para contratos de suscripción SaaS. \\*
 \hline
-\textbf{Categoría} & Identificador de Dominio \\*
+\textbf{Categoría} & Identificador Fuertemente Tipado \\*
 \hline
 \textbf{Relaciones} & Registro inmutable de identidad basado en UUID. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak ids} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
 Saas\allowbreak InvoiceId & Identificador único universal fuertemente tipado para recibos financieros de suscripción. \\*
 \hline
-\textbf{Categoría} & Identificador de Dominio \\*
+\textbf{Categoría} & Identificador Fuertemente Tipado \\*
 \hline
 \textbf{Relaciones} & Registro inmutable de identidad basado en UUID. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak ids} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
 Stripe\allowbreak EventId & Identificador unívoco del evento asíncrono emitido por Stripe con prefijo reglamentario evt\_. \\*
 \hline
-\textbf{Categoría} & Objeto de Valor \\*
+\textbf{Categoría} & Identificador Fuertemente Tipado \\*
 \hline
 \textbf{Relaciones} & Registro inmutable con validación de expresión regular de la pasarela de pagos. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak ids} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
-Stripe\allowbreak CustomerId & Identificador del cliente corporativo en la bóveda de Stripe con prefijo reglamentario cus\_. \\*
+Plan\allowbreak FeatureId & Identificador único universal fuertemente tipado para características funcionales empaquetadas en un plan. \\*
 \hline
-\textbf{Categoría} & Objeto de Valor \\*
+\textbf{Categoría} & Identificador Fuertemente Tipado \\*
 \hline
-\textbf{Relaciones} & Registro inmutable que delega el almacenamiento de datos sensibles bajo estándar PCI-DSS. \\*
+\textbf{Relaciones} & Registro inmutable de identidad basado en UUID. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
-\hline
-\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
-\hline
-Stripe\allowbreak SubscriptionId & Identificador unívoco del contrato de cobro recurrente en Stripe con prefijo reglamentario sub\_. \\*
-\hline
-\textbf{Categoría} & Objeto de Valor \\*
-\hline
-\textbf{Relaciones} & Registro inmutable vinculado al ciclo de facturación externa. \\*
-\hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak ids} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
-Stripe\allowbreak PriceId & Identificador foráneo del precio recurrente en el catálogo de Stripe con prefijo reglamentario price\_. \\*
+PlanTier & Segmentación funcional comercial del paquete de software ofrecido a los talleres. \\*
 \hline
-\textbf{Categoría} & Objeto de Valor \\*
+\textbf{Categoría} & Enumeración de Dominio \\*
 \hline
-\textbf{Relaciones} & Registro inmutable que vincula la tarifa configurada en la pasarela externa. \\*
+\textbf{Relaciones} & Valores GO, PRO, MAX y ENTERPRISE asociados a SubscriptionPlan. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak enums} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
@@ -3795,7 +3948,7 @@ BillingCycle & Periodicidad pactada para el cobro recurrente del servicio en la 
 \hline
 \textbf{Relaciones} & Valores formales MONTHLY y YEARLY consumidos por PlanPricing. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak enums} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
@@ -3805,7 +3958,7 @@ Subscription\allowbreak Status & Estados formales del ciclo de vida contractual 
 \hline
 \textbf{Relaciones} & Valores TRIALING, ACTIVE, PAST\_DUE, CANCELED, UNPAID e INCOMPLETE. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak enums} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
@@ -3815,47 +3968,7 @@ InvoiceStatus & Estados formales de liquidación financiera del recibo de suscri
 \hline
 \textbf{Relaciones} & Valores PAID, OPEN, VOID y UNCOLLECTIBLE gobernados por SaasInvoice. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
-\hline
-\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
-\hline
-PlanTier & Segmentación funcional comercial del paquete de software ofrecido a los talleres. \\*
-\hline
-\textbf{Categoría} & Enumeración de Dominio \\*
-\hline
-\textbf{Relaciones} & Valores STARTER, PROFESSIONAL y ENTERPRISE asociados a SubscriptionPlan. \\*
-\hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
-\hline
-\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
-\hline
-PlanPricing & Estructura inmutable que asocia el importe monetario formal con su ciclo de facturación recurrente. \\*
-\hline
-\textbf{Categoría} & Objeto de Valor \\*
-\hline
-\textbf{Relaciones} & Agrupa Money y BillingCycle con validación de precio no negativo. \\*
-\hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
-\hline
-\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
-\hline
-Tenant\allowbreak Quota\allowbreak Limits & Techos máximos de recursos operativos y banderas de módulos autorizados por plan. \\*
-\hline
-\textbf{Categoría} & Objeto de Valor \\*
-\hline
-\textbf{Relaciones} & Parámetros inmutables maxBranches, maxActiveStaff, iotTelemetryEnabled y aiDiagnosticsEnabled. \\*
-\hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
-\hline
-\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
-\hline
-Subscription\allowbreak Period & Ventana temporal inmutable que delimita el intervalo formal de vigencia de cobertura pagada. \\*
-\hline
-\textbf{Categoría} & Objeto de Valor \\*
-\hline
-\textbf{Relaciones} & Agrupa marcas temporales startDate y endDate con validación de secuencia cronológica. \\*
-\hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak enums} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
@@ -3864,6 +3977,76 @@ Webhook\allowbreak Processing\allowbreak Status & Situación transaccional del p
 \textbf{Categoría} & Enumeración de Dominio \\*
 \hline
 \textbf{Relaciones} & Valores PENDING, PROCESSED, FAILED e IGNORED gestionados por StripeWebhookEvent. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak enums} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+PlanPricing & Estructura inmutable que asocia el importe monetario formal con su ciclo de facturación recurrente. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor Inmutable \\*
+\hline
+\textbf{Relaciones} & Agrupa Money y BillingCycle con validación de precio no negativo. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Stripe\allowbreak CustomerId & Identificador del cliente corporativo en la bóveda de Stripe con prefijo reglamentario cus\_. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor Inmutable \\*
+\hline
+\textbf{Relaciones} & Registro inmutable que delega el almacenamiento de datos sensibles bajo estándar PCI-DSS. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Stripe\allowbreak SubscriptionId & Identificador unívoco del contrato de cobro recurrente en Stripe con prefijo reglamentario sub\_. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor Inmutable \\*
+\hline
+\textbf{Relaciones} & Registro inmutable vinculado al ciclo de facturación externa. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Stripe\allowbreak PriceId & Identificador foráneo del precio recurrente en el catálogo de Stripe con prefijo reglamentario price\_. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor Inmutable \\*
+\hline
+\textbf{Relaciones} & Registro inmutable que vincula la tarifa configurada en la pasarela externa. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Stripe\allowbreak InvoiceId & Identificador foráneo unívoco de la factura generada por Stripe con prefijo reglamentario in\_. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor Inmutable \\*
+\hline
+\textbf{Relaciones} & Registro inmutable que vincula el comprobante financiero externo con SaasInvoice. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Subscription\allowbreak Period & Ventana temporal inmutable que delimita el intervalo formal de vigencia de cobertura pagada. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor Inmutable \\*
+\hline
+\textbf{Relaciones} & Agrupa marcas temporales startDate y endDate con validación de secuencia cronológica. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Tenant\allowbreak Quota\allowbreak Limits & Techos máximos de recursos operativos y banderas de módulos autorizados por plan. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor Inmutable \\*
+\hline
+\textbf{Relaciones} & Parámetros inmutables maxBranches, maxActiveStaff, iotTelemetryEnabled y aiDiagnosticsEnabled. \\*
 \hline
 \textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
 \hline
@@ -3889,9 +4072,19 @@ Stripe\allowbreak Webhook\allowbreak Signature\allowbreak Verification\allowbrea
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
+Subscription\allowbreak Lifecycle\allowbreak Domain\allowbreak Service & Servicio de dominio que gobierna políticas contractuales, fiscalización de gracia y expiración. \\*
+\hline
+\textbf{Categoría} & Servicio de Dominio \\*
+\hline
+\textbf{Relaciones} & Aplica reglas de negocio sobre transiciones de estado de TenantSubscription. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak services} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
 Subscription\allowbreak Plan\allowbreak Repository & Contrato de persistencia de dominio para el catálogo de planes comerciales. \\*
 \hline
-\textbf{Categoría} & Puerto de Salida \\*
+\textbf{Categoría} & Puerto de Repositorio de Dominio \\*
 \hline
 \textbf{Relaciones} & Implementado por adaptadores en Infrastructure Layer para persistencia en PostgreSQL 16. \\*
 \hline
@@ -3901,7 +4094,7 @@ Subscription\allowbreak Plan\allowbreak Repository & Contrato de persistencia de
 \hline
 Tenant\allowbreak Subscription\allowbreak Repository & Contrato de persistencia de dominio para contratos de suscripción activa de talleres mecánicos. \\*
 \hline
-\textbf{Categoría} & Puerto de Salida \\*
+\textbf{Categoría} & Puerto de Repositorio de Dominio \\*
 \hline
 \textbf{Relaciones} & Provee consultas de alta velocidad y verificación de unicidad de suscripción activa por taller. \\*
 \hline
@@ -3911,7 +4104,7 @@ Tenant\allowbreak Subscription\allowbreak Repository & Contrato de persistencia 
 \hline
 Saas\allowbreak Invoice\allowbreak Repository & Contrato de persistencia de dominio para recibos y comprobantes financieros de membresías. \\*
 \hline
-\textbf{Categoría} & Puerto de Salida \\*
+\textbf{Categoría} & Puerto de Repositorio de Dominio \\*
 \hline
 \textbf{Relaciones} & Provee consultas históricas de facturación por taller y búsqueda por identificador de Stripe. \\*
 \hline
@@ -3921,7 +4114,7 @@ Saas\allowbreak Invoice\allowbreak Repository & Contrato de persistencia de domi
 \hline
 Stripe\allowbreak Webhook\allowbreak Event\allowbreak Repository & Contrato de persistencia de dominio para registro forense y control de deduplicación de eventos. \\*
 \hline
-\textbf{Categoría} & Puerto de Salida \\*
+\textbf{Categoría} & Puerto de Repositorio de Dominio \\*
 \hline
 \textbf{Relaciones} & Permite verificar existencia previa por StripeEventId garantizando idempotencia estricta. \\*
 \hline
@@ -3935,7 +4128,7 @@ Subscription\allowbreak Plan\allowbreak Created\allowbreak Event & Notifica la p
 \hline
 \textbf{Relaciones} & Emitido por SubscriptionPlan tras su factoría de creación. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak events} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak events} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
@@ -3945,7 +4138,7 @@ Tenant\allowbreak Subscription\allowbreak Activated\allowbreak Event & Notifica 
 \hline
 \textbf{Relaciones} & Emitido por TenantSubscription habilitando el acceso a módulos de la plataforma. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak events} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak events} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
@@ -3955,7 +4148,7 @@ Tenant\allowbreak Subscription\allowbreak Renewed\allowbreak Event & Notifica la
 \hline
 \textbf{Relaciones} & Emitido por TenantSubscription renovando la validez en la capa de caché. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak events} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak events} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
@@ -3965,7 +4158,7 @@ Tenant\allowbreak Subscription\allowbreak PastDue\allowbreak Event & Notifica el
 \hline
 \textbf{Relaciones} & Emitido por TenantSubscription alertando al administrador del taller. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak events} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak events} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
@@ -3975,7 +4168,7 @@ Tenant\allowbreak Subscription\allowbreak Canceled\allowbreak Event & Notifica l
 \hline
 \textbf{Relaciones} & Emitido por TenantSubscription invalidando de forma inmediata credenciales de sesión en IAM. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak events} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak events} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
@@ -3985,17 +4178,17 @@ Tenant\allowbreak Plan\allowbreak Changed\allowbreak Event & Notifica el cambio 
 \hline
 \textbf{Relaciones} & Emitido por TenantSubscription propagando nuevas capacidades a otros contextos. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak events} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak events} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
-Saas\allowbreak Invoice\allowbreak Payment\allowbreak Succeeded\allowbreak Event & Notifica la acreditación bancaria exitosa de un recibo de servicio procesado por Stripe. \\*
+Saas\allowbreak Invoice\allowbreak Paid\allowbreak Event & Notifica la acreditación bancaria exitosa de un recibo de servicio procesado por Stripe. \\*
 \hline
 \textbf{Categoría} & Evento de Dominio \\*
 \hline
 \textbf{Relaciones} & Emitido por SaasInvoice registrando la liquidación financiera. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak events} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak events} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
@@ -4005,31 +4198,131 @@ Saas\allowbreak Invoice\allowbreak Payment\allowbreak Failed\allowbreak Event & 
 \hline
 \textbf{Relaciones} & Emitido por SaasInvoice iniciando mecanismos de cobranza y notificación de mora. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak events} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Stripe\allowbreak Webhook\allowbreak Processed\allowbreak Event & Notifica el procesamiento transaccional e idempotente exitoso de un webhook de Stripe. \\*
+\hline
+\textbf{Categoría} & Evento de Dominio \\*
+\hline
+\textbf{Relaciones} & Emitido por StripeWebhookEvent tras culminar la mutación de estado de negocio. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak events} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
 Billing\allowbreak Domain\allowbreak Exception & Superclase abstracta para contingencias semánticas e infracciones a las reglas de cobro SaaS. \\*
 \hline
-\textbf{Categoría} & Excepción Base de Dominio \\*
+\textbf{Categoría} & Excepción de Dominio \\*
 \hline
 \textbf{Relaciones} & Generalización de DomainException con normalización de códigos RFC 7807. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak exceptions} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak exceptions} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
-Quota\allowbreak Exceeded\allowbreak Exception & Señaliza la tentativa de exceder los techos operativos autorizados por el plan de suscripción. \\*
+Duplicate\allowbreak Active\allowbreak Subscription\allowbreak Exception & Señala el intento de registrar o activar una nueva suscripción para un taller con membresía vigente. \\*
 \hline
 \textbf{Categoría} & Excepción de Dominio \\*
 \hline
-\textbf{Relaciones} & Especialización de BillingDomainException con mapeo HTTP 403 Forbidden o 409 Conflict. \\*
+\textbf{Relaciones} & Especialización de BillingDomainException con mapeo HTTP 409 Conflict. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak exceptions} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak exceptions} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Invalid\allowbreak Plan\allowbreak Pricing\allowbreak Exception & Señala importes monetarios negativos o configuraciones tarifarias inválidas en el plan comercial. \\*
+\hline
+\textbf{Categoría} & Excepción de Dominio \\*
+\hline
+\textbf{Relaciones} & Especialización de BillingDomainException con mapeo HTTP 400 Bad Request. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak exceptions} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Invalid\allowbreak Webhook\allowbreak Signature\allowbreak Exception & Señala discrepancias criptográficas HMAC-SHA256 en la firma de notificaciones entrantes de Stripe. \\*
+\hline
+\textbf{Categoría} & Excepción de Dominio \\*
+\hline
+\textbf{Relaciones} & Especialización de BillingDomainException con mapeo HTTP 401 Unauthorized. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak exceptions} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Plan\allowbreak Not\allowbreak Found\allowbreak Exception & Señala la ausencia del plan de suscripción solicitado en el catálogo comercial. \\*
+\hline
+\textbf{Categoría} & Excepción de Dominio \\*
+\hline
+\textbf{Relaciones} & Especialización de BillingDomainException con mapeo HTTP 404 Not Found. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak exceptions} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Quota\allowbreak Exceeded\allowbreak Exception & Señala la tentativa de exceder los techos operativos autorizados por el plan de suscripción. \\*
+\hline
+\textbf{Categoría} & Excepción de Dominio \\*
+\hline
+\textbf{Relaciones} & Especialización de BillingDomainException con mapeo HTTP 403 Forbidden. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak exceptions} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Saas\allowbreak Invoice\allowbreak Not\allowbreak Found\allowbreak Exception & Señala que no se localiza el comprobante contable de recaudación en el repositorio financiero. \\*
+\hline
+\textbf{Categoría} & Excepción de Dominio \\*
+\hline
+\textbf{Relaciones} & Especialización de BillingDomainException con mapeo HTTP 404 Not Found. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak exceptions} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Stripe\allowbreak Integration\allowbreak Exception & Señala anomalías de red, interrupciones o fallos de comunicación con la API externa de Stripe. \\*
+\hline
+\textbf{Categoría} & Excepción de Dominio \\*
+\hline
+\textbf{Relaciones} & Especialización de BillingDomainException con mapeo HTTP 502 Bad Gateway. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak exceptions} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Stripe\allowbreak Webhook\allowbreak Processing\allowbreak Exception & Señala anomalías sintácticas o estructurales en la deserialización del cuerpo JSON del webhook. \\*
+\hline
+\textbf{Categoría} & Excepción de Dominio \\*
+\hline
+\textbf{Relaciones} & Especialización de BillingDomainException con mapeo HTTP 422 Unprocessable Entity. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak exceptions} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Subscription\allowbreak Not\allowbreak Found\allowbreak Exception & Señala que no se localiza un contrato de membresía asociado al identificador o taller consultado. \\*
+\hline
+\textbf{Categoría} & Excepción de Dominio \\*
+\hline
+\textbf{Relaciones} & Especialización de BillingDomainException con mapeo HTTP 404 Not Found. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak exceptions} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Subscription\allowbreak Past\allowbreak Due\allowbreak Exception & Señala que el taller automotriz intenta operar con cobros rechazados fuera del periodo de gracia. \\*
+\hline
+\textbf{Categoría} & Excepción de Dominio \\*
+\hline
+\textbf{Relaciones} & Especialización de BillingDomainException con mapeo HTTP 402 Payment Required. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak domain.\allowbreak exceptions} \\
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-*Nota.* Catálogo taxonómico de tipos tácticos del paquete com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak billing.\allowbreak domain.
+*Nota.* Catálogo taxonómico de tipos tácticos del paquete com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak billing.\allowbreak domain segregado en los subpaquetes model.\allowbreak aggregates, model.\allowbreak entities, model.\allowbreak ids, model.\allowbreak enums, model.\allowbreak valueobjects, model.\allowbreak events, exceptions, repositories y services.
 
 **Raíces de Agregado y Entidades Dependientes de SaaS Billing & Subscriptions**
 
@@ -4077,7 +4370,7 @@ name & Denominación descriptiva del paquete de software ofrecido a los talleres
 \hline
 \thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
 \hline
-tier & Segmentación funcional comercial del paquete de software con niveles STARTER, PROFESSIONAL o ENTERPRISE. \\*
+tier & Segmentación funcional comercial del paquete de software con niveles GO, PRO, MAX o ENTERPRISE. \\*
 \hline
 \textbf{Tipo o Firma} & \texttt{PlanTier} \\*
 \hline
@@ -4413,7 +4706,7 @@ paidAt & Marca de tiempo UTC que certifica la liquidación y acreditación forma
 \hline
 \thfirst{Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
 \hline
-recordPaid & Factoría que registra el cobro satisfactorio y emite SaasInvoicePaymentSucceededEvent. \\*
+recordPaid & Factoría que registra el cobro satisfactorio y emite SaasInvoicePaidEvent. \\*
 \hline
 \textbf{Tipo o Firma} & \texttt{static SaasInvoice recordPaid(SubscriptionId,\allowbreak  TenantId,\allowbreak  StripeInvoiceId,\allowbreak  Money,\allowbreak  String,\allowbreak  String,\allowbreak  Instant)} \\*
 \hline
@@ -4531,7 +4824,7 @@ markFailed & Transiciona el estado a FAILED registrando la causa técnica del fa
 \hline
 id & Identificador universal único de la característica técnica subordinada. \\*
 \hline
-\textbf{Tipo o Firma} & \texttt{UUID} \\*
+\textbf{Tipo o Firma} & \texttt{PlanFeatureId} \\*
 \hline
 \textbf{Ámbito de Acceso} & Privado \\
 \hline
@@ -4579,29 +4872,41 @@ En la @tbl:billing-value-objects se especifican los atributos y reglas de valida
 \thfirst{Componente Inmutable} & \thcell{Definición de Atributos y Reglas de Validación} \\
 \hline
 \endhead
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} PlanId} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Identificador Tipado:} PlanId} \\*
 \hline
 \textbf{Atributos Clave} & \texttt{value: UUID} \\*
 \hline
 \textbf{Restricciones y Reglas} & Identificador unívoco universal del plan comercial de software. Inmutable y no nulo. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} SubscriptionId} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Identificador Tipado:} SubscriptionId} \\*
 \hline
 \textbf{Atributos Clave} & \texttt{value: UUID} \\*
 \hline
 \textbf{Restricciones y Reglas} & Identificador unívoco universal del contrato de suscripción SaaS del taller. Inmutable y no nulo. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} SaasInvoiceId} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Identificador Tipado:} SaasInvoiceId} \\*
 \hline
 \textbf{Atributos Clave} & \texttt{value: UUID} \\*
 \hline
 \textbf{Restricciones y Reglas} & Identificador unívoco universal del comprobante contable de suscripción. Inmutable y no nulo. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} StripeEventId} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Identificador Tipado:} StripeEventId} \\*
 \hline
 \textbf{Atributos Clave} & \texttt{value: String} \\*
 \hline
 \textbf{Restricciones y Reglas} & Validación de expresión regular con prefijo obligatorio evt\_ garantizando formato original de Stripe. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Identificador Tipado:} PlanFeatureId} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{value: UUID} \\*
+\hline
+\textbf{Restricciones y Reglas} & Identificador unívoco universal de la característica funcional empaquetada. Inmutable y no nulo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} PlanPricing} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{price: Money,\allowbreak  billingCycle: BillingCycle} \\*
+\hline
+\textbf{Restricciones y Reglas} & Invariante de importe monetario no negativo (*price* ≥ 0.00) y fijación unívoca del ciclo de cobro. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} StripeCustomerId} \\*
 \hline
@@ -4621,23 +4926,29 @@ En la @tbl:billing-value-objects se especifican los atributos y reglas de valida
 \hline
 \textbf{Restricciones y Reglas} & Validación con prefijo obligatorio price\_ identificando la tarifa comercial en Stripe. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} PlanPricing} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} StripeInvoiceId} \\*
 \hline
-\textbf{Atributos Clave} & \texttt{price: Money,\allowbreak  billingCycle: BillingCycle} \\*
+\textbf{Atributos Clave} & \texttt{value: String} \\*
 \hline
-\textbf{Restricciones y Reglas} & Invariante de importe monetario no negativo (*price* ≥ 0.00) y fijación unívoca del ciclo de cobro. \\
-\hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} TenantQuotaLimits} \\*
-\hline
-\textbf{Atributos Clave} & \texttt{maxBranches: int,\allowbreak  maxActiveStaff: int,\allowbreak  iotTelemetryEnabled: boolean,\allowbreak  aiDiagnosticsEnabled: boolean,\allowbreak  maxMonthlyWorkOrders: int} \\*
-\hline
-\textbf{Restricciones y Reglas} & Invariantes de techos operativos mínimos (*maxBranches* ≥ 1, *maxActiveStaff* ≥ 1) y control de módulos. \\
+\textbf{Restricciones y Reglas} & Validación con prefijo obligatorio in\_ identificando la factura en la pasarela externa de Stripe. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} SubscriptionPeriod} \\*
 \hline
 \textbf{Atributos Clave} & \texttt{startDate: Instant,\allowbreak  endDate: Instant} \\*
 \hline
 \textbf{Restricciones y Reglas} & Invariante cronológica estricta que exige que la fecha de inicio preceda a la de culminación. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} TenantQuotaLimits} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{maxBranches: int,\allowbreak  maxActiveStaff: int,\allowbreak  maxActiveObd2Devices: int,\allowbreak  maxPhotosPerWorkOrder: int,\allowbreak  maxMonthlyAiReports: int,\allowbreak  companyRegistrationAllowed: boolean,\allowbreak  multiWarehouseAllowed: boolean,\allowbreak  marketplaceListed: boolean,\allowbreak  maxMonthlyWorkOrders: int,\allowbreak  iotTelemetryEnabled: boolean,\allowbreak  aiDiagnosticsEnabled: boolean} \\*
+\hline
+\textbf{Restricciones y Reglas} & Invariantes de techos operativos (*maxBranches* $\ge$ 1, *maxActiveStaff* $\ge$ 1), cupos numéricos de dispositivos, fotos y reportes IA, y banderas de autorización. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Enumeración de Dominio:} PlanTier} \\*
+\hline
+\textbf{Valores Permitidos} & \texttt{GO}, \texttt{PRO}, \texttt{MAX}, \texttt{ENTERPRISE} \\*
+\hline
+\textbf{Propósito en el Modelo} & Clasificación comercial del nivel de servicio y volumen de capacidad paquetizado. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Enumeración de Dominio:} BillingCycle} \\*
 \hline
@@ -4657,12 +4968,6 @@ En la @tbl:billing-value-objects se especifican los atributos y reglas de valida
 \hline
 \textbf{Propósito en el Modelo} & Modela la situación financiera del comprobante de recaudación emitido hacia el taller. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Enumeración de Dominio:} PlanTier} \\*
-\hline
-\textbf{Valores Permitidos} & \texttt{STARTER}, \texttt{PROFESSIONAL}, \texttt{ENTERPRISE} \\*
-\hline
-\textbf{Propósito en el Modelo} & Clasificación comercial del nivel de servicio y volumen de capacidad paquetizado. \\
-\hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Enumeración de Dominio:} WebhookProcessingStatus} \\*
 \hline
 \textbf{Valores Permitidos} & \texttt{PENDING}, \texttt{PROCESSED}, \texttt{FAILED}, \texttt{IGNORED} \\*
@@ -4671,7 +4976,7 @@ En la @tbl:billing-value-objects se especifican los atributos y reglas de valida
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-*Nota.* Objetos de valor inmutables y tipos enumerados del paquete com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak valueobjects.
+*Nota.* Identificadores tipados, objetos de valor inmutables y enumeraciones en los subpaquetes model.\allowbreak ids, model.\allowbreak valueobjects y model.\allowbreak enums de com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak billing.\allowbreak domain.
 
 **Servicios de Dominio de SaaS Billing & Subscriptions**
 
@@ -4681,7 +4986,9 @@ Las operaciones que trascienden la frontera de un único agregado o que ejecutan
 
 - **StripeWebhookSignatureVerificationService**: Ejecuta la comprobación criptográfica rigurosa de los mensajes entrantes en el canal telemático de webhooks. Calcula la firma simétrica HMAC-SHA256 sobre el cuerpo del mensaje empleando el secreto compartido y la compara en tiempo constante contra el encabezado de Stripe, verificando adicionalmente una ventana de tolerancia cronológica de 300 segundos para frustrar ataques de intermediarios y repetición.
 
-En la @tbl:billing-domain-services se presentan los servicios de dominio de este contexto, indicando sus signaturas operativas y responsabilidades técnicas.
+- **SubscriptionLifecycleDomainService**: Gobierna las políticas de transición contractual, fiscalización de periodos de gracia ante impagos, reactivación de membresías y vigencia operativa del taller en la plataforma.
+
+En la @tbl:billing-domain-services se presentan los tres servicios de dominio de este contexto, indicando sus signaturas operativas y responsabilidades técnicas.
 
 \renewcommand{\arraystretch}{1.25}\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
 \caption{Servicios de Dominio del Bounded Context SaaS Billing \& Subscriptions} \label{tbl:billing-domain-services} \\
@@ -4695,15 +5002,21 @@ En la @tbl:billing-domain-services se presentan los servicios de dominio de este
 \endhead
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Dominio:} SubscriptionQuotaEnforcementService} \\*
 \hline
-\textbf{Métodos Principales} & - \texttt{validateBranchCreationAllowed(TenantSubscription sub,\allowbreak  SubscriptionPlan plan,\allowbreak  int currentBranchCount)} \newline - \texttt{validateStaffAdditionAllowed(TenantSubscription sub,\allowbreak  SubscriptionPlan plan,\allowbreak  int currentStaffCount)} \newline - \texttt{isFeatureEnabled(TenantSubscription sub,\allowbreak  SubscriptionPlan plan,\allowbreak  String featureKey)} \\*
+\textbf{Métodos Principales} & - \texttt{validateBranchCreationAllowed(TenantSubscription sub,\allowbreak  SubscriptionPlan plan,\allowbreak  int currentBranchCount)} \newline - \texttt{validateStaffAdditionAllowed(TenantSubscription sub,\allowbreak  SubscriptionPlan plan,\allowbreak  int currentStaffCount)} \newline - \texttt{validateWorkOrderCreationAllowed(TenantSubscription sub,\allowbreak  SubscriptionPlan plan,\allowbreak  int currentMonthlyOrders)} \newline - \texttt{validateObd2DeviceRegistrationAllowed(TenantSubscription sub,\allowbreak  SubscriptionPlan plan,\allowbreak  int currentActiveObd2Devices)} \newline - \texttt{validatePhotoUploadAllowed(TenantSubscription sub,\allowbreak  SubscriptionPlan plan,\allowbreak  int currentPhotosInWorkOrder)} \newline - \texttt{validateCompanyCustomerRegistrationAllowed(TenantSubscription sub,\allowbreak  SubscriptionPlan plan)} \newline - \texttt{validateAiReportGenerationAllowed(TenantSubscription sub,\allowbreak  SubscriptionPlan plan,\allowbreak  int currentMonthlyAiReports)} \newline - \texttt{validateMultiWarehouseTransferAllowed(TenantSubscription sub,\allowbreak  SubscriptionPlan plan)} \newline - \texttt{isFeatureEnabled(TenantSubscription sub,\allowbreak  SubscriptionPlan plan,\allowbreak  String featureKey)} \\*
 \hline
-\textbf{Responsabilidad} & Fiscaliza en memoria que las tentativas de creación de sucursales o personal activo no superen los techos estipulados en el plan contratado lanzando QuotaExceededException ante excesos e inspecciona la habilitación de módulos avanzados. \\
+\textbf{Responsabilidad} & Fiscaliza en memoria que las operaciones y consumos operativos de sedes, colaboradores, órdenes de trabajo, telemetría OBD-II, evidencias fotográficas, clientes jurídicos, informes predictivos con IA y transferencias multi-almacén no rebasen los techos estipulados en el plan contratado lanzando QuotaExceededException ante excesos e inspeccionando módulos avanzados. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Dominio:} StripeWebhookSignatureVerificationService} \\*
 \hline
 \textbf{Métodos Principales} & - \texttt{verifySignature(String payload,\allowbreak  String signatureHeader,\allowbreak  String secret)} \\*
 \hline
 \textbf{Responsabilidad} & Realiza la validación criptográfica pura de la firma digital HMAC-SHA256 presente en los encabezados HTTP contra el secreto simétrico del webhook asegurando la autenticidad matemática de los eventos de Stripe. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Dominio:} SubscriptionLifecycleDomainService} \\*
+\hline
+\textbf{Métodos Principales} & - \texttt{isGracePeriodActive(TenantSubscription sub,\allowbreak  Instant currentTimestamp)} \newline - \texttt{canReactivate(TenantSubscription sub)} \newline - \texttt{evaluateExpirationPolicy(TenantSubscription sub,\allowbreak  Instant currentTimestamp)} \\*
+\hline
+\textbf{Responsabilidad} & Fiscaliza la vigencia de periodos de gracia tras impagos, verifica condiciones de reactivación contractual y aplica políticas de expiración sobre la membresía del taller. \\
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
@@ -4761,9 +5074,11 @@ La propagación de cambios de estado hacia otros Bounded Contexts y la orquestac
 
 - **Continuidad operativa y contingencias de cobranza**: **TenantSubscriptionRenewedEvent**, **TenantSubscriptionPastDueEvent** y **TenantSubscriptionCanceledEvent** informan la extensión regular de la cobertura pagada, el ingreso en periodo de gracia por rechazos bancarios y la suspensión inmediata de accesos por rescisión del servicio.
 
-- **Conciliación contable y liquidaciones**: **SaasInvoicePaymentSucceededEvent** y **SaasInvoicePaymentFailedEvent** notifican la recaudación monetaria formal o el fracaso transaccional de cobros recurrentes para su registro en los libros financieros de Andeva.
+- **Conciliación contable y liquidaciones**: **SaasInvoicePaidEvent** y **SaasInvoicePaymentFailedEvent** notifican la recaudación monetaria formal o el fracaso transaccional de cobros recurrentes para su registro en los libros financieros de Andeva.
 
-En la @tbl:billing-domain-events se sintetiza la taxonomía de los ocho eventos de dominio de SaaS Billing & Subscriptions con sus respectivas cargas útiles y consecuencias intermodulares.
+- **Procesamiento de notificaciones de pasarela**: **StripeWebhookProcessedEvent** confirma el procesamiento transaccional e idempotente exitoso de un webhook de Stripe para fines de trazabilidad y auditoría.
+
+En la @tbl:billing-domain-events se sintetiza la taxonomía de los nueve eventos de dominio de SaaS Billing & Subscriptions con sus respectivas cargas útiles y consecuencias intermodulares.
 
 \renewcommand{\arraystretch}{1.25}\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
 \caption{Taxonomía de Eventos de Dominio de SaaS Billing \& Subscriptions} \label{tbl:billing-domain-events} \\
@@ -4811,7 +5126,7 @@ En la @tbl:billing-domain-events se sintetiza la taxonomía de los ocho eventos 
 \hline
 \textbf{Efecto Intermodular} & Notifica la migración hacia un nuevo nivel comercial reajustando de forma dinámica las cuotas de sedes y personal en la plataforma. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} SaasInvoicePaymentSucceededEvent \quad (\textit{Emisor:} SaasInvoice)} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} SaasInvoicePaidEvent \quad (\textit{Emisor:} SaasInvoice)} \\*
 \hline
 \textbf{Atributos Transportados} & \texttt{invoiceId}, \texttt{tenantId}, \texttt{amount}, \texttt{occurredOn} \\*
 \hline
@@ -4823,9 +5138,15 @@ En la @tbl:billing-domain-events se sintetiza la taxonomía de los ocho eventos 
 \hline
 \textbf{Efecto Intermodular} & Notifica el rechazo bancario definitivo de un intento de cobro para activar procedimientos de cobranza preventiva. \\
 \hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Dominio:} StripeWebhookProcessedEvent \quad (\textit{Emisor:} StripeWebhookEvent)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{eventId}, \texttt{eventType}, \texttt{processedAt}, \texttt{occurredOn} \\*
+\hline
+\textbf{Efecto Intermodular} & Notifica el procesamiento transaccional e idempotente exitoso de un evento asíncrono emitido por Stripe. \\
+\hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-*Nota.* Taxonomía de eventos de dominio del paquete com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak billing.\allowbreak domain.\allowbreak events.
+*Nota.* Taxonomía de eventos de dominio del paquete com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak events.
 
 **Jerarquía de Excepciones Semánticas de Dominio**
 
@@ -4835,7 +5156,7 @@ Las anomalías operativas y transgresiones a las invariantes de licenciamiento s
 
 - **Conflictos de cuota y transgresiones de concurrencia**: **QuotaExceededException** y **DuplicateActiveSubscriptionException** alertan sobre intentos de exceder los techos operativos autorizados o registrar contratos concurrentes para un mismo taller.
 
-- **Vulneraciones de seguridad y fallos de formato telemático**: **InvalidWebhookSignatureException** y **StripeWebhookProcessingException** deniegan peticiones con firmas criptográficas inválidas o cuerpos JSON malformados en los puntos de entrada de notificaciones externas.
+- **Vulneraciones de seguridad y fallos de formato telemático**: **InvalidWebhookSignatureException**, **InvalidPlanPricingException**, **SubscriptionPastDueException**, **StripeIntegrationException** y **StripeWebhookProcessingException** deniegan peticiones con firmas criptográficas inválidas, precios monetarios negativos, operaciones fuera de gracia o anomalías telemáticas en la integración con Stripe.
 
 En la @tbl:billing-domain-exceptions se presenta la jerarquía de excepciones semánticas de dominio, detallando sus códigos de error y condiciones de lanzamiento en el modelo.
 
@@ -4851,39 +5172,51 @@ En la @tbl:billing-domain-exceptions se presenta la jerarquía de excepciones se
 \endhead
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} BillingDomainException} \\*
 \hline
-\texttt{ERR\_BILLING\_\allowbreak DOMAIN\_BASE} \newline HTTP 500 Internal Server Error & Superclase abstracta de contingencias semánticas del modelo de suscripciones que centraliza la estructura del protocolo RFC 7807. \\
-\hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} PlanNotFoundException} \\*
-\hline
-\texttt{ERR\_PLAN\_\allowbreak NOT\_FOUND} \newline HTTP 404 Not Found & No se localiza el plan de suscripción solicitado en el catálogo comercial mediante su identificador o código tarifario foráneo. \\
-\hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} SubscriptionNotFoundException} \\*
-\hline
-\texttt{ERR\_SUBSCRIPTION\_\allowbreak NOT\_FOUND} \newline HTTP 404 Not Found & No se localiza un contrato de membresía asociado al identificador único o al taller automotriz consultado. \\
-\hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} QuotaExceededException} \\*
-\hline
-\texttt{ERR\_QUOTA\_\allowbreak EXCEEDED} \newline HTTP 403 Forbidden o 409 Conflict & Se intenta crear una nueva sucursal física o registrar personal activo excediendo los techos permitidos por el plan vigente del taller. \\
+\texttt{ERR\_BILLING\_\allowbreak DOMAIN\_VIOLATION} \newline HTTP 400 Bad Request & Superclase abstracta de contingencias semánticas del modelo de suscripciones que centraliza la estructura del protocolo RFC 7807. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} DuplicateActiveSubscriptionException} \\*
 \hline
 \texttt{ERR\_DUPLICATE\_\allowbreak ACTIVE\_SUBSCRIPTION} \newline HTTP 409 Conflict & Se intenta registrar o activar una nueva membresía para un taller que ya dispone de una suscripción activa o en periodo de prueba. \\
 \hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} InvalidPlanPricingException} \\*
+\hline
+\texttt{ERR\_INVALID\_\allowbreak PLAN\_PRICING} \newline HTTP 400 Bad Request & Importes monetarios negativos, ciclos de cobro incompatibles o monedas no soportadas en la definición tarifaria del plan. \\
+\hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} InvalidWebhookSignatureException} \\*
 \hline
 \texttt{ERR\_INVALID\_\allowbreak WEBHOOK\_SIGNATURE} \newline HTTP 401 Unauthorized & El encabezado Stripe-Signature no coincide con el cálculo matemático HMAC-SHA256 del payload denegando el procesamiento del mensaje. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} PlanNotFoundException} \\*
+\hline
+\texttt{ERR\_PLAN\_\allowbreak NOT\_FOUND} \newline HTTP 404 Not Found & No se localiza el plan de suscripción solicitado en el catálogo comercial mediante su identificador o código tarifario foráneo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} QuotaExceededException} \\*
+\hline
+\texttt{ERR\_QUOTA\_\allowbreak EXCEEDED} \newline HTTP 403 Forbidden & Se intenta crear una nueva sucursal física o registrar personal activo excediendo los techos permitidos por el plan vigente del taller. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} SaasInvoiceNotFoundException} \\*
 \hline
 \texttt{ERR\_SAAS\_INVOICE\_\allowbreak NOT\_FOUND} \newline HTTP 404 Not Found & No se localiza el comprobante de cobro recurrente solicitado en el repositorio financiero mediante el identificador provisto. \\
 \hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} StripeIntegrationException} \\*
+\hline
+\texttt{ERR\_STRIPE\_\allowbreak INTEGRATION} \newline HTTP 502 Bad Gateway & Anomalías de red, interrupciones telemáticas o fallos no recuperables en la comunicación con los servicios externos de Stripe. \\
+\hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} StripeWebhookProcessingException} \\*
 \hline
 \texttt{ERR\_STRIPE\_\allowbreak WEBHOOK\_PROCESSING} \newline HTTP 422 Unprocessable Entity & Anomalía sintáctica o estructural durante la deserialización y análisis del cuerpo JSON del evento asíncrono recibido de Stripe. \\
 \hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} SubscriptionNotFoundException} \\*
+\hline
+\texttt{ERR\_SUBSCRIPTION\_\allowbreak NOT\_FOUND} \newline HTTP 404 Not Found & No se localiza un contrato de membresía asociado al identificador único o al taller automotriz consultado. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} SubscriptionPastDueException} \\*
+\hline
+\texttt{ERR\_SUBSCRIPTION\_\allowbreak PAST\_DUE} \newline HTTP 402 Payment Required & El taller automotriz con cobros reiteradamente rechazados intenta ejecutar operaciones fuera de su periodo de gracia contractual. \\
+\hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-*Nota.* Excepciones semánticas del paquete com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak billing.\allowbreak domain.\allowbreak model.\allowbreak exceptions.
+*Nota.* Excepciones semánticas del paquete com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak billing.\allowbreak domain.\allowbreak exceptions.
 
 El diseño táctico de la capa de dominio de SaaS Billing & Subscriptions garantiza el desacoplamiento estricto entre el modelo de negocio B2B de la compañía Andeva y la operativa tributaria interna de los talleres mecánicos. Al erigir fronteras transaccionales limpias, el sistema evita que las particularidades fiscales peruanas interfieran con las reglas de suscripción internacional, permitiendo escalar el esquema de monetización hacia nuevos mercados sin alterar la lógica de facturación de servicios automotrices.
 
@@ -4903,7 +5236,7 @@ Al situarse en la frontera perimetral de monetización y licenciamiento de la pl
 
 - **Ingesta asíncrona de webhooks con firma criptográfica e idempotencia:** Verificación matemática simétrica HMAC-SHA256 sobre las notificaciones telemáticas de Stripe con tolerancia temporal de 300 segundos y deduplicación relacional estricta, descartando reintentos de red durante contingencias de conectividad.
 
-- **Evaluación de cuotas operativas en memoria ultra rápida:** Gobernanza de techos de consumo mediante una Fachada de Contexto Abierto respaldada por memoria volátil Caffeine Cache, resolviendo consultas de autorización intermodular con latencia inferior a 0.05 milisegundos.
+- **Fiscalización de cuotas operativas en memoria ultra rápida:** Gobernanza de techos de consumo mediante una Fachada de Contexto Abierto respaldada por memoria volátil Caffeine Cache, resolviendo consultas de autorización intermodular con latencia inferior a 0.05 milisegundos.
 
 En la @tbl:billing-interface-types se presenta el catálogo taxonómico consolidado de los componentes tácticos que integran la Capa de Interfaz de SaaS Billing & Subscriptions, detallando sus categorías, paquetes canónicos y responsabilidades arquitectónicas.
 
@@ -4917,23 +5250,23 @@ En la @tbl:billing-interface-types se presenta el catálogo taxonómico consolid
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\
 \hline
 \endhead
-Subscription\allowbreak Plans\allowbreak Controller & Endpoints REST para la consulta pública y administración de catálogo de planes comerciales tarifas y cuotas de consumo paquetizadas. \\*
+Subscription\allowbreak Plans\allowbreak Controller & Endpoints REST para la consulta pública y administración de catálogo de planes comerciales, tarifas y cuotas de consumo paquetizadas. \\*
 \hline
 \textbf{Categoría} & Controlador REST \\*
 \hline
 \textbf{Relaciones} & Invoca SubscriptionPlanCommandService y SubscriptionPlanQueryService. Utiliza SubscriptionPlanResourceAssembler. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak controllers} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
-Tenant\allowbreak Subscriptions\allowbreak Controller & Endpoints REST para consulta del estado contractual del taller suscrito sesiones de Stripe Checkout Customer Portal y cancelaciones. \\*
+Tenant\allowbreak Subscriptions\allowbreak Controller & Endpoints REST para consulta del estado contractual del taller suscrito, sesiones de Stripe Checkout, portal de clientes y cancelaciones. \\*
 \hline
 \textbf{Categoría} & Controlador REST \\*
 \hline
-\textbf{Relaciones} & Invoca TenantSubscriptionCommandService y TenantSubscriptionQueryService. Utiliza TenantSubscriptionResourceAssembler. \\*
+\textbf{Relaciones} & Invoca TenantSubscriptionCommandService y TenantSubscriptionQueryService. Utiliza TenantSubscriptionResourceAssembler y CheckoutSessionResourceAssembler. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak controllers} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -4943,7 +5276,7 @@ Saas\allowbreak Invoices\allowbreak Controller & Endpoints REST para consulta hi
 \hline
 \textbf{Relaciones} & Invoca SaasInvoiceQueryService. Utiliza SaasInvoiceResourceAssembler. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak controllers} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
@@ -4951,75 +5284,205 @@ Stripe\allowbreak Webhooks\allowbreak Controller & Endpoint perimetral de alta c
 \hline
 \textbf{Categoría} & Controlador REST \\*
 \hline
-\textbf{Relaciones} & Invoca StripeWebhookSignatureVerificationService y ProcessStripeWebhookCommand. Utiliza StripeWebhookEventRepository. \\*
+\textbf{Relaciones} & Invoca StripeWebhookSignatureVerificationService y StripeWebhookCommandService. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak controllers} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
 Create\allowbreak Subscription\allowbreak Plan\allowbreak Request & Carga útil inmutable para dar de alta un nuevo plan de suscripción en el catálogo comercial de Andeva. \\*
 \hline
-\textbf{Categoría} & Recurso de Petición \\*
+\textbf{Categoría} & Recurso REST de Petición \\*
 \hline
-\textbf{Relaciones} & Validado mediante Jakarta Bean Validation. Transformado por SubscriptionPlanResourceAssembler. \\*
+\textbf{Relaciones} & Validado mediante Jakarta Bean Validation. Mapeado por SubscriptionPlanResourceAssembler. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Update\allowbreak Subscription\allowbreak Plan\allowbreak Request & Carga útil inmutable para actualizar tarifas, cuotas operativas y características funcionales de un plan existente. \\*
+\hline
+\textbf{Categoría} & Recurso REST de Petición \\*
+\hline
+\textbf{Relaciones} & Validado mediante Jakarta Bean Validation. Mapeado a comando de actualización. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
 Create\allowbreak Checkout\allowbreak Session\allowbreak Request & Parámetros requeridos para inicializar una sesión de pago alojada en Stripe Checkout para contratación o mejora de plan. \\*
 \hline
-\textbf{Categoría} & Recurso de Petición \\*
+\textbf{Categoría} & Recurso REST de Petición \\*
 \hline
 \textbf{Relaciones} & Mapeado a comando de checkout por TenantSubscriptionCommandService. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
-Customer\allowbreak Portal\allowbreak Request & Solicitud de generación de enlace interactivo hacia el portal de autogestión financiera de Stripe. \\*
+Create\allowbreak Customer\allowbreak Portal\allowbreak Session\allowbreak Request & Solicitud de generación de enlace interactivo seguro hacia el portal de autogestión financiera de Stripe. \\*
 \hline
-\textbf{Categoría} & Recurso de Petición \\*
+\textbf{Categoría} & Recurso REST de Petición \\*
 \hline
 \textbf{Relaciones} & Procesado por TenantSubscriptionCommandService para invocar la API de Stripe. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
-Subscription\allowbreak Plan\allowbreak Resource & Proyección REST pública y administrativa con los detalles tarifas y cuotas paquetizadas en un plan comercial. \\*
+Change\allowbreak Subscription\allowbreak Plan\allowbreak Request & Solicitud de migración o cambio de nivel comercial de membresía para un taller automotriz. \\*
 \hline
-\textbf{Categoría} & Recurso de Respuesta \\*
+\textbf{Categoría} & Recurso REST de Petición \\*
+\hline
+\textbf{Relaciones} & Validado y transformado en comando por TenantSubscriptionCommandService. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Cancel\allowbreak Subscription\allowbreak Request & Petición para solicitar la cancelación programada o rescisión inmediata de la suscripción del taller. \\*
+\hline
+\textbf{Categoría} & Recurso REST de Petición \\*
+\hline
+\textbf{Relaciones} & Mapeado a CancelSubscriptionCommand por TenantSubscriptionCommandService. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Plan\allowbreak Feature\allowbreak Request & Característica modular individual para el catálogo de funcionalidades empaquetadas en un plan comercial. \\*
+\hline
+\textbf{Categoría} & Recurso REST de Petición \\*
+\hline
+\textbf{Relaciones} & Componente subordinado de CreateSubscriptionPlanRequest y UpdateSubscriptionPlanRequest. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Subscription\allowbreak Plan\allowbreak Resource & Proyección REST pública y administrativa con los detalles, tarifas y cuotas paquetizadas en un plan comercial. \\*
+\hline
+\textbf{Categoría} & Recurso REST de Respuesta \\*
 \hline
 \textbf{Relaciones} & Producido por SubscriptionPlanResourceAssembler a partir del agregado SubscriptionPlan. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
 Tenant\allowbreak Subscription\allowbreak Resource & Representación consolidada de la membresía activa del taller con vigencia temporal y cuotas operativas vigentes. \\*
 \hline
-\textbf{Categoría} & Recurso de Respuesta \\*
+\textbf{Categoría} & Recurso REST de Respuesta \\*
 \hline
 \textbf{Relaciones} & Producido por TenantSubscriptionResourceAssembler componiendo datos de suscripción y plan. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Tenant\allowbreak Quota\allowbreak Limits\allowbreak Resource & Proyección REST pública inmutable de techos autorizados de consumo para despliegue en clientes de plataforma. \\*
+\hline
+\textbf{Categoría} & Recurso REST de Respuesta \\*
+\hline
+\textbf{Relaciones} & Derivado de las cuotas operativas activas de la membresía del taller. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
 Saas\allowbreak Invoice\allowbreak Resource & Detalle financiero exhaustivo de comprobante de cobro emitido por el SaaS con enlaces de descarga de Stripe. \\*
 \hline
-\textbf{Categoría} & Recurso de Respuesta \\*
+\textbf{Categoría} & Recurso REST de Respuesta \\*
 \hline
 \textbf{Relaciones} & Producido por SaasInvoiceResourceAssembler a partir del agregado SaasInvoice. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
-Subscription\allowbreak Plan\allowbreak Resource\allowbreak Assembler & Componente de transformación bidireccional entre agregados comandos y recursos DTO de planes comerciales. \\*
+Saas\allowbreak Invoice\allowbreak Summary\allowbreak Resource & Proyección resumida de facturación SaaS optimizada para cuadrículas contables de alta velocidad. \\*
 \hline
-\textbf{Categoría} & Ensamblador de Recursos \\*
+\textbf{Categoría} & Recurso REST de Respuesta \\*
+\hline
+\textbf{Relaciones} & Producido por SaasInvoiceResourceAssembler para listados masivos organizados por lotes. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Checkout\allowbreak Session\allowbreak Resource & Respuesta con enlace URL seguro de Stripe Checkout e identificador de sesión para redirección interactiva de pago. \\*
+\hline
+\textbf{Categoría} & Recurso REST de Respuesta \\*
+\hline
+\textbf{Relaciones} & Producido por CheckoutSessionResourceAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Customer\allowbreak Portal\allowbreak Session\allowbreak Resource & Respuesta con enlace URL temporal firmado hacia el Stripe Customer Portal para gestión autónoma de tarjetas. \\*
+\hline
+\textbf{Categoría} & Recurso REST de Respuesta \\*
+\hline
+\textbf{Relaciones} & Generado por TenantSubscriptionCommandService a través de la pasarela Stripe. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Plan\allowbreak Feature\allowbreak Resource & Representación REST inmutable de una característica modular autorizada en el catálogo comercial. \\*
+\hline
+\textbf{Categoría} & Recurso REST de Respuesta \\*
+\hline
+\textbf{Relaciones} & Producido por PlanFeatureResourceAssembler desde la entidad PlanFeature. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Stripe\allowbreak Webhook\allowbreak Acknowledgment\allowbreak Resource & Acuse liviano inmutable de confirmación perimetral emitido de inmediato hacia la infraestructura de Stripe. \\*
+\hline
+\textbf{Categoría} & Recurso REST de Respuesta \\*
+\hline
+\textbf{Relaciones} & Retornado por StripeWebhooksController tras verificar firma e idempotencia. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Tenant\allowbreak Subscription\allowbreak Status\allowbreak Dto & Contrato inmutable que expone el estado de membresía, vigencia y nivel de plan para otros Bounded Contexts. \\*
+\hline
+\textbf{Categoría} & DTO de Integración de Fachada \\*
+\hline
+\textbf{Relaciones} & Retornado por SubscriptionContextFacade para gobernanza intermodular. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak acl.\allowbreak dto} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Tenant\allowbreak Quota\allowbreak Limits\allowbreak Dto & Contrato inmutable de techos operativos autorizados de sucursales, personal activo y órdenes de trabajo. \\*
+\hline
+\textbf{Categoría} & DTO de Integración de Fachada \\*
+\hline
+\textbf{Relaciones} & Retornado por SubscriptionContextFacade y utilizado en validaciones sincrónicas en memoria. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak acl.\allowbreak dto} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Feature\allowbreak Entitlement\allowbreak Dto & Contrato inmutable que dictamina derechos de acceso y límites específicos para características funcionales avanzadas. \\*
+\hline
+\textbf{Categoría} & DTO de Integración de Fachada \\*
+\hline
+\textbf{Relaciones} & Retornado por checkFeatureEntitlement en SubscriptionContextFacade. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak acl.\allowbreak dto} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Subscription\allowbreak Plan\allowbreak Resource\allowbreak Assembler & Componente de transformación bidireccional entre agregados, comandos y recursos DTO de planes comerciales. \\*
+\hline
+\textbf{Categoría} & Ensamblador de Recursos REST \\*
 \hline
 \textbf{Relaciones} & Depende de PlanFeatureResourceAssembler. Utilizado por SubscriptionPlansController. \\*
 \hline
@@ -5027,26 +5490,117 @@ Subscription\allowbreak Plan\allowbreak Resource\allowbreak Assembler & Componen
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
+Tenant\allowbreak Subscription\allowbreak Resource\allowbreak Assembler & Ensamblador que combina datos contractuales y del catálogo comercial para conformar recursos de membresía. \\*
+\hline
+\textbf{Categoría} & Ensamblador de Recursos REST \\*
+\hline
+\textbf{Relaciones} & Utilizado por TenantSubscriptionsController. Soporta sobrecarga optimizada con datos de caché. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak transform} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Saas\allowbreak Invoice\allowbreak Resource\allowbreak Assembler & Ensamblador que proyecta comprobantes contables hacia recursos detallados y resúmenes para cuadrículas. \\*
+\hline
+\textbf{Categoría} & Ensamblador de Recursos REST \\*
+\hline
+\textbf{Relaciones} & Utilizado por SaasInvoicesController a partir de SaasInvoice. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak transform} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Checkout\allowbreak Session\allowbreak Resource\allowbreak Assembler & Ensamblador que estructura la respuesta con enlace URL e identificador de sesión para Stripe Checkout. \\*
+\hline
+\textbf{Categoría} & Ensamblador de Recursos REST \\*
+\hline
+\textbf{Relaciones} & Utilizado por TenantSubscriptionsController para inicializar pagos seguros. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak transform} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Plan\allowbreak Feature\allowbreak Resource\allowbreak Assembler & Ensamblador que transforma colecciones de entidades de características modulares en listas inmutables de recursos. \\*
+\hline
+\textbf{Categoría} & Ensamblador de Recursos REST \\*
+\hline
+\textbf{Relaciones} & Invocado por SubscriptionPlanResourceAssembler. Maneja colecciones nulas o vacías de forma segura. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak transform} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
 Subscription\allowbreak Context\allowbreak Facade & Fachada de Contexto Abierto en memoria para validación sub-milisegundo de vigencia y cuotas operativas desde otros contextos. \\*
 \hline
-\textbf{Categoría} & Fachada Inbound ACL \\*
+\textbf{Categoría} & Fachada de Contexto Abierto \\*
 \hline
-\textbf{Relaciones} & Implementada por SubscriptionContextFacadeImpl. Integrada con Caffeine In-Memory Cache. \\*
+\textbf{Relaciones} & Implementada por SubscriptionContextFacadeImpl en la capa de aplicación. Integrada con Caffeine In-Memory Cache. \\*
 \hline
 \textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak acl} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
+Tenant\allowbreak Plan\allowbreak Changed\allowbreak Integration\allowbreak Event & Notifica a la plataforma la migración de plan tarifario y actualización de cuotas para sincronización intermodular. \\*
+\hline
+\textbf{Categoría} & Evento de Integración \\*
+\hline
+\textbf{Relaciones} & Publicado vía Outbox. Consumido por IAM, MRO, HR e IoT. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Tenant\allowbreak Quota\allowbreak Limits\allowbreak Updated\allowbreak Integration\allowbreak Event & Notifica la reconfiguración de techos operativos autorizados para su actualización en memoria volátil. \\*
+\hline
+\textbf{Categoría} & Evento de Integración \\*
+\hline
+\textbf{Relaciones} & Publicado vía Outbox. Consumido por IAM, MRO y HR. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Tenant\allowbreak Subscription\allowbreak Activated\allowbreak Integration\allowbreak Event & Notifica la activación o formalización de pago de la suscripción para concesión irrestricta de acceso operativo. \\*
+\hline
+\textbf{Categoría} & Evento de Integración \\*
+\hline
+\textbf{Relaciones} & Publicado vía Outbox. Consumido por IAM y API Gateway. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Tenant\allowbreak Subscription\allowbreak Canceled\allowbreak Integration\allowbreak Event & Notifica la rescisión o cancelación programada de la membresía del taller para revocación de servicios. \\*
+\hline
+\textbf{Categoría} & Evento de Integración \\*
+\hline
+\textbf{Relaciones} & Publicado vía Outbox. Consumido por IAM y Notificaciones. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Tenant\allowbreak Subscription\allowbreak Past\allowbreak Due\allowbreak Integration\allowbreak Event & Notifica cobros bancarios fallidos e inicio del periodo de gracia para emisión de alertas administrativas. \\*
+\hline
+\textbf{Categoría} & Evento de Integración \\*
+\hline
+\textbf{Relaciones} & Publicado vía Outbox. Consumido por IAM y Notificaciones. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
 Billing\allowbreak Exception\allowbreak Handler & Interceptor perimetral que transforma excepciones de dominio en respuestas estandarizadas RFC 7807 Problem Details. \\*
 \hline
-\textbf{Categoría} & Interceptor de Excepciones \\*
+\textbf{Categoría} & Manejador Global de Excepciones \\*
 \hline
-\textbf{Relaciones} & Anotado con RestControllerAdvice. Captura BillingDomainException y sus subclases especializadas. \\*
+\textbf{Relaciones} & Anotado con RestControllerAdvice. Captura BillingDomainException y sus especializaciones. \\*
 \hline
 \textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak advice} \\
 \hline
 \end{longtable}
-*Nota.* Catálogo taxonómico de los tipos de interfaz de SaaS Billing \& Subscriptions correspondientes al paquete com.andeva.atelier.platform.billing.interfaces.
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Catálogo taxonómico consolidado de componentes de la Capa de Interfaz pertenecientes a los subpaquetes rest, rest.resources.requests, rest.resources.responses, rest.transform, rest.advice, acl, acl.dto y events de com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak billing.\allowbreak interfaces.
 
 **Controladores REST y Endpoints de Comunicación de SaaS Billing & Subscriptions**
 
@@ -5054,9 +5608,9 @@ El acceso perimetral a las capacidades de suscripción y facturación se estruct
 
 - **SubscriptionPlansController**: Gestiona el catálogo de planes comerciales de software comercializados por Andeva. Expone endpoints públicos y administrativos para listar paquetes tarifarios, consultar techos de consumo y dar de alta nuevas opciones comerciales bajo control de acceso estricto para administradores de la plataforma.
 
-- **TenantSubscriptionsController**: Centraliza el ciclo de vida de la membresía activa de cada taller automotriz. Permite inspeccionar el estado contractual vigente, inicializar sesiones de pago seguras en Stripe Checkout para contrataciones o migraciones, generar enlaces interactivos al portal de clientes y tramitar cancelaciones de servicio.
+- **TenantSubscriptionsController**: Centraliza el ciclo de vida de la membresía activa de cada taller automotriz. Permite inspeccionar el estado contractual vigente, inicializar sesiones de pago seguras en Stripe Checkout para contrataciones o migraciones, generar enlaces interactivos al portal de clientes, tramitar cancelaciones de servicio y procesar cambios de plan tarifario.
 
-- **SaasInvoicesController**: Provee a los talleres mecánicos acceso auditado a sus comprobantes de facturación corporativa emitida por Andeva, soportando listados paginados históricos y redirecciones temporales seguras hacia los comprobantes PDF oficiales custodiados en la infraestructura de Stripe.
+- **SaasInvoicesController**: Provee a los talleres mecánicos acceso auditado a sus comprobantes de facturación corporativa emitida por Andeva, soportando listados históricos clasificados por periodos, detalle contable unitario y redirecciones temporales seguras hacia los comprobantes PDF oficiales custodiados en la infraestructura de Stripe.
 
 - **StripeWebhooksController**: Punto de entrada de alta disponibilidad para la recepción de eventos telemáticos emitidos por Stripe. Verifica la autenticidad criptográfica del mensaje entrante, salvaguarda la idempotencia transaccional y delega el procesamiento hacia la capa de aplicación sin introducir bloqueos en la comunicación perimetral.
 
@@ -5088,7 +5642,7 @@ En la @tbl:billing-controllers-and-endpoints se detallan los contratos de comuni
 \hline
 \textbf{Seguridad y Rol} & Público o Autenticado \\*
 \hline
-\textbf{Responsabilidad} & Obtiene la especificación completa de un plan tarifario cuotas paquetizadas y funcionalidades habilitadas. \\
+\textbf{Responsabilidad} & Obtiene la especificación completa de un plan tarifario, cuotas paquetizadas y funcionalidades habilitadas. \\
 \hline
 \multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak billing/\allowbreak plans}} \\*
 \hline
@@ -5104,7 +5658,7 @@ En la @tbl:billing-controllers-and-endpoints se detallan los contratos de comuni
 \hline
 \textbf{Seguridad y Rol} & Autenticación Bearer JWT con rol excluyente \texttt{ROLE\_SUPER\_ADMIN} \\*
 \hline
-\textbf{Responsabilidad} & Actualiza cuotas operativas denominación comercial y módulos autorizados preservando suscripciones en curso. \\
+\textbf{Responsabilidad} & Actualiza cuotas operativas, denominación comercial y módulos autorizados preservando suscripciones en curso. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Controlador REST:} Tenant\allowbreak Subscriptions\allowbreak Controller} \\*
 \hline
@@ -5114,11 +5668,11 @@ En la @tbl:billing-controllers-and-endpoints se detallan los contratos de comuni
 \hline
 \textbf{Seguridad y Rol} & Autenticación Bearer JWT con roles \texttt{ROLE\_TENANT\_ADMIN} o \texttt{ROLE\_WORKSHOP\_OWNER} \\*
 \hline
-\textbf{Responsabilidad} & Consulta el contrato activo del taller autenticado estado contable periodo vigente y consumo de cuotas. \\
+\textbf{Responsabilidad} & Consulta el contrato activo del taller autenticado, estado contable, periodo vigente y consumo de cuotas. \\
 \hline
 \multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak billing/\allowbreak subscriptions/\allowbreak checkout-session}} \\*
 \hline
-\textbf{Petición:} \texttt{Create\allowbreak Checkout\allowbreak Session\allowbreak Request} & \textbf{Respuesta:} 200 OK (\texttt{Checkout\allowbreak Session\allowbreak Response}) \\*
+\textbf{Petición:} \texttt{Create\allowbreak Checkout\allowbreak Session\allowbreak Request} & \textbf{Respuesta:} 200 OK (\texttt{Checkout\allowbreak Session\allowbreak Resource}) \\*
 \hline
 \textbf{Seguridad y Rol} & Autenticación Bearer JWT con roles \texttt{ROLE\_TENANT\_ADMIN} o \texttt{ROLE\_WORKSHOP\_OWNER} \\*
 \hline
@@ -5126,11 +5680,19 @@ En la @tbl:billing-controllers-and-endpoints se detallan los contratos de comuni
 \hline
 \multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak billing/\allowbreak subscriptions/\allowbreak customer-portal}} \\*
 \hline
-\textbf{Petición:} \texttt{Customer\allowbreak Portal\allowbreak Request} & \textbf{Respuesta:} 200 OK (\texttt{Customer\allowbreak Portal\allowbreak Response}) \\*
+\textbf{Petición:} \texttt{Create\allowbreak Customer\allowbreak Portal\allowbreak Session\allowbreak Request} & \textbf{Respuesta:} 200 OK (\texttt{Customer\allowbreak Portal\allowbreak Session\allowbreak Resource}) \\*
 \hline
 \textbf{Seguridad y Rol} & Autenticación Bearer JWT con roles \texttt{ROLE\_TENANT\_ADMIN} o \texttt{ROLE\_WORKSHOP\_OWNER} \\*
 \hline
 \textbf{Responsabilidad} & Genera sesión interactiva en Stripe Customer Portal para actualizar tarjeta de crédito y consultar facturas. \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak billing/\allowbreak subscriptions/\allowbreak change-plan}} \\*
+\hline
+\textbf{Petición:} \texttt{Change\allowbreak Subscription\allowbreak Plan\allowbreak Request} & \textbf{Respuesta:} 200 OK (\texttt{Tenant\allowbreak Subscription\allowbreak Resource}) \\*
+\hline
+\textbf{Seguridad y Rol} & Autenticación Bearer JWT con roles \texttt{ROLE\_TENANT\_ADMIN} o \texttt{ROLE\_WORKSHOP\_OWNER} \\*
+\hline
+\textbf{Responsabilidad} & Procesa la migración a un nuevo nivel tarifario coordinando el prorrateo financiero con Stripe. \\
 \hline
 \multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak billing/\allowbreak subscriptions/\allowbreak cancel}} \\*
 \hline
@@ -5144,11 +5706,19 @@ En la @tbl:billing-controllers-and-endpoints se detallan los contratos de comuni
 \hline
 \multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak billing/\allowbreak invoices}} \\*
 \hline
-\textbf{Petición:} Query Params de paginación & \textbf{Respuesta:} 200 OK (\texttt{List<Saas\allowbreak Invoice\allowbreak Summary\allowbreak Resource>}) \\*
+\textbf{Petición:} Parámetros de consulta por bloques & \textbf{Respuesta:} 200 OK (\texttt{List<Saas\allowbreak Invoice\allowbreak Summary\allowbreak Resource>}) \\*
 \hline
 \textbf{Seguridad y Rol} & Autenticación Bearer JWT con roles administrativos y contables del taller \\*
 \hline
 \textbf{Responsabilidad} & Lista el historial cronológico de facturas de suscripción emitidas por Andeva al taller mecánico. \\
+\hline
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak billing/\allowbreak invoices/\allowbreak \{id\}}} \\*
+\hline
+\textbf{Petición:} Path Variable \texttt{id} & \textbf{Respuesta:} 200 OK (\texttt{Saas\allowbreak Invoice\allowbreak Resource}) \\*
+\hline
+\textbf{Seguridad y Rol} & Autenticación Bearer JWT con roles administrativos y contables del taller \\*
+\hline
+\textbf{Responsabilidad} & Obtiene el detalle financiero exhaustivo de un comprobante de facturación de suscripción específico. \\
 \hline
 \multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak billing/\allowbreak invoices/\allowbreak \{id\}/\allowbreak pdf}} \\*
 \hline
@@ -5162,14 +5732,15 @@ En la @tbl:billing-controllers-and-endpoints se detallan los contratos de comuni
 \hline
 \multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak billing/\allowbreak webhooks/\allowbreak stripe}} \\*
 \hline
-\textbf{Petición:} Raw JSON en cuerpo & \textbf{Respuesta:} 200 OK (\texttt{Stripe\allowbreak Webhook\allowbreak Acknowledgment\allowbreak Response}) \\*
+\textbf{Petición:} Raw JSON en cuerpo & \textbf{Respuesta:} 200 OK (\texttt{Stripe\allowbreak Webhook\allowbreak Acknowledgment\allowbreak Resource}) \\*
 \hline
 \textbf{Seguridad y Rol} & Validación criptográfica simétrica HMAC-SHA256 mediante cabecera \texttt{Stripe-Signature} \\*
 \hline
 \textbf{Responsabilidad} & Procesa eventos asíncronos de cobro de facturas y ciclo de vida de Stripe con idempotencia estricta. \\
 \hline
 \end{longtable}
-*Nota.* Especificación perimetral de rutas verbos HTTP códigos de respuesta y seguridad de SaaS Billing \& Subscriptions.
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Especificación perimetral de rutas, verbos HTTP, códigos de respuesta y seguridad de SaaS Billing \& Subscriptions.
 
 **Recursos DTO de Petición y Respuesta de Facturación y Membresías**
 
@@ -5179,7 +5750,9 @@ La transferencia de información a través del perímetro HTTP se instrumenta me
 
 - **Contratos de Respuesta**: Encapsulan proyecciones optimizadas para clientes web y móviles, denormalizando denominaciones de plan y techos de cuota operativa para evitar viajes de red redundantes y omitiendo campos nulos mediante políticas de serialización selectiva.
 
-En la @tbl:billing-resources-dtos se especifican los atributos estructurales y las reglas de validación declarativa que rigen los recursos DTO de entrada y salida de este contexto.
+- **Contratos DTO de Fachada**: Definen estructuras inmutables de intercambio en memoria para abastecer a otros Bounded Contexts con datos de membresía, cuotas vigentes y derechos de uso funcional sin acoplamiento a entidades internas.
+
+En la @tbl:billing-resources-dtos se especifican los atributos estructurales y las reglas de validación declarativa que rigen los recursos DTO de petición, respuesta y contratos de fachada de este contexto.
 
 \renewcommand{\arraystretch}{1.25}\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
 \caption{Recursos DTO de Entrada y Salida del Bounded Context SaaS Billing \& Subscriptions} \label{tbl:billing-resources-dtos} \\
@@ -5191,68 +5764,161 @@ En la @tbl:billing-resources-dtos se especifican los atributos estructurales y l
 \thfirst{Aspecto de Recurso} & \thcell{Especificación de Atributos e Integridad} \\
 \hline
 \endhead
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Create\allowbreak Subscription\allowbreak Plan\allowbreak Request \quad (\textit{Categoría:} Petición)} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso REST de Petición:} Create\allowbreak Subscription\allowbreak Plan\allowbreak Request} \\*
+\hline
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\*
 \hline
 \textbf{Atributos Principales} & \texttt{stripePriceId}, \texttt{name}, \texttt{tier}, \texttt{price}, \texttt{currency}, \texttt{billingCycle}, \texttt{quotaLimits}, \texttt{features} \\*
 \hline
-\textbf{Validación de Integridad} & Anotación \texttt{@NotBlank} y formato \texttt{@Pattern(regexp = "\textasciicircum price\_[a-zA-Z0-9]+\$")} para stripePriceId, \texttt{@NotBlank} y \texttt{@Size(min = 3, max = 100)} para name, \texttt{@Pattern} con valores STARTER PROFESSIONAL o ENTERPRISE para tier, importe no negativo \texttt{@DecimalMin("0.0")} con precisión \texttt{@Digits(integer = 10, fraction = 2)}, código de moneda ISO \texttt{@Size(min = 3, max = 3)}, ciclo de facturación \texttt{@Pattern} con MONTHLY o YEARLY, cuotas validadas (\texttt{@Valid}) y lista de funcionalidades con validación anidada. \\
+\textbf{Validación de Integridad} & Anotación \texttt{@NotBlank} y formato \texttt{@Pattern(regexp = "\textasciicircum price\_[a-zA-Z0-9]+\$")} para stripePriceId, \texttt{@NotBlank} y \texttt{@Size(min = 3, max = 100)} para name, \texttt{@Pattern} con valores GO, PRO, MAX o ENTERPRISE para tier, importe no negativo \texttt{@DecimalMin("0.0")} con precisión \texttt{@Digits(integer = 10, fraction = 2)}, código de moneda ISO \texttt{@Size(min = 3, max = 3)}, ciclo de facturación \texttt{@Pattern} con MONTHLY o YEARLY, cuotas validadas (\texttt{@Valid}) y lista de funcionalidades con validación anidada. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Update\allowbreak Subscription\allowbreak Plan\allowbreak Request \quad (\textit{Categoría:} Petición)} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso REST de Petición:} Update\allowbreak Subscription\allowbreak Plan\allowbreak Request} \\*
 \hline
-\textbf{Atributos Principales} & \texttt{name}, \texttt{price}, \texttt{quotaLimits}, \texttt{isActive}, \texttt{features} \\*
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\*
 \hline
-\textbf{Validación de Integridad} & \texttt{@NotBlank} y \texttt{@Size(min = 3, max = 100)} para denominación comercial, \texttt{@NotNull} y \texttt{@DecimalMin("0.0")} para precio, objeto de cuotas obligatorias \texttt{@NotNull} con validación anidada (\texttt{@Valid}), bandera booleana para disponibilidad de contratación y lista de características funcionales validadas. \\
+\textbf{Atributos Principales} & \texttt{name}, \texttt{price}, \texttt{billingCycle}, \texttt{quotaLimits}, \texttt{isActive}, \texttt{features} \\*
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Create\allowbreak Checkout\allowbreak Session\allowbreak Request \quad (\textit{Categoría:} Petición)} \\*
+\textbf{Validación de Integridad} & \texttt{@NotBlank} y \texttt{@Size(min = 3, max = 100)} para denominación comercial, \texttt{@NotNull} y \texttt{@DecimalMin("0.0")} para precio, ciclo de facturación \texttt{@NotBlank} con MONTHLY o YEARLY, objeto de cuotas obligatorias \texttt{@NotNull} con validación anidada (\texttt{@Valid}), bandera booleana para disponibilidad de contratación y lista de características funcionales validadas. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso REST de Petición:} Create\allowbreak Checkout\allowbreak Session\allowbreak Request} \\*
+\hline
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\*
 \hline
 \textbf{Atributos Principales} & \texttt{planId}, \texttt{successUrl}, \texttt{cancelUrl} \\*
 \hline
 \textbf{Validación de Integridad} & Identificador \texttt{@NotNull} de plan comercial UUID, URLs de retorno obligatorias \texttt{@NotBlank} y validadas mediante expresión regular \texttt{@Pattern(regexp = "\textasciicircum https?://.*")} para garantizar protocolo web seguro. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Customer\allowbreak Portal\allowbreak Request \quad (\textit{Categoría:} Petición)} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso REST de Petición:} Create\allowbreak Customer\allowbreak Portal\allowbreak Session\allowbreak Request} \\*
+\hline
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\*
 \hline
 \textbf{Atributos Principales} & \texttt{returnUrl} \\*
 \hline
 \textbf{Validación de Integridad} & Dirección web obligatoria \texttt{@NotBlank} con patrón \texttt{@Pattern(regexp = "\textasciicircum https?://.*")} que valida destino seguro de redirección al culminar gestiones en Stripe Customer Portal. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Cancel\allowbreak Subscription\allowbreak Request \quad (\textit{Categoría:} Petición)} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso REST de Petición:} Change\allowbreak Subscription\allowbreak Plan\allowbreak Request} \\*
 \hline
-\textbf{Atributos Principales} & \texttt{immediately}, \texttt{cancellationReason} \\*
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{newPlanId}, \texttt{immediateProration} \\*
+\hline
+\textbf{Validación de Integridad} & Identificador obligatorio \texttt{@NotNull} del nuevo plan comercial UUID y bandera booleana para habilitar prorrateo financiero inmediato. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso REST de Petición:} Cancel\allowbreak Subscription\allowbreak Request} \\*
+\hline
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{cancelImmediately}, \texttt{cancellationReason} \\*
 \hline
 \textbf{Validación de Integridad} & Indicador booleano de cancelación inmediata o al fin de ciclo y texto descriptivo de motivo con límite \texttt{@Size(max = 500)}. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Tenant\allowbreak Quota\allowbreak Limits\allowbreak Dto \quad (\textit{Categoría:} Objeto de Transferencia)} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso REST de Petición:} Plan\allowbreak Feature\allowbreak Request} \\*
+\hline
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{featureKey}, \texttt{name}, \texttt{description}, \texttt{isEnabled} \\*
+\hline
+\textbf{Validación de Integridad} & Clave técnica alfanumérica \texttt{@NotBlank} con patrón \texttt{@Pattern(regexp = "\textasciicircum[A-Z0-9\_]+\$")}, nombre obligatorio \texttt{@Size(min = 3, max = 100)}, descripción opcional con límite \texttt{@Size(max = 255)} y bandera booleana de habilitación. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso REST de Respuesta:} Subscription\allowbreak Plan\allowbreak Resource} \\*
+\hline
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{id}, \texttt{stripePriceId}, \texttt{name}, \texttt{tier}, \texttt{price}, \texttt{currency}, \texttt{billingCycle}, \texttt{quotaLimits}, \texttt{features}, \texttt{isActive}, \texttt{createdAt}, \texttt{updatedAt} \\*
+\hline
+\textbf{Validación de Integridad} & Registro Java 21 inmutable serializado como JSON excluyendo nulos (\texttt{@JsonInclude(NON\_NULL)}). Proyecta tipos primitivos, marcas temporales UTC Instant y listas inmutables de PlanFeatureResource. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso REST de Respuesta:} Tenant\allowbreak Subscription\allowbreak Resource} \\*
+\hline
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{id}, \texttt{tenantId}, \texttt{planId}, \texttt{planName}, \texttt{tier}, \texttt{status}, \texttt{currentPeriodStart}, \texttt{currentPeriodEnd}, \texttt{cancelAtPeriodEnd}, \texttt{trialEndDate}, \texttt{quotaLimits}, \texttt{isAccessGranted} \\*
+\hline
+\textbf{Validación de Integridad} & Registro Java 21 inmutable con marcas temporales UTC Instant, identificadores UUID y cuotas operativas consolidadas para gobernanza del taller. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso REST de Respuesta:} Tenant\allowbreak Quota\allowbreak Limits\allowbreak Resource} \\*
+\hline
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\*
 \hline
 \textbf{Atributos Principales} & \texttt{maxBranches}, \texttt{maxActiveStaff}, \texttt{iotTelemetryEnabled}, \texttt{aiDiagnosticsEnabled}, \texttt{maxMonthlyWorkOrders} \\*
 \hline
-\textbf{Validación de Integridad} & Techo mínimo de sedes físicas o auxilio móvil con \texttt{@Min(1)}, personal activo con \texttt{@Min(1)}, órdenes mensuales con \texttt{@Min(1)} y banderas booleanas de habilitación de telemetría IoT y diagnósticos IA. \\
+\textbf{Validación de Integridad} & Registro inmutable que proyecta los techos cuantitativos autorizados de sedes, mecánicos y órdenes mecánicas para despliegue perimetral en paneles de control. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Subscription\allowbreak Plan\allowbreak Resource \quad (\textit{Categoría:} Respuesta)} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso REST de Respuesta:} Saas\allowbreak Invoice\allowbreak Resource} \\*
 \hline
-\textbf{Atributos Principales} & \texttt{id}, \texttt{stripePriceId}, \texttt{name}, \texttt{tier}, \texttt{price}, \texttt{currency}, \texttt{billingCycle}, \texttt{quotaLimits}, \texttt{features}, \texttt{isActive} \\*
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\*
 \hline
-\textbf{Validación de Integridad} & Registro Java 21 inmutable serializado como JSON excluyendo nulos (\texttt{@JsonInclude(NON\_NULL)}). Proyecta tipos primitivos y listas inmutables de PlanFeatureResource. \\
+\textbf{Atributos Principales} & \texttt{id}, \texttt{subscriptionId}, \texttt{tenantId}, \texttt{stripeInvoiceId}, \texttt{amountPaid}, \texttt{currency}, \texttt{status}, \texttt{invoicePdfUrl}, \texttt{hostedInvoiceUrl}, \texttt{paidAt}, \texttt{createdAt} \\*
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Tenant\allowbreak Subscription\allowbreak Resource \quad (\textit{Categoría:} Respuesta)} \\*
+\textbf{Validación de Integridad} & Registro inmutable que expone importes monetarios amortizados, enlaces directos a activos digitales en Stripe y marca de tiempo UTC de liquidación. \\
 \hline
-\textbf{Atributos Principales} & \texttt{id}, \texttt{tenantId}, \texttt{planId}, \texttt{planName}, \texttt{status}, \texttt{currentPeriodStart}, \texttt{currentPeriodEnd}, \texttt{cancelAtPeriodEnd}, \texttt{canceledAt}, \texttt{trialEndDate}, \texttt{quotas} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso REST de Respuesta:} Saas\allowbreak Invoice\allowbreak Summary\allowbreak Resource} \\*
 \hline
-\textbf{Validación de Integridad} & Registro Java 21 inmutable con marcas temporales UTC Instant identificadores UUID y cuotas operativas consolidadas para gobernanza del taller. \\
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\*
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Saas\allowbreak Invoice\allowbreak Resource \quad (\textit{Categoría:} Respuesta)} \\*
+\textbf{Atributos Principales} & \texttt{id}, \texttt{stripeInvoiceId}, \texttt{amountPaid}, \texttt{currency}, \texttt{status}, \texttt{paidAt} \\*
 \hline
-\textbf{Atributos Principales} & \texttt{id}, \texttt{subscriptionId}, \texttt{tenantId}, \texttt{stripeInvoiceId}, \texttt{amountPaid}, \texttt{currency}, \texttt{status}, \texttt{invoicePdfUrl}, \texttt{hostedInvoiceUrl}, \texttt{paidAt} \\*
+\textbf{Validación de Integridad} & Proyección liviana inmutable optimizada para cuadrículas de consulta contable masiva en paneles administrativos del taller. \\
 \hline
-\textbf{Validación de Integridad} & Registro inmutable que expone importes monetarios amortizados enlaces directos a activos digitales en Stripe y marca de tiempo de liquidación. \\
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso REST de Respuesta:} Checkout\allowbreak Session\allowbreak Resource} \\*
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Stripe\allowbreak Webhook\allowbreak Acknowledgment\allowbreak Response \quad (\textit{Categoría:} Respuesta)} \\*
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\*
 \hline
-\textbf{Atributos Principales} & \texttt{received}, \texttt{eventId}, \texttt{timestamp} \\*
+\textbf{Atributos Principales} & \texttt{checkoutUrl}, \texttt{sessionId} \\*
 \hline
-\textbf{Validación de Integridad} & Confirmación ligera serializada de inmediato hacia los servidores de Stripe con acuse booleano identificador y marca de tiempo UTC. \\
+\textbf{Validación de Integridad} & Registro inmutable con localizador URL firmado de Stripe Checkout e identificador de sesión telemática para redirección frontend. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso REST de Respuesta:} Customer\allowbreak Portal\allowbreak Session\allowbreak Resource} \\*
+\hline
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{portalUrl} \\*
+\hline
+\textbf{Validación de Integridad} & Registro inmutable con enlace URL temporal firmado hacia el Stripe Customer Portal para autogestión de medios de pago y comprobantes. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso REST de Respuesta:} Plan\allowbreak Feature\allowbreak Resource} \\*
+\hline
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{id}, \texttt{featureKey}, \texttt{name}, \texttt{description}, \texttt{isEnabled} \\*
+\hline
+\textbf{Validación de Integridad} & Registro inmutable que proyecta el identificador universal, clave de funcionalidad alfanumérica, denominación comercial y estado de habilitación. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso REST de Respuesta:} Stripe\allowbreak Webhook\allowbreak Acknowledgment\allowbreak Resource} \\*
+\hline
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{received}, \texttt{eventId}, \texttt{status}, \texttt{timestamp} \\*
+\hline
+\textbf{Validación de Integridad} & Confirmación ligera serializada de inmediato hacia los servidores de Stripe con acuse booleano, identificador, estado y marca de tiempo UTC. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{DTO de Integración de Fachada:} Tenant\allowbreak Subscription\allowbreak Status\allowbreak Dto} \\*
+\hline
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak acl.\allowbreak dto} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{tenantId}, \texttt{planName}, \texttt{tier}, \texttt{status}, \texttt{isActive}, \texttt{currentPeriodEnd}, \texttt{cancelAtPeriodEnd} \\*
+\hline
+\textbf{Validación de Integridad} & Contrato DTO inmutable consumido por otros Bounded Contexts para comprobar estado contractual y vigencia sin acoplamiento a entidades internas. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{DTO de Integración de Fachada:} Tenant\allowbreak Quota\allowbreak Limits\allowbreak Dto} \\*
+\hline
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak acl.\allowbreak dto} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{maxBranches}, \texttt{maxActiveStaff}, \texttt{iotTelemetryEnabled}, \texttt{aiDiagnosticsEnabled}, \texttt{maxMonthlyWorkOrders} \\*
+\hline
+\textbf{Validación de Integridad} & Techo mínimo de sedes físicas o auxilio móvil con \texttt{@Min(1)}, personal activo con \texttt{@Min(1)}, órdenes mensuales con \texttt{@Min(1)} y banderas booleanas de habilitación modular. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{DTO de Integración de Fachada:} Feature\allowbreak Entitlement\allowbreak Dto} \\*
+\hline
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak interfaces.\allowbreak acl.\allowbreak dto} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{tenantId}, \texttt{featureKey}, \texttt{isEntitled}, \texttt{currentUsage}, \texttt{maximumLimit} \\*
+\hline
+\textbf{Validación de Integridad} & Contrato DTO inmutable para comprobaciones puntuales de acceso a capacidades técnicas avanzadas con telemetría y diagnósticos automotrices. \\
 \hline
 \end{longtable}
-*Nota.* Especificación de DTOs inmutables implementados como Java 21 Records con Jakarta Bean Validation.
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Especificación de DTOs inmutables implementados como Java 21 Records con Jakarta Bean Validation pertenecientes a resources y acl.dto.
 
 **Ensambladores de Recursos y Transformación de Tipos**
 
@@ -5260,9 +5926,11 @@ El desacoplamiento entre el modelo conceptual de dominio y los contratos de tran
 
 - **SubscriptionPlanResourceAssembler**: Desempaqueta identificadores tipados hacia tipos universales, extrae importes y divisas desde el objeto de valor de tarificación y delega la proyección de funcionalidades modulares hacia componentes especializados.
 
-- **TenantSubscriptionResourceAssembler**: Amalgama el contrato de membresía con las políticas del catálogo comercial, ofreciendo sobrecargas optimizadas para proyectar el estado contractual a partir de políticas pre-cargadas en memoria sin requerir consultas adicionales hacia la base de datos relacional.
+- **TenantSubscriptionResourceAssembler**: Amalgama el contrato de membresía con las políticas del catálogo comercial, ofreciendo sobrecargas optimizadas para proyectar el estado contractual a partir de políticas precargadas en memoria sin requerir consultas adicionales hacia la base de datos relacional.
 
 - **SaasInvoiceResourceAssembler**: Traduce recibos de liquidación financiera hacia representaciones detalladas o resumidas, posibilitando la renderización eficiente de grillas contables en los paneles administrativos de los talleres.
+
+- **CheckoutSessionResourceAssembler**: Estructura la respuesta de inicialización de sesiones en Stripe Checkout encapsulando localizadores web e identificadores de sesión.
 
 - **PlanFeatureResourceAssembler**: Mapea la habilitación de módulos técnicos avanzados hacia listas inmutables de presentación con manejo seguro ante colecciones vacías o nulas.
 
@@ -5282,13 +5950,13 @@ En la @tbl:billing-resource-assemblers se detallan las signaturas operativas, ti
 \hline
 \textbf{Método Principal} & \texttt{toResource} \\*
 \hline
-\textbf{Transformación} & \texttt{SubscriptionPlan} → \texttt{SubscriptionPlanResource} \\*
+\textbf{Transformación} & \texttt{SubscriptionPlan} $\longrightarrow$ \texttt{SubscriptionPlanResource} \\*
 \hline
 \textbf{Reglas de Mapeo} & Desempaqueta identificadores tipados PlanId y StripePriceId hacia UUID y String. Extrae precio y moneda desde PlanPricing.price. Convierte cuotas a TenantQuotaLimitsDto y delega el mapeo de PlanFeature a PlanFeatureResourceAssembler.toResourceList. Arroja IllegalArgumentException si el agregado es nulo. \\
 \hline
 \textbf{Método Secundario} & \texttt{toResourceList} \\*
 \hline
-\textbf{Transformación} & \texttt{List<SubscriptionPlan>} → \texttt{List<SubscriptionPlanResource>} \\*
+\textbf{Transformación} & \texttt{List<SubscriptionPlan>} $\longrightarrow$ \texttt{List<SubscriptionPlanResource>} \\*
 \hline
 \textbf{Reglas de Mapeo} & Transforma iterables de planes comerciales retornando listas inmutables serializables para los catálogos públicos y de administración. \\
 \hline
@@ -5296,13 +5964,13 @@ En la @tbl:billing-resource-assemblers se detallan las signaturas operativas, ti
 \hline
 \textbf{Método Principal} & \texttt{toResource} \\*
 \hline
-\textbf{Transformación} & \texttt{TenantSubscription, SubscriptionPlan} → \texttt{TenantSubscriptionResource} \\*
+\textbf{Transformación} & \texttt{TenantSubscription, SubscriptionPlan} $\longrightarrow$ \texttt{TenantSubscriptionResource} \\*
 \hline
-\textbf{Reglas de Mapeo} & Combina la raíz de agregado contractual con los metadatos del catálogo comercial. Desempaqueta identificadores UUID traduce SubscriptionStatus a texto proyecta marcas de tiempo del periodo pagado e incrusta el DTO de cuotas paquetizadas en el plan. \\
+\textbf{Reglas de Mapeo} & Combina la raíz de agregado contractual con los metadatos del catálogo comercial. Desempaqueta identificadores UUID, traduce SubscriptionStatus a texto, proyecta marcas de tiempo del periodo pagado e incrusta el DTO de cuotas paquetizadas en el plan. \\
 \hline
 \textbf{Método Secundario} & \texttt{toResource (Sobrecarga de Caché)} \\*
 \hline
-\textbf{Transformación} & \texttt{TenantSubscription, String planName, TenantQuotaLimits quotas} → \texttt{TenantSubscriptionResource} \\*
+\textbf{Transformación} & \texttt{TenantSubscription, String planName, TenantQuotaLimits quotas} $\longrightarrow$ \texttt{TenantSubscriptionResource} \\*
 \hline
 \textbf{Reglas de Mapeo} & Compone el recurso de suscripción a partir de proyecciones cacheadas en memoria RAM sin necesidad de ejecutar lecturas adicionales sobre el catálogo en PostgreSQL. \\
 \hline
@@ -5310,38 +5978,47 @@ En la @tbl:billing-resource-assemblers se detallan las signaturas operativas, ti
 \hline
 \textbf{Método Principal} & \texttt{toResource} \\*
 \hline
-\textbf{Transformación} & \texttt{SaasInvoice} → \texttt{SaasInvoiceResource} \\*
+\textbf{Transformación} & \texttt{SaasInvoice} $\longrightarrow$ \texttt{SaasInvoiceResource} \\*
 \hline
 \textbf{Reglas de Mapeo} & Mapea SaasInvoiceId y StripeInvoiceId a cadenas e identificadores UUID. Extrae monto y divisa desde Money. Traduce InvoiceStatus e incrusta enlaces PDF seguros emitidos por Stripe. \\
 \hline
 \textbf{Método Secundario} & \texttt{toSummaryResourceList} \\*
 \hline
-\textbf{Transformación} & \texttt{List<SaasInvoice>} → \texttt{List<SaasInvoiceSummaryResource>} \\*
+\textbf{Transformación} & \texttt{List<SaasInvoice>} $\longrightarrow$ \texttt{List<SaasInvoiceSummaryResource>} \\*
 \hline
 \textbf{Reglas de Mapeo} & Genera proyecciones livianas de facturas optimizadas para grillas de consulta contable masiva en paneles administrativos del taller. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} Checkout\allowbreak Session\allowbreak Resource\allowbreak Assembler} \\*
+\hline
+\textbf{Método Principal} & \texttt{toResource} \\*
+\hline
+\textbf{Transformación} & \texttt{String checkoutUrl, String sessionId} $\longrightarrow$ \texttt{CheckoutSessionResource} \\*
+\hline
+\textbf{Reglas de Mapeo} & Encapsula el enlace URL seguro de redirección y el identificador telemático de sesión emitidos por la API de Stripe en un recurso inmutable de presentación. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador:} Plan\allowbreak Feature\allowbreak Resource\allowbreak Assembler} \\*
 \hline
 \textbf{Método Principal} & \texttt{toResource} \\*
 \hline
-\textbf{Transformación} & \texttt{PlanFeature} → \texttt{PlanFeatureResource} \\*
+\textbf{Transformación} & \texttt{PlanFeature} $\longrightarrow$ \texttt{PlanFeatureResource} \\*
 \hline
-\textbf{Reglas de Mapeo} & Mapea el identificador universal clave de funcionalidad alfanumérica descripción textual y bandera booleana de habilitación modular. \\
+\textbf{Reglas de Mapeo} & Mapea el identificador universal, clave de funcionalidad alfanumérica, denominación, descripción textual y bandera booleana de habilitación modular. \\
 \hline
 \textbf{Método Secundario} & \texttt{toResourceList} \\*
 \hline
-\textbf{Transformación} & \texttt{List<PlanFeature>} → \texttt{List<PlanFeatureResource>} \\*
+\textbf{Transformación} & \texttt{List<PlanFeature>} $\longrightarrow$ \texttt{List<PlanFeatureResource>} \\*
 \hline
 \textbf{Reglas de Mapeo} & Transforma colecciones de funcionalidades empaquetadas. Si la colección de entrada es nula o vacía retorna de forma segura una lista inmutable vacía. \\
 \hline
 \end{longtable}
-*Nota.* Especificación de firmas y reglas de conversión de los componentes de transformación REST de SaaS Billing \& Subscriptions.
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Especificación de firmas y reglas de conversión de los componentes de transformación REST en interfaces.rest.transform.
 
 **Fachada de Contexto Abierto y Gobernanza de Cuotas en Memoria**
 
 La interacción sincrónica de alta frecuencia entre SaaS Billing & Subscriptions y los restantes Bounded Contexts de Atelier Platform se canaliza a través de la interfaz **SubscriptionContextFacade**, configurada bajo el patrón de Fachada de Contexto Abierto. Esta frontera abstracta permite a módulos como IAM, Human Resources, Workshop Operations e IoT Telemetry consultar la vigencia de licencias y comprobar límites de capacidad sin acoplarse a los agregados transaccionales del contexto:
 
-- **Aceleración en memoria volátil**: La implementación perimetral respalda la evaluación de cuotas operativas mediante una estructura de almacenamiento temporal de ultra alta velocidad implementada con Caffeine Cache, logrando latencias de resolución inferiores a 0.05 milisegundos en pruebas de carga.
+- **Aceleración en memoria volátil**: La implementación perimetral respalda la comprobación de cuotas operativas mediante una estructura de almacenamiento temporal de ultra alta velocidad implementada con Caffeine Cache, logrando latencias de resolución inferiores a 0.05 milisegundos en pruebas de carga.
 
 - **Invalidación reactiva**: Ante eventos de cambio de estado de membresía o migraciones de plan comercial, la memoria volátil expulsa de forma determinista la política almacenada para el taller, garantizando consistencia eventual estricta en todo el clúster de la plataforma.
 
@@ -5359,7 +6036,7 @@ En la @tbl:billing-facade-methods se exponen los métodos de la fachada de conte
 \endhead
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método de Fachada:} \texttt{isTenantSubscriptionActive}} \\*
 \hline
-\textbf{Parámetros y Retorno} & \texttt{UUID tenantId} → \texttt{boolean} \\*
+\textbf{Parámetros y Retorno} & \texttt{UUID tenantId} $\longrightarrow$ \texttt{boolean} \\*
 \hline
 \textbf{Módulos Consumidores} & IAM \& Tenancy, Workshop Operations (MRO), Human Resources, IoT Telemetry \\*
 \hline
@@ -5369,17 +6046,27 @@ En la @tbl:billing-facade-methods se exponen los métodos de la fachada de conte
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método de Fachada:} \texttt{getTenantQuotaLimits}} \\*
 \hline
-\textbf{Parámetros y Retorno} & \texttt{UUID tenantId} → \texttt{TenantQuotaLimitsDto} \\*
+\textbf{Parámetros y Retorno} & \texttt{UUID tenantId} $\longrightarrow$ \texttt{TenantQuotaLimitsDto} \\*
 \hline
 \textbf{Módulos Consumidores} & Paneles de administración de IAM y tableros de gestión de recursos de plataforma \\*
 \hline
 \textbf{Estrategia de Caché} & Almacenado en política inmutable en Caffeine Cache con tiempo de vida de 30 minutos y desalojo reactivo por eventos de migración. \\*
 \hline
-\textbf{Propósito Intermodular} & Provee la nómina completa de techos operativos autorizados para el taller incluyendo sedes colaboradores órdenes mecánicas y módulos IoT. \\
+\textbf{Propósito Intermodular} & Provee la nómina completa de techos operativos autorizados para el taller incluyendo sedes, colaboradores, órdenes mecánicas y módulos IoT. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método de Fachada:} \texttt{getTenantSubscriptionStatus}} \\*
+\hline
+\textbf{Parámetros y Retorno} & \texttt{UUID tenantId} $\longrightarrow$ \texttt{TenantSubscriptionStatusDto} \\*
+\hline
+\textbf{Módulos Consumidores} & IAM \& Tenancy, API Gateway, Paneles de administración del taller \\*
+\hline
+\textbf{Estrategia de Caché} & Resuelto en memoria volátil Caffeine Cache con desalojo reactivo ante transiciones de estado contractual. \\*
+\hline
+\textbf{Propósito Intermodular} & Retorna el estado contractual detallado del taller incluyendo denominación de plan, nivel tarifario, vigencia y bandera de cancelación programada. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método de Fachada:} \texttt{canAddBranch}} \\*
 \hline
-\textbf{Parámetros y Retorno} & \texttt{UUID tenantId, int currentBranchCount} → \texttt{boolean} \\*
+\textbf{Parámetros y Retorno} & \texttt{UUID tenantId, int currentBranchCount} $\longrightarrow$ \texttt{boolean} \\*
 \hline
 \textbf{Módulos Consumidores} & IAM \& Tenancy (Comando de creación de sedes y auxilio móvil) \\*
 \hline
@@ -5389,27 +6076,27 @@ En la @tbl:billing-facade-methods se exponen los métodos de la fachada de conte
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método de Fachada:} \texttt{canAddStaffMember}} \\*
 \hline
-\textbf{Parámetros y Retorno} & \texttt{UUID tenantId, int currentStaffCount} → \texttt{boolean} \\*
+\textbf{Parámetros y Retorno} & \texttt{UUID tenantId, int currentStaffCount} $\longrightarrow$ \texttt{boolean} \\*
 \hline
 \textbf{Módulos Consumidores} & Human Resources (Comando de contratación de personal operativo) \\*
 \hline
 \textbf{Estrategia de Caché} & Validación aritmética instantánea en RAM contra el valor inmutable maxActiveStaff de la suscripción. \\*
 \hline
-\textbf{Propósito Intermodular} & Impide la contratación de colaboradores asesores o mecánicos si la plantilla en servicio iguala el techo del plan contratado. \\
+\textbf{Propósito Intermodular} & Impide la contratación de colaboradores, asesores o mecánicos si la plantilla en servicio iguala el techo del plan contratado. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método de Fachada:} \texttt{canCreateWorkOrder}} \\*
 \hline
-\textbf{Parámetros y Retorno} & \texttt{UUID tenantId, int currentMonthlyWorkOrders} → \texttt{boolean} \\*
+\textbf{Parámetros y Retorno} & \texttt{UUID tenantId, int currentMonthlyWorkOrders} $\longrightarrow$ \texttt{boolean} \\*
 \hline
 \textbf{Módulos Consumidores} & Workshop Operations (MRO) (Apertura de órdenes de reparación y mantenimiento) \\*
 \hline
-\textbf{Estrategia de Caché} & Evaluación en memoria ultra rápida mitigando sobrecarga transaccional sobre PostgreSQL en el flujo de recepción vehicular. \\*
+\textbf{Estrategia de Caché} & Validación en memoria ultra rápida mitigando sobrecarga transaccional sobre PostgreSQL en el flujo de recepción vehicular. \\*
 \hline
 \textbf{Propósito Intermodular} & Fiscaliza que el volumen mensual de órdenes mecánicas creadas no rebase la cuota paquetizada en el nivel de software contratado. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método de Fachada:} \texttt{isFeatureAllowed}} \\*
 \hline
-\textbf{Parámetros y Retorno} & \texttt{UUID tenantId, String featureKey} → \texttt{boolean} \\*
+\textbf{Parámetros y Retorno} & \texttt{UUID tenantId, String featureKey} $\longrightarrow$ \texttt{boolean} \\*
 \hline
 \textbf{Módulos Consumidores} & IoT Telemetry \& Predictive Maintenance, Módulos de Diagnóstico IA \\*
 \hline
@@ -5417,8 +6104,19 @@ En la @tbl:billing-facade-methods se exponen los métodos de la fachada de conte
 \hline
 \textbf{Propósito Intermodular} & Determina en tiempo de ejecución si el plan comercial contratado ampara la ingesta de telemetría OBD-II o diagnósticos avanzados de falla. \\
 \hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método de Fachada:} \texttt{checkFeatureEntitlement}} \\*
+\hline
+\textbf{Parámetros y Retorno} & \texttt{UUID tenantId, String featureKey} $\longrightarrow$ \texttt{FeatureEntitlementDto} \\*
+\hline
+\textbf{Módulos Consumidores} & IoT Telemetry \& Predictive Maintenance, Workshop Operations (MRO) \\*
+\hline
+\textbf{Estrategia de Caché} & Consulta en memoria volátil combinando banderas booleanas y cuotas específicas de módulos avanzados. \\*
+\hline
+\textbf{Propósito Intermodular} & Verifica detalladamente los derechos de acceso, límites cuantitativos y consumo actual para una funcionalidad modular específica. \\
+\hline
 \end{longtable}
-*Nota.* Especificación de contratos de interoperabilidad en memoria de SubscriptionContextFacade con aceleración mediante Caffeine Cache.
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Especificación de contratos de interoperabilidad en memoria de SubscriptionContextFacade vinculados a interfaces.acl.dto.
 
 **Eventos de Integración y Coordinación Asíncrona Intermodular**
 
@@ -5440,29 +6138,45 @@ En la @tbl:billing-integration-events se sintetiza la taxonomía de los eventos 
 \thfirst{Aspecto de Integración} & \thcell{Carga Útil y Sincronización Intermodular} \\
 \hline
 \endhead
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Integración:} Tenant\allowbreak Subscription\allowbreak Status\allowbreak Changed\allowbreak Integration\allowbreak Event \quad (\textit{Tipo:} Publicado)} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Integración:} Tenant\allowbreak Plan\allowbreak Changed\allowbreak Integration\allowbreak Event \quad (\textit{Tipo:} Publicado)} \\*
 \hline
-\textbf{Atributos Transportados} & \texttt{subscriptionId}, \texttt{tenantId}, \texttt{planId}, \texttt{previousStatus}, \texttt{newStatus}, \texttt{periodEnd}, \texttt{occurredOn} \\*
+\textbf{Atributos Transportados} & \texttt{subscriptionId}, \texttt{tenantId}, \texttt{oldPlanId}, \texttt{newPlanId}, \texttt{newPlanTier}, \texttt{occurredOn} \\*
+\hline
+\textbf{Módulos Receptores} & IAM \& Tenancy, Workshop Operations (MRO), Human Resources, IoT Telemetry \\*
+\hline
+\textbf{Efecto Arquitectónico} & Comunica la migración de plan tarifario para sincronizar privilegios comerciales y recalcular techos operativos en los módulos consumidores. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Integración:} Tenant\allowbreak Quota\allowbreak Limits\allowbreak Updated\allowbreak Integration\allowbreak Event \quad (\textit{Tipo:} Publicado)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{subscriptionId}, \texttt{tenantId}, \texttt{newQuotas}, \texttt{occurredOn} \\*
+\hline
+\textbf{Módulos Receptores} & IAM \& Tenancy, Workshop Operations (MRO), Human Resources, API Gateway \\*
+\hline
+\textbf{Efecto Arquitectónico} & Expande o restringe de forma inmediata los límites autorizados de sucursales, mecánicos y órdenes de trabajo en la memoria volátil de la plataforma. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Integración:} Tenant\allowbreak Subscription\allowbreak Activated\allowbreak Integration\allowbreak Event \quad (\textit{Tipo:} Publicado)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{subscriptionId}, \texttt{tenantId}, \texttt{planId}, \texttt{tier}, \texttt{currentPeriodEnd}, \texttt{occurredOn} \\*
 \hline
 \textbf{Módulos Receptores} & IAM \& Tenancy, API Gateway, Instancias de SubscriptionContextFacade \\*
 \hline
-\textbf{Efecto Arquitectónico} & Invalida de forma reactiva la caché en memoria RAM de Caffeine en todas las instancias del clúster y sincroniza permisos de acceso al ERP. \\
+\textbf{Efecto Arquitectónico} & Habilita el acceso irrestricto a los módulos operativos contratados e inicializa las entradas de autorización en Caffeine Cache. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Integración:} Tenant\allowbreak Plan\allowbreak Upgraded\allowbreak Integration\allowbreak Event \quad (\textit{Tipo:} Publicado)} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Integración:} Tenant\allowbreak Subscription\allowbreak Canceled\allowbreak Integration\allowbreak Event \quad (\textit{Tipo:} Publicado)} \\*
 \hline
-\textbf{Atributos Transportados} & \texttt{subscriptionId}, \texttt{tenantId}, \texttt{oldPlanId}, \texttt{newPlanId}, \texttt{newQuotas}, \texttt{occurredOn} \\*
+\textbf{Atributos Transportados} & \texttt{subscriptionId}, \texttt{tenantId}, \texttt{cancellationReason}, \texttt{effectiveDate}, \texttt{occurredOn} \\*
 \hline
-\textbf{Módulos Receptores} & IAM \& Tenancy, Human Resources, Workshop Operations (MRO), IoT Telemetry \\*
+\textbf{Módulos Receptores} & IAM \& Tenancy, API Gateway, Notificaciones \\*
 \hline
-\textbf{Efecto Arquitectónico} & Expande de inmediato los techos autorizados de sedes colaboradores y órdenes de trabajo habilitando módulos técnicos avanzados. \\
+\textbf{Efecto Arquitectónico} & Programa o ejecuta la rescisión contractual, revoca privilegios operativos al expirar la vigencia y notifica a los administradores del taller. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Integración:} Tenant\allowbreak Subscription\allowbreak Suspended\allowbreak Integration\allowbreak Event \quad (\textit{Tipo:} Publicado)} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Integración:} Tenant\allowbreak Subscription\allowbreak Past\allowbreak Due\allowbreak Integration\allowbreak Event \quad (\textit{Tipo:} Publicado)} \\*
 \hline
-\textbf{Atributos Transportados} & \texttt{subscriptionId}, \texttt{tenantId}, \texttt{suspensionReason}, \texttt{suspendedAt}, \texttt{occurredOn} \\*
+\textbf{Atributos Transportados} & \texttt{subscriptionId}, \texttt{tenantId}, \texttt{stripeInvoiceId}, \texttt{attemptCount}, \texttt{gracePeriodEnd}, \texttt{occurredOn} \\*
 \hline
-\textbf{Módulos Receptores} & API Gateway, IAM \& Tenancy \\*
+\textbf{Módulos Receptores} & IAM \& Tenancy, API Gateway, Notificaciones \\*
 \hline
-\textbf{Efecto Arquitectónico} & Revoca de manera forzosa sesiones activas y deniega el paso en los filtros perimetrales a todas las peticiones operativas del taller. \\
+\textbf{Efecto Arquitectónico} & Alerta sobre cobros bancarios fallidos, activa el periodo de gracia transitorio y restringe funciones críticas si la mora persiste sin subsanarse. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Integración:} Tenant\allowbreak Registered\allowbreak Integration\allowbreak Event \quad (\textit{Tipo:} Consumido)} \\*
 \hline
@@ -5473,7 +6187,8 @@ En la @tbl:billing-integration-events se sintetiza la taxonomía de los eventos 
 \textbf{Efecto Arquitectónico} & Gatilla el aprovisionamiento asíncrono de un cliente corporativo en Stripe y activa una membresía de prueba gratuita de 14 días. \\
 \hline
 \end{longtable}
-*Nota.* Taxonomía de eventos de integración asíncronos publicados y consumidos por SaaS Billing \& Subscriptions.
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Taxonomía de eventos de integración asíncronos publicados en interfaces.events y consumidos por SaaS Billing \& Subscriptions.
 
 El diseño perimetral de la Capa de Interfaz de SaaS Billing & Subscriptions garantiza el aislamiento absoluto entre las reglas de monetización de Andeva y la operativa tributaria interna de los talleres mecánicos. Al erigir controladores REST y contratos de transferencia independientes, el sistema impide que las regulaciones tributarias de SUNAT modeladas en Invoicing interfieran con el esquema de licenciamiento recurrente, preservando la portabilidad del modelo de negocio hacia nuevos países.
 
@@ -5507,29 +6222,19 @@ En la @tbl:billing-application-types se expone el catálogo taxonómico consolid
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\
 \hline
 \endhead
-Tenant\allowbreak Subscription\allowbreak Command\allowbreak Service\allowbreak Impl & Orquesta los flujos transaccionales de contratación de planes generación de sesiones de pago Stripe Checkout portal de clientes renovaciones y cancelaciones. \\*
+Subscription\allowbreak Plan\allowbreak Command\allowbreak Service & Define las operaciones transaccionales para la creación, actualización y gestión comercial de planes de suscripción. \\*
 \hline
-\textbf{Categoría} & Servicio de Comandos \\*
+\textbf{Categoría} & Servicio de Comandos (Interfaz) \\*
 \hline
-\textbf{Relaciones} & Implementa TenantSubscriptionCommandService. Invoca StripeGateway y TenantSubscriptionRepository. Publica eventos de dominio y de integración. \\*
+\textbf{Relaciones} & Implementado por SubscriptionPlanCommandServiceImpl. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak application.\allowbreak internal.\allowbreak commandservices} \\
-\hline
-\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
-\hline
-Stripe\allowbreak Webhook\allowbreak Command\allowbreak Service\allowbreak Impl & Procesa notificaciones asíncronas telemáticas de Stripe con verificación criptográfica HMAC-SHA256 e idempotencia estricta en base de datos. \\*
-\hline
-\textbf{Categoría} & Servicio de Comandos \\*
-\hline
-\textbf{Relaciones} & Implementa StripeWebhookCommandService. Invoca StripeWebhookSignatureVerificationService y StripeWebhookEventRepository. \\*
-\hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak application.\allowbreak internal.\allowbreak commandservices} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak application.\allowbreak commandservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
-Subscription\allowbreak Plan\allowbreak Command\allowbreak Service\allowbreak Impl & Gobierna el ciclo de vida del catálogo comercial de software alta de tarifas paquetizadas y desactivación administrativa. \\*
+Subscription\allowbreak Plan\allowbreak Command\allowbreak Service\allowbreak Impl & Gobierna el ciclo de vida del catálogo comercial de software, alta de tarifas paquetizadas y desactivación administrativa. \\*
 \hline
-\textbf{Categoría} & Servicio de Comandos \\*
+\textbf{Categoría} & Servicio de Comandos (Implementación) \\*
 \hline
 \textbf{Relaciones} & Implementa SubscriptionPlanCommandService. Invoca SubscriptionPlanRepository y valida identificadores foráneos de precio en Stripe. \\*
 \hline
@@ -5537,9 +6242,59 @@ Subscription\allowbreak Plan\allowbreak Command\allowbreak Service\allowbreak Im
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
+Tenant\allowbreak Subscription\allowbreak Command\allowbreak Service & Define los flujos transaccionales de contratación, generación de sesiones de pago, renovación, cambio de plan y cancelación. \\*
+\hline
+\textbf{Categoría} & Servicio de Comandos (Interfaz) \\*
+\hline
+\textbf{Relaciones} & Implementado por TenantSubscriptionCommandServiceImpl. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak application.\allowbreak commandservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Tenant\allowbreak Subscription\allowbreak Command\allowbreak Service\allowbreak Impl & Orquesta los flujos transaccionales de contratación de planes, sesiones Stripe Checkout, portal de clientes, renovaciones y cancelaciones. \\*
+\hline
+\textbf{Categoría} & Servicio de Comandos (Implementación) \\*
+\hline
+\textbf{Relaciones} & Implementa TenantSubscriptionCommandService. Invoca StripeGatewayPort, TenantSubscriptionRepository y BillingCachePort. Publica eventos. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak application.\allowbreak internal.\allowbreak commandservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Stripe\allowbreak Webhook\allowbreak Command\allowbreak Service & Define la ingesta y procesamiento transaccional e idempotente de notificaciones telemáticas asíncronas de Stripe. \\*
+\hline
+\textbf{Categoría} & Servicio de Comandos (Interfaz) \\*
+\hline
+\textbf{Relaciones} & Implementado por StripeWebhookCommandServiceImpl. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak application.\allowbreak commandservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Stripe\allowbreak Webhook\allowbreak Command\allowbreak Service\allowbreak Impl & Procesa notificaciones telemáticas de Stripe con verificación criptográfica HMAC-SHA256 e idempotencia estricta en base de datos. \\*
+\hline
+\textbf{Categoría} & Servicio de Comandos (Implementación) \\*
+\hline
+\textbf{Relaciones} & Implementa StripeWebhookCommandService. Invoca StripeWebhookSignatureVerificationService y StripeWebhookEventRepository. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak application.\allowbreak internal.\allowbreak commandservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Saas\allowbreak Invoice\allowbreak Command\allowbreak Service & Define el registro inmutable de comprobantes de recaudación devengados por Stripe y emisión de notificaciones de pago. \\*
+\hline
+\textbf{Categoría} & Servicio de Comandos (Interfaz) \\*
+\hline
+\textbf{Relaciones} & Implementado por SaasInvoiceCommandServiceImpl. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak application.\allowbreak commandservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
 Saas\allowbreak Invoice\allowbreak Command\allowbreak Service\allowbreak Impl & Asienta de forma inmutable los comprobantes de recaudación del SaaS y preserva los enlaces oficiales a los recibos custodiados en Stripe. \\*
 \hline
-\textbf{Categoría} & Servicio de Comandos \\*
+\textbf{Categoría} & Servicio de Comandos (Implementación) \\*
 \hline
 \textbf{Relaciones} & Implementa SaasInvoiceCommandService. Invoca SaasInvoiceRepository y emite SaasInvoicePaymentSucceededEvent. \\*
 \hline
@@ -5547,19 +6302,19 @@ Saas\allowbreak Invoice\allowbreak Command\allowbreak Service\allowbreak Impl & 
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
-Tenant\allowbreak Subscription\allowbreak Query\allowbreak Service\allowbreak Impl & Resuelve consultas de situación contractual cuotas operativas vigentes y validez de membresías con aceleración en Caffeine Cache. \\*
+Subscription\allowbreak Plan\allowbreak Query\allowbreak Service & Define métodos de lectura del catálogo público y corporativo de planes de software, tarifas y funcionalidades autorizadas. \\*
 \hline
-\textbf{Categoría} & Servicio de Consultas \\*
+\textbf{Categoría} & Servicio de Consultas (Interfaz) \\*
 \hline
-\textbf{Relaciones} & Implementa TenantSubscriptionQueryService. Utiliza anotaciones Spring Cache y consulta TenantSubscriptionRepository. \\*
+\textbf{Relaciones} & Implementado por SubscriptionPlanQueryServiceImpl. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak application.\allowbreak internal.\allowbreak queryservices} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak application.\allowbreak queryservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
-Subscription\allowbreak Plan\allowbreak Query\allowbreak Service\allowbreak Impl & Provee lecturas optimizadas del catálogo público y corporativo de planes de software tarifas y funcionalidades autorizadas. \\*
+Subscription\allowbreak Plan\allowbreak Query\allowbreak Service\allowbreak Impl & Provee lecturas optimizadas del catálogo público y corporativo de planes de software, tarifas y funcionalidades autorizadas. \\*
 \hline
-\textbf{Categoría} & Servicio de Consultas \\*
+\textbf{Categoría} & Servicio de Consultas (Implementación) \\*
 \hline
 \textbf{Relaciones} & Implementa SubscriptionPlanQueryService. Emplea almacenamiento temporal en memoria volátil de alta velocidad. \\*
 \hline
@@ -5567,9 +6322,39 @@ Subscription\allowbreak Plan\allowbreak Query\allowbreak Service\allowbreak Impl
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
+Tenant\allowbreak Subscription\allowbreak Query\allowbreak Service & Define consultas de situación contractual, cuotas operativas vigentes y validez de membresías para los talleres mecánicos. \\*
+\hline
+\textbf{Categoría} & Servicio de Consultas (Interfaz) \\*
+\hline
+\textbf{Relaciones} & Implementado por TenantSubscriptionQueryServiceImpl. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak application.\allowbreak queryservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Tenant\allowbreak Subscription\allowbreak Query\allowbreak Service\allowbreak Impl & Resuelve consultas de situación contractual, cuotas operativas vigentes y validez de membresías con aceleración en Caffeine Cache. \\*
+\hline
+\textbf{Categoría} & Servicio de Consultas (Implementación) \\*
+\hline
+\textbf{Relaciones} & Implementa TenantSubscriptionQueryService. Utiliza anotaciones Spring Cache y consulta TenantSubscriptionRepository. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak application.\allowbreak internal.\allowbreak queryservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Saas\allowbreak Invoice\allowbreak Query\allowbreak Service & Define consultas de comprobantes de cobro y detalles contables paginados para los administradores de los talleres. \\*
+\hline
+\textbf{Categoría} & Servicio de Consultas (Interfaz) \\*
+\hline
+\textbf{Relaciones} & Implementado por SaasInvoiceQueryServiceImpl. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak application.\allowbreak queryservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
 Saas\allowbreak Invoice\allowbreak Query\allowbreak Service\allowbreak Impl & Proyecta resúmenes históricos de comprobantes de cobro y detalles contables paginados para los administradores de los talleres. \\*
 \hline
-\textbf{Categoría} & Servicio de Consultas \\*
+\textbf{Categoría} & Servicio de Consultas (Implementación) \\*
 \hline
 \textbf{Relaciones} & Implementa SaasInvoiceQueryService. Invoca SaasInvoiceRepository para recuperar registros financieros. \\*
 \hline
@@ -5577,11 +6362,21 @@ Saas\allowbreak Invoice\allowbreak Query\allowbreak Service\allowbreak Impl & Pr
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
-Subscription\allowbreak Domain\allowbreak Event\allowbreak Handler & Escucha eventos del ciclo de vida contractual para ejecutar la purga reactiva de caché en memoria y enviar notificaciones por correo. \\*
+Subscription\allowbreak Context\allowbreak Facade\allowbreak Impl & Implementa la fachada de contexto abierto coordinando repositorios de dominio con aceleración en memoria volátil. \\*
+\hline
+\textbf{Categoría} & Implementación de Fachada de Contexto Abierto \\*
+\hline
+\textbf{Relaciones} & Implementa SubscriptionContextFacade de la capa de interfaz. Resuelve comprobaciones de cuotas operativas en submilisegundos. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak application.\allowbreak acl} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Subscription\allowbreak Domain\allowbreak Event\allowbreak Handler & Escucha eventos del ciclo de vida contractual para ejecutar la purga reactiva de caché en memoria y enviar notificaciones. \\*
 \hline
 \textbf{Categoría} & Manejador de Eventos de Dominio \\*
 \hline
-\textbf{Relaciones} & Anotado con TransactionalEventListener. Invoca EmailGateway y expulsa políticas cacheadas en Caffeine. \\*
+\textbf{Relaciones} & Anotado con TransactionalEventListener. Invoca TenantBillingNotificationGatewayPort y expulsa políticas cacheadas en BillingCachePort. \\*
 \hline
 \textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak application.\allowbreak internal.\allowbreak eventhandlers} \\
 \hline
@@ -5591,38 +6386,69 @@ Tenant\allowbreak Lifecycle\allowbreak Integration\allowbreak Event\allowbreak H
 \hline
 \textbf{Categoría} & Manejador de Eventos de Integración \\*
 \hline
-\textbf{Relaciones} & Escucha TenantRegisteredIntegrationEvent desde IAM. Invoca TenantSubscriptionCommandService y StripeGateway. \\*
+\textbf{Relaciones} & Escucha TenantRegisteredIntegrationEvent desde IAM. Invoca TenantSubscriptionCommandService, StripeGatewayPort e IamTenantValidationAclPort. \\*
 \hline
 \textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak application.\allowbreak internal.\allowbreak eventhandlers} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
-Stripe\allowbreak Gateway & Puerto de salida agnóstico que encapsula y aísla las interacciones con el SDK de Stripe protegiendo al dominio de dependencias externas. \\*
+Billing\allowbreak Transactional\allowbreak Outbox\allowbreak Publisher & Persiste eventos de integración en la tabla outbox\_messages bajo la misma transacción ACID con garantía de entrega At-Least-Once. \\*
 \hline
-\textbf{Categoría} & Puerto de Salida \\*
+\textbf{Categoría} & Publicador Transaccional Outbox \\*
 \hline
-\textbf{Relaciones} & Implementado en la capa de infraestructura por StripeGatewayAdapter. Utilizado por los servicios de comandos. \\*
+\textbf{Relaciones} & Intercepta eventos del ciclo de vida contractual y los almacena atómicamente en base de datos para despacho asíncrono seguro. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak application.\allowbreak outboundservices} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak application.\allowbreak internal.\allowbreak eventhandlers} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
-Email\allowbreak Gateway & Puerto de salida para la transmisión telemática de correos electrónicos transaccionales confirmaciones y alertas financieras. \\*
+Stripe\allowbreak Gateway\allowbreak Port & Puerto de salida agnóstico que encapsula y aísla las interacciones con el SDK de Stripe protegiendo al dominio de dependencias externas. \\*
 \hline
-\textbf{Categoría} & Puerto de Salida \\*
+\textbf{Categoría} & Puerto de Salida (Gateway) \\*
 \hline
-\textbf{Relaciones} & Implementado en infraestructura por ResendEmailAdapter. Utilizado por los manejadores de eventos. \\*
+\textbf{Relaciones} & Implementado en la capa de infraestructura por StripeGatewayAdapter. Utilizado por los servicios de comandos. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak application.\allowbreak outboundservices} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak application.\allowbreak internal.\allowbreak outbound.\allowbreak acl} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Tenant\allowbreak Billing\allowbreak Notification\allowbreak Gateway\allowbreak Port & Puerto de salida para la transmisión telemática de correos electrónicos transaccionales, confirmaciones de pago y alertas financieras. \\*
+\hline
+\textbf{Categoría} & Puerto de Salida (Gateway) \\*
+\hline
+\textbf{Relaciones} & Implementado en infraestructura por ResendTenantBillingNotificationAdapter. Utilizado por los manejadores de eventos. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak application.\allowbreak internal.\allowbreak outbound.\allowbreak acl} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Iam\allowbreak Tenant\allowbreak Validation\allowbreak Acl\allowbreak Port & Puerto de salida anticorrupción para validar la existencia y razón social del taller automotriz contra IAM \& Tenancy. \\*
+\hline
+\textbf{Categoría} & Puerto de Salida (Gateway) \\*
+\hline
+\textbf{Relaciones} & Implementado en infraestructura por IamTenantValidationAclAdapter. Utilizado por servicios de comandos y eventos de ciclo de vida. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak application.\allowbreak internal.\allowbreak outbound.\allowbreak acl} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Billing\allowbreak Cache\allowbreak Port & Puerto de salida para la gestión de caché de alto rendimiento en memoria volátil RAM con Caffeine para cuotas y estados de suscripción. \\*
+\hline
+\textbf{Categoría} & Puerto de Salida (Gateway) \\*
+\hline
+\textbf{Relaciones} & Implementado en infraestructura por CaffeineBillingCacheAdapter. Consumido por servicios de consultas y manejadores de eventos. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak application.\allowbreak internal.\allowbreak outbound.\allowbreak acl} \\
 \hline
 \end{longtable}
-*Nota.* Catálogo taxonómico de clases de la Capa de Aplicación del Bounded Context SaaS Billing \& Subscriptions.
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Catálogo taxonómico de tipos de la Capa de Aplicación, organizados en los subpaquetes canónicos commandservices, internal.commandservices, queryservices, internal.queryservices, internal.eventhandlers, internal.outbound.acl y acl.
 
 **Servicios de Comandos de la Capa de Aplicación**
 
 La modificación transaccional del estado de licenciamiento y facturación se gestiona mediante cuatro servicios de comandos especializados, alineados a las raíces de agregado del contexto:
 
-- **TenantSubscriptionCommandServiceImpl**: Orquesta la activación de membresías, la generación de sesiones de pago con Stripe, renovaciones de periodos contables, conmutaciones a mora transitoria y cancelaciones, asegurando límites transaccionales acotados.
+- **TenantSubscriptionCommandServiceImpl**: Orquesta la activación de membresías, la generación de sesiones de pago con Stripe, renovaciones de periodos contables, cambios de plan, conmutaciones a mora transitoria y cancelaciones, asegurando límites transaccionales acotados.
 
 - **StripeWebhookCommandServiceImpl**: Centraliza la ingesta telemática de notificaciones de Stripe, validando firmas criptográficas y asegurando un procesamiento exactamente una vez antes de disparar actualizaciones de ciclo de vida o registrar facturas.
 
@@ -5648,37 +6474,43 @@ En la @tbl:billing-command-services se detallan las operaciones transaccionales,
 \hline
 \textbf{Parámetros Principales} & \texttt{TenantId tenantId, PlanId planId, String successUrl, String cancelUrl} \\*
 \hline
-\textbf{Reglas y Transaccionalidad} & Verifica que el taller no cuente con una membresía activa idéntica en curso. Invoca StripeGateway para crear la sesión de checkout adjuntando identificadores en los metadatos y retorna la URL segura para redirección. Anotado con \texttt{@Transactional}. \\
+\textbf{Reglas y Transaccionalidad} & Verifica que el taller no cuente con una membresía activa idéntica en curso. Invoca StripeGatewayPort para crear la sesión de checkout adjuntando identificadores en los metadatos y retorna la URL segura para redirección. Anotado con \texttt{@Transactional}. \\
 \hline
 \textbf{Comando:} \texttt{Create\allowbreak Customer\allowbreak Portal\allowbreak Session\allowbreak Command} & \texttt{handle(CreateCustomerPortalSessionCommand)} → \texttt{CustomerPortalSessionDto} \\*
 \hline
 \textbf{Parámetros Principales} & \texttt{TenantId tenantId, String returnUrl} \\*
 \hline
-\textbf{Reglas y Transaccionalidad} & Recupera el identificador StripeCustomerId asociado al taller y solicita a StripeGateway la emisión de una sesión interactiva del portal de facturación. Valida que la URL de retorno pertenezca a dominios autorizados. \\
+\textbf{Reglas y Transaccionalidad} & Recupera el identificador StripeCustomerId asociado al taller y solicita a StripeGatewayPort la emisión de una sesión interactiva del portal de facturación. Valida que la URL de retorno pertenezca a dominios autorizados. \\
+\hline
+\textbf{Comando:} \texttt{Change\allowbreak Subscription\allowbreak Plan\allowbreak Command} & \texttt{handle(ChangeSubscriptionPlanCommand)} → \texttt{void} \\*
+\hline
+\textbf{Parámetros Principales} & \texttt{TenantId tenantId, PlanId newPlanId} \\*
+\hline
+\textbf{Reglas y Transaccionalidad} & Valida la existencia del nuevo plan y su vigencia comercial. Comunica la actualización a Stripe mediante StripeGatewayPort, actualiza las cuotas del taller en TenantSubscription, emite TenantPlanChangedIntegrationEvent y purga la memoria volátil a través de BillingCachePort. \\
 \hline
 \textbf{Comando:} \texttt{Activate\allowbreak Tenant\allowbreak Subscription\allowbreak Command} & \texttt{handle(ActivateTenantSubscriptionCommand)} → \texttt{SubscriptionId} \\*
 \hline
 \textbf{Parámetros Principales} & \texttt{TenantId tenantId, PlanId planId, StripeCustomerId customerId, StripeSubscriptionId subId, SubscriptionPeriod period} \\*
 \hline
-\textbf{Reglas y Transaccionalidad} & Inicializa el contrato en estado ACTIVE o TRIALING según corresponda. Persiste el agregado TenantSubscription emite TenantSubscriptionActivatedEvent y publica TenantSubscriptionStatusChangedIntegrationEvent. \\
+\textbf{Reglas y Transaccionalidad} & Inicializa el contrato en estado ACTIVE o TRIALING según corresponda. Persiste el agregado TenantSubscription, emite TenantSubscriptionActivatedEvent y publica TenantSubscriptionActivatedIntegrationEvent. \\
 \hline
 \textbf{Comando:} \texttt{Renew\allowbreak Tenant\allowbreak Subscription\allowbreak Command} & \texttt{handle(RenewTenantSubscriptionCommand)} → \texttt{void} \\*
 \hline
 \textbf{Parámetros Principales} & \texttt{StripeSubscriptionId stripeSubId, SubscriptionPeriod newPeriod} \\*
 \hline
-\textbf{Reglas y Transaccionalidad} & Localiza la suscripción por su identificador foráneo extiende la ventana cronológica de cobertura actualiza el estado a ACTIVE emite TenantSubscriptionRenewedEvent y purga la memoria volátil en Caffeine. \\
+\textbf{Reglas y Transaccionalidad} & Localiza la suscripción por su identificador foráneo, extiende la ventana cronológica de cobertura, actualiza el estado a ACTIVE, emite TenantSubscriptionRenewedEvent y purga la memoria volátil en Caffeine vía BillingCachePort. \\
 \hline
-\textbf{Comando:} \texttt{Mark\allowbreak Tenant\allowbreak Subscription\allowbreak PastDue\allowbreak Command} & \texttt{handle(MarkTenantSubscriptionPastDueCommand)} → \texttt{void} \\*
+\textbf{Comando:} \texttt{Mark\allowbreak Tenant\allowbreak Subscription\allowbreak Past\allowbreak Due\allowbreak Command} & \texttt{handle(MarkTenantSubscriptionPastDueCommand)} → \texttt{void} \\*
 \hline
 \textbf{Parámetros Principales} & \texttt{StripeSubscriptionId stripeSubId} \\*
 \hline
-\textbf{Reglas y Transaccionalidad} & Transiciona el contrato a estado PAST\_DUE tras confirmarse un fallo bancario en Stripe. Abre el periodo de gracia de catorce días y emite TenantSubscriptionPastDueEvent para despacho de alertas financieras urgentes. \\
+\textbf{Reglas y Transaccionalidad} & Transiciona el contrato a estado PAST\_DUE tras confirmarse un fallo bancario en Stripe. Abre el periodo de gracia de catorce días y emite TenantSubscriptionPastDueEvent para despacho de alertas financieras urgentes mediante TenantBillingNotificationGatewayPort. \\
 \hline
 \textbf{Comando:} \texttt{Cancel\allowbreak Tenant\allowbreak Subscription\allowbreak Command} & \texttt{handle(CancelTenantSubscriptionCommand)} → \texttt{void} \\*
 \hline
 \textbf{Parámetros Principales} & \texttt{TenantId tenantId, boolean immediately, String cancellationReason} \\*
 \hline
-\textbf{Reglas y Transaccionalidad} & Si la cancelación es inmediata rescinde el contrato en Stripe revoca accesos de inmediato y transiciona a CANCELED. Si es al fin de ciclo programa cancelAtPeriodEnd en true. Emite TenantSubscriptionCanceledEvent. \\
+\textbf{Reglas y Transaccionalidad} & Si la cancelación es inmediata rescinde el contrato en Stripe, revoca accesos de inmediato y transiciona a CANCELED. Si es al fin de ciclo programa cancelAtPeriodEnd en true. Emite TenantSubscriptionCanceledEvent y TenantSubscriptionCanceledIntegrationEvent. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Comandos:} Stripe\allowbreak Webhook\allowbreak Command\allowbreak Service\allowbreak Impl} \\*
 \hline
@@ -5711,7 +6543,8 @@ En la @tbl:billing-command-services se detallan las operaciones transaccionales,
 \textbf{Reglas y Transaccionalidad} & Asienta de forma inmutable el comprobante financiero en la base de datos relacional. Registra la marca temporal UTC de recaudación formal y emite SaasInvoicePaymentSucceededEvent. \\
 \hline
 \end{longtable}
-*Nota.* Especificación de firmas parámetros y reglas de consistencia de los comandos de la Capa de Aplicación.
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Especificación de firmas, parámetros y reglas de consistencia de los comandos de la Capa de Aplicación, organizados en commandservices e internal.commandservices.
 
 **Servicios de Consulta y Proyección Acelerada de Datos**
 
@@ -5741,7 +6574,7 @@ En la @tbl:billing-query-services se presentan los métodos de consulta de la ca
 \hline
 \textbf{Parámetros} & \texttt{TenantId tenantId} \\*
 \hline
-\textbf{Estrategia de Caché} & Almacenado en Caffeine Cache bajo la región tenantSubscriptionStatus. Resuelve consultas frecuentes de situación contractual en tiempo inferior a 0.05 ms. Transaccionalidad de solo lectura (\texttt{@Transactional(readOnly = true)}). \\
+\textbf{Estrategia de Caché} & Almacenado en Caffeine Cache bajo la región tenantSubscriptionStatus vía BillingCachePort. Resuelve consultas frecuentes de situación contractual en tiempo inferior a 0.05 ms. Transaccionalidad de solo lectura (\texttt{@Transactional(readOnly = true)}). \\
 \hline
 \textbf{Consulta:} \texttt{Get\allowbreak Tenant\allowbreak Subscription\allowbreak By\allowbreak Id\allowbreak Query} & \texttt{handle(GetTenantSubscriptionByIdQuery)} → \texttt{Optional<TenantSubscription>} \\*
 \hline
@@ -5753,13 +6586,13 @@ En la @tbl:billing-query-services se presentan los métodos de consulta de la ca
 \hline
 \textbf{Parámetros} & \texttt{TenantId tenantId} \\*
 \hline
-\textbf{Estrategia de Caché} & Proyección booleana ligera acelerada en RAM. Evalúa si el contrato se encuentra en ACTIVE TRIALING o periodo de gracia transitoria. \\
+\textbf{Estrategia de Caché} & Proyección booleana ligera acelerada en RAM mediante BillingCachePort. Evalúa si el contrato se encuentra en ACTIVE, TRIALING o periodo de gracia transitoria. \\
 \hline
 \textbf{Consulta:} \texttt{Get\allowbreak Tenant\allowbreak Quota\allowbreak Limits\allowbreak Query} & \texttt{handle(GetTenantQuotaLimitsQuery)} → \texttt{TenantQuotaLimitsDto} \\*
 \hline
 \textbf{Parámetros} & \texttt{TenantId tenantId} \\*
 \hline
-\textbf{Estrategia de Caché} & Consulta de la política inmutable pre-compilada en memoria RAM. Evita accesos a PostgreSQL en las comprobaciones de cuotas de sedes y personal. \\
+\textbf{Estrategia de Caché} & Consulta de la política inmutable precompilada en memoria RAM mediante BillingCachePort. Evita accesos a PostgreSQL en las comprobaciones de cuotas de sedes y personal. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Consultas:} Subscription\allowbreak Plan\allowbreak Query\allowbreak Service\allowbreak Impl} \\*
 \hline
@@ -5796,15 +6629,18 @@ En la @tbl:billing-query-services se presentan los métodos de consulta de la ca
 \textbf{Estrategia de Caché} & Recuperación del detalle contable individual y verificación de pertenencia del comprobante respecto al taller solicitante. \\
 \hline
 \end{longtable}
-*Nota.* Especificación de consultas y esquemas de aceleración en memoria volátil de la Capa de Aplicación.
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Especificación de consultas y esquemas de aceleración en memoria volátil de la Capa de Aplicación, organizados en queryservices e internal.queryservices.
 
 **Manejadores de Eventos de Dominio y de Integración**
 
-La reactividad interna del contexto y su coordinación con otros Bounded Contexts se canaliza mediante manejadores de eventos desacoplados, ejecutados de forma transaccional o asíncrona:
+La reactividad interna del contexto y su coordinación con otros Bounded Contexts se canaliza mediante manejadores de eventos desacoplados y un publicador transaccional Outbox, garantizando consistencia eventual y entrega confiable:
 
-- **SubscriptionDomainEventHandler**: Escucha eventos de dominio de activaciones, renovaciones periódicas o rechazos bancarios, ejecutando en fase posterior al commit la invalidación de memorias volátiles y el despacho de correos transaccionales.
+- **SubscriptionDomainEventHandler**: Escucha eventos de dominio de activaciones, renovaciones periódicas, mora bancaria y cancelaciones, ejecutando en fase posterior al commit la invalidación de memorias volátiles y el despacho de notificaciones transaccionales.
 
 - **TenantLifecycleIntegrationEventHandler**: Consume el evento de integración de registro emitido por IAM & Tenancy, gatillando automáticamente la creación del cliente en la bóveda de Stripe y activando una membresía de prueba gratuita de catorce días.
+
+- **BillingTransactionalOutboxPublisher**: Intercepta eventos de dominio e integración para persistirlos de forma atómica en la tabla outbox\_messages dentro de la misma transacción de PostgreSQL, garantizando entrega de tipo At-Least-Once hacia el bus de mensajería sin incurrir en bloqueos distribuidos.
 
 En la @tbl:billing-event-handlers se especifican los eventos interceptados por los manejadores, detallando sus fases de ejecución, orígenes y consecuencias arquitectónicas.
 
@@ -5824,31 +6660,31 @@ En la @tbl:billing-event-handlers se especifican los eventos interceptados por l
 \hline
 \textbf{Origen del Suceso} & Raíz de Agregado TenantSubscription ante activación de plan o inicio de prueba \\*
 \hline
-\textbf{Efectos del Manejador} & Purga la caché en memoria volátil de Caffeine para el taller y solicita a EmailGateway el envío del mensaje formal de bienvenida y confirmación de activación. \\
+\textbf{Efectos del Manejador} & Purga la memoria volátil de Caffeine mediante BillingCachePort y solicita a TenantBillingNotificationGatewayPort el envío del mensaje formal de bienvenida y confirmación de activación. \\
 \hline
 \textbf{Evento:} \texttt{Tenant\allowbreak Subscription\allowbreak Renewed\allowbreak Event} & Ejecución en fase \texttt{AFTER\_COMMIT} mediante \texttt{@TransactionalEventListener} \\*
 \hline
 \textbf{Origen del Suceso} & Raíz de Agregado TenantSubscription ante recaudación periódica exitosa \\*
 \hline
-\textbf{Efectos del Manejador} & Invalida y refresca la política contractual en Caffeine Cache garantizando que los módulos del ERP reconozcan de inmediato la extensión del periodo pagado. \\
+\textbf{Efectos del Manejador} & Invalida y refresca la política contractual en Caffeine Cache vía BillingCachePort, garantizando que los módulos del ERP reconozcan de inmediato la extensión del periodo pagado. \\
 \hline
 \textbf{Evento:} \texttt{Tenant\allowbreak Subscription\allowbreak Past\allowbreak Due\allowbreak Event} & Ejecución en fase \texttt{AFTER\_COMMIT} mediante \texttt{@TransactionalEventListener} \\*
 \hline
 \textbf{Origen del Suceso} & Raíz de Agregado TenantSubscription ante débito bancario fallido en Stripe \\*
 \hline
-\textbf{Efectos del Manejador} & Despacha una notificación electrónica prioritaria al administrador del taller con enlace interactivo al Stripe Customer Portal para regularizar su tarjeta bancaria antes de la suspensión forzosa. \\
+\textbf{Efectos del Manejador} & Despacha una notificación electrónica prioritaria al administrador del taller mediante TenantBillingNotificationGatewayPort con enlace interactivo al Stripe Customer Portal para regularizar su tarjeta bancaria antes de la suspensión forzosa. \\
 \hline
 \textbf{Evento:} \texttt{Tenant\allowbreak Subscription\allowbreak Canceled\allowbreak Event} & Ejecución en fase \texttt{AFTER\_COMMIT} mediante \texttt{@TransactionalEventListener} \\*
 \hline
 \textbf{Origen del Suceso} & Raíz de Agregado TenantSubscription ante rescisión voluntaria o forzosa \\*
 \hline
-\textbf{Efectos del Manejador} & Purga la caché local de autorizaciones publica el evento TenantSubscriptionSuspendedIntegrationEvent hacia el bus de mensajería y emite correo de notificación de cese de servicio. \\
+\textbf{Efectos del Manejador} & Purga la caché local de autorizaciones en BillingCachePort, propaga el evento de cancelación y emite correo de notificación de cese de servicio mediante TenantBillingNotificationGatewayPort. \\
 \hline
 \textbf{Evento:} \texttt{Saas\allowbreak Invoice\allowbreak Payment\allowbreak Succeeded\allowbreak Event} & Ejecución en fase \texttt{AFTER\_COMMIT} mediante \texttt{@TransactionalEventListener} \\*
 \hline
 \textbf{Origen del Suceso} & Raíz de Agregado SaasInvoice ante asentamiento de cobro formal \\*
 \hline
-\textbf{Efectos del Manejador} & Genera y despacha el comprobante contable digital al correo electrónico del área financiera del taller mecánico incorporando el enlace oficial de descarga del PDF. \\
+\textbf{Efectos del Manejador} & Genera y despacha el comprobante contable digital al correo electrónico del área financiera del taller mecánico incorporando el enlace oficial de descarga del PDF mediante TenantBillingNotificationGatewayPort. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Manejador de Eventos de Integración:} Tenant\allowbreak Lifecycle\allowbreak Integration\allowbreak Event\allowbreak Handler} \\*
 \hline
@@ -5856,20 +6692,31 @@ En la @tbl:billing-event-handlers se especifican los eventos interceptados por l
 \hline
 \textbf{Origen del Suceso} & Bounded Context IAM \& Tenancy ante alta y registro corporativo de nuevo taller \\*
 \hline
-\textbf{Efectos del Manejador} & Aprovisiona de forma desatendida un cliente en Stripe mediante StripeGateway vincula una suscripción de prueba gratuita de 14 días bajo el nivel comercial PROFESSIONAL y activa la cuenta sin fricción para el usuario. \\
+\textbf{Efectos del Manejador} & Aprovisiona de forma desatendida un cliente en Stripe mediante StripeGatewayPort, valida los datos del taller vía IamTenantValidationAclPort, vincula una suscripción de prueba gratuita de 14 días bajo el nivel comercial PRO y activa la cuenta sin fricción para el usuario. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Publicador Transaccional Outbox:} Billing\allowbreak Transactional\allowbreak Outbox\allowbreak Publisher} \\*
+\hline
+\textbf{Evento:} \texttt{Billing\allowbreak Integration\allowbreak Event} & Ejecución dentro de la misma transacción ACID local antes de la confirmación \\*
+\hline
+\textbf{Origen del Suceso} & Mutaciones de ciclo de vida contractual en agregados TenantSubscription y SubscriptionPlan \\*
+\hline
+\textbf{Efectos del Manejador} & Serializa las cargas útiles de eventos de integración en formato JSON y las persiste atómicamente en la tabla outbox\_messages con garantía de entrega At-Least-Once hacia el bus de mensajería sin recurrir a bloqueos distribuidos. \\
 \hline
 \end{longtable}
-*Nota.* Especificación de manejadores de eventos y orquestación reactiva de la Capa de Aplicación.
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Especificación de manejadores de eventos y orquestación reactiva de la Capa de Aplicación bajo el paquete canónico internal.eventhandlers.
 
 **Puertos de Salida, Pasarelas y Adaptadores Anticorrupción**
 
-La comunicación hacia proveedores externos y servicios auxiliares se aísla rigurosamente mediante puertos de salida agnósticos situados en el perímetro de aplicación:
+La comunicación hacia proveedores externos, servicios de plataforma y mecanismos de almacenamiento temporal se aísla rigurosamente mediante puertos de salida agnósticos situados bajo el subpaquete canónico **com.andeva.atelier.platform.billing.application.internal.outbound.acl**:
 
-- **StripeGateway**: Encapsula las operaciones remotas hacia la infraestructura de Stripe, protegiendo al núcleo del software frente a dependencias directas del SDK de la pasarela y traduciendo anomalías telemáticas a excepciones semánticas.
+- **StripeGatewayPort**: Encapsula las operaciones remotas hacia la infraestructura de Stripe, protegiendo al núcleo del software frente a dependencias directas del SDK de la pasarela y traduciendo anomalías telemáticas a excepciones semánticas.
 
-- **EmailGateway**: Desacopla la lógica de negocio respecto a los mecanismos de transporte SMTP o HTTP para el envío de alertas de cobranza y confirmaciones de pago hacia los usuarios administradores.
+- **TenantBillingNotificationGatewayPort**: Desacopla la lógica de negocio respecto a los mecanismos de transporte SMTP o HTTP en la nube para el envío de alertas de cobranza, confirmaciones de activación y comprobantes de recaudación hacia los administradores.
 
-- **IamClientPort**: Provee acceso seguro a los metadatos de identidad y perfiles de los talleres automotrices, salvaguardando la autonomía de datos de SaaS Billing & Subscriptions.
+- **IamTenantValidationAclPort**: Provee acceso seguro a los metadatos de identidad y perfiles de los talleres automotrices, salvaguardando la autonomía de datos de SaaS Billing & Subscriptions frente al modelo relacional de IAM & Tenancy.
+
+- **BillingCachePort**: Abstrae el acceso y desalojo reactivo de políticas contractuales y cuotas operativas en memoria volátil de alta velocidad con Caffeine Cache, resolviendo comprobaciones de autorización en submilisegundos.
 
 En la @tbl:billing-outbound-ports se detallan los puertos de salida de la capa de aplicación, sus signaturas de métodos y sus adaptadores concretos de infraestructura.
 
@@ -5883,7 +6730,7 @@ En la @tbl:billing-outbound-ports se detallan los puertos de salida de la capa d
 \thfirst{Puerto de Salida} & \thcell{Firma de Operaciones y Adaptador de Infraestructura} \\
 \hline
 \endhead
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} Stripe\allowbreak Gateway} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} Stripe\allowbreak Gateway\allowbreak Port} \\*
 \hline
 \textbf{Operación Principal} & \texttt{createCustomer(TenantId, String email, String name)} → \texttt{StripeCustomerId} \\*
 \hline
@@ -5891,30 +6738,49 @@ En la @tbl:billing-outbound-ports se detallan los puertos de salida de la capa d
 \hline
 \textbf{Adaptador Concreto} & StripeGatewayAdapter en la capa de infraestructura mediante el SDK oficial stripe-java \\*
 \hline
-\textbf{Propósito Arquitectónico} & Aislar por completo las dependencias y tipos foráneos de la pasarela Stripe del núcleo del software Atelier traduciendo anomalías externas a excepciones de dominio. \\
+\textbf{Propósito Arquitectónico} & Aislar por completo las dependencias y tipos foráneos de la pasarela Stripe del núcleo del software Atelier traduciendo anomalías externas a excepciones de dominio. \\*
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} Email\allowbreak Gateway} \\*
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak application.\allowbreak internal.\allowbreak outbound.\allowbreak acl} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} Tenant\allowbreak Billing\allowbreak Notification\allowbreak Gateway\allowbreak Port} \\*
 \hline
 \textbf{Operación Principal} & \texttt{sendSubscriptionActivatedEmail(TenantId, String recipient, String planName)} → \texttt{void} \\*
 \hline
 \textbf{Operaciones Secundarias} & - \texttt{sendPaymentFailedAlertEmail(TenantId, String recipient, String portalUrl)} → \texttt{void} \newline - \texttt{sendSubscriptionCanceledEmail(TenantId, String recipient, Instant effectiveDate)} → \texttt{void} \newline - \texttt{sendInvoiceReceiptEmail(TenantId, String recipient, String invoicePdfUrl)} → \texttt{void} \\*
 \hline
-\textbf{Adaptador Concreto} & ResendEmailAdapter en la capa de infraestructura consumiendo el servicio Resend \\*
+\textbf{Adaptador Concreto} & ResendTenantBillingNotificationAdapter en la capa de infraestructura consumiendo el servicio Resend \\*
 \hline
-\textbf{Propósito Arquitectónico} & Desacoplar la lógica de notificaciones financieras respecto a proveedores concretos de transporte SMTP o HTTP de correo electrónico. \\
+\textbf{Propósito Arquitectónico} & Desacoplar la lógica de notificaciones financieras respecto a proveedores concretos de transporte de correo electrónico en la nube. \\*
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} Iam\allowbreak Client\allowbreak Port} \\*
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak application.\allowbreak internal.\allowbreak outbound.\allowbreak acl} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} Iam\allowbreak Tenant\allowbreak Validation\allowbreak Acl\allowbreak Port} \\*
 \hline
 \textbf{Operación Principal} & \texttt{getTenantProfile(TenantId)} → \texttt{Optional<TenantProfileDto>} \\*
 \hline
 \textbf{Operaciones Secundarias} & - \texttt{validateTenantExistence(TenantId)} → \texttt{boolean} \newline - \texttt{getTenantAdminEmail(TenantId)} → \texttt{Optional<String>} \\*
 \hline
-\textbf{Adaptador Concreto} & IamClientAdapter en la capa de infraestructura invocando la fachada de IAM \& Tenancy \\*
+\textbf{Adaptador Concreto} & IamTenantValidationAclAdapter en la capa de infraestructura invocando la fachada de IAM \& Tenancy \\*
 \hline
-\textbf{Propósito Arquitectónico} & Proveer acceso a metadatos de identidad del taller automotriz sin acoplar la capa de aplicación de Billing a las entidades relacionales de IAM. \\
+\textbf{Propósito Arquitectónico} & Proveer acceso a metadatos de identidad del taller automotriz sin acoplar la capa de aplicación de Billing a las entidades relacionales de IAM. \\*
+\hline
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak application.\allowbreak internal.\allowbreak outbound.\allowbreak acl} \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto de Salida:} Billing\allowbreak Cache\allowbreak Port} \\*
+\hline
+\textbf{Operación Principal} & \texttt{getSubscriptionStatus(TenantId)} → \texttt{Optional<TenantSubscriptionStatusDto>} \\*
+\hline
+\textbf{Operaciones Secundarias} & - \texttt{putSubscriptionStatus(TenantId, TenantSubscriptionStatusDto)} → \texttt{void} \newline - \texttt{evictSubscriptionStatus(TenantId)} → \texttt{void} \newline - \texttt{getQuotaLimits(TenantId)} → \texttt{Optional<TenantQuotaLimitsDto>} \newline - \texttt{putQuotaLimits(TenantId, TenantQuotaLimitsDto)} → \texttt{void} \\*
+\hline
+\textbf{Adaptador Concreto} & CaffeineBillingCacheAdapter en la capa de infraestructura utilizando el motor de caché en memoria Caffeine \\*
+\hline
+\textbf{Propósito Arquitectónico} & Proveer una abstracción de acceso a caché de alta velocidad en memoria volátil RAM para comprobación de cuotas operativas con latencia sub-milisegundo. \\*
+\hline
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak billing.\allowbreak application.\allowbreak internal.\allowbreak outbound.\allowbreak acl} \\
 \hline
 \end{longtable}
-*Nota.* Especificación de puertos de salida y adaptadores de infraestructura para integración externa.
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Especificación de puertos de salida y adaptadores de infraestructura organizados en internal.outbound.acl.
 
 La arquitectura implementada en la Capa de Aplicación de SaaS Billing & Subscriptions consolida una frontera transaccional limpia que preserva la consistencia de los contratos corporativos sin comprometer la agilidad operativa del taller. Al articular los casos de uso bajo el patrón CQRS, el sistema asegura que las mutaciones financieras se ejecuten con aislamiento riguroso y auditoría completa, mientras que las consultas intensivas de licenciamiento se atienden con máxima concurrencia y mínima latencia.
 
@@ -5946,29 +6812,29 @@ En la @tbl:billing-infrastructure-types se sintetiza el catálogo consolidado de
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\
 \hline
 \endhead
-Subscription\allowbreak Plan\allowbreak JpaEntity & Mapeo relacional de planes comerciales y cuotas operativas hacia la tabla física plans. \\*
+Subscription\allowbreak Plan\allowbreak Persistence\allowbreak Entity & Mapeo relacional de planes comerciales y cuotas operativas hacia la tabla física plans. \\*
 \hline
-\textbf{Categoría} & Entidad JPA \\*
+\textbf{Categoría} & Entidad de Persistencia JPA \\*
 \hline
-\textbf{Relaciones} & Hereda de AuditableAbstractPersistenceEntity. Raíz de persistencia con colección en cascada hacia PlanFeatureJpaEntity. \\*
-\hline
-\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak entities} \\
-\hline
-\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
-\hline
-Plan\allowbreak Feature\allowbreak JpaEntity & Mapeo relacional de módulos funcionales y banderas de activación hacia la tabla plan\_features. \\*
-\hline
-\textbf{Categoría} & Entidad JPA \\*
-\hline
-\textbf{Relaciones} & Clave foránea hacia SubscriptionPlanJpaEntity. Restricción de unicidad compuesta sobre identificador de plan y clave funcional. \\*
+\textbf{Relaciones} & Hereda de AuditableAbstractPersistenceEntity. Raíz de persistencia con colección en cascada hacia PlanFeaturePersistenceEntity. \\*
 \hline
 \textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak entities} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
-Tenant\allowbreak Subscription\allowbreak JpaEntity & Mapeo relacional del ciclo de vida de membresías de talleres hacia la tabla física subscriptions. \\*
+Plan\allowbreak Feature\allowbreak Persistence\allowbreak Entity & Mapeo relacional de módulos funcionales y banderas de activación hacia la tabla plan\_features. \\*
 \hline
-\textbf{Categoría} & Entidad JPA \\*
+\textbf{Categoría} & Entidad de Persistencia JPA \\*
+\hline
+\textbf{Relaciones} & Clave foránea hacia SubscriptionPlanPersistenceEntity. Restricción de unicidad compuesta sobre identificador de plan y clave funcional. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak entities} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Tenant\allowbreak Subscription\allowbreak Persistence\allowbreak Entity & Mapeo relacional del ciclo de vida de membresías de talleres hacia la tabla física subscriptions. \\*
+\hline
+\textbf{Categoría} & Entidad de Persistencia JPA \\*
 \hline
 \textbf{Relaciones} & Hereda de AuditableAbstractPersistenceEntity. Clave foránea lógica hacia tenants y plans. Índices por estado y suscripción de Stripe. \\*
 \hline
@@ -5976,9 +6842,9 @@ Tenant\allowbreak Subscription\allowbreak JpaEntity & Mapeo relacional del ciclo
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
-Saas\allowbreak Invoice\allowbreak JpaEntity & Mapeo relacional de comprobantes contables y recibos de cobro hacia la tabla física invoices. \\*
+Saas\allowbreak Invoice\allowbreak Persistence\allowbreak Entity & Mapeo relacional de comprobantes contables y recibos de cobro hacia la tabla física saas\_invoices. \\*
 \hline
-\textbf{Categoría} & Entidad JPA \\*
+\textbf{Categoría} & Entidad de Persistencia JPA \\*
 \hline
 \textbf{Relaciones} & Hereda de AuditableAbstractPersistenceEntity. Clave foránea hacia subscriptions y tenants. Custodia enlaces seguros a facturas en Stripe. \\*
 \hline
@@ -5986,9 +6852,9 @@ Saas\allowbreak Invoice\allowbreak JpaEntity & Mapeo relacional de comprobantes 
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
-Stripe\allowbreak Webhook\allowbreak Event\allowbreak JpaEntity & Mapeo de auditoría forense y control estricto de idempotencia hacia la tabla física stripe\_events. \\*
+Stripe\allowbreak Webhook\allowbreak Event\allowbreak Persistence\allowbreak Entity & Mapeo de auditoría forense y control estricto de idempotencia hacia la tabla física stripe\_webhook\_events. \\*
 \hline
-\textbf{Categoría} & Entidad JPA \\*
+\textbf{Categoría} & Entidad de Persistencia JPA \\*
 \hline
 \textbf{Relaciones} & Restricción de unicidad estricta sobre el identificador nativo de Stripe impidiendo doble procesamiento transaccional. \\*
 \hline
@@ -5996,9 +6862,9 @@ Stripe\allowbreak Webhook\allowbreak Event\allowbreak JpaEntity & Mapeo de audit
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
-SpringData\allowbreak Subscription\allowbreak Plan\allowbreak Repository & Interfaz de persistencia Spring Data JPA para administración del catálogo de planes y precios en Stripe. \\*
+Subscription\allowbreak Plan\allowbreak Persistence\allowbreak Repository & Interfaz de persistencia Spring Data JPA para administración del catálogo de planes y precios en Stripe. \\*
 \hline
-\textbf{Categoría} & Repositorio JPA \\*
+\textbf{Categoría} & Repositorio Spring Data JPA \\*
 \hline
 \textbf{Relaciones} & Extiende JpaRepository. Consultas unívocas por identificador de precio en Stripe y listado de planes activos en plataforma. \\*
 \hline
@@ -6006,9 +6872,9 @@ SpringData\allowbreak Subscription\allowbreak Plan\allowbreak Repository & Inter
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
-SpringData\allowbreak Tenant\allowbreak Subscription\allowbreak Repository & Interfaz de persistencia Spring Data JPA para administración relacional de suscripciones de talleres. \\*
+Tenant\allowbreak Subscription\allowbreak Persistence\allowbreak Repository & Interfaz de persistencia Spring Data JPA para administración relacional de suscripciones de talleres. \\*
 \hline
-\textbf{Categoría} & Repositorio JPA \\*
+\textbf{Categoría} & Repositorio Spring Data JPA \\*
 \hline
 \textbf{Relaciones} & Extiende JpaRepository. Búsqueda por identificador de taller, identificador de suscripción de Stripe y verificación booleana de estado. \\*
 \hline
@@ -6016,9 +6882,9 @@ SpringData\allowbreak Tenant\allowbreak Subscription\allowbreak Repository & Int
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
-SpringData\allowbreak Saas\allowbreak Invoice\allowbreak Repository & Interfaz de persistencia Spring Data JPA para consultas de facturas de plataforma e historial de cobros. \\*
+Saas\allowbreak Invoice\allowbreak Persistence\allowbreak Repository & Interfaz de persistencia Spring Data JPA para consultas de facturas de plataforma e historial de cobros. \\*
 \hline
-\textbf{Categoría} & Repositorio JPA \\*
+\textbf{Categoría} & Repositorio Spring Data JPA \\*
 \hline
 \textbf{Relaciones} & Extiende JpaRepository. Búsqueda unívoca por factura de Stripe y recuperación cronológica paginada por taller. \\*
 \hline
@@ -6026,9 +6892,9 @@ SpringData\allowbreak Saas\allowbreak Invoice\allowbreak Repository & Interfaz d
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
-SpringData\allowbreak Stripe\allowbreak Webhook\allowbreak Event\allowbreak Repository & Interfaz de persistencia Spring Data JPA para trazabilidad e idempotencia de notificaciones de eventos externos. \\*
+Stripe\allowbreak Webhook\allowbreak Event\allowbreak Persistence\allowbreak Repository & Interfaz de persistencia Spring Data JPA para trazabilidad e idempotencia de notificaciones de eventos externos. \\*
 \hline
-\textbf{Categoría} & Repositorio JPA \\*
+\textbf{Categoría} & Repositorio Spring Data JPA \\*
 \hline
 \textbf{Relaciones} & Extiende JpaRepository. Verificación booleana ultra rápida de existencia y recuperación de eventos para auditoría de errores. \\*
 \hline
@@ -6038,89 +6904,89 @@ SpringData\allowbreak Stripe\allowbreak Webhook\allowbreak Event\allowbreak Repo
 \hline
 Subscription\allowbreak Plan\allowbreak Repository\allowbreak Impl & Adaptador secundario de salida que implementa el puerto de dominio SubscriptionPlanRepository. \\*
 \hline
-\textbf{Categoría} & Adaptador de Persistencia \\*
+\textbf{Categoría} & Adaptador de Repositorio de Persistencia \\*
 \hline
-\textbf{Relaciones} & Implementa SubscriptionPlanRepository delegando en SpringDataSubscriptionPlanRepository y ensamblador bidireccional. \\*
+\textbf{Relaciones} & Implementa SubscriptionPlanRepository delegando en SubscriptionPlanPersistenceRepository y ensamblador bidireccional. \\*
 \hline
-\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak repositories} \\
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak adapters} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
 Tenant\allowbreak Subscription\allowbreak Repository\allowbreak Impl & Adaptador secundario de salida que implementa el puerto de dominio TenantSubscriptionRepository. \\*
 \hline
-\textbf{Categoría} & Adaptador de Persistencia \\*
+\textbf{Categoría} & Adaptador de Repositorio de Persistencia \\*
 \hline
 \textbf{Relaciones} & Implementa TenantSubscriptionRepository gestionando transaccionalidad atómica y sincronización de estados operativos. \\*
 \hline
-\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak repositories} \\
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak adapters} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
 Saas\allowbreak Invoice\allowbreak Repository\allowbreak Impl & Adaptador secundario de salida que implementa el puerto de dominio SaasInvoiceRepository. \\*
 \hline
-\textbf{Categoría} & Adaptador de Persistencia \\*
+\textbf{Categoría} & Adaptador de Repositorio de Persistencia \\*
 \hline
 \textbf{Relaciones} & Implementa SaasInvoiceRepository persistiendo facturas emitidas y facilitando consultas históricas paginadas. \\*
 \hline
-\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak repositories} \\
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak adapters} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
 Stripe\allowbreak Webhook\allowbreak Event\allowbreak Repository\allowbreak Impl & Adaptador secundario de salida que implementa el puerto de dominio StripeWebhookEventRepository. \\*
 \hline
-\textbf{Categoría} & Adaptador de Persistencia \\*
+\textbf{Categoría} & Adaptador de Repositorio de Persistencia \\*
 \hline
 \textbf{Relaciones} & Implementa StripeWebhookEventRepository garantizando inserción atómica y detección de eventos duplicados en base de datos. \\*
 \hline
-\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak repositories} \\
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak adapters} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
 Subscription\allowbreak Plan\allowbreak Persistence\allowbreak Assembler & Ensamblador de datos para transformación bidireccional entre el agregado SubscriptionPlan y su entidad JPA. \\*
 \hline
-\textbf{Categoría} & Ensamblador de Persistencia \\*
+\textbf{Categoría} & Ensamblador de Persistencia JPA \\*
 \hline
 \textbf{Relaciones} & Convierte cuotas comerciales en columnas escalares y mapea entidades de funcionalidad sin emitir eventos espurios. \\*
 \hline
-\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak transform} \\
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak assemblers} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
 Tenant\allowbreak Subscription\allowbreak Persistence\allowbreak Assembler & Ensamblador de datos para transformación bidireccional entre el agregado TenantSubscription y su entidad JPA. \\*
 \hline
-\textbf{Categoría} & Ensamblador de Persistencia \\*
+\textbf{Categoría} & Ensamblador de Persistencia JPA \\*
 \hline
 \textbf{Relaciones} & Reconstituye agregados de suscripción vinculando identificadores foráneos y fechas de período de facturación en UTC. \\*
 \hline
-\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak transform} \\
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak assemblers} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
 Saas\allowbreak Invoice\allowbreak Persistence\allowbreak Assembler & Ensamblador de datos para transformación bidireccional entre el agregado SaasInvoice y su entidad JPA. \\*
 \hline
-\textbf{Categoría} & Ensamblador de Persistencia \\*
+\textbf{Categoría} & Ensamblador de Persistencia JPA \\*
 \hline
 \textbf{Relaciones} & Mapea montos facturados, referencias de pago en Stripe, URLs de descarga de comprobantes y marcas temporales. \\*
 \hline
-\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak transform} \\
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak assemblers} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
 Stripe\allowbreak Webhook\allowbreak Event\allowbreak Persistence\allowbreak Assembler & Ensamblador de datos para transformación bidireccional entre la entidad StripeWebhookEvent y su entidad JPA. \\*
 \hline
-\textbf{Categoría} & Ensamblador de Persistencia \\*
+\textbf{Categoría} & Ensamblador de Persistencia JPA \\*
 \hline
 \textbf{Relaciones} & Reconstituye registros de auditoría de webhooks preservando la carga JSON original para análisis forense de fallos. \\*
 \hline
-\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak transform} \\
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak assemblers} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
 Plan\allowbreak Tier\allowbreak Converter & Convertidor JPA para serialización del tipo enumerado PlanTier a columna relacional VARCHAR(20). \\*
 \hline
-\textbf{Categoría} & Convertidor JPA \\*
+\textbf{Categoría} & Conversor de Tipos JPA \\*
 \hline
-\textbf{Relaciones} & Mapea los niveles comerciales COMMUNITY, STARTER, PROFESSIONAL y ENTERPRISE. \\*
+\textbf{Relaciones} & Mapea los niveles comerciales GO, PRO, MAX y ENTERPRISE. \\*
 \hline
 \textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak converters} \\
 \hline
@@ -6128,7 +6994,7 @@ Plan\allowbreak Tier\allowbreak Converter & Convertidor JPA para serialización 
 \hline
 Subscription\allowbreak Status\allowbreak Converter & Convertidor JPA para serialización del estado de suscripción SubscriptionStatus a columna VARCHAR(20). \\*
 \hline
-\textbf{Categoría} & Convertidor JPA \\*
+\textbf{Categoría} & Conversor de Tipos JPA \\*
 \hline
 \textbf{Relaciones} & Normaliza estados operativos INCOMPLETE, TRIALING, ACTIVE, PAST\_DUE, CANCELED y UNPAID. \\*
 \hline
@@ -6138,7 +7004,7 @@ Subscription\allowbreak Status\allowbreak Converter & Convertidor JPA para seria
 \hline
 Invoice\allowbreak Status\allowbreak Converter & Convertidor JPA para mapeo del ciclo de cobro InvoiceStatus a columna relacional VARCHAR(20). \\*
 \hline
-\textbf{Categoría} & Convertidor JPA \\*
+\textbf{Categoría} & Conversor de Tipos JPA \\*
 \hline
 \textbf{Relaciones} & Normaliza estados financieros DRAFT, OPEN, PAID, VOID y UNCOLLECTIBLE. \\*
 \hline
@@ -6148,7 +7014,7 @@ Invoice\allowbreak Status\allowbreak Converter & Convertidor JPA para mapeo del 
 \hline
 Billing\allowbreak Cycle\allowbreak Converter & Convertidor JPA para mapeo de periodicidad de facturación BillingCycle a columna VARCHAR(20). \\*
 \hline
-\textbf{Categoría} & Convertidor JPA \\*
+\textbf{Categoría} & Conversor de Tipos JPA \\*
 \hline
 \textbf{Relaciones} & Mapea frecuencias periódicas MONTHLY y ANNUAL. \\*
 \hline
@@ -6156,53 +7022,103 @@ Billing\allowbreak Cycle\allowbreak Converter & Convertidor JPA para mapeo de pe
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
+Webhook\allowbreak Processing\allowbreak Status\allowbreak Converter & Convertidor JPA para mapeo del estado WebhookProcessingStatus a columna relacional VARCHAR(20). \\*
+\hline
+\textbf{Categoría} & Conversor de Tipos JPA \\*
+\hline
+\textbf{Relaciones} & Normaliza estados PENDING, PROCESSED, FAILED e IGNORED en el registro de auditoría de webhooks. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak converters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Tenant\allowbreak Quota\allowbreak Limits\allowbreak Converter & Convertidor JPA para serialización estructurada del objeto de valor TenantQuotaLimits a columna relacional. \\*
+\hline
+\textbf{Categoría} & Conversor de Tipos JPA \\*
+\hline
+\textbf{Relaciones} & Serializa cuotas cuantitativas y banderas modulares para comprobación ágil de límites operativos. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak converters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
 Stripe\allowbreak Gateway\allowbreak Adapter & Adaptador de salida perimetral que interactúa con los servicios de pasarela de pago internacional Stripe. \\*
 \hline
-\textbf{Categoría} & Pasarela Perimetral de Pagos \\*
+\textbf{Categoría} & Adaptador de Pasarela de Pagos Externa \\*
 \hline
-\textbf{Relaciones} & Implementa el puerto StripeGateway utilizando el cliente oficial StripeClient y encapsulando credenciales seguras. \\*
+\textbf{Relaciones} & Implementa el puerto StripeGatewayPort utilizando el cliente oficial StripeClient y encapsulando credenciales seguras. \\*
 \hline
-\textbf{Paquete} & \texttt{...\allowbreak infrastructure.\allowbreak gateways} \\
-\hline
-\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
-\hline
-Resend\allowbreak Email\allowbreak Adapter & Pasarela de notificaciones transaccionales para despacho de correos electrónicos vía API REST de Resend. \\*
-\hline
-\textbf{Categoría} & Pasarela Cloud de Notificaciones \\*
-\hline
-\textbf{Relaciones} & Implementa EmailGateway enviando recibos de pago, confirmaciones de alta y notificaciones de regularización de cobros. \\*
-\hline
-\textbf{Paquete} & \texttt{...\allowbreak infrastructure.\allowbreak gateways} \\
+\textbf{Paquete} & \texttt{...\allowbreak external.\allowbreak payment.\allowbreak stripe} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
-Iam\allowbreak Client\allowbreak Adapter & Adaptador de integración intermodular para consulta en memoria de información corporativa de talleres. \\*
+Stripe\allowbreak Webhook\allowbreak Signature\allowbreak Verifier\allowbreak Adapter & Adaptador perimetral de verificación criptográfica de cabeceras de firma para webhooks de Stripe. \\*
 \hline
-\textbf{Categoría} & Adaptador de Integración Intermodular \\*
+\textbf{Categoría} & Adaptador de Pasarela de Pagos Externa \\*
 \hline
-\textbf{Relaciones} & Implementa IamClientPort consumiendo TenancyContextFacade sin generar acoplamiento físico a nivel de base de datos. \\*
+\textbf{Relaciones} & Valida firmas HMAC-SHA256 y tolerancia temporal de eventos protegiendo al dominio frente a suplantación. \\*
 \hline
-\textbf{Paquete} & \texttt{...\allowbreak infrastructure.\allowbreak gateways} \\
+\textbf{Paquete} & \texttt{...\allowbreak external.\allowbreak payment.\allowbreak stripe} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
-Caffeine\allowbreak Cache\allowbreak Config & Clase de configuración de infraestructura de almacenamiento en caché en memoria de alto rendimiento. \\*
+Resend\allowbreak Billing\allowbreak Notification\allowbreak Adapter & Pasarela de notificaciones transaccionales para despacho de correos electrónicos vía API REST de Resend. \\*
 \hline
-\textbf{Categoría} & Configuración de Caché en Memoria \\*
+\textbf{Categoría} & Adaptador de Correo Transaccional \\*
+\hline
+\textbf{Relaciones} & Implementa TenantBillingNotificationGatewayPort enviando recibos de pago, confirmaciones de alta y avisos de cobro. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak external.\allowbreak mail.\allowbreak resend} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Iam\allowbreak Tenant\allowbreak Validation\allowbreak Adapter & Adaptador de integración intermodular para consulta en memoria de información corporativa de talleres. \\*
+\hline
+\textbf{Categoría} & Adaptador Anticorrupción ACL \\*
+\hline
+\textbf{Relaciones} & Implementa IamTenantValidationAclPort consumiendo TenancyContextFacade sin generar acoplamiento físico en base de datos. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak external.\allowbreak acl.\allowbreak iam} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Caffeine\allowbreak Billing\allowbreak Cache\allowbreak Adapter & Adaptador de almacenamiento en memoria para resolución ultra veloz de membresías y límites operativos. \\*
+\hline
+\textbf{Categoría} & Adaptador de Caché en Memoria \\*
+\hline
+\textbf{Relaciones} & Implementa BillingCachePort gestionando almacenamiento y desalojo reactivo en cachés Caffeine en memoria RAM. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak external.\allowbreak cache.\allowbreak caffeine} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Caffeine\allowbreak Cache\allowbreak Configuration & Clase de configuración de infraestructura de almacenamiento en caché en memoria de alto rendimiento. \\*
+\hline
+\textbf{Categoría} & Configuración de Infraestructura \\*
 \hline
 \textbf{Relaciones} & Configura BillingCacheManager gestionando cachés tenantSubscriptionStatus y activePlans con latencia sub-milisegundo. \\*
 \hline
-\textbf{Paquete} & \texttt{...\allowbreak infrastructure.\allowbreak cache} \\
+\textbf{Paquete} & \texttt{...\allowbreak external.\allowbreak cache.\allowbreak caffeine} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Billing\allowbreak Outbox\allowbreak Message\allowbreak Relay\allowbreak Adapter & Adaptador de despacho y relevo transaccional asíncrono de eventos de integración hacia el bus de la plataforma. \\*
+\hline
+\textbf{Categoría} & Adaptador de Relé Transaccional Outbox \\*
+\hline
+\textbf{Relaciones} & Consulta periódicamente outbox\_messages y publica eventos de suscripción y facturación con garantía At-Least-Once. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak external.\allowbreak messaging.\allowbreak outbox} \\
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-*Nota.* Componentes pertenecientes al paquete canónico com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak billing.\allowbreak infrastructure.
+*Nota.* Catálogo taxonómico de tipos de la Capa de Infraestructura, organizados en los subpaquetes modulares persistence.jpa.entities, persistence.jpa.repositories, persistence.jpa.adapters, persistence.jpa.assemblers, persistence.jpa.converters, external.payment.stripe, external.mail.resend, external.acl.iam, external.cache.caffeine y external.messaging.outbox.
 
 **Entidades de Persistencia JPA y Modelado Relacional Físico**
 
-El modelado relacional de persistencia reproduce fielmente la topología comercial y de cuotas del dominio SaaS mediante cinco entidades JPA mapeadas a sus respectivas tablas físicas en PostgreSQL 16. La entidad **SubscriptionPlanJpaEntity** se vincula a la tabla **plans**, encapsulando el identificador del plan tarifario en Stripe, precios monetarios, periodicidad de facturación, cuotas de sucursales y personal, y banderas booleanas de acceso a telemetría IoT y diagnóstico predictivo. A su vez, la entidad **PlanFeatureJpaEntity** mapea las características funcionales específicas a la tabla **plan_features**, manteniendo integridad referencial en cascada total.
+El modelado relacional de persistencia reproduce fielmente la topología comercial y de cuotas del dominio SaaS mediante cinco entidades JPA mapeadas a sus respectivas tablas físicas en PostgreSQL 16. La entidad **SubscriptionPlanPersistenceEntity** se vincula a la tabla **plans**, encapsulando el identificador del plan tarifario en Stripe, precios monetarios, periodicidad de facturación, cuotas de sucursales y personal, y banderas booleanas de acceso a telemetría IoT y diagnóstico predictivo. A su vez, la entidad **PlanFeaturePersistenceEntity** mapea las características funcionales específicas a la tabla **plan_features**, manteniendo integridad referencial en cascada total.
 
-Por su parte, la entidad **TenantSubscriptionJpaEntity** custodia el ciclo de vida de membresía de cada taller en la tabla **subscriptions**, vinculando el cliente y la suscripción remota de Stripe con estados formales y fechas límite de cobertura. La entidad **SaasInvoiceJpaEntity** estructura los comprobantes contables en la tabla **invoices**, almacenando montos devengados, fechas de pago y enlaces a documentos probatorios. Finalmente, la entidad **StripeWebhookEventJpaEntity** opera sobre la tabla **stripe_events** para blindar la plataforma ante eventuales reintentos de red de la pasarela. En la @tbl:billing-jpa-entities se detallan los esquemas relacionales, claves primarias, índices B-Tree y restricciones de verificación de estas entidades.
+Por su parte, la entidad **TenantSubscriptionPersistenceEntity** custodia el ciclo de vida de membresía de cada taller en la tabla **subscriptions**, vinculando el cliente y la suscripción remota de Stripe con estados formales y fechas límite de cobertura. La entidad **SaasInvoicePersistenceEntity** estructura los comprobantes contables en la tabla **saas_invoices**, almacenando montos devengados, fechas de pago y enlaces a documentos probatorios. Finalmente, la entidad **StripeWebhookEventPersistenceEntity** opera sobre la tabla **stripe_webhook_events** para blindar la plataforma ante eventuales reintentos de red de la pasarela. En la @tbl:billing-jpa-entities se detallan los esquemas relacionales, claves primarias, índices B-Tree y restricciones de verificación de estas entidades.
 
 \renewcommand{\arraystretch}{1.25}
 \begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
@@ -6215,23 +7131,23 @@ Por su parte, la entidad **TenantSubscriptionJpaEntity** custodia el ciclo de vi
 \thfirst{Aspecto de Persistencia} & \thcell{Especificación Físico-Relacional} \\
 \hline
 \endhead
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} SubscriptionPlanJpaEntity \quad (\textit{Tabla:} \texttt{plans})} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} SubscriptionPlanPersistenceEntity \quad (\textit{Tabla:} \texttt{plans})} \\*
 \hline
 \textbf{Clave Primaria} & \texttt{id (UUID)} \\*
 \hline
-\textbf{Columnas Principales} & \texttt{stripe\_price\_id}, \texttt{name}, \texttt{tier}, \texttt{price}, \texttt{currency}, \texttt{billing\_cycle}, \texttt{max\_branches}, \texttt{max\_active\_staff}, \texttt{iot\_telemetry\_enabled}, \texttt{ai\_diagnostics\_enabled}, \texttt{is\_active}, \texttt{created\_at}, \texttt{updated\_at} \\*
+\textbf{Columnas Principales} & \texttt{stripe\_price\_id}, \texttt{name}, \texttt{tier}, \texttt{price}, \texttt{currency}, \texttt{billing\_cycle}, \texttt{max\_branches}, \texttt{max\_active\_staff}, \texttt{max\_monthly\_work\_orders}, \texttt{iot\_telemetry\_enabled}, \texttt{ai\_diagnostics\_enabled}, \texttt{is\_active}, \texttt{created\_at}, \texttt{updated\_at} \\*
 \hline
 \textbf{Restricciones e Índices} & Restricción de unicidad uk\_plans\_stripe\_price sobre stripe\_price\_id. Restricciones de verificación chk\_plans\_price\_positive sobre price no negativo y chk\_plans\_quotas\_positive sobre max\_branches y max\_active\_staff mayores a cero. Índice B-Tree idx\_plans\_tier\_active sobre (tier, is\_active) para consulta acelerada de planes comerciales activos. Relación de cascada total con eliminación de huérfanos hacia plan\_features. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} PlanFeatureJpaEntity \quad (\textit{Tabla:} \texttt{plan\_features})} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} PlanFeaturePersistenceEntity \quad (\textit{Tabla:} \texttt{plan\_features})} \\*
 \hline
 \textbf{Clave Primaria} & \texttt{id (UUID)} \\*
 \hline
 \textbf{Columnas Principales} & \texttt{plan\_id}, \texttt{feature\_key}, \texttt{name}, \texttt{description}, \texttt{is\_enabled} \\*
 \hline
-\textbf{Restricciones e Índices} & Clave foránea fk\_plan\_features\_plan hacia plans con eliminación en cascada. Restricción de unicidad compuesta uk\_plan\_features\_plan\_key sobre la tupla (plan\_id, feature\_key). Índice B-Tree idx\_plan\_features\_lookup sobre (plan\_id, is\_enabled) para evaluación inmediata de funcionalidades durante verificaciones de cuota. \\
+\textbf{Restricciones e Índices} & Clave foránea fk\_plan\_features\_plan hacia plans con eliminación en cascada. Restricción de unicidad compuesta uk\_plan\_features\_plan\_key sobre la tupla (plan\_id, feature\_key). Índice B-Tree idx\_plan\_features\_lookup sobre (plan\_id, is\_enabled) para comprobación inmediata de funcionalidades durante verificaciones de cuota. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} TenantSubscriptionJpaEntity \quad (\textit{Tabla:} \texttt{subscriptions})} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} TenantSubscriptionPersistenceEntity \quad (\textit{Tabla:} \texttt{subscriptions})} \\*
 \hline
 \textbf{Clave Primaria} & \texttt{id (UUID)} \\*
 \hline
@@ -6239,21 +7155,21 @@ Por su parte, la entidad **TenantSubscriptionJpaEntity** custodia el ciclo de vi
 \hline
 \textbf{Restricciones e Índices} & Restricción de unicidad uk\_subscriptions\_tenant sobre tenant\_id garantizando una única suscripción por taller. Clave foránea fk\_subscriptions\_plan hacia plans. Restricción de verificación chk\_subscription\_periods para asegurar que current\_period\_end sea posterior a current\_period\_start. Índices B-Tree idx\_subscriptions\_stripe\_sub sobre stripe\_sub\_id e idx\_subscriptions\_status sobre status. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} SaasInvoiceJpaEntity \quad (\textit{Tabla:} \texttt{invoices})} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} SaasInvoicePersistenceEntity \quad (\textit{Tabla:} \texttt{saas\_invoices})} \\*
 \hline
 \textbf{Clave Primaria} & \texttt{id (UUID)} \\*
 \hline
 \textbf{Columnas Principales} & \texttt{subscription\_id}, \texttt{tenant\_id}, \texttt{stripe\_invoice\_id}, \texttt{amount\_paid}, \texttt{currency}, \texttt{status}, \texttt{invoice\_pdf\_url}, \texttt{hosted\_invoice\_url}, \texttt{paid\_at}, \texttt{created\_at}, \texttt{updated\_at} \\*
 \hline
-\textbf{Restricciones e Índices} & Claves foráneas fk\_invoices\_subscription hacia subscriptions y fk\_invoices\_tenant hacia tenants. Restricción de unicidad uk\_invoices\_stripe\_inv sobre stripe\_invoice\_id. Restricción de verificación chk\_invoice\_amount\_non\_negative para importe monetario no negativo. Índices B-Tree idx\_invoices\_tenant\_created sobre (tenant\_id, created\_at DESC) e idx\_invoices\_stripe\_lookup sobre stripe\_invoice\_id. \\
+\textbf{Restricciones e Índices} & Claves foráneas fk\_saas\_invoices\_subscription hacia subscriptions y fk\_saas\_invoices\_tenant hacia tenants. Restricción de unicidad uk\_saas\_invoices\_stripe\_inv sobre stripe\_invoice\_id. Restricción de verificación chk\_saas\_invoice\_amount\_non\_negative para importe monetario no negativo. Índices B-Tree idx\_saas\_invoices\_tenant\_created sobre (tenant\_id, created\_at DESC) e idx\_saas\_invoices\_stripe\_lookup sobre stripe\_invoice\_id. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} StripeWebhookEventJpaEntity \quad (\textit{Tabla:} \texttt{stripe\_events})} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} StripeWebhookEventPersistenceEntity \quad (\textit{Tabla:} \texttt{stripe\_webhook\_events})} \\*
 \hline
 \textbf{Clave Primaria} & \texttt{id (UUID)} \\*
 \hline
 \textbf{Columnas Principales} & \texttt{stripe\_event\_id}, \texttt{type}, \texttt{payload}, \texttt{status}, \texttt{processed\_at}, \texttt{error\_message} \\*
 \hline
-\textbf{Restricciones e Índices} & Restricción de unicidad estricta uk\_stripe\_events\_event\_id sobre stripe\_event\_id que actúa como cerrojo de concurrencia para evitar doble ejecución de webhooks. Índice B-Tree idx\_stripe\_events\_type\_status sobre (type, status, processed\_at DESC) para auditoría operativa y depuración de eventos fallidos. \\
+\textbf{Restricciones e Índices} & Restricción de unicidad estricta uk\_stripe\_webhook\_events\_event\_id sobre stripe\_event\_id que actúa como cerrojo de concurrencia para evitar doble ejecución de webhooks. Índice B-Tree idx\_stripe\_webhook\_events\_type\_status sobre (type, status, processed\_at DESC) para auditoría operativa y depuración de eventos fallidos. \\
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
@@ -6280,43 +7196,43 @@ Asimismo, el adaptador **SaasInvoiceRepositoryImpl** gestiona el archivo inmutab
 \hline
 \textbf{Puerto de Dominio} & \texttt{SubscriptionPlanRepository} \\*
 \hline
-\textbf{Repositorio Inyectado} & \texttt{SpringDataSubscriptionPlanRepository} \\*
+\textbf{Repositorio Inyectado} & \texttt{SubscriptionPlanPersistenceRepository} \\*
 \hline
-\textbf{Operaciones Clave} & Transforma agregados SubscriptionPlan hacia SubscriptionPlanJpaEntity mediante SubscriptionPlanPersistenceAssembler. Coordina la persistencia relacional en la tabla plans sincronizando en cascada sus características en plan\_features. Provee métodos *save()* bajo transacción de escritura, *findById()* para hidratación de cuotas comerciales, *findByStripePriceId()* para mapear identificadores de precio en Stripe y *findAllActive()* optimizado para la exposición del catálogo comercial. \\
+\textbf{Operaciones Clave} & Transforma agregados SubscriptionPlan hacia SubscriptionPlanPersistenceEntity mediante SubscriptionPlanPersistenceAssembler. Coordina la persistencia relacional en la tabla plans sincronizando en cascada sus características en plan\_features. Provee métodos *save()* bajo transacción de escritura, *findById()* para hidratación de cuotas comerciales, *findByStripePriceId()* para mapear identificadores de precio en Stripe y *findAllActive()* optimizado para la exposición del catálogo comercial. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} TenantSubscriptionRepositoryImpl} \\*
 \hline
 \textbf{Puerto de Dominio} & \texttt{TenantSubscriptionRepository} \\*
 \hline
-\textbf{Repositorio Inyectado} & \texttt{SpringDataTenantSubscriptionRepository} \\*
+\textbf{Repositorio Inyectado} & \texttt{TenantSubscriptionPersistenceRepository} \\*
 \hline
-\textbf{Operaciones Clave} & Administra la persistencia del ciclo de vida de membresías de talleres en la tabla subscriptions. Reconstituye agregados puros TenantSubscription vinculando sus estados de vigencia. Provee *save()* con bloqueo a nivel de fila para cambios de estado, *findByTenantId()* para consulta de suscripción activa de taller, *findByStripeSubscriptionId()* para sincronización reactiva desde webhooks y *existsActiveByTenantId()* para validaciones rápidas de membresía. \\
+\textbf{Operaciones Clave} & Administra la persistencia del ciclo de vida de membresías de talleres en la tabla subscriptions. Reconstituye agregados puros TenantSubscription vinculando sus estados de vigencia mediante TenantSubscriptionPersistenceAssembler. Provee *save()* con bloqueo a nivel de fila para cambios de estado, *findByTenantId()* para consulta de suscripción activa de taller, *findByStripeSubscriptionId()* para sincronización reactiva desde webhooks y *existsActiveByTenantId()* para validaciones rápidas de membresía. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} SaasInvoiceRepositoryImpl} \\*
 \hline
 \textbf{Puerto de Dominio} & \texttt{SaasInvoiceRepository} \\*
 \hline
-\textbf{Repositorio Inyectado} & \texttt{SpringDataSaasInvoiceRepository} \\*
+\textbf{Repositorio Inyectado} & \texttt{SaasInvoicePersistenceRepository} \\*
 \hline
-\textbf{Operaciones Clave} & Persiste el historial de comprobantes de cobro y recibos contables emitidos por la plataforma en la tabla invoices. Provee *save()* para registrar facturas generadas tras pagos exitosos, *findById()* para auditoría individual, *findByStripeInvoiceId()* para conciliación bancaria y *findAllByTenantId()* con soporte nativo de paginación para alimentar la vista histórica del panel del taller. \\
+\textbf{Operaciones Clave} & Persiste el historial de comprobantes de cobro y recibos contables emitidos por la plataforma en la tabla saas\_invoices mediante SaasInvoicePersistenceAssembler. Provee *save()* para registrar facturas generadas tras pagos exitosos, *findById()* para auditoría individual, *findByStripeInvoiceId()* para conciliación bancaria y *findAllByTenantId()* con soporte nativo de paginación para alimentar la vista histórica del panel del taller. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} StripeWebhookEventRepositoryImpl} \\*
 \hline
 \textbf{Puerto de Dominio} & \texttt{StripeWebhookEventRepository} \\*
 \hline
-\textbf{Repositorio Inyectado} & \texttt{SpringDataStripeWebhookEventRepository} \\*
+\textbf{Repositorio Inyectado} & \texttt{StripeWebhookEventPersistenceRepository} \\*
 \hline
-\textbf{Operaciones Clave} & Implementa el cerrojo de persistencia para el procesamiento seguro de webhooks asíncronos en la tabla stripe\_events. Provee *existsByStripeEventId()* para descartar en tiempo constante notificaciones duplicadas emitidas por Stripe ante demoras de confirmación, *save()* para persistir la traza de auditoría con la carga JSON íntegra y *markAsFailed()* para documentar el motivo de excepción en caso de errores en consumidores. \\
+\textbf{Operaciones Clave} & Implementa el cerrojo de persistencia para el procesamiento seguro de webhooks asíncronos en la tabla stripe\_webhook\_events mediante StripeWebhookEventPersistenceAssembler. Provee *existsByStripeEventId()* para descartar en tiempo constante notificaciones duplicadas emitidas por Stripe ante demoras de confirmación, *save()* para persistir la traza de auditoría con la carga JSON íntegra y *markAsFailed()* para documentar el motivo de excepción en caso de errores en consumidores. \\
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-*Nota.* Clases ubicadas bajo el paquete canónico com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak billing.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak repositories.
+*Nota.* Adaptadores de repositorio de persistencia ubicados bajo el subpaquete canónico persistence.jpa.adapters.
 
 **Ensambladores de Persistencia y Convertidores de Atributos JPA**
 
 El desacoplamiento estricto entre el esquema físico relacional y los tipos puros del dominio se materializa mediante ensambladores de persistencia y convertidores de atributos JPA. El ensamblador **SubscriptionPlanPersistenceAssembler** traduce bidireccionalmente planes comerciales, proyectando las cuotas operativas de sucursales y mecánicos hacia columnas escalares y reconstruyendo el agregado puro mediante su método estático de fábrica sin disparar eventos de dominio espurios durante consultas. De modo semejante, los ensambladores **TenantSubscriptionPersistenceAssembler**, **SaasInvoicePersistenceAssembler** y **StripeWebhookEventPersistenceAssembler** restauran el estado interno de membresías, recibos y trazas de auditoría preservando la inmutabilidad de sus identificadores y marcas temporales en UTC.
 
-Este esquema de transformación se complementa con cuatro convertidores de atributos JPA que serializan enumeraciones de dominio hacia tipos columnares estándar de SQL. En particular, **PlanTierConverter** serializa los niveles de suscripción, **SubscriptionStatusConverter** sincroniza los estados de vigencia con la terminología de Stripe, **InvoiceStatusConverter** asegura la validez de los recibos de cobro y **BillingCycleConverter** estandariza la periodicidad mensual y anual. En la @tbl:billing-persistence-assemblers se describen las transformaciones y mapeos de tipos implementados por estos componentes.
+Este esquema de transformación se complementa con seis convertidores de atributos JPA que serializan enumeraciones de dominio y estructuras de cuotas hacia tipos columnares estándar de SQL. En particular, **PlanTierConverter** serializa los niveles de suscripción, **SubscriptionStatusConverter** sincroniza los estados de vigencia con la terminología de Stripe, **InvoiceStatusConverter** asegura la validez de los recibos de cobro, **BillingCycleConverter** estandariza la periodicidad mensual y anual, **WebhookProcessingStatusConverter** tipifica las fases de consumo de eventos asíncronos y **TenantQuotaLimitsConverter** serializa las cuotas operativas consolidadas. En la @tbl:billing-persistence-assemblers se describen las transformaciones y mapeos de tipos implementados por estos componentes.
 
 \renewcommand{\arraystretch}{1.25}
 \begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
@@ -6331,33 +7247,33 @@ Este esquema de transformación se complementa con cuatro convertidores de atrib
 \endhead
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} SubscriptionPlanPersistenceAssembler} \\*
 \hline
-\textbf{Mapeo de Tipos} & \texttt{SubscriptionPlan} $\longleftrightarrow$ \texttt{SubscriptionPlanJpaEntity} \\*
+\textbf{Mapeo de Tipos} & \texttt{SubscriptionPlan} $\longleftrightarrow$ \texttt{SubscriptionPlanPersistenceEntity} \\*
 \hline
-\textbf{Transformación} & Mapea identificadores PlanId y campos comerciales name, price y currency. Descompone el objeto de valor PlanLimits en columnas escalares max\_branches, max\_active\_staff, iot\_telemetry\_enabled y ai\_diagnostics\_enabled. Transforma la colección de entidades hijas PlanFeature hacia PlanFeatureJpaEntity. Reconstituye el agregado puro mediante método estático *reconstitute()* sin disparar eventos de dominio espurios durante consultas. \\
+\textbf{Transformación} & Mapea identificadores PlanId y campos comerciales name, price y currency. Descompone el objeto de valor TenantQuotaLimits en columnas escalares max\_branches, max\_active\_staff, max\_monthly\_work\_orders, iot\_telemetry\_enabled y ai\_diagnostics\_enabled. Transforma la colección de entidades hijas PlanFeature hacia PlanFeaturePersistenceEntity. Reconstituye el agregado puro mediante método estático *reconstitute()* sin disparar eventos de dominio espurios durante consultas. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} TenantSubscriptionPersistenceAssembler} \\*
 \hline
-\textbf{Mapeo de Tipos} & \texttt{TenantSubscription} $\longleftrightarrow$ \texttt{TenantSubscriptionJpaEntity} \\*
+\textbf{Mapeo de Tipos} & \texttt{TenantSubscription} $\longleftrightarrow$ \texttt{TenantSubscriptionPersistenceEntity} \\*
 \hline
 \textbf{Transformación} & Mapea SubscriptionId, TenantId y PlanId a identificadores UUID planos. Vincula los identificadores de cliente y suscripción en Stripe. Convierte marcas temporales de inicio y término de ciclo a marcas Instant en UTC. Reconstituye el agregado puro restaurando su estado de vigencia mediante *reconstitute()* para asegurar invariantes de ciclo de vida sin generar eventos duplicados en base de datos. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} SaasInvoicePersistenceAssembler} \\*
 \hline
-\textbf{Mapeo de Tipos} & \texttt{SaasInvoice} $\longleftrightarrow$ \texttt{SaasInvoiceJpaEntity} \\*
+\textbf{Mapeo de Tipos} & \texttt{SaasInvoice} $\longleftrightarrow$ \texttt{SaasInvoicePersistenceEntity} \\*
 \hline
-\textbf{Transformación} & Mapea InvoiceId, SubscriptionId y TenantId a claves UUID relacionales. Traduce el monto monetario a escala BigDecimal en dos decimales con redondeo contable. Asocia las URLs seguras de descarga de PDF y vista web hospedada de Stripe. Invoca *reconstitute()* restaurando el estado inmutable del recibo de suscripción. \\
+\textbf{Transformación} & Mapea SaasInvoiceId, SubscriptionId y TenantId a claves UUID relacionales. Traduce el monto monetario a escala BigDecimal en dos decimales con redondeo contable. Asocia las URLs seguras de descarga de PDF y vista web hospedada de Stripe. Invoca *reconstitute()* restaurando el estado inmutable del recibo de suscripción. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} StripeWebhookEventPersistenceAssembler} \\*
 \hline
-\textbf{Mapeo de Tipos} & \texttt{StripeWebhookEvent} $\longleftrightarrow$ \texttt{StripeWebhookEventJpaEntity} \\*
+\textbf{Mapeo de Tipos} & \texttt{StripeWebhookEvent} $\longleftrightarrow$ \texttt{StripeWebhookEventPersistenceEntity} \\*
 \hline
-\textbf{Transformación} & Transforma el identificador de evento nativo de Stripe, el tipo de notificación estructurado y la carga útil en formato JSON crudo hacia columnas de texto plano. Reconstituye la entidad de auditoría con su fecha de recepción y resultado de procesamiento. \\
+\textbf{Transformación} & Transforma el identificador de evento nativo de Stripe, el tipo de notificación estructurado y la carga útil en formato JSON crudo hacia columnas de texto plano. Reconstituye la entidad de auditoría con su fecha de recepción y resultado de procesamiento mediante *reconstitute()*. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} PlanTierConverter} \\*
 \hline
 \textbf{Mapeo de Tipos} & \texttt{PlanTier} $\longleftrightarrow$ \texttt{VARCHAR(20)} \\*
 \hline
-\textbf{Transformación} & Implementa AttributeConverter mapeando los valores enumerados COMMUNITY, STARTER, PROFESSIONAL y ENTERPRISE a cadenas alfanuméricas estándar en PostgreSQL. \\
+\textbf{Transformación} & Implementa AttributeConverter mapeando los valores enumerados GO, PRO, MAX y ENTERPRISE a cadenas alfanuméricas estándar en PostgreSQL. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} SubscriptionStatusConverter} \\*
 \hline
@@ -6377,15 +7293,27 @@ Este esquema de transformación se complementa con cuatro convertidores de atrib
 \hline
 \textbf{Transformación} & Mapea la periodicidad comercial de facturación MONTHLY y ANNUAL hacia la base de datos permitiendo configuraciones tarifarias flexibles para talleres automotrices. \\
 \hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} WebhookProcessingStatusConverter} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{WebhookProcessingStatus} $\longleftrightarrow$ \texttt{VARCHAR(20)} \\*
+\hline
+\textbf{Transformación} & Implementa AttributeConverter mapeando los estados operativos PENDING, PROCESSED, FAILED e IGNORED hacia columnas relacionales de texto para el control de idempotencia y auditoría de eventos. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador / Convertidor:} TenantQuotaLimitsConverter} \\*
+\hline
+\textbf{Mapeo de Tipos} & \texttt{TenantQuotaLimits} $\longleftrightarrow$ \texttt{VARCHAR(255)} \\*
+\hline
+\textbf{Transformación} & Implementa AttributeConverter serializando la estructura de límites de sucursales, colaboradores y módulos tecnológicos hacia representación estructurada para almacenamiento consistente y comprobación de cuotas. \\
+\hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-*Nota.* Componentes ubicados bajo com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak billing.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.
+*Nota.* Ensambladores y conversores ubicados bajo los subpaquetes canónicos persistence.jpa.assemblers y persistence.jpa.converters.
 
 **Pasarelas Externas de Pago, Notificaciones y Caché en Memoria**
 
-La interacción con los servicios perimetrales de nube y las dependencias intermodulares se articula mediante adaptadores especializados que implementan los puertos salientes de la capa de aplicación. El adaptador **StripeGatewayAdapter** encapsula las llamadas remotas hacia la API de Stripe mediante el cliente oficial, gestionando la generación de sesiones de cobro hospedadas y enlaces al portal de autoservicio de clientes con credenciales aisladas del código fuente. Por su parte, el adaptador **ResendEmailAdapter** conecta con la infraestructura de mensajería RESTful de Resend para emitir confirmaciones de pago, recibos contables y alertas preventivas de regularización financiera.
+La interacción con los servicios perimetrales de nube y las dependencias intermodulares se articula mediante adaptadores especializados organizados en subpaquetes modulares según el proveedor o tecnología externa. El adaptador **StripeGatewayAdapter** encapsula las llamadas remotas hacia la API de Stripe mediante el cliente oficial, gestionando la generación de clientes, sesiones de cobro hospedadas y enlaces al portal de autoservicio con credenciales aisladas del código fuente. De forma complementaria, **StripeWebhookSignatureVerifierAdapter** valida la autenticidad criptográfica de los eventos asíncronos mediante el cálculo de firmas HMAC-SHA256. Por su parte, el adaptador **ResendBillingNotificationAdapter** conecta con la infraestructura de mensajería RESTful de Resend para emitir confirmaciones de pago, recibos contables y alertas preventivas de regularización financiera.
 
-Asimismo, el adaptador **IamClientAdapter** resuelve los datos de razón social, documento de identidad fiscal y correo electrónico del titular del taller consumiendo la fachada en memoria del contexto IAM & Tenancy bajo el patrón Open Host Service, eliminando dependencias de red o acoplamientos relacionales entre esquemas de base de datos. Para garantizar la evaluación inmediata de cuotas operativas en las estaciones de trabajo de taller y en terminales de taller móvil, la configuración **CaffeineCacheConfig** define políticas de retención temporal en memoria RAM con latencia de resolución sub-milisegundo. En la @tbl:billing-external-infrastructure se resumen los puertos implementados, componentes tecnológicos y mecanismos de resiliencia adoptados por estas pasarelas.
+Asimismo, el adaptador **IamTenantValidationAdapter** resuelve los datos de razón social, documento de identidad fiscal y correo electrónico del titular del taller consumiendo la fachada en memoria del contexto IAM & Tenancy bajo el patrón Open Host Service, eliminando dependencias de red o acoplamientos relacionales entre esquemas de base de datos. Para garantizar la verificación inmediata de cuotas operativas en las estaciones de trabajo de taller y en terminales móviles, el adaptador **CaffeineBillingCacheAdapter** y la clase de configuración **CaffeineCacheConfiguration** definen políticas de retención temporal en memoria RAM con latencia de resolución sub-milisegundo. Finalmente, el adaptador **BillingOutboxMessageRelayAdapter** orquesta el relevo transaccional asíncrono de eventos de integración hacia el bus de la plataforma con garantía de entrega At-Least-Once. En la @tbl:billing-external-infrastructure se resumen los puertos implementados, componentes tecnológicos y mecanismos de resiliencia adoptados por estas pasarelas.
 
 \renewcommand{\arraystretch}{1.25}
 \begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
@@ -6400,39 +7328,63 @@ Asimismo, el adaptador **IamClientAdapter** resuelve los datos de razón social,
 \endhead
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} StripeGatewayAdapter} \\*
 \hline
-\textbf{Puerto Implementado} & \texttt{StripeGateway} \\*
+\textbf{Puerto Implementado} & \texttt{StripeGatewayPort} \\*
 \hline
-\textbf{Tecnología y Cliente} & SDK oficial stripe-java v24+ mediante instancia inyectada com.stripe.StripeClient. \\*
+\textbf{Tecnología y Cliente} & SDK oficial stripe-java mediante instancia inyectada com.stripe.StripeClient. \\*
 \hline
-\textbf{Operaciones y Resiliencia} & Gestiona la creación de sesiones seguras Stripe Checkout mediante *createCheckoutSession()*, redirección hacia Stripe Customer Portal mediante *createCustomerPortalSession()* y cancelación de membresías mediante *cancelSubscription()*. Encapsula credenciales secretas mediante inyección externa de propiedades. Traduce excepciones nativas de pasarela CardException, RateLimitException e InvalidRequestException en excepciones semánticas de dominio BillingDomainException para proteger las capas internas. \\
+\textbf{Operaciones y Resiliencia} & Gestiona la creación de clientes en Stripe mediante *createCustomer()*, sesiones seguras Stripe Checkout mediante *createCheckoutSession()*, redirección hacia Stripe Customer Portal mediante *createCustomerPortalSession()*, cancelación de membresías con *cancelSubscription()* y consulta de comprobantes con *retrieveInvoice()*. Encapsula credenciales secretas mediante inyección externa de propiedades. Traduce excepciones nativas de pasarela CardException, RateLimitException e InvalidRequestException en excepciones semánticas de dominio BillingDomainException para proteger las capas internas. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} ResendEmailAdapter} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} StripeWebhookSignatureVerifierAdapter} \\*
 \hline
-\textbf{Puerto Implementado} & \texttt{EmailGateway} \\*
+\textbf{Puerto Implementado} & \texttt{StripeWebhookSignatureVerificationService} \\*
+\hline
+\textbf{Tecnología y Cliente} & SDK oficial stripe-java mediante com.stripe.net.Webhook.Signature. \\*
+\hline
+\textbf{Operaciones y Resiliencia} & Valida la autenticidad criptográfica y frescura de la cabecera Stripe-Signature calculando y comparando el hash HMAC-SHA256 con tolerancia estricta de tiempo de 300 segundos, neutralizando ataques de repetición o transmisiones apócrifas antes de que alcancen el modelo de dominio. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} ResendBillingNotificationAdapter} \\*
+\hline
+\textbf{Puerto Implementado} & \texttt{TenantBillingNotificationGatewayPort} \\*
 \hline
 \textbf{Tecnología y Cliente} & Cliente HTTP RESTful de Resend con plantillas responsivas HTML5 parametrizadas. \\*
 \hline
-\textbf{Operaciones y Resiliencia} & Despacha notificaciones transaccionales para bienvenida de suscripciones activadas, confirmación de abono periódico con recibo descargable y avisos preventivos de regularización bancaria ante cobros rechazados. Implementa reintentos exponenciales automáticos y tolerancia a fallos transitorios de red para asegurar entrega de avisos críticos. \\
+\textbf{Operaciones y Resiliencia} & Despacha notificaciones transaccionales para bienvenida de suscripciones activadas mediante *sendSubscriptionActivatedEmail()*, confirmación de abono periódico con recibo descargable mediante *sendInvoiceReceiptEmail()*, avisos de cancelación mediante *sendSubscriptionCanceledEmail()* y alertas preventivas de regularización bancaria ante cobros rechazados mediante *sendPaymentFailedAlertEmail()*. Implementa reintentos exponenciales automáticos y tolerancia a fallos transitorios de red para asegurar entrega de avisos críticos. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} IamClientAdapter} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} IamTenantValidationAdapter} \\*
 \hline
-\textbf{Puerto Implementado} & \texttt{IamClientPort} \\*
+\textbf{Puerto Implementado} & \texttt{IamTenantValidationAclPort} \\*
 \hline
 \textbf{Tecnología y Cliente} & Fachada pública de contexto TenancyContextFacade consumida en memoria bajo patrón Open Host Service. \\*
 \hline
 \textbf{Operaciones y Resiliencia} & Resuelve la razón social del taller, documento tributario de identidad, correo del propietario y sucursales activas invocando métodos de la fachada en memoria. Garantiza desacoplamiento físico entre esquemas de base de datos y provee validaciones atómicas de existencia de taller previas a la creación de sesiones de cobro. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Configuración:} CaffeineCacheConfig} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} CaffeineBillingCacheAdapter} \\*
 \hline
-\textbf{Puerto Implementado} & \texttt{org.springframework.cache.CacheManager} \\*
+\textbf{Puerto Implementado} & \texttt{BillingCachePort} \\*
 \hline
-\textbf{Tecnología y Cliente} & Biblioteca Caffeine Cache v3.x integrada en el ecosistema Spring Cache. \\*
+\textbf{Tecnología y Cliente} & Biblioteca Caffeine Cache integrada mediante Spring CacheManager. \\*
 \hline
-\textbf{Operaciones y Resiliencia} & Configura BillingCacheManager gestionando cachés dedicados tenantSubscriptionStatus y activePlans con directiva de expiración *expireAfterWrite* de 5 minutos y capacidad máxima de 10,000 entradas. Provee evaluación de membresía y cuotas operativas con latencia sub-milisegundo (< 0.05 ms) para interacciones concurrentes desde estaciones web y talleres móviles. \\
+\textbf{Operaciones y Resiliencia} & Provee almacenamiento y recuperación ultra veloz de estados de suscripción mediante *getSubscriptionStatus()*, *putSubscriptionStatus()*, *evictSubscriptionStatus()* y cuotas vigentes mediante *getQuotaLimits()*, *putQuotaLimits()*, resolviendo comprobaciones de autorización en submilisegundos (< 0.05 ms) para interacciones concurrentes desde estaciones web y talleres móviles. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Configuración:} CaffeineCacheConfiguration} \\*
+\hline
+\textbf{Propósito en Infraestructura} & \texttt{Configuración de Infraestructura de Caché} \\*
+\hline
+\textbf{Tecnología y Cliente} & Anotaciones @Configuration y @Bean de Spring Framework con CaffeineCacheManager. \\*
+\hline
+\textbf{Operaciones y Resiliencia} & Configura BillingCacheManager gestionando cachés dedicados tenantSubscriptionStatus y activePlans con directiva de expiración *expireAfterWrite* de 5 minutos y capacidad máxima de 10,000 entradas para optimizar el uso de memoria RAM y evitar saturación por consumo de recursos. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} BillingOutboxMessageRelayAdapter} \\*
+\hline
+\textbf{Propósito en Infraestructura} & \texttt{Adaptador de Relé Transaccional Outbox} \\*
+\hline
+\textbf{Tecnología y Cliente} & Programador asíncrono Spring Task Scheduler (@Scheduled) y Spring Data JPA sobre tabla outbox\_messages. \\*
+\hline
+\textbf{Operaciones y Resiliencia} & Consulta periódicamente mensajes pendientes de integración en la tabla outbox\_messages con semántica de entrega At-Least-Once, transmitiendo eventos de suscripción y facturación hacia el bus de eventos de la plataforma con políticas de reintentos exponenciales y marcado de estado PROCESSED o FAILED tras confirmación de despacho. \\
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-*Nota.* Adaptadores de infraestructura perimetral bajo com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak billing.\allowbreak infrastructure.
+*Nota.* Pasarelas y adaptadores externos ubicados bajo los subpaquetes modulares de external.
 
 El diseño de la Capa de Infraestructura de SaaS Billing & Subscriptions garantiza el aislamiento físico y lógico entre los datos de facturación de la plataforma y los esquemas operativos de los talleres automotrices abonados. Al centralizar la persistencia relacional en tablas normalizadas con claves foráneas e índices B-Tree optimizados en PostgreSQL 16, el sistema asegura tiempos de consulta deterministas y previene degradaciones de rendimiento durante picos de recaudación mensual o auditorías impositivas.
 
@@ -6467,9 +7419,9 @@ En la @tbl:billing-c4-components se presenta el catálogo estructurado de los si
 \hline
 \textbf{Tecnologías} & Spring MVC, SpringDoc OpenAPI, Jakarta Validation, Spring HATEOAS \\*
 \hline
-\textbf{Responsabilidad} & Expone endpoints REST perimetrales para el catálogo comercial de planes, inicialización de sesiones de pago Stripe Checkout, redirección hacia Stripe Customer Portal, consulta histórica de recibos contables y recepción de webhooks asíncronos. Valida contratos DTO, gestiona excepciones con RFC 7807 y proyecta representaciones hipermedia estructuradas. \\*
+\textbf{Responsabilidad} & Expone endpoints REST perimetrales para el catálogo comercial de planes, inicialización de sesiones de pago Stripe Checkout, redirección hacia Stripe Customer Portal, consulta histórica de recibos contables y recepción de webhooks asíncronos mediante SubscriptionPlansController, TenantSubscriptionsController, SaasInvoicesController y StripeWebhooksController. Valida contratos DTO, gestiona excepciones con RFC 7807 y proyecta representaciones hipermedia estructuradas mediante ensambladores de recursos REST. \\*
 \hline
-\textbf{Relaciones} & Invocado por WebApp y Mobile Workshop mediante peticiones HTTPS seguras. Recibe webhooks desde Stripe Platform. Despacha comandos transaccionales y consultas hacia los servicios de aplicación CQRS. Emplea ensambladores de recursos REST para transformar modelos de dominio en DTOs. \\
+\textbf{Relaciones} & Invocado por WebApp y Mobile Workshop mediante peticiones HTTPS seguras. Recibe webhooks desde Stripe Platform. Despacha comandos transaccionales y consultas hacia los servicios de aplicación CQRS. Emplea ensambladores dedicados (SubscriptionPlanResourceAssembler, TenantSubscriptionResourceAssembler, SaasInvoiceResourceAssembler) para transformar modelos de dominio en recursos DTO. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} Billing CQRS Application Services} \\*
 \hline
@@ -6477,19 +7429,19 @@ En la @tbl:billing-c4-components se presenta el catálogo estructurado de los si
 \hline
 \textbf{Tecnologías} & Spring Service, Transactional, CQRS, Interfaces Funcionales \\*
 \hline
-\textbf{Responsabilidad} & Orquesta los casos de uso transaccionales de planes comerciales, contratación de membresías, transiciones de estado operativo, cancelaciones inmediatas o a término de ciclo y archivo contable de comprobantes de cobro bajo transacciones ACID, canalizando resultados mediante tipos Result. \\*
+\textbf{Responsabilidad} & Orquesta los casos de uso transaccionales de planes comerciales, contratación de membresías, transiciones de estado operativo, cancelaciones inmediatas o a término de ciclo y archivo contable de comprobantes de cobro bajo transacciones ACID mediante SubscriptionPlanCommandService, TenantSubscriptionCommandService, StripeWebhookCommandService, SaasInvoiceCommandService y TenantSubscriptionQueryService, canalizando resultados mediante tipos Result. \\*
 \hline
 \textbf{Relaciones} & Implementa contratos de casos de uso de comando y consulta. Invoca reglas de gobernanza y validación de cuotas en el modelo de dominio. Delega la persistencia relacional en repositorios JPA. Coordina con pasarelas externas para sesiones de pago en Stripe y despacho de recibos por correo vía Resend. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} Billing Event Handlers \& Webhook Processing} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} Billing Event Handlers \& Outbox Publisher} \\*
 \hline
 \textbf{Tipo de Elemento} & Componente \\*
 \hline
 \textbf{Tecnologías} & Spring Events, TransactionalEventListener, Webhook Processor, Outbox Pattern \\*
 \hline
-\textbf{Responsabilidad} & Procesa notificaciones asíncronas de eventos emitidos por Stripe garantizando estricta idempotencia transaccional mediante verificación previa en la tabla stripe\_events. Despacha eventos de dominio internos de activación y morosidad de suscripciones, e invalida reactivamente las entradas de memoria en caché. \\*
+\textbf{Responsabilidad} & Procesa notificaciones asíncronas de eventos emitidos por Stripe garantizando estricta idempotencia transaccional mediante verificación previa en la tabla stripe\_webhook\_events. Despacha eventos de dominio internos de activación y morosidad de suscripciones mediante SubscriptionDomainEventHandler, e inserta registros de integración en el Outbox transaccional mediante BillingTransactionalOutboxPublisher. \\*
 \hline
-\textbf{Relaciones} & Recibe cargas de eventos de Stripe desde los controladores perimetrales. Verifica y registra identificadores únicos en stripe\_events mediante adaptadores de persistencia. Notifica a la fachada Open Host Service para invalidar la memoria en caché y publica eventos hacia contextos hermanos. \\
+\textbf{Relaciones} & Recibe cargas de eventos de Stripe desde los controladores perimetrales. Verifica y registra identificadores únicos en stripe\_webhook\_events mediante adaptadores de persistencia. Notifica a la fachada Open Host Service para invalidar la memoria en caché y publica eventos hacia contextos hermanos mediante el relé Outbox. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} Billing Domain Model \& Quota Governance Engines} \\*
 \hline
@@ -6497,7 +7449,7 @@ En la @tbl:billing-c4-components se presenta el catálogo estructurado de los si
 \hline
 \textbf{Tecnologías} & Java 24 puro, Domain Model, Records, Inmutabilidad, Criptografía HMAC-SHA256 \\*
 \hline
-\textbf{Responsabilidad} & Encapsula las invariantes de negocio de licenciamiento SaaS, las raíces de agregado SubscriptionPlan, TenantSubscription, SaasInvoice y StripeWebhookEvent, el motor de gobernanza de cuotas operativas SubscriptionQuotaEnforcementService y el servicio criptográfico de verificación de firmas HMAC-SHA256. \\*
+\textbf{Responsabilidad} & Encapsula las invariantes de negocio de licenciamiento SaaS, las raíces de agregado SubscriptionPlan, TenantSubscription, SaasInvoice y StripeWebhookEvent, la entidad dependiente PlanFeature, el motor de gobernanza de cuotas operativas SubscriptionQuotaEnforcementService, el servicio criptográfico de verificación de firmas HMAC-SHA256 StripeWebhookSignatureVerificationService y las políticas contractuales en SubscriptionLifecycleDomainService. \\*
 \hline
 \textbf{Relaciones} & Contiene las entidades maestras y dependientes PlanFeature. Evalúa invariantes de cuota para creación de sucursales, vinculación de mecánicos y acceso a telemetría IoT. Provee contratos criptográficos consumidos por el procesador de webhooks y emite eventos de dominio inmutables. \\
 \hline
@@ -6507,9 +7459,9 @@ En la @tbl:billing-c4-components se presenta el catálogo estructurado de los si
 \hline
 \textbf{Tecnologías} & Jakarta Persistence 3.1, Spring Data JPA, Hibernate ORM, PostgreSQL 16 \\*
 \hline
-\textbf{Responsabilidad} & Materializa los puertos de repositorio del dominio mediante adaptadores secundarios JPA, administrando la persistencia relacional normalizada, restricciones de unicidad de suscripción por taller, índices B-Tree de alto rendimiento y cerrojo de auditoría contra eventos duplicados de Stripe. \\*
+\textbf{Responsabilidad} & Materializa los puertos de repositorio del dominio mediante adaptadores secundarios JPA (SubscriptionPlanRepositoryImpl, TenantSubscriptionRepositoryImpl, SaasInvoiceRepositoryImpl, StripeWebhookEventRepositoryImpl) respaldados por repositorios Spring Data JPA, administrando la persistencia relacional normalizada, restricciones de unicidad de suscripción por taller, índices B-Tree de alto rendimiento y cerrojo de auditoría contra eventos duplicados de Stripe. \\*
 \hline
-\textbf{Relaciones} & Realiza los contratos SubscriptionPlanRepository, TenantSubscriptionRepository, SaasInvoiceRepository y StripeWebhookEventRepository. Lee y escribe en las tablas plans, plan\_features, subscriptions, invoices y stripe\_events en PostgreSQL 16. \\
+\textbf{Relaciones} & Realiza los contratos SubscriptionPlanRepository, TenantSubscriptionRepository, SaasInvoiceRepository y StripeWebhookEventRepository. Lee y escribe en las tablas plans, plan\_features, subscriptions, saas\_invoices y stripe\_webhook\_events en PostgreSQL 16. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Componente C4:} Billing Open Host Facade \& Quota Evaluation ACL} \\*
 \hline
@@ -6517,7 +7469,7 @@ En la @tbl:billing-c4-components se presenta el catálogo estructurado de los si
 \hline
 \textbf{Tecnologías} & Spring Service, Open Host Service, In-Memory ACL, Caffeine Cache \\*
 \hline
-\textbf{Responsabilidad} & Publica una fachada Open Host Service en memoria que permite a los Bounded Contexts IAM \& Tenancy y Workshop Operations verificar la vigencia de membresía, cuotas de sucursales, personal activo y permisos de telemetría IoT con latencia sub-milisegundo (< 0.05 ms) respaldada en memoria RAM. \\*
+\textbf{Responsabilidad} & Publica una fachada Open Host Service en memoria mediante SubscriptionContextFacadeImpl que permite a los Bounded Contexts IAM \& Tenancy y Workshop Operations verificar la vigencia de membresía, cuotas de sucursales, personal activo y permisos de telemetría IoT con latencia sub-milisegundo (< 0.05 ms) respaldada en memoria RAM. \\*
 \hline
 \textbf{Relaciones} & Invocado en memoria por IAM \& Tenancy y Workshop Operations. Consulta la vigencia de suscripciones y límites en repositorios JPA o en memoria en caché mediante Caffeine Cache. Invalida entradas de caché ante eventos de actualización emitidos por el procesador de webhooks. \\
 \hline
@@ -6527,7 +7479,7 @@ En la @tbl:billing-c4-components se presenta el catálogo estructurado de los si
 \hline
 \textbf{Tecnologías} & Stripe Java SDK v24+, Spring WebClient, Resend Cloud API, Caffeine Cache Manager \\*
 \hline
-\textbf{Responsabilidad} & Encapsula la comunicación perimetral con la API de Stripe mediante el SDK oficial stripe-java para crear sesiones de pago hospedadas y enlaces al portal de autoservicio de clientes. Despacha confirmaciones y recibos contables por correo vía Resend y resuelve datos corporativos del taller en IAM. \\*
+\textbf{Responsabilidad} & Encapsula la comunicación perimetral con la API de Stripe mediante StripeGatewayAdapter para crear sesiones de pago hospedadas y enlaces al portal de autoservicio de clientes. Despacha confirmaciones y recibos contables por correo vía ResendBillingNotificationAdapter, consulta datos corporativos en IAM mediante IamTenantValidationAdapter, acelera lecturas con CaffeineBillingCacheAdapter y despacha eventos asíncronos con BillingOutboxMessageRelayAdapter. \\*
 \hline
 \textbf{Relaciones} & Invocado por los servicios de aplicación CQRS. Conecta vía HTTPS REST con la plataforma Stripe y con la API de Resend. Consume en memoria la fachada de IAM \& Tenancy para validar la existencia del taller sin acoplamientos relacionales. \\
 \hline
@@ -6550,14 +7502,14 @@ Para formalizar la colaboración sincronizada entre los componentes internos del
 
   El servicio de aplicación coordina la consulta de datos del taller invocando a **Billing External Gateways & Cloud Integration**, la cual interactúa en memoria con la fachada de **IAM & Tenancy Context** para verificar la razón social y el correo electrónico del titular. A continuación, la pasarela solicita a la API de Stripe la apertura de una sesión de pago hospedada utilizando el cliente oficial stripe-java, configurando las direcciones seguras de redirección ante éxito o cancelación. El controlador retorna la URL generada a la aplicación web para redirigir al usuario hacia la pasarela protegida de Stripe, garantizando que los datos confidenciales de tarjetas de crédito nunca toquen la infraestructura de Atelier.
 
-  Una vez completado el pago de manera exitosa en Stripe, su infraestructura emite el webhook asíncrono checkout.session.completed hacia el endpoint perimetral de Atelier. El componente **Billing Event Handlers & Webhook Processing** verifica la firma digital HMAC-SHA256 en **Billing Domain Model & Quota Governance Engines**, comprueba la no duplicidad del evento contra la tabla **stripe_events** en **Billing Persistence Repositories & JPA Adapters**, activa formalmente la entidad **TenantSubscription**, asienta el comprobante inicial en **invoices**, notifica la confirmación de alta por correo mediante Resend e invalida de forma reactiva la memoria en caché en **Billing Open Host Facade & Quota Evaluation ACL**.
+  Una vez completado el pago de manera exitosa en Stripe, su infraestructura emite el webhook asíncrono checkout.session.completed hacia el endpoint perimetral de Atelier. El componente **Billing Event Handlers & Outbox Publisher** verifica la firma digital HMAC-SHA256 en **Billing Domain Model & Quota Governance Engines**, comprueba la no duplicidad del evento contra la tabla **stripe_webhook_events** en **Billing Persistence Repositories & JPA Adapters**, activa formalmente la entidad **TenantSubscription**, asienta el comprobante inicial en **saas_invoices**, notifica la confirmación de alta por correo mediante Resend e invalida de forma reactiva la memoria en caché en **Billing Open Host Facade & Quota Evaluation ACL**.
 
 - **Ciclo de Notificación Asíncrona, Conciliación de Pagos e Idempotencia vía Webhooks:**
   Este flujo gobierna la consistencia financiera del sistema frente a cobros recurrentes periódicos mensuales o anuales ejecutados de manera desatendida por Stripe. Al cumplirse el ciclo de facturación, la pasarela intenta efectuar el cobro automático sobre la tarjeta registrada del taller, generando eventos asíncronos invoice.payment_succeeded o invoice.payment_failed que se envían hacia el endpoint perimetral de webhooks de Stripe.
 
   El componente **Billing REST Controllers & Resource Assemblers** intercepta la petición HTTP y traslada la carga útil y la cabecera Stripe-Signature hacia **Billing CQRS Application Services**. El servicio de aplicación delega la autenticación criptográfica en **Billing Domain Model & Quota Governance Engines**, donde **StripeWebhookSignatureVerificationService** computa la firma HMAC-SHA256 empleando la clave secreta institucional para rechazar intentos maliciosos de falsificación o repetición.
 
-  Seguidamente, el componente **Billing Event Handlers & Webhook Processing** comprueba la existencia previa del identificador en **Billing Persistence Repositories & JPA Adapters**. Si el evento ya fue procesado con anterioridad, se descarta inmediatamente retornando un código de confirmación para neutralizar reintentos repetidos de red. Si es inédito, se registra en la tabla **stripe_events**, se actualiza el estado de la membresía del taller a vigencia plena o mora controlada, se almacena el recibo con enlaces de auditoría en la tabla **invoices**, se emite el evento de dominio correspondiente y se purga reactivamente la entrada de membresía en la memoria en caché.
+  Seguidamente, el componente **Billing Event Handlers & Outbox Publisher** comprueba la existencia previa del identificador en **Billing Persistence Repositories & JPA Adapters**. Si el evento ya fue procesado con anterioridad, se descarta inmediatamente retornando un código de confirmación para neutralizar reintentos repetidos de red. Si es inédito, se registra en la tabla **stripe_webhook_events**, se actualiza el estado de la membresía del taller a vigencia plena o mora controlada, se almacena el recibo con enlaces de auditoría en la tabla **saas_invoices**, se emite el evento de dominio correspondiente y se purga reactivamente la entrada de membresía en la memoria en caché.
 
 - **Ciclo de Verificación y Aplicación de Cuotas Operativas con Memoria en Caché (Caffeine):**
   Para garantizar la integridad operativa de la plataforma sin introducir latencias perjudiciales en los flujos diarios de trabajo, este ciclo se ejecuta de manera continua cada vez que un taller intenta registrar una nueva sede, afiliar personal técnico o aperturar órdenes de trabajo. El módulo solicitante de **IAM & Tenancy** o **Workshop Operations** invoca en memoria los métodos de consulta expuestos por **Billing Open Host Facade & Quota Evaluation ACL**.
@@ -6568,7 +7520,7 @@ Para formalizar la colaboración sincronizada entre los componentes internos del
 
 En primer término, la estricta segregación de responsabilidades y la delegación de captura de instrumentos financieros hacia Stripe Checkout y Customer Portal reducen de forma determinante el perímetro de cumplimiento normativo PCI-DSS Nivel 1. Al no almacenar, procesar ni transmitir números de tarjeta de crédito en los servidores de Atelier, el sistema elimina riesgos de filtración de información bancaria sensible, conservando únicamente tokens opacos de cliente y suscripción vinculados a los registros corporativos en PostgreSQL 16.
 
-En segundo término, la implementación del cerrojo de persistencia para eventos asíncronos en el componente de procesamiento de webhooks confiere una tolerancia absoluta a fallas de red y reintentos repetidos por parte de la pasarela de pagos. La restricción de unicidad sobre la tabla de eventos garantiza que cada abono periódico o transición de estado se asiente una única vez con exactitud contable, erradicando duplicidades de cobro o inconsistencias en los recibos emitidos ante eventuales intermitencias en la infraestructura de nube.
+En segundo término, la implementación del cerrojo de persistencia para eventos asíncronos en el componente de procesamiento de webhooks confiere una tolerancia absoluta a fallas de red y reintentos repetidos por parte de la pasarela de pagos. La restricción de unicidad sobre la tabla **stripe_webhook_events** garantiza que cada abono periódico o transición de estado se asiente una única vez con exactitud contable, erradicando duplicidades de cobro o inconsistencias en los recibos emitidos ante eventuales intermitencias en la infraestructura de nube.
 
 Por último, la articulación de la fachada Open Host Service respaldada en almacenamiento en caché con Caffeine Cache resuelve eficazmente la concurrencia masiva de consultas de licenciamiento. Al absorber las verificaciones intensivas de cuota y vigencia en memoria local con tiempos de respuesta sub-milisegundo, el sistema descarga de trabajo al motor de base de datos relacional y garantiza que tanto las terminales administrativas de mostrador como los asesores en bahía y mecánicos en auxilio vial dispongan de autorización inmediata para el desempeño de sus labores automotrices.
 
@@ -6588,16 +7540,17 @@ En la @fig:class-diagram-billing se expone el Diagrama de Clases UML detallado p
 
 *Nota.* Elaboración propia en base al diseño táctico de dominio y el estándar UML en PlantUML.
 
-La organización interna del modelo estático se estructura en ocho paquetes cohesivos que encapsulan las responsabilidades del dominio de monetización y licenciamiento:
+La organización interna del modelo estático se estructura en nueve paquetes canónicos cohesivos que encapsulan las responsabilidades del dominio de monetización y licenciamiento:
 
-- **Raíces de Agregado (billing.domain.model.aggregates):** Gobierna las entidades maestras que delimitan las fronteras de consistencia transaccional: **SubscriptionPlan** para la gobernanza del catálogo de tarifas y cuotas, **TenantSubscription** para el ciclo contractual y periodos de vigencia del taller mecánico, **SaasInvoice** para el registro contable inmutable de recaudación, y **StripeWebhookEvent** para la deduplicación telemática estricta. Todas las raíces extienden de **AbstractDomainAggregateRoot<T>**.
-- **Entidades Internas (billing.domain.model.entities):** Modela las partes dependientes subordinadas al ciclo de vida del plan: **PlanFeature** para la especificación modular de capacidades avanzadas habilitadas, tales como telemetría OBD-II o diagnósticos predictivos con inteligencia artificial.
-- **Identificadores Fuertemente Tipados (billing.domain.model.ids):** Implementa el contrato **TypedId<UUID>** mediante registros inmutables (**PlanId**, **SubscriptionId**, **SaasInvoiceId**), asociando identidades transversales del Shared Kernel (**TenantId**) y envoltorios alfanuméricos con validación reglamentaria de prefijos oficiales de pasarela (**StripeEventId**, **StripeCustomerId**, **StripeSubscriptionId**, **StripePriceId**, **StripeInvoiceId**).
-- **Objetos de Valor de Licenciamiento y Cuotas (billing.domain.model.valueobjects):** Encapsula estructuras inmutables con validación de invariantes: **PlanPricing** para asociar tarifas monetarias con ciclos de facturación, **TenantQuotaLimits** para cuantificar techos máximos de sedes físicas, mecánicos en plantilla y órdenes mensuales de trabajo, y **SubscriptionPeriod** para delimitar el intervalo temporal de cobertura pagada, enlazando tipos universales (**Money**, **Currency**).
-- **Enumeraciones de Dominio (billing.domain.model.enums):** Normaliza el vocabulario operativo y comercial (**PlanTier**, **BillingCycle**, **SubscriptionStatus**, **InvoiceStatus**, **WebhookProcessingStatus**).
-- **Servicios de Dominio de Gobernanza y Criptografía (billing.domain.services):** Provee motores algorítmicos puros sin acoplamiento a infraestructura: **SubscriptionQuotaEnforcementService** para la verificación determinista de techos de consumo contratados frente a los recursos acumulados, y **StripeWebhookSignatureVerificationService** para la autenticación criptográfica de firmas digitales HMAC-SHA256 y control de tolerancia temporal de marcas de tiempo.
-- **Puertos de Repositorio (billing.domain.repositories):** Define los contratos abstractos de almacenamiento y consulta (**SubscriptionPlanRepository**, **TenantSubscriptionRepository**, **SaasInvoiceRepository**, **StripeWebhookEventRepository**) desacoplados de motores relacionales o tecnologías de persistencia.
-- **Eventos de Dominio y Excepciones Semánticas (billing.domain.events y billing.domain.exceptions):** Formaliza mutaciones del estado comercial y contractual para el Transactional Outbox (**SubscriptionPlanCreatedEvent**, **TenantSubscriptionActivatedEvent**, **TenantSubscriptionPastDueEvent**, **SaasInvoicePaidEvent**, **StripeWebhookProcessedEvent**) y jerarquiza excepciones no comprobadas derivadas de **DomainException** bajo la norma RFC 7807 (**QuotaExceededException**, **SubscriptionNotFoundException**, **DuplicateActiveSubscriptionException**, **InvalidWebhookSignatureException**).
+- **Raíces de Agregado (billing.domain.model.aggregates):** Gobierna las 4 entidades maestras que delimitan las fronteras de consistencia transaccional y extienden de AbstractDomainAggregateRoot: SubscriptionPlan para la soberanía del catálogo de tarifas y cuotas, TenantSubscription para el ciclo de vida contractual y periodos de vigencia del taller mecánico, SaasInvoice para el registro contable inmutable de recaudación, y StripeWebhookEvent para la deduplicación telemática estricta e idempotencia.
+- **Entidades Dependientes (billing.domain.model.entities):** Modela la entidad subordinada PlanFeature (identificada unívocamente mediante PlanFeatureId id), la cual encapsula la especificación modular de capacidades avanzadas habilitadas por plan comercial, tales como telemetría vehicular OBD-II continua o algoritmos predictivos con inteligencia artificial.
+- **Identificadores Fuertemente Tipados (billing.domain.model.ids):** Implementa el contrato canónico TypedId mediante 5 registros inmutables libres de tipos primitivos: PlanId, SubscriptionId, SaasInvoiceId, StripeEventId y PlanFeatureId, asociando además la identidad transversal de organización TenantId proveniente del Shared Kernel.
+- **Objetos de Valor Inmutables (billing.domain.model.valueobjects):** Encapsula 7 estructuras inmutables con validación de invariantes de negocio: PlanPricing para asociar cuantías de dinero con la frecuencia de cobro, StripeCustomerId, StripeSubscriptionId, StripePriceId y StripeInvoiceId para validar identificadores oficiales de pasarela con prefijos reglamentarios, SubscriptionPeriod para delimitar la ventana cronológica de vigencia pagada, y TenantQuotaLimits para cuantificar los techos autorizados de sedes físicas, mecánicos y órdenes de trabajo mensuales, enlazando tipos universales Money y Currency.
+- **Enumeraciones de Dominio (billing.domain.model.enums):** Normaliza el vocabulario operativo y comercial mediante 5 tipos enumerados inmutables: PlanTier (niveles Go, Pro, Max, Enterprise), BillingCycle (periodicidades mensual y anual), SubscriptionStatus (estados Trialing, Active, Past Due, Canceled, Unpaid, Incomplete), InvoiceStatus (liquidaciones Paid, Open, Void, Uncollectible) y WebhookProcessingStatus (estados Pending, Processed, Failed, Ignored).
+- **Servicios de Dominio Puros (billing.domain.services):** Provee 3 motores algorítmicos sin acoplamiento a infraestructura tecnológica: SubscriptionQuotaEnforcementService para la comprobación determinista de techos de consumo frente a los recursos acumulados del taller, StripeWebhookSignatureVerificationService para la autenticación criptográfica de firmas HMAC-SHA256 con tolerancia temporal, y SubscriptionLifecycleDomainService para la gobernanza de políticas de gracia, reactivaciones y rescisión contractual.
+- **Puertos de Repositorio de Dominio (billing.domain.repositories):** Define los 4 contratos abstractos de almacenamiento y consulta desacoplados de motores relacionales: SubscriptionPlanRepository, TenantSubscriptionRepository, SaasInvoiceRepository y StripeWebhookEventRepository.
+- **Eventos de Dominio (billing.domain.model.events):** Formaliza las mutaciones de estado transaccionales mediante 9 eventos inmutables para el Transactional Outbox: SubscriptionPlanCreatedEvent, TenantSubscriptionActivatedEvent, TenantSubscriptionRenewedEvent, TenantSubscriptionPastDueEvent, TenantSubscriptionCanceledEvent, TenantPlanChangedEvent, SaasInvoicePaidEvent, SaasInvoicePaymentFailedEvent y StripeWebhookProcessedEvent.
+- **Jerarquía de Excepciones Semánticas (billing.domain.exceptions):** Estructura 11 excepciones de dominio no comprobadas derivadas de DomainException con mapeo normalizado bajo el estándar RFC 7807: BillingDomainException como raíz jerárquica, DuplicateActiveSubscriptionException, InvalidPlanPricingException, InvalidWebhookSignatureException, PlanNotFoundException, QuotaExceededException, SaasInvoiceNotFoundException, StripeIntegrationException, StripeWebhookProcessingException, SubscriptionNotFoundException y SubscriptionPastDueException.
 
 En la @tbl:billing-domain-classes-members se detalla la especificación formal de atributos, firmas de métodos, modificadores de acceso y reglas de negocio para cada componente de la Capa de Dominio.
 
@@ -6680,7 +7633,7 @@ Deduplicación y procesamiento & Invariantes: el identificador de evento de Stri
 \hline
 Atributos y capacidad & Entidad dependiente subordinada a \textbf{SubscriptionPlan}. Modela una característica funcional paquetizada en el licenciamiento SaaS, tal como telemetría OBD-II en tiempo real o diagnósticos predictivos mediante inteligencia artificial. \\*
 \hline
-\textbf{Firma o Tipo} & - \texttt{UUID id} \newline - \texttt{PlanId planId} \newline - \texttt{String featureKey} \newline - \texttt{String description} \newline - \texttt{boolean isEnabled} \\*
+\textbf{Firma o Tipo} & - \texttt{PlanFeatureId id} \newline - \texttt{PlanId planId} \newline - \texttt{String featureKey} \newline - \texttt{String description} \newline - \texttt{boolean isEnabled} \\*
 \hline
 \textbf{Ámbito} & Privado \\
 \hline
@@ -6688,7 +7641,7 @@ Atributos y capacidad & Entidad dependiente subordinada a \textbf{SubscriptionPl
 \hline
 Operaciones de habilitación & Invariantes: la clave de funcionalidad es alfanumérica y unívoca dentro del plan. Permite activar o suspender el acceso a módulos tecnológicos especializados de Atelier. \\*
 \hline
-\textbf{Firma o Tipo} & - \texttt{PlanFeature of(PlanId,\allowbreak  String,\allowbreak  String,\allowbreak  boolean)} \newline - \texttt{void enable()} \newline - \texttt{void disable()} \newline - \texttt{UUID id()} \newline - \texttt{PlanId planId()} \newline - \texttt{String featureKey()} \newline - \texttt{String description()} \newline - \texttt{boolean isEnabled()} \\*
+\textbf{Firma o Tipo} & - \texttt{PlanFeature of(PlanFeatureId,\allowbreak  PlanId,\allowbreak  String,\allowbreak  String,\allowbreak  boolean)} \newline - \texttt{void enable()} \newline - \texttt{void disable()} \newline - \texttt{PlanFeatureId id()} \newline - \texttt{PlanId planId()} \newline - \texttt{String featureKey()} \newline - \texttt{String description()} \newline - \texttt{boolean isEnabled()} \\*
 \hline
 \textbf{Ámbito} & Público \\
 \hline
@@ -6705,6 +7658,14 @@ Fiscalización de cuotas & Servicio de dominio puro sin estado. Aplica algoritmo
 Autenticación criptográfica & Servicio criptográfico sin estado. Computa firmas digitales HMAC-SHA256 sobre el cuerpo sin procesar de los webhooks utilizando la clave institucional secreta de endpoint, verificando marcas temporales contra ataques de repetición. \\*
 \hline
 \textbf{Firma o Tipo} & - \texttt{boolean verifySignature(String,\allowbreak  String,\allowbreak  String)} \newline - \texttt{long extractTimestamp(String)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Dominio:} Subscription\allowbreak Lifecycle\allowbreak Domain\allowbreak Service} \\*
+\hline
+Gobernanza de ciclo de vida & Servicio de dominio puro sin estado. Gobierna las políticas contractuales, evaluación de ventanas temporales de gracia, condiciones de reactivación y reglas de expiración ante impago prolongado. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{boolean isGracePeriodActive(TenantSubscription,\allowbreak  Instant)} \newline - \texttt{boolean canReactivate(TenantSubscription)} \newline - \texttt{void evaluateExpirationPolicy(TenantSubscription,\allowbreak  Instant)} \\*
 \hline
 \textbf{Ámbito} & Público \\
 \hline
@@ -6734,13 +7695,15 @@ Stripe\allowbreak Webhook\allowbreak Event\allowbreak Repository & Contrato de p
 \hline
 \textbf{Ámbito} & Público \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Identificadores Fuertemente Tipados y Objetos de Valor:} Estructuras Inmutables} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Identificadores Fuertemente Tipados:} Identidades de Dominio} \\*
 \hline
-Identificadores tipados & Registros inmutables que realizan \texttt{TypedId} para erradicar la obsesión por tipos primitivos y validar prefijos reglamentarios de pasarela. \\*
+Identificadores tipados & Registros inmutables que realizan \texttt{TypedId} para erradicar la obsesión por tipos primitivos y garantizar seguridad de tipos en compilación. \\*
 \hline
-\textbf{Firma o Tipo} & - \texttt{PlanId} \newline - \texttt{SubscriptionId} \newline - \texttt{SaasInvoiceId} \newline - \texttt{StripeEventId} \newline - \texttt{StripeCustomerId} \newline - \texttt{StripeSubscriptionId} \newline - \texttt{StripePriceId} \newline - \texttt{StripeInvoiceId} \newline - \texttt{TenantId} \\*
+\textbf{Firma o Tipo} & - \texttt{record PlanId(UUID value)} \newline - \texttt{record SubscriptionId(UUID value)} \newline - \texttt{record SaasInvoiceId(UUID value)} \newline - \texttt{record StripeEventId(String value)} \newline - \texttt{record PlanFeatureId(UUID value)} \newline - \texttt{static of(UUID / String)} \newline - \texttt{static generate()} \\*
 \hline
 \textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objetos de Valor Inmutables:} Estructuras de Licenciamiento y Pasarela} \\*
 \hline
 Plan\allowbreak Pricing & Registro inmutable que empaqueta la cuantía monetaria y la cadencia recurrente de cobro. \\*
 \hline
@@ -6748,9 +7711,9 @@ Plan\allowbreak Pricing & Registro inmutable que empaqueta la cuantía monetaria
 \hline
 \textbf{Ámbito} & Público \\
 \hline
-Tenant\allowbreak Quota\allowbreak Limits & Registro inmutable que cuantifica las capacidades máximas autorizadas por taller mecánico. Métodos: \texttt{canAddBranch(int)}, \texttt{canAddStaff(int)} y \texttt{canCreateWorkOrder(int)}. \\*
+Identificadores remotos de Stripe & Registros inmutables que encapsulan identificadores alfanuméricos oficiales de Stripe con validación de prefijos reglamentarios. \\*
 \hline
-\textbf{Firma o Tipo} & - \texttt{int maxBranches} \newline - \texttt{int maxActiveStaff} \newline - \texttt{boolean iotTelemetryEnabled} \newline - \texttt{boolean aiDiagnosticsEnabled} \newline - \texttt{int maxMonthlyWorkOrders} \\*
+\textbf{Firma o Tipo} & - \texttt{record StripeCustomerId(String value)} \quad (prefijo cus\_) \newline - \texttt{record StripeSubscriptionId(String value)} \quad (prefijo sub\_) \newline - \texttt{record StripePriceId(String value)} \quad (prefijo price\_) \newline - \texttt{record StripeInvoiceId(String value)} \quad (prefijo in\_) \\*
 \hline
 \textbf{Ámbito} & Público \\
 \hline
@@ -6760,17 +7723,33 @@ Subscription\allowbreak Period & Registro inmutable que delimita el intervalo te
 \hline
 \textbf{Ámbito} & Público \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Enumeraciones y Jerarquía de Excepciones:} Tipos de Dominio y Errores RFC 7807} \\*
+Tenant\allowbreak Quota\allowbreak Limits & Registro inmutable que cuantifica las capacidades máximas autorizadas por taller mecánico. Métodos: \texttt{canAddBranch(int)}, \texttt{canAddStaff(int)}, \texttt{canCreateWorkOrder(int)}, \texttt{canRegisterObd2Device(int)}, \texttt{canUploadPhotos(int)}, \texttt{canRegisterCompanyCustomer()}, \texttt{canGenerateAiReport(int)} y \texttt{canPerformMultiWarehouseTransfer()}. \\*
 \hline
-Enumeraciones de Dominio & Vocabularios controlados inmutables que tipifican niveles comerciales, periodicidades, estados contractuales, liquidaciones y deduplicación de eventos. \\*
-\hline
-\textbf{Firma o Tipo} & - \texttt{PlanTier (STARTER,\allowbreak  PROFESSIONAL,\allowbreak  ENTERPRISE)} \newline - \texttt{BillingCycle (MONTHLY,\allowbreak  YEARLY)} \newline - \texttt{SubscriptionStatus (TRIALING,\allowbreak  ACTIVE,\allowbreak  PAST\_DUE,\allowbreak  CANCELED,\allowbreak  UNPAID,\allowbreak  INCOMPLETE)} \newline - \texttt{InvoiceStatus (PAID,\allowbreak  OPEN,\allowbreak  VOID,\allowbreak  UNCOLLECTIBLE)} \newline - \texttt{WebhookProcessingStatus (PENDING,\allowbreak  PROCESSED,\allowbreak  FAILED,\allowbreak  IGNORED)} \\*
+\textbf{Firma o Tipo} & - \texttt{int maxBranches} \newline - \texttt{int maxActiveStaff} \newline - \texttt{int maxActiveObd2Devices} \newline - \texttt{int maxPhotosPerWorkOrder} \newline - \texttt{int maxMonthlyAiReports} \newline - \texttt{boolean companyRegistrationAllowed} \newline - \texttt{boolean multiWarehouseAllowed} \newline - \texttt{boolean marketplaceListed} \newline - \texttt{int maxMonthlyWorkOrders} \newline - \texttt{boolean iotTelemetryEnabled} \newline - \texttt{boolean aiDiagnosticsEnabled} \\*
 \hline
 \textbf{Ámbito} & Público \\
 \hline
-Excepciones RFC 7807 & Excepciones semánticas no comprobadas derivadas de \texttt{DomainException}. Portan códigos canónicos normalizados bajo RFC 7807 para mapeo HTTP 4xx en la capa perimetral ante infracciones de cuotas, planes inexistentes, suscripciones duplicadas o firmas ilegítimas. \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Enumeraciones de Dominio:} Vocabularios Controlados Inmutables} \\*
 \hline
-\textbf{Firma o Tipo} & - \texttt{BillingDomainException} \newline - \texttt{PlanNotFoundException} \newline - \texttt{SubscriptionNotFoundException} \newline - \texttt{QuotaExceededException} \newline - \texttt{DuplicateActiveSubscriptionException} \newline - \texttt{InvalidWebhookSignatureException} \newline - \texttt{StripeWebhookProcessingException} \newline - \texttt{SubscriptionPastDueException} \\*
+Enumeraciones de Dominio & Vocabularios controlados inmutables que tipifican niveles comerciales, periodicidades, estados contractuales, liquidaciones y deduplicación de eventos. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{PlanTier (GO,\allowbreak  PRO,\allowbreak  MAX,\allowbreak  ENTERPRISE)} \newline - \texttt{BillingCycle (MONTHLY,\allowbreak  YEARLY)} \newline - \texttt{SubscriptionStatus (TRIALING,\allowbreak  ACTIVE,\allowbreak  PAST\_DUE,\allowbreak  CANCELED,\allowbreak  UNPAID,\allowbreak  INCOMPLETE)} \newline - \texttt{InvoiceStatus (PAID,\allowbreak  OPEN,\allowbreak  VOID,\allowbreak  UNCOLLECTIBLE)} \newline - \texttt{WebhookProcessingStatus (PENDING,\allowbreak  PROCESSED,\allowbreak  FAILED,\allowbreak  IGNORED)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Eventos de Dominio:} Mutaciones Transaccionales para Transactional Outbox} \\*
+\hline
+Eventos de Dominio & Registros inmutables que implementan \texttt{DomainEvent}. Describen mutaciones transaccionales en el ciclo de suscripciones y facturación para propagación asíncrona mediante el Transactional Outbox. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{Subscription\allowbreak Plan\allowbreak Created\allowbreak Event(PlanId,\allowbreak  StripePriceId,\allowbreak  String,\allowbreak  PlanTier,\allowbreak  PlanPricing,\allowbreak  TenantQuotaLimits,\allowbreak  Instant)} \newline - \texttt{Tenant\allowbreak Subscription\allowbreak Activated\allowbreak Event(SubscriptionId,\allowbreak  TenantId,\allowbreak  PlanId,\allowbreak  StripeSubscriptionId,\allowbreak  SubscriptionPeriod,\allowbreak  Instant)} \newline - \texttt{Tenant\allowbreak Subscription\allowbreak Renewed\allowbreak Event(SubscriptionId,\allowbreak  TenantId,\allowbreak  SubscriptionPeriod,\allowbreak  Instant)} \newline - \texttt{Tenant\allowbreak Subscription\allowbreak PastDue\allowbreak Event(SubscriptionId,\allowbreak  TenantId,\allowbreak  Instant)} \newline - \texttt{Tenant\allowbreak Subscription\allowbreak Canceled\allowbreak Event(SubscriptionId,\allowbreak  TenantId,\allowbreak  boolean,\allowbreak  Instant)} \newline - \texttt{Tenant\allowbreak Plan\allowbreak Changed\allowbreak Event(SubscriptionId,\allowbreak  TenantId,\allowbreak  PlanId,\allowbreak  StripePriceId,\allowbreak  Instant)} \newline - \texttt{Saas\allowbreak Invoice\allowbreak Paid\allowbreak Event(SaasInvoiceId,\allowbreak  SubscriptionId,\allowbreak  TenantId,\allowbreak  StripeInvoiceId,\allowbreak  Money,\allowbreak  Instant)} \newline - \texttt{Saas\allowbreak Invoice\allowbreak Payment\allowbreak Failed\allowbreak Event(SaasInvoiceId,\allowbreak  SubscriptionId,\allowbreak  TenantId,\allowbreak  StripeInvoiceId,\allowbreak  String,\allowbreak  Instant)} \newline - \texttt{Stripe\allowbreak Webhook\allowbreak Processed\allowbreak Event(UUID,\allowbreak  StripeEventId,\allowbreak  String,\allowbreak  Instant)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Jerarquía de Excepciones Semánticas:} Errores de Negocio RFC 7807} \\*
+\hline
+Excepciones RFC 7807 & Excepciones semánticas no comprobadas derivadas de \texttt{DomainException}. Portan códigos canónicos normalizados bajo RFC 7807 para mapeo HTTP 4xx en la capa perimetral ante infracciones de cuotas, precios inválidos, planes inexistentes, suscripciones duplicadas o firmas ilegítimas. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{BillingDomainException} \newline - \texttt{DuplicateActiveSubscriptionException} \newline - \texttt{InvalidPlanPricingException} \newline - \texttt{InvalidWebhookSignatureException} \newline - \texttt{PlanNotFoundException} \newline - \texttt{QuotaExceededException} \newline - \texttt{SaasInvoiceNotFoundException} \newline - \texttt{StripeIntegrationException} \newline - \texttt{StripeWebhookProcessingException} \newline - \texttt{SubscriptionNotFoundException} \newline - \texttt{SubscriptionPastDueException} \\*
 \hline
 \textbf{Ámbito} & Público \\
 \hline
@@ -6784,7 +7763,7 @@ A partir del modelo estático ilustrado en la @fig:class-diagram-billing y desgl
   El diseño arquitectónico impone una separación radical entre los cobros comerciales corporativos que Andeva factura a los talleres automotrices y los comprobantes fiscales que cada taller emite a conductores particulares bajo normativa de SUNAT en Invoicing & Compliance. Al delegar completamente la captura de números de tarjeta de crédito e instrumentos bancarios hacia Stripe Checkout y Stripe Customer Portal, el backend de Atelier prescinde de almacenar credenciales financieras sensibles, reteniendo únicamente tokens opacos de cliente y suscripción en **TenantSubscription**, erradicando riesgos de vulneración de datos bancarios.
 
 - **Criptografía Simétrica HMAC-SHA256, Idempotencia y Resiliencia en Notificaciones:**
-  La recepción de eventos asíncronos de facturación recurrente se salvaguarda mediante autenticación criptográfica obligatoria en **StripeWebhookSignatureVerificationService**, neutralizando intentos de suplantación mediante la verificación del hash simétrico HMAC-SHA256. Asimismo, la raíz **StripeWebhookEvent** actúa como cerrojo de persistencia relacional frente a la tabla **stripe_events**, garantizando que las confirmaciones de abono o alertas de morosidad se procesen exactamente una vez y descartando de manera inocua las transmisiones duplicadas originadas por reintentos de red.
+  La recepción de eventos asíncronos de facturación recurrente se salvaguarda mediante autenticación criptográfica obligatoria en **StripeWebhookSignatureVerificationService**, neutralizando intentos de suplantación mediante la verificación del hash simétrico HMAC-SHA256. Asimismo, la raíz **StripeWebhookEvent** actúa como cerrojo de persistencia relacional frente a la tabla **stripe_webhook_events**, garantizando que las confirmaciones de abono o alertas de morosidad se procesen exactamente una vez y descartando de manera inocua las transmisiones duplicadas originadas por reintentos de red.
 
 - **Fiscalización Determinista de Cuotas Operativas y Aceleración en Memoria RAM:**
   La gobernanza de capacidades de plataforma se aísla en el motor algorítmico **SubscriptionQuotaEnforcementService**, el cual valida en tiempo de ejecución que ningún taller sobrepase el techo contratado de sucursales activas, mecánicos en nómina u órdenes mensuales de servicio. Al articularse con una fachada Open Host Service respaldada en memoria mediante Caffeine Cache, el sistema resuelve verificaciones de cuota con latencia sub-milisegundo (< 0.05 ms), asegurando que tanto las estaciones web de administración como los asesores en bahía y mecánicos en campo gocen de una respuesta inmediata sin penalizar a la base de datos relacional.
@@ -6806,10 +7785,10 @@ En la @fig:database-diagram-billing se presenta el Diagrama Entidad-Relación f�
   Administra el ciclo de vida ontológico del contrato de suscripción del taller automotriz mediante la tabla **subscriptions**. Esta entidad vincula directamente al inquilino con su plan vigente y preserva los identificadores remotos en Stripe. Asimismo, gobierna de forma determinista los estados de vigencia operativa, períodos de gracia de prueba, cancelaciones diferidas a fin de ciclo y marcas temporales de corte para renovación automática.
 
 - **Subsistema de Recaudación Periódica y Trazabilidad de Pagos:**
-  Registra la bitácora contable de cobros recurrentes de software mediante la tabla **invoices**. Esta tabla sincroniza los cobros bancarios procesados por Stripe Invoices, resguardando el monto exacto debitado, la divisa de transacción, el estado de liquidación y los enlaces seguros hacia los comprobantes en formato PDF y páginas de pago hospedadas, garantizando una auditoría financiera inmutable para los administradores del taller.
+  Registra la bitácora contable de cobros recurrentes de software mediante la tabla **saas_invoices**. Esta tabla sincroniza los cobros bancarios procesados por Stripe Invoices, resguardando el monto exacto debitado, la divisa de transacción, el estado de liquidación y los enlaces seguros hacia los comprobantes en formato PDF y portales de pago hospedados, garantizando una auditoría financiera inmutable para los administradores del taller.
 
 - **Subsistema de Auditoría Transaccional e Idempotencia de Webhooks:**
-  Proporciona un cerrojo criptográfico y de concurrencia contra entregas duplicadas de Stripe Webhooks mediante la tabla **stripe_events**. Al imponer una restricción de unicidad estricta sobre el identificador único del evento y custodiar la carga útil completa en formato de texto, el sistema garantiza procesamiento *exactly-once*, descartando automáticamente reintentos de red sin degradar la consistencia de las membresías.
+  Proporciona un cerrojo criptográfico y de concurrencia contra entregas duplicadas de Stripe Webhooks mediante la tabla **stripe_webhook_events**. Al imponer una restricción de unicidad estricta sobre el identificador único del evento y custodiar la carga útil completa en formato de texto, el sistema garantiza procesamiento exactamente una vez, descartando automáticamente reintentos de red sin degradar la consistencia de las membresías.
 
 - **Persistencia Técnica Desconectada en SQLite 3:**
   Otorga soberanía operacional al cliente móvil de taller mediante las tablas locales **local_subscription_cache** y **local_plan_features_cache**. La tabla **local_subscription_cache** resguarda en el dispositivo del técnico una réplica ligera de las cuotas operativas vigentes y el estado de la suscripción, facultando la evaluación de límites en foso o patio sin depender de conectividad celular. De forma análoga, la tabla **local_plan_features_cache** mantiene las autorizaciones modulares para habilitar o restringir componentes de la interfaz de usuario en movilidad.
@@ -6831,11 +7810,11 @@ A partir de la arquitectura relacional definida en el diagrama de persistencia, 
 \hline
 \textbf{Motor y Producto} & PostgreSQL 16 (API Application) \\*
 \hline
-\textbf{Propósito y Aislamiento} & Catálogo maestro de planes comerciales de suscripción SaaS ofertados por Andeva a los talleres mecánicos en los niveles Starter, Professional y Enterprise. Define el precio recurrente, divisa, periodicidad contable y los techos de cuotas operativas para sucursales, mecánicos activos y órdenes de trabajo mensuales permitidas, así como el acceso a funciones avanzadas de telemetría IoT y diagnóstico predictivo con IA. \\*
+\textbf{Propósito y Aislamiento} & Catálogo maestro de planes comerciales de suscripción SaaS ofertados por Andeva a los talleres mecánicos en los niveles Go, Pro, Max y Enterprise. Define el precio recurrente, divisa, periodicidad contable y los techos de cuotas operativas para sucursales, mecánicos activos, dispositivos OBD-II, fotos por orden de trabajo, reportes mensuales de IA y órdenes de trabajo mensuales permitidas, así como habilitaciones para registro de flotas empresariales, multialmacén intersede, presencia en marketplace B2B, telemetría IoT y diagnóstico predictivo con IA. \\*
 \hline
-\textbf{Columnas Clave y Tipos} & \texttt{id (UUID PK)}, \texttt{stripe\_price\_id (VARCHAR(100) UK)}, \texttt{name (VARCHAR(100))}, \texttt{tier (VARCHAR(20))}, \texttt{price (DECIMAL(10,2))}, \texttt{currency (VARCHAR(3))}, \texttt{billing\_cycle (VARCHAR(20))}, \texttt{max\_branches (INTEGER)}, \texttt{max\_active\_staff (INTEGER)}, \texttt{max\_monthly\_work\_orders (INTEGER)}, \texttt{iot\_telemetry\_enabled (BOOLEAN)}, \texttt{ai\_diagnostics\_enabled (BOOLEAN)}, \texttt{is\_active (BOOLEAN)}, \texttt{created\_at (TIMESTAMPTZ)}, \texttt{updated\_at (TIMESTAMPTZ)}, \texttt{version (BIGINT)}, \texttt{deleted\_at (TIMESTAMPTZ)}. \\*
+\textbf{Columnas Clave y Tipos} & \texttt{id (UUID PK)}, \texttt{stripe\_price\_id (VARCHAR(100) UK)}, \texttt{name (VARCHAR(100))}, \texttt{tier (VARCHAR(20))}, \texttt{price (DECIMAL(10,2))}, \texttt{currency (VARCHAR(3))}, \texttt{billing\_cycle (VARCHAR(20))}, \texttt{max\_branches (INTEGER)}, \texttt{max\_active\_staff (INTEGER)}, \texttt{max\_active\_obd2\_devices (INTEGER)}, \texttt{max\_photos\_per\_work\_order (INTEGER)}, \texttt{max\_monthly\_ai\_reports (INTEGER)}, \texttt{company\_registration\_allowed (BOOLEAN)}, \texttt{multi\_warehouse\_allowed (BOOLEAN)}, \texttt{marketplace\_listed (BOOLEAN)}, \texttt{max\_monthly\_work\_orders (INTEGER)}, \texttt{iot\_telemetry\_enabled (BOOLEAN)}, \texttt{ai\_diagnostics\_enabled (BOOLEAN)}, \texttt{is\_active (BOOLEAN)}, \texttt{created\_at (TIMESTAMPTZ)}, \texttt{updated\_at (TIMESTAMPTZ)}, \texttt{version (BIGINT)}, \texttt{deleted\_at (TIMESTAMPTZ)}. \\*
 \hline
-\textbf{Constraints e Índices} & - PK: pk\_\allowbreak plans (id) \newline - UK: uk\_\allowbreak plans\_\allowbreak stripe\_\allowbreak price\_\allowbreak id (stripe\_price\_id) \newline - CHECK: chk\_\allowbreak plans\_\allowbreak tier (tier IN ('STARTER', 'PROFESSIONAL', 'ENTERPRISE')), chk\_\allowbreak plans\_\allowbreak cycle (billing\_cycle IN ('MONTHLY', 'YEARLY')), chk\_\allowbreak plans\_\allowbreak price (price >= 0.00), chk\_\allowbreak plans\_\allowbreak max\_\allowbreak branches (max\_branches > 0), chk\_\allowbreak plans\_\allowbreak max\_\allowbreak staff (max\_active\_staff > 0), chk\_\allowbreak plans\_\allowbreak max\_\allowbreak orders (max\_monthly\_work\_orders > 0) \newline - Índices B-Tree: idx\_\allowbreak plans\_\allowbreak tier (tier), idx\_\allowbreak plans\_\allowbreak active (is\_active), idx\_\allowbreak plans\_\allowbreak stripe\_\allowbreak price (stripe\_price\_id) \\
+\textbf{Constraints e Índices} & - PK: pk\_\allowbreak plans (id) \newline - UK: uk\_\allowbreak plans\_\allowbreak stripe\_\allowbreak price\_\allowbreak id (stripe\_price\_id) \newline - CHECK: chk\_\allowbreak plans\_\allowbreak tier (tier IN ('GO', 'PRO', 'MAX', 'ENTERPRISE')), chk\_\allowbreak plans\_\allowbreak cycle (billing\_cycle IN ('MONTHLY', 'YEARLY')), chk\_\allowbreak plans\_\allowbreak price (price >= 0.00), chk\_\allowbreak plans\_\allowbreak max\_\allowbreak branches (max\_branches > 0), chk\_\allowbreak plans\_\allowbreak max\_\allowbreak staff (max\_active\_staff > 0) \newline - Índices B-Tree: idx\_\allowbreak plans\_\allowbreak tier (tier), idx\_\allowbreak plans\_\allowbreak active (is\_active), idx\_\allowbreak plans\_\allowbreak stripe\_\allowbreak price (stripe\_price\_id) \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{plan\allowbreak \_features}} \\*
 \hline
@@ -6857,7 +7836,7 @@ A partir de la arquitectura relacional definida en el diagrama de persistencia, 
 \hline
 \textbf{Constraints e Índices} & - PK: pk\_\allowbreak subscriptions (id) \newline - FK: fk\_\allowbreak subscriptions\_\allowbreak tenant\_\allowbreak id hacia tenants(id), fk\_\allowbreak subscriptions\_\allowbreak plan\_\allowbreak id hacia plans(id) \newline - UK: uk\_\allowbreak subscriptions\_\allowbreak tenant\_\allowbreak id (tenant\_id) \newline - CHECK: chk\_\allowbreak subscription\_\allowbreak status (status IN ('TRIALING', 'ACTIVE', 'PAST\_DUE', 'CANCELED', 'UNPAID', 'INCOMPLETE')) \newline - Índices B-Tree: idx\_\allowbreak subscriptions\_\allowbreak tenant (tenant\_id), idx\_\allowbreak subscriptions\_\allowbreak status (status), idx\_\allowbreak subscriptions\_\allowbreak stripe\_\allowbreak sub (stripe\_sub\_id), idx\_\allowbreak subscriptions\_\allowbreak period\_\allowbreak end (current\_period\_end) \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{invoices}} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{saas\allowbreak \_invoices}} \\*
 \hline
 \textbf{Motor y Producto} & PostgreSQL 16 (API Application) \\*
 \hline
@@ -6865,9 +7844,9 @@ A partir de la arquitectura relacional definida en el diagrama de persistencia, 
 \hline
 \textbf{Columnas Clave y Tipos} & \texttt{id (UUID PK)}, \texttt{subscription\_id (UUID FK)}, \texttt{tenant\_id (UUID FK)}, \texttt{stripe\_invoice\_id (VARCHAR(100) UK)}, \texttt{amount\_paid (DECIMAL(10,2))}, \texttt{currency (VARCHAR(3))}, \texttt{status (VARCHAR(20))}, \texttt{invoice\_pdf\_url (VARCHAR(255))}, \texttt{hosted\_invoice\_url (VARCHAR(255))}, \texttt{paid\_at (TIMESTAMPTZ)}, \texttt{created\_at (TIMESTAMPTZ)}, \texttt{updated\_at (TIMESTAMPTZ)}, \texttt{version (BIGINT)}, \texttt{deleted\_at (TIMESTAMPTZ)}. \\*
 \hline
-\textbf{Constraints e Índices} & - PK: pk\_\allowbreak invoices (id) \newline - FK: fk\_\allowbreak invoices\_\allowbreak subscription\_\allowbreak id hacia subscriptions(id), fk\_\allowbreak invoices\_\allowbreak tenant\_\allowbreak id hacia tenants(id) \newline - UK: uk\_\allowbreak invoices\_\allowbreak stripe\_\allowbreak invoice\_\allowbreak id (stripe\_invoice\_id) \newline - CHECK: chk\_\allowbreak invoice\_\allowbreak status (status IN ('DRAFT', 'OPEN', 'PAID', 'UNCOLLECTIBLE', 'VOID')), chk\_\allowbreak invoice\_\allowbreak amount\_\allowbreak paid (amount\_paid >= 0.00) \newline - Índices B-Tree: idx\_\allowbreak invoices\_\allowbreak subscription (subscription\_id), idx\_\allowbreak invoices\_\allowbreak tenant\_\allowbreak paid (tenant\_id, paid\_at), idx\_\allowbreak invoices\_\allowbreak status (status) \\
+\textbf{Constraints e Índices} & - PK: pk\_\allowbreak saas\_\allowbreak invoices (id) \newline - FK: fk\_\allowbreak saas\_\allowbreak invoices\_\allowbreak subscription\_\allowbreak id hacia subscriptions(id), fk\_\allowbreak saas\_\allowbreak invoices\_\allowbreak tenant\_\allowbreak id hacia tenants(id) \newline - UK: uk\_\allowbreak saas\_\allowbreak invoices\_\allowbreak stripe\_\allowbreak invoice\_\allowbreak id (stripe\_invoice\_id) \newline - CHECK: chk\_\allowbreak saas\_\allowbreak invoice\_\allowbreak status (status IN ('DRAFT', 'OPEN', 'PAID', 'UNCOLLECTIBLE', 'VOID')), chk\_\allowbreak saas\_\allowbreak invoice\_\allowbreak amount\_\allowbreak paid (amount\_paid >= 0.00) \newline - Índices B-Tree: idx\_\allowbreak saas\_\allowbreak invoices\_\allowbreak subscription (subscription\_id), idx\_\allowbreak saas\_\allowbreak invoices\_\allowbreak tenant\_\allowbreak paid (tenant\_id, paid\_at), idx\_\allowbreak saas\_\allowbreak invoices\_\allowbreak status (status) \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{stripe\allowbreak \_events}} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{stripe\allowbreak \_webhook\allowbreak \_events}} \\*
 \hline
 \textbf{Motor y Producto} & PostgreSQL 16 (API Application) \\*
 \hline
@@ -6875,7 +7854,7 @@ A partir de la arquitectura relacional definida en el diagrama de persistencia, 
 \hline
 \textbf{Columnas Clave y Tipos} & \texttt{id (UUID PK)}, \texttt{stripe\_event\_id (VARCHAR(100) UK)}, \texttt{type (VARCHAR(50))}, \texttt{payload (TEXT)}, \texttt{status (VARCHAR(20))}, \texttt{processed\_at (TIMESTAMPTZ)}, \texttt{error\_message (VARCHAR(500))}. \\*
 \hline
-\textbf{Constraints e Índices} & - PK: pk\_\allowbreak stripe\_\allowbreak events (id) \newline - UK: uk\_\allowbreak stripe\_\allowbreak events\_\allowbreak event\_\allowbreak id (stripe\_event\_id) \newline - CHECK: chk\_\allowbreak stripe\_\allowbreak event\_\allowbreak status (status IN ('PENDING', 'PROCESSED', 'FAILED', 'IGNORED')) \newline - Índices B-Tree: idx\_\allowbreak stripe\_\allowbreak events\_\allowbreak status (status, processed\_at), idx\_\allowbreak stripe\_\allowbreak events\_\allowbreak type (type) \\
+\textbf{Constraints e Índices} & - PK: pk\_\allowbreak stripe\_\allowbreak webhook\_\allowbreak events (id) \newline - UK: uk\_\allowbreak stripe\_\allowbreak webhook\_\allowbreak events\_\allowbreak event\_\allowbreak id (stripe\_event\_id) \newline - CHECK: chk\_\allowbreak stripe\_\allowbreak webhook\_\allowbreak event\_\allowbreak status (status IN ('PENDING', 'PROCESSED', 'FAILED', 'IGNORED')) \newline - Índices B-Tree: idx\_\allowbreak stripe\_\allowbreak webhook\_\allowbreak events\_\allowbreak status (status, processed\_at), idx\_\allowbreak stripe\_\allowbreak webhook\_\allowbreak events\_\allowbreak type (type) \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{auditable\allowbreak \_abstract\allowbreak \_entity}} \\*
 \hline
@@ -6891,9 +7870,9 @@ A partir de la arquitectura relacional definida en el diagrama de persistencia, 
 \hline
 \textbf{Motor y Producto} & SQLite 3 (Mobile Workshop) \\*
 \hline
-\textbf{Propósito y Aislamiento} & Caché relacional local de solo lectura en el dispositivo móvil del técnico o asesor de patio. Almacena una copia sincronizada de la membresía del taller y sus cuotas operativas vigentes respecto al número máximo de sucursales, mecánicos activos permitidos, órdenes de trabajo mensuales autorizadas y habilitación de telemetría IoT o diagnóstico predictivo. Permite la evaluación inmediata en frío de capacidades en fosos y bahías sin depender de conectividad telemática. \\*
+\textbf{Propósito y Aislamiento} & Caché relacional local de solo lectura en el dispositivo móvil del técnico o asesor de patio. Almacena una copia sincronizada de la membresía del taller y sus cuotas operativas vigentes respecto al número máximo de sucursales, mecánicos activos permitidos, dispositivos OBD-II, fotos por orden de trabajo, órdenes de trabajo mensuales autorizadas, registro de flotas y habilitación de telemetría IoT o diagnóstico predictivo. Permite la evaluación inmediata en frío de capacidades en fosos y bahías sin depender de conectividad telemática. \\*
 \hline
-\textbf{Columnas Clave y Tipos} & \texttt{id (TEXT PK)}, \texttt{tenant\_id (TEXT)}, \texttt{plan\_name (TEXT)}, \texttt{plan\_tier (TEXT)}, \texttt{subscription\_status (TEXT)}, \texttt{max\_branches (INTEGER)}, \texttt{max\_active\_staff (INTEGER)}, \texttt{max\_monthly\_work\_orders (INTEGER)}, \texttt{iot\_telemetry\_enabled (INTEGER)}, \texttt{ai\_diagnostics\_enabled (INTEGER)}, \texttt{current\_period\_end (TEXT)}, \texttt{synced\_at (TEXT)}. \\*
+\textbf{Columnas Clave y Tipos} & \texttt{id (TEXT PK)}, \texttt{tenant\_id (TEXT UK)}, \texttt{plan\_name (TEXT)}, \texttt{plan\_tier (TEXT)}, \texttt{subscription\_status (TEXT)}, \texttt{max\_branches (INTEGER)}, \texttt{max\_active\_staff (INTEGER)}, \texttt{max\_active\_obd2\_devices (INTEGER)}, \texttt{max\_photos\_per\_work\_order (INTEGER)}, \texttt{max\_monthly\_work\_orders (INTEGER)}, \texttt{company\_registration\_allowed (INTEGER)}, \texttt{iot\_telemetry\_enabled (INTEGER)}, \texttt{ai\_diagnostics\_enabled (INTEGER)}, \texttt{current\_period\_end (TEXT)}, \texttt{synced\_at (TEXT)}. \\*
 \hline
 \textbf{Constraints e Índices} & - PK: pk\_\allowbreak local\_\allowbreak subscription\_\allowbreak cache (id) \newline - UK: uk\_\allowbreak local\_\allowbreak subscription\_\allowbreak tenant (tenant\_id) \newline - Índices B-Tree: idx\_\allowbreak local\_\allowbreak subscription\_\allowbreak status (subscription\_status), idx\_\allowbreak local\_\allowbreak subscription\_\allowbreak tenant (tenant\_id) \\
 \hline
@@ -6917,11 +7896,10 @@ A partir de la estructura formalizada en la @fig:database-diagram-billing y la @
   El particionamiento lógico de los datos de suscripción se salvaguarda a través de la restricción foránea única en la columna **tenant_id** de la tabla **subscriptions**, garantizando que cada taller cuente exactamente con una única membresía operativa asociada. Dicha segregación se complementa con el arquetipo técnico **auditable_abstract_entity**, el cual inyecta mecanismos universales de control de concurrencia optimista mediante marcas de versión y borrado lógico, previniendo sobreescrituras accidentales entre administradores concurrentes.
 
 - **Criptografía, Resiliencia e Idempotencia Estricta en la Ingestión de Webhooks:**
-  La persistencia física en la tabla **stripe_events** constituye una barrera transaccional que neutraliza las contingencias de red inherentes a los pagos electrónicos en la nube. Al sincronizar las transiciones de estado de cobro en **invoices** y renovaciones de ciclo en **subscriptions** dentro de la misma frontera transaccional ACID donde se inserta el evento de Stripe, se asegura que anomalías en las comunicaciones HTTP nunca originen cobros duplicados o desincronizaciones contractuales.
+  La persistencia física en la tabla **stripe_webhook_events** constituye una barrera transaccional que neutraliza las contingencias de red inherentes a los pagos electrónicos en la nube. Al sincronizar las transiciones de estado de cobro en **saas_invoices** y renovaciones de ciclo en **subscriptions** dentro de la misma frontera transaccional ACID donde se inserta el evento de Stripe, se asegura que anomalías en las comunicaciones HTTP nunca originen cobros duplicados o desincronizaciones contractuales.
 
 - **Evaluación de Cuotas Operativas en Frío y Sincronización Reactiva hacia Clientes Móviles:**
   La inclusión de las tablas de caché en SQLite 3 responde al requisito operacional de movilidad en talleres automotrices, donde la recepción de vehículos y asignación de órdenes de trabajo puede ejecutarse en sótanos o zonas sin cobertura inalámbrica. Mediante un protocolo de refresco incremental basado en marcas temporales y cabeceras de validación condicional ETag, la aplicación móvil actualiza sus techos de capacidad sin generar sobrecarga en el backend central, garantizando fluidez en la atención al cliente.
-
 ### 2.6.9. *Bounded Context: IoT Telemetry & Predictive Maintenance*
 
 El Bounded Context de IoT Telemetry & Predictive Maintenance constituye la pieza central de innovación tecnológica y la ventaja competitiva más relevante de Atelier Platform en el mercado automotriz. Su propósito es convertir al taller mecánico tradicional en un centro de servicio inteligente, conectado y proactivo, capaz de anticipar fallas mecánicas catastróficas en los automóviles antes de que se manifiesten en daños irreparables o accidentes viales.
@@ -6930,7 +7908,7 @@ En los talleres mecánicos convencionales, el mantenimiento es preponderantement
 
 Para transformar este paradigma, el contexto modela la ingesta masiva de parámetros de diagnóstico vehicular a través del puerto OBD-II (*On-Board Diagnostics II*), estandarizado bajo normas internacionales SAE J1962 / ISO 15031. Mediante dispositivos de hardware conectados físicamente al puerto del automóvil (módems celulares con tarjeta SIM o escáneres Bluetooth BLE que se comunican a través del smartphone del conductor), Atelier recolecta de forma continua los flujos de identificación de parámetros (PIDs): revoluciones por minuto del motor (RPM), velocidad del vehículo, temperatura del refrigerante, nivel de combustible y tensión eléctrica de la batería.
 
-Debido al volumen masivo de datos generados —cientos de lecturas por minuto por cada vehículo activo—, almacenar estos registros en una base de datos relacional transaccional convencional degradaría el rendimiento del ERP. Por esta razón, el dominio aísla la serie temporal en la hipertabla especializada `telemetry_logs` gestionada por TimescaleDB en Aiven Cloud. Esta tabla opera bajo una semántica de solo inserción (*Append-Only*), prescindiendo de borrados lógicos y restricciones foráneas pesadas en tiempo de ejecución, y aplicando políticas automáticas de compresión columnar para reducir la huella en disco en más de un 90%.
+Debido al volumen masivo de datos generados, con cientos de lecturas por minuto por cada vehículo activo, almacenar estos registros en una base de datos relacional transaccional convencional degradaría el rendimiento del ERP. Por esta razón, el dominio aísla la serie temporal en la hipertabla especializada `telemetry_logs` gestionada por TimescaleDB en Aiven Cloud. Esta tabla opera bajo una semántica de solo inserción (*Append-Only*), prescindiendo de borrados lógicos y restricciones foráneas pesadas en tiempo de ejecución, y aplicando políticas automáticas de compresión columnar para reducir la huella en disco en más de un 90%.
 
 Sobre esta telemetría continua, el motor de inferencia `PredictiveAnomalyDetectionEngine` evalúa correlaciones matemáticas en tiempo real. Cuando los parámetros exceden umbrales térmicos o eléctricos seguros, o cuando la computadora del auto (ECU/PCM) emite códigos de avería de diagnóstico (DTC - *Diagnostic Trouble Codes* bajo el estándar SAE J2012), el sistema formula una `PredictiveAlert` con un puntaje de confianza algorítmica (`confidence_score`). De manera inmediata, esta alerta vincula un servicio preventivo del catálogo de MRO y se despacha como notificación push de alta prioridad mediante Firebase Cloud Messaging (FCM) al conductor en `Atelier Driver` y al asesor del taller en `Atelier Workshop`, permitiendo una intervención correctiva oportuna.
 
@@ -6945,8 +7923,7 @@ La capa de dominio de IoT Telemetry \& Predictive Maintenance concentra los mode
 
 En la @tbl:iot-domain-types se presenta la clasificación formal de los componentes que integran el núcleo del dominio telemático, detallando sus categorías tácticas, relaciones cardinales y paquetes canónicos.
 
-\renewcommand{\arraystretch}{1.25}
-\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
+\renewcommand{\arraystretch}{1.25}\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
 \caption{Catálogo de la Capa de Dominio de IoT Telemetry \& Predictive Maintenance} \label{tbl:iot-domain-types} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\
@@ -6960,9 +7937,9 @@ Obd2Device & Modela el hardware físico de escaneo a bordo custodiando su identi
 \hline
 \textbf{Categoría} & Raíz de Agregado \\*
 \hline
-\textbf{Relaciones} & Vinculado al taller titular TenantId y referenciado en DeviceInstallation. \\*
+\textbf{Relaciones} & Generalización de AbstractDomainAggregateRoot<Obd2Device>. Vinculado al taller titular TenantId y referenciado en DeviceInstallation. \\*
 \hline
-\textbf{Paquete} & \texttt{...iot.domain.model.aggregates} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak model.\allowbreak aggregates} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
@@ -6970,9 +7947,29 @@ DeviceInstallation & Gobierna la sesión física temporal de acople de un escán
 \hline
 \textbf{Categoría} & Raíz de Agregado \\*
 \hline
-\textbf{Relaciones} & Mantiene referencias foráneas con DeviceId, VehicleId y TenantId. \\*
+\textbf{Relaciones} & Generalización de AbstractDomainAggregateRoot<DeviceInstallation>. Mantiene referencias foráneas por identidad con DeviceId, VehicleId y TenantId. \\*
 \hline
-\textbf{Paquete} & \texttt{...iot.domain.model.aggregates} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak model.\allowbreak aggregates} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+VehicleFault & Modela un código de avería electrónica diagnosticado por la computadora de a bordo del automóvil. \\*
+\hline
+\textbf{Categoría} & Raíz de Agregado \\*
+\hline
+\textbf{Relaciones} & Generalización de AbstractDomainAggregateRoot<VehicleFault>. Asociado a VehicleId y TenantId con clasificación estandarizada mediante DtcCode. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak model.\allowbreak aggregates} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+PredictiveAlert & Advertencia de mantenimiento proactivo formulada algorítmicamente ante riesgo inminente de fallo mecánico. \\*
+\hline
+\textbf{Categoría} & Raíz de Agregado \\*
+\hline
+\textbf{Relaciones} & Generalización de AbstractDomainAggregateRoot<PredictiveAlert>. Vinculada a VehicleId, TenantId y opcionalmente a un servicio preventivo de MRO. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak model.\allowbreak aggregates} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
@@ -6982,27 +7979,7 @@ TelemetryRecord & Registro inmutable de parámetros de sensores vehiculares pers
 \hline
 \textbf{Relaciones} & Clave compuesta por marca temporal y VehicleId con desnormalización de TenantId. \\*
 \hline
-\textbf{Paquete} & \texttt{...iot.domain.model.aggregates} \\
-\hline
-\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
-\hline
-VehicleFault & Modela un código de avería electrónica diagnosticado por la computadora del vehículo. \\*
-\hline
-\textbf{Categoría} & Raíz de Agregado \\*
-\hline
-\textbf{Relaciones} & Asociado a VehicleId y TenantId con clasificación estandarizada mediante DtcCode. \\*
-\hline
-\textbf{Paquete} & \texttt{...iot.domain.model.aggregates} \\
-\hline
-\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
-\hline
-PredictiveAlert & Advertencia de mantenimiento proactivo formulada algorítmicamente ante riesgo inminente de fallo. \\*
-\hline
-\textbf{Categoría} & Raíz de Agregado \\*
-\hline
-\textbf{Relaciones} & Vinculada a VehicleId, TenantId y opcionalmente a un servicio preventivo de MRO. \\*
-\hline
-\textbf{Paquete} & \texttt{...iot.domain.model.aggregates} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak model.\allowbreak aggregates} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
@@ -7010,79 +7987,509 @@ DtcCatalogEntry & Registro maestro del catálogo internacional de códigos de av
 \hline
 \textbf{Categoría} & Entidad Dependiente \\*
 \hline
-\textbf{Relaciones} & Utilizada por el servicio de dominio para clasificación taxonómica de fallas. \\*
+\textbf{Relaciones} & Identificado por DtcCatalogId y utilizado por los servicios de dominio para clasificación taxonómica de fallas. \\*
 \hline
-\textbf{Paquete} & \texttt{...iot.domain.model.entities} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak model.\allowbreak entities} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
-PredictiveAnomalyDetectionEngine & Motor analítico que procesa lecturas en tiempo real y calcula probabilidades de avería crítica. \\*
+DeviceId & Identificador único universal fuertemente tipado para el hardware de escaneo a bordo OBD-II. \\*
+\hline
+\textbf{Categoría} & Identificador Fuertemente Tipado \\*
+\hline
+\textbf{Relaciones} & Registro inmutable de identidad basado en UUID. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak model.\allowbreak ids} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+InstallationId & Identificador único universal fuertemente tipado para la sesión física de vinculación telemática. \\*
+\hline
+\textbf{Categoría} & Identificador Fuertemente Tipado \\*
+\hline
+\textbf{Relaciones} & Registro inmutable de identidad basado en UUID. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak model.\allowbreak ids} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+FaultId & Identificador único universal fuertemente tipado para el reporte de avería diagnosticada en el vehículo. \\*
+\hline
+\textbf{Categoría} & Identificador Fuertemente Tipado \\*
+\hline
+\textbf{Relaciones} & Registro inmutable de identidad basado en UUID. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak model.\allowbreak ids} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+AlertId & Identificador único universal fuertemente tipado para la advertencia predictiva formulada por el sistema. \\*
+\hline
+\textbf{Categoría} & Identificador Fuertemente Tipado \\*
+\hline
+\textbf{Relaciones} & Registro inmutable de identidad basado en UUID. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak model.\allowbreak ids} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+DtcCatalogId & Identificador único universal fuertemente tipado para la entrada normativa del catálogo de códigos de avería. \\*
+\hline
+\textbf{Categoría} & Identificador Fuertemente Tipado \\*
+\hline
+\textbf{Relaciones} & Registro inmutable de identidad basado en UUID. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak model.\allowbreak ids} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+ConnectionType & Canales físicos y lógicos de transmisión telemática vehicular soportados por los dispositivos de hardware. \\*
+\hline
+\textbf{Categoría} & Enumeración de Dominio \\*
+\hline
+\textbf{Relaciones} & Valores BLUETOOTH\_BLE, SIM\_CELLULAR y WIFI asociados a Obd2Device. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak model.\allowbreak enums} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+DeviceStatus & Situación operativa y administrativa del hardware que condiciona la admisión de tramas sensoriales. \\*
+\hline
+\textbf{Categoría} & Enumeración de Dominio \\*
+\hline
+\textbf{Relaciones} & Valores ACTIVE, INACTIVE, LOST y BROKEN gobernados por Obd2Device. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak model.\allowbreak enums} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+FaultSeverity & Nivel de criticidad técnica asignado al código de avería detectado por la computadora del vehículo. \\*
+\hline
+\textbf{Categoría} & Enumeración de Dominio \\*
+\hline
+\textbf{Relaciones} & Valores LOW, MEDIUM y CRITICAL clasificados en VehicleFault y DtcCatalogEntry. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak model.\allowbreak enums} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+AlertSeverity & Nivel de urgencia o gravedad de la advertencia predictiva para la priorización en el taller y conductor. \\*
+\hline
+\textbf{Categoría} & Enumeración de Dominio \\*
+\hline
+\textbf{Relaciones} & Valores LOW, MEDIUM, HIGH y CRITICAL vinculados a la notificación preventiva. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak model.\allowbreak enums} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+AlertStatus & Estados formales del ciclo de vida y atención de la advertencia predictiva en la plataforma. \\*
+\hline
+\textbf{Categoría} & Enumeración de Dominio \\*
+\hline
+\textbf{Relaciones} & Valores DISPATCHED, ACKNOWLEDGED, RESOLVED y DISMISSED gestionados por PredictiveAlert. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak model.\allowbreak enums} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+RiskLevel & Nivel de riesgo integral estimado por los modelos analíticos de mantenimiento preventivo y peritaje. \\*
+\hline
+\textbf{Categoría} & Enumeración de Dominio \\*
+\hline
+\textbf{Relaciones} & Valores LOW, MODERATE, HIGH y CRITICAL utilizados en evaluaciones de salud mecánica. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak model.\allowbreak enums} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+DeviceIdentifier & Objeto de valor inmutable que valida el identificador de hardware mediante dirección MAC o código celular IMEI. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor \\*
+\hline
+\textbf{Relaciones} & Valida formato de seis pares hexadecimales o quince dígitos numéricos bajo restricción de unicidad. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+DtcCode & Objeto de valor inmutable para códigos de diagnóstico normalizados bajo SAE J2012 e ISO 15031-6. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor \\*
+\hline
+\textbf{Relaciones} & Valida sintaxis con letra inicial P, C, B o U seguida de cuatro caracteres numéricos. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+ConfidenceScore & Expresa la certeza probabilística calculada por el motor predictivo para una avería vehicular inminente. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor \\*
+\hline
+\textbf{Relaciones} & Registro inmutable con escala porcentual decimal validada entre 0.00 y 100.00. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+EngineTemperature & Magnitud térmica del refrigerante de motor en grados Celsius con validación termodinámica. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor \\*
+\hline
+\textbf{Relaciones} & Provee lógica de dominio isCriticalOverheating() para valores superiores a 105.0°C. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+EngineRpm & Régimen de rotación del cigüeñal en revoluciones por minuto con validación de límites físicos de motor. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor \\*
+\hline
+\textbf{Relaciones} & Provee lógica de dominio isExcessiveRpm() para valores superiores a 6000 RPM. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+VehicleSpeed & Velocidad lineal instantánea del automóvil reportada por la unidad de control electrónico en km/h. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor \\*
+\hline
+\textbf{Relaciones} & Valida rango físico no negativo acotado estrictamente entre 0 y 350 km/h. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+BatteryVoltage & Tensión eléctrica en voltios registrada en los terminales de batería o alternador del vehículo. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor \\*
+\hline
+\textbf{Relaciones} & Provee lógica de dominio isLowBattery() para mediciones inferiores a 11.80V en reposo. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+FuelLevel & Porcentaje de combustible remanente en el depósito vehicular reportado por el aforador electrónico. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor \\*
+\hline
+\textbf{Relaciones} & Valida magnitud física en escala porcentual acotada estrictamente entre 0.0 y 100.0. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+GeoCoordinates & Posicionamiento satelital GPS compuesto por coordenadas geodésicas decimales de latitud y longitud. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor \\*
+\hline
+\textbf{Relaciones} & Valida límites geográficos con latitud en [-90.0, 90.0] y longitud en [-180.0, 180.0]. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+TelemetryPids & Mapeo inmutable de parámetros OBD-II normalizados (PIDs) leídos e interpretados desde la trama vehicular. \\*
+\hline
+\textbf{Categoría} & Objeto de Valor \\*
+\hline
+\textbf{Relaciones} & Encapsula lecturas paramétricas complementarias de sensores automotrices sin acoplar esquemas fijos. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak model.\allowbreak valueobjects} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+ActiveInstallation\allowbreak ConflictException & Señala conflicto al intentar instalar un escáner en un vehículo que ya posee una sesión activa en paralelo. \\*
+\hline
+\textbf{Categoría} & Excepción de Dominio \\*
+\hline
+\textbf{Relaciones} & Especialización de IoTDomainException asociada al código ERR\_ACTIVE\_INSTALLATION\_CONFLICT y HTTP 409 Conflict. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak exceptions} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+DeviceAlready\allowbreak InstalledException & Señala que el escáner seleccionado ya mantiene una sesión de montaje activa en otra unidad sin concluir. \\*
+\hline
+\textbf{Categoría} & Excepción de Dominio \\*
+\hline
+\textbf{Relaciones} & Especialización de IoTDomainException asociada al código ERR\_DEVICE\_ALREADY\_INSTALLED y HTTP 409 Conflict. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak exceptions} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+DeviceNotFound\allowbreak Exception & Señala que no se localiza el escáner telemático mediante el identificador UUID o dirección física suministrada. \\*
+\hline
+\textbf{Categoría} & Excepción de Dominio \\*
+\hline
+\textbf{Relaciones} & Especialización de IoTDomainException asociada al código ERR\_DEVICE\_NOT\_FOUND y HTTP 404 Not Found. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak exceptions} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+InstallationNotFound\allowbreak Exception & Señala que la sesión de montaje telemático consultada no existe en el registro del taller automotriz. \\*
+\hline
+\textbf{Categoría} & Excepción de Dominio \\*
+\hline
+\textbf{Relaciones} & Especialización de IoTDomainException asociada al código ERR\_INSTALLATION\_NOT\_FOUND y HTTP 404 Not Found. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak exceptions} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+InvalidDevice\allowbreak IdentifierException & Señala que la dirección física no cumple el formato estricto de MAC Address ni de código celular IMEI. \\*
+\hline
+\textbf{Categoría} & Excepción de Dominio \\*
+\hline
+\textbf{Relaciones} & Especialización de IoTDomainException asociada al código ERR\_INVALID\_DEVICE\_IDENTIFIER y HTTP 422 Unprocessable Entity. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak exceptions} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+InvalidDtc\allowbreak CodeException & Señala que la trama del código de avería recibido incumple la nomenclatura reglamentaria SAE J2012. \\*
+\hline
+\textbf{Categoría} & Excepción de Dominio \\*
+\hline
+\textbf{Relaciones} & Especialización de IoTDomainException asociada al código ERR\_INVALID\_DTC\_CODE y HTTP 422 Unprocessable Entity. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak exceptions} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+IoTDomain\allowbreak Exception & Superclase abstracta no comprobada de la que derivan todas las contingencias semánticas del contexto telemático. \\*
+\hline
+\textbf{Categoría} & Excepción de Dominio \\*
+\hline
+\textbf{Relaciones} & Generalización de RuntimeException con código legible normalizado bajo norma RFC 7807. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak exceptions} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+PredictiveAlert\allowbreak NotFoundException & Señala que no se localiza la alerta predictiva consultada para su confirmación o resolución en taller. \\*
+\hline
+\textbf{Categoría} & Excepción de Dominio \\*
+\hline
+\textbf{Relaciones} & Especialización de IoTDomainException asociada al código ERR\_PREDICTIVE\_ALERT\_NOT\_FOUND y HTTP 404 Not Found. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak exceptions} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+TimescaleIngestion\allowbreak Exception & Señala lecturas fuera del dominio físico plausible o fallos irrecuperables en la ingesta por lotes en TimescaleDB. \\*
+\hline
+\textbf{Categoría} & Excepción de Dominio \\*
+\hline
+\textbf{Relaciones} & Especialización de IoTDomainException asociada al código ERR\_TIMESCALE\_INGESTION\_FAILED y HTTP 422 Unprocessable Entity. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak exceptions} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+VehicleFault\allowbreak NotFoundException & Señala que no se localiza el registro del código de avería consultado para su seguimiento o resolución en taller. \\*
+\hline
+\textbf{Categoría} & Excepción de Dominio \\*
+\hline
+\textbf{Relaciones} & Especialización de IoTDomainException asociada al código ERR\_VEHICLE\_FAULT\_NOT\_FOUND y HTTP 404 Not Found. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak exceptions} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+DeviceInstallation\allowbreak Repository & Contrato de persistencia para auditar las sesiones de montaje físico y vigencia temporal de escáneres. \\*
+\hline
+\textbf{Categoría} & Puerto de Repositorio \\*
+\hline
+\textbf{Relaciones} & Implementado por adaptadores de persistencia relacional en la Capa de Infraestructura. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+DtcCatalog\allowbreak Repository & Contrato de persistencia para consultas sobre el catálogo maestro internacional de fallas SAE J2012 e ISO 15031. \\*
+\hline
+\textbf{Categoría} & Puerto de Repositorio \\*
+\hline
+\textbf{Relaciones} & Implementado por adaptadores de persistencia relacional en la Capa de Infraestructura. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Obd2Device\allowbreak Repository & Contrato de persistencia para el inventario de hardware telemático y validación de unicidad de identificadores. \\*
+\hline
+\textbf{Categoría} & Puerto de Repositorio \\*
+\hline
+\textbf{Relaciones} & Implementado por adaptadores de persistencia relacional en la Capa de Infraestructura. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+PredictiveAlert\allowbreak Repository & Contrato de persistencia para la gestión del ciclo de vida y despacho de advertencias predictivas. \\*
+\hline
+\textbf{Categoría} & Puerto de Repositorio \\*
+\hline
+\textbf{Relaciones} & Implementado por adaptadores de persistencia relacional en la Capa de Infraestructura. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+TelemetryRecord\allowbreak Repository & Contrato de persistencia para inserción masiva JDBC en hipertablas y agregaciones temporales en TimescaleDB. \\*
+\hline
+\textbf{Categoría} & Puerto de Repositorio \\*
+\hline
+\textbf{Relaciones} & Implementado por adaptadores optimizados para series temporales en la Capa de Infraestructura. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+VehicleFault\allowbreak Repository & Contrato de persistencia para el historial de códigos de avería electrónica y control de resolución mecánica. \\*
+\hline
+\textbf{Categoría} & Puerto de Repositorio \\*
+\hline
+\textbf{Relaciones} & Implementado por adaptadores de persistencia relacional en la Capa de Infraestructura. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+PredictiveAnomaly\allowbreak DetectionEngine & Motor analítico de inferencia en tiempo real que evalúa telemetría sensorial recién arribada para formular advertencias. \\*
 \hline
 \textbf{Categoría} & Servicio de Dominio \\*
 \hline
-\textbf{Relaciones} & Invocado durante la ingesta masiva de telemetría para evaluar desviaciones térmicas y eléctricas. \\*
+\textbf{Relaciones} & Invocado durante la ingesta de telemetría para evaluar desviaciones térmicas y eléctricas según heurísticas de combustión. \\*
 \hline
-\textbf{Paquete} & \texttt{...iot.domain.services} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak services} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
-DtcCodeEvaluationService & Clasifica la severidad reglamentaria y el subsistema automotriz afectado según el código leído. \\*
+DtcCodeEvaluation\allowbreak Service & Servicio de enriquecimiento taxonómico de códigos de diagnóstico conforme a SAE J2012 e ISO 15031. \\*
 \hline
 \textbf{Categoría} & Servicio de Dominio \\*
 \hline
-\textbf{Relaciones} & Invocado al detectar códigos de diagnóstico para sugerir servicios correctivos en taller. \\*
+\textbf{Relaciones} & Invocado al detectar códigos de falla para asignar severidad predeterminada y sugerir servicios de MRO. \\*
 \hline
-\textbf{Paquete} & \texttt{...iot.domain.services} \\
-\hline
-\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
-\hline
-Obd2DeviceRepository & Contrato de persistencia para el inventario de hardware telemático y validación de unicidad. \\*
-\hline
-\textbf{Categoría} & Puerto de Salida \\*
-\hline
-\textbf{Relaciones} & Implementado por adaptadores de persistencia relacional en infraestructura. \\*
-\hline
-\textbf{Paquete} & \texttt{...iot.domain.repositories} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak services} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
-DeviceInstallationRepository & Contrato de persistencia para auditar las sesiones de montaje y vigencia de monitoreo. \\*
+VehicleThermodynamic\allowbreak EvaluationService & Evalúa los gradientes térmicos y dinámicas de disipación de calor del motor analizando revoluciones, velocidad y temperatura. \\*
 \hline
-\textbf{Categoría} & Puerto de Salida \\*
+\textbf{Categoría} & Servicio de Dominio \\*
 \hline
-\textbf{Relaciones} & Implementado por adaptadores de persistencia relacional en infraestructura. \\*
+\textbf{Relaciones} & Modela correlaciones dinámicas de termodinámica interna para anticipar fallas incipientes de refrigeración. \\*
 \hline
-\textbf{Paquete} & \texttt{...iot.domain.repositories} \\
-\hline
-\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
-\hline
-TelemetryLogRepository & Contrato de persistencia para inserción masiva JDBC en hipertablas y agregación temporal. \\*
-\hline
-\textbf{Categoría} & Puerto de Salida \\*
-\hline
-\textbf{Relaciones} & Implementado por adaptadores optimizados para TimescaleDB en infraestructura. \\*
-\hline
-\textbf{Paquete} & \texttt{...iot.domain.repositories} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak services} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
-VehicleFaultRepository & Contrato de persistencia para el historial patológico de anomalías electrónicas de la unidad. \\*
+CriticalEngine\allowbreak AnomalyDetected\allowbreak Event & Emitido por el motor de inferencia cuando los sensores rebasan umbrales termodinámicos de peligro inminente. \\*
 \hline
-\textbf{Categoría} & Puerto de Salida \\*
+\textbf{Categoría} & Evento de Dominio \\*
 \hline
-\textbf{Relaciones} & Implementado por adaptadores de persistencia relacional en infraestructura. \\*
+\textbf{Relaciones} & Propagado de forma reactiva para formular alertas predictivas y despachar notificaciones push de alta prioridad. \\*
 \hline
-\textbf{Paquete} & \texttt{...iot.domain.repositories} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak model.\allowbreak events} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
 \hline
-PredictiveAlertRepository & Contrato de persistencia para la gestión del ciclo de vida y despacho de advertencias predictivas. \\*
+DeviceInstalled\allowbreak OnVehicleEvent & Emitido al acoplar físicamente un escáner en el puerto OBD-II del vehículo iniciando el monitoreo continuo. \\*
 \hline
-\textbf{Categoría} & Puerto de Salida \\*
+\textbf{Categoría} & Evento de Dominio \\*
 \hline
-\textbf{Relaciones} & Implementado por adaptadores de persistencia relacional en infraestructura. \\*
+\textbf{Relaciones} & Notifica el inicio de sesión física para habilitar la ingesta telemática de la unidad. \\*
 \hline
-\textbf{Paquete} & \texttt{...iot.domain.repositories} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak model.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+DeviceUninstalled\allowbreak FromVehicleEvent & Emitido al desconectar el hardware telemático en foso asentando el odómetro final de la sesión. \\*
+\hline
+\textbf{Categoría} & Evento de Dominio \\*
+\hline
+\textbf{Relaciones} & Notifica el cierre de monitoreo y sincroniza el odómetro final con el expediente vehicular en CRM. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak model.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+Obd2Device\allowbreak RegisteredEvent & Emitido al catalogar y registrar un nuevo hardware telemático en el inventario del taller automotriz. \\*
+\hline
+\textbf{Categoría} & Evento de Dominio \\*
+\hline
+\textbf{Relaciones} & Registra la incorporación del escáner con identificación unívoca por dirección MAC o IMEI. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak model.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+PredictiveAlert\allowbreak AcknowledgedEvent & Emitido cuando el conductor o el asesor de servicio confirma la lectura de la alerta predictiva. \\*
+\hline
+\textbf{Categoría} & Evento de Dominio \\*
+\hline
+\textbf{Relaciones} & Asienta la confirmación de recepción en el ciclo de vida de la advertencia. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak model.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+PredictiveAlert\allowbreak DispatchedEvent & Emitido al despachar la notificación push a las aplicaciones móviles mediante Firebase Cloud Messaging. \\*
+\hline
+\textbf{Categoría} & Evento de Dominio \\*
+\hline
+\textbf{Relaciones} & Registra el identificador de mensaje FCM para auditoría de entrega perimetral. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak model.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+PredictiveAlert\allowbreak GeneratedEvent & Emitido al formularse algorítmicamente una nueva advertencia predictiva en el núcleo de dominio. \\*
+\hline
+\textbf{Categoría} & Evento de Dominio \\*
+\hline
+\textbf{Relaciones} & Dispara la orquestación de despacho de notificaciones y la vinculación con servicios de MRO. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak model.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+TelemetryBatch\allowbreak IngestedEvent & Emitido tras insertar exitosamente una ráfaga masiva de lecturas temporales en la hipertabla de TimescaleDB. \\*
+\hline
+\textbf{Categoría} & Evento de Dominio \\*
+\hline
+\textbf{Relaciones} & Habilita el cálculo reactivo de resúmenes estadísticos y la actualización de instrumental en tiempo real. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak model.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+VehicleFault\allowbreak DetectedEvent & Emitido al registrarse un código de avería DTC activo proveniente de la computadora de a bordo. \\*
+\hline
+\textbf{Categoría} & Evento de Dominio \\*
+\hline
+\textbf{Relaciones} & Inicia el expediente patológico de la falla y evalúa la necesidad de intervención técnica en taller. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak model.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en el Dominio} \\*
+\hline
+VehicleFault\allowbreak ResolvedEvent & Emitido al certificar la reparación mecánica en foso de un código de avería previamente diagnosticado. \\*
+\hline
+\textbf{Categoría} & Evento de Dominio \\*
+\hline
+\textbf{Relaciones} & Cierra el estado de la avería en el historial técnico del vehículo automotriz. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak domain.\allowbreak model.\allowbreak events} \\
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
@@ -7109,13 +8516,13 @@ En la @tbl:iot-device-members se especifican los atributos estructurales, métod
 \endhead
 id & Identificador universal único e inmutable del hardware telemático. \\*
 \hline
-\textbf{Firma o Tipo} & \texttt{DeviceId (UUID)} \\*
+\textbf{Firma o Tipo} & \texttt{DeviceId} \\*
 \hline
 \textbf{Ámbito} & Privado \\
 \hline
 tenantId & Identificador del taller automotriz propietario o custodio del dispositivo. \\*
 \hline
-\textbf{Firma o Tipo} & \texttt{TenantId (UUID)} \\*
+\textbf{Firma o Tipo} & \texttt{TenantId} \\*
 \hline
 \textbf{Ámbito} & Privado \\
 \hline
@@ -7153,7 +8560,7 @@ firmwareVersion & Versión de software embebido instalado en el microcontrolador
 \hline
 register & Factoría de dominio que valida la sintaxis del identificador e inicializa el equipo en estado activo. \\*
 \hline
-\textbf{Firma o Tipo} & \texttt{static Obd2Device register(...)} \\*
+\textbf{Firma o Tipo} & \texttt{static Obd2Device register(TenantId tId, DeviceIdentifier devId, ConnectionType conn, String model, String fw)} \\*
 \hline
 \textbf{Ámbito} & Público \\
 \hline
@@ -7196,25 +8603,25 @@ En la @tbl:iot-installation-members se detallan los miembros, métodos y restric
 \endhead
 id & Identificador universal único de la sesión de montaje telemático. \\*
 \hline
-\textbf{Firma o Tipo} & \texttt{InstallationId (UUID)} \\*
+\textbf{Firma o Tipo} & \texttt{InstallationId} \\*
 \hline
 \textbf{Ámbito} & Privado \\
 \hline
 deviceId & Referencia al hardware físico OBD-II instalado en el puerto de diagnóstico. \\*
 \hline
-\textbf{Firma o Tipo} & \texttt{DeviceId (UUID)} \\*
+\textbf{Firma o Tipo} & \texttt{DeviceId} \\*
 \hline
 \textbf{Ámbito} & Privado \\
 \hline
 vehicleId & Vehículo automotriz intervenido y objeto del monitoreo preventivo. \\*
 \hline
-\textbf{Firma o Tipo} & \texttt{VehicleId (UUID)} \\*
+\textbf{Firma o Tipo} & \texttt{VehicleId} \\*
 \hline
 \textbf{Ámbito} & Privado \\
 \hline
 tenantId & Taller automotriz prestador y responsable del servicio de telemetría. \\*
 \hline
-\textbf{Firma o Tipo} & \texttt{TenantId (UUID)} \\*
+\textbf{Firma o Tipo} & \texttt{TenantId} \\*
 \hline
 \textbf{Ámbito} & Privado \\
 \hline
@@ -7246,7 +8653,7 @@ finalOdometerKm & Kilometraje verificado al retirar el escáner con valor mayor 
 \hline
 install & Factoría de dominio que vincula el escáner al vehículo y emite DeviceInstalledOnVehicleEvent. \\*
 \hline
-\textbf{Firma o Tipo} & \texttt{static DeviceInstallation install(...)} \\*
+\textbf{Firma o Tipo} & \texttt{static DeviceInstallation install(DeviceId devId, VehicleId vehId, TenantId tenId, int initialKm)} \\*
 \hline
 \textbf{Ámbito} & Público \\
 \hline
@@ -7289,13 +8696,13 @@ timestamp & Marca de tiempo UTC de captura sensorial que actúa como clave de pa
 \hline
 vehicleId & Vehículo emisor que conforma la clave primaria compuesta relacional de la hipertabla. \\*
 \hline
-\textbf{Firma o Tipo} & \texttt{VehicleId (UUID)} \\*
+\textbf{Firma o Tipo} & \texttt{VehicleId} \\*
 \hline
 \textbf{Ámbito} & Público \\
 \hline
 tenantId & Taller automotriz desnormalizado para acelerar agregaciones analíticas multi-inquilino. \\*
 \hline
-\textbf{Firma o Tipo} & \texttt{TenantId (UUID)} \\*
+\textbf{Firma o Tipo} & \texttt{TenantId} \\*
 \hline
 \textbf{Ámbito} & Público \\
 \hline
@@ -7335,11 +8742,17 @@ batteryVoltage & Tensión eléctrica del sistema de carga en voltios leída en t
 \hline
 \textbf{Ámbito} & Público \\
 \hline
+telemetryPids & Mapeo inmutable de parámetros OBD-II normalizados leídos e interpretados desde la trama vehicular. \\*
+\hline
+\textbf{Firma o Tipo} & \texttt{Optional<TelemetryPids>} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
 \thfirst{Método u Operación} & \thcell{Comportamiento y Reglas de Dominio} \\*
 \hline
 of & Factoría inmutable que valida rangos físicos antes de admitir la inserción masiva en hipertablas. \\*
 \hline
-\textbf{Firma o Tipo} & \texttt{static TelemetryRecord of(...)} \\*
+\textbf{Firma o Tipo} & \texttt{static TelemetryRecord of(Instant ts, VehicleId vId, TenantId tId, Optional<GeoCoordinates> loc, VehicleSpeed spd, EngineTemperature temp, EngineRpm rpm, Optional<FuelLevel> fuel, Optional<BatteryVoltage> batt, Optional<TelemetryPids> pids)} \\*
 \hline
 \textbf{Ámbito} & Público \\
 \hline
@@ -7382,7 +8795,7 @@ isResolved \textbar\ resolvedAt & Bandera que certifica subsanación técnica y 
 \hline
 detect & Factoría de dominio que asienta la avería y emite \texttt{VehicleFaultDetectedEvent}. \\*
 \hline
-resolve & Conmuta el estado a subsanado tras la intervención mecánica en el taller. \\
+markResolved & Conmuta el estado a subsanado tras la intervención mecánica en el taller emitiendo \texttt{VehicleFaultResolvedEvent}. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Raíz de Agregado:} PredictiveAlert} \\*
 \hline
@@ -7394,17 +8807,19 @@ recommendedServiceId & Servicio preventivo sugerido del catálogo de MRO para so
 \hline
 alertType \textbar\ confidenceScore & Tipo de riesgo mecánico y probabilidad porcentual estimada por el motor algorítmico. \\*
 \hline
-message \textbar\ status & Advertencia en lenguaje comprensible y estado (\texttt{DISPATCHED}, \texttt{ACKNOWLEDGED}, \texttt{RESOLVED}). \\*
+message \textbar\ status & Advertencia en lenguaje comprensible y estado (\texttt{DISPATCHED}, \texttt{ACKNOWLEDGED}, \texttt{RESOLVED}, \texttt{DISMISSED}). \\*
 \hline
 fcmMessageId & Identificador de entrega push retornado por Firebase Cloud Messaging. \\*
 \hline
-generate & Factoría de dominio que inicializa la alerta y emite \texttt{PredictiveAlertDispatchedEvent}. \\*
+create & Factoría de dominio que inicializa la alerta emitiendo \texttt{PredictiveAlertGeneratedEvent} y \texttt{PredictiveAlertDispatchedEvent}. \\*
 \hline
-markDispatched \textbar\ acknowledge & Registra el identificador de despacho FCM y asienta la lectura por parte del conductor. \\*
+markDispatched \textbar\ acknowledge & Registra el identificador de despacho FCM y asienta la lectura por parte del conductor emitiendo \texttt{PredictiveAlertAcknowledgedEvent}. \\*
 \hline
-resolve \textbar\ dismiss & Cierra la alerta tras la reparación en taller o la descarta por decisión de usuario. \\
+resolve \textbar\ dismiss & Cierra la alerta tras la reparación en taller o la descarta por decisión del usuario. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad Dependiente:} DtcCatalogEntry} \\*
+\hline
+id & Identificador universal inmutable de la entrada normativa del catálogo (\texttt{DtcCatalogId}). \\*
 \hline
 code \textbar\ category & Código SAE J2012 y categoría funcional (\texttt{POWERTRAIN\_P}, \texttt{CHASSIS\_C}, \texttt{BODY\_B}, \texttt{NETWORK\_U}). \\*
 \hline
@@ -7424,56 +8839,144 @@ En la @tbl:iot-value-objects se detallan los objetos de valor inmutables y los t
 
 \renewcommand{\arraystretch}{1.25}
 \begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
-\caption{Objetos de Valor y Enumeraciones de IoT Telemetry \& Predictive Maintenance} \label{tbl:iot-value-objects} \\
+\caption{Identificadores Tipados, Objetos de Valor y Enumeraciones de IoT Telemetry \& Predictive Maintenance} \label{tbl:iot-value-objects} \\
 \hline
-\thfirst{Objeto o Enumeración} & \thcell{Estructura y Reglas de Invariante de Dominio} \\
+\thfirst{Componente Inmutable} & \thcell{Definición de Atributos y Reglas de Validación} \\
 \hline
 \endfirsthead
 \hline
-\thfirst{Objeto o Enumeración} & \thcell{Estructura y Reglas de Invariante de Dominio} \\
+\thfirst{Componente Inmutable} & \thcell{Definición de Atributos y Reglas de Validación} \\
 \hline
 \endhead
-DeviceId & Registro inmutable para el identificador único del hardware (\texttt{record DeviceId(UUID value)}). \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Identificador Tipado:} DeviceId} \\*
 \hline
-InstallationId & Registro inmutable para la sesión de vinculación vehicular (\texttt{record InstallationId(UUID value)}). \\*
+\textbf{Atributos Clave} & \texttt{value: UUID} \\*
 \hline
-FaultId & Registro inmutable para el reporte de avería diagnosticada (\texttt{record FaultId(UUID value)}). \\*
+\textbf{Restricciones y Reglas} & Identificador unívoco universal del hardware telemático OBD-II. Inmutable y no nulo. \\
 \hline
-AlertId & Registro inmutable para la advertencia predictiva (\texttt{record AlertId(UUID value)}). \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Identificador Tipado:} InstallationId} \\*
 \hline
-DeviceIdentifier & Valida dirección MAC de seis pares hexadecimales o identificador IMEI de quince dígitos numéricos. \\*
+\textbf{Atributos Clave} & \texttt{value: UUID} \\*
 \hline
-DtcCode & Valida formato alfanumérico SAE J2012 con letra inicial P, C, B o U seguida de cuatro dígitos numéricos. \\*
+\textbf{Restricciones y Reglas} & Identificador unívoco universal de la sesión física de vinculación y monitoreo vehicular. Inmutable y no nulo. \\
 \hline
-ConfidenceScore & Probabilidad matemática de fallo inminente expresada como decimal entre cero y cien por ciento. \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Identificador Tipado:} FaultId} \\*
 \hline
-EngineTemperature & Temperatura del refrigerante en Celsius. Define método \textit{isCriticalOverheating()} para valores mayores a 105.0°C. \\*
+\textbf{Atributos Clave} & \texttt{value: UUID} \\*
 \hline
-EngineRpm & Revoluciones por minuto del motor. Define método \textit{isExcessiveRpm()} para valores superiores a 6000 RPM. \\*
+\textbf{Restricciones y Reglas} & Identificador unívoco universal del reporte de código de avería electrónica diagnosticada. Inmutable y no nulo. \\
 \hline
-VehicleSpeed & Velocidad instantánea en kilómetros por hora validada en rango no negativo de cero a trescientos cincuenta. \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Identificador Tipado:} AlertId} \\*
 \hline
-BatteryVoltage & Tensión eléctrica en voltios. Define método \textit{isLowBattery()} para mediciones inferiores a 11.8V en reposo. \\*
+\textbf{Atributos Clave} & \texttt{value: UUID} \\*
 \hline
-FuelLevel & Porcentaje de combustible remanente en el tanque acotado estrictamente entre cero y cien por ciento. \\*
+\textbf{Restricciones y Reglas} & Identificador unívoco universal de la advertencia preventiva o predictiva formulada. Inmutable y no nulo. \\
 \hline
-GeoCoordinates & Registro inmutable de coordenadas geodésicas compuesto por latitud y longitud en formato decimal. \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Identificador Tipado:} DtcCatalogId} \\*
 \hline
-ConnectionType & Enumeración del canal físico de transmisión (\texttt{BLUETOOTH\_BLE}, \texttt{SIM\_CELLULAR}, \texttt{WIFI}). \\*
+\textbf{Atributos Clave} & \texttt{value: UUID} \\*
 \hline
-DeviceStatus & Enumeración de la situación del hardware (\texttt{ACTIVE}, \texttt{INACTIVE}, \texttt{LOST}, \texttt{BROKEN}). \\*
+\textbf{Restricciones y Reglas} & Identificador unívoco universal de la entrada normativa en el catálogo maestro internacional de fallas. Inmutable y no nulo. \\
 \hline
-FaultSeverity & Nivel de criticidad asignado al código de avería (\texttt{LOW}, \texttt{MEDIUM}, \texttt{CRITICAL}). \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} DeviceIdentifier} \\*
 \hline
-DtcCategory & Categoría funcional del subsistema (\texttt{POWERTRAIN\_P}, \texttt{CHASSIS\_C}, \texttt{BODY\_B}, \texttt{NETWORK\_U}). \\*
+\textbf{Atributos Clave} & \texttt{value: String} \\*
 \hline
-AlertType & Clasificación analítica de la amenaza mecánica formulada por el motor predictivo. \\*
+\textbf{Restricciones y Reglas} & Valida dirección física MAC de seis pares hexadecimales o código de módem celular IMEI de quince dígitos numéricos bajo restricción de unicidad global. \\
 \hline
-AlertStatus & Estados del ciclo de vida de la alerta (\texttt{DISPATCHED}, \texttt{ACKNOWLEDGED}, \texttt{RESOLVED}, \texttt{DISMISSED}). \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} DtcCode} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{value: String} \\*
+\hline
+\textbf{Restricciones y Reglas} & Valida formato alfanumérico estandarizado SAE J2012 e ISO 15031-6 con prefijo P, C, B o U seguido de cuatro dígitos numéricos. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} ConfidenceScore} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{value: BigDecimal} \\*
+\hline
+\textbf{Restricciones y Reglas} & Probabilidad matemática de fallo inminente estimada por el motor algorítmico, acotada en escala porcentual de 0.00 a 100.00. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} EngineTemperature} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{celsius: double} \\*
+\hline
+\textbf{Restricciones y Reglas} & Temperatura del refrigerante de motor en grados Celsius acotada a rangos termodinámicos plausibles. Provee método \textit{isCriticalOverheating()} para magnitudes superiores a 105.0°C. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} EngineRpm} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{rpm: int} \\*
+\hline
+\textbf{Restricciones y Reglas} & Régimen de giro del cigüeñal en revoluciones por minuto acotado entre cero y doce mil. Provee método \textit{isExcessiveRpm()} para valores mayores a 6000 RPM. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} VehicleSpeed} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{kmh: int} \\*
+\hline
+\textbf{Restricciones y Reglas} & Velocidad lineal instantánea reportada por la computadora del vehículo, acotada en un rango no negativo de 0 a 350 km/h. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} BatteryVoltage} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{volts: double} \\*
+\hline
+\textbf{Restricciones y Reglas} & Tensión eléctrica del sistema de carga en voltios leída en bornes. Provee método \textit{isLowBattery()} para mediciones inferiores a 11.80V en reposo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} FuelLevel} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{percentage: double} \\*
+\hline
+\textbf{Restricciones y Reglas} & Porcentaje de combustible remanente en el depósito vehicular, acotado estrictamente en escala porcentual de 0.0 a 100.0. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} GeoCoordinates} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{latitude: double, longitude: double} \\*
+\hline
+\textbf{Restricciones y Reglas} & Coordenadas geodésicas de posicionamiento GPS en formato decimal con latitud entre -90.0 y 90.0 y longitud entre -180.0 y 180.0. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Valor:} TelemetryPids} \\*
+\hline
+\textbf{Atributos Clave} & \texttt{parameters: Map<String, Object>} \\*
+\hline
+\textbf{Restricciones y Reglas} & Mapeo inmutable de parámetros OBD-II normalizados (PIDs) leídos e interpretados desde la trama sensorial vehicular. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Enumeración de Dominio:} ConnectionType} \\*
+\hline
+\textbf{Atributos Clave} & Constantes de conectividad física \\*
+\hline
+\textbf{Restricciones y Reglas} & Canales de transmisión telemática vehicular: BLUETOOTH\_BLE, SIM\_CELLULAR y WIFI. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Enumeración de Dominio:} DeviceStatus} \\*
+\hline
+\textbf{Atributos Clave} & Constantes de situación operativa \\*
+\hline
+\textbf{Restricciones y Reglas} & Estados de habilitación del hardware en plataforma: ACTIVE, INACTIVE, LOST y BROKEN. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Enumeración de Dominio:} FaultSeverity} \\*
+\hline
+\textbf{Atributos Clave} & Constantes de gravedad técnica \\*
+\hline
+\textbf{Restricciones y Reglas} & Criticidad del código de avería en la ECU automotriz: LOW, MEDIUM y CRITICAL. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Enumeración de Dominio:} AlertSeverity} \\*
+\hline
+\textbf{Atributos Clave} & Constantes de criticidad de alerta \\*
+\hline
+\textbf{Restricciones y Reglas} & Niveles de severidad predictiva para conductor y taller: LOW, MEDIUM, HIGH y CRITICAL. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Enumeración de Dominio:} AlertStatus} \\*
+\hline
+\textbf{Atributos Clave} & Constantes de ciclo de vida \\*
+\hline
+\textbf{Restricciones y Reglas} & Estados de atención y gestión de la advertencia predictiva: DISPATCHED, ACKNOWLEDGED, RESOLVED y DISMISSED. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Enumeración de Dominio:} RiskLevel} \\*
+\hline
+\textbf{Atributos Clave} & Constantes de riesgo analítico \\*
+\hline
+\textbf{Restricciones y Reglas} & Clasificación de riesgo global estimado por el motor de inferencia: LOW, MODERATE, HIGH y CRITICAL. \\
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-*Nota.* Diccionario de objetos de valor inmutables y tipos enumerados en com.andeva.atelier.platform.iot.domain.model.valueobjects.
+*Nota.* Componentes inmutables organizados en los subpaquetes modulares ids, valueobjects y enums de com.andeva.atelier.platform.iot.domain.model.
 
 **Servicios de Dominio de IoT Telemetry & Predictive Maintenance**
 
@@ -7482,6 +8985,8 @@ Aquellas operaciones algorítmicas que involucran transformaciones complejas o e
 - **PredictiveAnomalyDetectionEngine:** Motor analítico de inferencia que evalúa en tiempo real cada registro telemático recién arribado. Aplica heurísticas fundadas en la termodinámica vehicular para advertir sobrecalentamientos de refrigerante superiores a 105.0°C o 115.0°C, caídas de tensión de acumulador por debajo de 11.80V en ralentí y combustiones defectuosas en cilindros asociadas a fluctuaciones erráticas de RPM.
 
 - **DtcCodeEvaluationService:** Servicio taxonómico que interpreta la nomenclatura alfanumérica de códigos de falla según estándares internacionales, clasificando su impacto en tren motriz, chasis, carrocería o redes de comunicación y proponiendo paquetes de servicio correctivo en el taller.
+
+- **VehicleThermodynamicEvaluationService:** Servicio analítico que modela las curvas dinámicas de disipación térmica y cinemática vehicular. Correlaciona la temperatura del refrigerante con el régimen de revoluciones y la velocidad para diagnosticar fallas incipientes en el sistema de enfriamiento antes de una sobretemperatura catastrófica.
 
 En la @tbl:iot-domain-services se formalizan las responsabilidades algorítmicas y los contratos públicos de los servicios de dominio telemáticos.
 
@@ -7511,6 +9016,15 @@ DtcCodeEvaluation\allowbreak Service & Servicio de enriquecimiento taxonómico d
 - Sugiere el enlace paramétrico hacia paquetes de mantenimiento preventivo y correctivo del catálogo maestro de MRO. \\*
 \hline
 \textbf{Métodos Clave} & \texttt{DtcEvaluationResult evaluateDtcCode(DtcCode dtcCode)} \\*
+\hline
+\textbf{Paquete} & \texttt{...iot.domain.services} \\
+\hline
+VehicleThermodynamic\allowbreak EvaluationService & Servicio de evaluación termodinámica y cinemática de motores de combustión interna. \newline
+- Modela curvas térmicas en función del régimen de revoluciones por minuto, velocidad lineal y temperatura de refrigerante. \newline
+- Detecta gradientes anómalos de disipación térmica para anticipar fallas incipientes en termostato, electroventilador o bomba de agua. \newline
+- Correlaciona caídas térmicas en regímenes de alta carga mecánica para prevenir choque térmico en componentes del motor. \\*
+\hline
+\textbf{Métodos Clave} & \texttt{ThermodynamicEvaluationResult evaluateThermalDynamics(EngineTemperature temp, EngineRpm rpm, VehicleSpeed speed)} \\*
 \hline
 \textbf{Paquete} & \texttt{...iot.domain.services} \\
 \hline
@@ -7553,7 +9067,7 @@ DeviceInstallation\allowbreak Repository & Contrato para auditar las sesiones de
 \hline
 \textbf{Paquete} & \texttt{...iot.domain.repositories} \\
 \hline
-TelemetryLogRepository & Contrato de persistencia de alto rendimiento para inserción por lotes y agregación en TimescaleDB. \newline
+TelemetryRecord\allowbreak Repository & Contrato de persistencia de alto rendimiento para inserción por lotes y agregación en TimescaleDB. \newline
 \textit{saveAllBatch(List<TelemetryRecord> records): void} \newline
 \textit{findLatestByVehicleId(VehicleId id): Optional<TelemetryRecord>} \newline
 \textit{findHistoryAggregated(VehicleId id, Instant from, Instant to, String bucket): List<TelemetryRecord>} \\*
@@ -7577,8 +9091,10 @@ PredictiveAlert\allowbreak Repository & Contrato para almacenar y monitorear las
 \textbf{Paquete} & \texttt{...iot.domain.repositories} \\
 \hline
 DtcCatalogRepository & Contrato de consulta sobre el catálogo maestro internacional de fallas SAE J2012 e ISO 15031. \newline
+\textit{findById(DtcCatalogId id): Optional<DtcCatalogEntry>} \newline
 \textit{findByCode(DtcCode code): Optional<DtcCatalogEntry>} \newline
-\textit{findAllByCategory(DtcCategory category): List<DtcCatalogEntry>} \\*
+\textit{findAllByCategory(String category): List<DtcCatalogEntry>} \newline
+\textit{existsByCode(DtcCode code): boolean} \\*
 \hline
 \textbf{Paquete} & \texttt{...iot.domain.repositories} \\
 \hline
@@ -7603,8 +9119,8 @@ En la @tbl:iot-domain-events se sintetiza la taxonomía de eventos de dominio ge
 \thfirst{Evento de Dominio} & \thcell{Causa de Emisión y Carga Útil del Contrato} \\
 \hline
 \endhead
-Obd2DeviceRegistered\allowbreak Event & Emitido al incorporar y catalogar un nuevo hardware en el inventario del taller automotriz. \newline
-\textbf{Carga útil:} DeviceId deviceId, TenantId tenantId, DeviceIdentifier identifier, Instant occurredOn. \\*
+CriticalEngineAnomaly\allowbreak DetectedEvent & Emitido por el motor de inferencia cuando los sensores rebasan umbrales termodinámicos de peligro inminente. \newline
+\textbf{Carga útil:} VehicleId vehicleId, TenantId tenantId, AlertType type, ConfidenceScore score, String message. \\*
 \hline
 DeviceInstalledOn\allowbreak VehicleEvent & Emitido al acoplar un escáner en el puerto OBD-II del vehículo iniciando el monitoreo continuo. \newline
 \textbf{Carga útil:} InstallationId installationId, DeviceId deviceId, VehicleId vehicleId, Instant timestamp. \\*
@@ -7612,24 +9128,30 @@ DeviceInstalledOn\allowbreak VehicleEvent & Emitido al acoplar un escáner en el
 DeviceUninstalledFrom\allowbreak VehicleEvent & Emitido al desconectar el hardware en foso asentando el odómetro final para su sincronización con CRM. \newline
 \textbf{Carga útil:} InstallationId installationId, VehicleId vehicleId, int finalOdometerKm, Instant timestamp. \\*
 \hline
-TelemetryBatchIngested\allowbreak Event & Emitido tras insertar exitosamente una ráfaga masiva de lecturas temporales en TimescaleDB. \newline
-\textbf{Carga útil:} VehicleId vehicleId, TenantId tenantId, int recordsCount, Instant latestTimestamp. \\*
-\hline
-CriticalEngineAnomaly\allowbreak DetectedEvent & Emitido por el motor de inferencia cuando los sensores rebasan umbrales termodinámicos de peligro. \newline
-\textbf{Carga útil:} VehicleId vehicleId, TenantId tenantId, AlertType type, ConfidenceScore score, String message. \\*
-\hline
-VehicleFaultDetected\allowbreak Event & Emitido al capturar un código de avería DTC emitido por la computadora de a bordo del automóvil. \newline
-\textbf{Carga útil:} FaultId faultId, VehicleId vehicleId, TenantId tenantId, DtcCode dtcCode, FaultSeverity severity. \\*
-\hline
-PredictiveAlert\allowbreak DispatchedEvent & Emitido al despachar la notificación push a las aplicaciones móviles mediante Firebase Cloud Messaging. \newline
-\textbf{Carga útil:} AlertId alertId, VehicleId vehicleId, TenantId tenantId, String fcmMessageId, Instant dispatchedAt. \\*
+Obd2DeviceRegistered\allowbreak Event & Emitido al incorporar y catalogar un nuevo hardware en el inventario del taller automotriz. \newline
+\textbf{Carga útil:} DeviceId deviceId, TenantId tenantId, DeviceIdentifier identifier, Instant occurredOn. \\*
 \hline
 PredictiveAlert\allowbreak AcknowledgedEvent & Emitido cuando el conductor o el asesor de servicio confirma la lectura de la alerta predictiva. \newline
 \textbf{Carga útil:} AlertId alertId, VehicleId vehicleId, Instant acknowledgedAt. \\*
 \hline
+PredictiveAlert\allowbreak DispatchedEvent & Emitido al despachar la notificación push a las aplicaciones móviles mediante Firebase Cloud Messaging. \newline
+\textbf{Carga útil:} AlertId alertId, VehicleId vehicleId, TenantId tenantId, String fcmMessageId, Instant dispatchedAt. \\*
+\hline
+PredictiveAlert\allowbreak GeneratedEvent & Emitido al formularse algorítmicamente una nueva advertencia preventiva tras el análisis analítico. \newline
+\textbf{Carga útil:} AlertId alertId, VehicleId vehicleId, TenantId tenantId, AlertType type, ConfidenceScore confidenceScore, Instant generatedAt. \\*
+\hline
+TelemetryBatchIngested\allowbreak Event & Emitido tras insertar exitosamente una ráfaga masiva de lecturas temporales en TimescaleDB. \newline
+\textbf{Carga útil:} VehicleId vehicleId, TenantId tenantId, int recordsCount, Instant latestTimestamp. \\*
+\hline
+VehicleFaultDetected\allowbreak Event & Emitido al capturar un código de avería DTC emitido por la computadora de a bordo del automóvil. \newline
+\textbf{Carga útil:} FaultId faultId, VehicleId vehicleId, TenantId tenantId, DtcCode dtcCode, FaultSeverity severity. \\*
+\hline
+VehicleFaultResolved\allowbreak Event & Emitido al certificar la resolución técnica y reparación mecánica en foso de una falla DTC en el taller. \newline
+\textbf{Carga útil:} FaultId faultId, VehicleId vehicleId, TenantId tenantId, DtcCode dtcCode, Instant resolvedAt. \\*
+\hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-*Nota.* Taxonomía de eventos de dominio inmutables del paquete com.andeva.atelier.platform.iot.domain.events.
+*Nota.* Taxonomía de eventos de dominio inmutables del paquete com.andeva.atelier.platform.iot.domain.model.events.
 
 **Excepciones de Dominio y Manejo de Errores Semánticos**
 
@@ -7648,41 +9170,45 @@ En la @tbl:iot-domain-exceptions se catalogan las excepciones semánticas del do
 \thfirst{Código de Error Semántico} & \thcell{Condición de Lanzamiento en el Modelo} \\
 \hline
 \endhead
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} DeviceAlreadyAssignedException} \\*
-\hline
-\texttt{ERR\_DEVICE\_ALREADY\_ASSIGNED} & El escáner OBD-II ya cuenta con una instalación activa en otra unidad sin concluir previamente. \\
-\hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} ActiveInstallationConflictException} \\*
 \hline
-\texttt{ERR\_ACTIVE\_INSTALLATION\_CONFLICT} & El vehículo ya tiene asignado otro escáner físico transmitiendo telemetría en paralelo. \\
+\texttt{ERR\_ACTIVE\_INSTALLATION\_CONFLICT} & El vehículo ya tiene asignado otro escáner físico transmitiendo telemetría en paralelo. Mapeo HTTP 409 Conflict. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} DeviceAlreadyInstalledException} \\*
+\hline
+\texttt{ERR\_DEVICE\_ALREADY\_INSTALLED} & El escáner OBD-II ya cuenta con una instalación activa en otra unidad sin concluir previamente. Mapeo HTTP 409 Conflict. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} DeviceNotFoundException} \\*
 \hline
-\texttt{ERR\_DEVICE\_NOT\_FOUND} & No se localiza el escáner en el inventario mediante el identificador suministrado. \\
+\texttt{ERR\_DEVICE\_NOT\_FOUND} & No se localiza el escáner en el inventario mediante el identificador UUID o dirección física suministrada. Mapeo HTTP 404 Not Found. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} InstallationNotFoundException} \\*
 \hline
-\texttt{ERR\_INSTALLATION\_NOT\_FOUND} & La sesión de montaje telemático consultada no existe en el registro del taller. \\
+\texttt{ERR\_INSTALLATION\_NOT\_FOUND} & La sesión de montaje telemático consultada no existe en el registro del taller automotriz. Mapeo HTTP 404 Not Found. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} InvalidDeviceIdentifierException} \\*
 \hline
-\texttt{ERR\_INVALID\_DEVICE\_IDENTIFIER} & La dirección física incumple el formato estricto de MAC Address o código IMEI celular. \\
+\texttt{ERR\_INVALID\_DEVICE\_IDENTIFIER} & La dirección física incumple el formato estricto de MAC Address de seis pares hexadecimales o código IMEI celular de quince dígitos. Mapeo HTTP 422 Unprocessable Entity. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} InvalidDtcCodeException} \\*
 \hline
-\texttt{ERR\_INVALID\_DTC\_CODE} & El código alfanumérico transgrede la nomenclatura formal de la norma SAE J2012. \\
+\texttt{ERR\_INVALID\_DTC\_CODE} & El código alfanumérico transgrede la nomenclatura formal de la norma SAE J2012 e ISO 15031-6. Mapeo HTTP 422 Unprocessable Entity. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} TelemetryIngestionException} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} IoTDomainException} \\*
 \hline
-\texttt{ERR\_TELEMETRY\_INGESTION\_FAILED} & Las lecturas sensoriales contienen magnitudes incompatibles con las leyes físicas del automotor. \\
+\texttt{ERR\_IOT\_DOMAIN\_BASE} & Superclase abstracta no comprobada de la que derivan todas las contingencias semánticas del contexto telemático bajo norma RFC 7807. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} AlertNotFoundException} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} PredictiveAlertNotFoundException} \\*
 \hline
-\texttt{ERR\_ALERT\_NOT\_FOUND} & No se localiza la alerta predictiva consultada para su confirmación o resolución en taller. \\
+\texttt{ERR\_PREDICTIVE\_ALERT\_NOT\_FOUND} & No se localiza la alerta predictiva consultada para su confirmación o resolución en taller. Mapeo HTTP 404 Not Found. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} UnsupportedPidException} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} TimescaleIngestionException} \\*
 \hline
-\texttt{ERR\_UNSUPPORTED\_PID} & La trama recibida contiene identificadores de parámetros no admitidos por el decodificador telemático. \\
+\texttt{ERR\_TIMESCALE\_INGESTION\_FAILED} & Las lecturas sensoriales contienen magnitudes incompatibles con las leyes físicas del automotor o la ingesta por lotes en TimescaleDB falló. Mapeo HTTP 422 Unprocessable Entity. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepción:} VehicleFaultNotFoundException} \\*
+\hline
+\texttt{ERR\_VEHICLE\_FAULT\_NOT\_FOUND} & No se localiza el registro del código de avería consultado para su seguimiento o resolución en taller. Mapeo HTTP 404 Not Found. \\
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
@@ -7727,7 +9253,7 @@ En la @tbl:iot-interface-types se expone el catálogo taxonómico consolidado de
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\
 \hline
 \endhead
-Obd2\allowbreak Devices\allowbreak Controller & Endpoints REST para el registro inventario y fiscalización del estado operativo de escáneres telemáticos del taller. \\*
+Obd2\allowbreak Devices\allowbreak Controller & Endpoints REST para el registro, inventario y fiscalización del estado operativo de escáneres telemáticos del taller. \\*
 \hline
 \textbf{Categoría} & Controlador REST \\*
 \hline
@@ -7737,7 +9263,7 @@ Obd2\allowbreak Devices\allowbreak Controller & Endpoints REST para el registro 
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
-Device\allowbreak Installations\allowbreak Controller & Endpoints REST para orquestar la vinculación física montaje y desmonte de dispositivos OBD-II en vehículos automotrices. \\*
+Device\allowbreak Installations\allowbreak Controller & Endpoints REST para orquestar la vinculación física, montaje y desmonte de dispositivos OBD-II en vehículos automotrices. \\*
 \hline
 \textbf{Categoría} & Controlador REST \\*
 \hline
@@ -7747,7 +9273,7 @@ Device\allowbreak Installations\allowbreak Controller & Endpoints REST para orqu
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
-Telemetry\allowbreak Ingestion\allowbreak Controller & Punto perimetral de alta frecuencia para ingestión de ráfagas temporales lecturas de tacómetro y métricas analíticas. \\*
+Telemetry\allowbreak Ingestion\allowbreak Controller & Endpoint perimetral de alta frecuencia para ingestión de ráfagas temporales, lecturas de tacómetro en tiempo real y métricas analíticas. \\*
 \hline
 \textbf{Categoría} & Controlador REST \\*
 \hline
@@ -7757,7 +9283,7 @@ Telemetry\allowbreak Ingestion\allowbreak Controller & Punto perimetral de alta 
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
-Vehicle\allowbreak Faults\allowbreak Controller & Endpoints REST para registro consulta diagnóstica y resolución formal de códigos de avería electrónica vehicular DTC. \\*
+Vehicle\allowbreak Faults\allowbreak Controller & Endpoints REST para registro, consulta diagnóstica y resolución formal de códigos de avería electrónica vehicular DTC. \\*
 \hline
 \textbf{Categoría} & Controlador REST \\*
 \hline
@@ -7767,7 +9293,7 @@ Vehicle\allowbreak Faults\allowbreak Controller & Endpoints REST para registro c
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
-Predictive\allowbreak Alerts\allowbreak Controller & Endpoints REST para gestión de advertencias predictivas confirmación de lectura y descarte justificado de recomendaciones. \\*
+Predictive\allowbreak Alerts\allowbreak Controller & Endpoints REST para gestión de advertencias predictivas, confirmación de lectura y canalización hacia mantenimiento preventivo. \\*
 \hline
 \textbf{Categoría} & Controlador REST \\*
 \hline
@@ -7777,7 +9303,7 @@ Predictive\allowbreak Alerts\allowbreak Controller & Endpoints REST para gestió
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
-Vehicle\allowbreak Health\allowbreak Reports\allowbreak Controller & Endpoints REST para generación asistida por inteligencia artificial de diagnósticos globales, consulta y descarga documental PDF. \\*
+Vehicle\allowbreak Health\allowbreak Reports\allowbreak Controller & Endpoints REST para generación asistida por inteligencia artificial de diagnósticos globales, consulta pericial y descarga documental PDF. \\*
 \hline
 \textbf{Categoría} & Controlador REST \\*
 \hline
@@ -7789,194 +9315,295 @@ Vehicle\allowbreak Health\allowbreak Reports\allowbreak Controller & Endpoints R
 \hline
 Register\allowbreak Device\allowbreak Request & Carga útil inmutable para dar de alta un nuevo escáner telemático en el inventario del taller mecánico. \\*
 \hline
-\textbf{Categoría} & Recurso DTO (Petición) \\*
+\textbf{Categoría} & Recurso REST de Petición \\*
 \hline
-\textbf{Relaciones} & Mapeado a RegisterObd2DeviceCommand con validación perimetral de dirección física MAC o código IMEI celular. \\*
+\textbf{Relaciones} & Validado con Jakarta Bean Validation. Mapeado por Obd2DeviceResourceAssembler hacia RegisterObd2DeviceCommand. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Update\allowbreak Device\allowbreak Status\allowbreak Request & Carga útil inmutable para actualizar la situación operativa del escáner en inventario. \\*
+\hline
+\textbf{Categoría} & Recurso REST de Petición \\*
+\hline
+\textbf{Relaciones} & Validado con Jakarta Bean Validation. Mapeado por Obd2DeviceResourceAssembler hacia UpdateDeviceStatusCommand. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
 Install\allowbreak Device\allowbreak Request & Carga útil inmutable para acoplar un escáner telemático a una unidad automotriz registrando odómetro inicial. \\*
 \hline
-\textbf{Categoría} & Recurso DTO (Petición) \\*
+\textbf{Categoría} & Recurso REST de Petición \\*
 \hline
-\textbf{Relaciones} & Mapeado a InstallDeviceOnVehicleCommand validando identificadores UUID y lectura kilométrica no negativa. \\*
+\textbf{Relaciones} & Validado con Jakarta Bean Validation. Mapeado por DeviceInstallationResourceAssembler hacia InstallDeviceCommand. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
 Uninstall\allowbreak Device\allowbreak Request & Carga útil inmutable para registrar el desmonte físico de un dispositivo con odómetro final e instante de retiro. \\*
 \hline
-\textbf{Categoría} & Recurso DTO (Petición) \\*
+\textbf{Categoría} & Recurso REST de Petición \\*
 \hline
-\textbf{Relaciones} & Mapeado a UninstallDeviceCommand validando odómetro acumulado superior al inicial. \\*
+\textbf{Relaciones} & Validado con Jakarta Bean Validation. Mapeado por DeviceInstallationResourceAssembler hacia UninstallDeviceCommand. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
-\hline
-\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
-\hline
-Telemetry\allowbreak Batch\allowbreak Request & Lote inmutable de hasta cien lecturas cinemáticas y térmicas emitidas por gateways móviles o módems vehiculares. \\*
-\hline
-\textbf{Categoría} & Recurso DTO (Petición) \\*
-\hline
-\textbf{Relaciones} & Mapeado a IngestTelemetryBatchCommand conteniendo una colección validada de TelemetryReadingItemDto. \\*
-\hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
-Register\allowbreak Vehicle\allowbreak Fault\allowbreak Request & Carga útil inmutable para registrar una anomalía electrónica detectada en la computadora vehicular. \\*
+Telemetry\allowbreak Batch\allowbreak Request & Lote inmutable de hasta cien lecturas cinemáticas y térmicas emitidas por pasarelas móviles o módems vehiculares. \\*
 \hline
-\textbf{Categoría} & Recurso DTO (Petición) \\*
+\textbf{Categoría} & Recurso REST de Petición \\*
 \hline
-\textbf{Relaciones} & Mapeado a RegisterVehicleFaultCommand con validación estricta de formato de código DTC según norma SAE J2012. \\*
+\textbf{Relaciones} & Validado en cascada con Jakarta Bean Validation. Mapeado por TelemetryResourceAssembler hacia IngestTelemetryBatchCommand. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
-\hline
-\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
-\hline
-Resolve\allowbreak Vehicle\allowbreak Fault\allowbreak Request & Carga útil inmutable para asentar la resolución técnica de una falla con notas de servicio de taller mecánico. \\*
-\hline
-\textbf{Categoría} & Recurso DTO (Petición) \\*
-\hline
-\textbf{Relaciones} & Mapeado a ResolveVehicleFaultCommand con asociación opcional a una orden de trabajo de mantenimiento. \\*
-\hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
-Dismiss\allowbreak Alert\allowbreak Request & Carga útil inmutable para desestimar una alerta predictiva requiriendo justificación técnica obligatoria. \\*
+Register\allowbreak Vehicle\allowbreak Fault\allowbreak Request & Carga útil inmutable para asentar un código de avería electrónica DTC detectado en la computadora vehicular. \\*
 \hline
-\textbf{Categoría} & Recurso DTO (Petición) \\*
+\textbf{Categoría} & Recurso REST de Petición \\*
 \hline
-\textbf{Relaciones} & Mapeado a DismissPredictiveAlertCommand auditando el colaborador responsable del descarte. \\*
+\textbf{Relaciones} & Validado con expresión regular SAE J2012. Mapeado por VehicleFaultResourceAssembler hacia RegisterVehicleFaultCommand. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
 Generate\allowbreak Health\allowbreak Report\allowbreak Request & Carga útil inmutable para solicitar la generación pericial de un diagnóstico de salud vehicular parametrizando la ventana temporal. \\*
 \hline
-\textbf{Categoría} & Recurso DTO (Petición) \\*
+\textbf{Categoría} & Recurso REST de Petición \\*
 \hline
-\textbf{Relaciones} & Mapeado a GenerateVehicleHealthReportCommand con validación perimetral de ventana de análisis entre siete y noventa días. \\*
+\textbf{Relaciones} & Validado con límites de días de análisis. Mapeado por VehicleHealthReportResourceAssembler hacia GenerateVehicleHealthReportCommand. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
-\hline
-\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
-\hline
-Obd2\allowbreak Device\allowbreak Resource & Representación pública estandarizada de un escáner telemático con especificaciones de enlace y estado. \\*
-\hline
-\textbf{Categoría} & Recurso DTO (Respuesta) \\*
-\hline
-\textbf{Relaciones} & Proyectado desde el agregado Obd2Device por Obd2DeviceResourceAssembler para clientes web y móviles. \\*
-\hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
-Device\allowbreak Installation\allowbreak Resource & Representación pública de una sesión de vinculación entre escáner y vehículo con marcas de odómetro. \\*
+Obd2\allowbreak Device\allowbreak Response & Representación pública inmutable de un escáner telemático con especificaciones de enlace, modelo y estado de inventario. \\*
 \hline
-\textbf{Categoría} & Recurso DTO (Respuesta) \\*
+\textbf{Categoría} & Recurso REST de Respuesta \\*
 \hline
-\textbf{Relaciones} & Proyectado desde el agregado DeviceInstallation por DeviceInstallationResourceAssembler. \\*
+\textbf{Relaciones} & Ensamblado por Obd2DeviceResourceAssembler a partir del agregado Obd2Device. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
-\hline
-\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
-\hline
-Telemetry\allowbreak Ingestion\allowbreak Ack\allowbreak Resource & Acuse de recibo perimetral tras la persistencia en lote indicando cantidad procesada y anomalías detectadas. \\*
-\hline
-\textbf{Categoría} & Recurso DTO (Respuesta) \\*
-\hline
-\textbf{Relaciones} & Retornado inmediatamente con código HTTP 202 Accepted hacia gateways vehiculares y móviles. \\*
-\hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
-Vehicle\allowbreak Latest\allowbreak Telemetry\allowbreak Resource & Tacómetro digital en tiempo real con lecturas instantáneas de cinemática motorización y batería. \\*
+Device\allowbreak Installation\allowbreak Response & Representación pública inmutable de una sesión de vinculación entre escáner y vehículo con marcas de kilometraje y vigencia. \\*
 \hline
-\textbf{Categoría} & Recurso DTO (Respuesta) \\*
+\textbf{Categoría} & Recurso REST de Respuesta \\*
 \hline
-\textbf{Relaciones} & Construido por TelemetryResourceAssembler a partir de la última lectura sensorial registrada. \\*
+\textbf{Relaciones} & Ensamblado por DeviceInstallationResourceAssembler a partir del agregado DeviceInstallation. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
-\hline
-\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
-\hline
-Telemetry\allowbreak Aggregate\allowbreak Resource & Proyección temporal analítica calculada mediante cubos temporales con promedios y máximos de motor. \\*
-\hline
-\textbf{Categoría} & Recurso DTO (Respuesta) \\*
-\hline
-\textbf{Relaciones} & Construido por TelemetryResourceAssembler desde proyecciones analíticas de TimescaleDB. \\*
-\hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
-Vehicle\allowbreak Fault\allowbreak Resource & Representación de falla electrónica vehicular enriquecida con código severidad y catálogo oficial. \\*
+Telemetry\allowbreak Ingestion\allowbreak Ack\allowbreak Response & Acuse de recibo perimetral tras la persistencia en lote indicando cantidad de lecturas procesadas y detección de anomalías. \\*
 \hline
-\textbf{Categoría} & Recurso DTO (Respuesta) \\*
+\textbf{Categoría} & Recurso REST de Respuesta \\*
 \hline
-\textbf{Relaciones} & Proyectado desde el agregado VehicleFault por VehicleFaultResourceAssembler. \\*
+\textbf{Relaciones} & Retornado por TelemetryIngestionController tras la ejecución de IngestTelemetryBatchCommand. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
-\hline
-\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
-\hline
-Predictive\allowbreak Alert\allowbreak Resource & Representación de recomendación preventiva de taller con índice de confianza y servicio correctivo sugerido. \\*
-\hline
-\textbf{Categoría} & Recurso DTO (Respuesta) \\*
-\hline
-\textbf{Relaciones} & Proyectado desde el agregado PredictiveAlert por PredictiveAlertResourceAssembler. \\*
-\hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
-Health\allowbreak Report\allowbreak Created\allowbreak Response & Carga útil de confirmación de reporte generado con resumen ejecutivo, métrica global de salud y enlaces REST de descarga. \\*
+Vehicle\allowbreak Latest\allowbreak Telemetry\allowbreak Response & Tacómetro digital en tiempo real con lecturas instantáneas de velocidad, temperatura de motor, régimen de giro y batería. \\*
 \hline
-\textbf{Categoría} & Recurso DTO (Respuesta) \\*
+\textbf{Categoría} & Recurso REST de Respuesta \\*
 \hline
-\textbf{Relaciones} & Proyectado tras la ejecución exitosa de inferencia por VehicleHealthReportResourceAssembler con enlaces al recurso JSON y binario PDF. \\*
+\textbf{Relaciones} & Ensamblado por TelemetryResourceAssembler a partir del agregado temporal TelemetryRecord. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
-\hline
-\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
-\hline
-Vehicle\allowbreak Health\allowbreak Report\allowbreak Resource & Representación integral del informe de salud mecánica con evaluación de subsistemas, riesgos predictivos y acciones sugeridas. \\*
-\hline
-\textbf{Categoría} & Recurso DTO (Respuesta) \\*
-\hline
-\textbf{Relaciones} & Proyectado desde el modelo analítico consolidado por VehicleHealthReportResourceAssembler para cuadros de mando web y móviles. \\*
-\hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
-IoT\allowbreak Telemetry\allowbreak Context\allowbreak Facade & Fachada de Contexto Abierto que expone lecturas fallas y puntaje de salud mecánica a otros módulos. \\*
+Vehicle\allowbreak Fault\allowbreak Response & Representación pública inmutable de avería electrónica vehicular enriquecida con severidad, descripción y estado de resolución. \\*
 \hline
-\textbf{Categoría} & Fachada Inbound OHS (ACL) \\*
+\textbf{Categoría} & Recurso REST de Respuesta \\*
 \hline
-\textbf{Relaciones} & Consumida en memoria por Customer and Fleet Management y Workshop Operations MRO. \\*
+\textbf{Relaciones} & Ensamblado por VehicleFaultResourceAssembler a partir de la entidad VehicleFault y el catálogo de averías. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Predictive\allowbreak Alert\allowbreak Response & Representación pública inmutable de recomendación preventiva de taller con índice de certeza y servicio correctivo sugerido. \\*
+\hline
+\textbf{Categoría} & Recurso REST de Respuesta \\*
+\hline
+\textbf{Relaciones} & Ensamblado por PredictiveAlertResourceAssembler a partir del agregado PredictiveAlert. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Health\allowbreak Report\allowbreak Created\allowbreak Response & Carga útil perimetral de informe generado con resumen ejecutivo, métrica consolidada de salud y enlaces de acceso REST y descarga PDF. \\*
+\hline
+\textbf{Categoría} & Recurso REST de Respuesta \\*
+\hline
+\textbf{Relaciones} & Ensamblado por VehicleHealthReportResourceAssembler a partir del DTO analítico generado con Spring AI. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Vehicle\allowbreak Latest\allowbreak Telemetry\allowbreak Dto & DTO inmutable perimetral para transferir en memoria la última instantánea sensorial vehicular a CRM y Workshop Operations (MRO). \\*
+\hline
+\textbf{Categoría} & DTO de Integración de Fachada \\*
+\hline
+\textbf{Relaciones} & Expuesto por IoTTelemetryContextFacade sin acoplamiento a las tablas temporales de TimescaleDB. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak acl.\allowbreak dto} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Active\allowbreak Vehicle\allowbreak Faults\allowbreak Dto & DTO inmutable perimetral para abastecer a Workshop Operations (MRO) con la lista de códigos DTC activos al abrir órdenes de trabajo. \\*
+\hline
+\textbf{Categoría} & DTO de Integración de Fachada \\*
+\hline
+\textbf{Relaciones} & Expuesto por IoTTelemetryContextFacade a partir de averías no resueltas de la unidad automotriz. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak acl.\allowbreak dto} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Vehicle\allowbreak Telemetry\allowbreak Health\allowbreak Dto & DTO inmutable perimetral que condensa el índice de salud mecánica, indicador semafórico y existencia de alertas predictivas. \\*
+\hline
+\textbf{Categoría} & DTO de Integración de Fachada \\*
+\hline
+\textbf{Relaciones} & Expuesto por IoTTelemetryContextFacade hacia Customer and Fleet Management (CRM). \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak acl.\allowbreak dto} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Obd2\allowbreak Device\allowbreak Resource\allowbreak Assembler & Mapea agregados Obd2Device a Obd2DeviceResponse y transforma RegisterDeviceRequest en comandos de aplicación. \\*
+\hline
+\textbf{Categoría} & Ensamblador de Recursos REST \\*
+\hline
+\textbf{Relaciones} & Inyectado en Obd2DevicesController. Desempaqueta identificadores fuertemente tipados DeviceId. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak transform} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Device\allowbreak Installation\allowbreak Resource\allowbreak Assembler & Mapea entidades DeviceInstallation a DeviceInstallationResponse y formula comandos de instalación y desinstalación física. \\*
+\hline
+\textbf{Categoría} & Ensamblador de Recursos REST \\*
+\hline
+\textbf{Relaciones} & Inyectado en DeviceInstallationsController. Valida transiciones de ciclo de vida de montaje. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak transform} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Telemetry\allowbreak Resource\allowbreak Assembler & Proyecta agregados TelemetryRecord a VehicleLatestTelemetryResponse y mapea solicitudes de lote a IngestTelemetryBatchCommand. \\*
+\hline
+\textbf{Categoría} & Ensamblador de Recursos REST \\*
+\hline
+\textbf{Relaciones} & Inyectado en TelemetryIngestionController. Desacopla hipertablas de TimescaleDB de los contratos HTTP. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak transform} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Vehicle\allowbreak Fault\allowbreak Resource\allowbreak Assembler & Mapea entidades VehicleFault a VehicleFaultResponse y transforma peticiones de registro en comandos de aplicación. \\*
+\hline
+\textbf{Categoría} & Ensamblador de Recursos REST \\*
+\hline
+\textbf{Relaciones} & Inyectado en VehicleFaultsController. Enriquecido con el catálogo de códigos de avería. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak transform} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Predictive\allowbreak Alert\allowbreak Resource\allowbreak Assembler & Transforma agregados PredictiveAlert en recursos de respuesta perimetrales PredictiveAlertResponse. \\*
+\hline
+\textbf{Categoría} & Ensamblador de Recursos REST \\*
+\hline
+\textbf{Relaciones} & Inyectado en PredictiveAlertsController. Denormaliza niveles de confianza y recomendaciones de servicio. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak transform} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Vehicle\allowbreak Health\allowbreak Report\allowbreak Resource\allowbreak Assembler & Transforma el dictamen pericial de inteligencia artificial en HealthReportCreatedResponse con enlaces REST y descarga PDF. \\*
+\hline
+\textbf{Categoría} & Ensamblador de Recursos REST \\*
+\hline
+\textbf{Relaciones} & Inyectado en VehicleHealthReportsController. Mapea GenerateHealthReportRequest hacia comandos de aplicación. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak transform} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+IoT\allowbreak Telemetry\allowbreak Context\allowbreak Facade & Contrato público perimetral de Fachada de Contexto Abierto que abastece de datos telemáticos a CRM y Workshop Operations (MRO). \\*
+\hline
+\textbf{Categoría} & Fachada de Contexto Abierto \\*
+\hline
+\textbf{Relaciones} & Implementado en application.acl por IoTTelemetryContextFacadeImpl. Expone DTOs del subpaquete acl.dto. \\*
 \hline
 \textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak acl} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
-IoT\allowbreak Exception\allowbreak Handler & Controlador de asesoría REST que normaliza excepciones de dominio hacia especificación RFC 7807 Problem Details. \\*
+Vehicle\allowbreak Anomaly\allowbreak Detected\allowbreak Integration\allowbreak Event & Evento publicado al confirmar una anomalía cinemática o térmica severa en motor para alerta inmediata de CRM y notificaciones push. \\*
+\hline
+\textbf{Categoría} & Evento de Integración \\*
+\hline
+\textbf{Relaciones} & Publicado mediante Outbox transaccional. Consumido por CRM y pasarela de notificaciones push. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Predictive\allowbreak Alert\allowbreak Generated\allowbreak Integration\allowbreak Event & Evento publicado al formularse una recomendación predictiva de mantenimiento automotriz para presupuestación anticipada en taller. \\*
+\hline
+\textbf{Categoría} & Evento de Integración \\*
+\hline
+\textbf{Relaciones} & Publicado mediante Outbox transaccional. Consumido por Workshop Operations (MRO) y CRM. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Vehicle\allowbreak Fault\allowbreak Logged\allowbreak Integration\allowbreak Event & Evento publicado al registrarse un nuevo código de falla DTC persistente para precarga diagnóstica en órdenes de trabajo de taller. \\*
+\hline
+\textbf{Categoría} & Evento de Integración \\*
+\hline
+\textbf{Relaciones} & Publicado mediante Outbox transaccional. Consumido por Workshop Operations (MRO). \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Vehicle\allowbreak Health\allowbreak Report\allowbreak Generated\allowbreak Integration\allowbreak Event & Evento publicado al concluir la inferencia diagnóstica con inteligencia artificial comunicando la disponibilidad del dictamen pericial. \\*
+\hline
+\textbf{Categoría} & Evento de Integración \\*
+\hline
+\textbf{Relaciones} & Publicado mediante Outbox transaccional. Consumido por Workshop Operations (MRO) y CRM. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak events} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+IoT\allowbreak Exception\allowbreak Handler & Interceptor perimetral que captura excepciones de dominio de IoT y las serializa bajo el estándar RFC 7807 Problem Details. \\*
 \hline
 \textbf{Categoría} & Manejador Global de Excepciones \\*
 \hline
-\textbf{Relaciones} & Intercepta excepciones de dominio mapeando códigos semánticos 400, 404, 409 y 422 hacia respuestas JSON estandarizadas. \\*
+\textbf{Relaciones} & Anotado con RestControllerAdvice. Captura IoTDomainException y excepciones de validación de Bean Validation. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak exceptions} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak advice} \\
 \hline
 \end{longtable}
-*Nota.* Catálogo consolidado de componentes de la Capa de Interfaz de IoT Telemetry \& Predictive Maintenance.
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Catálogo taxonómico consolidado de componentes de la Capa de Interfaz pertenecientes a los subpaquetes interfaces.rest.controllers, interfaces.rest.resources.requests, interfaces.rest.resources.responses, interfaces.rest.transform, interfaces.rest.advice, interfaces.acl, interfaces.acl.dto e interfaces.events de com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak iot.
 
 Los controladores REST de la capa perimetral delimitan formalmente los puntos de entrada para la gestión de dispositivos, el montaje vehicular, la ingestión de métricas, el diagnóstico electrónico, las alertas preventivas y la evaluación pericial de salud automotriz:
 
@@ -7988,7 +9615,7 @@ Los controladores REST de la capa perimetral delimitan formalmente los puntos de
 
 - **VehicleFaultsController**: Canaliza el reporte de averías electrónicas capturadas desde la unidad de control del motor, facilitando la consulta de anomalías no resueltas y el asentamiento formal de su subsanación en foso.
 
-- **PredictiveAlertsController**: Administra el ciclo de vida de las advertencias comerciales y técnicas generadas por el motor analítico, permitiendo la confirmación de lectura por el personal o su descarte justificado.
+- **PredictiveAlertsController**: Administra el ciclo de vida de las advertencias comerciales y técnicas generadas por el motor analítico, permitiendo la confirmación de lectura por el personal o la conversión proactiva en citas de servicio.
 
 - **VehicleHealthReportsController**: Expone puntos de acceso perimetrales para la generación asistida por inteligencia artificial de diagnósticos globales del estado del vehículo, consulta del dictamen pericial más reciente y compilación descargable en documento PDF institucional.
 
@@ -8008,7 +9635,7 @@ En la @tbl:iot-controllers-and-endpoints se detallan los contratos de comunicaci
 \hline
 \multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak devices}} \\*
 \hline
-\textbf{Petición:} Ninguna o Paginación & \textbf{Respuesta:} 200 OK (\texttt{PagedModel<Obd2\allowbreak Device\allowbreak Resource>}) \\*
+\textbf{Petición:} Ninguna o Filtros de Consulta & \textbf{Respuesta:} 200 OK (\texttt{List<Obd2\allowbreak Device\allowbreak Response>}) \\*
 \hline
 \textbf{Seguridad y Rol} & Autenticación Bearer JWT con roles de personal de taller mecánico \\*
 \hline
@@ -8016,15 +9643,15 @@ En la @tbl:iot-controllers-and-endpoints se detallan los contratos de comunicaci
 \hline
 \multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak devices/\allowbreak \{id\}}} \\*
 \hline
-\textbf{Petición:} Path Variable \texttt{id} & \textbf{Respuesta:} 200 OK (\texttt{Obd2\allowbreak Device\allowbreak Resource}) \\*
+\textbf{Petición:} Path Variable \texttt{id} & \textbf{Respuesta:} 200 OK (\texttt{Obd2\allowbreak Device\allowbreak Response}) \\*
 \hline
 \textbf{Seguridad y Rol} & Autenticación Bearer JWT con \texttt{ROLE\_WORKSHOP\_ADMIN} o \texttt{ROLE\_WORKSHOP\_TECHNICIAN} \\*
 \hline
-\textbf{Responsabilidad} & Obtiene la especificación detallada de un dispositivo identificador físico protocolo y estado de inventario. \\
+\textbf{Responsabilidad} & Obtiene la especificación detallada de un dispositivo, identificador físico, protocolo y estado de inventario. \\
 \hline
 \multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak devices}} \\*
 \hline
-\textbf{Petición:} \texttt{Register\allowbreak Device\allowbreak Request} & \textbf{Respuesta:} 201 CREATED (\texttt{Obd2\allowbreak Device\allowbreak Resource}) con cabecera \texttt{Location} \\*
+\textbf{Petición:} \texttt{Register\allowbreak Device\allowbreak Request} & \textbf{Respuesta:} 201 CREATED (\texttt{Obd2\allowbreak Device\allowbreak Response}) con cabecera \texttt{Location} \\*
 \hline
 \textbf{Seguridad y Rol} & Autenticación Bearer JWT con rol directivo \texttt{ROLE\_WORKSHOP\_ADMIN} \\*
 \hline
@@ -8032,17 +9659,17 @@ En la @tbl:iot-controllers-and-endpoints se detallan los contratos de comunicaci
 \hline
 \multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{PATCH} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak devices/\allowbreak \{id\}/\allowbreak status}} \\*
 \hline
-\textbf{Petición:} \texttt{Update\allowbreak Device\allowbreak Status\allowbreak Request} & \textbf{Respuesta:} 200 OK (\texttt{Obd2\allowbreak Device\allowbreak Resource}) \\*
+\textbf{Petición:} \texttt{Update\allowbreak Device\allowbreak Status\allowbreak Request} & \textbf{Respuesta:} 200 OK (\texttt{Obd2\allowbreak Device\allowbreak Response}) \\*
 \hline
 \textbf{Seguridad y Rol} & Autenticación Bearer JWT con rol directivo \texttt{ROLE\_WORKSHOP\_ADMIN} \\*
 \hline
-\textbf{Responsabilidad} & Actualiza la condición operativa del dispositivo permitiendo marcarlo como activo en mantenimiento o extraviado. \\
+\textbf{Responsabilidad} & Actualiza la condición operativa del dispositivo permitiendo marcarlo como disponible, en mantenimiento o averiado. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Controlador REST:} Device\allowbreak Installations\allowbreak Controller} \\*
 \hline
 \multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak installations/\allowbreak install}} \\*
 \hline
-\textbf{Petición:} \texttt{Install\allowbreak Device\allowbreak Request} & \textbf{Respuesta:} 201 CREATED (\texttt{Device\allowbreak Installation\allowbreak Resource}) con cabecera \texttt{Location} \\*
+\textbf{Petición:} \texttt{Install\allowbreak Device\allowbreak Request} & \textbf{Respuesta:} 201 CREATED (\texttt{Device\allowbreak Installation\allowbreak Response}) con cabecera \texttt{Location} \\*
 \hline
 \textbf{Seguridad y Rol} & Autenticación Bearer JWT con \texttt{ROLE\_WORKSHOP\_TECHNICIAN} o \texttt{ROLE\_WORKSHOP\_ADMIN} \\*
 \hline
@@ -8050,7 +9677,7 @@ En la @tbl:iot-controllers-and-endpoints se detallan los contratos de comunicaci
 \hline
 \multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak installations/\allowbreak \{id\}/\allowbreak uninstall}} \\*
 \hline
-\textbf{Petición:} \texttt{Uninstall\allowbreak Device\allowbreak Request} & \textbf{Respuesta:} 200 OK (\texttt{Device\allowbreak Installation\allowbreak Resource}) \\*
+\textbf{Petición:} \texttt{Uninstall\allowbreak Device\allowbreak Request} & \textbf{Respuesta:} 200 OK (\texttt{Device\allowbreak Installation\allowbreak Response}) \\*
 \hline
 \textbf{Seguridad y Rol} & Autenticación Bearer JWT con \texttt{ROLE\_WORKSHOP\_TECHNICIAN} o \texttt{ROLE\_WORKSHOP\_ADMIN} \\*
 \hline
@@ -8058,7 +9685,7 @@ En la @tbl:iot-controllers-and-endpoints se detallan los contratos de comunicaci
 \hline
 \multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak installations/\allowbreak vehicle/\allowbreak \{vehicleId\}/\allowbreak active}} \\*
 \hline
-\textbf{Petición:} Path Variable \texttt{vehicleId} & \textbf{Respuesta:} 200 OK (\texttt{Device\allowbreak Installation\allowbreak Resource}) \\*
+\textbf{Petición:} Path Variable \texttt{vehicleId} & \textbf{Respuesta:} 200 OK (\texttt{Device\allowbreak Installation\allowbreak Response}) \\*
 \hline
 \textbf{Seguridad y Rol} & Autenticación Bearer JWT con rol de conductor o personal de taller mecánico \\*
 \hline
@@ -8066,7 +9693,7 @@ En la @tbl:iot-controllers-and-endpoints se detallan los contratos de comunicaci
 \hline
 \multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak installations/\allowbreak vehicle/\allowbreak \{vehicleId\}/\allowbreak history}} \\*
 \hline
-\textbf{Petición:} Path Variable \texttt{vehicleId} & \textbf{Respuesta:} 200 OK (\texttt{List<Device\allowbreak Installation\allowbreak Resource>}) \\*
+\textbf{Petición:} Path Variable \texttt{vehicleId} & \textbf{Respuesta:} 200 OK (\texttt{List<Device\allowbreak Installation\allowbreak Response>}) \\*
 \hline
 \textbf{Seguridad y Rol} & Autenticación Bearer JWT con rol técnico de taller mecánico \\*
 \hline
@@ -8076,15 +9703,15 @@ En la @tbl:iot-controllers-and-endpoints se detallan los contratos de comunicaci
 \hline
 \multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak telemetry/\allowbreak batch}} \\*
 \hline
-\textbf{Petición:} \texttt{Telemetry\allowbreak Batch\allowbreak Request} & \textbf{Respuesta:} 202 ACCEPTED (\texttt{Telemetry\allowbreak Ingestion\allowbreak Ack\allowbreak Resource}) \\*
+\textbf{Petición:} \texttt{Telemetry\allowbreak Batch\allowbreak Request} & \textbf{Respuesta:} 202 ACCEPTED (\texttt{Telemetry\allowbreak Ingestion\allowbreak Ack\allowbreak Response}) \\*
 \hline
 \textbf{Seguridad y Rol} & Token de Dispositivo o Autenticación Bearer JWT de conductor en ruta \\*
 \hline
-\textbf{Responsabilidad} & Ingesta ráfagas de 1 a 100 lecturas temporales persistiendo en TimescaleDB y evaluando anomalías predictivas. \\
+\textbf{Responsabilidad} & Ingesta ráfagas de una a cien lecturas temporales persistiendo en TimescaleDB y evaluando anomalías predictivas. \\
 \hline
 \multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak telemetry/\allowbreak vehicle/\allowbreak \{vehicleId\}/\allowbreak latest}} \\*
 \hline
-\textbf{Petición:} Path Variable \texttt{vehicleId} & \textbf{Respuesta:} 200 OK (\texttt{Vehicle\allowbreak Latest\allowbreak Telemetry\allowbreak Resource}) \\*
+\textbf{Petición:} Path Variable \texttt{vehicleId} & \textbf{Respuesta:} 200 OK (\texttt{Vehicle\allowbreak Latest\allowbreak Telemetry\allowbreak Response}) \\*
 \hline
 \textbf{Seguridad y Rol} & Autenticación Bearer JWT con rol de conductor o personal de taller \\*
 \hline
@@ -8092,7 +9719,7 @@ En la @tbl:iot-controllers-and-endpoints se detallan los contratos de comunicaci
 \hline
 \multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak telemetry/\allowbreak vehicle/\allowbreak \{vehicleId\}/\allowbreak history}} \\*
 \hline
-\textbf{Petición:} Parámetros \texttt{from}, \texttt{to}, \texttt{interval} & \textbf{Respuesta:} 200 OK (\texttt{List<Telemetry\allowbreak Aggregate\allowbreak Resource>}) \\*
+\textbf{Petición:} Parámetros \texttt{from}, \texttt{to}, \texttt{interval} & \textbf{Respuesta:} 200 OK (\texttt{List<Vehicle\allowbreak Latest\allowbreak Telemetry\allowbreak Response>}) \\*
 \hline
 \textbf{Seguridad y Rol} & Autenticación Bearer JWT con rol técnico o directivo de taller \\*
 \hline
@@ -8102,15 +9729,15 @@ En la @tbl:iot-controllers-and-endpoints se detallan los contratos de comunicaci
 \hline
 \multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak faults}} \\*
 \hline
-\textbf{Petición:} \texttt{Register\allowbreak Vehicle\allowbreak Fault\allowbreak Request} & \textbf{Respuesta:} 201 CREATED (\texttt{Vehicle\allowbreak Fault\allowbreak Resource}) \\*
+\textbf{Petición:} \texttt{Register\allowbreak Vehicle\allowbreak Fault\allowbreak Request} & \textbf{Respuesta:} 201 CREATED (\texttt{Vehicle\allowbreak Fault\allowbreak Response}) con cabecera \texttt{Location} \\*
 \hline
 \textbf{Seguridad y Rol} & Token de Dispositivo o Autenticación Bearer JWT técnica \\*
 \hline
-\textbf{Responsabilidad} & Asienta un código de avería electrónica DTC detectado en la ECU del automóvil clasificando su severidad. \\
+\textbf{Responsabilidad} & Asienta un código de avería electrónica DTC detectado en la computadora vehicular clasificando su severidad. \\
 \hline
 \multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak faults/\allowbreak vehicle/\allowbreak \{vehicleId\}/\allowbreak active}} \\*
 \hline
-\textbf{Petición:} Path Variable \texttt{vehicleId} & \textbf{Respuesta:} 200 OK (\texttt{List<Vehicle\allowbreak Fault\allowbreak Resource>}) \\*
+\textbf{Petición:} Path Variable \texttt{vehicleId} & \textbf{Respuesta:} 200 OK (\texttt{List<Vehicle\allowbreak Fault\allowbreak Response>}) \\*
 \hline
 \textbf{Seguridad y Rol} & Autenticación Bearer JWT con rol de conductor o mecánico de taller \\*
 \hline
@@ -8118,17 +9745,17 @@ En la @tbl:iot-controllers-and-endpoints se detallan los contratos de comunicaci
 \hline
 \multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{PATCH} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak faults/\allowbreak \{id\}/\allowbreak resolve}} \\*
 \hline
-\textbf{Petición:} \texttt{Resolve\allowbreak Vehicle\allowbreak Fault\allowbreak Request} & \textbf{Respuesta:} 200 OK (\texttt{Vehicle\allowbreak Fault\allowbreak Resource}) \\*
+\textbf{Petición:} Path Variable \texttt{id} & \textbf{Respuesta:} 200 OK (\texttt{Vehicle\allowbreak Fault\allowbreak Response}) \\*
 \hline
 \textbf{Seguridad y Rol} & Autenticación Bearer JWT con rol técnico \texttt{ROLE\_WORKSHOP\_TECHNICIAN} \\*
 \hline
-\textbf{Responsabilidad} & Marca una avería electrónica como resuelta vinculando la orden de trabajo de mantenimiento efectuada. \\
+\textbf{Responsabilidad} & Marca una avería electrónica como resuelta vinculando la subsanación mecánica efectuada en el taller. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Controlador REST:} Predictive\allowbreak Alerts\allowbreak Controller} \\*
 \hline
 \multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak alerts/\allowbreak tenant}} \\*
 \hline
-\textbf{Petición:} Parámetros \texttt{severity}, \texttt{status} & \textbf{Respuesta:} 200 OK (\texttt{List<Predictive\allowbreak Alert\allowbreak Resource>}) \\*
+\textbf{Petición:} Parámetros \texttt{severity}, \texttt{status} & \textbf{Respuesta:} 200 OK (\texttt{List<Predictive\allowbreak Alert\allowbreak Response>}) \\*
 \hline
 \textbf{Seguridad y Rol} & Autenticación Bearer JWT con \texttt{ROLE\_WORKSHOP\_MANAGER} o \texttt{ROLE\_WORKSHOP\_ADMIN} \\*
 \hline
@@ -8136,7 +9763,7 @@ En la @tbl:iot-controllers-and-endpoints se detallan los contratos de comunicaci
 \hline
 \multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak alerts/\allowbreak vehicle/\allowbreak \{vehicleId\}}} \\*
 \hline
-\textbf{Petición:} Path Variable \texttt{vehicleId} & \textbf{Respuesta:} 200 OK (\texttt{List<Predictive\allowbreak Alert\allowbreak Resource>}) \\*
+\textbf{Petición:} Path Variable \texttt{vehicleId} & \textbf{Respuesta:} 200 OK (\texttt{List<Predictive\allowbreak Alert\allowbreak Response>}) \\*
 \hline
 \textbf{Seguridad y Rol} & Autenticación Bearer JWT con rol de conductor o asesor de taller \\*
 \hline
@@ -8144,19 +9771,19 @@ En la @tbl:iot-controllers-and-endpoints se detallan los contratos de comunicaci
 \hline
 \multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{PATCH} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak alerts/\allowbreak \{id\}/\allowbreak acknowledge}} \\*
 \hline
-\textbf{Petición:} Path Variable \texttt{id} & \textbf{Respuesta:} 200 OK (\texttt{Predictive\allowbreak Alert\allowbreak Resource}) \\*
+\textbf{Petición:} Path Variable \texttt{id} & \textbf{Respuesta:} 200 OK (\texttt{Predictive\allowbreak Alert\allowbreak Response}) \\*
 \hline
 \textbf{Seguridad y Rol} & Autenticación Bearer JWT con rol de personal técnico o asesor \\*
 \hline
 \textbf{Responsabilidad} & Registra el acuse de recibo de la alerta predictiva confirmando que el personal del taller ha tomado conocimiento. \\
 \hline
-\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak alerts/\allowbreak \{id\}/\allowbreak dismiss}} \\*
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{POST} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak alerts/\allowbreak \{id\}/\allowbreak convert-to-appointment}} \\*
 \hline
-\textbf{Petición:} \texttt{Dismiss\allowbreak Alert\allowbreak Request} & \textbf{Respuesta:} 200 OK (\texttt{Predictive\allowbreak Alert\allowbreak Resource}) \\*
+\textbf{Petición:} Path Variable \texttt{id} & \textbf{Respuesta:} 200 OK (\texttt{Predictive\allowbreak Alert\allowbreak Response}) \\*
 \hline
-\textbf{Seguridad y Rol} & Autenticación Bearer JWT con rol directivo \texttt{ROLE\_WORKSHOP\_MANAGER} \\*
+\textbf{Seguridad y Rol} & Autenticación Bearer JWT con rol de asesor de servicio \\*
 \hline
-\textbf{Responsabilidad} & Desestima una sugerencia de mantenimiento registrando la justificación técnica que sustenta el descarte. \\
+\textbf{Responsabilidad} & Canaliza la alerta predictiva hacia la programación de cita de mantenimiento preventivo en los módulos de CRM y MRO. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Controlador REST:} Vehicle\allowbreak Health\allowbreak Reports\allowbreak Controller} \\*
 \hline
@@ -8178,11 +9805,11 @@ En la @tbl:iot-controllers-and-endpoints se detallan los contratos de comunicaci
 \hline
 \multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak vehicles/\allowbreak \{vehicleId\}/\allowbreak health-reports/\allowbreak latest}} \\*
 \hline
-\textbf{Petición:} Path Variable \texttt{vehicleId} & \textbf{Respuesta:} 200 OK (\texttt{Vehicle\allowbreak Health\allowbreak Report\allowbreak Resource}) \\*
+\textbf{Petición:} Path Variable \texttt{vehicleId} & \textbf{Respuesta:} 200 OK (\texttt{Health\allowbreak Report\allowbreak Created\allowbreak Response}) \\*
 \hline
 \textbf{Seguridad y Rol} & Autenticación Bearer JWT con rol técnico, asesor de servicio o conductor \\*
 \hline
-\textbf{Responsabilidad} & Recupera el último dictamen consolidado de salud automotriz con desglose por subsistemas, riesgos mecánicos y acciones de mantenimiento sugeridas. \\
+\textbf{Responsabilidad} & Recupera el último dictamen consolidado de salud automotriz con resumen pericial, índice global y enlaces de acceso. \\
 \hline
 \multicolumn{2}{|>{\raggedright\arraybackslash}p{15.4cm}|}{\textbf{GET} \quad \texttt{/\allowbreak api/\allowbreak v1/\allowbreak iot/\allowbreak vehicles/\allowbreak \{vehicleId\}/\allowbreak health-reports/\allowbreak \{reportId\}/\allowbreak pdf}} \\*
 \hline
@@ -8190,18 +9817,21 @@ En la @tbl:iot-controllers-and-endpoints se detallan los contratos de comunicaci
 \hline
 \textbf{Seguridad y Rol} & Autenticación Bearer JWT con rol técnico, asesor de servicio o conductor \\*
 \hline
-\textbf{Responsabilidad} & Compila tipográficamente y transmite el informe pericial en formato binario PDF aplicando maquetación institucional con membrete corporativo y semáforos de estado. \\
+\textbf{Responsabilidad} & Renderiza y transmite el informe pericial en formato binario PDF aplicando maquetación institucional con membrete corporativo y semáforos de estado. \\
 \hline
 \end{longtable}
+\renewcommand{\arraystretch}{1.0}
 *Nota.* Especificación formal de controladores REST y endpoints de comunicación del Bounded Context IoT Telemetry \& Predictive Maintenance.
 
 La transferencia de información a través del perímetro del sistema se estructura mediante contratos de datos inmutables modelados como registros de Java:
 
-- **Contratos de Solicitud**: Capturan las intenciones del cliente incorporando validaciones declarativas perimetrales que garantizan la integridad de identificadores físicos, cotas cinemáticas y formatos normalizados de diagnóstico vehicular.
+- **Contratos de Petición**: Capturan las intenciones del usuario o dispositivos telemáticos validando identificadores vehiculares obligatorios, rangos de magnitudes físicas, estructuras SAE J2012 de códigos DTC y límites temporales de análisis.
 
-- **Contratos de Respuesta**: Encapsulan proyecciones de información optimizadas para visualización en tableros de control web y cuadros de mando en dispositivos móviles, omitiendo metadatos irrelevantes y calculando agregados analíticos para minimizar el consumo de ancho de banda celular.
+- **Contratos de Respuesta**: Encapsulan proyecciones optimizadas para visualización en aplicaciones web y móviles, serializando estados operativos, historiales diagnósticos y acuses de recibo perimetrales.
 
-En la @tbl:iot-resources-dtos se especifican los atributos estructurales y las reglas de validación declarativa que rigen los recursos DTO de entrada y salida de este contexto.
+- **Contratos DTO de Fachada**: Definen estructuras inmutables de intercambio en memoria para proveer a CRM y Workshop Operations con datos telemáticos consolidados sin acoplar los contextos colaboradores a la persistencia interna.
+
+En la @tbl:iot-resources-dtos se especifican los atributos estructurales y las reglas de validación declarativa que rigen los recursos DTO de petición, respuesta y contratos de fachada de este contexto.
 
 \renewcommand{\arraystretch}{1.25}\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
 \caption{Recursos DTO de Entrada y Salida del Bounded Context IoT Telemetry \& Predictive Maintenance} \label{tbl:iot-resources-dtos} \\
@@ -8213,116 +9843,145 @@ En la @tbl:iot-resources-dtos se especifican los atributos estructurales y las r
 \thfirst{Aspecto de Recurso} & \thcell{Especificación de Atributos e Integridad} \\
 \hline
 \endhead
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Register\allowbreak Device\allowbreak Request \quad (\textit{Categoría:} Petición)} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso REST de Petición:} Register\allowbreak Device\allowbreak Request} \\*
+\hline
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\*
 \hline
 \textbf{Atributos Principales} & \texttt{deviceIdentifier}, \texttt{connectionType}, \texttt{hardwareModel}, \texttt{firmwareVersion} \\*
 \hline
-\textbf{Validación de Integridad} & Anotación \texttt{@NotBlank} para deviceIdentifier con validación de formato MAC Address o IMEI, \texttt{@NotBlank} con patrón \texttt{@Pattern(regexp = "\textasciicircum (BLUETOOTH\_BLE|SIM\_CELLULAR|WIFI)\$")} para connectionType y restricciones de longitud máxima de cien caracteres para modelo y versión. \\
+\textbf{Validación de Integridad} & Anotación \texttt{@NotBlank} para deviceIdentifier con validación de patrón MAC Address o IMEI, \texttt{@NotBlank} para connectionType admitiendo BLUETOOTH\_BLE, SIM\_CELLULAR o WIFI, y longitud máxima de cien caracteres para modelo y versión de firmware. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Install\allowbreak Device\allowbreak Request \quad (\textit{Categoría:} Petición)} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso REST de Petición:} Update\allowbreak Device\allowbreak Status\allowbreak Request} \\*
+\hline
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{status} \\*
+\hline
+\textbf{Validación de Integridad} & Anotación \texttt{@NotBlank} y validación de patrón coincidente con valores del enum DeviceStatus como AVAILABLE, INSTALLED, IN\_MAINTENANCE, BROKEN o DECOMMISSIONED. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso REST de Petición:} Install\allowbreak Device\allowbreak Request} \\*
+\hline
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\*
 \hline
 \textbf{Atributos Principales} & \texttt{deviceId}, \texttt{vehicleId}, \texttt{currentOdometerKm} \\*
 \hline
-\textbf{Validación de Integridad} & Identificadores obligatorios \texttt{@NotNull} en formato UUID para dispositivo y vehículo, y lectura de odómetro no negativa validada con \texttt{@Min(0)}. \\
+\textbf{Validación de Integridad} & Identificadores obligatorios \texttt{@NotNull} en formato UUID para escáner y vehículo, y kilometraje actual de odómetro mayor o igual a cero con anotación \texttt{@Min(0)}. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Uninstall\allowbreak Device\allowbreak Request \quad (\textit{Categoría:} Petición)} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso REST de Petición:} Uninstall\allowbreak Device\allowbreak Request} \\*
 \hline
-\textbf{Atributos Principales} & \texttt{finalOdometerKm}, \texttt{uninstalledTimestamp} \\*
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\*
 \hline
-\textbf{Validación de Integridad} & Odómetro final validado con \texttt{@Min(0)} verificando coherencia de avance respecto a la lectura de inicio, y marca temporal obligatoria \texttt{@NotNull} no posterior al instante de recepción. \\
+\textbf{Atributos Principales} & \texttt{finalOdometerKm}, \texttt{uninstalledAt} \\*
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Telemetry\allowbreak Batch\allowbreak Request \quad (\textit{Categoría:} Petición)} \\*
+\textbf{Validación de Integridad} & Kilometraje final no negativo validado con \texttt{@Min(0)} verificando avance cronológico respecto al odómetro de instalación, e instante de retiro con valor no futuro o nulo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso REST de Petición:} Telemetry\allowbreak Batch\allowbreak Request} \\*
+\hline
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\*
 \hline
 \textbf{Atributos Principales} & \texttt{vehicleId}, \texttt{readings} \\*
 \hline
-\textbf{Validación de Integridad} & Identificador vehicular obligatorio \texttt{@NotNull}, y colección no vacía \texttt{@NotEmpty} con límite superior de cien elementos \texttt{@Size(min = 1, max = 100)} validando cada lectura individual en cascada (\texttt{@Valid}). \\
+\textbf{Validación de Integridad} & Identificador vehicular obligatorio \texttt{@NotNull}, y colección de lecturas no vacía \texttt{@NotEmpty} con límite superior de cien elementos \texttt{@Size(min = 1, max = 100)}, validando cada elemento en cascada con \texttt{@Valid}. Cada lectura incluye marca temporal, coordenadas opcionales, velocidad acotada a trescientos cincuenta kilómetros por hora, temperatura de motor obligatoria entre menos cuarenta y ciento cincuenta grados Celsius, régimen de giro no negativo, voltaje y nivel de combustible. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Telemetry\allowbreak Reading\allowbreak Item\allowbreak Dto \quad (\textit{Categoría:} Petición)} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso REST de Petición:} Register\allowbreak Vehicle\allowbreak Fault\allowbreak Request} \\*
 \hline
-\textbf{Atributos Principales} & \texttt{timestamp}, \texttt{latitude}, \texttt{longitude}, \texttt{speedKmh}, \texttt{engineTempCelsius}, \texttt{engineRpm}, \texttt{fuelPercentage}, \texttt{batteryVoltage} \\*
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\*
 \hline
-\textbf{Validación de Integridad} & Marca temporal obligatoria \texttt{@NotNull}, velocidad no negativa con cota física \texttt{@Min(0) @Max(350)}, temperatura de motor obligatoria \texttt{@NotNull} entre -40 y 150 grados Celsius, régimen de giro \texttt{@Min(0) @Max(12000)} y niveles porcentuales y de tensión en rangos verosímiles. \\
+\textbf{Atributos Principales} & \texttt{vehicleId}, \texttt{dtcCode}, \texttt{severity}, \texttt{description} \\*
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Register\allowbreak Vehicle\allowbreak Fault\allowbreak Request \quad (\textit{Categoría:} Petición)} \\*
+\textbf{Validación de Integridad} & Identificador vehicular \texttt{@NotNull}, código de avería \texttt{@NotBlank} validado con expresión regular \texttt{@Pattern(regexp = "	extasciicircum [PCBU][0-9]\{4\}\$")} según la norma SAE J2012, severidad obligatoria no vacía y descripción opcional de hasta quinientos caracteres. \\
 \hline
-\textbf{Atributos Principales} & \texttt{vehicleId}, \texttt{dtcCode} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso REST de Petición:} Generate\allowbreak Health\allowbreak Report\allowbreak Request} \\*
 \hline
-\textbf{Validación de Integridad} & Identificador vehicular obligatorio \texttt{@NotNull}, y código de avería \texttt{@NotBlank} validado mediante expresión regular \texttt{@Pattern(regexp = "\textasciicircum [PCBU][0-9]\{4\}\$")} según la norma internacional SAE J2012. \\
-\hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Resolve\allowbreak Vehicle\allowbreak Fault\allowbreak Request \quad (\textit{Categoría:} Petición)} \\*
-\hline
-\textbf{Atributos Principales} & \texttt{resolutionNotes}, \texttt{workOrderId} \\*
-\hline
-\textbf{Validación de Integridad} & Notas técnicas descriptivas obligatorias \texttt{@NotBlank} con longitud mínima de cinco caracteres y referencia opcional a orden de trabajo en formato UUID. \\
-\hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Dismiss\allowbreak Alert\allowbreak Request \quad (\textit{Categoría:} Petición)} \\*
-\hline
-\textbf{Atributos Principales} & \texttt{dismissalReason} \\*
-\hline
-\textbf{Validación de Integridad} & Justificación de descarte obligatoria \texttt{@NotBlank} con restricción de longitud entre diez y quinientos caracteres \texttt{@Size(min = 10, max = 500)}. \\
-\hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Generate\allowbreak Health\allowbreak Report\allowbreak Request \quad (\textit{Categoría:} Petición)} \\*
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak requests} \\*
 \hline
 \textbf{Atributos Principales} & \texttt{daysToAnalyze}, \texttt{includeResolvedDtcHistory}, \texttt{triggerReason} \\*
 \hline
-\textbf{Validación de Integridad} & Parámetro de días de análisis restringido entre siete y noventa con anotaciones \texttt{@Min(7)} y \texttt{@Max(90)}, indicador booleano de historial y motivo de activación contextual. \\
+\textbf{Validación de Integridad} & Ventana temporal de análisis restringida entre siete y noventa días con anotaciones \texttt{@Min(7)} y \texttt{@Max(90)}, indicador booleano de inclusión de historial resuelto y motivo contextual de generación. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Obd2\allowbreak Device\allowbreak Resource \quad (\textit{Categoría:} Respuesta)} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso REST de Respuesta:} Obd2\allowbreak Device\allowbreak Response} \\*
 \hline
-\textbf{Atributos Principales} & \texttt{id}, \texttt{tenantId}, \texttt{deviceIdentifier}, \texttt{connectionType}, \texttt{hardwareModel}, \texttt{firmwareVersion}, \texttt{status}, \texttt{registeredAt} \\*
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\*
 \hline
-\textbf{Estructura y Serialización} & Encapsula los metadatos completos del hardware telemático denormalizando denominaciones de conectividad y estado para clientes web y móviles. \\
+\textbf{Atributos Principales} & \texttt{id}, \texttt{tenantId}, \texttt{deviceIdentifier}, \texttt{connectionType}, \texttt{status}, \texttt{hardwareModel}, \texttt{firmwareVersion}, \texttt{createdAt} \\*
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Device\allowbreak Installation\allowbreak Resource \quad (\textit{Categoría:} Respuesta)} \\*
+\textbf{Estructura y Serialización} & Encapsula los metadatos completos del hardware telemático denormalizando denominaciones de conectividad y estado operativo para clientes web y aplicaciones móviles. \\
 \hline
-\textbf{Atributos Principales} & \texttt{id}, \texttt{deviceId}, \texttt{vehicleId}, \texttt{installedAt}, \texttt{uninstalledAt}, \texttt{startOdometerKm}, \texttt{endOdometerKm}, \texttt{isActive} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso REST de Respuesta:} Device\allowbreak Installation\allowbreak Response} \\*
 \hline
-\textbf{Estructura y Serialización} & Proyección inmutable de la sesión de montaje con marcas temporales odómetros y bandera de vigencia para control de flotas. \\
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\*
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Telemetry\allowbreak Ingestion\allowbreak Ack\allowbreak Resource \quad (\textit{Categoría:} Respuesta)} \\*
+\textbf{Atributos Principales} & \texttt{id}, \texttt{deviceId}, \texttt{vehicleId}, \texttt{tenantId}, \texttt{installedAt}, \texttt{uninstalledAt}, \texttt{initialOdometerKm}, \texttt{finalOdometerKm}, \texttt{isActive} \\*
 \hline
-\textbf{Atributos Principales} & \texttt{vehicleId}, \texttt{ingestedCount}, \texttt{anomalyDetected}, \texttt{alertMessage}, \texttt{processedAt} \\*
+\textbf{Estructura y Serialización} & Proyección inmutable de la sesión de montaje telemático con marcas temporales, odómetros de inicio y retiro, y bandera booleana de vigencia activa. \\
 \hline
-\textbf{Estructura y Serialización} & Confirmación perimetral expedita que notifica la recepción persistente del lote y si se gatillaron alertas preventivas. \\
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso REST de Respuesta:} Telemetry\allowbreak Ingestion\allowbreak Ack\allowbreak Response} \\*
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Vehicle\allowbreak Latest\allowbreak Telemetry\allowbreak Resource \quad (\textit{Categoría:} Respuesta)} \\*
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{vehicleId}, \texttt{ingestedCount}, \texttt{anomalyDetected}, \texttt{alertMessage} \\*
+\hline
+\textbf{Estructura y Serialización} & Confirmación perimetral inmediata tras la persistencia por bloques en TimescaleDB, informando la cantidad de registros procesados y advertencias generadas en tiempo real. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso REST de Respuesta:} Vehicle\allowbreak Latest\allowbreak Telemetry\allowbreak Response} \\*
+\hline
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\*
 \hline
 \textbf{Atributos Principales} & \texttt{vehicleId}, \texttt{timestamp}, \texttt{latitude}, \texttt{longitude}, \texttt{speedKmh}, \texttt{engineTempCelsius}, \texttt{engineRpm}, \texttt{batteryVoltage}, \texttt{fuelPercentage} \\*
 \hline
-\textbf{Estructura y Serialización} & Tacómetro digital proyectado para cuadros de instrumentos en tiempo real omitiendo campos nulos y optimizando el ancho de banda móvil. \\
+\textbf{Estructura y Serialización} & Tacómetro digital proyectado para cuadros de instrumentos en tiempo real, omitiendo valores nulos para optimizar el consumo de ancho de banda móvil. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Telemetry\allowbreak Aggregate\allowbreak Resource \quad (\textit{Categoría:} Respuesta)} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso REST de Respuesta:} Vehicle\allowbreak Fault\allowbreak Response} \\*
 \hline
-\textbf{Atributos Principales} & \texttt{vehicleId}, \texttt{bucketStart}, \texttt{avgSpeedKmh}, \texttt{maxSpeedKmh}, \texttt{avgEngineTempCelsius}, \texttt{maxEngineTempCelsius}, \texttt{avgEngineRpm}, \texttt{samplesCount} \\*
-\hline
-\textbf{Estructura y Serialización} & Agregación estadística computada mediante funciones nativas de TimescaleDB para gráficas históricas de rendimiento y desgaste. \\
-\hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Vehicle\allowbreak Fault\allowbreak Resource \quad (\textit{Categoría:} Respuesta)} \\*
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\*
 \hline
 \textbf{Atributos Principales} & \texttt{id}, \texttt{vehicleId}, \texttt{dtcCode}, \texttt{severity}, \texttt{description}, \texttt{detectedAt}, \texttt{isResolved}, \texttt{resolvedAt} \\*
 \hline
-\textbf{Estructura y Serialización} & Diagnóstico electrónico enriquecido con catálogo oficial SAE J2012 para orientación mecánica precisa en el taller. \\
+\textbf{Estructura y Serialización} & Ficha de avería electrónica vehicular complementada con el estándar SAE J2012, marcas cronológicas de detección y estado formal de subsanación técnica. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Predictive\allowbreak Alert\allowbreak Resource \quad (\textit{Categoría:} Respuesta)} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso REST de Respuesta:} Predictive\allowbreak Alert\allowbreak Response} \\*
+\hline
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\*
 \hline
 \textbf{Atributos Principales} & \texttt{id}, \texttt{vehicleId}, \texttt{recommendedServiceId}, \texttt{alertType}, \texttt{confidenceScore}, \texttt{message}, \texttt{status}, \texttt{createdAt} \\*
 \hline
-\textbf{Estructura y Serialización} & Advertencia predictiva con índice de confianza algorítmico y servicio de mantenimiento recomendado para presupuestación proactiva. \\
+\textbf{Estructura y Serialización} & Advertencia predictiva que vincula el vehículo con un servicio de mantenimiento sugerido, denormalizando la probabilidad de falla y el mensaje de orientación. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Health\allowbreak Report\allowbreak Created\allowbreak Response \quad (\textit{Categoría:} Respuesta)} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso REST de Respuesta:} Health\allowbreak Report\allowbreak Created\allowbreak Response} \\*
+\hline
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak rest.\allowbreak resources.\allowbreak responses} \\*
 \hline
 \textbf{Atributos Principales} & \texttt{reportId}, \texttt{vehicleId}, \texttt{overallHealthScore}, \texttt{executiveSummary}, \texttt{totalRisksDetected}, \texttt{generatedAt}, \texttt{jsonResourceUrl}, \texttt{pdfDownloadUrl} \\*
 \hline
-\textbf{Estructura y Serialización} & Confirmación de dictamen pericial generado con puntuación global de salud, resumen ejecutivo y enlaces canónicos de acceso REST y descarga documental PDF. \\
+\textbf{Estructura y Serialización} & Confirmación perimetral del dictamen emitido por el motor de inteligencia artificial, integrando métrica consolidada de salud, resumen ejecutivo y enlaces de descarga. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Recurso DTO:} Vehicle\allowbreak Health\allowbreak Report\allowbreak Resource \quad (\textit{Categoría:} Respuesta)} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{DTO de Integración de Fachada:} Vehicle\allowbreak Latest\allowbreak Telemetry\allowbreak Dto} \\*
 \hline
-\textbf{Atributos Principales} & \texttt{reportId}, \texttt{vehicleId}, \texttt{overallHealthScore}, \texttt{executiveSummary}, \texttt{subsystemEvaluations}, \texttt{predictiveRisks}, \texttt{recommendedActions}, \texttt{dtcCorrelations}, \texttt{generatedAt} \\*
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak acl.\allowbreak dto} \\*
 \hline
-\textbf{Estructura y Serialización} & Representación estructurada completa del informe de salud mecánica para cuadros de mando web y aplicaciones móviles, conteniendo evaluaciones tipadas por subsistema, correlaciones de averías y acciones preventivas. \\
+\textbf{Atributos Principales} & \texttt{vehicleId}, \texttt{timestamp}, \texttt{speedKmh}, \texttt{engineTempCelsius}, \texttt{engineRpm}, \texttt{batteryVoltage} \\*
+\hline
+\textbf{Estructura y Serialización} & Objeto inmutable de intercambio en memoria para abastecer a CRM y Workshop Operations (MRO) con la lectura instantánea vehicular sin dependencia de TimescaleDB. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{DTO de Integración de Fachada:} Active\allowbreak Vehicle\allowbreak Faults\allowbreak Dto} \\*
+\hline
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak acl.\allowbreak dto} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{faultId}, \texttt{dtcCode}, \texttt{severity}, \texttt{description}, \texttt{detectedAt} \\*
+\hline
+\textbf{Estructura y Serialización} & Objeto inmutable perimetral para precargar averías electrónicas activas en órdenes de trabajo de taller al momento de la recepción del vehículo en patio. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{DTO de Integración de Fachada:} Vehicle\allowbreak Telemetry\allowbreak Health\allowbreak Dto} \\*
+\hline
+\textbf{Paquete Canónico} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak interfaces.\allowbreak acl.\allowbreak dto} \\*
+\hline
+\textbf{Atributos Principales} & \texttt{vehicleId}, \texttt{overallHealthScore}, \texttt{healthStatusTrafficLight}, \texttt{activeFaultCount}, \texttt{hasPendingPredictiveAlerts} \\*
+\hline
+\textbf{Estructura y Serialización} & Objeto inmutable de resumen que consolida la puntuación de salud de cero a cien, estado de semáforo automotriz y recuentos de anomalías para tableros de flota. \\
 \hline
 \end{longtable}
-*Nota.* Recursos DTO inmutables de entrada y salida con validación declarativa perimetral del Bounded Context IoT Telemetry \& Predictive Maintenance.
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Recursos DTO inmutables de petición, respuesta y contratos de fachada con validación perimetral declarativa del Bounded Context IoT Telemetry \& Predictive Maintenance.
 
 Para asegurar un desacoplamiento riguroso entre las estructuras de transferencia y el modelo táctico de dominio, la capa incorpora ensambladores dedicados de recursos:
 
@@ -8330,7 +9989,7 @@ Para asegurar un desacoplamiento riguroso entre las estructuras de transferencia
 
 - **DeviceInstallationResourceAssembler**: Traduce el estado de las sesiones de montaje físico hacia contratos enriquecidos con métricas de kilometraje y gestiona la conversión de comandos de instalación y desinstalación.
 
-- **TelemetryResourceAssembler**: Proyecta registros individuales hacia tacómetros en tiempo real, convierte proyecciones nativas de cubos temporales en agregaciones analíticas y formula comandos de ingestión en lote.
+- **TelemetryResourceAssembler**: Proyecta registros individuales hacia tacómetros en tiempo real, convierte lecturas continuas y formula comandos de ingestión en lote.
 
 - **VehicleFaultResourceAssembler**: Cruza las fallas registradas con el catálogo estándar de diagnóstico automotriz para entregar recursos comprensibles para los técnicos de taller.
 
@@ -8343,71 +10002,64 @@ En la @tbl:iot-resource-assemblers se describen los ensambladores de recursos RE
 \renewcommand{\arraystretch}{1.25}\begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
 \caption{Ensambladores de Recursos REST de IoT Telemetry \& Predictive Maintenance} \label{tbl:iot-resource-assemblers} \\
 \hline
-\thfirst{Ensamblador y Tipo} & \thcell{Método de Transformación y Flujo de Datos} \\
+\thfirst{Aspecto Ensamblador} & \thcell{Firma y Transformación de Tipos} \\
 \hline
 \endfirsthead
 \hline
-\thfirst{Ensamblador y Tipo} & \thcell{Método de Transformación y Flujo de Datos} \\
+\thfirst{Aspecto Ensamblador} & \thcell{Firma y Transformación de Tipos} \\
 \hline
 \endhead
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador de Recursos:} Obd2\allowbreak Device\allowbreak Resource\allowbreak Assembler} \\*
 \hline
-\textbf{toModel(Obd2Device)} & Transforma el agregado Obd2Device en la representación de salida Obd2DeviceResource. Desempaqueta identificadores tipados y serializa estados operativos para consumo por aplicaciones web y móviles. \\*
+\textbf{toResource(Obd2Device)} & Transforma el agregado Obd2Device en la respuesta Obd2DeviceResponse, desempaquetando identificadores fuertemente tipados DeviceId y normalizando estados operativos. \\*
 \hline
-\textbf{toCommand(Register\allowbreak Device\allowbreak Request, UUID)} & Convierte la carga útil HTTP en el comando de aplicación RegisterObd2DeviceCommand inyectando el identificador del taller autenticado. \\*
+\textbf{toCommand(RegisterDeviceRequest, UUID)} & Convierte la solicitud HTTP en el comando RegisterObd2DeviceCommand asociando el identificador del taller mecánico autenticado. \\*
 \hline
 \textbf{Responsabilidad} & Aísla los agregados de hardware de las representaciones de serialización perimetral de inventario técnico. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador de Recursos:} Device\allowbreak Installation\allowbreak Resource\allowbreak Assembler} \\*
 \hline
-\textbf{toModel(Device\allowbreak Installation)} & Mapea la entidad de montaje telemático hacia DeviceInstallationResource proyectando marcas temporales odómetros inicial y final y estado de vigencia. \\*
+\textbf{toResource(DeviceInstallation)} & Mapea la entidad DeviceInstallation hacia DeviceInstallationResponse proyectando marcas temporales, odómetros inicial y final, y estado de vigencia activa. \\*
 \hline
-\textbf{toInstallCommand(Install\allowbreak Device\allowbreak Request)} & Transforma la solicitud HTTP en InstallDeviceOnVehicleCommand extrayendo los identificadores UUID de escáner y vehículo. \\*
+\textbf{toInstallCommand(InstallDeviceRequest)} & Transforma la solicitud perimetral en InstallDeviceCommand extrayendo los identificadores UUID de escáner y vehículo. \\*
 \hline
-\textbf{toUninstallCommand(UUID, Uninstall\allowbreak Device\allowbreak Request)} & Transforma la solicitud perimetral en UninstallDeviceCommand validando la consistencia temporal y kilométrica del desmonte. \\*
+\textbf{toUninstallCommand(UUID, UninstallDeviceRequest)} & Transforma la petición en UninstallDeviceCommand verificando consistencia temporal y kilométrica del desmonte. \\*
 \hline
-\textbf{Responsabilidad} & Gobierna el mapeo bidireccional entre sesiones de instalación en vehículo y contratos de transporte perimetral. \\
+\textbf{Responsabilidad} & Gobierna el mapeo bidireccional entre sesiones de montaje físico en vehículo y contratos de transporte perimetral. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador de Recursos:} Telemetry\allowbreak Resource\allowbreak Assembler} \\*
 \hline
-\textbf{toLatestResource(Telemetry\allowbreak Record)} & Mapea el registro más reciente de la serie temporal hacia VehicleLatestTelemetryResource formateando magnitudes cinemáticas y térmicas para visualización en tacómetro digital. \\*
+\textbf{toLatestResponse(TelemetryRecord)} & Mapea el registro más reciente de la serie temporal hacia VehicleLatestTelemetryResponse formateando magnitudes cinemáticas y térmicas para visualización en tacómetro digital. \\*
 \hline
-\textbf{toAggregateResource(Telemetry\allowbreak Bucket\allowbreak Projection)} & Transforma proyecciones nativas de cubos temporales de TimescaleDB hacia instancias de TelemetryAggregateResource para análisis histórico. \\*
+\textbf{toBatchCommand(TelemetryBatchRequest)} & Mapea el lote de lecturas sensoriales de transferencia hacia el comando IngestTelemetryBatchCommand validando marcas temporales no futuras. \\*
 \hline
-\textbf{toBatchCommand(Telemetry\allowbreak Batch\allowbreak Request)} & Mapea el lote de lecturas sensoriales de transferencia hacia el comando IngestTelemetryBatchCommand validando marcas temporales no futuras. \\*
-\hline
-\textbf{Responsabilidad} & Desacopla la estructura física de series temporales de TimescaleDB de los formatos de transporte de baja latencia. \\
+\textbf{Responsabilidad} & Desacopla la estructura física de series temporales en TimescaleDB de los formatos de transporte perimetral de baja latencia. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador de Recursos:} Vehicle\allowbreak Fault\allowbreak Resource\allowbreak Assembler} \\*
 \hline
-\textbf{toModel(Vehicle\allowbreak Fault, Dtc\allowbreak Catalog\allowbreak Entry)} & Mapea la entidad VehicleFault fusionándola con la descripción formal del catálogo oficial SAE J2012 para generar VehicleFaultResource. \\*
+\textbf{toResource(VehicleFault, DtcCatalogEntry)} & Mapea la entidad VehicleFault complementándola con la descripción formal del catálogo oficial SAE J2012 para generar VehicleFaultResponse. \\*
 \hline
-\textbf{toRegisterCommand(Register\allowbreak Vehicle\allowbreak Fault\allowbreak Request)} & Construye RegisterVehicleFaultCommand a partir de la solicitud perimetral validando el prefijo del sistema automotriz afectado. \\*
+\textbf{toCommand(RegisterVehicleFaultRequest)} & Construye RegisterVehicleFaultCommand a partir de la solicitud perimetral validando el formato formal del código DTC. \\*
 \hline
-\textbf{toResolveCommand(UUID, Resolve\allowbreak Vehicle\allowbreak Fault\allowbreak Request)} & Mapea la petición de resolución técnica hacia ResolveVehicleFaultCommand asociando notas y orden de trabajo. \\*
-\hline
-\textbf{Responsabilidad} & Centraliza la conversión entre fallas de computadoras de a bordo y fichas diagnósticas enriquecidas para mecánicos. \\
+\textbf{Responsabilidad} & Centraliza la conversión entre averías de computadoras de a bordo y fichas diagnósticas enriquecidas para el personal técnico. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador de Recursos:} Predictive\allowbreak Alert\allowbreak Resource\allowbreak Assembler} \\*
 \hline
-\textbf{toModel(Predictive\allowbreak Alert)} & Transforma el agregado PredictiveAlert hacia PredictiveAlertResource denormalizando puntuaciones de confianza y descripciones preventivas. \\*
-\hline
-\textbf{toDismissCommand(UUID, Dismiss\allowbreak Alert\allowbreak Request, UUID)} & Construye DismissPredictiveAlertCommand capturando el identificador del colaborador técnico y la justificación obligatoria. \\*
+\textbf{toResource(PredictiveAlert)} & Transforma el agregado PredictiveAlert hacia PredictiveAlertResponse denormalizando puntuaciones de confianza y descripciones de servicio preventivo. \\*
 \hline
 \textbf{Responsabilidad} & Proyecta advertencias matemáticas de mantenimiento predictivo hacia representaciones claras para asesores de taller. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador de Recursos:} Vehicle\allowbreak Health\allowbreak Report\allowbreak Resource\allowbreak Assembler} \\*
 \hline
-\textbf{toCreatedResponse(report, vehicleId, jsonUrl, pdfUrl)} & Construye la respuesta HealthReportCreatedResponse proveyendo el identificador generado, índice consolidado y las URLs canónicas de consulta REST y descarga PDF. \\*
-\hline
-\textbf{toModel(report, vehicleId)} & Transforma el dictamen analítico en VehicleHealthReportResource estructurando evaluaciones de subsistemas, riesgos predictivos y acciones recomendadas. \\*
+\textbf{toCreatedResponse(report, vehicleId, jsonUrl, pdfUrl)} & Construye la respuesta HealthReportCreatedResponse proveyendo el identificador generado, índice consolidado y las rutas canónicas de consulta REST y descarga PDF. \\*
 \hline
 \textbf{toGenerateCommand(vehicleId, request)} & Mapea la petición perimetral hacia GenerateVehicleHealthReportCommand aplicando valores por defecto para ventana temporal e historial de averías. \\*
 \hline
 \textbf{Responsabilidad} & Desacopla la estructura analítica generada por el motor de inteligencia artificial de las representaciones de serialización y enlace perimetral. \\
 \hline
 \end{longtable}
-*Nota.* Ensambladores de recursos REST y métodos de transformación bidireccional de IoT Telemetry \& Predictive Maintenance.
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Ensambladores de recursos REST y métodos de transformación bidireccional ubicados en interfaces.rest.transform de IoT Telemetry \& Predictive Maintenance.
 
 La integración sincrónica intermodular se canaliza a través de la Fachada de Contexto Abierto **IoTTelemetryContextFacade**. Este componente actúa como una capa de prevención de corrupción ante los módulos consumidores de la plataforma, evitando que la complejidad de las tramas sensoriales o la tecnología de base de datos de series temporales trascienda hacia el resto del sistema.
 
@@ -8423,23 +10075,23 @@ En la @tbl:iot-facade-methods se presentan las firmas públicas, tipos de retorn
 \thfirst{Firma del Método} & \thcell{Contrato, Retorno y Módulos Consumidores} \\
 \hline
 \endhead
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método OHS:} getVehicle\allowbreak Latest\allowbreak Telemetry(UUID vehicleId)} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método OHS:} getVehicle\allowbreak Latest\allowbreak Telemetry(VehicleId vehicleId)} \\*
 \hline
-\textbf{Tipo de Retorno} & \texttt{Optional<Vehicle\allowbreak Telemetry\allowbreak Snapshot\allowbreak Dto>} \\*
+\textbf{Tipo de Retorno} & \texttt{Optional<Vehicle\allowbreak Latest\allowbreak Telemetry\allowbreak Dto>} \\*
 \hline
 \textbf{Módulos Consumidores} & Customer and Fleet Management (CRM), Workshop Operations (MRO) \\*
 \hline
-\textbf{Propósito y Efecto} & Provee la última lectura cinemática y térmica registrada del vehículo incluyendo velocidad odómetro digital temperatura y voltaje de batería. Permite a los asesores de servicio visualizar el estado operativo instantáneo al momento de recibir el vehículo en patio. \\
+\textbf{Propósito y Efecto} & Provee la última lectura cinemática y térmica registrada del vehículo incluyendo velocidad, temperatura de motor, régimen de giro y voltaje de batería. Permite a los asesores de servicio visualizar el estado operativo instantáneo en el mostrador del taller. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método OHS:} getActive\allowbreak Faults\allowbreak ForVehicle(UUID vehicleId)} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método OHS:} getActive\allowbreak Faults\allowbreak ForVehicle(VehicleId vehicleId)} \\*
 \hline
-\textbf{Tipo de Retorno} & \texttt{List<Vehicle\allowbreak Dtc\allowbreak Fault\allowbreak Dto>} \\*
+\textbf{Tipo de Retorno} & \texttt{List<Active\allowbreak Vehicle\allowbreak Faults\allowbreak Dto>} \\*
 \hline
 \textbf{Módulos Consumidores} & Workshop Operations (MRO) \\*
 \hline
-\textbf{Propósito y Efecto} & Recupera la lista de averías electrónicas activas y códigos DTC no subsanados registrados en la computadora de a bordo. Se invoca automáticamente al aperturar una Orden de Trabajo precargando los hallazgos para inspección en foso. \\
+\textbf{Propósito y Efecto} & Recupera la lista de averías electrónicas activas y códigos DTC no subsanados registrados en la computadora de a bordo. Se invoca automáticamente al aperturar una Orden de Trabajo precargando los hallazgos mecánicos para inspección en foso. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método OHS:} hasActive\allowbreak Device\allowbreak Installation(UUID vehicleId)} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método OHS:} hasActive\allowbreak Device\allowbreak Installation(VehicleId vehicleId)} \\*
 \hline
 \textbf{Tipo de Retorno} & \texttt{boolean} \\*
 \hline
@@ -8447,20 +10099,21 @@ En la @tbl:iot-facade-methods se presentan las firmas públicas, tipos de retorn
 \hline
 \textbf{Propósito y Efecto} & Verifica si el vehículo dispone de un escáner OBD-II enlazado y transmitiendo en tiempo real. Habilita o restringe en la interfaz de usuario del conductor las funciones de monitoreo remoto y tacómetro digital continuo. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método OHS:} calculate\allowbreak Vehicle\allowbreak Health\allowbreak Score(UUID vehicleId)} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Método OHS:} getVehicle\allowbreak Telemetry\allowbreak Health(VehicleId vehicleId)} \\*
 \hline
-\textbf{Tipo de Retorno} & \texttt{int} (Puntuación entera de 0 a 100) \\*
+\textbf{Tipo de Retorno} & \texttt{Vehicle\allowbreak Telemetry\allowbreak Health\allowbreak Dto} \\*
 \hline
 \textbf{Módulos Consumidores} & Customer and Fleet Management (CRM) \\*
 \hline
-\textbf{Propósito y Efecto} & Computa un índice integral de salud mecánica a partir de la gravedad de fallas DTC acumuladas desvíos térmicos e irregularidades cinemáticas. Utilizado en paneles de control de flotas y programas de fidelización comercial de mantenimiento preventivo. \\
+\textbf{Propósito y Efecto} & Provee el diagnóstico global de salud mecánica consolidando el índice numérico de cero a cien, el indicador semafórico, el conteo de averías activas y la existencia de alertas predictivas pendientes para cuadros de mando de flotas. \\
 \hline
 \end{longtable}
+\renewcommand{\arraystretch}{1.0}
 *Nota.* Especificación formal de los métodos públicos expuestos por la Fachada Inbound OHS IoTTelemetryContextFacade.
 
 La propagación de eventos asíncronos garantiza la sincronización eventual del ecosistema automotriz ante contingencias de telemetría y cambios en la vida operativa de los vehículos:
 
-- **Eventos Publicados**: Notifican a los contextos de CRM y MRO la detección de anomalías críticas, la generación de oportunidades de servicio preventivo y el registro de códigos de falla para agilizar la atención técnica.
+- **Eventos Publicados**: Notifican a los contextos de CRM y MRO la detección de anomalías críticas, la generación de oportunidades de servicio preventivo, el registro de códigos de falla y la disponibilidad de nuevos reportes de salud mecánica con inteligencia artificial.
 
 - **Eventos Consumidos**: Escuchan instrucciones de baja vehicular, transferencia de dominio y culminación de reparaciones para actualizar de manera autónoma las sesiones telemáticas y el estatus de las averías.
 
@@ -8490,7 +10143,7 @@ En la @tbl:iot-integration-events se sintetiza la taxonomía de eventos de integ
 \hline
 \textbf{Módulos Receptores} & Workshop Operations (MRO), Customer and Fleet Management (CRM) \\*
 \hline
-\textbf{Efecto Arquitectónico} & Preconfigura borradores de órdenes de trabajo y presupuestos de repuestos en el taller mecánico antes de que el cliente solicite la cita de atención. \\
+\textbf{Efecto Arquitectónico} & Preconfigura borradores de órdenes de trabajo y presupuestos de mantenimiento en el taller mecánico antes de que el cliente ingrese a las instalaciones. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Integración:} Vehicle\allowbreak Fault\allowbreak Logged\allowbreak Integration\allowbreak Event \quad (\textit{Tipo:} Publicado)} \\*
 \hline
@@ -8499,6 +10152,14 @@ En la @tbl:iot-integration-events se sintetiza la taxonomía de eventos de integ
 \textbf{Módulos Receptores} & Workshop Operations (MRO) \\*
 \hline
 \textbf{Efecto Arquitectónico} & Asienta de inmediato el código de diagnóstico en el historial clínico automotriz precargando tareas de foso en el módulo operativo del taller. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Integración:} Vehicle\allowbreak Health\allowbreak Report\allowbreak Generated\allowbreak Integration\allowbreak Event \quad (\textit{Tipo:} Publicado)} \\*
+\hline
+\textbf{Atributos Transportados} & \texttt{reportId}, \texttt{vehicleId}, \texttt{overallHealthScore}, \texttt{totalRisksDetected}, \texttt{occurredOn} \\*
+\hline
+\textbf{Módulos Receptores} & Workshop Operations (MRO), Customer and Fleet Management (CRM) \\*
+\hline
+\textbf{Efecto Arquitectónico} & Notifica la culminación de la inferencia diagnóstica con inteligencia artificial y la disponibilidad del informe consolidado de salud mecánica y dictamen pericial descargable. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Evento de Integración:} Vehicle\allowbreak Decommissioned\allowbreak Integration\allowbreak Event \quad (\textit{Tipo:} Consumido)} \\*
 \hline
@@ -8525,15 +10186,14 @@ En la @tbl:iot-integration-events se sintetiza la taxonomía de eventos de integ
 \textbf{Efecto Arquitectónico} & Marca de manera automática como resueltas todas las fallas electrónicas DTC asociadas a los subsistemas automotrices reparados en taller. \\
 \hline
 \end{longtable}
-*Nota.* Taxonomía de eventos de integración asíncronos publicados y consumidos por IoT Telemetry \& Predictive Maintenance.
+\renewcommand{\arraystretch}{1.0}
+*Nota.* Taxonomía de eventos de integración asíncronos publicados en interfaces.events y consumidos por IoT Telemetry \& Predictive Maintenance.
 
 El diseño perimetral de la Capa de Interfaz de IoT Telemetry & Predictive Maintenance asegura el aislamiento absoluto entre el flujo continuo de señales automotrices y las transacciones de gestión operativa del taller mecánico. Al implementar controladores independientes y una ingestión asíncrona con acuse de recibo inmediato, el sistema impide que ráfagas de telemetría de cientos de vehículos conectados degraden los tiempos de respuesta de la facturación, los contratos de suscripción o las agendas de mantenimiento.
 
 Asimismo, la arquitectura perimetral satisface con solvencia las restricciones de conectividad intermitente propias de vehículos en ruta y zonas con cobertura limitada. Al aceptar lotes telemáticos consolidados por pasarelas móviles locales y someterlos a validaciones declarativas rigurosas antes de su persistencia en TimescaleDB, la plataforma conjuga una alta resiliencia operativa en el borde con una defensa hermética frente a lecturas físicas espurias o tramas corruptas de bus CAN.
 
 Finalmente, la articulación de la Fachada de Contexto Abierto con la taxonomía de eventos de integración garantiza una colaboración fluida y proactiva con los módulos de CRM y MRO. Las fallas electrónicas y advertencias predictivas se traducen automáticamente en cotizaciones preventivas y precargas diagnósticas en las órdenes de trabajo de foso, transformando los datos cinemáticos en valor comercial tangible y fidelización técnica para el taller sin generar dependencias acopladas entre subsistemas.
-
-
 
 #### 2.6.9.3. Application Layer
 
@@ -8561,39 +10221,39 @@ En la @tbl:iot-application-types se expone el catálogo taxonómico consolidado 
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\
 \hline
 \endhead
-Telemetry\allowbreak Ingestion\allowbreak Command\allowbreak Service\allowbreak Impl & Orquesta la persistencia masiva en lote de lecturas sensoriales en TimescaleDB y activa en tiempo real el motor analítico de detección de anomalías predictivas. \\*
+Device\allowbreak Installation\allowbreak Command\allowbreak Service & Define los casos de uso transaccionales para la vinculación física de escáneres OBD-II a unidades vehiculares y el desmonte documentado de hardware. \\*
 \hline
-\textbf{Categoría} & Servicio de Comandos \\*
+\textbf{Categoría} & Servicio de Comando (Interfaz) \\*
 \hline
-\textbf{Relaciones} & Implementa TelemetryIngestionCommandService. Invoca DeviceInstallationRepository, TelemetryLogRepository, PredictiveAnomalyDetectionEngine, OperationsAclService y FcmNotificationAclService. \\*
+\textbf{Relaciones} & Implementado por DeviceInstallationCommandServiceImpl. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak commandservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Device\allowbreak Installation\allowbreak Command\allowbreak Service\allowbreak Impl & Orquesta el ciclo de vinculación física, montaje y desmonte de escáneres en automóviles, validando consistencia de odómetros y exclusividad de sesiones. \\*
+\hline
+\textbf{Categoría} & Servicio de Comando (Implementación) \\*
+\hline
+\textbf{Relaciones} & Implementa DeviceInstallationCommandService. Invoca DeviceInstallationRepository y Obd2DeviceRepository. Publica eventos de dominio. \\*
 \hline
 \textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak commandservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
-Device\allowbreak Installation\allowbreak Command\allowbreak Service\allowbreak Impl & Orquesta el ciclo de vinculación física montaje y desmonte de escáneres en automóviles validando consistencia de odómetros y exclusividad de sesiones. \\*
+Obd2\allowbreak Device\allowbreak Command\allowbreak Service & Define los contratos de escritura para la incorporación de dispositivos de telemetría y actualización del estado operativo de inventario. \\*
 \hline
-\textbf{Categoría} & Servicio de Comandos \\*
+\textbf{Categoría} & Servicio de Comando (Interfaz) \\*
 \hline
-\textbf{Relaciones} & Implementa DeviceInstallationCommandService. Invoca DeviceInstallationRepository y Obd2DeviceRepository. Publica eventos de dominio e integración. \\*
+\textbf{Relaciones} & Implementado por Obd2DeviceCommandServiceImpl. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak commandservices} \\
-\hline
-\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
-\hline
-Predictive\allowbreak Alert\allowbreak Command\allowbreak Service\allowbreak Impl & Administra el ciclo operativo de advertencias preventivas confirmación de lectura por asesores y descarte justificado de recomendaciones mecánicas. \\*
-\hline
-\textbf{Categoría} & Servicio de Comandos \\*
-\hline
-\textbf{Relaciones} & Implementa PredictiveAlertCommandService. Invoca PredictiveAlertRepository y OperationsAclService. Emite eventos de integración hacia CRM y MRO. \\*
-\hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak commandservices} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak commandservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
 Obd2\allowbreak Device\allowbreak Command\allowbreak Service\allowbreak Impl & Gobierna el alta de escáneres telemáticos en el inventario del taller y la alternancia de estados de disponibilidad física. \\*
 \hline
-\textbf{Categoría} & Servicio de Comandos \\*
+\textbf{Categoría} & Servicio de Comando (Implementación) \\*
 \hline
 \textbf{Relaciones} & Implementa Obd2DeviceCommandService. Invoca Obd2DeviceRepository y valida la unicidad de identificadores físicos MAC o IMEI celular. \\*
 \hline
@@ -8601,59 +10261,119 @@ Obd2\allowbreak Device\allowbreak Command\allowbreak Service\allowbreak Impl & G
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
-Vehicle\allowbreak Fault\allowbreak Command\allowbreak Service\allowbreak Impl & Registra averías electrónicas automotrices según la norma SAE J2012 y asienta su subsanación formal tras la reparación en taller. \\*
+Predictive\allowbreak Alert\allowbreak Command\allowbreak Service & Define los casos de uso para generación analítica, confirmación de lectura, descarte y conversión de alertas predictivas. \\*
 \hline
-\textbf{Categoría} & Servicio de Comandos \\*
+\textbf{Categoría} & Servicio de Comando (Interfaz) \\*
 \hline
-\textbf{Relaciones} & Implementa VehicleFaultCommandService. Invoca VehicleFaultRepository y publica VehicleFaultLoggedIntegrationEvent. \\*
+\textbf{Relaciones} & Implementado por PredictiveAlertCommandServiceImpl. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak commandservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Predictive\allowbreak Alert\allowbreak Command\allowbreak Service\allowbreak Impl & Administra el ciclo operativo de advertencias preventivas, confirmación de lectura por asesores y descarte justificado de recomendaciones mecánicas. \\*
+\hline
+\textbf{Categoría} & Servicio de Comando (Implementación) \\*
+\hline
+\textbf{Relaciones} & Implementa PredictiveAlertCommandService. Invoca PredictiveAlertRepository y OperationsAclPort. Emite eventos de integración hacia CRM y MRO. \\*
 \hline
 \textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak commandservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Telemetry\allowbreak Ingestion\allowbreak Command\allowbreak Service & Define el contrato transaccional para la ingesta en lote de series temporales telemáticas y disparo de análisis de anomalías en tiempo real. \\*
+\hline
+\textbf{Categoría} & Servicio de Comando (Interfaz) \\*
+\hline
+\textbf{Relaciones} & Implementado por TelemetryIngestionCommandServiceImpl. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak commandservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Telemetry\allowbreak Ingestion\allowbreak Command\allowbreak Service\allowbreak Impl & Orquesta la persistencia masiva en lote de lecturas sensoriales en TimescaleDB y activa en tiempo real el motor analítico de detección de anomalías predictivas. \\*
+\hline
+\textbf{Categoría} & Servicio de Comando (Implementación) \\*
+\hline
+\textbf{Relaciones} & Implementa TelemetryIngestionCommandService. Invoca DeviceInstallationRepository, TelemetryLogRepository, PredictiveAnomalyDetectionEngine, OperationsAclPort y FcmNotificationAclPort. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak commandservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Vehicle\allowbreak Fault\allowbreak Command\allowbreak Service & Define los casos de uso transaccionales para el registro de averías electrónicas automotrices y su resolución técnica en taller. \\*
+\hline
+\textbf{Categoría} & Servicio de Comando (Interfaz) \\*
+\hline
+\textbf{Relaciones} & Implementado por VehicleFaultCommandServiceImpl. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak commandservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Vehicle\allowbreak Fault\allowbreak Command\allowbreak Service\allowbreak Impl & Registra averías electrónicas automotrices según la norma SAE J2012 y asienta su subsanación formal tras la reparación en taller. \\*
+\hline
+\textbf{Categoría} & Servicio de Comando (Implementación) \\*
+\hline
+\textbf{Relaciones} & Implementa VehicleFaultCommandService. Invoca VehicleFaultRepository, DtcCatalogRepository y DtcCodeEvaluationService. Publica eventos de dominio e integración. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak commandservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Vehicle\allowbreak Health\allowbreak Report\allowbreak Command\allowbreak Service & Define las operaciones para la inferencia diagnóstica con inteligencia artificial estructurada y encolamiento por lotes de flotas. \\*
+\hline
+\textbf{Categoría} & Servicio de Comando (Interfaz) \\*
+\hline
+\textbf{Relaciones} & Implementado por VehicleHealthReportCommandServiceImpl. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak commandservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
 Vehicle\allowbreak Health\allowbreak Report\allowbreak Command\allowbreak Service\allowbreak Impl & Coordina la generación analítica de informes periciales con inteligencia artificial estructurada y persiste alertas de alta certeza. \\*
 \hline
-\textbf{Categoría} & Servicio de Comandos \\*
+\textbf{Categoría} & Servicio de Comando (Implementación) \\*
 \hline
-\textbf{Relaciones} & Implementa VehicleHealthReportCommandService. Invoca VehicleHealthAiDiagnosticService, PredictiveAlertRepository y DomainEventPublisher. \\*
+\textbf{Relaciones} & Implementa VehicleHealthReportCommandService. Invoca AiInferenceDiagnosticPort, PredictiveAlertRepository y DomainEventPublisher. \\*
 \hline
 \textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak commandservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
-Telemetry\allowbreak Log\allowbreak Query\allowbreak Service\allowbreak Impl & Provee lecturas de tacómetro en tiempo real y calcula promedios históricos mediante funciones de hipertabla time\_bucket de TimescaleDB. \\*
+Device\allowbreak Installation\allowbreak Query\allowbreak Service & Define los métodos de consulta para instalaciones telemáticas vigentes y trazabilidad histórica de montajes por vehículo. \\*
 \hline
-\textbf{Categoría} & Servicio de Consultas \\*
+\textbf{Categoría} & Servicio de Consulta (Interfaz) \\*
 \hline
-\textbf{Relaciones} & Implementa TelemetryLogQueryService. Consulta TelemetryLogRepository con transaccionalidad de solo lectura. \\*
+\textbf{Relaciones} & Implementado por DeviceInstallationQueryServiceImpl. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak queryservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Device\allowbreak Installation\allowbreak Query\allowbreak Service\allowbreak Impl & Consulta la sesión de instalación actualmente activa y la trazabilidad de montajes previos de una unidad vehicular. \\*
+\hline
+\textbf{Categoría} & Servicio de Consulta (Implementación) \\*
+\hline
+\textbf{Relaciones} & Implementa DeviceInstallationQueryService. Consulta DeviceInstallationRepository con transaccionalidad de solo lectura. \\*
 \hline
 \textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak queryservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
-Vehicle\allowbreak Fault\allowbreak Query\allowbreak Service\allowbreak Impl & Resuelve consultas de códigos DTC activos y el historial clínico de diagnósticos electrónicos del automóvil. \\*
+Obd2\allowbreak Device\allowbreak Query\allowbreak Service & Define consultas paginadas del inventario de hardware telemático y filtrado de escáneres disponibles para asignación. \\*
 \hline
-\textbf{Categoría} & Servicio de Consultas \\*
+\textbf{Categoría} & Servicio de Consulta (Interfaz) \\*
 \hline
-\textbf{Relaciones} & Implementa VehicleFaultQueryService. Consulta VehicleFaultRepository optimizando lecturas de averías no subsanadas. \\*
+\textbf{Relaciones} & Implementado por Obd2DeviceQueryServiceImpl. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak queryservices} \\
-\hline
-\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
-\hline
-Predictive\allowbreak Alert\allowbreak Query\allowbreak Service\allowbreak Impl & Resuelve tableros de oportunidades preventivas de taller mecánico y el registro histórico de advertencias emitidas. \\*
-\hline
-\textbf{Categoría} & Servicio de Consultas \\*
-\hline
-\textbf{Relaciones} & Implementa PredictiveAlertQueryService. Consulta PredictiveAlertRepository con filtros de severidad y estado. \\*
-\hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak queryservices} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak queryservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
 Obd2\allowbreak Device\allowbreak Query\allowbreak Service\allowbreak Impl & Provee lecturas paginadas del inventario de hardware telemático y filtra dispositivos disponibles para instalación. \\*
 \hline
-\textbf{Categoría} & Servicio de Consultas \\*
+\textbf{Categoría} & Servicio de Consulta (Implementación) \\*
 \hline
 \textbf{Relaciones} & Implementa Obd2DeviceQueryService. Consulta Obd2DeviceRepository mediante Spring Data con paginación Pageable. \\*
 \hline
@@ -8661,19 +10381,79 @@ Obd2\allowbreak Device\allowbreak Query\allowbreak Service\allowbreak Impl & Pro
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
-Device\allowbreak Installation\allowbreak Query\allowbreak Service\allowbreak Impl & Consulta la sesión de instalación actualmente activa y la trazabilidad de montajes previos de una unidad vehicular. \\*
+Predictive\allowbreak Alert\allowbreak Query\allowbreak Service & Define las consultas para tableros de control predictivo por taller automotriz e historial preventivo por unidad. \\*
 \hline
-\textbf{Categoría} & Servicio de Consultas \\*
+\textbf{Categoría} & Servicio de Consulta (Interfaz) \\*
 \hline
-\textbf{Relaciones} & Implementa DeviceInstallationQueryService. Consulta DeviceInstallationRepository. \\*
+\textbf{Relaciones} & Implementado por PredictiveAlertQueryServiceImpl. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak queryservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Predictive\allowbreak Alert\allowbreak Query\allowbreak Service\allowbreak Impl & Resuelve tableros de oportunidades preventivas de taller mecánico y el registro histórico de advertencias emitidas. \\*
+\hline
+\textbf{Categoría} & Servicio de Consulta (Implementación) \\*
+\hline
+\textbf{Relaciones} & Implementa PredictiveAlertQueryService. Consulta PredictiveAlertRepository con filtros de severidad y estado. \\*
 \hline
 \textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak queryservices} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
+Telemetry\allowbreak Log\allowbreak Query\allowbreak Service & Define consultas para lecturas de tacómetro en tiempo real y agregaciones analíticas de series temporales en cubos temporales. \\*
+\hline
+\textbf{Categoría} & Servicio de Consulta (Interfaz) \\*
+\hline
+\textbf{Relaciones} & Implementado por TelemetryLogQueryServiceImpl. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak queryservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Telemetry\allowbreak Log\allowbreak Query\allowbreak Service\allowbreak Impl & Provee lecturas de tacómetro en tiempo real y calcula promedios históricos mediante funciones de hipertabla time\_bucket de TimescaleDB. \\*
+\hline
+\textbf{Categoría} & Servicio de Consulta (Implementación) \\*
+\hline
+\textbf{Relaciones} & Implementa TelemetryLogQueryService. Consulta TelemetryLogRepository con transaccionalidad de solo lectura. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak queryservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Vehicle\allowbreak Fault\allowbreak Query\allowbreak Service & Define las consultas para averías electrónicas activas no resueltas e historial clínico integral de diagnósticos por unidad. \\*
+\hline
+\textbf{Categoría} & Servicio de Consulta (Interfaz) \\*
+\hline
+\textbf{Relaciones} & Implementado por VehicleFaultQueryServiceImpl. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak queryservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Vehicle\allowbreak Fault\allowbreak Query\allowbreak Service\allowbreak Impl & Resuelve consultas de códigos DTC activos y el historial clínico de diagnósticos electrónicos del automóvil. \\*
+\hline
+\textbf{Categoría} & Servicio de Consulta (Implementación) \\*
+\hline
+\textbf{Relaciones} & Implementa VehicleFaultQueryService. Consulta VehicleFaultRepository optimizando lecturas de averías no subsanadas. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak queryservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Vehicle\allowbreak Health\allowbreak Report\allowbreak Query\allowbreak Service & Define las consultas para recuperación del último informe pericial de salud vehicular y exportación documental en formato PDF. \\*
+\hline
+\textbf{Categoría} & Servicio de Consulta (Interfaz) \\*
+\hline
+\textbf{Relaciones} & Implementado por VehicleHealthReportQueryServiceImpl. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak queryservices} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
 Vehicle\allowbreak Health\allowbreak Report\allowbreak Query\allowbreak Service\allowbreak Impl & Resuelve consultas del último dictamen de salud y coordina la compilación del documento pericial en formato PDF. \\*
 \hline
-\textbf{Categoría} & Servicio de Consultas \\*
+\textbf{Categoría} & Servicio de Consulta (Implementación) \\*
 \hline
 \textbf{Relaciones} & Implementa VehicleHealthReportQueryService. Invoca VehicleHealthReportPdfGeneratorPort y repositorios telemáticos. \\*
 \hline
@@ -8681,11 +10461,11 @@ Vehicle\allowbreak Health\allowbreak Report\allowbreak Query\allowbreak Service\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
-Telemetry\allowbreak Domain\allowbreak Event\allowbreak Handler & Despacha de forma asíncrona notificaciones push críticas ante anomalías severas de motor hacia conductores y talleres mecánicos. \\*
+IoT\allowbreak Transactional\allowbreak Outbox\allowbreak Publisher & Garantiza la entrega at-least-once y consistencia eventual persistiendo eventos de dominio localmente dentro de la misma transacción de PostgreSQL 16. \\*
 \hline
-\textbf{Categoría} & Manejador de Eventos de Dominio \\*
+\textbf{Categoría} & Manejador de Eventos \\*
 \hline
-\textbf{Relaciones} & Escucha CriticalEngineAnomalyDetectedEvent en fase posterior al commit invocando FcmNotificationAclService. \\*
+\textbf{Relaciones} & Intercepta eventos de dominio y persiste mensajes atómicamente en la tabla relacional outbox. \\*
 \hline
 \textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak eventhandlers} \\
 \hline
@@ -8693,7 +10473,7 @@ Telemetry\allowbreak Domain\allowbreak Event\allowbreak Handler & Despacha de fo
 \hline
 Predictive\allowbreak Alert\allowbreak Domain\allowbreak Event\allowbreak Handler & Publica eventos de integración hacia CRM y MRO ante la generación formal de advertencias predictivas. \\*
 \hline
-\textbf{Categoría} & Manejador de Eventos de Dominio \\*
+\textbf{Categoría} & Manejador de Eventos \\*
 \hline
 \textbf{Relaciones} & Escucha PredictiveAlertGeneratedEvent y PredictiveAlertDismissedEvent propagando efectos intermodulares. \\*
 \hline
@@ -8701,11 +10481,21 @@ Predictive\allowbreak Alert\allowbreak Domain\allowbreak Event\allowbreak Handle
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
+Telemetry\allowbreak Domain\allowbreak Event\allowbreak Handler & Despacha de forma asíncrona notificaciones push críticas ante anomalías severas de motor hacia conductores y talleres mecánicos. \\*
+\hline
+\textbf{Categoría} & Manejador de Eventos \\*
+\hline
+\textbf{Relaciones} & Escucha CriticalEngineAnomalyDetectedEvent en fase posterior al commit invocando FcmNotificationAclPort. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak eventhandlers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
 Vehicle\allowbreak Fault\allowbreak Domain\allowbreak Event\allowbreak Handler & Publica eventos de integración hacia MRO ante el asentamiento de nuevos códigos DTC en la computadora vehicular. \\*
 \hline
-\textbf{Categoría} & Manejador de Eventos de Dominio \\*
+\textbf{Categoría} & Manejador de Eventos \\*
 \hline
-\textbf{Relaciones} & Escucha VehicleFaultLoggedEvent y VehicleFaultResolvedEvent sincronizando el historial clínico automotriz. \\*
+\textbf{Relaciones} & Escucha VehicleFaultDetectedEvent y VehicleFaultResolvedEvent sincronizando el historial clínico automotriz. \\*
 \hline
 \textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak eventhandlers} \\
 \hline
@@ -8713,7 +10503,7 @@ Vehicle\allowbreak Fault\allowbreak Domain\allowbreak Event\allowbreak Handler &
 \hline
 Vehicle\allowbreak Lifecycle\allowbreak Integration\allowbreak Event\allowbreak Handler & Consume eventos intermodulares para desconectar escáneres en unidades dadas de baja y resolver fallas reparadas en taller. \\*
 \hline
-\textbf{Categoría} & Manejador de Eventos de Integración \\*
+\textbf{Categoría} & Manejador de Eventos \\*
 \hline
 \textbf{Relaciones} & Suscriptor de VehicleDecommissionedIntegrationEvent, VehicleOwnershipTransferredIntegrationEvent y WorkOrderCompletedIntegrationEvent. \\*
 \hline
@@ -8721,56 +10511,76 @@ Vehicle\allowbreak Lifecycle\allowbreak Integration\allowbreak Event\allowbreak 
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
-Fcm\allowbreak Notification\allowbreak Acl\allowbreak Service & Capa Anticorrupción que encapsula el SDK oficial de Firebase Admin para estructurar mensajes push de alta prioridad. \\*
+Ai\allowbreak Inference\allowbreak Diagnostic\allowbreak Port & Define el contrato perimetral para solicitar inferencias diagnósticas periciales estructuradas a modelos de lenguaje avanzados. \\*
 \hline
-\textbf{Categoría} & Puerto de Salida / ACL \\*
+\textbf{Categoría} & Puerto de Salida ACL \\*
 \hline
-\textbf{Relaciones} & Invoca FirebaseCloudMessagingGateway para despacho de notificaciones a Atelier Driver y Atelier Workshop. \\*
+\textbf{Relaciones} & Implementado por GroqAiInferenceAdapter en la Capa de Infraestructura mediante Spring AI ChatClient y Groq LPU. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak outboundservices.\allowbreak acl} \\
-\hline
-\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
-\hline
-Operations\allowbreak Acl\allowbreak Service & Capa Anticorrupción que consulta en Workshop Operations MRO los servicios recomendados y cotizaciones preliminares. \\*
-\hline
-\textbf{Categoría} & Puerto de Salida / ACL \\*
-\hline
-\textbf{Relaciones} & Invoca adaptadores remotos de Workshop Operations para traducir anomalías físicas a tareas de taller. \\*
-\hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak outboundservices.\allowbreak acl} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak outbound.\allowbreak acl} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
-Crm\allowbreak Fleet\allowbreak Acl\allowbreak Service & Capa Anticorrupción que consulta en Customer and Fleet Management CRM los datos de contacto y titulares vehiculares. \\*
+Crm\allowbreak Fleet\allowbreak Acl\allowbreak Port & Capa Anticorrupción que consulta en CRM los datos de contacto, tokens de notificación y titulares de flotas vehiculares. \\*
 \hline
-\textbf{Categoría} & Puerto de Salida / ACL \\*
+\textbf{Categoría} & Puerto de Salida ACL \\*
 \hline
-\textbf{Relaciones} & Invoca clientes de CRM para enriquecer alertas y validar membresías de flotas automotrices. \\*
+\textbf{Relaciones} & Implementado por CrmFleetAclAdapter consumiendo la fachada pública Inbound OHS de Customer and Fleet Management CRM. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak outboundservices.\allowbreak acl} \\
-\hline
-\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
-\hline
-Timescale\allowbreak Batch\allowbreak Jdbc\allowbreak Client\allowbreak Port & Puerto de persistencia masiva de alto rendimiento para inserción en bloque de series temporales en TimescaleDB. \\*
-\hline
-\textbf{Categoría} & Puerto de Persistencia Especializada \\*
-\hline
-\textbf{Relaciones} & Implementado por TimescaleBatchJdbcAdapter en la Capa de Infraestructura. \\*
-\hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak outboundservices.\allowbreak acl} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak outbound.\allowbreak acl} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
 \hline
-Vehicle\allowbreak Health\allowbreak Report\allowbreak Pdf\allowbreak Generator\allowbreak Port & Puerto de salida perimetral que define el contrato de renderizado y exportación tipográfica en formato binario PDF. \\*
+Fcm\allowbreak Notification\allowbreak Acl\allowbreak Port & Capa Anticorrupción que encapsula el SDK de Firebase Cloud Messaging para estructurar mensajes push de alta prioridad en ruta. \\*
 \hline
-\textbf{Categoría} & Puerto de Salida / Exportación \\*
+\textbf{Categoría} & Puerto de Salida ACL \\*
+\hline
+\textbf{Relaciones} & Implementado por FirebaseNotificationGateway en la Capa de Infraestructura mediante el SDK oficial de Firebase Admin. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak outbound.\allowbreak acl} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Operations\allowbreak Acl\allowbreak Port & Capa Anticorrupción que consulta en MRO los servicios recomendados del catálogo de taller y canaliza pre-órdenes de trabajo. \\*
+\hline
+\textbf{Categoría} & Puerto de Salida ACL \\*
+\hline
+\textbf{Relaciones} & Implementado por OperationsAclAdapter consumiendo la fachada pública Inbound OHS de Workshop Operations MRO. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak outbound.\allowbreak acl} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Timescale\allowbreak Batch\allowbreak Jdbc\allowbreak Client\allowbreak Port & Puerto de persistencia masiva de alto rendimiento para inserción en bloque de series temporales en hipertablas de TimescaleDB. \\*
+\hline
+\textbf{Categoría} & Puerto de Salida ACL \\*
+\hline
+\textbf{Relaciones} & Implementado por TimescaleTelemetryRepositoryImpl en la Capa de Infraestructura mediante inserciones JDBC masivas. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak outbound.\allowbreak acl} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+Vehicle\allowbreak Health\allowbreak Report\allowbreak Pdf\allowbreak Generator\allowbreak Port & Puerto de salida perimetral que define el contrato de renderizado y exportación tipográfica del dictamen de salud en binario PDF. \\*
+\hline
+\textbf{Categoría} & Puerto de Salida ACL \\*
 \hline
 \textbf{Relaciones} & Implementado por VehicleHealthReportPdfGeneratorAdapter en la Capa de Infraestructura mediante Thymeleaf y OpenPDF. \\*
 \hline
-\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak outboundservices.\allowbreak acl} \\
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak internal.\allowbreak outbound.\allowbreak acl} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Capa} \\*
+\hline
+IoT\allowbreak Telemetry\allowbreak Context\allowbreak Facade\allowbreak Impl & Materializa el contrato Inbound OHS proveyendo lecturas telemáticas consolidadas, fallas activas y salud vehicular hacia otros contextos. \\*
+\hline
+\textbf{Categoría} & Implementación de Fachada de Contexto Abierto \\*
+\hline
+\textbf{Relaciones} & Implementa la interfaz pública IoTTelemetryContextFacade de la Capa de Interfaz coordinando repositorios del dominio. \\*
+\hline
+\textbf{Paquete} & \texttt{.\allowbreak .\allowbreak .\allowbreak iot.\allowbreak application.\allowbreak acl} \\
 \hline
 \end{longtable}
-*Nota.* Catálogo taxonómico consolidado de la Capa de Aplicación de IoT Telemetry \& Predictive Maintenance.
+*Nota.* Catálogo taxonómico de tipos de la Capa de Aplicación, organizados en los subpaquetes canónicos commandservices, internal.commandservices, queryservices, internal.queryservices, internal.eventhandlers, internal.outbound.acl y acl.
 
 **Servicios de Comandos y Flujos Transaccionales**
 
@@ -8806,7 +10616,7 @@ En la @tbl:iot-command-services se detallan las operaciones transaccionales, sig
 \hline
 \textbf{Parámetros Principales} & \texttt{UUID vehicleId, List<TelemetryReadingItemDto> readings} \\*
 \hline
-\textbf{Reglas y Transaccionalidad} & Valida que el vehículo mantenga una sesión de montaje activa en DeviceInstallationRepository. Transforma lecturas en agregados inmutables TelemetryRecord y persiste masivamente en bloque JDBC sobre la Hipertabla telemetry\_logs de TimescaleDB. Evalúa la lectura más reciente en PredictiveAnomalyDetectionEngine. Si se detecta anomalía crítica persiste PredictiveAlert despacha notificación push FCM y emite CriticalEngineAnomalyDetectedEvent. Anotado con \texttt{@Transactional}. \\
+\textbf{Reglas y Transaccionalidad} & Valida que el vehículo mantenga una sesión de montaje activa en DeviceInstallationRepository. Transforma lecturas en agregados inmutables TelemetryRecord y persiste masivamente en bloque JDBC sobre la Hipertabla telemetry\_logs de TimescaleDB mediante TimescaleBatchJdbcClientPort. Evalúa la lectura más reciente en PredictiveAnomalyDetectionEngine. Si se detecta anomalía crítica consulta servicios recomendados en OperationsAclPort, persiste PredictiveAlert, despacha notificación push FCM vía FcmNotificationAclPort y emite CriticalEngineAnomalyDetectedEvent. Anotado con \texttt{@Transactional}. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Comandos:} Device\allowbreak Installation\allowbreak Command\allowbreak Service\allowbreak Impl} \\*
 \hline
@@ -8814,13 +10624,13 @@ En la @tbl:iot-command-services se detallan las operaciones transaccionales, sig
 \hline
 \textbf{Parámetros Principales} & \texttt{UUID deviceId, UUID vehicleId, int currentOdometerKm} \\*
 \hline
-\textbf{Reglas y Transaccionalidad} & Verifica que el escáner se encuentre en estado AVAILABLE y que el vehículo no cuente con otra instalación activa en curso. Instancia el agregado DeviceInstallation con odómetro inicial transiciona el hardware a estado INSTALLED y persiste la sesión emitiendo DeviceInstalledOnVehicleEvent. \\
+\textbf{Reglas y Transaccionalidad} & Verifica que el escáner se encuentre en estado AVAILABLE y que el vehículo no cuente con otra instalación activa en curso. Instancia el agregado DeviceInstallation con odómetro inicial, transiciona el hardware a estado INSTALLED y persiste la sesión emitiendo DeviceInstalledOnVehicleEvent. Anotado con \texttt{@Transactional}. \\
 \hline
 \textbf{Comando:} \texttt{Uninstall\allowbreak Device\allowbreak Command} & \texttt{handle(UninstallDeviceCommand)} → \texttt{void} \\*
 \hline
 \textbf{Parámetros Principales} & \texttt{UUID installationId, int finalOdometerKm, Instant uninstalledTimestamp} \\*
 \hline
-\textbf{Reglas y Transaccionalidad} & Localiza la sesión de montaje activa valida que el odómetro final no sea inferior al inicial concluye la sesión con marca temporal y reintegra el escáner a estado AVAILABLE emitiendo DeviceUninstalledFromVehicleEvent. \\
+\textbf{Reglas y Transaccionalidad} & Localiza la sesión de montaje activa, valida que el odómetro final no sea inferior al inicial, concluye la sesión con marca temporal y reintegra el escáner a estado AVAILABLE emitiendo DeviceUninstalledFromVehicleEvent. Anotado con \texttt{@Transactional}. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Comandos:} Predictive\allowbreak Alert\allowbreak Command\allowbreak Service\allowbreak Impl} \\*
 \hline
@@ -8828,25 +10638,25 @@ En la @tbl:iot-command-services se detallan las operaciones transaccionales, sig
 \hline
 \textbf{Parámetros Principales} & \texttt{UUID vehicleId, UUID recommendedServiceId, String alertType, BigDecimal confidenceScore, String message} \\*
 \hline
-\textbf{Reglas y Transaccionalidad} & Instancia el agregado PredictiveAlert en estado ACTIVE vinculando la recomendación preventiva emitida por MRO. Persiste la alerta en base de datos relacional y publica PredictiveAlertGeneratedIntegrationEvent. \\
+\textbf{Reglas y Transaccionalidad} & Instancia el agregado PredictiveAlert en estado ACTIVE vinculando la recomendación preventiva emitida por MRO mediante OperationsAclPort. Persiste la alerta en base de datos relacional y publica PredictiveAlertGeneratedIntegrationEvent. Anotado con \texttt{@Transactional}. \\
 \hline
 \textbf{Comando:} \texttt{Acknowledge\allowbreak Predictive\allowbreak Alert\allowbreak Command} & \texttt{handle(AcknowledgePredictiveAlertCommand)} → \texttt{void} \\*
 \hline
 \textbf{Parámetros Principales} & \texttt{UUID alertId, UUID staffId} \\*
 \hline
-\textbf{Reglas y Transaccionalidad} & Localiza la advertencia en PredictiveAlertRepository y transiciona su estado a ACKNOWLEDGED registrando el asesor técnico responsable de la revisión. \\
+\textbf{Reglas y Transaccionalidad} & Localiza la advertencia en PredictiveAlertRepository y transiciona su estado a ACKNOWLEDGED registrando el asesor técnico responsable de la revisión y publicando PredictiveAlertAcknowledgedEvent. Anotado con \texttt{@Transactional}. \\
 \hline
 \textbf{Comando:} \texttt{Dismiss\allowbreak Predictive\allowbreak Alert\allowbreak Command} & \texttt{handle(DismissPredictiveAlertCommand)} → \texttt{void} \\*
 \hline
 \textbf{Parámetros Principales} & \texttt{UUID alertId, String dismissalReason, UUID staffId} \\*
 \hline
-\textbf{Reglas y Transaccionalidad} & Exige justificación técnica obligatoria transiciona el estado de la alerta a DISMISSED y emite PredictiveAlertDismissedEvent para retroalimentación analítica. \\
+\textbf{Reglas y Transaccionalidad} & Exige justificación técnica obligatoria, transiciona el estado de la alerta a DISMISSED y emite PredictiveAlertDismissedEvent para retroalimentación analítica. Anotado con \texttt{@Transactional}. \\
 \hline
 \textbf{Comando:} \texttt{Convert\allowbreak Alert\allowbreak To\allowbreak Appointment\allowbreak Command} & \texttt{handle(ConvertAlertToAppointmentCommand)} → \texttt{UUID} \\*
 \hline
 \textbf{Parámetros Principales} & \texttt{UUID alertId, Instant preferredDate} \\*
 \hline
-\textbf{Reglas y Transaccionalidad} & Invoca a OperationsAclService para formular una pre-orden de trabajo y agendar una inspección técnica en MRO asociando la cotización preventiva. \\
+\textbf{Reglas y Transaccionalidad} & Invoca a OperationsAclPort para formular una pre-orden de trabajo y agendar una inspección técnica en MRO asociando la cotización preventiva. Anotado con \texttt{@Transactional}. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Comandos:} Obd2\allowbreak Device\allowbreak Command\allowbreak Service\allowbreak Impl} \\*
 \hline
@@ -8854,13 +10664,13 @@ En la @tbl:iot-command-services se detallan las operaciones transaccionales, sig
 \hline
 \textbf{Parámetros Principales} & \texttt{UUID tenantId, String deviceIdentifier, String connectionType, String hardwareModel, String firmwareVersion} \\*
 \hline
-\textbf{Reglas y Transaccionalidad} & Comprueba en Obd2DeviceRepository que el identificador MAC o IMEI no se encuentre registrado previamente. Crea el agregado Obd2Device en estado AVAILABLE y lo persiste en PostgreSQL 16. \\
+\textbf{Reglas y Transaccionalidad} & Comprueba en Obd2DeviceRepository que el identificador MAC o IMEI no se encuentre registrado previamente. Crea el agregado Obd2Device en estado AVAILABLE, lo persiste en PostgreSQL 16 y emite Obd2DeviceRegisteredEvent. Anotado con \texttt{@Transactional}. \\
 \hline
 \textbf{Comando:} \texttt{Update\allowbreak Device\allowbreak Status\allowbreak Command} & \texttt{handle(UpdateDeviceStatusCommand)} → \texttt{void} \\*
 \hline
 \textbf{Parámetros Principales} & \texttt{UUID deviceId, DeviceStatus newStatus, String reason} \\*
 \hline
-\textbf{Reglas y Transaccionalidad} & Modifica la situación de inventario del escáner permitiendo retirarlo a mantenimiento técnico o darlo de baja por extravío físico. \\
+\textbf{Reglas y Transaccionalidad} & Modifica la situación de inventario del escáner permitiendo retirarlo a mantenimiento técnico o darlo de baja por extravío físico. Anotado con \texttt{@Transactional}. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Comandos:} Vehicle\allowbreak Fault\allowbreak Command\allowbreak Service\allowbreak Impl} \\*
 \hline
@@ -8868,13 +10678,13 @@ En la @tbl:iot-command-services se detallan las operaciones transaccionales, sig
 \hline
 \textbf{Parámetros Principales} & \texttt{UUID vehicleId, String dtcCode, String severity, String description} \\*
 \hline
-\textbf{Reglas y Transaccionalidad} & Valida que el código cumpla la estructura oficial SAE J2012. Persiste la entidad VehicleFault en estado no resuelto y publica VehicleFaultLoggedIntegrationEvent hacia MRO. \\
+\textbf{Reglas y Transaccionalidad} & Valida que el código cumpla la estructura oficial SAE J2012 mediante DtcCodeEvaluationService. Persiste la entidad VehicleFault en estado no resuelto y publica VehicleFaultLoggedIntegrationEvent hacia MRO. Anotado con \texttt{@Transactional}. \\
 \hline
 \textbf{Comando:} \texttt{Resolve\allowbreak Vehicle\allowbreak Fault\allowbreak Command} & \texttt{handle(ResolveVehicleFaultCommand)} → \texttt{void} \\*
 \hline
 \textbf{Parámetros Principales} & \texttt{UUID faultId, String resolutionNotes, UUID workOrderId} \\*
 \hline
-\textbf{Reglas y Transaccionalidad} & Marca formalmente la avería electrónica como resuelta asociando las notas técnicas y la orden de trabajo de foso que subsanó el problema. \\
+\textbf{Reglas y Transaccionalidad} & Marca formalmente la avería electrónica como resuelta asociando las notas técnicas y la orden de trabajo de foso que subsanó el problema emitiendo VehicleFaultResolvedEvent. Anotado con \texttt{@Transactional}. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Comandos:} Vehicle\allowbreak Health\allowbreak Report\allowbreak Command\allowbreak Service\allowbreak Impl} \\*
 \hline
@@ -8882,13 +10692,13 @@ En la @tbl:iot-command-services se detallan las operaciones transaccionales, sig
 \hline
 \textbf{Signatura y Tipos} & Entrada: identificador de vehículo, días de análisis, inclusión de historial DTC y motivo de activación \\*
 \hline
-\textbf{Consecuencias de Dominio} & Extrae métricas agregadas desde TimescaleDB y averías activas, ejecuta inferencia con Spring AI ChatClient bajo BeanOutputConverter, persiste alertas con confianza superior o igual al setenta por ciento y publica el evento VehicleHealthReportGeneratedIntegrationEvent. \\
+\textbf{Consecuencias de Dominio} & Extrae métricas agregadas desde TimescaleDB y averías activas desde PostgreSQL 16, ejecuta inferencia diagnóstica mediante AiInferenceDiagnosticPort con Spring AI ChatClient sobre Groq LPU, persiste alertas con confianza superior o igual al setenta por ciento y publica el evento VehicleHealthReportGeneratedIntegrationEvent. Anotado con \texttt{@Transactional}. \\
 \hline
 \textbf{Comando:} \texttt{Enqueue\allowbreak Vehicle\allowbreak Health\allowbreak Report\allowbreak Analysis\allowbreak Command} & \texttt{handle(EnqueueVehicleHealthReportAnalysisCommand)} → \texttt{UUID} \\*
 \hline
 \textbf{Signatura y Tipos} & Entrada: identificador de lote de flota, parámetros de ventana temporal y destinatario de notificación \\*
 \hline
-\textbf{Consecuencias de Dominio} & Registra una tarea de procesamiento asíncrono en segundo plano para evaluación de flotas masivas, retornando un identificador de seguimiento sin bloquear la interfaz de usuario. \\
+\textbf{Consecuencias de Dominio} & Registra una tarea de procesamiento asíncrono en segundo plano para evaluación de flotas masivas, retornando un identificador de seguimiento sin bloquear la interfaz de usuario. Anotado con \texttt{@Transactional}. \\
 \hline
 \end{longtable}
 *Nota.* Especificación de operaciones transaccionales y lógica de orquestación de los Command Services de IoT Telemetry \& Predictive Maintenance.
@@ -8933,7 +10743,7 @@ En la @tbl:iot-query-services se presentan los métodos de consulta de la capa d
 \hline
 \textbf{Parámetros} & \texttt{UUID vehicleId, Instant from, Instant to, Duration bucketInterval} \\*
 \hline
-\textbf{Mecanismo de Lectura} & Ejecuta consultas analíticas aprovechando la función SQL time\_bucket de TimescaleDB promediando velocidades RPM y temperaturas en cubos temporales uniformes. \\
+\textbf{Mecanismo de Lectura} & Ejecuta consultas analíticas aprovechando la función SQL time\_bucket de TimescaleDB promediando velocidades RPM y temperaturas en cubos temporales uniformes bajo \texttt{@Transactional(readOnly = true)}. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Consultas:} Vehicle\allowbreak Fault\allowbreak Query\allowbreak Service\allowbreak Impl} \\*
 \hline
@@ -8941,13 +10751,13 @@ En la @tbl:iot-query-services se presentan los métodos de consulta de la capa d
 \hline
 \textbf{Parámetros} & \texttt{UUID vehicleId} \\*
 \hline
-\textbf{Mecanismo de Lectura} & Recupera del repositorio relacional todas las averías electrónicas con bandera de resolución en falso para desplegar el diagnóstico en la orden de trabajo de foso. \\
+\textbf{Mecanismo de Lectura} & Recupera del repositorio relacional todas las averías electrónicas con bandera de resolución en falso para desplegar el diagnóstico en la orden de trabajo de foso con transaccionalidad de solo lectura mediante \texttt{@Transactional(readOnly = true)}. \\
 \hline
 \textbf{Consulta:} \texttt{Get\allowbreak Fault\allowbreak History\allowbreak By\allowbreak Vehicle\allowbreak Query} & \texttt{handle(GetFaultHistoryByVehicleQuery)} → \texttt{List<VehicleFaultResource>} \\*
 \hline
 \textbf{Parámetros} & \texttt{UUID vehicleId} \\*
 \hline
-\textbf{Mecanismo de Lectura} & Provee la trazabilidad histórica completa de anomalías electrónicas detectadas y subsanadas a lo largo de la vida útil del vehículo. \\
+\textbf{Mecanismo de Lectura} & Provee la trazabilidad histórica completa de anomalías electrónicas detectadas y subsanadas a lo largo de la vida útil del vehículo bajo \texttt{@Transactional(readOnly = true)}. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Consultas:} Predictive\allowbreak Alert\allowbreak Query\allowbreak Service\allowbreak Impl} \\*
 \hline
@@ -8955,13 +10765,13 @@ En la @tbl:iot-query-services se presentan los métodos de consulta de la capa d
 \hline
 \textbf{Parámetros} & \texttt{UUID tenantId, AlertSeverity severity, AlertStatus status} \\*
 \hline
-\textbf{Mecanismo de Lectura} & Filtra las alertas preventivas activas del taller mecánico permitiendo a los asesores de servicio priorizar vehículos con alto riesgo de avería inminente. \\
+\textbf{Mecanismo de Lectura} & Filtra las alertas preventivas activas del taller mecánico permitiendo a los asesores de servicio priorizar vehículos con alto riesgo de avería inminente bajo \texttt{@Transactional(readOnly = true)}. \\
 \hline
 \textbf{Consulta:} \texttt{Get\allowbreak Alerts\allowbreak By\allowbreak Vehicle\allowbreak Query} & \texttt{handle(GetAlertsByVehicleQuery)} → \texttt{List<PredictiveAlertResource>} \\*
 \hline
 \textbf{Parámetros} & \texttt{UUID vehicleId} \\*
 \hline
-\textbf{Mecanismo de Lectura} & Recupera el historial de advertencias preventivas emitidas por el motor de inferencia analítica para una unidad automotriz específica. \\
+\textbf{Mecanismo de Lectura} & Recupera el historial de advertencias preventivas emitidas por el motor de inferencia analítica para una unidad automotriz específica bajo \texttt{@Transactional(readOnly = true)}. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Consultas:} Obd2\allowbreak Device\allowbreak Query\allowbreak Service\allowbreak Impl} \\*
 \hline
@@ -8969,13 +10779,13 @@ En la @tbl:iot-query-services se presentan los métodos de consulta de la capa d
 \hline
 \textbf{Parámetros} & \texttt{UUID tenantId, Pageable pageable} \\*
 \hline
-\textbf{Mecanismo de Lectura} & Consulta paginada del inventario de hardware telemático registrado en el taller optimizando el consumo de memoria mediante Spring Data JPA. \\
+\textbf{Mecanismo de Lectura} & Consulta paginada del inventario de hardware telemático registrado en el taller optimizando el consumo de memoria mediante Spring Data JPA bajo \texttt{@Transactional(readOnly = true)}. \\
 \hline
 \textbf{Consulta:} \texttt{Get\allowbreak Available\allowbreak Devices\allowbreak Query} & \texttt{handle(GetAvailableDevicesQuery)} → \texttt{List<Obd2DeviceResource>} \\*
 \hline
 \textbf{Parámetros} & \texttt{UUID tenantId} \\*
 \hline
-\textbf{Mecanismo de Lectura} & Retorna la lista de escáneres operativos sin sesión de montaje activa disponibles para instalación inmediata en patio vehicular. \\
+\textbf{Mecanismo de Lectura} & Retorna la lista de escáneres operativos sin sesión de montaje activa disponibles para instalación inmediata en patio vehicular bajo \texttt{@Transactional(readOnly = true)}. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Consultas:} Device\allowbreak Installation\allowbreak Query\allowbreak Service\allowbreak Impl} \\*
 \hline
@@ -8983,13 +10793,13 @@ En la @tbl:iot-query-services se presentan los métodos de consulta de la capa d
 \hline
 \textbf{Parámetros} & \texttt{UUID vehicleId} \\*
 \hline
-\textbf{Mecanismo de Lectura} & Localiza la sesión de montaje telemático actualmente vigente para la unidad automotriz retornando los metadatos del escáner enlazado. \\
+\textbf{Mecanismo de Lectura} & Localiza la sesión de montaje telemático actualmente vigente para la unidad automotriz retornando los metadatos del escáner enlazado bajo \texttt{@Transactional(readOnly = true)}. \\
 \hline
 \textbf{Consulta:} \texttt{Get\allowbreak Installation\allowbreak History\allowbreak By\allowbreak Vehicle\allowbreak Query} & \texttt{handle(GetInstallationHistoryByVehicleQuery)} → \texttt{List<DeviceInstallationResource>} \\*
 \hline
 \textbf{Parámetros} & \texttt{UUID vehicleId} \\*
 \hline
-\textbf{Mecanismo de Lectura} & Reconstruye la cronología de escáneres instalados y retirados del vehículo con marcas temporales y lecturas de kilometraje acumulado. \\
+\textbf{Mecanismo de Lectura} & Reconstruye la cronología de escáneres instalados y retirados del vehículo con marcas temporales y lecturas de kilometraje acumulado bajo \texttt{@Transactional(readOnly = true)}. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Consultas:} Vehicle\allowbreak Health\allowbreak Report\allowbreak Query\allowbreak Service\allowbreak Impl} \\*
 \hline
@@ -8997,13 +10807,13 @@ En la @tbl:iot-query-services se presentan los métodos de consulta de la capa d
 \hline
 \textbf{Parámetros} & \texttt{UUID vehicleId} \\*
 \hline
-\textbf{Mecanismo de Lectura} & Recupera el último diagnóstico pericial generado consolidando evaluaciones por subsistema, correlaciones DTC y recomendaciones de mantenimiento preventivo. \\
+\textbf{Mecanismo de Lectura} & Recupera el último diagnóstico pericial generado consolidando evaluaciones por subsistema, correlaciones DTC y recomendaciones de mantenimiento preventivo bajo \texttt{@Transactional(readOnly = true)}. \\
 \hline
 \textbf{Consulta:} \texttt{Export\allowbreak Vehicle\allowbreak Health\allowbreak Report\allowbreak Pdf\allowbreak Query} & \texttt{handle(ExportVehicleHealthReportPdfQuery)} → \texttt{byte[]} \\*
 \hline
 \textbf{Parámetros} & \texttt{UUID vehicleId, UUID reportId} \\*
 \hline
-\textbf{Mecanismo de Lectura} & Invoca al puerto VehicleHealthReportPdfGeneratorPort para renderizar el informe analítico completo en binario PDF aplicando maquetación institucional con membrete y semáforos de salud mecánica. \\
+\textbf{Mecanismo de Lectura} & Invoca al puerto VehicleHealthReportPdfGeneratorPort para renderizar el informe analítico completo en binario PDF aplicando maquetación institucional con membrete y semáforos de salud mecánica bajo \texttt{@Transactional(readOnly = true)}. \\
 \hline
 \end{longtable}
 *Nota.* Métodos de consulta de la Capa de Aplicación de IoT Telemetry \& Predictive Maintenance.
@@ -9011,6 +10821,8 @@ En la @tbl:iot-query-services se presentan los métodos de consulta de la capa d
 **Manejadores de Eventos de Dominio y de Integración**
 
 La coordinación reactiva y la consistencia eventual entre subsistemas se articulan mediante manejadores dedicados de eventos:
+
+- **IoTTransactionalOutboxPublisher**: Intercepta eventos de dominio del contexto telemático y persiste mensajes de forma atómica en la tabla relacional de outbox dentro de la misma transacción de base de datos, garantizando una entrega confiable at-least-once sin pérdida de información ante fallas de red.
 
 - **TelemetryDomainEventHandler**: Intercepta eventos de detección de anomalías críticas de motor tras la confirmación transaccional de la ingesta sensorial, despachando de forma asíncrona notificaciones push de alta prioridad hacia las aplicaciones móviles de conductor y taller mediante la pasarela de Firebase.
 
@@ -9032,13 +10844,21 @@ En la @tbl:iot-event-handlers se especifican los eventos interceptados por los m
 \thfirst{Evento Interceptado} & \thcell{Fase de Ejecución y Efectos del Manejador} \\
 \hline
 \endhead
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Publicador Transaccional Outbox:} IoT\allowbreak Transactional\allowbreak Outbox\allowbreak Publisher} \\*
+\hline
+\textbf{Evento:} \texttt{Domain\allowbreak Event} & Ejecución síncrona en fase \texttt{BEFORE\_COMMIT} mediante \texttt{@TransactionalEventListener(phase = TransactionPhase.BEFORE\_COMMIT)} \\*
+\hline
+\textbf{Origen del Suceso} & Agregados de dominio TelemetryRecord, DeviceInstallation, VehicleFault, PredictiveAlert y Obd2Device \\*
+\hline
+\textbf{Efectos del Manejador} & Serializa la carga útil del suceso en estructura JSON y persiste el registro en la tabla de outbox transaccional de PostgreSQL 16 dentro de la misma transacción de negocio, asegurando consistencia eventual y entrega confiable hacia intermediarios de mensajería externos sin riesgo de pérdida de datos. \\
+\hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Manejador de Eventos de Dominio:} Telemetry\allowbreak Domain\allowbreak Event\allowbreak Handler} \\*
 \hline
 \textbf{Evento:} \texttt{Critical\allowbreak Engine\allowbreak Anomaly\allowbreak Detected\allowbreak Event} & Ejecución en fase \texttt{AFTER\_COMMIT} mediante \texttt{@TransactionalEventListener} y \texttt{@Async} \\*
 \hline
 \textbf{Origen del Suceso} & Inferencia analítica del motor matemático tras la ingesta de ráfagas sensoriales \\*
 \hline
-\textbf{Efectos del Manejador} & Invoca de inmediato a FcmNotificationAclService despachando notificaciones push de alta prioridad hacia el teléfono del conductor y la pantalla de recepción del taller mecánico. \\
+\textbf{Efectos del Manejador} & Invoca de inmediato a FcmNotificationAclPort despachando notificaciones push de alta prioridad hacia el teléfono del conductor y la pantalla de recepción del taller mecánico. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Manejador de Eventos de Dominio:} Predictive\allowbreak Alert\allowbreak Domain\allowbreak Event\allowbreak Handler} \\*
 \hline
@@ -9056,7 +10876,7 @@ En la @tbl:iot-event-handlers se especifican los eventos interceptados por los m
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Manejador de Eventos de Dominio:} Vehicle\allowbreak Fault\allowbreak Domain\allowbreak Event\allowbreak Handler} \\*
 \hline
-\textbf{Evento:} \texttt{Vehicle\allowbreak Fault\allowbreak Logged\allowbreak Event} & Ejecución en fase \texttt{AFTER\_COMMIT} mediante \texttt{@TransactionalEventListener} \\*
+\textbf{Evento:} \texttt{Vehicle\allowbreak Fault\allowbreak Detected\allowbreak Event} & Ejecución en fase \texttt{AFTER\_COMMIT} mediante \texttt{@TransactionalEventListener} \\*
 \hline
 \textbf{Origen del Suceso} & Agregado VehicleFault ante detección de un nuevo código DTC en la ECU \\*
 \hline
@@ -9093,13 +10913,15 @@ En la @tbl:iot-event-handlers se especifican los eventos interceptados por los m
 
 **Puertos Salientes y Capas Anticorrupción**
 
-La comunicación hacia proveedores externos y servicios especializados de persistencia se aísla rigurosamente mediante puertos de salida y Capas Anticorrupción:
+La comunicación hacia proveedores externos y servicios especializados de persistencia se aísla rigurosamente mediante puertos de salida y Capas Anticorrupción ubicados bajo el paquete canónico internal.outbound.acl:
 
-- **FcmNotificationAclService**: Encapsula el SDK oficial de Firebase Admin para estructurar y remitir notificaciones push con canalización prioritaria, aislando el núcleo de la aplicación de particularidades técnicas de la infraestructura de Google Cloud.
+- **AiInferenceDiagnosticPort**: Define el contrato perimetral para orquestar consultas de inferencia diagnóstica con inteligencia artificial estructurada, desacoplando los modelos de lenguaje fundacionales y garantizando dictámenes técnicos con tiempos de respuesta reducidos.
 
-- **OperationsAclService**: Traduce anomalías telemáticas a servicios sugeridos de mantenimiento y consulta la disponibilidad de bahías en el contexto de Workshop Operations, evitando el acoplamiento directo con el modelo interno de órdenes de trabajo.
+- **CrmFleetAclPort**: Resuelve la identidad de conductores, tokens de dispositivos y estado de registro de vehículos corporativos interactuando con Customer and Fleet Management bajo una interfaz neutral.
 
-- **CrmFleetAclService**: Resuelve la identidad de propietarios y conductores de vehículos corporativos interactuando con Customer and Fleet Management bajo una interfaz neutral.
+- **FcmNotificationAclPort**: Encapsula el SDK oficial de Firebase Admin para estructurar y remitir notificaciones push con canalización prioritaria, aislando el núcleo de la aplicación de particularidades técnicas de la infraestructura de Google Cloud.
+
+- **OperationsAclPort**: Traduce anomalías telemáticas a servicios sugeridos de mantenimiento y consulta el catálogo de servicios de taller en Workshop Operations, evitando el acoplamiento directo con el modelo interno de órdenes de trabajo.
 
 - **TimescaleBatchJdbcClientPort**: Define el contrato de persistencia masiva de alto rendimiento para la inserción en bloque de lecturas sensoriales sobre la hipertabla particionada de TimescaleDB.
 
@@ -9117,51 +10939,61 @@ En la @tbl:iot-outbound-ports se detallan los puertos de salida de la capa de ap
 \thfirst{Puerto de Salida} & \thcell{Firma de Operaciones y Adaptador de Infraestructura} \\
 \hline
 \endhead
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto / Capa Anticorrupción:} Fcm\allowbreak Notification\allowbreak Acl\allowbreak Service} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto / Capa Anticorrupción:} Ai\allowbreak Inference\allowbreak Diagnostic\allowbreak Port} \\*
 \hline
-\textbf{Operación Principal} & \texttt{sendPredictiveAlertPush(UUID vehicleId, String title, String body, UUID alertId)} → \texttt{String} \\*
+\textbf{Operación Principal} & \texttt{generateVehicleDiagnostic(TenantId tenantId, VehicleId vehicleId, int daysToAnalyze, boolean includeResolvedDtcHistory)} → \texttt{VehicleHealthReportAiDto} \\*
 \hline
-\textbf{Operaciones Secundarias} & - \texttt{sendCriticalFaultPush(UUID vehicleId, String dtcCode, String severity)} → \texttt{String} \newline - \texttt{sendMaintenanceReminderPush(UUID vehicleId, String serviceName)} → \texttt{String} \\*
+\textbf{Operaciones Secundarias} & - \texttt{isAiDiagnosticServiceAvailable()} → \texttt{boolean} \\*
 \hline
-\textbf{Adaptador Concreto} & FirebaseCloudMessagingGateway en la Capa de Infraestructura mediante el SDK oficial de Firebase Admin \\*
+\textbf{Adaptador Concreto} & GroqAiInferenceAdapter en la Capa de Infraestructura mediante Spring AI ChatClient sobre Groq LPU con Llama 3 70B Versatile \\*
 \hline
-\textbf{Propósito Arquitectónico} & Aislar el núcleo de software de las dependencias externas del SDK de Google Firebase estructurando notificaciones push con canal de alta prioridad para alertas de cabina en ruta. \\
+\textbf{Propósito Arquitectónico} & Desacoplar la orquestación de la aplicación de los proveedores de LLM y modelos de lenguaje fundacionales, canalizando diagnósticos periciales estructurados con latencias sub-segundo. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto / Capa Anticorrupción:} Operations\allowbreak Acl\allowbreak Service} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto / Capa Anticorrupción:} Crm\allowbreak Fleet\allowbreak Acl\allowbreak Port} \\*
 \hline
-\textbf{Operación Principal} & \texttt{recommendServiceForAnomaly(AnomalyType type)} → \texttt{ServiceRecommendationDto} \\*
+\textbf{Operación Principal} & \texttt{getDriverFcmDeviceToken(VehicleId vehicleId)} → \texttt{String} \\*
 \hline
-\textbf{Operaciones Secundarias} & - \texttt{createPreliminaryWorkOrder(UUID vehicleId, UUID serviceId, String reason)} → \texttt{UUID} \newline - \texttt{isWorkshopCapacityAvailable(UUID tenantId, Instant preferredDate)} → \texttt{boolean} \\*
-\hline
-\textbf{Adaptador Concreto} & WorkshopOperationsAclAdapter consumiendo la fachada pública Inbound OHS de Workshop Operations MRO \\*
-\hline
-\textbf{Propósito Arquitectónico} & Traducir anomalías telemáticas físicas en paquetes de servicios mecánicos estandarizados y consultar disponibilidad operativa sin acoplarse al modelo interno de órdenes de trabajo. \\
-\hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto / Capa Anticorrupción:} Crm\allowbreak Fleet\allowbreak Acl\allowbreak Service} \\*
-\hline
-\textbf{Operación Principal} & \texttt{getVehicleOwnerContact(UUID vehicleId)} → \texttt{VehicleOwnerContactDto} \\*
-\hline
-\textbf{Operaciones Secundarias} & - \texttt{isVehicleActiveInFleet(UUID vehicleId)} → \texttt{boolean} \newline - \texttt{getFleetManagerDeviceToken(UUID tenantId)} → \texttt{Optional<String>} \\*
+\textbf{Operaciones Secundarias} & - \texttt{isVehicleRegistered(VehicleId vehicleId)} → \texttt{boolean} \newline - \texttt{getVehicleOwnerContact(VehicleId vehicleId)} → \texttt{VehicleOwnerContactDto} \\*
 \hline
 \textbf{Adaptador Concreto} & CrmFleetAclAdapter consumiendo la fachada pública Inbound OHS de Customer and Fleet Management CRM \\*
 \hline
-\textbf{Propósito Arquitectónico} & Resolver la identidad del conductor y propietario del automóvil para el ruteo de alertas y salvaguardar la autonomía de datos de flotas corporativas. \\
+\textbf{Propósito Arquitectónico} & Resolver la titularidad del automóvil y el identificador de token móvil para el ruteo de alertas críticas salvaguardando la autonomía de datos entre contextos. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto / Capa Anticorrupción:} Fcm\allowbreak Notification\allowbreak Acl\allowbreak Port} \\*
+\hline
+\textbf{Operación Principal} & \texttt{sendHighPriorityNotification(VehicleId vehicleId, String title, String body, Map<String, String> data)} → \texttt{String} \\*
+\hline
+\textbf{Operaciones Secundarias} & - \texttt{sendTopicNotification(String topic, String title, String body, Map<String, String> data)} → \texttt{String} \\*
+\hline
+\textbf{Adaptador Concreto} & FirebaseNotificationGateway en la Capa de Infraestructura mediante el SDK oficial de Firebase Admin \\*
+\hline
+\textbf{Propósito Arquitectónico} & Aislar el núcleo de software de las dependencias externas del SDK de Google Firebase estructurando notificaciones push con canal de alta prioridad para alertas de cabina en ruta. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto / Capa Anticorrupción:} Operations\allowbreak Acl\allowbreak Port} \\*
+\hline
+\textbf{Operación Principal} & \texttt{getAvailableWorkshopServices(TenantId tenantId)} → \texttt{List<WorkshopServiceCatalogItemDto>} \\*
+\hline
+\textbf{Operaciones Secundarias} & - \texttt{createPreventiveWorkOrderDraft(VehicleId vehicleId, UUID serviceId, String reason)} → \texttt{UUID} \newline - \texttt{isWorkshopCapacityAvailable(TenantId tenantId, Instant preferredDate)} → \texttt{boolean} \\*
+\hline
+\textbf{Adaptador Concreto} & OperationsAclAdapter consumiendo la fachada pública Inbound OHS de Workshop Operations MRO \\*
+\hline
+\textbf{Propósito Arquitectónico} & Traducir anomalías telemáticas físicas en paquetes de servicios mecánicos estandarizados y consultar disponibilidad operativa sin acoplarse al modelo interno de órdenes de trabajo. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto Especializado:} Timescale\allowbreak Batch\allowbreak Jdbc\allowbreak Client\allowbreak Port} \\*
 \hline
-\textbf{Operación Principal} & \texttt{saveAllBatch(List<TelemetryRecord> records)} → \texttt{int} \\*
+\textbf{Operación Principal} & \texttt{executeBatchInsert(List<TelemetryRecord> records)} → \texttt{void} \\*
 \hline
-\textbf{Operaciones Secundarias} & - \texttt{queryLatestRecord(UUID vehicleId)} → \texttt{Optional<TelemetryRecord>} \newline - \texttt{queryAggregates(UUID vehicleId, Instant from, Instant to, Duration bucket)} → \texttt{List<TelemetryBucketDto>} \\*
+\textbf{Operaciones Secundarias} & - \texttt{queryLatestRecord(VehicleId vehicleId)} → \texttt{Optional<TelemetryRecord>} \newline - \texttt{queryAggregates(VehicleId vehicleId, Instant from, Instant to, Duration bucket)} → \texttt{List<TelemetryBucketDto>} \\*
 \hline
-\textbf{Adaptador Concreto} & TimescaleBatchJdbcAdapter en la Capa de Infraestructura mediante Spring JdbcClient con inserciones preparadas por lotes \\*
+\textbf{Adaptador Concreto} & TimescaleTelemetryRepositoryImpl en la Capa de Infraestructura mediante Spring JdbcClient con inserciones preparadas por lotes \\*
 \hline
 \textbf{Propósito Arquitectónico} & Garantizar persistencia masiva de series temporales de alta velocidad en hipertablas de TimescaleDB con latencias sub-segundo aislando el código SQL nativo. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puerto Especializado:} Vehicle\allowbreak Health\allowbreak Report\allowbreak Pdf\allowbreak Generator\allowbreak Port} \\*
 \hline
-\textbf{Operación Principal} & \texttt{generateHealthReportPdf(VehicleHealthReportAiDto report, VehicleMetadataDto metadata)} → \texttt{byte[]} \\*
+\textbf{Operación Principal} & \texttt{generateHealthReportPdf(VehicleHealthReportAiDto reportData, VehicleMetadataDto metadata)} → \texttt{byte[]} \\*
 \hline
-\textbf{Operaciones Secundarias} & - \texttt{isTemplateAvailable(String templateVersion)} → \texttt{boolean} \newline - \texttt{getReportMetadata(UUID reportId)} → \texttt{ReportMetadataDto} \\*
+\textbf{Operaciones Secundarias} & - \texttt{validateTemplateAvailability()} → \texttt{boolean} \newline - \texttt{getReportMetadata(UUID reportId)} → \texttt{ReportMetadataDto} \\*
 \hline
 \textbf{Adaptador Concreto} & VehicleHealthReportPdfGeneratorAdapter en la Capa de Infraestructura mediante plantillas XHTML procesadas por Thymeleaf y compilador binario OpenPDF \\*
 \hline
@@ -9174,7 +11006,7 @@ El desacoplamiento provisto por la Capa de Aplicación de IoT Telemetry & Predic
 
 Asimismo, la mediación de Capas Anticorrupción consolida una protección rigurosa frente a contingencias en proveedores externos y dependencias de red. Al confinar el protocolo de notificaciones push de Firebase Admin y las consultas de servicios de MRO detrás de adaptadores perimetrales, la plataforma garantiza que fallas transitorias de conectividad externa no interrumpan la captura sensorial ni corrompan el estado del dominio automotriz.
 
-Finalmente, la articulación de los manejadores de eventos con el ciclo transaccional posterior al commit garantiza una consistencia eventual intachable en toda la plataforma. Las anomalías de motor y advertencias predictivas se traducen de forma autónoma en oportunidades comerciales tangibles y citas preventivas, consolidando una sinergia operativa entre el monitoreo físico del vehículo y la gestión comercial del taller mecánico.
+Finalmente, la articulación de los manejadores de eventos con el ciclo transaccional posterior al commit y el publicador transaccional outbox garantiza una consistencia eventual intachable en toda la plataforma. Las anomalías de motor y advertencias predictivas se traducen de forma autónoma en oportunidades comerciales tangibles y citas preventivas, consolidando una sinergia operativa entre el monitoreo físico del vehículo y la gestión comercial del taller mecánico.
 
 
 
@@ -9184,12 +11016,12 @@ La Capa de Infraestructura del Bounded Context **IoT Telemetry & Predictive Main
 
 La arquitectura de infraestructura descansa sobre cuatro pilares técnicos fundamentales:
 
-- **Persistencia híbrida relacional y de series temporales:** Convivencia armónica entre PostgreSQL 16 para entidades auditadas de inventario y sesiones de montaje, y la extensión TimescaleDB para la ingesta en ráfagas de series temporales en hipertablas particionadas por tiempo.
-- **Ingesta masiva de alto rendimiento con inserción por lotes:** Canalización de lecturas de sensores mediante un adaptador JDBC especializado que prescinde del seguimiento de estados de Hibernate en favor de operaciones por lotes de baja sobrecarga computacional.
-- **Reconstitución pura del modelo de dominio y transformación desacoplada:** Ensambladores de persistencia bidireccionales dedicados que hidratan agregados y objetos de valor inmutables sin disparar eventos de dominio espurios durante consultas operativas.
-- **Aislamiento perimetral y resiliencia en notificaciones push y clientes anticorrupción:** Despacho de advertencias críticas mediante el protocolo HTTP v1 de Google Firebase Cloud Messaging y consumo desacoplado en memoria de las fachadas de gestión de talleres y clientes.
+- **Persistencia híbrida relacional y de series temporales:** Convivencia armónica entre PostgreSQL 16 para entidades auditadas de inventario y sesiones de montaje en persistence.jpa, y la extensión TimescaleDB en persistence.timescale para la ingesta en ráfagas de series temporales en hipertablas particionadas por tiempo.
+- **Ingesta masiva y analítica de alto rendimiento con inserción por lotes:** Canalización de lecturas de sensores mediante un repositorio JDBC especializado que prescinde del seguimiento de estados de Hibernate en favor de operaciones por lotes de baja sobrecarga computacional y consultas analíticas con ventanas temporales de agregación.
+- **Reconstitución pura del modelo de dominio y erradicación de transform en JPA:** Ensambladores de persistencia dedicados en persistence.jpa.assemblers y persistence.timescale.assemblers que hidratan agregados y objetos de valor inmutables sin disparar eventos de dominio espurios durante consultas operativas, complementados con convertidores de atributos JPA para tipos complejos.
+- **Adaptadores externos segregados por tecnología y resiliencia perimetral:** Aislamiento estricto de clientes externos en el subpaquete infrastructure.external, organizados modularmente para inferencia pericial con Spring AI sobre Groq, pasarela push de alta prioridad con Firebase Cloud Messaging, compilación de informes PDF periciales con OpenPDF, relay transaccional outbox y capas anticorrupción hacia contextos satélite.
 
-En la @tbl:iot-infrastructure-types se sintetiza el catálogo consolidado de clases, entidades de persistencia, adaptadores de repositorio, ensambladores y pasarelas que configuran este perímetro.
+En la @tbl:iot-infrastructure-types se sintetiza el catálogo consolidado de clases, entidades de persistencia, adaptadores de repositorio, ensambladores, convertidores y pasarelas que configuran este perímetro.
 
 \renewcommand{\arraystretch}{1.25}
 \begin{longtable}{| >{\centering\arraybackslash}p{5.0cm} | >{\raggedright\arraybackslash}p{10.4cm} |}
@@ -9202,9 +11034,9 @@ En la @tbl:iot-infrastructure-types se sintetiza el catálogo consolidado de cla
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\
 \hline
 \endhead
-Obd2\allowbreak Device\allowbreak JpaEntity & Mapeo relacional del inventario físico de hardware telemático hacia la tabla obd2\_devices. \\*
+Obd2\allowbreak Device\allowbreak Persistence\allowbreak Entity & Mapeo relacional del inventario físico de hardware telemático hacia la tabla obd2\_devices. \\*
 \hline
-\textbf{Categoría} & Entidad JPA \\*
+\textbf{Categoría} & Entidad de Persistencia JPA \\*
 \hline
 \textbf{Relaciones} & Hereda de AuditableAbstractPersistenceEntity. Raíz de persistencia para escáneres con índice único sobre device\_identifier. \\*
 \hline
@@ -9212,9 +11044,9 @@ Obd2\allowbreak Device\allowbreak JpaEntity & Mapeo relacional del inventario f�
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
-Device\allowbreak Installation\allowbreak JpaEntity & Mapeo relacional de las sesiones de emparejamiento telemático hacia la tabla device\_installations. \\*
+Device\allowbreak Installation\allowbreak Persistence\allowbreak Entity & Mapeo relacional de las sesiones de emparejamiento telemático hacia la tabla device\_installations. \\*
 \hline
-\textbf{Categoría} & Entidad JPA \\*
+\textbf{Categoría} & Entidad de Persistencia JPA \\*
 \hline
 \textbf{Relaciones} & Hereda de AuditableAbstractPersistenceEntity. Claves foráneas lógicas hacia vehicle\_id y device\_id con índices de búsqueda. \\*
 \hline
@@ -9222,19 +11054,9 @@ Device\allowbreak Installation\allowbreak JpaEntity & Mapeo relacional de las se
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
-Telemetry\allowbreak Log\allowbreak JpaEntity & Mapeo relacional de series temporales de telemetría vehicular hacia la hipertabla telemetry\_logs. \\*
+Vehicle\allowbreak Fault\allowbreak Persistence\allowbreak Entity & Mapeo relacional del historial clínico y averías electrónicas hacia la tabla vehicle\_faults. \\*
 \hline
-\textbf{Categoría} & Entidad JPA e Hipertabla \\*
-\hline
-\textbf{Relaciones} & Clave primaria compuesta TelemetryLogId sobre timestamp y vehicle\_id con índice temporal descendente en TimescaleDB. \\*
-\hline
-\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak entities} \\
-\hline
-\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
-\hline
-Vehicle\allowbreak Fault\allowbreak JpaEntity & Mapeo relacional del historial clínico y averías electrónicas hacia la tabla vehicle\_faults. \\*
-\hline
-\textbf{Categoría} & Entidad JPA \\*
+\textbf{Categoría} & Entidad de Persistencia JPA \\*
 \hline
 \textbf{Relaciones} & Hereda de AuditableAbstractPersistenceEntity. Índice compuesto sobre vehicle\_id y estado de subsanación is\_resolved. \\*
 \hline
@@ -9242,9 +11064,9 @@ Vehicle\allowbreak Fault\allowbreak JpaEntity & Mapeo relacional del historial c
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
-Predictive\allowbreak Alert\allowbreak JpaEntity & Mapeo relacional de alertas preventivas y recomendaciones mecánicas hacia la tabla predictive\_alerts. \\*
+Predictive\allowbreak Alert\allowbreak Persistence\allowbreak Entity & Mapeo relacional de alertas preventivas y recomendaciones mecánicas hacia la tabla predictive\_alerts. \\*
 \hline
-\textbf{Categoría} & Entidad JPA \\*
+\textbf{Categoría} & Entidad de Persistencia JPA \\*
 \hline
 \textbf{Relaciones} & Hereda de AuditableAbstractPersistenceEntity. Clave foránea opcional a orden de trabajo e índice por estado operativo. \\*
 \hline
@@ -9252,9 +11074,9 @@ Predictive\allowbreak Alert\allowbreak JpaEntity & Mapeo relacional de alertas p
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
-Dtc\allowbreak Catalog\allowbreak Entry\allowbreak JpaEntity & Mapeo relacional del catálogo canónico de fallas SAE J2012 e ISO 15031-6 hacia la tabla dtc\_catalog. \\*
+Dtc\allowbreak Catalog\allowbreak Persistence\allowbreak Entity & Mapeo relacional del catálogo canónico de fallas SAE J2012 e ISO 15031-6 hacia la tabla dtc\_catalog. \\*
 \hline
-\textbf{Categoría} & Entidad JPA \\*
+\textbf{Categoría} & Entidad de Persistencia JPA \\*
 \hline
 \textbf{Relaciones} & Hereda de AuditableAbstractPersistenceEntity. Restricción de unicidad estricta sobre la columna dtc\_code. \\*
 \hline
@@ -9262,9 +11084,9 @@ Dtc\allowbreak Catalog\allowbreak Entry\allowbreak JpaEntity & Mapeo relacional 
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
-SpringData\allowbreak Obd2\allowbreak Device\allowbreak Repository & Interfaz de persistencia Spring Data JPA para administración de dispositivos telemáticos del taller. \\*
+Obd2\allowbreak Device\allowbreak Persistence\allowbreak Repository & Interfaz de persistencia Spring Data JPA para administración de dispositivos telemáticos del taller. \\*
 \hline
-\textbf{Categoría} & Repositorio JPA \\*
+\textbf{Categoría} & Repositorio Spring Data JPA \\*
 \hline
 \textbf{Relaciones} & Extiende JpaRepository. Consultas unívocas por identificador físico y verificación de existencia por MAC o IMEI. \\*
 \hline
@@ -9272,9 +11094,9 @@ SpringData\allowbreak Obd2\allowbreak Device\allowbreak Repository & Interfaz de
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
-SpringData\allowbreak Device\allowbreak Installation\allowbreak Repository & Interfaz de persistencia Spring Data JPA para control de instalaciones activas e histórico de montaje. \\*
+Device\allowbreak Installation\allowbreak Persistence\allowbreak Repository & Interfaz de persistencia Spring Data JPA para control de instalaciones activas e histórico de montaje. \\*
 \hline
-\textbf{Categoría} & Repositorio JPA \\*
+\textbf{Categoría} & Repositorio Spring Data JPA \\*
 \hline
 \textbf{Relaciones} & Extiende JpaRepository. Consultas por vehículo activo sin desinstalación y listado cronológico de sesiones vehiculares. \\*
 \hline
@@ -9282,9 +11104,9 @@ SpringData\allowbreak Device\allowbreak Installation\allowbreak Repository & Int
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
-SpringData\allowbreak Vehicle\allowbreak Fault\allowbreak Repository & Interfaz de persistencia Spring Data JPA para gestión de averías electrónicas y códigos DTC activos. \\*
+Vehicle\allowbreak Fault\allowbreak Persistence\allowbreak Repository & Interfaz de persistencia Spring Data JPA para gestión de averías electrónicas y códigos DTC activos. \\*
 \hline
-\textbf{Categoría} & Repositorio JPA \\*
+\textbf{Categoría} & Repositorio Spring Data JPA \\*
 \hline
 \textbf{Relaciones} & Extiende JpaRepository. Filtrado de fallas no subsanadas por vehículo y recuperación de historial de diagnósticos. \\*
 \hline
@@ -9292,9 +11114,9 @@ SpringData\allowbreak Vehicle\allowbreak Fault\allowbreak Repository & Interfaz 
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
-SpringData\allowbreak Predictive\allowbreak Alert\allowbreak Repository & Interfaz de persistencia Spring Data JPA para administración de tableros de alertas de mantenimiento predictivo. \\*
+Predictive\allowbreak Alert\allowbreak Persistence\allowbreak Repository & Interfaz de persistencia Spring Data JPA para administración de tableros de alertas de mantenimiento predictivo. \\*
 \hline
-\textbf{Categoría} & Repositorio JPA \\*
+\textbf{Categoría} & Repositorio Spring Data JPA \\*
 \hline
 \textbf{Relaciones} & Extiende JpaRepository. Búsqueda de alertas por taller automotriz y estado operativo con ordenamiento cronológico. \\*
 \hline
@@ -9302,73 +11124,13 @@ SpringData\allowbreak Predictive\allowbreak Alert\allowbreak Repository & Interf
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
-SpringData\allowbreak Dtc\allowbreak Catalog\allowbreak Repository & Interfaz de persistencia Spring Data JPA para consulta canónica de definiciones de diagnóstico automotriz. \\*
+Dtc\allowbreak Catalog\allowbreak Persistence\allowbreak Repository & Interfaz de persistencia Spring Data JPA para consulta canónica de definiciones de diagnóstico automotriz. \\*
 \hline
-\textbf{Categoría} & Repositorio JPA \\*
+\textbf{Categoría} & Repositorio Spring Data JPA \\*
 \hline
 \textbf{Relaciones} & Extiende JpaRepository. Búsqueda por código DTC normalizado y recuperación por categoría de subsistema vehicular. \\*
 \hline
 \textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak repositories} \\
-\hline
-\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
-\hline
-Timescale\allowbreak Telemetry\allowbreak Jdbc\allowbreak Repository\allowbreak Impl & Adaptador de acceso a datos de alto rendimiento para inserción masiva en ráfagas sobre TimescaleDB. \\*
-\hline
-\textbf{Categoría} & Adaptador JDBC Batch \\*
-\hline
-\textbf{Relaciones} & Implementa TelemetryLogRepository empleando JdbcTemplate y Spring JdbcClient para inserciones y agregaciones temporales. \\*
-\hline
-\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak timescale} \\
-\hline
-\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
-\hline
-Obd2\allowbreak Device\allowbreak Repository\allowbreak Adapter & Adaptador secundario de salida que implementa el puerto de dominio Obd2DeviceRepository. \\*
-\hline
-\textbf{Categoría} & Adaptador de Persistencia \\*
-\hline
-\textbf{Relaciones} & Conecta el puerto de dominio con SpringDataObd2DeviceRepository delegando transformaciones en el ensamblador respectivo. \\*
-\hline
-\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak adapters} \\
-\hline
-\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
-\hline
-Device\allowbreak Installation\allowbreak Repository\allowbreak Adapter & Adaptador secundario de salida que implementa el puerto de dominio DeviceInstallationRepository. \\*
-\hline
-\textbf{Categoría} & Adaptador de Persistencia \\*
-\hline
-\textbf{Relaciones} & Implementa DeviceInstallationRepository orquestando la persistencia relacional y consultas de sesiones activas. \\*
-\hline
-\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak adapters} \\
-\hline
-\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
-\hline
-Vehicle\allowbreak Fault\allowbreak Repository\allowbreak Adapter & Adaptador secundario de salida que implementa el puerto de dominio VehicleFaultRepository. \\*
-\hline
-\textbf{Categoría} & Adaptador de Persistencia \\*
-\hline
-\textbf{Relaciones} & Implementa VehicleFaultRepository persistiendo anomalías electrónicas y facilitando consultas de fallas abiertas. \\*
-\hline
-\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak adapters} \\
-\hline
-\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
-\hline
-Predictive\allowbreak Alert\allowbreak Repository\allowbreak Adapter & Adaptador secundario de salida que implementa el puerto de dominio PredictiveAlertRepository. \\*
-\hline
-\textbf{Categoría} & Adaptador de Persistencia \\*
-\hline
-\textbf{Relaciones} & Implementa PredictiveAlertRepository gestionando el ciclo de vida de advertencias y vinculaciones con órdenes de servicio. \\*
-\hline
-\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak adapters} \\
-\hline
-\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
-\hline
-Dtc\allowbreak Catalog\allowbreak Repository\allowbreak Adapter & Adaptador secundario de salida que implementa el puerto de dominio DtcCatalogRepository. \\*
-\hline
-\textbf{Categoría} & Adaptador de Persistencia \\*
-\hline
-\textbf{Relaciones} & Implementa DtcCatalogRepository resolviendo descripciones en español y severidades predeterminadas de diagnóstico. \\*
-\hline
-\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak adapters} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
@@ -9382,7 +11144,7 @@ Obd2\allowbreak Device\allowbreak Persistence\allowbreak Assembler & Ensamblador
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
-Device\allowbreak Installation\allowbreak Persistence\allowbreak Assembler & Ensamblador para transformación bidireccional entre DeviceInstallation y DeviceInstallationJpaEntity. \\*
+Device\allowbreak Installation\allowbreak Persistence\allowbreak Assembler & Ensamblador para transformación bidireccional entre DeviceInstallation y DeviceInstallationPersistenceEntity. \\*
 \hline
 \textbf{Categoría} & Ensamblador de Persistencia \\*
 \hline
@@ -9392,7 +11154,7 @@ Device\allowbreak Installation\allowbreak Persistence\allowbreak Assembler & Ens
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
-Vehicle\allowbreak Fault\allowbreak Persistence\allowbreak Assembler & Ensamblador para transformación bidireccional entre VehicleFault y VehicleFaultJpaEntity. \\*
+Vehicle\allowbreak Fault\allowbreak Persistence\allowbreak Assembler & Ensamblador para transformación bidireccional entre VehicleFault y VehicleFaultPersistenceEntity. \\*
 \hline
 \textbf{Categoría} & Ensamblador de Persistencia \\*
 \hline
@@ -9402,7 +11164,7 @@ Vehicle\allowbreak Fault\allowbreak Persistence\allowbreak Assembler & Ensamblad
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
-Predictive\allowbreak Alert\allowbreak Persistence\allowbreak Assembler & Ensamblador para transformación bidireccional entre PredictiveAlert y PredictiveAlertJpaEntity. \\*
+Predictive\allowbreak Alert\allowbreak Persistence\allowbreak Assembler & Ensamblador para transformación bidireccional entre PredictiveAlert y PredictiveAlertPersistenceEntity. \\*
 \hline
 \textbf{Categoría} & Ensamblador de Persistencia \\*
 \hline
@@ -9412,7 +11174,7 @@ Predictive\allowbreak Alert\allowbreak Persistence\allowbreak Assembler & Ensamb
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
-Dtc\allowbreak Catalog\allowbreak Persistence\allowbreak Assembler & Ensamblador para transformación bidireccional entre DtcCatalogEntry y DtcCatalogEntryJpaEntity. \\*
+Dtc\allowbreak Catalog\allowbreak Persistence\allowbreak Assembler & Ensamblador para transformación bidireccional entre DtcCatalogEntry y DtcCatalogPersistenceEntity. \\*
 \hline
 \textbf{Categoría} & Ensamblador de Persistencia \\*
 \hline
@@ -9422,63 +11184,233 @@ Dtc\allowbreak Catalog\allowbreak Persistence\allowbreak Assembler & Ensamblador
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
-Firebase\allowbreak Cloud\allowbreak Messaging\allowbreak Gateway\allowbreak Impl & Pasarela perimetral de notificaciones push de alta prioridad hacia terminales móviles de conductores y talleres. \\*
+Battery\allowbreak Voltage\allowbreak Attribute\allowbreak Converter & Convertidor JPA para transformación bidireccional entre el objeto de valor BatteryVoltage y la columna física DOUBLE PRECISION. \\*
 \hline
-\textbf{Categoría} & Pasarela Cloud de Notificaciones \\*
+\textbf{Categoría} & Conversor de Atributo JPA \\*
 \hline
-\textbf{Relaciones} & Implementa FirebaseCloudMessagingGateway utilizando el SDK de Google Firebase Admin con protocolo HTTP v1 seguro. \\*
+\textbf{Relaciones} & Implementa AttributeConverter validando voltajes automotrices válidos en el ciclo de persistencia relacional. \\*
 \hline
-\textbf{Paquete} & \texttt{...\allowbreak infrastructure.\allowbreak gateways} \\
-\hline
-\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
-\hline
-Workshop\allowbreak Operations\allowbreak Acl\allowbreak Adapter & Adaptador de cliente remoto hacia Workshop Operations para mapeo de averías hacia servicios de taller. \\*
-\hline
-\textbf{Categoría} & Adaptador de Integración Intermodular \\*
-\hline
-\textbf{Relaciones} & Implementa OperationsAclService consumiendo WorkshopOperationsContextFacade bajo el patrón Open Host Service. \\*
-\hline
-\textbf{Paquete} & \texttt{...\allowbreak infrastructure.\allowbreak acl} \\
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak converters} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
-Crm\allowbreak Fleet\allowbreak Acl\allowbreak Adapter & Adaptador de cliente remoto hacia Customer and Fleet Management para recuperación de tokens móviles. \\*
+Confidence\allowbreak Score\allowbreak Attribute\allowbreak Converter & Convertidor JPA para mapeo del objeto de valor ConfidenceScore hacia la columna NUMERIC(5,2). \\*
 \hline
-\textbf{Categoría} & Adaptador de Integración Intermodular \\*
+\textbf{Categoría} & Conversor de Atributo JPA \\*
 \hline
-\textbf{Relaciones} & Implementa CrmFleetAclService consumiendo CustomerContextFacade sin generar acoplamiento físico en base de datos. \\*
+\textbf{Relaciones} & Implementa AttributeConverter garantizando precisión decimal en índices analíticos de certeza diagnóstica. \\*
 \hline
-\textbf{Paquete} & \texttt{...\allowbreak infrastructure.\allowbreak acl} \\
-\hline
-\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
-\hline
-Vehicle\allowbreak Health\allowbreak Report\allowbreak Pdf\allowbreak Generator\allowbreak Adapter & Adaptador de salida perimetral para renderizado y compilación de informes de salud en documentos PDF. \\*
-\hline
-\textbf{Categoría} & Adaptador de Renderizado y Exportación Documental \\*
-\hline
-\textbf{Relaciones} & Implementa VehicleHealthReportPdfGeneratorPort. Procesa plantillas XHTML con Thymeleaf y compila el flujo binario con OpenPDF. \\*
-\hline
-\textbf{Paquete} & \texttt{...\allowbreak infrastructure.\allowbreak reporting} \\
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak converters} \\
 \hline
 \thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
 \hline
-Vehicle\allowbreak Health\allowbreak Ai\allowbreak Diagnostic\allowbreak Service & Adaptador de inferencia de inteligencia artificial que sintetiza telemetría y averías en diagnósticos estructurados. \\*
+Device\allowbreak Identifier\allowbreak Attribute\allowbreak Converter & Convertidor JPA para transformación bidireccional entre DeviceIdentifier y la columna VARCHAR(100). \\*
 \hline
-\textbf{Categoría} & Adaptador de Inteligencia Artificial \\*
+\textbf{Categoría} & Conversor de Atributo JPA \\*
 \hline
-\textbf{Relaciones} & Utiliza Spring AI ChatClient con BeanOutputConverter consumiendo agregaciones de TimescaleDB e historial de fallas SAE J2012. \\*
+\textbf{Relaciones} & Implementa AttributeConverter asegurando formato normalizado de números de serie o direcciones MAC de hardware. \\*
 \hline
-\textbf{Paquete} & \texttt{...\allowbreak infrastructure.\allowbreak ai} \\
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak converters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Dtc\allowbreak Code\allowbreak Attribute\allowbreak Converter & Convertidor JPA para mapeo del objeto de valor DtcCode hacia la columna VARCHAR(10). \\*
+\hline
+\textbf{Categoría} & Conversor de Atributo JPA \\*
+\hline
+\textbf{Relaciones} & Implementa AttributeConverter validando el formato estandarizado SAE J2012 de cinco caracteres alfanuméricos. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak converters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Engine\allowbreak Temperature\allowbreak Attribute\allowbreak Converter & Convertidor JPA para transformación bidireccional entre EngineTemperature y la columna física DOUBLE PRECISION. \\*
+\hline
+\textbf{Categoría} & Conversor de Atributo JPA \\*
+\hline
+\textbf{Relaciones} & Implementa AttributeConverter resguardando la escala en grados Celsius del refrigerante de motor. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak converters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Geo\allowbreak Coordinates\allowbreak Attribute\allowbreak Converter & Convertidor JPA para mapeo bidireccional del objeto de valor GeoCoordinates hacia pares de coordenadas geográficas. \\*
+\hline
+\textbf{Categoría} & Conversor de Atributo JPA \\*
+\hline
+\textbf{Relaciones} & Implementa AttributeConverter garantizando rangos válidos de latitud y longitud satelital GPS. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak converters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Device\allowbreak Installation\allowbreak Repository\allowbreak Impl & Adaptador secundario de salida que implementa el puerto de dominio DeviceInstallationRepository. \\*
+\hline
+\textbf{Categoría} & Adaptador de Repositorio JPA \\*
+\hline
+\textbf{Relaciones} & Implementa DeviceInstallationRepository orquestando la persistencia relacional y consultas de sesiones activas. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak adapters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Dtc\allowbreak Catalog\allowbreak Repository\allowbreak Impl & Adaptador secundario de salida que implementa el puerto de dominio DtcCatalogRepository. \\*
+\hline
+\textbf{Categoría} & Adaptador de Repositorio JPA \\*
+\hline
+\textbf{Relaciones} & Implementa DtcCatalogRepository resolviendo descripciones en español y severidades canónicas de diagnóstico. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak adapters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Obd2\allowbreak Device\allowbreak Repository\allowbreak Impl & Adaptador secundario de salida que implementa el puerto de dominio Obd2DeviceRepository. \\*
+\hline
+\textbf{Categoría} & Adaptador de Repositorio JPA \\*
+\hline
+\textbf{Relaciones} & Conecta el puerto de dominio con Obd2DevicePersistenceRepository delegando transformaciones en el ensamblador respectivo. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak adapters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Predictive\allowbreak Alert\allowbreak Repository\allowbreak Impl & Adaptador secundario de salida que implementa el puerto de dominio PredictiveAlertRepository. \\*
+\hline
+\textbf{Categoría} & Adaptador de Repositorio JPA \\*
+\hline
+\textbf{Relaciones} & Implementa PredictiveAlertRepository gestionando el ciclo de vida de advertencias y vinculaciones con órdenes de servicio. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak adapters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Vehicle\allowbreak Fault\allowbreak Repository\allowbreak Impl & Adaptador secundario de salida que implementa el puerto de dominio VehicleFaultRepository. \\*
+\hline
+\textbf{Categoría} & Adaptador de Repositorio JPA \\*
+\hline
+\textbf{Relaciones} & Implementa VehicleFaultRepository persistiendo anomalías electrónicas y facilitando consultas de fallas abiertas. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak adapters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Telemetry\allowbreak Log\allowbreak Persistence\allowbreak Entity & Mapeo relacional de series temporales de telemetría vehicular hacia la hipertabla telemetry\_logs de TimescaleDB. \\*
+\hline
+\textbf{Categoría} & Entidad de Serie Temporal TimescaleDB \\*
+\hline
+\textbf{Relaciones} & Clave primaria compuesta TelemetryRecordId sobre timestamp y vehicle\_id con índice temporal descendente en TimescaleDB. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak timescale.\allowbreak entities} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Timescale\allowbreak Telemetry\allowbreak Jdbc\allowbreak Repository & Cliente JDBC Batch de acceso a datos de alto rendimiento para inserción masiva en ráfagas sobre hipertablas de TimescaleDB. \\*
+\hline
+\textbf{Categoría} & Cliente JDBC Batch de Hipertabla \\*
+\hline
+\textbf{Relaciones} & Emplea JdbcTemplate e inserciones SQL por lotes para ingesta continua sin sobrecarga de entidades JPA. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak timescale.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Timescale\allowbreak Telemetry\allowbreak Analytics\allowbreak Repository & Repositorio analítico de consultas estadísticas agregadas por ventanas de tiempo diario sobre la hipertabla telemetry\_logs. \\*
+\hline
+\textbf{Categoría} & Repositorio Analítico TimescaleDB \\*
+\hline
+\textbf{Relaciones} & Extiende Repository ejecutando la función time\_bucket de TimescaleDB para promedios y desviaciones estándar de sensores. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak timescale.\allowbreak repositories} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Timescale\allowbreak Telemetry\allowbreak Repository\allowbreak Impl & Adaptador de repositorio que implementa el puerto de dominio TelemetryLogRepository y el puerto de salida de aplicación. \\*
+\hline
+\textbf{Categoría} & Adaptador de Repositorio TimescaleDB \\*
+\hline
+\textbf{Relaciones} & Implementa TelemetryLogRepository utilizando TimescaleTelemetryJdbcRepository y TimescaleTelemetryPersistenceAssembler. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak timescale.\allowbreak adapters} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Timescale\allowbreak Telemetry\allowbreak Persistence\allowbreak Assembler & Ensamblador temporal para transformación bidireccional entre el agregado TelemetryRecord y la entidad de hipertabla. \\*
+\hline
+\textbf{Categoría} & Ensamblador de Persistencia Temporal \\*
+\hline
+\textbf{Relaciones} & Descompone objetos inmutables de telemetría hacia columnas de hipertabla e hidrata agregados sin eventos espurios. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak timescale.\allowbreak assemblers} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Crm\allowbreak Fleet\allowbreak Acl\allowbreak Adapter & Adaptador cliente remoto hacia Customer and Fleet Management para resolución de titulares vehiculares y tokens móviles FCM. \\*
+\hline
+\textbf{Categoría} & Adaptador ACL Antifragilidad \\*
+\hline
+\textbf{Relaciones} & Implementa CrmFleetAclPort consumiendo CustomerContextFacade en memoria bajo el patrón Open Host Service. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak external.\allowbreak acl.\allowbreak crm} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Workshop\allowbreak Operations\allowbreak Acl\allowbreak Adapter & Adaptador cliente remoto hacia Workshop Operations para mapeo de averías y anclaje estricto al catálogo de servicios de taller. \\*
+\hline
+\textbf{Categoría} & Adaptador ACL Antifragilidad \\*
+\hline
+\textbf{Relaciones} & Implementa OperationsAclPort consumiendo WorkshopOperationsContextFacade bajo el patrón Open Host Service. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak external.\allowbreak acl.\allowbreak mro} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Groq\allowbreak Spring\allowbreak Ai\allowbreak Diagnostic\allowbreak Adapter & Adaptador perimetral de inferencia analítica sustentado en Spring AI con modelos LPU de ultra-baja latencia sobre Groq. \\*
+\hline
+\textbf{Categoría} & Adaptador de Inferencia con IA \\*
+\hline
+\textbf{Relaciones} & Implementa AiInferenceDiagnosticPort combinando telemetría de 30 días, fallas activas y catálogo de taller con BeanOutputConverter. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak external.\allowbreak ai.\allowbreak groq} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+IoT\allowbreak Outbox\allowbreak Message\allowbreak Relay\allowbreak Adapter & Retransmisor transaccional en segundo plano para publicación confiable de eventos de integración hacia el broker de mensajería. \\*
+\hline
+\textbf{Categoría} & Relay de Publicación Transaccional Outbox \\*
+\hline
+\textbf{Relaciones} & Implementa sondeo programado sobre la tabla outbox garantizando entrega at-least-once hacia RabbitMQ o Kafka. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak external.\allowbreak messaging.\allowbreak outbox} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+Firebase\allowbreak Cloud\allowbreak Messaging\allowbreak Gateway\allowbreak Adapter & Pasarela perimetral de notificaciones push de alta prioridad hacia terminales móviles de conductores y jefes de taller. \\*
+\hline
+\textbf{Categoría} & Pasarela Push Notificaciones \\*
+\hline
+\textbf{Relaciones} & Implementa FcmNotificationAclPort aislando el SDK oficial de Google Firebase Admin con protocolo seguro HTTP v1. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak external.\allowbreak notification.\allowbreak firebase} \\
+\hline
+\thfirst{Clase o Tipo} & \thcell{Propósito en la Arquitectura} \\*
+\hline
+OpenPdf\allowbreak Vehicle\allowbreak Health\allowbreak Report\allowbreak Generator\allowbreak Adapter & Adaptador perimetral para renderizado y compilación del Informe Pericial Unificado de salud automotriz en formato PDF. \\*
+\hline
+\textbf{Categoría} & Motor Generador de Documentos PDF \\*
+\hline
+\textbf{Relaciones} & Implementa VehicleHealthReportPdfGeneratorPort procesando plantillas XHTML con Thymeleaf y compilando con OpenPDF. \\*
+\hline
+\textbf{Paquete} & \texttt{...\allowbreak external.\allowbreak reporting.\allowbreak openpdf} \\
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-*Nota.* Componentes pertenecientes al paquete canónico com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak iot.\allowbreak infrastructure.
+*Nota.* Componentes distribuidos en los subpaquetes modulares persistence.jpa, persistence.timescale y external bajo el paquete canónico com.andeva.atelier.platform.iot.infrastructure.
 
 **Entidades de Persistencia JPA, Hipertabla Temporal y Esquema Relacional Físico**
 
-El modelado relacional de persistencia reproduce fielmente la topología telemática y automotriz del dominio mediante cinco entidades JPA transaccionales y una hipertabla de series temporales en PostgreSQL 16 con TimescaleDB. La entidad **Obd2DeviceJpaEntity** mapea el hardware físico hacia la tabla **obd2_devices**, extendiendo de la clase abstracta de auditoría para registrar marcas temporales y versiones de control de concurrencia optimista. Por su parte, **DeviceInstallationJpaEntity** custodia en la tabla **device_installations** el historial cronológico de emparejamiento entre escáneres y vehículos, resguardando lecturas de odómetro inicial y final en kilómetros.
+El modelado relacional de persistencia reproduce la topología telemática y automotriz del dominio mediante cinco entidades JPA transaccionales en persistence.jpa.entities y una entidad de serie temporal en persistence.timescale.entities sobre PostgreSQL 16 con la extensión TimescaleDB. La entidad **Obd2DevicePersistenceEntity** mapea el hardware físico hacia la tabla **obd2_devices**, extendiendo de la clase abstracta de auditoría para registrar marcas temporales y versiones de control de concurrencia optimista. Por su parte, **DeviceInstallationPersistenceEntity** custodia en la tabla **device_installations** el historial cronológico de emparejamiento entre escáneres y vehículos, resguardando lecturas de odómetro inicial y final en kilómetros.
 
-A su vez, **TelemetryLogJpaEntity** estructura el almacenamiento masivo sobre la hipertabla **telemetry_logs**, particionada automáticamente por intervalos de tiempo sobre la marca temporal UTC y respaldada por una clave primaria compuesta sobre el instante de captura y el identificador vehicular. Para el diagnóstico electrónico, **VehicleFaultJpaEntity** registra en la tabla **vehicle_faults** las averías bajo el estándar SAE J2012, mientras que **PredictiveAlertJpaEntity** custodia en **predictive_alerts** los pronósticos de degradación mecánica con índices de confianza analíticos. Finalmente, **DtcCatalogEntryJpaEntity** normaliza el catálogo de definiciones automotrices en la tabla **dtc_catalog**. En la @tbl:iot-jpa-entities se detallan los esquemas relacionales, claves primarias, índices B-Tree y restricciones de estas entidades.
+A su vez, **TelemetryLogPersistenceEntity** estructura el almacenamiento masivo sobre la hipertabla **telemetry_logs**, particionada automáticamente por intervalos de tiempo sobre la marca temporal UTC y respaldada por una clave primaria compuesta sobre el instante de captura y el identificador vehicular. Para el diagnóstico electrónico, **VehicleFaultPersistenceEntity** registra en la tabla **vehicle_faults** las averías bajo el estándar SAE J2012, mientras que **PredictiveAlertPersistenceEntity** custodia en **predictive_alerts** los pronósticos de degradación mecánica con índices de confianza analíticos. Finalmente, **DtcCatalogPersistenceEntity** normaliza el catálogo de definiciones automotrices en la tabla **dtc_catalog**. En la @tbl:iot-jpa-entities se detallan los esquemas relacionales, claves primarias, índices B-Tree y restricciones de estas entidades.
 
 \renewcommand{\arraystretch}{1.25}
 \begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
@@ -9491,7 +11423,7 @@ A su vez, **TelemetryLogJpaEntity** estructura el almacenamiento masivo sobre la
 \thfirst{Aspecto de Persistencia} & \thcell{Especificación Físico-Relacional} \\
 \hline
 \endhead
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} Obd2DeviceJpaEntity \quad (\textit{Tabla:} \texttt{obd2\_devices})} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} Obd2DevicePersistenceEntity \quad (\textit{Tabla:} \texttt{obd2\_devices})} \\*
 \hline
 \textbf{Clave Primaria} & \texttt{id (UUID)} \\*
 \hline
@@ -9499,7 +11431,7 @@ A su vez, **TelemetryLogJpaEntity** estructura el almacenamiento masivo sobre la
 \hline
 \textbf{Restricciones e Índices} & Restricción de unicidad estricta uk\_obd2\_devices\_identifier sobre la columna device\_identifier. Restricciones de verificación chk\_device\_conn\_type y chk\_device\_status para dominios de valores válidos. Índice B-Tree idx\_devices\_tenant\_status sobre (tenant\_id, status) para filtrado ágil de escáneres disponibles en patio de taller. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} DeviceInstallationJpaEntity \quad (\textit{Tabla:} \texttt{device\_installations})} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} DeviceInstallationPersistenceEntity \quad (\textit{Tabla:} \texttt{device\_installations})} \\*
 \hline
 \textbf{Clave Primaria} & \texttt{id (UUID)} \\*
 \hline
@@ -9507,31 +11439,31 @@ A su vez, **TelemetryLogJpaEntity** estructura el almacenamiento masivo sobre la
 \hline
 \textbf{Restricciones e Índices} & Claves foráneas fk\_installations\_device hacia obd2\_devices y fk\_installations\_vehicle hacia el módulo vehicular. Restricción de verificación chk\_odometer\_positive sobre kilometrajes no negativos y chk\_uninstalled\_after\_installed para consistencia cronológica. Índices B-Tree idx\_installations\_vehicle sobre vehicle\_id e idx\_installations\_device sobre device\_id para resolución inmediata de sesiones activas. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA e Hipertabla:} TelemetryLogJpaEntity \quad (\textit{Hipertabla TimescaleDB:} \texttt{telemetry\_logs})} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA e Hipertabla:} TelemetryLogPersistenceEntity \quad (\textit{Hipertabla TimescaleDB:} \texttt{telemetry\_logs})} \\*
 \hline
-\textbf{Clave Primaria} & Clave compuesta \texttt{TelemetryLogId(timestamp TIMESTAMPTZ, vehicle\_id UUID)} \\*
+\textbf{Clave Primaria} & Clave compuesta \texttt{TelemetryRecordId(timestamp TIMESTAMPTZ, vehicle\_id UUID)} \\*
 \hline
-\textbf{Columnas Principales} & \texttt{timestamp}, \texttt{vehicle\_id}, \texttt{tenant\_id}, \texttt{latitude}, \texttt{longitude}, \texttt{speed}, \texttt{engine\_temp\_c}, \texttt{rpm}, \texttt{fuel\_level}, \texttt{battery\_voltage} \\*
+\textbf{Columnas Principales} & \texttt{timestamp}, \texttt{vehicle\_id}, \texttt{tenant\_id}, \texttt{latitude}, \texttt{longitude}, \texttt{speed}, \texttt{engine\_temp\_c}, \texttt{rpm}, \texttt{fuel\_level\_pct}, \texttt{battery\_voltage} \\*
 \hline
-\textbf{Restricciones e Índices} & Hipertabla particionada automáticamente en bloques temporales de siete días mediante la función create\_hypertable de TimescaleDB. Índice temporal descendente idx\_telemetry\_tenant\_time sobre las columnas (tenant\_id, timestamp DESC). Política de compresión columnar activa sobre segmentos (vehicle\_id, tenant\_id) para particiones con antigüedad superior a treinta días. \\
+\textbf{Restricciones e Índices} & Hipertabla particionada automáticamente en bloques temporales de siete días mediante la función create\_hypertable de TimescaleDB. Índice temporal descendente idx\_telemetry\_vehicle\_time sobre las columnas (vehicle\_id, timestamp DESC). Política de compresión columnar activa sobre segmentos (vehicle\_id, tenant\_id) para particiones con antigüedad superior a treinta días. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} VehicleFaultJpaEntity \quad (\textit{Tabla:} \texttt{vehicle\_faults})} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} VehicleFaultPersistenceEntity \quad (\textit{Tabla:} \texttt{vehicle\_faults})} \\*
 \hline
 \textbf{Clave Primaria} & \texttt{id (UUID)} \\*
 \hline
 \textbf{Columnas Principales} & \texttt{tenant\_id}, \texttt{vehicle\_id}, \texttt{dtc\_code}, \texttt{severity}, \texttt{description}, \texttt{detected\_at}, \texttt{is\_resolved}, \texttt{resolved\_at}, \texttt{created\_at}, \texttt{updated\_at}, \texttt{version}, \texttt{deleted\_at} \\*
 \hline
-\textbf{Restricciones e Índices} & Clave foránea fk\_faults\_vehicle hacia el registro automotriz. Restricción de verificación chk\_fault\_severity sobre valores LOW, MEDIUM, HIGH y CRITICAL. Índice B-Tree idx\_faults\_vehicle\_active sobre (vehicle\_id, is\_resolved) para inspección inmediata de fallas mecánicas abiertas durante el servicio en bahía. \\
+\textbf{Restricciones e Índices} & Clave foránea fk\_faults\_vehicle hacia el registro automotriz. Restricción de verificación chk\_fault\_severity sobre valores LOW, MEDIUM, HIGH y CRITICAL. Índices B-Tree idx\_faults\_vehicle\_dtc sobre (vehicle\_id, dtc\_code) e idx\_faults\_detected\_at sobre detected\_at para inspección inmediata de fallas mecánicas abiertas durante el servicio en bahía. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} PredictiveAlertJpaEntity \quad (\textit{Tabla:} \texttt{predictive\_alerts})} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} PredictiveAlertPersistenceEntity \quad (\textit{Tabla:} \texttt{predictive\_alerts})} \\*
 \hline
 \textbf{Clave Primaria} & \texttt{id (UUID)} \\*
 \hline
 \textbf{Columnas Principales} & \texttt{tenant\_id}, \texttt{vehicle\_id}, \texttt{recommended\_service\_id}, \texttt{alert\_type}, \texttt{confidence\_score}, \texttt{message}, \texttt{status}, \texttt{fcm\_message\_id}, \texttt{created\_at}, \texttt{updated\_at}, \texttt{version}, \texttt{deleted\_at} \\*
 \hline
-\textbf{Restricciones e Índices} & Restricción de verificación chk\_confidence\_range que asegura un índice de certeza entre 0.00 y 1.00. Índices B-Tree idx\_alerts\_vehicle sobre vehicle\_id e idx\_alerts\_tenant\_status sobre (tenant\_id, status) para alimentar tableros de advertencia en tiempo real. \\
+\textbf{Restricciones e Índices} & Restricción de verificación chk\_confidence\_range que asegura un índice de certeza entre 0.00 y 1.00. Índices B-Tree idx\_alerts\_vehicle sobre vehicle\_id e idx\_alerts\_status sobre status para alimentar tableros de advertencia en tiempo real. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} DtcCatalogEntryJpaEntity \quad (\textit{Tabla:} \texttt{dtc\_catalog})} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Entidad JPA:} DtcCatalogPersistenceEntity \quad (\textit{Tabla:} \texttt{dtc\_catalog})} \\*
 \hline
 \textbf{Clave Primaria} & \texttt{id (UUID)} \\*
 \hline
@@ -9543,11 +11475,11 @@ A su vez, **TelemetryLogJpaEntity** estructura el almacenamiento masivo sobre la
 \renewcommand{\arraystretch}{1.0}
 *Nota.* Especificación relacional en PostgreSQL 16 y extensión TimescaleDB bajo Aiven Cloud.
 
-**Repositorios Spring Data JPA y Adaptador de Persistencia en TimescaleDB**
+**Repositorios Spring Data JPA y Adaptadores de Persistencia**
 
-La mediación entre los contratos abstractos de persistencia del dominio y las operaciones físicas de base de datos se articula mediante interfaces Spring Data JPA y adaptadores de repositorio. El adaptador **Obd2DeviceRepositoryAdapter** implementa el puerto de dominio **Obd2DeviceRepository**, canalizando consultas derivadas por identificador físico de hardware o taller automotriz. Del mismo modo, **DeviceInstallationRepositoryAdapter** resuelve las sesiones activas de escáner en vehículos mediante métodos optimizados en **SpringDataDeviceInstallationRepository**, garantizando que una unidad automotriz no posea dos dispositivos montados simultáneamente.
+La mediación entre los contratos abstractos de persistencia del dominio y las operaciones físicas de base de datos se articula mediante interfaces Spring Data JPA en persistence.jpa.repositories y adaptadores de repositorio en persistence.jpa.adapters y persistence.timescale.adapters. El adaptador **Obd2DeviceRepositoryImpl** implementa el puerto de dominio **Obd2DeviceRepository**, canalizando consultas derivadas por identificador físico de hardware o taller automotriz. Del mismo modo, **DeviceInstallationRepositoryImpl** resuelve las sesiones activas de escáner en vehículos mediante métodos optimizados en **DeviceInstallationPersistenceRepository**, garantizando que una unidad automotriz no posea dos dispositivos montados simultáneamente.
 
-Asimismo, **VehicleFaultRepositoryAdapter** y **PredictiveAlertRepositoryAdapter** gestionan el almacenamiento de anomalías y advertencias mecánicas, ofreciendo filtros por taller, vehículo y estado operativo para alimentar los tableros de control en bahía. Para la persistencia de alto flujo de mediciones telemáticas, el adaptador **TimescaleTelemetryJdbcRepositoryImpl** implementa **TelemetryLogRepository** utilizando **JdbcTemplate** y sentencias SQL parametrizadas por lotes. Este componente elude deliberadamente el ciclo de vida de entidades JPA para insertar ráfagas de cincuenta a cien registros en un único viaje de red hacia el motor de base de datos. En la @tbl:iot-repository-adapters se detallan los puertos de dominio, repositorios inyectados y operaciones provistas.
+Asimismo, **VehicleFaultRepositoryImpl** y **PredictiveAlertRepositoryImpl** gestionan el almacenamiento de anomalías y advertencias mecánicas, ofreciendo filtros por taller, vehículo y estado operativo para alimentar los tableros de control en bahía. Por su parte, **DtcCatalogRepositoryImpl** provee la recuperación de definiciones estandarizadas mediante **DtcCatalogPersistenceRepository**. Para la persistencia de alto flujo de mediciones telemáticas, el adaptador **TimescaleTelemetryRepositoryImpl** implementa **TelemetryLogRepository** utilizando el cliente especializado **TimescaleTelemetryJdbcRepository** y sentencias SQL parametrizadas por lotes. Este componente elude deliberadamente el ciclo de vida de entidades JPA para insertar ráfagas de cincuenta a cien registros en un único viaje de red hacia el motor de base de datos, complementándose con consultas estadísticas ejecutadas por **TimescaleTelemetryAnalyticsRepository**. En la @tbl:iot-repository-adapters se detallan los puertos de dominio, repositorios inyectados y operaciones provistas.
 
 \renewcommand{\arraystretch}{1.25}
 \begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
@@ -9560,63 +11492,63 @@ Asimismo, **VehicleFaultRepositoryAdapter** y **PredictiveAlertRepositoryAdapter
 \thfirst{Aspecto de Adaptador} & \thcell{Especificación Técnica y Persistencia} \\
 \hline
 \endhead
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} Obd2DeviceRepositoryAdapter} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} Obd2DeviceRepositoryImpl} \\*
 \hline
 \textbf{Puerto de Dominio} & \texttt{Obd2DeviceRepository} \\*
 \hline
-\textbf{Repositorio Inyectado} & \texttt{SpringDataObd2DeviceRepository} \\*
+\textbf{Repositorio Inyectado} & \texttt{Obd2DevicePersistenceRepository} \\*
 \hline
 \textbf{Operaciones Clave} & Conecta el modelo de dominio con la base de datos relacional mediante Obd2DevicePersistenceAssembler. Provee métodos *save()* para alta y actualización de escáneres, *findById()* para hidratación por clave universal, *findByDeviceIdentifier()* para validación por código de fábrica y *existsByDeviceIdentifier()* para cerrojos de concurrencia. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} DeviceInstallationRepositoryAdapter} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} DeviceInstallationRepositoryImpl} \\*
 \hline
 \textbf{Puerto de Dominio} & \texttt{DeviceInstallationRepository} \\*
 \hline
-\textbf{Repositorio Inyectado} & \texttt{SpringDataDeviceInstallationRepository} \\*
+\textbf{Repositorio Inyectado} & \texttt{DeviceInstallationPersistenceRepository} \\*
 \hline
-\textbf{Operaciones Clave} & Administra la persistencia de sesiones de instalación vehicular en la tabla device\_installations. Provee métodos *save()* para iniciar o cerrar emparejamientos, *findActiveByVehicleId()* para resolver el escáner montado actualmente en la unidad y *findAllByVehicleId()* para auditoría histórica de intervenciones. \\
+\textbf{Operaciones Clave} & Administra la persistencia de sesiones de instalación vehicular en la tabla device\_installations. Provee métodos *save()* para iniciar o cerrar emparejamientos, *findActiveByVehicleId()* para resolver el escáner montado actualmente en la unidad y *findAllHistoryByVehicleId()* para auditoría histórica de intervenciones. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} VehicleFaultRepositoryAdapter} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} VehicleFaultRepositoryImpl} \\*
 \hline
 \textbf{Puerto de Dominio} & \texttt{VehicleFaultRepository} \\*
 \hline
-\textbf{Repositorio Inyectado} & \texttt{SpringDataVehicleFaultRepository} \\*
+\textbf{Repositorio Inyectado} & \texttt{VehicleFaultPersistenceRepository} \\*
 \hline
-\textbf{Operaciones Clave} & Persiste las averías electrónicas automotrices registradas en vehicle\_faults. Provee métodos *save()* para registrar o marcar como resuelta una falla, *findById()* para consulta puntual de avería y *findAllActiveByVehicleId()* optimizado para desplegar diagnósticos pendientes en el tacómetro de taller. \\
+\textbf{Operaciones Clave} & Persiste las averías electrónicas automotrices registradas en vehicle\_faults. Provee métodos *save()* para registrar o marcar como resuelta una falla, *findById()* para consulta puntual de avería y *findActiveByVehicleId()* optimizado para desplegar diagnósticos pendientes en el tacómetro de taller. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} PredictiveAlertRepositoryAdapter} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} PredictiveAlertRepositoryImpl} \\*
 \hline
 \textbf{Puerto de Dominio} & \texttt{PredictiveAlertRepository} \\*
 \hline
-\textbf{Repositorio Inyectado} & \texttt{SpringDataPredictiveAlertRepository} \\*
+\textbf{Repositorio Inyectado} & \texttt{PredictiveAlertPersistenceRepository} \\*
 \hline
 \textbf{Operaciones Clave} & Custodia el ciclo de vida de advertencias mecánicas preventivas en predictive\_alerts. Provee métodos *save()* para almacenamiento con identificador de mensaje push, *findAllByVehicleId()* para la cronología clínica de la unidad y *findAllByTenantIdAndStatus()* para alimentar consolas de despacho en taller. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} DtcCatalogRepositoryAdapter} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} DtcCatalogRepositoryImpl} \\*
 \hline
 \textbf{Puerto de Dominio} & \texttt{DtcCatalogRepository} \\*
 \hline
-\textbf{Repositorio Inyectado} & \texttt{SpringDataDtcCatalogRepository} \\*
+\textbf{Repositorio Inyectado} & \texttt{DtcCatalogPersistenceRepository} \\*
 \hline
-\textbf{Operaciones Clave} & Provee acceso canónico a las descripciones estandarizadas de fallas automotrices. Provee métodos *findByDtcCode()* para traducir códigos alfanuméricos de cinco caracteres a definiciones en español, *findAllBySystemCategory()* para inspecciones por subsistema y *existsByDtcCode()* para verificaciones de catálogo. \\
+\textbf{Operaciones Clave} & Provee acceso canónico a las descripciones estandarizadas de fallas automotrices. Provee métodos *findByCode()* para traducir códigos alfanuméricos de cinco caracteres a definiciones en español, *findAllByCategory()* para inspecciones por subsistema y *existsByCode()* para verificaciones de catálogo. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} TimescaleTelemetryJdbcRepositoryImpl} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} TimescaleTelemetryRepositoryImpl} \\*
 \hline
 \textbf{Puerto de Dominio} & \texttt{TelemetryLogRepository} \\*
 \hline
-\textbf{Tecnología y Cliente} & Spring JdbcClient y JdbcTemplate sobre PostgreSQL 16 con extensión TimescaleDB. \\*
+\textbf{Tecnología y Cliente} & \texttt{TimescaleTelemetryJdbcRepository} con Spring JdbcClient y JdbcTemplate sobre PostgreSQL 16 con extensión TimescaleDB. \\*
 \hline
-\textbf{Operaciones Clave} & Adaptador de alto rendimiento para flujos telemáticos masivos. Ejecuta *saveAllBatch()* insertando ráfagas completas de lecturas mediante sentencias SQL por lotes y *findLatestByVehicleId()* recuperando en microsegundos la última métrica de motor de cada unidad automotriz registrada. \\
+\textbf{Operaciones Clave} & Adaptador de alto rendimiento para flujos telemáticos masivos. Ejecuta *saveAllBatch()* insertando ráfagas completas de lecturas mediante sentencias SQL por lotes, *findLatestByVehicleId()* recuperando la última métrica de motor de cada unidad automotriz registrada y *findHistoryAggregated()* para series agregadas por ventanas de tiempo. \\
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-*Nota.* Clases ubicadas bajo el paquete canónico com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak iot.\allowbreak infrastructure.\allowbreak persistence.
+*Nota.* Adaptadores de repositorio ubicados bajo los subpaquetes persistence.jpa.adapters y persistence.timescale.adapters.
 
-**Ensambladores de Persistencia y Transformación Desacoplada de Datos**
+**Ensambladores de Persistencia, Convertidores JPA y Erradicación de Transform**
 
-El desacoplamiento estricto entre el esquema físico relacional y los tipos puros del dominio se materializa mediante ensambladores de persistencia bidireccionales. El componente **Obd2DevicePersistenceAssembler** traduce el agregado **Obd2Device** hacia su entidad relacional desempaquetando identificadores fuertemente tipados y enumeraciones de conectividad, al tiempo que restaura agregados puros mediante métodos de fábrica sin disparar eventos de dominio espurios durante consultas. De forma idéntica, **DeviceInstallationPersistenceAssembler** descompone los objetos de valor de odómetro hacia tipos numéricos escalares y garantiza la integridad de marcas temporales Instant en UTC.
+El desacoplamiento estricto entre el esquema físico relacional y los tipos puros del dominio se materializa mediante ensambladores de persistencia bidireccionales y convertidores JPA, habiéndose erradicado totalmente el subpaquete transform en la persistencia de datos. El componente **Obd2DevicePersistenceAssembler** traduce el agregado **Obd2Device** hacia su entidad relacional desempaquetando identificadores fuertemente tipados y enumeraciones de conectividad, al tiempo que restaura agregados puros mediante métodos de fábrica sin disparar eventos de dominio espurios durante consultas. De forma idéntica, **DeviceInstallationPersistenceAssembler** descompone los valores de odómetro hacia tipos numéricos escalares y garantiza la integridad de marcas temporales Instant en UTC.
 
-Por su parte, **VehicleFaultPersistenceAssembler** y **PredictiveAlertPersistenceAssembler** restauran entidades de avería y alerta preventiva, transformando cadenas DTC alfanuméricas, niveles de severidad y porcentajes de confianza sin alterar las reglas de encapsulamiento del modelo. Para el catálogo de diagnósticos, **DtcCatalogPersistenceAssembler** traduce registros normativos SAE hacia representaciones inmutables de dominio. Finalmente, **TelemetryRecordPersistenceAssembler** descompone lecturas inmutables de velocidad, temperatura de refrigerante, régimen de revoluciones por minuto y tensión de batería en parámetros posicionales SQL para su despacho por lotes. En la @tbl:iot-persistence-assemblers se describen las transformaciones y mapeos de tipos implementados por estos componentes.
+Por su parte, **VehicleFaultPersistenceAssembler** y **PredictiveAlertPersistenceAssembler** restauran entidades de avería y alerta preventiva, transformando cadenas DTC alfanuméricas, niveles de severidad y porcentajes de confianza sin alterar las reglas de encapsulamiento del modelo. Para el catálogo de diagnósticos, **DtcCatalogPersistenceAssembler** traduce registros normativos SAE hacia representaciones inmutables de dominio. Asimismo, **TimescaleTelemetryPersistenceAssembler** descompone lecturas inmutables de velocidad, temperatura de refrigerante, régimen de revoluciones por minuto y tensión de batería en parámetros posicionales SQL para su despacho por lotes en la hipertabla telemetry_logs. Esta arquitectura se complementa con seis convertidores JPA de atributos para garantizar la serialización de magnitudes físicas y tipados fuertes. En la @tbl:iot-persistence-assemblers se describen las transformaciones y mapeos de tipos implementados por estos componentes.
 
 \renewcommand{\arraystretch}{1.25}
 \begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
@@ -9631,53 +11563,53 @@ Por su parte, **VehicleFaultPersistenceAssembler** y **PredictiveAlertPersistenc
 \endhead
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador de Persistencia:} Obd2DevicePersistenceAssembler} \\*
 \hline
-\textbf{Mapeo de Tipos} & \texttt{Obd2Device} $\longleftrightarrow$ \texttt{Obd2DeviceJpaEntity} \\*
+\textbf{Mapeo de Tipos} & \texttt{Obd2Device} $\longleftrightarrow$ \texttt{Obd2DevicePersistenceEntity} \\*
 \hline
 \textbf{Transformación} & Traduce identificadores fuertemente tipados DeviceId, TenantId y DeviceIdentifier hacia valores UUID y cadenas alfanuméricas. Convierte los enumerados ConnectionType y DeviceStatus hacia representaciones estándar VARCHAR. Reconstituye el agregado puro protegiendo sus invariantes de fábrica sin emitir eventos espurios. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador de Persistencia:} DeviceInstallationPersistenceAssembler} \\*
 \hline
-\textbf{Mapeo de Tipos} & \texttt{DeviceInstallation} $\longleftrightarrow$ \texttt{DeviceInstallationJpaEntity} \\*
+\textbf{Mapeo de Tipos} & \texttt{DeviceInstallation} $\longleftrightarrow$ \texttt{DeviceInstallationPersistenceEntity} \\*
 \hline
-\textbf{Transformación} & Descompone los objetos de valor Odometer inicial y final en columnas numéricas enteras. Convierte marcas temporales a objetos Instant en UTC. Reconstituye agregados de instalación validando la consistencia temporal entre la fecha de montaje y la fecha de desinstalación. \\
+\textbf{Transformación} & Descompone los objetos de valor inicial y final de odómetro en columnas numéricas enteras. Convierte marcas temporales a objetos Instant en UTC. Reconstituye agregados de instalación validando la consistencia temporal entre la fecha de montaje y la fecha de desinstalación. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador de Persistencia:} VehicleFaultPersistenceAssembler} \\*
 \hline
-\textbf{Mapeo de Tipos} & \texttt{VehicleFault} $\longleftrightarrow$ \texttt{VehicleFaultJpaEntity} \\*
+\textbf{Mapeo de Tipos} & \texttt{VehicleFault} $\longleftrightarrow$ \texttt{VehicleFaultPersistenceEntity} \\*
 \hline
 \textbf{Transformación} & Mapea objetos de valor DtcCode y FaultSeverity hacia tipos relacionales normalizados. Preserva el estado booleano de resolución y marcas temporales de subsanación. Reconstituye la entidad de dominio manteniendo intacto el identificador de orden de trabajo vinculada. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador de Persistencia:} PredictiveAlertPersistenceAssembler} \\*
 \hline
-\textbf{Mapeo de Tipos} & \texttt{PredictiveAlert} $\longleftrightarrow$ \texttt{PredictiveAlertJpaEntity} \\*
+\textbf{Mapeo de Tipos} & \texttt{PredictiveAlert} $\longleftrightarrow$ \texttt{PredictiveAlertPersistenceEntity} \\*
 \hline
 \textbf{Transformación} & Desempaqueta el objeto de valor ConfidenceScore hacia una columna escalar BigDecimal con dos decimales de precisión. Mapea tipos de advertencia AlertType y estados AlertStatus. Preserva el identificador de despacho FCM para auditoría de entrega push. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador de Persistencia:} DtcCatalogPersistenceAssembler} \\*
 \hline
-\textbf{Mapeo de Tipos} & \texttt{DtcCatalogEntry} $\longleftrightarrow$ \texttt{DtcCatalogEntryJpaEntity} \\*
+\textbf{Mapeo de Tipos} & \texttt{DtcCatalogEntry} $\longleftrightarrow$ \texttt{DtcCatalogPersistenceEntity} \\*
 \hline
 \textbf{Transformación} & Mapea códigos de falla normalizados de cinco caracteres, descripciones oficiales en español e inglés, y niveles de severidad predeterminados. Convierte banderas booleanas de criticidad y resguarda la inmutabilidad del catálogo automotriz. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador de Persistencia:} TelemetryRecordPersistenceAssembler} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Ensamblador Temporal:} TimescaleTelemetryPersistenceAssembler} \\*
 \hline
-\textbf{Mapeo de Tipos} & \texttt{TelemetryRecord} $\longleftrightarrow$ \texttt{Filas SQL de Hipertabla telemetry\_logs} \\*
+\textbf{Mapeo de Tipos} & \texttt{TelemetryRecord} $\longleftrightarrow$ \texttt{TelemetryLogPersistenceEntity} \\*
 \hline
-\textbf{Transformación} & Descompone objetos inmutables SpeedKmh, EngineTemperature, EngineRpm, FuelLevel, BatteryVoltage y GeoLocation en parámetros posicionales SQL optimizados para inserción en ráfagas batch mediante el cliente JDBC de TimescaleDB. \\
+\textbf{Transformación} & Descompone objetos inmutables VehicleSpeed, EngineTemperature, EngineRpm, FuelLevel, BatteryVoltage y GeoCoordinates en parámetros posicionales y entidades de hipertabla optimizadas para inserción masiva en ráfagas batch mediante el cliente JDBC de TimescaleDB. \\
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-*Nota.* Componentes ubicados bajo com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak iot.\allowbreak infrastructure.\allowbreak persistence.\allowbreak jpa.\allowbreak assemblers.
+*Nota.* Ensambladores de persistencia ubicados bajo persistence.jpa.assemblers y persistence.timescale.assemblers.
 
-**Pasarelas Telemáticas Externas, Integración Cloud y Clientes Anticorrupción**
+**Adaptadores Externos Segregados por Tecnología y Clientes Anticorrupción**
 
-La interacción con servicios externos en la nube, motores analíticos de inferencia pericial y contextos satélite de la plataforma Atelier se gestiona a través de pasarelas perimetrales y clientes anticorrupción que implementan los puertos de salida de la capa de aplicación. El componente **FirebaseCloudMessagingGatewayImpl** encapsula las llamadas al servicio Google Firebase Cloud Messaging v1 mediante el SDK oficial de administración, estructurando notificaciones push con prioridad alta para alertar a conductores y mecánicos ante anomalías críticas de motor. Esta pasarela incorpora aislamiento de fallos y reintentos automáticos, evitando que eventuales demoras en la red de mensajería degraden el flujo de procesamiento telemático central.
+La interacción con servicios externos en la nube, motores analíticos de inferencia pericial y contextos satélite de la plataforma Atelier se gestiona a través de adaptadores externos segregados por tecnología bajo el subpaquete infrastructure.external, implementando los puertos de salida definidos en la capa de aplicación. El componente **CrmFleetAclAdapter** en external.acl.crm consume en memoria la fachada de clientes y flotas para resolver tokens de notificación móvil y verificar el registro de unidades sin generar acoplamiento físico en base de datos. Por su parte, **WorkshopOperationsAclAdapter** en external.acl.mro consume la fachada de operaciones de taller bajo el patrón Open Host Service, anclando de forma estricta las recomendaciones predictivas al catálogo real de servicios facturables del taller.
 
-En el ámbito de la inteligencia artificial estructurada y exportación pericial, **VehicleHealthAiDiagnosticService** encapsula la interacción con modelos fundacionales mediante Spring AI ChatClient, transformando tendencias telemáticas extraídas de TimescaleDB e historial DTC en diagnósticos deterministas y tipados en registros inmutables. Complementariamente, **VehicleHealthReportPdfGeneratorAdapter** procesa plantillas XHTML con Thymeleaf y genera binarios PDF mediante OpenPDF con membrete institucional. Asimismo, **WorkshopOperationsAclAdapter** consume en memoria la fachada del contexto de operaciones de taller bajo el patrón Open Host Service, permitiendo mapear códigos de avería hacia servicios de mantenimiento preconcebidos sin generar acoplamiento físico en base de datos. Por su parte, **CrmFleetAclAdapter** consulta la fachada de clientes y flotas para resolver tokens de notificación móvil. Por último, la configuración de hipertablas de TimescaleDB establece intervalos de partición de siete días y compresión columnar. En la @tbl:iot-external-infrastructure se resumen las tecnologías y directrices de resiliencia de estos adaptadores.
+En el ámbito de la inteligencia artificial y diagnóstico estructurado, **GroqSpringAiDiagnosticAdapter** en external.ai.groq materializa la inferencia pericial mediante Spring AI ChatClient sobre la infraestructura Groq LPU, analizando un doble horizonte temporal que combina las lecturas de telemetría de los últimos treinta días en TimescaleDB con las averías activas de la ECU. Para la exportación pericial, **OpenPdfVehicleHealthReportGeneratorAdapter** en external.reporting.openpdf procesa plantillas XHTML con Thymeleaf y compila el Informe Pericial Unificado en documentos PDF binarios con membrete institucional. Asimismo, **IoTOutboxMessageRelayAdapter** en external.messaging.outbox ejecuta la publicación programada y atómica de eventos de integración hacia el broker de mensajería bajo el patrón Transactional Outbox. Finalmente, **FirebaseCloudMessagingGatewayAdapter** en external.notification.firebase despacha notificaciones push de alta prioridad mediante el protocolo HTTP v1 de Google Firebase Admin hacia terminales móviles de conductores y jefes de taller. En la @tbl:iot-external-infrastructure se resumen las tecnologías y directrices de resiliencia de estos adaptadores.
 
 \renewcommand{\arraystretch}{1.25}
 \begin{longtable}{| >{\centering\arraybackslash}p{4.8cm} | >{\raggedright\arraybackslash}p{10.6cm} |}
-\caption{Pasarelas Telemáticas Externas, Integración Cloud y Clientes ACL de IoT Telemetry \& Predictive Maintenance} \label{tbl:iot-external-infrastructure} \\
+\caption{Adaptadores Externos Segregados por Tecnología de IoT Telemetry \& Predictive Maintenance} \label{tbl:iot-external-infrastructure} \\
 \hline
 \thfirst{Componente de Integración} & \thcell{Especificación Técnica y Resiliencia} \\
 \hline
@@ -9686,57 +11618,57 @@ En el ámbito de la inteligencia artificial estructurada y exportación pericial
 \thfirst{Componente de Integración} & \thcell{Especificación Técnica y Resiliencia} \\
 \hline
 \endhead
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Pasarela Cloud:} FirebaseCloudMessagingGatewayImpl} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador ACL Antifragilidad:} CrmFleetAclAdapter} \\*
 \hline
-\textbf{Puerto Implementado} & \texttt{FirebaseCloudMessagingGateway} \\*
+\textbf{Puerto Implementado} & \texttt{CrmFleetAclPort} \\*
+\hline
+\textbf{Tecnología y Cliente} & Fachada pública de contexto CustomerContextFacade consumida en memoria bajo el patrón Open Host Service. \\*
+\hline
+\textbf{Operaciones y Resiliencia} & Resuelve tokens móviles FCM de los propietarios y conductores asignados a la unidad vehicular consultando la fachada en memoria del cliente. Asegura que las advertencias predictivas alcancen oportunamente el dispositivo personal del titular del vehículo sin acoplamiento físico en base de datos. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador ACL Antifragilidad:} WorkshopOperationsAclAdapter} \\*
+\hline
+\textbf{Puerto Implementado} & \texttt{OperationsAclPort} \\*
+\hline
+\textbf{Tecnología y Cliente} & Fachada pública de contexto WorkshopOperationsContextFacade (mro\_service\_catalog) consumida en memoria. \\*
+\hline
+\textbf{Operaciones y Resiliencia} & Mapea códigos de diagnóstico vehicular hacia paquetes de servicio preventivo del taller mediante el método *getAvailableWorkshopServices()*. Garantiza anclaje estricto a servicios facturables reales y provee tolerancia ante ausencia transitoria del catálogo operativo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador de Inferencia con IA:} GroqSpringAiDiagnosticAdapter} \\*
+\hline
+\textbf{Puerto Implementado} & \texttt{AiInferenceDiagnosticPort} \\*
+\hline
+\textbf{Tecnología y Cliente} & Framework Spring AI con ChatClient y modelos LPU de ultra-baja latencia sobre Groq bajo BeanOutputConverter para serialización tipada en Java 21 Records. \\*
+\hline
+\textbf{Operaciones y Resiliencia} & Analiza simultáneamente el estado instantáneo de la unidad y el historial acumulado de treinta días en TimescaleDB, anclando recomendaciones al catálogo de servicios de MRO. Aplica control de temperatura en 0.1 y políticas de reintento automático con respaldo determinista ante contingencias de conectividad. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Relay de Publicación Transaccional Outbox:} IoTOutboxMessageRelayAdapter} \\*
+\hline
+\textbf{Puerto Implementado} & Componente transaccional de retransmisión de eventos de integración \\*
+\hline
+\textbf{Tecnología y Cliente} & Tarea programada en segundo plano con Spring Scheduling y RabbitTemplate sobre RabbitMQ o productor Kafka. \\*
+\hline
+\textbf{Operaciones y Resiliencia} & Realiza sondeos programados sobre la tabla outbox de mensajes pendientes, despachando eventos de integración telemáticos con garantías de entrega at-least-once y confirmación asíncrona hacia el broker de mensajería corporativo. \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Pasarela Push Notificaciones:} FirebaseCloudMessagingGatewayAdapter} \\*
+\hline
+\textbf{Puerto Implementado} & \texttt{FcmNotificationAclPort} \\*
 \hline
 \textbf{Tecnología y Cliente} & SDK oficial de Google Firebase Admin v9 mediante protocolo seguro HTTP v1. \\*
 \hline
-\textbf{Operaciones y Resiliencia} & Despacha notificaciones push de alta prioridad con cargas útiles estructuradas hacia terminales móviles de conductores y jefes de taller. Incorpora reintentos exponenciales automáticos y aislamiento de fallos para evitar que demoras en la red de Google degraden la ingesta telemática central. \\
+\textbf{Operaciones y Resiliencia} & Despacha notificaciones push de alta prioridad con cargas útiles estructuradas hacia terminales móviles de conductores y jefes de taller por el canal atelier\_critical\_alerts. Incorpora reintentos exponenciales automáticos y aislamiento de fallos para evitar que demoras en la red de Google degraden la ingesta telemática central. \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador ACL:} WorkshopOperationsAclAdapter} \\*
-\hline
-\textbf{Puerto Implementado} & \texttt{OperationsAclService} \\*
-\hline
-\textbf{Tecnología y Cliente} & Fachada pública de contexto WorkshopOperationsContextFacade consumida en memoria. \\*
-\hline
-\textbf{Operaciones y Resiliencia} & Mapea códigos de diagnóstico vehicular hacia paquetes de servicio preventivo del taller mediante el método *findRecommendedServiceIdByDtcCode()*. Garantiza cero acoplamiento físico en base de datos y provee tolerancia ante ausencia transitoria del catálogo operativo. \\
-\hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador ACL:} CrmFleetAclAdapter} \\*
-\hline
-\textbf{Puerto Implementado} & \texttt{CrmFleetAclService} \\*
-\hline
-\textbf{Tecnología y Cliente} & Fachada pública de contexto CustomerContextFacade consumida en memoria. \\*
-\hline
-\textbf{Operaciones y Resiliencia} & Resuelve tokens móviles FCM de los propietarios y conductores asignados a la unidad vehicular consultando la fachada en memoria del cliente. Asegura que las advertencias predictivas alcancen oportunamente el dispositivo personal del titular del vehículo. \\
-\hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Configuración de Motor:} TimescaleDbHypertableConfig} \\*
-\hline
-\textbf{Puerto Implementado} & \texttt{Configuración de Base de Datos y Políticas de Almacenamiento Temporal} \\*
-\hline
-\textbf{Tecnología y Cliente} & Extensión nativa TimescaleDB 2.14 ejecutándose sobre PostgreSQL 16 en clúster gestionado Aiven Cloud. \\*
-\hline
-\textbf{Operaciones y Resiliencia} & Particiona series temporales en chunks de siete días optimizando memoria de trabajo. Activa compresión columnar automática para registros mayores a treinta días reduciendo el consumo en disco hasta en un noventa por ciento y acelerando consultas analíticas agregadas. \\
-\hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador de Reportes:} Vehicle\allowbreak Health\allowbreak Report\allowbreak Pdf\allowbreak Generator\allowbreak Adapter} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Motor Generador de Documentos PDF:} OpenPdfVehicleHealthReportGeneratorAdapter} \\*
 \hline
 \textbf{Puerto Implementado} & \texttt{VehicleHealthReportPdfGeneratorPort} \\*
 \hline
 \textbf{Tecnología y Cliente} & Motor de plantillas XHTML Thymeleaf 3.1 y biblioteca de renderizado OpenPDF 1.3 mediante canalización en memoria. \\*
 \hline
-\textbf{Operaciones y Resiliencia} & Compila el informe pericial estructurado en formato binario PDF aplicando maquetación institucional con membrete del taller, semáforos cromáticos de salud mecánica y cotizaciones sugeridas. Incorpora manejo de excepciones de renderizado para eludir fugas de memoria y asegurar descargas atómicas. \\
-\hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Motor de IA Generativa:} Vehicle\allowbreak Health\allowbreak Ai\allowbreak Diagnostic\allowbreak Service} \\*
-\hline
-\textbf{Puerto Implementado} & Servicio perimetral de diagnóstico y salud mecánica estructurada \\*
-\hline
-\textbf{Tecnología y Cliente} & Framework Spring AI con ChatClient y modelo GPT-4o-mini bajo BeanOutputConverter para serialización tipada en Java 21 Records. \\*
-\hline
-\textbf{Operaciones y Resiliencia} & Analiza vectores telemáticos agregados de TimescaleDB y averías SAE J2012 emitiendo dictámenes analíticos deterministas con control estricto de temperatura fijado en 0.1 y políticas de reintento automático con respaldo determinista ante contingencias de red. \\
+\textbf{Operaciones y Resiliencia} & Compila el Informe Pericial Unificado estructurado en formato binario PDF aplicando maquetación institucional con membrete del taller, semáforos cromáticos de salud mecánica, desglose de subsistemas y correlación causal DTC frente a señales sensoriales. Incorpora canalización atómica en memoria para prevenir fugas de recursos del servidor. \\
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-*Nota.* Adaptadores de infraestructura perimetral bajo com.\allowbreak andeva.\allowbreak atelier.\allowbreak platform.\allowbreak iot.\allowbreak infrastructure.
+*Nota.* Adaptadores externos segregados por tecnología bajo el paquete canónico com.andeva.atelier.platform.iot.infrastructure.external.
 
 El diseño de la Capa de Infraestructura de IoT Telemetry & Predictive Maintenance asegura el aislamiento completo entre el flujo continuo de ingesta de señales automotrices y las transacciones comerciales de la plataforma Atelier. Al desacoplar la persistencia temporal en TimescaleDB de las entidades de auditoría relacionales en PostgreSQL 16, el sistema preserva la estabilidad operativa del motor principal incluso ante ráfagas simultáneas emitidas por cientos de vehículos conectados en ruta o terminales móviles en talleres de patio.
 
@@ -9745,7 +11677,6 @@ Asimismo, la sustitución deliberada de Hibernate por inserciones directas media
 Esta arquitectura perimetral se extiende hacia las terminales móviles de patio y cabina vehicular en las aplicaciones cliente Atelier Workshop y Atelier Driver. Ante pérdidas transitorias de cobertura celular en carretera o zonas ciegas del taller, los dispositivos resguardan las lecturas sensoriales en una base de datos local SQLite 3 gestionada mediante Room en Android y Drift en Flutter, ejecutando una sincronización masiva en bloque hacia el adaptador telemático tan pronto se restablece el enlace de red.
 
 Finalmente, la integración perimetral con Firebase Cloud Messaging y las capas anticorrupción hacia los contextos de taller y clientes consolidan un ecosistema predictivo verdaderamente reactivo. La detección inmediata de averías mecánicas críticas desencadena notificaciones push hacia los dispositivos móviles de los conductores en cuestión de milisegundos, vinculando automáticamente recomendaciones de servicio preventivo que optimizan la gestión de citas en los talleres automotrices y mitigan el riesgo de fallas catastróficas en carretera.
-
 
 
 #### 2.6.9.5. Bounded Context Software Architecture Component Level Diagrams
@@ -9805,7 +11736,7 @@ En la @tbl:iot-c4-components se presenta el catálogo estructurado de los siete 
 \hline
 \textbf{Tecnologías} & Java 21, Domain-Driven Design, Inmutabilidad, Estándar SAE J2012 e ISO 15031-6 \\*
 \hline
-\textbf{Responsabilidad} & Custodia los invariantes automotrices en los agregados Obd2Device, DeviceInstallation, VehicleFault, PredictiveAlert, DtcCatalogEntry y TelemetryRecord. Alberga los motores analíticos PredictiveAnomalyDetectionEngine para inferencia de sobrecalentamiento y fallas eléctricas en milisegundos, y DtcCodeEvaluationService para clasificación de severidad de códigos de error. \\*
+\textbf{Responsabilidad} & Custodia los invariantes automotrices en los agregados Obd2Device, DeviceInstallation, VehicleFault, PredictiveAlert y TelemetryRecord, junto a la entidad dependiente DtcCatalogEntry. Alberga los motores analíticos PredictiveAnomalyDetectionEngine para inferencia de sobrecalentamiento y fallas eléctricas en milisegundos, DtcCodeEvaluationService para clasificación de severidad de códigos de error y VehicleThermodynamicEvaluationService para análisis de dinámicas de disipación térmica. \\*
 \hline
 \textbf{Relaciones} & Invocado por IoT CQRS Application Services Component para evaluación de métricas y validación de reglas de dominio. Emite eventos de dominio inmutables hacia las capas de orquestación de aplicación. \\
 \hline
@@ -9815,7 +11746,7 @@ En la @tbl:iot-c4-components se presenta el catálogo estructurado de los siete 
 \hline
 \textbf{Tecnologías} & Jakarta Persistence 3.1, Spring Data JPA, Hibernate 6, Spring JdbcClient, TimescaleDB 2.14 \\*
 \hline
-\textbf{Responsabilidad} & Materializa la arquitectura de persistencia híbrida. Gestiona entidades relacionales auditadas en PostgreSQL 16 para inventario de escáneres, sesiones de montaje, fallas y catálogo DTC, y ejecuta inserciones masivas en bloque de alta velocidad sobre la hipertabla particionada \textbf{telemetry\_logs} en TimescaleDB sin sobrecarga de Hibernate. \\*
+\textbf{Responsabilidad} & Materializa la arquitectura de persistencia híbrida. Gestiona entidades relacionales auditadas en PostgreSQL 16 para inventario de escáneres, sesiones de montaje, fallas y catálogo DTC, y ejecuta inserciones masivas en bloque de alta velocidad sobre la hipertabla particionada telemetry\_logs en TimescaleDB sin sobrecarga de Hibernate. \\*
 \hline
 \textbf{Relaciones} & Invocado por IoT CQRS Application Services Component y consultado analíticamente por IoT Open Host Facade \& Tacometer Evaluation Component. Conecta vía TCP y JDBC hacia el contenedor anfitrión Database. \\
 \hline
@@ -9902,19 +11833,29 @@ En la @fig:class-diagram-iot se expone el Diagrama de Clases UML detallado para 
 
 La organización interna del modelo estático se estructura en ocho paquetes cohesivos que encapsulan las responsabilidades del dominio telemático y analítico:
 
-- **Raíces de Agregado (iot.domain.model.aggregates):** Gobierna las entidades maestras que delimitan las fronteras de consistencia transaccional: **Obd2Device** para el inventario y estado operativo de escáneres, **DeviceInstallation** para el emparejamiento físico en automotores, **VehicleFault** para el ciclo de vida de averías DTC, **PredictiveAlert** para las advertencias preventivas generadas analíticamente, **DtcCatalogEntry** para el catálogo maestro de códigos de falla, y **TelemetryRecord** para las mediciones sensoriales instantáneas. A excepción del registro temporal inmutable, las raíces transaccionales extienden de **AbstractDomainAggregateRoot<T>**.
+- **Raíces de Agregado y Entidades Dependientes (domain.model.aggregates y domain.model.entities):**
+  Gobierna las entidades maestras que delimitan las fronteras de consistencia transaccional y la serie temporal telemática. Comprende cuatro raíces de agregado relacionales (**Obd2Device** para inventario físico de hardware, **DeviceInstallation** para sesiones de emparejamiento, **VehicleFault** para averías electrónicas y **PredictiveAlert** para advertencias formuladas analíticamente), una raíz de serie temporal append-only (**TelemetryRecord** para lecturas multidimensionales continuas) y la entidad dependiente **DtcCatalogEntry** para el catálogo universal de diagnóstico. Todas las raíces transaccionales extienden de **AbstractDomainAggregateRoot<T>**.
 
-- **Identificadores Fuertemente Tipados (iot.domain.model.ids):** Implementa el contrato **TypedId<UUID>** mediante registros inmutables (**DeviceId**, **InstallationId**, **FaultId**, **AlertId**, **DtcId**), asociando identidades transversales del Shared Kernel (**TenantId**, **VehicleId**, **ServiceId**) y envoltorios alfanuméricos con validación reglamentaria (**DeviceIdentifier**, **MacAddress**, **DtcCode**).
+- **Identificadores Fuertemente Tipados (domain.model.ids):**
+  Implementa el contrato **TypedId<UUID>** mediante registros Java inmutables que erradican la obsesión por tipos primitivos y blindan la seguridad de tipos en tiempo de compilación: **DeviceId**, **InstallationId**, **FaultId**, **AlertId** y **DtcCatalogId**. Estos identificadores se articulan armónicamente con identidades foráneas transversales del Shared Kernel como **TenantId**, **VehicleId** y **ServiceId**.
 
-- **Objetos de Valor Sensoriales y Métricos (iot.domain.model.valueobjects):** Encapsula magnitudes físicas con validación estricta de invariantes: **VehicleSpeed**, **EngineRpm**, **EngineTemperature**, **BatteryVoltage**, **FuelLevel**, **ThrottlePosition**, **EngineLoad**, **GeoCoordinates**, **ConfidenceScore**, **FirmwareVersion** e **InstallationNotes**.
+- **Objetos de Valor Sensoriales y Métricos (domain.model.valueobjects):**
+  Encapsula magnitudes físicas y reglas de validación en registros inmutables sin identidad propia: **DeviceIdentifier** con validación estricta de dirección MAC o código celular IMEI, **DtcCode** con sintaxis reglamentaria SAE J2012, **ConfidenceScore** con certeza estadística de 0.00 a 100.00, **EngineTemperature** con termometría de sobrecalentamiento crítico, **EngineRpm** para régimen de giro de motor, **VehicleSpeed** para velocidad lineal instantánea acotada, **BatteryVoltage** con diagnóstico de tensión eléctrica, **FuelLevel** para aforo porcentual, **GeoCoordinates** para posicionamiento GPS geodésico y **TelemetryPids** para el mapa inmutable de parámetros normalizados.
 
-- **Enumeraciones de Dominio (iot.domain.model.enums):** Normaliza el vocabulario operativo y normativo (**DeviceStatus**, **ConnectionType**, **ProtocolType**, **InstallationStatus**, **FaultSeverity**, **FaultStatus**, **AlertType**, **AlertStatus**, **DtcStandard**, **DtcSystemCategory**).
+- **Enumeraciones de Dominio (domain.model.enums):**
+  Estandariza los vocabularios controlados e invariantes operacionales del subsistema mediante seis enumeraciones inmutables: **ConnectionType** (canales físicos BLUETOOTH_BLE, SIM_CELLULAR y WIFI), **DeviceStatus** (situaciones ACTIVE, INACTIVE, LOST y BROKEN), **FaultSeverity** (criticidad LOW, MEDIUM y CRITICAL), **AlertSeverity** (gravedad de advertencia LOW, MEDIUM, HIGH y CRITICAL), **AlertStatus** (ciclo DISPATCHED, ACKNOWLEDGED, RESOLVED y DISMISSED) y **RiskLevel** (escala analítica LOW, MODERATE, HIGH y CRITICAL).
 
-- **Servicios de Dominio de Inferencia y Diagnóstico (iot.domain.services):** Provee motores algorítmicos puros sin acoplamiento a infraestructura: **PredictiveAnomalyDetectionEngine** para la inferencia determinista de patrones de sobrecalentamiento térmico o degradación del sistema de carga eléctrica, y **DtcCodeEvaluationService** para la clasificación de severidad de fallas y mapeo de servicios preventivos.
+- **Servicios de Dominio de Inferencia y Diagnóstico (domain.services):**
+  Concentra la lógica de negocio algorítmica y determinista independiente de frameworks tecnológicos: **PredictiveAnomalyDetectionEngine** para evaluación de lecturas de motor en tiempo real y disparo de alertas preventivas, **DtcCodeEvaluationService** para catalogación taxonómica de fallas y recomendación de paquetes de servicio de taller, y **VehicleThermodynamicEvaluationService** para modelado de gradientes térmicos y disipación de calor del bloque motriz.
 
-- **Puertos de Repositorio (iot.domain.repositories):** Define los contratos abstractos de almacenamiento y consulta (**Obd2DeviceRepository**, **DeviceInstallationRepository**, **TelemetryLogRepository**, **VehicleFaultRepository**, **PredictiveAlertRepository**, **DtcCatalogEntryRepository**) desacoplados de motores relacionales o de series temporales.
+- **Puertos de Repositorio (domain.repositories):**
+  Declara los contratos abstractos de persistencia agnósticos a la tecnología subyacente: **Obd2DeviceRepository** para inventario y unicidad de hardware, **DeviceInstallationRepository** para sesiones de emparejamiento activo e historial, **TelemetryRecordRepository** para inserciones masivas por lotes y agregaciones temporales, **VehicleFaultRepository** para historial de averías detectadas, **PredictiveAlertRepository** para despacho y seguimiento de alertas preventivas, y **DtcCatalogRepository** para consultas sobre el catálogo maestro de fallas.
 
-- **Eventos de Dominio y Excepciones Semánticas (iot.domain.events y iot.domain.exceptions):** Formaliza mutaciones del estado vehicular para el Transactional Outbox (**Obd2DeviceRegisteredEvent**, **DeviceInstalledEvent**, **DeviceUninstalledEvent**, **TelemetryBatchIngestedEvent**, **VehicleFaultDetectedEvent**, **VehicleFaultResolvedEvent**, **PredictiveAlertGeneratedEvent**) y jerarquiza excepciones no comprobadas derivadas de **IoTDomainException** bajo la norma RFC 7807 (**DeviceNotFoundException**, **ActiveInstallationConflictException**, **InvalidTelemetryDataException**).
+- **Eventos de Dominio Inmutables (domain.model.events):**
+  Formaliza las transiciones de estado y sucesos de negocio para su propagación asíncrona mediante el patrón Transactional Outbox: **CriticalEngineAnomalyDetectedEvent**, **DeviceInstalledOnVehicleEvent**, **DeviceUninstalledFromVehicleEvent**, **Obd2DeviceRegisteredEvent**, **PredictiveAlertAcknowledgedEvent**, **PredictiveAlertDispatchedEvent**, **PredictiveAlertGeneratedEvent**, **TelemetryBatchIngestedEvent**, **VehicleFaultDetectedEvent** y **VehicleFaultResolvedEvent**.
+
+- **Jerarquía de Excepciones Semánticas (domain.exceptions):**
+  Especializa la jerarquía no comprobada derivada de **IoTDomainException** con mapeo directo a códigos Problem Details bajo la norma RFC 7807: **ActiveInstallationConflictException**, **DeviceAlreadyInstalledException**, **DeviceNotFoundException**, **InstallationNotFoundException**, **InvalidDeviceIdentifierException**, **InvalidDtcCodeException**, **PredictiveAlertNotFoundException**, **TimescaleIngestionException** y **VehicleFaultNotFoundException**.
 
 En la @tbl:iot-domain-classes-members se detalla la especificación formal de atributos, firmas de métodos, modificadores de acceso y reglas de negocio para cada componente de la Capa de Dominio.
 
@@ -9929,127 +11870,171 @@ En la @tbl:iot-domain-classes-members se detalla la especificación formal de at
 \thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\
 \hline
 \endhead
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} Obd2\allowbreak Device \quad (\textit{Aggregate Root})} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} Obd2Device \quad (\textit{Aggregate Root})} \\*
 \hline
-Atributos y composición & Raíz de agregado que custodia el inventario físico de escáneres telemáticos. Controla estados operativos, protocolos de comunicación compatibles y actualizaciones de firmware. Generalización de \texttt{AbstractDomainAggregateRoot<\allowbreak DeviceId>\allowbreak }. Composición con \textbf{DeviceIdentifier}, \textbf{MacAddress} y \textbf{FirmwareVersion}. \\*
+Atributos y composición & Raíz de agregado que custodia el inventario físico de escáneres telemáticos y su canal de transmisión. Generalización de AbstractDomainAggregateRoot<DeviceId>. Composición con DeviceIdentifier, ConnectionType y DeviceStatus. \\*
 \hline
-\textbf{Firma o Tipo} & - \texttt{DeviceId id} \newline - \texttt{TenantId tenantId} \newline - \texttt{DeviceIdentifier serialNumber} \newline - \texttt{MacAddress macAddress} \newline - \texttt{DeviceStatus status} \newline - \texttt{FirmwareVersion firmwareVersion} \newline - \texttt{ProtocolType protocolType} \newline - \texttt{Instant registeredAt} \newline - \texttt{Optional<\allowbreak Instant>\allowbreak  lastHeartbeatAt} \\*
-\hline
-\textbf{Ámbito} & Privado \\
-\hline
-Factoría y gestión operativa & Invariantes: el dispositivo nace en estado PROVISIONED o ACTIVE. El número de serie y la dirección MAC son inmutables tras su asignación. El latido telemático actualiza la marca de tiempo de actividad. Emite Obd2\allowbreak Device\allowbreak Registered\allowbreak Event. \\*
-\hline
-\textbf{Firma o Tipo} & - \texttt{Obd2\allowbreak Device register(TenantId,\allowbreak  DeviceIdentifier,\allowbreak  MacAddress,\allowbreak  ProtocolType,\allowbreak  FirmwareVersion)} \newline - \texttt{void recordHeartbeat(Instant)} \newline - \texttt{void markActive()} \newline - \texttt{void markSuspended()} \newline - \texttt{void markDecommissioned()} \newline - \texttt{void updateFirmware(FirmwareVersion)} \newline - \texttt{DeviceId id()} \newline - \texttt{TenantId tenantId()} \newline - \texttt{DeviceIdentifier serialNumber()} \newline - \texttt{MacAddress macAddress()} \newline - \texttt{DeviceStatus status()} \newline - \texttt{FirmwareVersion firmwareVersion()} \newline - \texttt{ProtocolType protocolType()} \newline - \texttt{boolean isOperational()} \\*
-\hline
-\textbf{Ámbito} & Público \\
-\hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} Device\allowbreak Installation \quad (\textit{Aggregate Root})} \\*
-\hline
-Atributos y vigencia & Raíz de agregado que delimita la sesión física de montaje de un escáner en un automotor. Custodia kilometrajes iniciales y finales para auditoría de odómetro. Generalización de \texttt{AbstractDomainAggregateRoot<\allowbreak InstallationId>\allowbreak }. \\*
-\hline
-\textbf{Firma o Tipo} & - \texttt{InstallationId id} \newline - \texttt{DeviceId deviceId} \newline - \texttt{VehicleId vehicleId} \newline - \texttt{TenantId tenantId} \newline - \texttt{Instant installedAt} \newline - \texttt{Optional<\allowbreak Instant>\allowbreak  uninstalledAt} \newline - \texttt{int initialOdometerKm} \newline - \texttt{Optional<\allowbreak Integer>\allowbreak  finalOdometerKm} \newline - \texttt{InstallationStatus status} \newline - \texttt{InstallationNotes notes} \\*
+\textbf{Firma o Tipo} & - \texttt{DeviceId id} \newline - \texttt{TenantId tenantId} \newline - \texttt{DeviceIdentifier deviceIdentifier} \newline - \texttt{ConnectionType connectionType} \newline - \texttt{DeviceStatus status} \newline - \texttt{String hardwareModel} \newline - \texttt{String firmwareVersion} \newline - \texttt{Instant registeredAt} \newline - \texttt{Optional<\allowbreak Instant>\allowbreak  lastHeartbeatAt} \\*
 \hline
 \textbf{Ámbito} & Privado \\
 \hline
-Ciclo de vida y montaje & Invariantes: un automotor solo puede registrar una instalación en estado ACTIVE simultáneamente. El kilometraje final de desmontaje debe ser mayor o igual al inicial. Emite Device\allowbreak Installed\allowbreak Event y Device\allowbreak Uninstalled\allowbreak Event. \\*
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
 \hline
-\textbf{Firma o Tipo} & - \texttt{Device\allowbreak Installation install(DeviceId,\allowbreak  VehicleId,\allowbreak  TenantId,\allowbreak  int,\allowbreak  InstallationNotes)} \newline - \texttt{void uninstall(int,\allowbreak  Instant)} \newline - \texttt{boolean isActive()} \newline - \texttt{InstallationId id()} \newline - \texttt{DeviceId deviceId()} \newline - \texttt{VehicleId vehicleId()} \newline - \texttt{TenantId tenantId()} \newline - \texttt{Instant installedAt()} \newline - \texttt{Optional<\allowbreak Instant>\allowbreak  uninstalledAt()} \newline - \texttt{int initialOdometerKm()} \newline - \texttt{Optional<\allowbreak Integer>\allowbreak  finalOdometerKm()} \newline - \texttt{InstallationStatus status()} \\*
+Factoría y gestión operativa & Invariantes: el dispositivo nace en estado ACTIVE. El identificador de hardware es inmutable y unívoco. El latido telemático actualiza la marca de tiempo de actividad. Emite Obd2DeviceRegisteredEvent. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{Obd2Device register(TenantId,\allowbreak  DeviceIdentifier,\allowbreak  ConnectionType,\allowbreak  String,\allowbreak  String)} \newline - \texttt{void recordHeartbeat(Instant)} \newline - \texttt{void markActive()} \newline - \texttt{void markInactive()} \newline - \texttt{void markLost()} \newline - \texttt{void markBroken()} \newline - \texttt{void updateFirmware(String)} \newline - \texttt{DeviceId id()} \newline - \texttt{TenantId tenantId()} \newline - \texttt{DeviceIdentifier deviceIdentifier()} \newline - \texttt{ConnectionType connectionType()} \newline - \texttt{DeviceStatus status()} \newline - \texttt{boolean isOperational()} \\*
 \hline
 \textbf{Ámbito} & Público \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} Telemetry\allowbreak Record \quad (\textit{Value Object / Time-Series Aggregate})} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} DeviceInstallation \quad (\textit{Aggregate Root})} \\*
 \hline
-Atributos sensoriales & Registro temporal inmutable que modela una lectura puntual multidimensional del tren motriz. Contiene métricas físicas de velocidad, revoluciones, temperatura de refrigerante y códigos DTC activos. \\*
+Atributos y vigencia & Raíz de agregado que delimita la sesión física de montaje de un escáner en un automotor. Custodia kilometrajes iniciales y finales para auditoría de odómetro. Generalización de AbstractDomainAggregateRoot<InstallationId>. \\*
 \hline
-\textbf{Firma o Tipo} & - \texttt{Instant timestamp} \newline - \texttt{VehicleId vehicleId} \newline - \texttt{DeviceId deviceId} \newline - \texttt{TenantId tenantId} \newline - \texttt{Optional<\allowbreak GeoCoordinates>\allowbreak  location} \newline - \texttt{VehicleSpeed speed} \newline - \texttt{EngineRpm rpm} \newline - \texttt{EngineTemperature coolantTemperature} \newline - \texttt{Optional<\allowbreak FuelLevel>\allowbreak  fuelLevel} \newline - \texttt{Optional<\allowbreak BatteryVoltage>\allowbreak  batteryVoltage} \newline - \texttt{Optional<\allowbreak ThrottlePosition>\allowbreak  throttlePosition} \newline - \texttt{Optional<\allowbreak EngineLoad>\allowbreak  engineLoad} \newline - \texttt{List<\allowbreak DtcCode>\allowbreak  activeDtcCodes} \\*
+\textbf{Firma o Tipo} & - \texttt{InstallationId id} \newline - \texttt{TenantId tenantId} \newline - \texttt{DeviceId deviceId} \newline - \texttt{VehicleId vehicleId} \newline - \texttt{Instant installedAt} \newline - \texttt{Optional<\allowbreak Instant>\allowbreak  uninstalledAt} \newline - \texttt{int initialOdometerKm} \newline - \texttt{Optional<\allowbreak Integer>\allowbreak  finalOdometerKm} \\*
 \hline
 \textbf{Ámbito} & Privado \\
 \hline
-Invariantes y evaluación & Invariantes: la marca de tiempo UTC es obligatoria. La velocidad y RPM deben ubicarse dentro de los límites físicos del vehículo. Provee métodos deterministas de detección preliminar. \\*
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
 \hline
-\textbf{Firma o Tipo} & - \texttt{Telemetry\allowbreak Record of(Instant,\allowbreak  VehicleId,\allowbreak  DeviceId,\allowbreak  TenantId,\allowbreak  VehicleSpeed,\allowbreak  EngineRpm,\allowbreak  EngineTemperature)} \newline - \texttt{boolean indicatesOverheating()} \newline - \texttt{boolean indicatesLowBattery()} \newline - \texttt{boolean hasActiveDtcs()} \newline - \texttt{Instant timestamp()} \newline - \texttt{VehicleId vehicleId()} \newline - \texttt{DeviceId deviceId()} \newline - \texttt{VehicleSpeed speed()} \newline - \texttt{EngineRpm rpm()} \newline - \texttt{EngineTemperature coolantTemperature()} \\*
+Ciclo de vida y montaje & Invariantes: un automotor solo puede registrar una instalación activa simultáneamente. El kilometraje final de desmontaje debe ser mayor o igual al inicial. Emite DeviceInstalledOnVehicleEvent y DeviceUninstalledFromVehicleEvent. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{DeviceInstallation install(DeviceId,\allowbreak  VehicleId,\allowbreak  TenantId,\allowbreak  int,\allowbreak  Instant)} \newline - \texttt{void uninstall(int,\allowbreak  Instant)} \newline - \texttt{boolean isActive()} \newline - \texttt{InstallationId id()} \newline - \texttt{DeviceId deviceId()} \newline - \texttt{VehicleId vehicleId()} \newline - \texttt{TenantId tenantId()} \newline - \texttt{Instant installedAt()} \newline - \texttt{Optional<\allowbreak Instant>\allowbreak  uninstalledAt()} \newline - \texttt{int initialOdometerKm()} \newline - \texttt{Optional<\allowbreak Integer>\allowbreak  finalOdometerKm()} \\*
 \hline
 \textbf{Ámbito} & Público \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} Vehicle\allowbreak Fault \quad (\textit{Aggregate Root})} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} VehicleFault \quad (\textit{Aggregate Root})} \\*
 \hline
-Atributos y diagnóstico & Raíz de agregado que formaliza la persistencia y ciclo de resolución de fallas DTC detectadas en ruta. Generalización de \texttt{AbstractDomainAggregateRoot<\allowbreak FaultId>\allowbreak }. \\*
+Atributos y diagnóstico & Raíz de agregado que formaliza la persistencia y ciclo de resolución de fallas DTC detectadas en ruta. Generalización de AbstractDomainAggregateRoot<FaultId>. Composición con DtcCode y FaultSeverity. \\*
 \hline
-\textbf{Firma o Tipo} & - \texttt{FaultId id} \newline - \texttt{VehicleId vehicleId} \newline - \texttt{TenantId tenantId} \newline - \texttt{DeviceId deviceId} \newline - \texttt{DtcCode dtcCode} \newline - \texttt{FaultSeverity severity} \newline - \texttt{FaultStatus status} \newline - \texttt{String description} \newline - \texttt{Instant detectedAt} \newline - \texttt{Optional<\allowbreak Instant>\allowbreak  resolvedAt} \newline - \texttt{Optional<\allowbreak String>\allowbreak  resolutionNotes} \\*
+\textbf{Firma o Tipo} & - \texttt{FaultId id} \newline - \texttt{TenantId tenantId} \newline - \texttt{VehicleId vehicleId} \newline - \texttt{DtcCode dtcCode} \newline - \texttt{FaultSeverity severity} \newline - \texttt{String description} \newline - \texttt{Instant detectedAt} \newline - \texttt{boolean isResolved} \newline - \texttt{Optional<\allowbreak Instant>\allowbreak  resolvedAt} \newline - \texttt{Optional<\allowbreak String>\allowbreak  resolutionNotes} \\*
 \hline
 \textbf{Ámbito} & Privado \\
 \hline
-Resolución y criticidad & Invariantes: el código DTC debe ser válido bajo SAE J2012. La confirmación de falla genera el suceso Vehicle\allowbreak Fault\allowbreak Detected\allowbreak Event. La resolución formal sella con marca de tiempo y emite Vehicle\allowbreak Fault\allowbreak Resolved\allowbreak Event. \\*
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
 \hline
-\textbf{Firma o Tipo} & - \texttt{Vehicle\allowbreak Fault detect(VehicleId,\allowbreak  TenantId,\allowbreak  DeviceId,\allowbreak  DtcCode,\allowbreak  FaultSeverity,\allowbreak  String,\allowbreak  Instant)} \newline - \texttt{void markInReview()} \newline - \texttt{void resolve(String,\allowbreak  Instant)} \newline - \texttt{void dismiss(String)} \newline - \texttt{boolean isResolved()} \newline - \texttt{boolean isCritical()} \newline - \texttt{FaultId id()} \newline - \texttt{VehicleId vehicleId()} \newline - \texttt{DtcCode dtcCode()} \newline - \texttt{FaultSeverity severity()} \newline - \texttt{FaultStatus status()} \\*
+Resolución y criticidad & Invariantes: el código DTC debe ser válido bajo SAE J2012. La confirmación de avería emite VehicleFaultDetectedEvent. La resolución formal sella con marca de tiempo UTC y emite VehicleFaultResolvedEvent. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{VehicleFault detect(VehicleId,\allowbreak  TenantId,\allowbreak  DtcCode,\allowbreak  FaultSeverity,\allowbreak  String,\allowbreak  Instant)} \newline - \texttt{void resolve(String,\allowbreak  Instant)} \newline - \texttt{boolean isResolved()} \newline - \texttt{boolean isCritical()} \newline - \texttt{FaultId id()} \newline - \texttt{VehicleId vehicleId()} \newline - \texttt{TenantId tenantId()} \newline - \texttt{DtcCode dtcCode()} \newline - \texttt{FaultSeverity severity()} \newline - \texttt{String description()} \newline - \texttt{Instant detectedAt()} \newline - \texttt{Optional<\allowbreak Instant>\allowbreak  resolvedAt()} \\*
 \hline
 \textbf{Ámbito} & Público \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} Predictive\allowbreak Alert \quad (\textit{Aggregate Root})} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} PredictiveAlert \quad (\textit{Aggregate Root})} \\*
 \hline
-Atributos y despacho & Raíz de agregado que modela advertencias generadas analíticamente por inferencia predictiva. Asocia paquetes de servicio sugeridos y gobierna la notificación telemática hacia la consola de Atelier Workshop y la aplicación móvil Atelier Driver. \\*
+Atributos y despacho & Raíz de agregado que modela advertencias generadas analíticamente por inferencia predictiva. Asocia paquetes de servicio sugeridos de MRO y gobierna la notificación push reactiva hacia Atelier Workshop y Atelier Driver. Generalización de AbstractDomainAggregateRoot<AlertId>. \\*
 \hline
-\textbf{Firma o Tipo} & - \texttt{AlertId id} \newline - \texttt{VehicleId vehicleId} \newline - \texttt{TenantId tenantId} \newline - \texttt{Optional<\allowbreak ServiceId>\allowbreak  recommendedServiceId} \newline - \texttt{AlertType alertType} \newline - \texttt{ConfidenceScore confidenceScore} \newline - \texttt{String message} \newline - \texttt{AlertStatus status} \newline - \texttt{Optional<\allowbreak String>\allowbreak  fcmMessageId} \newline - \texttt{Instant createdAt} \\*
+\textbf{Firma o Tipo} & - \texttt{AlertId id} \newline - \texttt{TenantId tenantId} \newline - \texttt{VehicleId vehicleId} \newline - \texttt{Optional<\allowbreak ServiceId>\allowbreak  recommendedServiceId} \newline - \texttt{AlertSeverity severity} \newline - \texttt{RiskLevel riskLevel} \newline - \texttt{ConfidenceScore confidenceScore} \newline - \texttt{String message} \newline - \texttt{AlertStatus status} \newline - \texttt{Optional<\allowbreak String>\allowbreak  fcmMessageId} \newline - \texttt{Instant createdAt} \\*
 \hline
 \textbf{Ámbito} & Privado \\
 \hline
-Inferencia y notificación & Invariantes: la confianza estadística debe superar el umbral mínimo del 75 por ciento. El despacho registra el identificador de Firebase Cloud Messaging y emite Predictive\allowbreak Alert\allowbreak Generated\allowbreak Event. \\*
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
 \hline
-\textbf{Firma o Tipo} & - \texttt{Predictive\allowbreak Alert generate(VehicleId,\allowbreak  TenantId,\allowbreak  Optional<\allowbreak ServiceId>\allowbreak ,\allowbreak  AlertType,\allowbreak  ConfidenceScore,\allowbreak  String)} \newline - \texttt{void markDispatched(String)} \newline - \texttt{void acknowledge()} \newline - \texttt{void resolve()} \newline - \texttt{void dismiss()} \newline - \texttt{AlertId id()} \newline - \texttt{VehicleId vehicleId()} \newline - \texttt{AlertType alertType()} \newline - \texttt{ConfidenceScore confidenceScore()} \newline - \texttt{AlertStatus status()} \\*
+Inferencia y notificación & Invariantes: la confianza estadística debe situarse en el rango de 0.00 a 100.00. Emite PredictiveAlertGeneratedEvent al crearse, PredictiveAlertDispatchedEvent al notificarse y PredictiveAlertAcknowledgedEvent al confirmarse su lectura. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{PredictiveAlert generate(VehicleId,\allowbreak  TenantId,\allowbreak  Optional<\allowbreak ServiceId>\allowbreak ,\allowbreak  AlertSeverity,\allowbreak  RiskLevel,\allowbreak  ConfidenceScore,\allowbreak  String)} \newline - \texttt{void markDispatched(String)} \newline - \texttt{void acknowledge()} \newline - \texttt{void resolve()} \newline - \texttt{void dismiss()} \newline - \texttt{AlertId id()} \newline - \texttt{VehicleId vehicleId()} \newline - \texttt{TenantId tenantId()} \newline - \texttt{AlertSeverity severity()} \newline - \texttt{RiskLevel riskLevel()} \newline - \texttt{ConfidenceScore confidenceScore()} \newline - \texttt{AlertStatus status()} \newline - \texttt{Optional<\allowbreak String>\allowbreak  fcmMessageId()} \\*
 \hline
 \textbf{Ámbito} & Público \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} Dtc\allowbreak Catalog\allowbreak Entry \quad (\textit{Aggregate Root})} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} TelemetryRecord \quad (\textit{Time-Series Aggregate Root})} \\*
 \hline
-Atributos y normativa & Raíz de agregado del catálogo maestro de diagnóstico vehicular. Clasifica códigos bajo SAE J2012 e ISO 15031-6 en categorías Powertrain, Chassis, Body y Network. Generalización de \texttt{AbstractDomainAggregateRoot<\allowbreak DtcId>\allowbreak }. \\*
+Atributos sensoriales & Registro inmutable de serie temporal que modela una lectura puntual multidimensional del tren motriz para la hipertabla telemetry\_logs de TimescaleDB. \\*
 \hline
-\textbf{Firma o Tipo} & - \texttt{DtcId id} \newline - \texttt{DtcCode code} \newline - \texttt{DtcStandard standard} \newline - \texttt{DtcSystemCategory systemCategory} \newline - \texttt{String description} \newline - \texttt{FaultSeverity defaultSeverity} \newline - \texttt{Optional<\allowbreak ServiceId>\allowbreak  recommendedServiceId} \newline - \texttt{boolean isGeneric} \\*
+\textbf{Firma o Tipo} & - \texttt{Instant timestamp} \newline - \texttt{VehicleId vehicleId} \newline - \texttt{TenantId tenantId} \newline - \texttt{DeviceId deviceId} \newline - \texttt{VehicleSpeed speed} \newline - \texttt{EngineRpm rpm} \newline - \texttt{EngineTemperature coolantTemperature} \newline - \texttt{Optional<\allowbreak BatteryVoltage>\allowbreak  batteryVoltage} \newline - \texttt{Optional<\allowbreak FuelLevel>\allowbreak  fuelLevel} \newline - \texttt{Optional<\allowbreak GeoCoordinates>\allowbreak  coordinates} \newline - \texttt{Optional<\allowbreak TelemetryPids>\allowbreak  telemetryPids} \\*
 \hline
 \textbf{Ámbito} & Privado \\
 \hline
-Clasificación y enlace MRO & Invariantes: el código de falla es unívoco. Permite actualizar la descripción técnica y asociar dinámicamente plantillas de servicio preventivo para apertura automática de órdenes de trabajo. \\*
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
 \hline
-\textbf{Firma o Tipo} & - \texttt{Dtc\allowbreak Catalog\allowbreak Entry register(DtcCode,\allowbreak  DtcStandard,\allowbreak  DtcSystemCategory,\allowbreak  String,\allowbreak  FaultSeverity,\allowbreak  Optional<\allowbreak ServiceId>\allowbreak ,\allowbreak  boolean)} \newline - \texttt{void updateDescription(String)} \newline - \texttt{void updateRecommendedService(ServiceId)} \newline - \texttt{DtcId id()} \newline - \texttt{DtcCode code()} \newline - \texttt{DtcSystemCategory systemCategory()} \newline - \texttt{FaultSeverity defaultSeverity()} \\*
+Invariantes y evaluación & Invariantes: la marca de tiempo UTC es obligatoria. La velocidad, revoluciones y temperatura se validan en los objetos de valor asociados. Provee métodos deterministas de detección preliminar. \\*
 \hline
-\textbf{Ámbito} & Público \\
-\hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Dominio:} Predictive\allowbreak Anomaly\allowbreak Detection\allowbreak Engine} \\*
-\hline
-Inferencia de fallas & Servicio de dominio algorítmico puro. Evalúa lecturas de telemetría continuas para identificar tendencias de sobrecalentamiento crítico de refrigerante (temperatura mayor o igual a 105.0°C) o degradación del sistema eléctrico con motor encendido (tensión menor a 11.8 V). \\*
-\hline
-\textbf{Firma o Tipo} & - \texttt{Optional<\allowbreak AnomalyEvaluationResult>\allowbreak  evaluateTelemetry(TelemetryRecord)} \newline - \texttt{boolean detectThermalRunaway(List<\allowbreak TelemetryRecord>\allowbreak )} \newline - \texttt{boolean detectAlternatorFailure(BatteryVoltage,\allowbreak  EngineRpm)} \\*
+\textbf{Firma o Tipo} & - \texttt{TelemetryRecord of(Instant,\allowbreak  VehicleId,\allowbreak  TenantId,\allowbreak  DeviceId,\allowbreak  VehicleSpeed,\allowbreak  EngineRpm,\allowbreak  EngineTemperature,\allowbreak  Optional<\allowbreak BatteryVoltage>\allowbreak ,\allowbreak  Optional<\allowbreak FuelLevel>\allowbreak ,\allowbreak  Optional<\allowbreak GeoCoordinates>\allowbreak ,\allowbreak  Optional<\allowbreak TelemetryPids>\allowbreak )} \newline - \texttt{boolean indicatesOverheating()} \newline - \texttt{boolean indicatesLowBattery()} \newline - \texttt{Instant timestamp()} \newline - \texttt{VehicleId vehicleId()} \newline - \texttt{TenantId tenantId()} \newline - \texttt{DeviceId deviceId()} \newline - \texttt{VehicleSpeed speed()} \newline - \texttt{EngineRpm rpm()} \newline - \texttt{EngineTemperature coolantTemperature()} \\*
 \hline
 \textbf{Ámbito} & Público \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Dominio:} Dtc\allowbreak Code\allowbreak Evaluation\allowbreak Service} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} DtcCatalogEntry \quad (\textit{Dependent Entity})} \\*
 \hline
-Evaluación de severidad & Servicio de dominio que contrasta códigos DTC contra el catálogo estandarizado para determinar criticidad operativa y recomendar paquetes de servicio preventivo en taller. \\*
+Atributos y normativa & Entidad dependiente del catálogo maestro de diagnóstico vehicular bajo normativas SAE J2012 e ISO 15031-6. Clasifica códigos en categorías Powertrain, Chassis, Body y Network. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{DtcCatalogId id} \newline - \texttt{DtcCode code} \newline - \texttt{String standard} \newline - \texttt{String systemCategory} \newline - \texttt{String descriptionEs} \newline - \texttt{String descriptionEn} \newline - \texttt{FaultSeverity defaultSeverity} \newline - \texttt{boolean isCritical} \newline - \texttt{Optional<\allowbreak ServiceId>\allowbreak  recommendedServiceId} \\*
+\hline
+\textbf{Ámbito} & Privado \\
+\hline
+\thfirst{Miembro o Elemento} & \thcell{Descripción y Reglas de Negocio} \\*
+\hline
+Clasificación y enlace MRO & Invariantes: el código de falla es unívoco. Permite actualizar descripciones bilingües y vincular paquetes de servicio preventivo del módulo de operaciones para órdenes de trabajo automáticas. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{DtcCatalogEntry of(DtcCatalogId,\allowbreak  DtcCode,\allowbreak  String,\allowbreak  String,\allowbreak  String,\allowbreak  String,\allowbreak  FaultSeverity,\allowbreak  boolean,\allowbreak  Optional<\allowbreak ServiceId>\allowbreak )} \newline - \texttt{void updateDescriptions(String,\allowbreak  String)} \newline - \texttt{void assignRecommendedService(ServiceId)} \newline - \texttt{DtcCatalogId id()} \newline - \texttt{DtcCode code()} \newline - \texttt{String systemCategory()} \newline - \texttt{FaultSeverity defaultSeverity()} \newline - \texttt{boolean isCritical()} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Dominio:} PredictiveAnomalyDetectionEngine} \\*
+\hline
+Inferencia de anomalías en tiempo real & Servicio de dominio algorítmico puro sin estado. Evalúa telemetría sensorial recién arribada para formular advertencias predictivas analizando correlaciones térmicas y eléctricas según leyes de combustión interna. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{Optional<\allowbreak PredictiveAlert>\allowbreak  evaluateTelemetry(TelemetryRecord,\allowbreak  Optional<\allowbreak ServiceId>\allowbreak )} \newline - \texttt{boolean detectThermalRunaway(List<\allowbreak TelemetryRecord>\allowbreak )} \newline - \texttt{boolean detectAlternatorFailure(BatteryVoltage,\allowbreak  EngineRpm)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Dominio:} DtcCodeEvaluationService} \\*
+\hline
+Evaluación de códigos de avería & Servicio de dominio que contrasta códigos DTC contra el catálogo estandarizado para clasificar severidad operativa y recomendar paquetes de servicio preventivo en taller mecánico. \\*
 \hline
 \textbf{Firma o Tipo} & - \texttt{FaultSeverity evaluateSeverity(DtcCode)} \newline - \texttt{Optional<\allowbreak ServiceId>\allowbreak  resolveRecommendedService(DtcCode)} \newline - \texttt{boolean isEmissionsRelated(DtcCode)} \\*
 \hline
 \textbf{Ámbito} & Público \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Contratos de Repositorio:} Puertos de la Capa de Dominio} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Servicio de Dominio:} VehicleThermodynamicEvaluationService} \\*
 \hline
-Puertos de persistencia & Interfaces puras desacopladas de tecnología: \textbf{Obd2DeviceRepository}, \textbf{DeviceInstallationRepository}, \textbf{TelemetryLogRepository}, \textbf{VehicleFaultRepository}, \textbf{PredictiveAlertRepository}, \textbf{DtcCatalogEntryRepository}. \\*
+Modelado termodinámico y refrigeración & Servicio de dominio puro que evalúa gradientes térmicos y dinámicas de disipación de calor del motor analizando correlaciones continuas entre revoluciones por minuto, velocidad lineal y temperatura de refrigerante. \\*
 \hline
-\textbf{Firma o Tipo} & - \texttt{Obd2Device save(Obd2Device)} \newline - \texttt{Optional<\allowbreak Obd2Device>\allowbreak  findById(DeviceId)} \newline - \texttt{Optional<\allowbreak DeviceInstallation>\allowbreak  findActiveByVehicleId(VehicleId)} \newline - \texttt{void saveAllBatch(List<\allowbreak TelemetryRecord>\allowbreak )} \newline - \texttt{List<\allowbreak VehicleFault>\allowbreak  findActiveByVehicleId(VehicleId)} \newline - \texttt{List<\allowbreak PredictiveAlert>\allowbreak  findAllByVehicleId(VehicleId)} \\*
-\hline
-\textbf{Ámbito} & Público \\
-\hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Identificadores Tipados y Objetos de Valor:} Tipos de Dominio Inmutables} \\*
-\hline
-Estructuras inmutables & Registros Java que garantizan tipado fuerte: \textbf{DeviceId}, \textbf{InstallationId}, \textbf{FaultId}, \textbf{AlertId}, \textbf{DtcId}, \textbf{DeviceIdentifier}, \textbf{MacAddress}, \textbf{DtcCode}, \textbf{VehicleSpeed}, \textbf{EngineRpm}, \textbf{EngineTemperature}, \textbf{BatteryVoltage}, \textbf{ConfidenceScore}. \\*
-\hline
-\textbf{Firma o Tipo} & - \texttt{DeviceId of(UUID)} \newline - \texttt{DtcCode of(String)} \newline - \texttt{MacAddress of(String)} \newline - \texttt{VehicleSpeed of(double)} \newline - \texttt{EngineTemperature of(double)} \newline - \texttt{BatteryVoltage of(double)} \newline - \texttt{ConfidenceScore of(BigDecimal)} \\*
+\textbf{Firma o Tipo} & - \texttt{boolean evaluateThermalGradient(EngineTemperature,\allowbreak  EngineTemperature,\allowbreak  Duration)} \newline - \texttt{boolean isCoolingSystemDegraded(EngineTemperature,\allowbreak  VehicleSpeed,\allowbreak  EngineRpm)} \newline - \texttt{double calculateHeatDissipationIndex(EngineTemperature,\allowbreak  VehicleSpeed)} \\*
 \hline
 \textbf{Ámbito} & Público \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Excepciones de Dominio y Eventos:} Jerarquía Semántica y Sucesos de Negocio} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Puertos de Repositorio:} Repositorios de Persistencia de Dominio} \\*
 \hline
-Excepciones y eventos & Jerarquía no comprobada derivada de \textbf{IoTDomainException} con mapeo RFC 7807 y eventos de dominio inmutables para el patrón Transactional Outbox. \\*
+Puertos de persistencia de dominio & Interfaces puras desacopladas de tecnología: Obd2DeviceRepository, DeviceInstallationRepository, TelemetryRecordRepository, VehicleFaultRepository, PredictiveAlertRepository y DtcCatalogRepository. \\*
 \hline
-\textbf{Firma o Tipo} & - \texttt{DeviceNotFoundException(DeviceId)} \newline - \texttt{ActiveInstallationConflictException(VehicleId)} \newline - \texttt{InvalidTelemetryDataException(String)} \newline - \texttt{Obd2DeviceRegisteredEvent(DeviceId,\allowbreak  TenantId,\allowbreak  DeviceIdentifier,\allowbreak  Instant)} \newline - \texttt{TelemetryBatchIngestedEvent(VehicleId,\allowbreak  DeviceId,\allowbreak  TenantId,\allowbreak  int,\allowbreak  Instant,\allowbreak  Instant)} \newline - \texttt{PredictiveAlertGeneratedEvent(AlertId,\allowbreak  VehicleId,\allowbreak  TenantId,\allowbreak  AlertType,\allowbreak  ConfidenceScore,\allowbreak  Instant)} \\*
+\textbf{Firma o Tipo} & - \texttt{Obd2Device save(Obd2Device)} \newline - \texttt{Optional<\allowbreak Obd2Device>\allowbreak  findById(DeviceId)} \newline - \texttt{Optional<\allowbreak Obd2Device>\allowbreak  findByDeviceIdentifier(DeviceIdentifier)} \newline - \texttt{Optional<\allowbreak DeviceInstallation>\allowbreak  findActiveByVehicleId(VehicleId)} \newline - \texttt{void saveAllBatch(List<\allowbreak TelemetryRecord>\allowbreak )} \newline - \texttt{List<\allowbreak VehicleFault>\allowbreak  findActiveByVehicleId(VehicleId)} \newline - \texttt{List<\allowbreak PredictiveAlert>\allowbreak  findAllByVehicleId(VehicleId)} \newline - \texttt{Optional<\allowbreak DtcCatalogEntry>\allowbreak  findByCode(DtcCode)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Identificadores Fuertemente Tipados:} Identidades de Dominio} \\*
+\hline
+Identificadores tipados & Registros Java inmutables que realizan TypedId<UUID> para erradicar la obsesión por tipos primitivos y garantizar seguridad de tipos en compilación: DeviceId, InstallationId, FaultId, AlertId y DtcCatalogId. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{record DeviceId(UUID value)} \newline - \texttt{record InstallationId(UUID value)} \newline - \texttt{record FaultId(UUID value)} \newline - \texttt{record AlertId(UUID value)} \newline - \texttt{record DtcCatalogId(UUID value)} \newline - \texttt{static of(UUID value)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objetos de Valor Inmutables:} Magnitudes Sensoriales y Diagnósticas} \\*
+\hline
+Estructuras inmutables & Registros Java inmutables con validación estricta de invariantes en construcción: DeviceIdentifier, DtcCode, ConfidenceScore, EngineTemperature, EngineRpm, VehicleSpeed, BatteryVoltage, FuelLevel, GeoCoordinates y TelemetryPids. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{DeviceIdentifier of(String value)} \newline - \texttt{DtcCode of(String value)} \newline - \texttt{ConfidenceScore of(BigDecimal value)} \newline - \texttt{EngineTemperature of(double value)} \newline - \texttt{EngineRpm of(int value)} \newline - \texttt{VehicleSpeed of(double value)} \newline - \texttt{BatteryVoltage of(double value)} \newline - \texttt{FuelLevel of(double value)} \newline - \texttt{GeoCoordinates of(double latitude,\allowbreak  double longitude)} \newline - \texttt{TelemetryPids of(Map<\allowbreak String,\allowbreak  Object>\allowbreak  pids)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Enumeraciones de Dominio:} Vocabularios Controlados Inmutables} \\*
+\hline
+Enumeraciones de dominio & Vocabularios controlados inmutables que tipifican canales de transmisión, situaciones de hardware, severidad de fallas, niveles de advertencia, estados de notificación y escalas de riesgo analítico. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{ConnectionType (BLUETOOTH\_BLE,\allowbreak  SIM\_CELLULAR,\allowbreak  WIFI)} \newline - \texttt{DeviceStatus (ACTIVE,\allowbreak  INACTIVE,\allowbreak  LOST,\allowbreak  BROKEN)} \newline - \texttt{FaultSeverity (LOW,\allowbreak  MEDIUM,\allowbreak  CRITICAL)} \newline - \texttt{AlertSeverity (LOW,\allowbreak  MEDIUM,\allowbreak  HIGH,\allowbreak  CRITICAL)} \newline - \texttt{AlertStatus (DISPATCHED,\allowbreak  ACKNOWLEDGED,\allowbreak  RESOLVED,\allowbreak  DISMISSED)} \newline - \texttt{RiskLevel (LOW,\allowbreak  MODERATE,\allowbreak  HIGH,\allowbreak  CRITICAL)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Eventos de Dominio:} Mutaciones Transaccionales para Transactional Outbox} \\*
+\hline
+Eventos de dominio & Registros inmutables que implementan DomainEvent. Describen mutaciones transaccionales del estado vehicular y hardware telemático para propagación asíncrona mediante el Transactional Outbox. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{CriticalEngine\allowbreak AnomalyDetected\allowbreak Event(VehicleId,\allowbreak  DeviceId,\allowbreak  TenantId,\allowbreak  String,\allowbreak  Instant)} \newline - \texttt{DeviceInstalled\allowbreak OnVehicleEvent(InstallationId,\allowbreak  DeviceId,\allowbreak  VehicleId,\allowbreak  TenantId,\allowbreak  int,\allowbreak  Instant)} \newline - \texttt{DeviceUninstalled\allowbreak FromVehicleEvent(InstallationId,\allowbreak  DeviceId,\allowbreak  VehicleId,\allowbreak  TenantId,\allowbreak  int,\allowbreak  Instant)} \newline - \texttt{Obd2Device\allowbreak RegisteredEvent(DeviceId,\allowbreak  TenantId,\allowbreak  DeviceIdentifier,\allowbreak  Instant)} \newline - \texttt{PredictiveAlert\allowbreak AcknowledgedEvent(AlertId,\allowbreak  VehicleId,\allowbreak  TenantId,\allowbreak  Instant)} \newline - \texttt{PredictiveAlert\allowbreak DispatchedEvent(AlertId,\allowbreak  VehicleId,\allowbreak  TenantId,\allowbreak  String,\allowbreak  Instant)} \newline - \texttt{PredictiveAlert\allowbreak GeneratedEvent(AlertId,\allowbreak  VehicleId,\allowbreak  TenantId,\allowbreak  AlertSeverity,\allowbreak  RiskLevel,\allowbreak  ConfidenceScore,\allowbreak  Instant)} \newline - \texttt{TelemetryBatch\allowbreak IngestedEvent(VehicleId,\allowbreak  DeviceId,\allowbreak  TenantId,\allowbreak  int,\allowbreak  Instant,\allowbreak  Instant)} \newline - \texttt{VehicleFault\allowbreak DetectedEvent(FaultId,\allowbreak  VehicleId,\allowbreak  TenantId,\allowbreak  DtcCode,\allowbreak  FaultSeverity,\allowbreak  Instant)} \newline - \texttt{VehicleFault\allowbreak ResolvedEvent(FaultId,\allowbreak  VehicleId,\allowbreak  TenantId,\allowbreak  DtcCode,\allowbreak  Instant)} \\*
+\hline
+\textbf{Ámbito} & Público \\
+\hline
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Jerarquía de Excepciones Semánticas:} Errores de Negocio RFC 7807} \\*
+\hline
+Excepciones semánticas RFC 7807 & Jerarquía no comprobada derivada de IoTDomainException. Portan códigos legibles normalizados bajo RFC 7807 para mapeo HTTP en la capa perimetral ante conflictos de montaje, dispositivos no encontrados, tramas inválidas o anomalías en TimescaleDB. \\*
+\hline
+\textbf{Firma o Tipo} & - \texttt{ActiveInstallation\allowbreak ConflictException(VehicleId)} \newline - \texttt{DeviceAlready\allowbreak InstalledException(DeviceId)} \newline - \texttt{DeviceNotFound\allowbreak Exception(DeviceId)} \newline - \texttt{InstallationNotFound\allowbreak Exception(InstallationId)} \newline - \texttt{InvalidDevice\allowbreak IdentifierException(String)} \newline - \texttt{InvalidDtc\allowbreak CodeException(String)} \newline - \texttt{IoTDomain\allowbreak Exception(String,\allowbreak  String,\allowbreak  HttpStatus)} \newline - \texttt{PredictiveAlert\allowbreak NotFoundException(AlertId)} \newline - \texttt{TimescaleIngestion\allowbreak Exception(String)} \newline - \texttt{VehicleFault\allowbreak NotFoundException(FaultId)} \\*
 \hline
 \textbf{Ámbito} & Público \\
 \hline
@@ -10089,14 +12074,17 @@ En la @fig:database-diagram-iot se expone el Diagrama Entidad-Relación físico 
 - **Subsistema de Emparejamiento Físico y Auditoría de Odometría:**
   Administra el ciclo de vida de las sesiones de conexión física del escáner en los puertos de diagnóstico de los vehículos automotores mediante la tabla **device_installations**. Esta estructura formaliza la relación temporal entre el dispositivo y el vehículo intervenido, salvaguardando el kilometraje inicial de conexión y el kilometraje final de desmonte. De este modo, impone como regla de integridad que ningún vehículo admita múltiples escáneres activos simultáneamente y que el odómetro mantenga una progresión no decreciente durante la prestación del servicio.
 
-- **Subsistema de Ingesta Masiva de Series Temporales en TimescaleDB:**
-  Aísla la captura de lecturas sensoriales de alta frecuencia mediante la hipertabla especializada **telemetry_logs**, desplegada sobre TimescaleDB. Esta tabla opera bajo una semántica *append-only* y se particiona automáticamente en bloques temporales de siete días, complementados por una política de compresión columnar automática para registros que superen los treinta días de antigüedad. Este particionamiento optimizado absorbe millones de mediciones de velocidad, temperatura de refrigerante, tensión de batería, nivel de combustible y coordenadas geográficas sin generar contención sobre las transacciones del sistema.
+- **Subsistema de Catálogo Universal de Diagnóstico Automotriz:**
+  Estandariza el diccionario de códigos de avería mediante la tabla **dtc_catalog**, clasificada bajo normas SAE J2012 e ISO 15031-6. Almacena las definiciones técnicas bilingües en español e inglés, la severidad intrínseca recomendada, la categorización por subsistemas de tren motriz, chasis, carrocería y redes, así como el indicador de criticidad de intervención técnica en el taller automotriz.
 
-- **Subsistema de Averías Electrónicas y Catálogo Universal de Diagnóstico:**
-  Resguarda la bitácora de códigos de falla registrados por la computadora vehicular mediante la tabla **vehicle_faults**, asociándola al catálogo maestro de averías normalizadas en la tabla **dtc_catalog**. Al estructurar el catálogo bajo las directrices de las normas SAE J2012 e ISO 15031-6, el sistema enriquece semánticamente cada lectura con su descripción técnica en español, severidad de impacto en carretera y recomendaciones de acción inmediata en taller, categorizando los fallos en subsistemas de tren motriz, chasis, carrocería y redes de comunicación.
+- **Subsistema de Averías Electrónicas Vehiculares:**
+  Resguarda la bitácora de códigos de falla registrados por la computadora vehicular mediante la tabla **vehicle_faults**, vinculada por identidad hacia el expediente del vehículo. Permite auditar el momento de detección por el sensor, el estado de resolución técnica por el mecánico en foso y las notas de procedimiento correctivo aplicadas en la orden de servicio de mantenimiento.
 
 - **Subsistema de Inferencia Preventiva y Notificaciones Push:**
-  Registra las anomalías mecánicas detectadas analíticamente por los motores de evaluación mediante la tabla **predictive_alerts**. Esta entidad almacena el grado de confianza estadística asignado por el algoritmo, vincula de forma proactiva paquetes de servicio sugeridos procedentes del módulo de mantenimiento y custodia los identificadores de entrega asíncrona hacia Firebase Cloud Messaging, permitiendo despachar alertas críticas tanto a la consola del taller como al teléfono inteligente del conductor.
+  Registra las anomalías mecánicas detectadas analíticamente por los motores de evaluación mediante la tabla **predictive_alerts**. Esta entidad almacena el grado de certeza estadística asignado por el algoritmo, vincula proactivamente el paquete de servicio sugerido procedente del catálogo de taller y custodia los identificadores de entrega asíncrona hacia Firebase Cloud Messaging para despacho multicanal.
+
+- **Subsistema de Ingesta Masiva de Series Temporales en TimescaleDB:**
+  Aísla la captura de lecturas sensoriales de alta frecuencia mediante la hipertabla especializada **telemetry_logs**, desplegada sobre TimescaleDB en Aiven Cloud. Esta tabla opera bajo una semántica append-only y se particiona automáticamente en bloques temporales de siete días, complementados por una política de compresión columnar automática para registros que superen los treinta días de antigüedad. Este particionamiento optimizado absorbe millones de mediciones de velocidad, temperatura de refrigerante, tensión de batería, nivel de combustible y coordenadas geográficas sin generar contención sobre las transacciones del sistema.
 
 - **Persistencia Desconectada y Amortiguamiento Fuera de Línea en SQLite 3:**
   Garantiza la operatividad continua de los clientes móviles en zonas sin cobertura de red móvil mediante las tablas locales **local_telemetry_buffer**, **local_vehicle_faults_cache** y **local_predictive_alerts_cache**. La tabla **local_telemetry_buffer** actúa como un buffer transaccional en el dispositivo para almacenar en frío las tramas OBD-II capturadas por Bluetooth, drenándolas en lote hacia el backend en cuanto se recupera el enlace celular. Por su parte, las tablas de caché local proporcionan acceso inmediato a los códigos de falla y advertencias preventivas sin latencia de red.
@@ -10120,9 +12108,9 @@ A partir de la arquitectura física formalizada en el diagrama de persistencia, 
 \hline
 \textbf{Propósito y Aislamiento} & Inventario maestro de adaptadores telemáticos y escáneres OBD-II pertenecientes a la dotación técnica del taller. Almacena las direcciones físicas MAC para dispositivos Bluetooth Low Energy o números IMEI para terminales celulares 4G LTE, administrando el estado funcional del equipo y previniendo la utilización de adaptadores extraviados o dañados. Aislamiento estricto por taller mediante clave foránea obligatoria. \\*
 \hline
-\textbf{Columnas Clave y Tipos} & \texttt{id (UUID PK)}, \texttt{tenant\_id (UUID FK)}, \texttt{device\_identifier (VARCHAR(100) UK)}, \texttt{connection\_type (VARCHAR(20))}, \texttt{protocol\_type (VARCHAR(20))}, \texttt{status (VARCHAR(20))}, \texttt{hardware\_model (VARCHAR(100))}, \texttt{firmware\_version (VARCHAR(50))}, \texttt{created\_at (TIMESTAMPTZ)}, \texttt{updated\_at (TIMESTAMPTZ)}, \texttt{version (BIGINT)}, \texttt{deleted\_at (TIMESTAMPTZ)}. \\*
+\textbf{Columnas Clave y Tipos} & \texttt{id (UUID PK)}, \texttt{tenant\_id (UUID FK)}, \texttt{device\_identifier (VARCHAR(100) UK)}, \texttt{connection\_type (VARCHAR(20))}, \texttt{status (VARCHAR(20))}, \texttt{hardware\_model (VARCHAR(100))}, \texttt{firmware\_version (VARCHAR(50))}, \texttt{created\_at (TIMESTAMPTZ)}, \texttt{updated\_at (TIMESTAMPTZ)}, \texttt{version (BIGINT)}, \texttt{deleted\_at (TIMESTAMPTZ)}. \\*
 \hline
-\textbf{Constraints e Índices} & - PK: pk\_\allowbreak obd2\_\allowbreak devices (id) \newline - UK: uk\_\allowbreak obd2\_\allowbreak device\_\allowbreak identifier (device\_identifier) \newline - FK: fk\_\allowbreak obd2\_\allowbreak devices\_\allowbreak tenant hacia tenants(id) \newline - CHECK: chk\_\allowbreak obd2\_\allowbreak connection (connection\_type IN ('bluetooth', 'sim\_cellular', 'wifi')), chk\_\allowbreak obd2\_\allowbreak protocol (protocol\_type IN ('elm327', 'custom\_telematics')), chk\_\allowbreak obd2\_\allowbreak status (status IN ('active', 'inactive', 'lost', 'broken')) \newline - Índices B-Tree: idx\_\allowbreak obd2\_\allowbreak tenant (tenant\_id), idx\_\allowbreak obd2\_\allowbreak status (status), idx\_\allowbreak obd2\_\allowbreak identifier (device\_identifier) \\
+\textbf{Constraints e Índices} & - PK: pk\_\allowbreak obd2\_\allowbreak devices (id) \newline - UK: uk\_\allowbreak obd2\_\allowbreak devices\_\allowbreak identifier (device\_identifier) \newline - FK: fk\_\allowbreak obd2\_\allowbreak devices\_\allowbreak tenant hacia tenants(id) \newline - CHECK: chk\_\allowbreak device\_\allowbreak conn\_\allowbreak type (connection\_type IN ('BLUETOOTH\_BLE', 'SIM\_CELLULAR', 'WIFI')), chk\_\allowbreak device\_\allowbreak status (status IN ('ACTIVE', 'INACTIVE', 'LOST', 'BROKEN')) \newline - Índices B-Tree: idx\_\allowbreak devices\_\allowbreak tenant\_\allowbreak status (tenant\_id, status), idx\_\allowbreak obd2\_\allowbreak identifier (device\_identifier) \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{device\allowbreak \_installations}} \\*
 \hline
@@ -10130,19 +12118,19 @@ A partir de la arquitectura física formalizada en el diagrama de persistencia, 
 \hline
 \textbf{Propósito y Aislamiento} & Sesiones de acoplamiento físico entre un escáner OBD-II y un vehículo automotor intervenido. Gobierna el período temporal de monitoreo, auditando el kilometraje inicial al conectar y el kilometraje final al desinstalar. Protege la consistencia operativa asegurando que no existan registros simultáneos activos para el mismo vehículo y comprobando que el odómetro sea monótonamente creciente. \\*
 \hline
-\textbf{Columnas Clave y Tipos} & \texttt{id (UUID PK)}, \texttt{tenant\_id (UUID FK)}, \texttt{device\_id (UUID FK)}, \texttt{vehicle\_id (UUID FK)}, \texttt{installed\_at (TIMESTAMPTZ)}, \texttt{uninstalled\_at (TIMESTAMPTZ)}, \texttt{initial\_odometer\_km (INTEGER)}, \texttt{final\_odometer\_km (INTEGER)}, \texttt{status (VARCHAR(20))}, \texttt{installation\_notes (VARCHAR(500))}, \texttt{created\_at (TIMESTAMPTZ)}, \texttt{updated\_at (TIMESTAMPTZ)}, \texttt{version (BIGINT)}, \texttt{deleted\_at (TIMESTAMPTZ)}. \\*
+\textbf{Columnas Clave y Tipos} & \texttt{id (UUID PK)}, \texttt{tenant\_id (UUID FK)}, \texttt{device\_id (UUID FK)}, \texttt{vehicle\_id (UUID FK)}, \texttt{installed\_at (TIMESTAMPTZ)}, \texttt{uninstalled\_at (TIMESTAMPTZ)}, \texttt{initial\_odometer\_km (INTEGER)}, \texttt{final\_odometer\_km (INTEGER)}, \texttt{created\_at (TIMESTAMPTZ)}, \texttt{updated\_at (TIMESTAMPTZ)}, \texttt{version (BIGINT)}, \texttt{deleted\_at (TIMESTAMPTZ)}. \\*
 \hline
-\textbf{Constraints e Índices} & - PK: pk\_\allowbreak device\_\allowbreak installations (id) \newline - FK: fk\_\allowbreak inst\_\allowbreak device hacia obd2\_devices(id), fk\_\allowbreak inst\_\allowbreak vehicle hacia vehicles(id), fk\_\allowbreak inst\_\allowbreak tenant hacia tenants(id) \newline - CHECK: chk\_\allowbreak inst\_\allowbreak status (status IN ('active', 'completed')), chk\_\allowbreak inst\_\allowbreak odometer (final\_odometer\_km IS NULL OR final\_odometer\_km >= initial\_odometer\_km), chk\_\allowbreak inst\_\allowbreak init\_\allowbreak odo (initial\_odometer\_km >= 0) \newline - Índices B-Tree: idx\_\allowbreak inst\_\allowbreak device (device\_id), idx\_\allowbreak inst\_\allowbreak vehicle (vehicle\_id), idx\_\allowbreak inst\_\allowbreak active (vehicle\_id, status) \\
+\textbf{Constraints e Índices} & - PK: pk\_\allowbreak device\_\allowbreak installations (id) \newline - FK: fk\_\allowbreak installations\_\allowbreak device hacia obd2\_devices(id), fk\_\allowbreak installations\_\allowbreak vehicle hacia vehicles(id), fk\_\allowbreak installations\_\allowbreak tenant hacia tenants(id) \newline - CHECK: chk\_\allowbreak odometer\_\allowbreak positive (initial\_odometer\_km >= 0 AND (final\_odometer\_km IS NULL OR final\_odometer\_km >= initial\_odometer\_km)), chk\_\allowbreak uninstalled\_\allowbreak after\_\allowbreak installed (uninstalled\_at IS NULL OR uninstalled\_at >= installed\_at) \newline - Índices B-Tree: idx\_\allowbreak installations\_\allowbreak device (device\_id), idx\_\allowbreak installations\_\allowbreak vehicle (vehicle\_id), idx\_\allowbreak installations\_\allowbreak active (vehicle\_id, uninstalled\_at) \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{telemetry\allowbreak \_logs}} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{dtc\allowbreak \_catalog}} \\*
 \hline
-\textbf{Motor y Producto} & TimescaleDB Extension (API Application / Aiven Cloud) \\*
+\textbf{Motor y Producto} & PostgreSQL 16 (API Application) \\*
 \hline
-\textbf{Propósito y Aislamiento} & Hipertabla de series temporales de solo inserción para la ingesta masiva de lecturas de sensores vehiculares de identificación de parámetros. Particionada en intervalos temporales de siete días con compresión columnar automática tras treinta días de antigüedad, optimizando el uso de disco en más de un noventa por ciento. Soporta el cómputo de métricas continuas de velocidad, temperatura del motor, carga, aceleración, tensión de batería y posición geográfica. \\*
+\textbf{Propósito y Aislamiento} & Diccionario universal estandarizado de códigos de diagnóstico automotriz bajo los esquemas normativos SAE J2012 e ISO 15031-6. Almacena las definiciones técnicas en español e inglés, la severidad intrínseca recomendada, la categorización por subsistema vehicular y la criticidad de intervención técnica en taller. \\*
 \hline
-\textbf{Columnas Clave y Tipos} & \texttt{timestamp (TIMESTAMPTZ PK)}, \texttt{vehicle\_id (UUID PK FK)}, \texttt{tenant\_id (UUID FK)}, \texttt{device\_id (UUID FK)}, \texttt{speed (INTEGER)}, \texttt{rpm (INTEGER)}, \texttt{engine\_temp\_c (DECIMAL(5,2))}, \texttt{battery\_voltage (DECIMAL(4,2))}, \texttt{fuel\_level (DECIMAL(5,2))}, \texttt{throttle\_position (DECIMAL(5,2))}, \texttt{engine\_load (DECIMAL(5,2))}, \texttt{latitude (DECIMAL(10,8))}, \texttt{longitude (DECIMAL(11,8))}. \\*
+\textbf{Columnas Clave y Tipos} & \texttt{id (UUID PK)}, \texttt{dtc\_code (VARCHAR(10) UK)}, \texttt{system\_category (VARCHAR(30))}, \texttt{description\_es (VARCHAR(500))}, \texttt{description\_en (VARCHAR(500))}, \texttt{default\_severity (VARCHAR(20))}, \texttt{is\_critical (BOOLEAN)}, \texttt{created\_at (TIMESTAMPTZ)}, \texttt{updated\_at (TIMESTAMPTZ)}, \texttt{version (BIGINT)}, \texttt{deleted\_at (TIMESTAMPTZ)}. \\*
 \hline
-\textbf{Constraints e Índices} & - PK Compuesta: pk\_\allowbreak telemetry\_\allowbreak logs (timestamp, vehicle\_id) \newline - Particionamiento: time chunks de siete días sobre la dimensión temporal timestamp \newline - Compresión Columnar: activada para chunks mayores a treinta días con segmentby vehicle\_id y orderby timestamp DESC \newline - Índices Físicos: idx\_\allowbreak telemetry\_\allowbreak vehicle\_\allowbreak time (vehicle\_id, timestamp DESC), idx\_\allowbreak telemetry\_\allowbreak tenant\_\allowbreak time (tenant\_id, timestamp DESC) \\
+\textbf{Constraints e Índices} & - PK: pk\_\allowbreak dtc\_\allowbreak catalog (id) \newline - UK: uk\_\allowbreak dtc\_\allowbreak catalog\_\allowbreak code (dtc\_code) \newline - CHECK: chk\_\allowbreak dtc\_\allowbreak category (system\_category IN ('powertrain', 'chassis', 'body', 'network')), chk\_\allowbreak dtc\_\allowbreak severity (default\_severity IN ('LOW', 'MEDIUM', 'HIGH', 'CRITICAL')) \newline - Índices B-Tree: idx\_\allowbreak dtc\_\allowbreak code (dtc\_code), idx\_\allowbreak dtc\_\allowbreak category (system\_category) \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{vehicle\allowbreak \_faults}} \\*
 \hline
@@ -10150,9 +12138,9 @@ A partir de la arquitectura física formalizada en el diagrama de persistencia, 
 \hline
 \textbf{Propósito y Aislamiento} & Registro formal de códigos de avería de diagnóstico automotriz emitidos por la computadora del vehículo y leídos a través del bus CAN. Permite auditar el momento de detección, el estado de resolución técnica por el mecánico en taller y las notas de procedimiento correctivo aplicadas en la orden de servicio. \\*
 \hline
-\textbf{Columnas Clave y Tipos} & \texttt{id (UUID PK)}, \texttt{tenant\_id (UUID FK)}, \texttt{vehicle\_id (UUID FK)}, \texttt{dtc\_code (VARCHAR(10))}, \texttt{severity (VARCHAR(20))}, \texttt{status (VARCHAR(20))}, \texttt{description (VARCHAR(255))}, \texttt{detected\_at (TIMESTAMPTZ)}, \texttt{resolved\_at (TIMESTAMPTZ)}, \texttt{resolution\_notes (VARCHAR(500))}, \texttt{created\_at (TIMESTAMPTZ)}, \texttt{updated\_at (TIMESTAMPTZ)}, \texttt{version (BIGINT)}, \texttt{deleted\_at (TIMESTAMPTZ)}. \\*
+\textbf{Columnas Clave y Tipos} & \texttt{id (UUID PK)}, \texttt{tenant\_id (UUID FK)}, \texttt{vehicle\_id (UUID FK)}, \texttt{dtc\_code (VARCHAR(10))}, \texttt{severity (VARCHAR(20))}, \texttt{description (VARCHAR(255))}, \texttt{detected\_at (TIMESTAMPTZ)}, \texttt{is\_resolved (BOOLEAN)}, \texttt{resolved\_at (TIMESTAMPTZ)}, \texttt{resolution\_notes (VARCHAR(500))}, \texttt{created\_at (TIMESTAMPTZ)}, \texttt{updated\_at (TIMESTAMPTZ)}, \texttt{version (BIGINT)}, \texttt{deleted\_at (TIMESTAMPTZ)}. \\*
 \hline
-\textbf{Constraints e Índices} & - PK: pk\_\allowbreak vehicle\_\allowbreak faults (id) \newline - FK: fk\_\allowbreak faults\_\allowbreak vehicle hacia vehicles(id), fk\_\allowbreak faults\_\allowbreak tenant hacia tenants(id) \newline - CHECK: chk\_\allowbreak faults\_\allowbreak severity (severity IN ('low', 'medium', 'critical')), chk\_\allowbreak faults\_\allowbreak status (status IN ('active', 'pending\_review', 'resolved', 'cleared')) \newline - Índices B-Tree: idx\_\allowbreak faults\_\allowbreak vehicle (vehicle\_id), idx\_\allowbreak faults\_\allowbreak dtc (dtc\_code), idx\_\allowbreak faults\_\allowbreak status (status) \\
+\textbf{Constraints e Índices} & - PK: pk\_\allowbreak vehicle\_\allowbreak faults (id) \newline - FK: fk\_\allowbreak faults\_\allowbreak vehicle hacia vehicles(id), fk\_\allowbreak faults\_\allowbreak tenant hacia tenants(id) \newline - CHECK: chk\_\allowbreak fault\_\allowbreak severity (severity IN ('LOW', 'MEDIUM', 'HIGH', 'CRITICAL')) \newline - Índices B-Tree: idx\_\allowbreak faults\_\allowbreak vehicle\_\allowbreak dtc (vehicle\_id, dtc\_code), idx\_\allowbreak faults\_\allowbreak detected\_\allowbreak at (detected\_at) \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{predictive\allowbreak \_alerts}} \\*
 \hline
@@ -10162,17 +12150,17 @@ A partir de la arquitectura física formalizada en el diagrama de persistencia, 
 \hline
 \textbf{Columnas Clave y Tipos} & \texttt{id (UUID PK)}, \texttt{tenant\_id (UUID FK)}, \texttt{vehicle\_id (UUID FK)}, \texttt{recommended\_service\_id (UUID FK)}, \texttt{alert\_type (VARCHAR(50))}, \texttt{confidence\_score (DECIMAL(5,2))}, \texttt{message (VARCHAR(255))}, \texttt{status (VARCHAR(20))}, \texttt{fcm\_message\_id (VARCHAR(100))}, \texttt{created\_at (TIMESTAMPTZ)}, \texttt{updated\_at (TIMESTAMPTZ)}, \texttt{version (BIGINT)}, \texttt{deleted\_at (TIMESTAMPTZ)}. \\*
 \hline
-\textbf{Constraints e Índices} & - PK: pk\_\allowbreak predictive\_\allowbreak alerts (id) \newline - FK: fk\_\allowbreak alerts\_\allowbreak vehicle hacia vehicles(id), fk\_\allowbreak alerts\_\allowbreak tenant hacia tenants(id), fk\_\allowbreak alerts\_\allowbreak service hacia services(id) \newline - CHECK: chk\_\allowbreak alerts\_\allowbreak confidence (confidence\_score >= 0.00 AND confidence\_score <= 100.00), chk\_\allowbreak alerts\_\allowbreak status (status IN ('dispatched', 'acknowledged', 'resolved', 'dismissed')) \newline - Índices B-Tree: idx\_\allowbreak alerts\_\allowbreak vehicle (vehicle\_id), idx\_\allowbreak alerts\_\allowbreak status (status), idx\_\allowbreak alerts\_\allowbreak type (alert\_type) \\
+\textbf{Constraints e Índices} & - PK: pk\_\allowbreak predictive\_\allowbreak alerts (id) \newline - FK: fk\_\allowbreak alerts\_\allowbreak vehicle hacia vehicles(id), fk\_\allowbreak alerts\_\allowbreak tenant hacia tenants(id), fk\_\allowbreak alerts\_\allowbreak service hacia services(id) \newline - CHECK: chk\_\allowbreak confidence\_\allowbreak range (confidence\_score >= 0.00 AND confidence\_score <= 1.00), chk\_\allowbreak alert\_\allowbreak status (status IN ('DISPATCHED', 'ACKNOWLEDGED', 'RESOLVED', 'DISMISSED')) \newline - Índices B-Tree: idx\_\allowbreak alerts\_\allowbreak vehicle (vehicle\_id), idx\_\allowbreak alerts\_\allowbreak status (status) \\
 \hline
-\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{dtc\allowbreak \_catalog}} \\*
+\multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{telemetry\allowbreak \_logs}} \\*
 \hline
-\textbf{Motor y Producto} & PostgreSQL 16 (API Application) \\*
+\textbf{Motor y Producto} & TimescaleDB Extension (API Application / Aiven Cloud) \\*
 \hline
-\textbf{Propósito y Aislamiento} & Diccionario universal estandarizado de códigos de diagnóstico automotriz bajo los esquemas normativos SAE J2012 e ISO 15031-6. Almacena las definiciones técnicas en español, la severidad intrínseca recomendada, la categorización por subsistema vehicular y el indicador de impacto en normativas de control de emisiones contaminantes. \\*
+\textbf{Propósito y Aislamiento} & Hipertabla de series temporales de solo inserción para la ingesta masiva de lecturas de sensores vehiculares de identificación de parámetros. Particionada en intervalos temporales de siete días con compresión columnar automática tras treinta días de antigüedad, optimizando el uso de disco en más de un noventa por ciento. Soporta el cómputo de métricas continuas de velocidad, temperatura del motor, revoluciones, tensión de batería, nivel de combustible y coordenadas geográficas. \\*
 \hline
-\textbf{Columnas Clave y Tipos} & \texttt{id (UUID PK)}, \texttt{code (VARCHAR(10) UK)}, \texttt{standard (VARCHAR(20))}, \texttt{system\_category (VARCHAR(30))}, \texttt{description\_es (VARCHAR(500))}, \texttt{severity (VARCHAR(20))}, \texttt{recommended\_action (VARCHAR(500))}, \texttt{is\_emissions\_related (BOOLEAN)}, \texttt{created\_at (TIMESTAMPTZ)}, \texttt{updated\_at (TIMESTAMPTZ)}. \\*
+\textbf{Columnas Clave y Tipos} & \texttt{timestamp (TIMESTAMPTZ PK)}, \texttt{vehicle\_id (UUID PK FK)}, \texttt{tenant\_id (UUID FK)}, \texttt{latitude (DECIMAL(10,8))}, \texttt{longitude (DECIMAL(11,8))}, \texttt{speed (INTEGER)}, \texttt{engine\_temp\_c (DECIMAL(5,2))}, \texttt{rpm (INTEGER)}, \texttt{fuel\_level\_pct (DECIMAL(5,2))}, \texttt{battery\_voltage (DECIMAL(4,2))}. \\*
 \hline
-\textbf{Constraints e Índices} & - PK: pk\_\allowbreak dtc\_\allowbreak catalog (id) \newline - UK: uk\_\allowbreak dtc\_\allowbreak code (code) \newline - CHECK: chk\_\allowbreak dtc\_\allowbreak std (standard IN ('sae\_j2012', 'iso\_15031')), chk\_\allowbreak dtc\_\allowbreak cat (system\_category IN ('powertrain', 'chassis', 'body', 'network')), chk\_\allowbreak dtc\_\allowbreak sev (severity IN ('low', 'medium', 'critical')) \newline - Índices B-Tree: idx\_\allowbreak dtc\_\allowbreak code (code), idx\_\allowbreak dtc\_\allowbreak category (system\_category) \\
+\textbf{Constraints e Índices} & - PK Compuesta: pk\_\allowbreak telemetry\_\allowbreak logs (timestamp, vehicle\_id) \newline - FK: fk\_\allowbreak telemetry\_\allowbreak tenant hacia tenants(id) \newline - Particionamiento: time chunks de siete días sobre la dimensión temporal timestamp mediante create\_hypertable \newline - Compresión Columnar: activada para chunks mayores a treinta días con segmentby (vehicle\_id, tenant\_id) y orderby timestamp DESC \newline - Índices Físicos: idx\_\allowbreak telemetry\_\allowbreak vehicle\_\allowbreak time (vehicle\_id, timestamp DESC), idx\_\allowbreak telemetry\_\allowbreak tenant\_\allowbreak time (tenant\_id, timestamp DESC) \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Objeto de Persistencia:} \texttt{auditable\allowbreak \_abstract\allowbreak \_entity}} \\*
 \hline

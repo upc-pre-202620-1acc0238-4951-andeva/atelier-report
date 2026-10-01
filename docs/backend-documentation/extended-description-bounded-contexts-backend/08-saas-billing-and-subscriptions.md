@@ -1,15 +1,21 @@
-## 10. Fase 7: Bounded Context 7 — SaaS Billing & Subscriptions Context (`com.andeva.atelier.platform.billing`)
+## 10. Fase 7: Bounded Context 7: SaaS Billing & Subscriptions Context (`com.andeva.atelier.platform.billing`)
 
 ### 10.1. Diccionario y Propósito del Contexto
 
 #### 10.1.1. Propósito y Límites de Responsabilidad
 El **SaaS Billing & Subscriptions Context** administra el modelo de ingresos comerciales B2B y el aprovisionamiento de membresías de la plataforma Atelier hacia los talleres mecánicos abonados. Su delimitación responde a tres principios fundamentales de gobernanza de software:
 1. **Desacoplamiento Estricto entre Facturación B2B (Andeva -> Taller) vs. Facturación Local (Taller -> Conductor):** En la versión previa (v1), los conceptos de facturación se encontraban severamente acoplados con cotizaciones y comprobantes fiscales locales. En la arquitectura v2, este contexto administra exclusivamente los planes comerciales contratados por el taller automotriz con la empresa *Andeva*, mientras que el contexto de **Invoicing & Compliance** gestiona la emisión de comprobantes fiscales tributarios (Facturas y Boletas UBL 2.1 ante SUNAT) del taller a sus clientes particulares.
-2. **Ciclo de Vida de Planes y Membresías Recurrentes (`SubscriptionPlan` y `TenantSubscription`):** Administra el catálogo de planes comerciales (`STARTER`, `PROFESSIONAL`, `ENTERPRISE`), sus ciclos de cobro (mensual o anual) y los estados del ciclo de vida de la suscripción (`TRIALING`, `ACTIVE`, `PAST_DUE`, `CANCELED`, `UNPAID`).
-3. **Gobernanza de Cuotas y Límites de Plataforma (*Tenant Quota Limits*):** Determina qué capacidades operativas tiene habilitadas cada taller en función de su plan activo:
-   * Cantidad máxima de sucursales físicas permitidas (`maxBranches`).
-   * Límite máximo de mecánicos y personal de taller activos simultáneamente (`maxActiveStaff`).
-   * Habilitación de funcionalidades avanzadas como la ingesta y alertas predictivas de telemetría IoT OBD-II (`iotTelemetryEnabled`) o reportes ejecutivos de rentabilidad financiera.
+2. **Ciclo de Vida de Planes y Membresías Recurrentes (`SubscriptionPlan` y `TenantSubscription`):** Administra el catálogo de planes comerciales (`GO`, `PRO`, `MAX`, `ENTERPRISE`), sus ciclos de cobro (mensual o anual) y los estados del ciclo de vida de la suscripción (`TRIALING`, `ACTIVE`, `PAST_DUE`, `CANCELED`, `UNPAID`).
+3. **Gobernanza de Cuotas y Límites de Plataforma (*Tenant Quota Limits*):** Determina de forma determinista qué capacidades operativas tiene habilitadas cada taller en función de su plan activo:
+   * Cantidad máxima de sucursales físicas permitidas (`maxBranches`: 1 en Go, 2 en Pro, 5 en Max, elástico en Enterprise).
+   * Límite máximo de mecánicos y personal de taller activos simultáneamente (`maxActiveStaff`: 5 en Go, 10 en Pro, 25 en Max, elástico en Enterprise).
+   * Cupo mensual de órdenes de trabajo (`maxMonthlyWorkOrders`: 100 en Go, 300 en Pro, 1000 en Max, ilimitado en Enterprise).
+   * Techo de dispositivos telemáticos OBD-II activos vinculados (`maxActiveObd2Devices`: 0 en Go, 5 en Pro, 15 en Max, elástico en Enterprise).
+   * Techo de evidencias fotográficas por orden de trabajo en `work_order_images` y `work_order_task_images` (`maxPhotosPerWorkOrder`: 10 en Go, ilimitado en Pro, Max y Enterprise).
+   * Cupo mensual de Reportes PDF de Salud Vehicular asistidos por IA (*Spring AI*) (`maxMonthlyAiReports`: 0 en Go y Pro, 60 en Max, elástico en Enterprise).
+   * Autorización para registrar clientes corporativos y flotas `CustomerType.COMPANY` (`companyRegistrationAllowed`: habilitado exclusivamente en Max y Enterprise).
+   * Habilitación de gestión multi-almacén FIFO inter-sede (`multiWarehouseAllowed`: habilitado en Max y Enterprise; Go y Pro operan en almacén único con costeo FIFO estricto por lote).
+   * Presencia y verificación en el marketplace B2B *Atelier Bussiness* (`marketplaceListed`: exclusivo de Max y Enterprise para visibilidad y captación de flotas corporativas).
 4. **Cumplimiento Estricto de Seguridad PCI-DSS:** Para certificar el cumplimiento de los estándares internacionales de la industria de tarjetas de pago (**PCI-DSS Nivel 1**), el backend de Atelier **jamás procesa, transmite ni almacena números de tarjeta de crédito (PAN), códigos de seguridad CVV ni fechas de caducidad**. Todo el intercambio sensible de datos bancarios se delega al frontend mediante componentes seguros de **Stripe Elements** y el **SDK Móvil de Stripe**, intercambiando únicamente identificadores de clientes y métodos de pago tokenizados (`stripe_customer_id`, `stripe_sub_id`, `stripe_price_id`).
 5. **Idempotencia Garantizada en Webhooks (*Webhook Idempotency*):** Cuando la pasarela de pagos ejecuta una operación asíncrona de cobro recurrente o renovación, notifica a los servidores de Atelier mediante solicitudes HTTP Webhook. Ante fluctuaciones de conectividad, Stripe reintenta el despacho del mismo evento hasta por 72 horas. Para evitar cobros duplicados, renovaciones espurias o inconsistencias de saldo, la tabla `stripe_events` registra unívocamente cada identificador de evento (`stripe_event_id` con restricción `UNIQUE`), descartando de forma inmediata cualquier procesamiento repetido.
 6. **Aceleración de Lectura mediante Caché en Memoria (`Caffeine Cache`):** Dado que cada invocación a endpoints protegidos del ERP en cualquier Bounded Context requiere verificar si la suscripción del taller sigue activa y si no ha sobrepasado sus límites de uso, consultar PostgreSQL en cada petición crearía un cuello de botella de latencia inaceptable. Se implementa una capa de caché de ultra alta velocidad en memoria local JVM con **Caffeine Cache** (TTL de 5 minutos e invalidación reactiva inmediata ante webhooks de Stripe).
@@ -18,6 +24,240 @@ El **SaaS Billing & Subscriptions Context** administra el modelo de ingresos com
 * **Integración Oficial con `stripe-java` SDK:** En lugar de implementar clientes HTTP ad-hoc propensos a errores de compatibilidad, Atelier integra la biblioteca oficial de Stripe para Java, gestionando sesiones de checkout seguras (*Stripe Checkout Sessions*) y portales de autogestión de cliente (*Stripe Customer Billing Portal*).
 * **Verificación Criptográfica de Firmas Webhook:** Todos los mensajes entrantes en el endpoint público de webhooks son validados matemáticamente verificando la firma HMAC-SHA256 (`Stripe-Signature`) contra el secreto simétrico del webhook (`STRIPE_WEBHOOK_SECRET`), impidiendo ataques de suplantación de identidad (*Spoofing*).
 * **Fachada Open Host Service (OHS) con Respaldo en Caché:** Los contextos de IAM, CRM, MRO e IoT consultan la interfaz `SubscriptionContextFacade.isTenantSubscriptionActive(TenantId tenantId)` y `isFeatureAllowed(TenantId tenantId, String featureKey)`, resolviendo la autorización de cuotas en menos de 0.05 milisegundos gracias a Caffeine Cache.
+
+#### 10.1.3. Estructura Canónica de Directorios y Archivos
+
+La siguiente estructura de directorios y archivos representa la taxonomía canónica definitiva de **SaaS Billing & Subscriptions Context** (`com.andeva.atelier.platform.billing`), alineada estrictamente con el estándar arquitectónico de Atelier Platform y los patrones tácticos de Domain-Driven Design (DDD) Hexagonal y Clean Architecture:
+
+```text
+com.andeva.atelier.platform.billing/
+├── domain/
+│   ├── exceptions/
+│   │   ├── BillingDomainException.java
+│   │   ├── DuplicateActiveSubscriptionException.java
+│   │   ├── InvalidPlanPricingException.java
+│   │   ├── InvalidWebhookSignatureException.java
+│   │   ├── PlanNotFoundException.java
+│   │   ├── QuotaExceededException.java
+│   │   ├── SaasInvoiceNotFoundException.java
+│   │   ├── StripeIntegrationException.java
+│   │   ├── StripeWebhookProcessingException.java
+│   │   ├── SubscriptionNotFoundException.java
+│   │   └── SubscriptionPastDueException.java
+│   ├── model/
+│   │   ├── aggregates/
+│   │   │   ├── SaasInvoice.java
+│   │   │   ├── StripeWebhookEvent.java
+│   │   │   ├── SubscriptionPlan.java
+│   │   │   └── TenantSubscription.java
+│   │   ├── commands/
+│   │   │   ├── CancelSubscriptionCommand.java
+│   │   │   ├── ChangeSubscriptionPlanCommand.java
+│   │   │   ├── CreateSubscriptionPlanCommand.java
+│   │   │   ├── InitiateCheckoutSessionCommand.java
+│   │   │   ├── ProcessStripeWebhookCommand.java
+│   │   │   ├── RecordSaasInvoicePaymentCommand.java
+│   │   │   └── UpdateSubscriptionPlanCommand.java
+│   │   ├── entities/
+│   │   │   └── PlanFeature.java
+│   │   ├── enums/
+│   │   │   ├── BillingCycle.java
+│   │   │   ├── InvoiceStatus.java
+│   │   │   ├── PlanTier.java
+│   │   │   ├── SubscriptionStatus.java
+│   │   │   └── WebhookProcessingStatus.java
+│   │   ├── events/
+│   │   │   ├── SaasInvoicePaymentFailedEvent.java
+│   │   │   ├── SaasInvoicePaymentSucceededEvent.java
+│   │   │   ├── StripeWebhookProcessedEvent.java
+│   │   │   ├── SubscriptionPlanCreatedEvent.java
+│   │   │   ├── TenantPlanChangedEvent.java
+│   │   │   ├── TenantSubscriptionActivatedEvent.java
+│   │   │   ├── TenantSubscriptionCanceledEvent.java
+│   │   │   ├── TenantSubscriptionPastDueEvent.java
+│   │   │   └── TenantSubscriptionRenewedEvent.java
+│   │   ├── ids/
+│   │   │   ├── PlanFeatureId.java
+│   │   │   ├── PlanId.java
+│   │   │   ├── SaasInvoiceId.java
+│   │   │   ├── StripeEventId.java
+│   │   │   └── SubscriptionId.java
+│   │   ├── queries/
+│   │   │   ├── CheckTenantQuotaQuery.java
+│   │   │   ├── GetSubscriptionPlanByIdQuery.java
+│   │   │   ├── GetTenantSubscriptionQuery.java
+│   │   │   ├── IsTenantSubscriptionActiveQuery.java
+│   │   │   ├── ListActivePlansQuery.java
+│   │   │   └── ListTenantInvoicesQuery.java
+│   │   └── valueobjects/
+│   │       ├── PlanPricing.java
+│   │       ├── StripeCustomerId.java
+│   │       ├── StripeInvoiceId.java
+│   │       ├── StripePriceId.java
+│   │       ├── StripeSubscriptionId.java
+│   │       ├── SubscriptionPeriod.java
+│   │       └── TenantQuotaLimits.java
+│   ├── repositories/
+│   │   ├── SaasInvoiceRepository.java
+│   │   ├── StripeWebhookEventRepository.java
+│   │   ├── SubscriptionPlanRepository.java
+│   │   └── TenantSubscriptionRepository.java
+│   └── services/
+│       ├── StripeWebhookSignatureVerificationService.java
+│       ├── SubscriptionLifecycleDomainService.java
+│       └── SubscriptionQuotaEnforcementService.java
+├── application/
+│   ├── acl/
+│   │   └── SubscriptionContextFacadeImpl.java
+│   ├── commandservices/
+│   │   ├── SaasInvoiceCommandService.java
+│   │   ├── StripeWebhookCommandService.java
+│   │   ├── SubscriptionPlanCommandService.java
+│   │   └── TenantSubscriptionCommandService.java
+│   ├── internal/
+│   │   ├── commandservices/
+│   │   │   ├── SaasInvoiceCommandServiceImpl.java
+│   │   │   ├── StripeWebhookCommandServiceImpl.java
+│   │   │   ├── SubscriptionPlanCommandServiceImpl.java
+│   │   │   └── TenantSubscriptionCommandServiceImpl.java
+│   │   ├── eventhandlers/
+│   │   │   ├── BillingTransactionalOutboxPublisher.java
+│   │   │   ├── SubscriptionDomainEventHandler.java
+│   │   │   └── TenantLifecycleIntegrationEventHandler.java
+│   │   ├── outbound/
+│   │   │   └── acl/
+│   │   │       ├── BillingCachePort.java
+│   │   │       ├── IamTenantValidationAclPort.java
+│   │   │       ├── StripeGatewayPort.java
+│   │   │       └── TenantBillingNotificationGatewayPort.java
+│   │   └── queryservices/
+│   │       ├── SaasInvoiceQueryServiceImpl.java
+│   │       ├── SubscriptionPlanQueryServiceImpl.java
+│   │       └── TenantSubscriptionQueryServiceImpl.java
+│   └── queryservices/
+│       ├── SaasInvoiceQueryService.java
+│       ├── SubscriptionPlanQueryService.java
+│       └── TenantSubscriptionQueryService.java
+├── infrastructure/
+│   ├── external/
+│   │   ├── acl/
+│   │   │   └── iam/
+│   │   │       └── IamTenantValidationAdapter.java
+│   │   ├── cache/
+│   │   │   └── caffeine/
+│   │   │       ├── CaffeineBillingCacheAdapter.java
+│   │   │       └── CaffeineCacheConfiguration.java
+│   │   ├── mail/
+│   │   │   └── resend/
+│   │   │       └── ResendBillingNotificationAdapter.java
+│   │   ├── messaging/
+│   │   │   └── outbox/
+│   │   │       └── BillingOutboxMessageRelayAdapter.java
+│   │   └── payment/
+│   │       └── stripe/
+│   │           ├── StripeGatewayAdapter.java
+│   │           └── StripeWebhookSignatureVerifierAdapter.java
+│   └── persistence/
+│       └── jpa/
+│           ├── adapters/
+│           │   ├── SaasInvoiceRepositoryImpl.java
+│           │   ├── StripeWebhookEventRepositoryImpl.java
+│           │   ├── SubscriptionPlanRepositoryImpl.java
+│           │   └── TenantSubscriptionRepositoryImpl.java
+│           ├── assemblers/
+│           │   ├── SaasInvoicePersistenceAssembler.java
+│           │   ├── StripeWebhookEventPersistenceAssembler.java
+│           │   ├── SubscriptionPlanPersistenceAssembler.java
+│           │   └── TenantSubscriptionPersistenceAssembler.java
+│           ├── converters/
+│           │   ├── BillingCycleConverter.java
+│           │   ├── InvoiceStatusConverter.java
+│           │   ├── PlanTierConverter.java
+│           │   ├── SubscriptionStatusConverter.java
+│           │   └── WebhookProcessingStatusConverter.java
+│           ├── entities/
+│           │   ├── PlanFeaturePersistenceEntity.java
+│           │   ├── SaasInvoicePersistenceEntity.java
+│           │   ├── StripeWebhookEventPersistenceEntity.java
+│           │   ├── SubscriptionPlanPersistenceEntity.java
+│           │   └── TenantSubscriptionPersistenceEntity.java
+│           └── repositories/
+│               ├── SaasInvoicePersistenceRepository.java
+│               ├── StripeWebhookEventPersistenceRepository.java
+│               ├── SubscriptionPlanPersistenceRepository.java
+│               └── TenantSubscriptionPersistenceRepository.java
+└── interfaces/
+    ├── acl/
+    │   ├── SubscriptionContextFacade.java
+    │   └── dto/
+    │       ├── FeatureEntitlementDto.java
+    │       ├── TenantQuotaLimitsDto.java
+    │       └── TenantSubscriptionStatusDto.java
+    ├── events/
+    │   ├── TenantPlanChangedIntegrationEvent.java
+    │   ├── TenantQuotaLimitsUpdatedIntegrationEvent.java
+    │   ├── TenantSubscriptionActivatedIntegrationEvent.java
+    │   ├── TenantSubscriptionCanceledIntegrationEvent.java
+    │   └── TenantSubscriptionPastDueIntegrationEvent.java
+    └── rest/
+        ├── controllers/
+        │   ├── SaasInvoicesController.java
+        │   ├── StripeWebhooksController.java
+        │   ├── SubscriptionPlansController.java
+        │   └── TenantSubscriptionsController.java
+        ├── resources/
+        │   ├── requests/
+        │   │   ├── CancelSubscriptionRequest.java
+        │   │   ├── CreateCheckoutSessionRequest.java
+        │   │   ├── CreateSubscriptionPlanRequest.java
+        │   │   ├── CustomerPortalRequest.java
+        │   │   ├── PlanFeatureRequest.java
+        │   │   └── UpdateSubscriptionPlanRequest.java
+        │   └── responses/
+        │       ├── CheckoutSessionResponse.java
+        │       ├── CustomerPortalResponse.java
+        │       ├── PlanFeatureResource.java
+        │       ├── SaasInvoiceResource.java
+        │       ├── SaasInvoiceSummaryResource.java
+        │       ├── StripeWebhookAcknowledgmentResponse.java
+        │       ├── SubscriptionPlanResource.java
+        │       └── TenantSubscriptionResource.java
+        └── transform/
+            ├── PlanFeatureResourceAssembler.java
+            ├── SaasInvoiceResourceAssembler.java
+            ├── SubscriptionPlanResourceAssembler.java
+            └── TenantSubscriptionResourceAssembler.java
+```
+
+#### 10.1.4. Arquitectura de Gobernanza de Cuotas y Autorización Forzada en Backend (Backend-Enforced Authorization)
+
+La arquitectura de Atelier implementa el principio de **Autorización Estricta Forzada en Backend** (*Backend-Enforced Authorization*), garantizando que ningún cliente (interfaz web administrativa en Angular, aplicación móvil de taller en Android Kotlin o peticiones HTTP directas vía API) pueda eludir las cuotas comerciales ni desbloquear capacidades fuera de su plan contratado:
+
+1. **Separación de Responsabilidades entre UI y Dominio:**
+   * **Compuertas Visuales en el Frontend (*Client-Side UX Gates*):** Tanto el panel web como la aplicación móvil consumen la caché local o el endpoint de cuotas (`GET /api/v1/billing/subscriptions/tenant-quota`) para habilitar una experiencia de usuario fluida y transparente. Cuando una función no está disponible en el plan activo (ej. telemetría OBD-II en el plan Go, o generación de reportes IA en Go y Pro), la interfaz muestra indicadores visuales de bloqueo (candados 🔒, distintivos de plan Pro/Max, botones deshabilitados y modales informativos de actualización de plan). Estas compuertas son de carácter puramente informativo y de guía comercial, jamás de seguridad.
+   * **Validación Infranqueable en el Backend (*Server-Side Invariant Enforcement*):** Cada comando entrante que represente una mutación de estado o consumo de capacidad (creación de sedes, alta de mecánicos, apertura de órdenes de trabajo, vinculación de dispositivos OBD-II, subida de fotos periciales, emisión de reportes predictivos o registro de clientes corporativos) debe superar la validación determinista del servicio de dominio `SubscriptionQuotaEnforcementService`.
+2. **Latencia Sub-milisegundo con Caché en Memoria (`Caffeine Cache`):**
+   * Evaluar las cuotas en PostgreSQL en cada interacción del taller degradaría el rendimiento operativo de la plataforma. Por ello, la fachada `SubscriptionContextFacade` interpone una capa de caché de alto rendimiento en memoria local JVM basada en **Caffeine Cache**, logrando tiempos de verificación inferiores a **0.05 milisegundos**.
+   * La caché almacena el registro `CachedTenantSubscriptionPolicy`, que consolida el estado de la suscripción, las cuotas numéricas máximas de `TenantQuotaLimits` y las banderas de capacidades modulares.
+3. **Invalidación Reactiva e Idempotente ante Webhooks de Stripe:**
+   * Ante eventos de ciclo de vida emitidos por la pasarela de pagos (cambio de plan `customer.subscription.updated`, cancelación `customer.subscription.deleted`, cobro conforme `invoice.payment_succeeded` o rechazo de tarjeta `invoice.payment_failed`), el servicio de aplicación `StripeWebhookCommandService` procesa el evento con garantía de deduplicación y ejecuta la invalidación inmediata de la clave de caché del taller afectado en Caffeine Cache (`billingCachePort.evictSubscription(tenantId)`).
+   * La siguiente petición del taller genera una carga limpia desde la base de datos relacional hacia la memoria en menos de 10 milisegundos.
+4. **Manejo Estandarizado de Errores Semánticos (RFC 7807 Problem Details):**
+   * Cuando un taller supera un cupo o intenta consumir una funcionalidad restringida, el dominio lanza de forma determinista una excepción semántica `QuotaExceededException`.
+   * El controlador global de excepciones de Spring (`GlobalExceptionHandler`) captura esta falla de dominio y la transforma en una respuesta HTTP `403 Forbidden` estructurada bajo el estándar RFC 7807 (`application/problem+json`), conteniendo el código de error `quota_exceeded`, el consumo actual, el límite pactado y el nivel mínimo de plan requerido para desbloquear la capacidad:
+   ```json
+   {
+     "type": "https://api.atelier.andeva.pe/errors/quota-exceeded",
+     "title": "Cupo Operativo Copado",
+     "status": 403,
+     "detail": "El plan Go no incluye telemetría vehicular IoT OBD-II. Actualice a Pro o Max para vincular dispositivos telemáticos.",
+     "instance": "/api/v1/telemetry/obd2-devices",
+     "code": "QUOTA_EXCEEDED",
+     "currentUsage": 0,
+     "maxAllowed": 0,
+     "requiredTier": "PRO"
+   }
+   ```
 
 ---
 
@@ -30,19 +270,19 @@ El **SaaS Billing & Subscriptions Context** administra el modelo de ingresos com
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<SubscriptionPlan>`
 * **Propósito:** Representa un paquete comercial de software ofrecido por Andeva a los talleres mecánicos, definiendo precio, periodicidad y límites de recursos autorizados.
 * **Atributos:**
-  * `id: PlanId` — Identificador universal del plan (UUID).
-  * `stripePriceId: StripePriceId` — Identificador del precio recurrente en Stripe (ej. `price_1N2M3...`).
-  * `name: String` — Denominación del plan (ej. "Plan Profesional - Hasta 3 Sucursales", "Plan Taller Inicial").
-  * `tier: PlanTier` — Nivel del plan (`STARTER`, `PROFESSIONAL`, `ENTERPRISE`).
-  * `pricing: PlanPricing` — Objeto de valor que agrupa el precio monetario (`Money price`) y el ciclo de facturación (`BillingCycle billingCycle` [`MONTHLY`, `YEARLY`]).
-  * `quotaLimits: TenantQuotaLimits` — Objeto de valor con las cuotas máximas autorizadas (`maxBranches`, `maxActiveStaff`, `iotTelemetryEnabled`, `aiDiagnosticsEnabled`).
-  * `isActive: boolean` — Bandera que determina si el plan está disponible para nuevas contrataciones comerciales.
+  * `id: PlanId`: Identificador universal del plan (UUID).
+  * `stripePriceId: StripePriceId`: Identificador del precio recurrente en Stripe (ej. `price_1N2M3...`).
+  * `name: String`: Denominación del plan (ej. "Go", "Pro", "Max", "Enterprise").
+  * `tier: PlanTier`: Nivel del plan (`GO`, `PRO`, `MAX`, `ENTERPRISE`).
+  * `pricing: PlanPricing`: Objeto de valor que agrupa el precio monetario (`Money price`) y el ciclo de facturación (`BillingCycle billingCycle` [`MONTHLY`, `YEARLY`]).
+  * `quotaLimits: TenantQuotaLimits`: Objeto de valor inmutable con las cuotas máximas y autorizaciones del plan (`maxBranches`, `maxActiveStaff`, `maxActiveObd2Devices`, `maxPhotosPerWorkOrder`, `maxMonthlyAiReports`, `companyRegistrationAllowed`, `multiWarehouseAllowed`, `marketplaceListed`, `maxMonthlyWorkOrders`, `iotTelemetryEnabled`, `aiDiagnosticsEnabled`).
+  * `isActive: boolean`: Bandera que determina si el plan está disponible para nuevas contrataciones comerciales.
 * **Invariantes y Reglas de Negocio:**
   * El identificador de precio en Stripe (`stripePriceId`) debe comenzar con el prefijo `price_` y no puede ser nulo ni estar vacío.
   * El precio monetario no puede ser negativo.
   * El límite de sucursales debe ser al menos 1 y el de personal al menos 1.
 * **Métodos:**
-  * `+ static SubscriptionPlan create(StripePriceId stripePriceId, String name, PlanTier tier, PlanPricing pricing, TenantQuotaLimits quotas): SubscriptionPlan`: Factoría de dominio; valida invariantes, establece vigencia activa y registra `SubscriptionPlanCreatedEvent`.
+  * `+ static SubscriptionPlan create(StripePriceId stripePriceId, String name, PlanTier tier, PlanPricing pricing, TenantQuotaLimits quotas): SubscriptionPlan`: Factoría de dominio. Valida invariantes, establece vigencia activa y registra `SubscriptionPlanCreatedEvent`.
   * `+ void updateDetails(String name, PlanPricing pricing, TenantQuotaLimits quotas): void`: Modifica los parámetros comerciales y cuotas del plan.
   * `+ void deactivate(): void`: Retira el plan del catálogo para nuevas compras, preservando las suscripciones existentes.
   * `+ void activate(): void`: Restituye la disponibilidad comercial.
@@ -52,27 +292,27 @@ El **SaaS Billing & Subscriptions Context** administra el modelo de ingresos com
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<TenantSubscription>`
 * **Propósito:** Representa el contrato de suscripción SaaS activo o histórico de un taller automotriz con la plataforma Atelier.
 * **Atributos:**
-  * `id: SubscriptionId` — Identificador universal de la suscripción (UUID).
-  * `tenantId: TenantId` — Taller mecánico titular del contrato.
-  * `planId: PlanId` — Plan comercial contratado.
-  * `stripeCustomerId: StripeCustomerId` — Identificador de cliente en Stripe (ej. `cus_...`).
-  * `stripeSubscriptionId: StripeSubscriptionId` — Identificador unívoco de suscripción en Stripe (ej. `sub_...`).
-  * `status: SubscriptionStatus` — Estado del ciclo de vida (`TRIALING`, `ACTIVE`, `PAST_DUE`, `CANCELED`, `UNPAID`, `INCOMPLETE`).
-  * `currentPeriod: SubscriptionPeriod` — Periodo actual de cobertura (`startDate: Instant`, `endDate: Instant`).
-  * `cancelAtPeriodEnd: boolean` — Bandera que indica si la suscripción se cancelará automáticamente al concluir el periodo vigente.
-  * `canceledAt: Optional<Instant>` — Fecha y hora formal de cancelación (nullable).
-  * `trialEndDate: Optional<Instant>` — Fecha límite de prueba gratuita (nullable).
+  * `id: SubscriptionId`: Identificador universal de la suscripción (UUID).
+  * `tenantId: TenantId`: Taller mecánico titular del contrato.
+  * `planId: PlanId`: Plan comercial contratado.
+  * `stripeCustomerId: StripeCustomerId`: Identificador de cliente en Stripe (ej. `cus_...`).
+  * `stripeSubscriptionId: StripeSubscriptionId`: Identificador unívoco de suscripción en Stripe (ej. `sub_...`).
+  * `status: SubscriptionStatus`: Estado del ciclo de vida (`TRIALING`, `ACTIVE`, `PAST_DUE`, `CANCELED`, `UNPAID`, `INCOMPLETE`).
+  * `currentPeriod: SubscriptionPeriod`: Periodo actual de cobertura (`startDate: Instant`, `endDate: Instant`).
+  * `cancelAtPeriodEnd: boolean`: Bandera que indica si la suscripción se cancelará automáticamente al concluir el periodo vigente.
+  * `canceledAt: Optional<Instant>`: Fecha y hora formal de cancelación (nullable).
+  * `trialEndDate: Optional<Instant>`: Fecha límite de prueba gratuita (nullable).
 * **Invariantes y Reglas de Negocio:**
   * No puede existir más de una suscripción activa o en periodo de prueba (`ACTIVE`, `TRIALING`, `PAST_DUE`) simultáneamente para el mismo `tenant_id`.
   * La fecha de inicio del periodo no puede ser posterior a la fecha de fin del periodo.
-  * Una suscripción en estado `CANCELED` no puede reactivarse directamente; requiere la contratación de una nueva suscripción.
+  * Una suscripción en estado `CANCELED` no puede reactivarse directamente. Requiere la contratación de una nueva suscripción.
 * **Métodos:**
-  * `+ static TenantSubscription startTrial(TenantId tenantId, PlanId planId, StripeCustomerId customerId, int trialDays): TenantSubscription`: Factoría para periodos de prueba gratuitos; registra `TenantSubscriptionActivatedEvent`.
-  * `+ static TenantSubscription activate(TenantId tenantId, PlanId planId, StripeCustomerId customerId, StripeSubscriptionId subscriptionId, SubscriptionPeriod period): TenantSubscription`: Factoría tras confirmación de pago inicial de Stripe; registra `TenantSubscriptionActivatedEvent`.
-  * `+ void renewPeriod(SubscriptionPeriod newPeriod): void`: Extiende la vigencia del servicio tras un cobro recurrente exitoso; registra `TenantSubscriptionRenewedEvent`.
-  * `+ void markPastDue(): void`: Marca la suscripción en mora cuando un cobro recurrente es rechazado por el banco emisor; registra `TenantSubscriptionPastDueEvent`.
+  * `+ static TenantSubscription startTrial(TenantId tenantId, PlanId planId, StripeCustomerId customerId, int trialDays): TenantSubscription`: Factoría para periodos de prueba gratuitos. Registra `TenantSubscriptionActivatedEvent`.
+  * `+ static TenantSubscription activate(TenantId tenantId, PlanId planId, StripeCustomerId customerId, StripeSubscriptionId subscriptionId, SubscriptionPeriod period): TenantSubscription`: Factoría tras confirmación de pago inicial de Stripe. Registra `TenantSubscriptionActivatedEvent`.
+  * `+ void renewPeriod(SubscriptionPeriod newPeriod): void`: Extiende la vigencia del servicio tras un cobro recurrente exitoso. Registra `TenantSubscriptionRenewedEvent`.
+  * `+ void markPastDue(): void`: Marca la suscripción en mora cuando un cobro recurrente es rechazado por el banco emisor. Registra `TenantSubscriptionPastDueEvent`.
   * `+ void cancelAtPeriodEnd(): void`: Programa la cancelación al finalizar el ciclo de facturación pagado.
-  * `+ void cancelImmediately(Instant cancellationTimestamp): void`: Cancela de forma inmediata la suscripción revocando el acceso a la plataforma; registra `TenantSubscriptionCanceledEvent`.
+  * `+ void cancelImmediately(Instant cancellationTimestamp): void`: Cancela de forma inmediata la suscripción revocando el acceso a la plataforma. Registra `TenantSubscriptionCanceledEvent`.
   * `+ void changePlan(PlanId newPlanId, StripePriceId newPriceId): void`: Actualiza el plan contratado (*upgrade* o *downgrade*) y registra `TenantPlanChangedEvent`.
   * `+ boolean isAccessGranted(): boolean`: Evalúa si el taller está autorizado a operar en la plataforma (estados `ACTIVE` o `TRIALING`, o periodo de gracia en `PAST_DUE`).
 
@@ -81,15 +321,15 @@ El **SaaS Billing & Subscriptions Context** administra el modelo de ingresos com
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<SaasInvoice>`
 * **Propósito:** Representa el recibo o factura formal emitida por Andeva hacia el taller por el uso de la suscripción mensual o anual.
 * **Atributos:**
-  * `id: SaasInvoiceId` — Identificador universal interno de la factura SaaS (UUID).
-  * `subscriptionId: SubscriptionId` — Suscripción vinculada.
-  * `tenantId: TenantId` — Taller pagador.
-  * `stripeInvoiceId: StripeInvoiceId` — Identificador de factura en Stripe (ej. `in_...`).
-  * `amountPaid: Money` — Monto efectivamente debitado a la tarjeta de crédito o cuenta bancaria.
-  * `status: InvoiceStatus` — Estado de la factura (`PAID`, `OPEN`, `VOID`, `UNCOLLECTIBLE`).
-  * `invoicePdfUrl: String` — Enlace seguro provisto por Stripe para la descarga del comprobante en PDF.
-  * `hostedInvoiceUrl: String` — Enlace a la página web interactiva de pago de Stripe.
-  * `paidAt: Optional<Instant>` — Momento cronológico del débito bancario exitoso.
+  * `id: SaasInvoiceId`: Identificador universal interno de la factura SaaS (UUID).
+  * `subscriptionId: SubscriptionId`: Suscripción vinculada.
+  * `tenantId: TenantId`: Taller pagador.
+  * `stripeInvoiceId: StripeInvoiceId`: Identificador de factura en Stripe (ej. `in_...`).
+  * `amountPaid: Money`: Monto efectivamente debitado a la tarjeta de crédito o cuenta bancaria.
+  * `status: InvoiceStatus`: Estado de la factura (`PAID`, `OPEN`, `VOID`, `UNCOLLECTIBLE`).
+  * `invoicePdfUrl: String`: Enlace seguro provisto por Stripe para la descarga del comprobante en PDF.
+  * `hostedInvoiceUrl: String`: Enlace al portal web interactivo de pago de Stripe.
+  * `paidAt: Optional<Instant>`: Momento cronológico del débito bancario exitoso.
 * **Métodos:**
   * `+ static SaasInvoice recordPaid(SubscriptionId subscriptionId, TenantId tenantId, StripeInvoiceId stripeInvoiceId, Money amountPaid, String pdfUrl, String hostedUrl, Instant paidAt): SaasInvoice`: Registra el pago exitoso y emite `SaasInvoicePaymentSucceededEvent`.
   * `+ void markPaymentFailed(String reason): void`: Registra el fallo de cobro bancario y emite `SaasInvoicePaymentFailedEvent`.
@@ -98,13 +338,13 @@ El **SaaS Billing & Subscriptions Context** administra el modelo de ingresos com
 * **Paquete:** `com.andeva.atelier.platform.billing.domain.model.aggregates`
 * **Propósito:** Garantiza el procesamiento exactamente una vez (*Exactly-Once Processing*) de las notificaciones asíncronas de Stripe, actuando como escudo contra duplicidades de red.
 * **Atributos:**
-  * `id: UUID` — Identificador de base de datos interno.
-  * `stripeEventId: StripeEventId` — Identificador unívoco del evento emitido por Stripe (`evt_...`). **Restricción UNIQUE a nivel de BD**.
-  * `eventType: String` — Tipo de evento (ej. `invoice.payment_succeeded`, `customer.subscription.deleted`).
-  * `eventPayload: String` — Contenido serializado en formato JSON de la notificación para auditoría forense.
-  * `status: WebhookProcessingStatus` — Estado del procesamiento (`PENDING`, `PROCESSED`, `FAILED`, `IGNORED`).
-  * `processedAt: Instant` — Timestamp de resolución en el backend.
-  * `errorMessage: Optional<String>` — Detalle del error en caso de fallo durante el procesamiento.
+  * `id: StripeEventId`: Identificador unívoco del evento emitido por Stripe (`evt_...`). Restricción UNIQUE a nivel de base de datos relacional.
+  * `stripeEventId: StripeEventId`: Identificador unívoco del evento emitido por Stripe (`evt_...`).
+  * `eventType: String`: Tipo de evento (ej. `invoice.payment_succeeded`, `customer.subscription.deleted`).
+  * `eventPayload: String`: Contenido serializado en formato JSON de la notificación para auditoría forense.
+  * `status: WebhookProcessingStatus`: Estado del procesamiento (`PENDING`, `PROCESSED`, `FAILED`, `IGNORED`).
+  * `processedAt: Instant`: Timestamp de resolución en el backend.
+  * `errorMessage: Optional<String>`: Detalle del error en caso de fallo durante el procesamiento.
 * **Métodos:**
   * `+ static StripeWebhookEvent receive(StripeEventId eventId, String type, String payload): StripeWebhookEvent`: Registra la recepción inicial en estado `PENDING`.
   * `+ void markProcessed(): void`: Marca el evento como resuelto con éxito.
@@ -118,30 +358,39 @@ El **SaaS Billing & Subscriptions Context** administra el modelo de ingresos com
 * **Paquete:** `com.andeva.atelier.platform.billing.domain.model.entities`
 * **Propósito:** Representa una característica funcional o módulo individual paquetizado dentro de un plan comercial de suscripción.
 * **Atributos:**
-  * `id: UUID` — Identificador de la característica.
-  * `featureKey: String` — Clave alfanumérica única (ej. `FEATURE_OBD2_TELEMETRY`, `FEATURE_AI_PREDICTIONS`, `FEATURE_MULTI_BRANCH`).
-  * `description: String` — Descripción para el catálogo comercial.
-  * `isEnabled: boolean` — Disponibilidad en el plan actual.
+  * `id: PlanFeatureId`: Identificador universal de la característica.
+  * `featureKey: String`: Clave alfanumérica única (ej. `FEATURE_OBD2_TELEMETRY`, `FEATURE_AI_PREDICTIONS`, `FEATURE_MULTI_BRANCH`).
+  * `description: String`: Descripción para el catálogo comercial.
+  * `isEnabled: boolean`: Disponibilidad en el plan actual.
 
 ---
 
-#### 10.2.3. Value Objects
+#### 10.2.3. Value Objects, Typed IDs & Domain Enums
 
-* **`PlanId`:** Identificador universal inmutable de un plan (`record PlanId(UUID value)`).
-* **`SubscriptionId`:** Identificador inmutable de una suscripción (`record SubscriptionId(UUID value)`).
-* **`SaasInvoiceId`:** Identificador inmutable de una factura SaaS (`record SaasInvoiceId(UUID value)`).
-* **`StripeEventId`:** Objeto de valor para identificadores de eventos de Stripe (`record StripeEventId(String value)`). Valida que cumpla el patrón `^evt_[a-zA-Z0-9]+$`.
+Los tipos de soporte del dominio de suscripciones SaaS y monetización B2B se organizan formalmente en tres subpaquetes modulares según su semántica táctica de Domain-Driven Design:
+
+##### 1. Identificadores Fuertemente Tipados (`com.andeva.atelier.platform.billing.domain.model.ids`)
+* **`PlanId`:** Identificador universal inmutable de un plan comercial (`record PlanId(UUID value)`).
+* **`SubscriptionId`:** Identificador universal inmutable de una suscripción contractual (`record SubscriptionId(UUID value)`).
+* **`SaasInvoiceId`:** Identificador universal inmutable de una factura SaaS (`record SaasInvoiceId(UUID value)`).
+* **`StripeEventId`:** Identificador unívoco de evento de Stripe (`record StripeEventId(String value)`). Valida que cumpla el patrón `^evt_[a-zA-Z0-9]+$`.
+* **`PlanFeatureId`:** Identificador universal inmutable de una característica funcional del plan (`record PlanFeatureId(UUID value)`).
+
+##### 2. Enumeraciones de Dominio (`com.andeva.atelier.platform.billing.domain.model.enums`)
+* **`PlanTier`:** Nivel del paquete de software (`GO`, `PRO`, `MAX`, `ENTERPRISE`).
+* **`BillingCycle`:** Ciclo de facturación y periodicidad de cobro recurrente (`MONTHLY`, `YEARLY`).
+* **`SubscriptionStatus`:** Estados del ciclo de vida de la suscripción (`TRIALING`, `ACTIVE`, `PAST_DUE`, `CANCELED`, `UNPAID`, `INCOMPLETE`).
+* **`InvoiceStatus`:** Estados del ciclo contable de facturas SaaS (`PAID`, `OPEN`, `VOID`, `UNCOLLECTIBLE`).
+* **`WebhookProcessingStatus`:** Estados del procesamiento idempotente de webhooks (`PENDING`, `PROCESSED`, `FAILED`, `IGNORED`).
+
+##### 3. Objetos de Valor (`com.andeva.atelier.platform.billing.domain.model.valueobjects`)
+* **`PlanPricing`:** Objeto de valor que asocia el precio monetario y su periodicidad (`record PlanPricing(Money price, BillingCycle billingCycle)`).
 * **`StripeCustomerId`:** Identificador de cliente en Stripe (`record StripeCustomerId(String value)`). Valida prefijo `cus_`.
 * **`StripeSubscriptionId`:** Identificador de suscripción en Stripe (`record StripeSubscriptionId(String value)`). Valida prefijo `sub_`.
-* **`StripePriceId`:** Identificador de precio en Stripe (`record StripePriceId(String value)`). Valida prefijo `price_`.
-* **`BillingCycle`:** Enumeración del ciclo de cobro recurrente (`MONTHLY`, `YEARLY`).
-* **`SubscriptionStatus`:** Enumeración de estados de suscripción (`TRIALING`, `ACTIVE`, `PAST_DUE`, `CANCELED`, `UNPAID`, `INCOMPLETE`).
-* **`InvoiceStatus`:** Enumeración del estado de factura SaaS (`PAID`, `OPEN`, `VOID`, `UNCOLLECTIBLE`).
-* **`PlanTier`:** Nivel del paquete de software (`STARTER`, `PROFESSIONAL`, `ENTERPRISE`).
-* **`PlanPricing`:** Objeto de valor que asocia el precio y su ciclo (`record PlanPricing(Money price, BillingCycle billingCycle)`).
-* **`TenantQuotaLimits`:** Cuotas máximas autorizadas por el plan (`record TenantQuotaLimits(int maxBranches, int maxActiveStaff, boolean iotTelemetryEnabled, boolean aiDiagnosticsEnabled, int maxMonthlyWorkOrders)`).
+* **`StripePriceId`:** Identificador de precio recurrente en Stripe (`record StripePriceId(String value)`). Valida prefijo `price_`.
+* **`StripeInvoiceId`:** Identificador de factura en Stripe (`record StripeInvoiceId(String value)`). Valida prefijo `in_`.
 * **`SubscriptionPeriod`:** Intervalo temporal de cobertura pagada (`record SubscriptionPeriod(Instant startDate, Instant endDate)`).
-* **`WebhookProcessingStatus`:** Estado del despacho de webhooks (`PENDING`, `PROCESSED`, `FAILED`, `IGNORED`).
+* **`TenantQuotaLimits`:** Cuotas máximas y habilitaciones autorizadas por el plan contratado (`record TenantQuotaLimits(int maxBranches, int maxActiveStaff, int maxActiveObd2Devices, int maxPhotosPerWorkOrder, int maxMonthlyAiReports, boolean companyRegistrationAllowed, boolean multiWarehouseAllowed, boolean marketplaceListed, int maxMonthlyWorkOrders, boolean iotTelemetryEnabled, boolean aiDiagnosticsEnabled)`).
 
 ---
 
@@ -178,6 +427,7 @@ El **SaaS Billing & Subscriptions Context** administra el modelo de ingresos com
 * **`TenantPlanChangedEvent`:** Emitido tras un upgrade o downgrade comercial (`SubscriptionId subscriptionId, TenantId tenantId, PlanId oldPlanId, PlanId newPlanId`).
 * **`SaasInvoicePaymentSucceededEvent`:** Emitido al registrarse el recibo de Stripe (`SaasInvoiceId invoiceId, TenantId tenantId, Money amount`).
 * **`SaasInvoicePaymentFailedEvent`:** Emitido cuando un cargo a tarjeta no prospera (`TenantId tenantId, String failureReason`).
+* **`StripeWebhookProcessedEvent`:** Emitido tras el procesamiento idempotente y exitoso de un webhook de Stripe (`StripeEventId eventId, String eventType, Instant processedAt`).
 
 ---
 
@@ -227,7 +477,7 @@ package com.andeva.atelier.platform.billing.domain.services;
 
 import com.andeva.atelier.platform.billing.domain.model.aggregates.SubscriptionPlan;
 import com.andeva.atelier.platform.billing.domain.model.aggregates.TenantSubscription;
-import com.andeva.atelier.platform.billing.domain.model.exceptions.QuotaExceededException;
+import com.andeva.atelier.platform.billing.domain.exceptions.QuotaExceededException;
 import com.andeva.atelier.platform.billing.domain.model.valueobjects.TenantQuotaLimits;
 import org.springframework.stereotype.Service;
 
@@ -239,9 +489,9 @@ public class SubscriptionQuotaEnforcementService {
             throw new QuotaExceededException("La suscripción del taller se encuentra inactiva o suspendida.");
         }
         TenantQuotaLimits limits = plan.getQuotaLimits();
-        if (currentBranchCount >= limits.maxBranches()) {
+        if (limits.maxBranches() != -1 && currentBranchCount >= limits.maxBranches()) {
             throw new QuotaExceededException(String.format(
-                "Límite de sucursales alcanzado (%d/%d). Actualice su plan a Professional o Enterprise para abrir nuevas sedes.",
+                "Límite de sucursales alcanzado (%d/%d sedes autorizadas). Actualice su plan para abrir nuevas sedes.",
                 currentBranchCount, limits.maxBranches()
             ));
         }
@@ -252,100 +502,216 @@ public class SubscriptionQuotaEnforcementService {
             throw new QuotaExceededException("La suscripción del taller se encuentra inactiva o suspendida.");
         }
         TenantQuotaLimits limits = plan.getQuotaLimits();
-        if (currentStaffCount >= limits.maxActiveStaff()) {
+        if (limits.maxActiveStaff() != -1 && currentStaffCount >= limits.maxActiveStaff()) {
             throw new QuotaExceededException(String.format(
-                "Límite de personal alcanzado (%d/%d). Actualice su plan para registrar más mecánicos y asesores.",
+                "Capacidad máxima de personal operativo alcanzada (%d/%d mecánicos y asesores activos). Actualice su plan para sumar más colaboradores.",
                 currentStaffCount, limits.maxActiveStaff()
             ));
         }
     }
 
+    public void validateWorkOrderCreationAllowed(TenantSubscription subscription, SubscriptionPlan plan, int currentMonthlyWorkOrders) {
+        if (!subscription.isAccessGranted()) {
+            throw new QuotaExceededException("La suscripción del taller no cuenta con acceso activo para abrir nuevas órdenes de trabajo.");
+        }
+        TenantQuotaLimits limits = plan.getQuotaLimits();
+        if (limits.maxMonthlyWorkOrders() != -1 && currentMonthlyWorkOrders >= limits.maxMonthlyWorkOrders()) {
+            throw new QuotaExceededException(String.format(
+                "Cupo mensual de órdenes de trabajo copado (%d/%d OTs). Actualice su nivel de suscripción para continuar recibiendo vehículos este mes.",
+                currentMonthlyWorkOrders, limits.maxMonthlyWorkOrders()
+            ));
+        }
+    }
+
+    public void validateObd2DeviceRegistrationAllowed(TenantSubscription subscription, SubscriptionPlan plan, int currentActiveObd2Devices) {
+        if (!subscription.isAccessGranted()) {
+            throw new QuotaExceededException("La suscripción del taller no cuenta con acceso activo.");
+        }
+        TenantQuotaLimits limits = plan.getQuotaLimits();
+        if (limits.maxActiveObd2Devices() <= 0) {
+            throw new QuotaExceededException(
+                "El plan " + plan.getName() + " no incluye telemetría vehicular IoT OBD-II. Actualice a Pro o Max para vincular dispositivos telemáticos."
+            );
+        }
+        if (limits.maxActiveObd2Devices() != -1 && currentActiveObd2Devices >= limits.maxActiveObd2Devices()) {
+            throw new QuotaExceededException(String.format(
+                "Límite de dispositivos telemáticos OBD-II activos alcanzado (%d/%d dispositivos vinculados). Actualice su plan a Max o Enterprise para ampliar su flota de monitoreo.",
+                currentActiveObd2Devices, limits.maxActiveObd2Devices()
+            ));
+        }
+    }
+
+    public void validatePhotoUploadAllowed(TenantSubscription subscription, SubscriptionPlan plan, int currentPhotosInWorkOrder) {
+        if (!subscription.isAccessGranted()) {
+            throw new QuotaExceededException("La suscripción del taller no cuenta con acceso activo.");
+        }
+        TenantQuotaLimits limits = plan.getQuotaLimits();
+        if (limits.maxPhotosPerWorkOrder() != -1 && currentPhotosInWorkOrder >= limits.maxPhotosPerWorkOrder()) {
+            throw new QuotaExceededException(String.format(
+                "Límite de evidencias fotográficas por orden de trabajo alcanzado (%d/%d fotos). Actualice a Pro o Max para adjuntar fotos ilimitadas por peritaje.",
+                currentPhotosInWorkOrder, limits.maxPhotosPerWorkOrder()
+            ));
+        }
+    }
+
+    public void validateCompanyCustomerRegistrationAllowed(TenantSubscription subscription, SubscriptionPlan plan) {
+        if (!subscription.isAccessGranted()) {
+            throw new QuotaExceededException("La suscripción del taller no cuenta con acceso activo.");
+        }
+        TenantQuotaLimits limits = plan.getQuotaLimits();
+        if (!limits.companyRegistrationAllowed()) {
+            throw new QuotaExceededException(
+                "El registro de clientes con personería jurídica (empresas y flotas comerciales) requiere el plan Max o Enterprise. Su plan actual solo permite clientes individuales (DNI/CE)."
+            );
+        }
+    }
+
+    public void validateAiReportGenerationAllowed(TenantSubscription subscription, SubscriptionPlan plan, int currentMonthlyAiReports) {
+        if (!subscription.isAccessGranted()) {
+            throw new QuotaExceededException("La suscripción del taller no cuenta con acceso activo.");
+        }
+        TenantQuotaLimits limits = plan.getQuotaLimits();
+        if (limits.maxMonthlyAiReports() <= 0) {
+            throw new QuotaExceededException(
+                "La generación de Informes Ejecutivos de Salud Vehicular asistidos por IA predictiva requiere el plan Max o Enterprise."
+            );
+        }
+        if (limits.maxMonthlyAiReports() != -1 && currentMonthlyAiReports >= limits.maxMonthlyAiReports()) {
+            throw new QuotaExceededException(String.format(
+                "Cupo mensual de informes predictivos con IA alcanzado (%d/%d informes generados este mes).",
+                currentMonthlyAiReports, limits.maxMonthlyAiReports()
+            ));
+        }
+    }
+
+    public void validateMultiWarehouseTransferAllowed(TenantSubscription subscription, SubscriptionPlan plan) {
+        if (!subscription.isAccessGranted()) {
+            throw new QuotaExceededException("La suscripción del taller no cuenta con acceso activo.");
+        }
+        TenantQuotaLimits limits = plan.getQuotaLimits();
+        if (!limits.multiWarehouseAllowed()) {
+            throw new QuotaExceededException(
+                "La gestión de múltiples almacenes y transferencias inter-sede requiere el plan Max o Enterprise con ERP Suite. Los planes Go y Pro operan en almacén único con costeo FIFO estricto por lote."
+            );
+        }
+    }
+
     public boolean isFeatureEnabled(TenantSubscription subscription, SubscriptionPlan plan, String featureKey) {
-        if (!subscription.isAccessGranted()) return false;
-        return switch (featureKey) {
-            case "FEATURE_OBD2_TELEMETRY" -> plan.getQuotaLimits().iotTelemetryEnabled();
-            case "FEATURE_AI_PREDICTIONS" -> plan.getQuotaLimits().aiDiagnosticsEnabled();
-            default -> false;
-        };
+        if (!subscription.isAccessGranted()) {
+            return false;
+        }
+        return plan.getFeatures().stream()
+            .anyMatch(f -> f.getFeatureKey().equalsIgnoreCase(featureKey) && f.isEnabled());
     }
 }
 ```
 
 ##### 2. `StripeWebhookSignatureVerificationService` (Servicio Criptográfico de Firmas)
 * **Paquete:** `com.andeva.atelier.platform.billing.domain.services`
-* **Propósito:** Valida la autenticidad matemática del payload de cada webhook entrante verificando la firma HMAC-SHA256 (`Stripe-Signature`) contra el secreto simétrico del webhook de Stripe con tolerancia temporal de 300 segundos, mitigando ataques de intermediarios (*Man-in-the-Middle*) y ataques de repetición (*Replay Attacks*):
+* **Propósito:** Ejecuta el cómputo matemático de verificación de autenticidad sobre el cuerpo de la notificación HTTP Webhook y el encabezado `Stripe-Signature`:
 ```java
 package com.andeva.atelier.platform.billing.domain.services;
 
-import com.andeva.atelier.platform.billing.domain.model.exceptions.InvalidWebhookSignatureException;
+import com.andeva.atelier.platform.billing.domain.exceptions.InvalidWebhookSignatureException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.time.Instant;
 
 @Service
 public class StripeWebhookSignatureVerificationService {
-    private static final String HMAC_SHA256 = "HmacSHA256";
-    private static final long TOLERANCE_SECONDS = 300L; // 5 minutos de ventana de tolerancia
 
-    public boolean verifySignature(String payload, String signatureHeader, String secret) {
-        if (payload == null || signatureHeader == null || secret == null) {
-            throw new InvalidWebhookSignatureException("Encabezado de firma o secreto nulo.");
+    private final String webhookSecret;
+
+    public StripeWebhookSignatureVerificationService(@Value("${stripe.webhook.secret}") String webhookSecret) {
+        this.webhookSecret = webhookSecret;
+    }
+
+    public void verifyOrThrow(String payload, String sigHeader) {
+        if (sigHeader == null || sigHeader.isBlank()) {
+            throw new InvalidWebhookSignatureException("Cabecera Stripe-Signature ausente en solicitud webhook");
         }
 
-        String[] elements = signatureHeader.split(",");
-        String timestampStr = null;
+        String[] elements = sigHeader.split(",");
+        String timestamp = null;
         String signature = null;
 
         for (String element : elements) {
-            String[] pair = element.trim().split("=", 2);
-            if (pair.length == 2) {
-                if ("t".equals(pair[0])) {
-                    timestampStr = pair[1];
-                } else if ("v1".equals(pair[0])) {
-                    signature = pair[1];
-                }
+            String[] kv = element.trim().split("=", 2);
+            if (kv.length == 2) {
+                if ("t".equals(kv[0])) timestamp = kv[1];
+                if ("v1".equals(kv[0])) signature = kv[1];
             }
         }
 
-        if (timestampStr == null || signature == null) {
-            throw new InvalidWebhookSignatureException("Encabezado Stripe-Signature malformado.");
+        if (timestamp == null || signature == null) {
+            throw new InvalidWebhookSignatureException("Formato de cabecera Stripe-Signature inválido");
         }
 
+        String signedPayload = timestamp + "." + payload;
         try {
-            long timestamp = Long.parseLong(timestampStr);
-            long now = Instant.now().getEpochSecond();
-            if (Math.abs(now - timestamp) > TOLERANCE_SECONDS) {
-                throw new InvalidWebhookSignatureException("Firma del webhook fuera de la ventana de tolerancia temporal.");
+            Mac hmacSha256 = Mac.getInstance("HmacSHA256");
+            SecretKeySpec secretKey = new SecretKeySpec(webhookSecret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+            hmacSha256.init(secretKey);
+            byte[] hash = hmacSha256.doFinal(signedPayload.getBytes(StandardCharsets.UTF_8));
+            
+            StringBuilder computedSignature = new StringBuilder();
+            for (byte b : hash) {
+                computedSignature.append(String.format("%02x", b));
             }
 
-            String signedPayload = timestampStr + "." + payload;
-            Mac mac = Mac.getInstance(HMAC_SHA256);
-            mac.init(new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), HMAC_SHA256));
-            byte[] hash = mac.doFinal(signedPayload.getBytes(StandardCharsets.UTF_8));
-            String expectedSignature = bytesToHex(hash);
-
-            if (!MessageDigest.isEqual(expectedSignature.getBytes(StandardCharsets.UTF_8), signature.getBytes(StandardCharsets.UTF_8))) {
-                throw new InvalidWebhookSignatureException("La firma criptográfica HMAC-SHA256 no coincide con el payload recibido.");
+            if (!MessageDigest.isEqual(computedSignature.toString().getBytes(StandardCharsets.UTF_8), signature.getBytes(StandardCharsets.UTF_8))) {
+                throw new InvalidWebhookSignatureException("Firma criptográfica HMAC-SHA256 no coincide con el secreto configurado");
             }
-
-            return true;
-        } catch (InvalidWebhookSignatureException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new InvalidWebhookSignatureException("Error en la verificación criptográfica: " + e.getMessage());
+        } catch (Exception ex) {
+            if (ex instanceof InvalidWebhookSignatureException) throw (InvalidWebhookSignatureException) ex;
+            throw new InvalidWebhookSignatureException("Fallo en verificación criptográfica de webhook: " + ex.getMessage());
         }
     }
+}
+```
 
-    private String bytesToHex(byte[] bytes) {
-        StringBuilder sb = new StringBuilder();
-        for (byte b : bytes) {
-            sb.append(String.format("%02x", b));
+##### 3. `SubscriptionLifecycleDomainService` (Servicio de Dominio de Ciclo de Vida Contractual)
+* **Paquete:** `com.andeva.atelier.platform.billing.domain.services`
+* **Propósito:** Gobierna las políticas de transición contractual, evaluación de periodos de gracia ante impagos, reactivación de membresías y cálculo de prorrateo entre ciclos comerciales:
+```java
+package com.andeva.atelier.platform.billing.domain.services;
+
+import com.andeva.atelier.platform.billing.domain.model.aggregates.TenantSubscription;
+import com.andeva.atelier.platform.billing.domain.model.enums.SubscriptionStatus;
+import com.andeva.atelier.platform.billing.domain.model.valueobjects.SubscriptionPeriod;
+import org.springframework.stereotype.Service;
+
+import java.time.Duration;
+import java.time.Instant;
+
+@Service
+public class SubscriptionLifecycleDomainService {
+
+    private static final int DEFAULT_GRACE_PERIOD_DAYS = 5;
+
+    public boolean isGracePeriodActive(TenantSubscription subscription, Instant currentTimestamp) {
+        if (subscription.getStatus() != SubscriptionStatus.PAST_DUE) {
+            return false;
         }
-        return sb.toString();
+        Instant periodEnd = subscription.getCurrentPeriod().endDate();
+        Instant graceLimit = periodEnd.plus(Duration.ofDays(DEFAULT_GRACE_PERIOD_DAYS));
+        return currentTimestamp.isBefore(graceLimit);
+    }
+
+    public boolean canReactivate(TenantSubscription subscription) {
+        return subscription.getStatus() == SubscriptionStatus.PAST_DUE
+            || subscription.getStatus() == SubscriptionStatus.UNPAID;
+    }
+
+    public void evaluateExpirationPolicy(TenantSubscription subscription, Instant currentTimestamp) {
+        if (subscription.getStatus() == SubscriptionStatus.PAST_DUE 
+                && !isGracePeriodActive(subscription, currentTimestamp)) {
+            subscription.markUnpaid();
+        }
     }
 }
 ```
@@ -357,7 +723,7 @@ public class StripeWebhookSignatureVerificationService {
 Las excepciones de la capa de dominio heredan de `DomainException` (provista en el Shared Kernel) y encapsulan códigos de error semánticos legibles para su serialización bajo la directiva RFC 7807:
 
 ```java
-package com.andeva.atelier.platform.billing.domain.model.exceptions;
+package com.andeva.atelier.platform.billing.domain.exceptions;
 
 import com.andeva.atelier.platform.shared.domain.exceptions.DomainException;
 
@@ -368,13 +734,17 @@ public abstract class BillingDomainException extends DomainException {
 }
 ```
 
-* **`PlanNotFoundException`:** Lanzada cuando el plan comercial de suscripción solicitado no existe en el catálogo o no coincide el código tarifario foráneo. Código: `ERR_PLAN_NOT_FOUND` (HTTP 404 Not Found).
-* **`SubscriptionNotFoundException`:** Lanzada cuando no se localiza un contrato de membresía asociado al identificador unívoco o al taller automotriz consultado. Código: `ERR_SUBSCRIPTION_NOT_FOUND` (HTTP 404 Not Found).
-* **`QuotaExceededException`:** Lanzada cuando una operación intenta sobrepasar los techos operativos permitidos por el plan contratado (sucursales físicas o personal de taller activo) o acceder a módulos restringidos. Código: `ERR_QUOTA_EXCEEDED` (HTTP 403 Forbidden o 409 Conflict).
+* **`BillingDomainException`:** Clase base abstracta de la que derivan todas las contingencias semánticas del contexto de facturación SaaS. Código: `ERR_BILLING_DOMAIN_VIOLATION` (HTTP 400 Bad Request).
 * **`DuplicateActiveSubscriptionException`:** Lanzada cuando se intenta registrar o activar una nueva suscripción para un taller que ya dispone de una membresía activa o en periodo de prueba. Código: `ERR_DUPLICATE_ACTIVE_SUBSCRIPTION` (HTTP 409 Conflict).
+* **`InvalidPlanPricingException`:** Lanzada ante importes monetarios negativos, ciclos de cobro incompatibles o monedas no soportadas en la definición tarifaria. Código: `ERR_INVALID_PLAN_PRICING` (HTTP 400 Bad Request).
 * **`InvalidWebhookSignatureException`:** Lanzada cuando la firma criptográfica HMAC-SHA256 del webhook de Stripe es nula, malformada o no coincide matemáticamente con el secreto configurado. Código: `ERR_INVALID_WEBHOOK_SIGNATURE` (HTTP 401 Unauthorized).
+* **`PlanNotFoundException`:** Lanzada cuando el plan comercial de suscripción solicitado no existe en el catálogo o no coincide el código tarifario foráneo. Código: `ERR_PLAN_NOT_FOUND` (HTTP 404 Not Found).
+* **`QuotaExceededException`:** Lanzada cuando una operación intenta sobrepasar los techos operativos permitidos por el plan contratado (sucursales físicas o personal de taller activo) o acceder a módulos restringidos. Código: `ERR_QUOTA_EXCEEDED` (HTTP 403 Forbidden).
 * **`SaasInvoiceNotFoundException`:** Lanzada cuando no se localiza el comprobante contable de recaudación en el repositorio financiero. Código: `ERR_SAAS_INVOICE_NOT_FOUND` (HTTP 404 Not Found).
-* **`StripeWebhookProcessingException`:** Lanzada ante fallos en la deserialización o análisis estructural del cuerpo JSON del evento asíncrono recibido de Stripe. Código: `ERR_STRIPE_WEBHOOK_PROCESSING` (HTTP 422 Unprocessable Entity o 500 Internal Server Error).
+* **`StripeIntegrationException`:** Lanzada ante anomalías de red, timeouts telemáticos o fallos irrecuperables en la invocación a la API externa de Stripe. Código: `ERR_STRIPE_INTEGRATION` (HTTP 502 Bad Gateway).
+* **`StripeWebhookProcessingException`:** Lanzada ante fallos en la deserialización o análisis estructural del cuerpo JSON del evento asíncrono recibido de Stripe. Código: `ERR_STRIPE_WEBHOOK_PROCESSING` (HTTP 422 Unprocessable Entity).
+* **`SubscriptionNotFoundException`:** Lanzada cuando no se localiza un contrato de membresía asociado al identificador unívoco o al taller automotriz consultado. Código: `ERR_SUBSCRIPTION_NOT_FOUND` (HTTP 404 Not Found).
+* **`SubscriptionPastDueException`:** Lanzada cuando un taller automotriz con cobros reiteradamente rechazados intenta ejecutar operaciones fuera de su periodo de gracia. Código: `ERR_SUBSCRIPTION_PAST_DUE` (HTTP 402 Payment Required).
 
 ---
 
@@ -466,23 +836,22 @@ public abstract class BillingDomainException extends DomainException {
 
 #### 10.3.2. REST Resources & DTOs (Records)
 
-Todos los contratos de transferencia y petición de la Capa de Interfaz están implementados mediante **Java 21 Records**, garantizando inmutabilidad estricta por diseño y validaciones declarativas mediante **Jakarta Bean Validation** (`jakarta.validation.constraints.*`):
+Todos los contratos de transferencia y petición de la Capa de Interfaz están implementados mediante **Java 21 Records**, garantizando inmutabilidad estricta por diseño y validaciones declarativas mediante **Jakarta Bean Validation** (`jakarta.validation.constraints.*`). Siguiendo la arquitectura canónica de Atelier, los contratos se segregan estrictamente en subpaquetes de solicitud (`requests`) y respuesta (`responses`):
+
+##### 1. Recursos de Solicitud (`com.andeva.atelier.platform.billing.interfaces.rest.resources.requests`)
 
 ```java
-package com.andeva.atelier.platform.billing.interfaces.rest.resources;
+package com.andeva.atelier.platform.billing.interfaces.rest.resources.requests;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -499,7 +868,7 @@ public record CreateSubscriptionPlanRequest(
     String name,
 
     @NotBlank(message = "El nivel del plan (tier) es obligatorio")
-    @Pattern(regexp = "^(STARTER|PROFESSIONAL|ENTERPRISE)$", message = "El tier debe ser STARTER, PROFESSIONAL o ENTERPRISE")
+    @Pattern(regexp = "^(GO|PRO|MAX|ENTERPRISE)$", message = "El tier debe ser GO, PRO, MAX o ENTERPRISE")
     String tier,
 
     @NotNull(message = "El precio es obligatorio")
@@ -517,14 +886,14 @@ public record CreateSubscriptionPlanRequest(
 
     @NotNull(message = "Las cuotas operativas son obligatorias")
     @Valid
-    TenantQuotaLimitsDto quotaLimits,
+    com.andeva.atelier.platform.billing.interfaces.acl.dto.TenantQuotaLimitsDto quotaLimits,
 
     @Valid
     List<PlanFeatureRequest> features
 ) {}
 
 /**
- * 2. Solicitud de actualización de metadatos y cuotas de un plan comercial.
+ * 2. Modificación de parámetros de un plan comercial existente.
  */
 public record UpdateSubscriptionPlanRequest(
     @NotBlank(message = "El nombre del plan es obligatorio")
@@ -536,68 +905,77 @@ public record UpdateSubscriptionPlanRequest(
     @Digits(integer = 10, fraction = 2, message = "El precio debe tener como máximo 10 dígitos enteros y 2 decimales")
     BigDecimal price,
 
+    @NotBlank(message = "El ciclo de facturación es obligatorio")
+    @Pattern(regexp = "^(MONTHLY|YEARLY)$", message = "El ciclo de facturación debe ser MONTHLY o YEARLY")
+    String billingCycle,
+
     @NotNull(message = "Las cuotas operativas son obligatorias")
     @Valid
-    TenantQuotaLimitsDto quotaLimits,
+    com.andeva.atelier.platform.billing.interfaces.acl.dto.TenantQuotaLimitsDto quotaLimits,
 
-    boolean isActive,
-
-    @Valid
-    List<PlanFeatureRequest> features
+    Boolean isActive
 ) {}
 
 /**
- * 3. Solicitud para inicializar una sesión de Stripe Checkout.
+ * 3. Solicitud para iniciar una sesión de Stripe Checkout.
  */
 public record CreateCheckoutSessionRequest(
-    @NotNull(message = "El identificador del plan comercial es obligatorio")
+    @NotNull(message = "El ID del plan es obligatorio")
     UUID planId,
 
     @NotBlank(message = "La URL de éxito es obligatoria")
-    @Pattern(regexp = "^https?://.*", message = "La URL de éxito debe ser una dirección HTTP/HTTPS válida")
     String successUrl,
 
     @NotBlank(message = "La URL de cancelación es obligatoria")
-    @Pattern(regexp = "^https?://.*", message = "La URL de cancelación debe ser una dirección HTTP/HTTPS válida")
     String cancelUrl
 ) {}
 
 /**
- * 4. Solicitud para generar enlace al Stripe Customer Portal.
+ * 4. Petición para generar URL al portal de autogestión de Stripe.
  */
 public record CustomerPortalRequest(
-    @NotBlank(message = "La URL de retorno tras salir del portal es obligatoria")
-    @Pattern(regexp = "^https?://.*", message = "La URL de retorno debe ser una dirección HTTP/HTTPS válida")
+    @NotBlank(message = "La URL de retorno es obligatoria")
     String returnUrl
 ) {}
 
 /**
- * 5. Solicitud de cancelación de suscripción.
+ * 5. Petición para solicitar la cancelación de la suscripción.
  */
 public record CancelSubscriptionRequest(
-    boolean immediately,
-
-    @Size(max = 500, message = "El motivo de cancelación no puede exceder los 500 caracteres")
+    boolean cancelImmediately,
     String cancellationReason
 ) {}
 
 /**
- * 6. Solicitud de característica funcional individual asociada a un plan.
+ * 6. Característica modular individual para el catálogo.
  */
 public record PlanFeatureRequest(
-    @NotBlank(message = "La clave de la funcionalidad es obligatoria")
-    @Size(min = 3, max = 80, message = "La clave debe contener entre 3 y 80 caracteres")
+    @NotBlank(message = "La clave funcional de la característica es obligatoria")
     String featureKey,
 
-    @NotBlank(message = "La descripción de la funcionalidad es obligatoria")
-    @Size(min = 3, max = 255, message = "La descripción no puede exceder los 255 caracteres")
+    @NotBlank(message = "El nombre de la característica es obligatorio")
+    String name,
+
     String description,
 
     boolean isEnabled
 ) {}
+```
+
+##### 2. Recursos de Respuesta (`com.andeva.atelier.platform.billing.interfaces.rest.resources.responses`)
+
+```java
+package com.andeva.atelier.platform.billing.interfaces.rest.resources.responses;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
 
 /**
- * 7. Recurso de salida que expone un plan comercial de suscripción.
+ * 1. Representación REST completa de un plan de software.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record SubscriptionPlanResource(
@@ -608,23 +986,26 @@ public record SubscriptionPlanResource(
     BigDecimal price,
     String currency,
     String billingCycle,
-    TenantQuotaLimitsDto quotaLimits,
+    com.andeva.atelier.platform.billing.interfaces.acl.dto.TenantQuotaLimitsDto quotaLimits,
     List<PlanFeatureResource> features,
-    boolean isActive
+    boolean isActive,
+    Instant createdAt,
+    Instant updatedAt
 ) {}
 
 /**
- * 8. Recurso de salida para características individuales de planes.
+ * 2. Representación de una característica modular autorizada.
  */
 public record PlanFeatureResource(
     UUID id,
     String featureKey,
+    String name,
     String description,
     boolean isEnabled
 ) {}
 
 /**
- * 9. Respuesta con la sesión de Stripe Checkout generada.
+ * 3. Respuesta al iniciar checkout seguro en Stripe.
  */
 public record CheckoutSessionResponse(
     String checkoutUrl,
@@ -632,34 +1013,33 @@ public record CheckoutSessionResponse(
 ) {}
 
 /**
- * 10. Respuesta con la URL del Stripe Customer Portal.
+ * 4. Respuesta con enlace temporal al Stripe Customer Portal.
  */
 public record CustomerPortalResponse(
     String portalUrl
 ) {}
 
 /**
- * 11. Recurso de salida que expone la suscripción activa del taller.
+ * 5. Representación completa de la suscripción activa del taller.
  */
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public record TenantSubscriptionResource(
     UUID id,
     UUID tenantId,
     UUID planId,
     String planName,
+    String tier,
     String status,
     Instant currentPeriodStart,
     Instant currentPeriodEnd,
     boolean cancelAtPeriodEnd,
-    Instant canceledAt,
     Instant trialEndDate,
-    TenantQuotaLimitsDto quotas
+    com.andeva.atelier.platform.billing.interfaces.acl.dto.TenantQuotaLimitsDto quotaLimits,
+    boolean isAccessGranted
 ) {}
 
 /**
- * 12. Recurso detallado de factura comercial SaaS de la plataforma.
+ * 6. Detalle exhaustivo de una factura devengada por Andeva.
  */
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public record SaasInvoiceResource(
     UUID id,
     UUID subscriptionId,
@@ -670,11 +1050,12 @@ public record SaasInvoiceResource(
     String status,
     String invoicePdfUrl,
     String hostedInvoiceUrl,
-    Instant paidAt
+    Instant paidAt,
+    Instant createdAt
 ) {}
 
 /**
- * 13. Recurso resumido de factura para listados contables masivos.
+ * 7. Resumen compacto para tablas históricas de pagos.
  */
 public record SaasInvoiceSummaryResource(
     UUID id,
@@ -682,35 +1063,16 @@ public record SaasInvoiceSummaryResource(
     BigDecimal amountPaid,
     String currency,
     String status,
-    Instant paidAt,
-    String invoicePdfUrl
+    Instant paidAt
 ) {}
 
 /**
- * 14. Confirmación de recepción asíncrona de webhooks de Stripe.
+ * 8. Acuse de recibo para Stripe Webhooks.
  */
 public record StripeWebhookAcknowledgmentResponse(
     boolean received,
     String eventId,
-    Instant timestamp
-) {}
-
-/**
- * 15. Objeto de transferencia para las cuotas operativas del taller.
- */
-public record TenantQuotaLimitsDto(
-    @Min(value = 1, message = "El taller debe permitir al menos 1 sucursal física")
-    int maxBranches,
-
-    @Min(value = 1, message = "El taller debe permitir al menos 1 miembro del personal activo")
-    int maxActiveStaff,
-
-    boolean iotTelemetryEnabled,
-
-    boolean aiDiagnosticsEnabled,
-
-    @Min(value = 1, message = "El límite de órdenes de trabajo mensuales debe ser al menos 1")
-    int maxMonthlyWorkOrders
+    String status
 ) {}
 ```
 
@@ -776,12 +1138,14 @@ Los ensambladores de recursos (*Resource Assemblers*) traducen agregados y entid
 
 La fachada pública de suscripciones (`SubscriptionContextFacade`) actúa como un **Open Host Service (OHS)** perimetral dentro de la arquitectura modular. Permite a todos los Bounded Contexts clientes (IAM, Workshop Operations / MRO, HR, IoT) verificar de forma instantánea la validez contractual y los techos operativos de cada taller mecánico.
 
-Para eliminar por completo la contención sobre PostgreSQL y evitar cuellos de botella en operaciones de alta frecuencia, la implementación desacopla las lecturas mediante **Caffeine Cache**, garantizando **latencia en memoria sub-milisegundo (< 0.05 ms)**:
+Para eliminar por completo la contención sobre PostgreSQL y evitar cuellos de botella en operaciones de alta frecuencia, la especificación de la interfaz desacopla las consultas perimetrales mediante contratos inmutables:
 
 ```java
 package com.andeva.atelier.platform.billing.interfaces.acl;
 
-import com.andeva.atelier.platform.billing.interfaces.rest.resources.TenantQuotaLimitsDto;
+import com.andeva.atelier.platform.billing.interfaces.acl.dto.FeatureEntitlementDto;
+import com.andeva.atelier.platform.billing.interfaces.acl.dto.TenantQuotaLimitsDto;
+import com.andeva.atelier.platform.billing.interfaces.acl.dto.TenantSubscriptionStatusDto;
 
 import java.util.UUID;
 
@@ -803,6 +1167,11 @@ public interface SubscriptionContextFacade {
     TenantQuotaLimitsDto getTenantQuotaLimits(UUID tenantId);
 
     /**
+     * Retorna el estado contractual detallado del taller automotriz.
+     */
+    TenantSubscriptionStatusDto getTenantSubscriptionStatus(UUID tenantId);
+
+    /**
      * Valida si el taller puede aperturar una nueva sucursal física en IAM & Tenancy.
      */
     boolean canAddBranch(UUID tenantId, int currentBranchCount);
@@ -822,145 +1191,55 @@ public interface SubscriptionContextFacade {
      * Valida si una funcionalidad avanzada (ej. Telemetría OBD-II IoT, Diagnóstico IA) está habilitada por el plan.
      */
     boolean isFeatureAllowed(UUID tenantId, String featureKey);
+
+    /**
+     * Verifica los derechos y consumos de una característica funcional específica.
+     */
+    FeatureEntitlementDto checkFeatureEntitlement(UUID tenantId, String featureKey);
 }
 ```
 
-##### Snippet de Implementación con Caffeine Cache (< 0.05 ms)
+##### Contratos DTO Inmutables de Fachada (`com.andeva.atelier.platform.billing.interfaces.acl.dto`)
 
-La implementación de la fachada emplea una estructura in-memory de alta concurrencia basada en `Caffeine`, la cual almacena una política inmutable pre-calculada (`CachedTenantSubscriptionPolicy`). La invalidación se coordina de manera reactiva ante eventos de dominio o integración:
+Los objetos de transferencia inmutables expuestos por la fachada residen formalmente en el subpaquete `dto`:
 
 ```java
-package com.andeva.atelier.platform.billing.infrastructure.acl;
+package com.andeva.atelier.platform.billing.interfaces.acl.dto;
 
-import com.andeva.atelier.platform.billing.domain.model.aggregates.SubscriptionPlan;
-import com.andeva.atelier.platform.billing.domain.model.aggregates.TenantSubscription;
-import com.andeva.atelier.platform.billing.domain.model.valueobjects.TenantId;
-import com.andeva.atelier.platform.billing.domain.repositories.SubscriptionPlanRepository;
-import com.andeva.atelier.platform.billing.domain.repositories.TenantSubscriptionRepository;
-import com.andeva.atelier.platform.billing.interfaces.acl.SubscriptionContextFacade;
-import com.andeva.atelier.platform.billing.interfaces.rest.resources.TenantQuotaLimitsDto;
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
-import java.time.Duration;
-import java.util.Collections;
-import java.util.Set;
+import java.time.Instant;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
-@Service
-public class SubscriptionContextFacadeImpl implements SubscriptionContextFacade {
+public record TenantQuotaLimitsDto(
+    int maxBranches,
+    int maxActiveStaff,
+    int maxActiveObd2Devices,
+    int maxPhotosPerWorkOrder,
+    int maxMonthlyAiReports,
+    boolean companyRegistrationAllowed,
+    boolean multiWarehouseAllowed,
+    boolean marketplaceListed,
+    int maxMonthlyWorkOrders,
+    boolean iotTelemetryEnabled,
+    boolean aiDiagnosticsEnabled
+) {}
 
-    private static final Logger log = LoggerFactory.getLogger(SubscriptionContextFacadeImpl.class);
+public record TenantSubscriptionStatusDto(
+    UUID tenantId,
+    String planName,
+    String tier,
+    String status,
+    boolean isActive,
+    Instant currentPeriodEnd,
+    boolean cancelAtPeriodEnd
+) {}
 
-    private final TenantSubscriptionRepository subscriptionRepository;
-    private final SubscriptionPlanRepository planRepository;
-
-    // Estructura lock-free en RAM que permite resolver consultas de cuotas en < 0.05 ms
-    private final Cache<UUID, CachedTenantSubscriptionPolicy> policyCache;
-
-    public SubscriptionContextFacadeImpl(
-            TenantSubscriptionRepository subscriptionRepository,
-            SubscriptionPlanRepository planRepository) {
-        this.subscriptionRepository = subscriptionRepository;
-        this.planRepository = planRepository;
-        this.policyCache = Caffeine.newBuilder()
-                .maximumSize(10_000)
-                .expireAfterWrite(Duration.ofMinutes(30))
-                .recordStats()
-                .build();
-    }
-
-    @Override
-    public boolean isTenantSubscriptionActive(UUID tenantId) {
-        return getOrLoadPolicy(tenantId).isActive();
-    }
-
-    @Override
-    public TenantQuotaLimitsDto getTenantQuotaLimits(UUID tenantId) {
-        return getOrLoadPolicy(tenantId).quotas();
-    }
-
-    @Override
-    public boolean canAddBranch(UUID tenantId, int currentBranchCount) {
-        CachedTenantSubscriptionPolicy policy = getOrLoadPolicy(tenantId);
-        return policy.isActive() && currentBranchCount < policy.quotas().maxBranches();
-    }
-
-    @Override
-    public boolean canAddStaffMember(UUID tenantId, int currentStaffCount) {
-        CachedTenantSubscriptionPolicy policy = getOrLoadPolicy(tenantId);
-        return policy.isActive() && currentStaffCount < policy.quotas().maxActiveStaff();
-    }
-
-    @Override
-    public boolean canCreateWorkOrder(UUID tenantId, int currentMonthlyWorkOrders) {
-        CachedTenantSubscriptionPolicy policy = getOrLoadPolicy(tenantId);
-        return policy.isActive() && currentMonthlyWorkOrders < policy.quotas().maxMonthlyWorkOrders();
-    }
-
-    @Override
-    public boolean isFeatureAllowed(UUID tenantId, String featureKey) {
-        CachedTenantSubscriptionPolicy policy = getOrLoadPolicy(tenantId);
-        return policy.isActive() && policy.allowedFeatures().contains(featureKey);
-    }
-
-    /**
-     * Invalida de forma reactiva la caché in-memory al recibirse eventos de cambio de estado o upgrade.
-     */
-    public void evictCache(UUID tenantId) {
-        policyCache.invalidate(tenantId);
-        log.debug("Caché de suscripción invalidada en RAM para el taller: {}", tenantId);
-    }
-
-    private CachedTenantSubscriptionPolicy getOrLoadPolicy(UUID tenantId) {
-        return policyCache.get(tenantId, id -> {
-            log.debug("Cache miss para el taller {}. Cargando estado desde PostgreSQL...", id);
-            return subscriptionRepository.findByTenantId(new TenantId(id))
-                    .map(sub -> {
-                        SubscriptionPlan plan = planRepository.findById(sub.getPlanId())
-                                .orElseThrow(() -> new IllegalStateException("Plan no hallado para suscripción activa"));
-                        
-                        TenantQuotaLimitsDto quotaDto = new TenantQuotaLimitsDto(
-                                plan.getQuotaLimits().maxBranches(),
-                                plan.getQuotaLimits().maxActiveStaff(),
-                                plan.getQuotaLimits().iotTelemetryEnabled(),
-                                plan.getQuotaLimits().aiDiagnosticsEnabled(),
-                                plan.getQuotaLimits().maxMonthlyWorkOrders()
-                        );
-
-                        Set<String> features = plan.getFeatures().stream()
-                                .filter(f -> f.isEnabled())
-                                .map(f -> f.getFeatureKey())
-                                .collect(Collectors.toUnmodifiableSet());
-
-                        return new CachedTenantSubscriptionPolicy(
-                                sub.isAccessGranted(),
-                                quotaDto,
-                                features
-                        );
-                    })
-                    .orElseGet(() -> CachedTenantSubscriptionPolicy.inactiveDefault());
-        });
-    }
-
-    private record CachedTenantSubscriptionPolicy(
-            boolean isActive,
-            TenantQuotaLimitsDto quotas,
-            Set<String> allowedFeatures
-    ) {
-        public static CachedTenantSubscriptionPolicy inactiveDefault() {
-            return new CachedTenantSubscriptionPolicy(
-                    false,
-                    new TenantQuotaLimitsDto(0, 0, false, false, 0),
-                    Collections.emptySet()
-            );
-        }
-    }
-}
+public record FeatureEntitlementDto(
+    UUID tenantId,
+    String featureKey,
+    boolean isEntitled,
+    int currentUsage,
+    int maximumLimit
+) {}
 ```
 
 ---
@@ -987,9 +1266,13 @@ La Capa de Interfaz del Bounded Context Billing implementa un interceptor unific
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | `PlanNotFoundException` | `404 Not Found` | `https://api.atelier.andeva.com/errors/plan-not-found` | Plan Not Found | `ERR_PLAN_NOT_FOUND` | El plan tarifario o precio de Stripe consultado no existe en el catálogo activo. |
 | `SubscriptionNotFoundException` | `404 Not Found` | `https://api.atelier.andeva.com/errors/subscription-not-found` | Subscription Not Found | `ERR_SUBSCRIPTION_NOT_FOUND` | El taller consultado no dispone de un contrato de suscripción SaaS registrado. |
+| `SaasInvoiceNotFoundException` | `404 Not Found` | `https://api.atelier.andeva.com/errors/saas-invoice-not-found` | SaaS Invoice Not Found | `ERR_SAAS_INVOICE_NOT_FOUND` | El comprobante contable de recaudación no fue localizado en el repositorio. |
 | `QuotaExceededException` | `403 Forbidden` | `https://api.atelier.andeva.com/errors/quota-exceeded` | Quota Exceeded | `ERR_QUOTA_EXCEEDED` | La operación supera el número máximo de sucursales, personal activo u órdenes de trabajo permitidas. |
 | `DuplicateActiveSubscriptionException` | `409 Conflict` | `https://api.atelier.andeva.com/errors/duplicate-subscription` | Duplicate Subscription | `ERR_DUPLICATE_ACTIVE_SUBSCRIPTION` | El taller automotriz ya posee una membresía en estado `ACTIVE` o `TRIALING`. |
+| `SubscriptionPastDueException` | `402 Payment Required` | `https://api.atelier.andeva.com/errors/subscription-past-due` | Subscription Past Due | `ERR_SUBSCRIPTION_PAST_DUE` | Suscripción suspendida por mora bancaria reiterada fuera del periodo de gracia. |
 | `InvalidWebhookSignatureException` | `401 Unauthorized` | `https://api.atelier.andeva.com/errors/invalid-webhook-signature` | Invalid Webhook Signature | `ERR_INVALID_WEBHOOK_SIGNATURE` | La firma HMAC-SHA256 en la cabecera `Stripe-Signature` es inválida o no coincide con el secreto configurado. |
+| `InvalidPlanPricingException` | `400 Bad Request` | `https://api.atelier.andeva.com/errors/invalid-plan-pricing` | Invalid Plan Pricing | `ERR_INVALID_PLAN_PRICING` | Parámetros de tarifa, moneda o periodicidad incompatibles en el catálogo comercial. |
+| `StripeIntegrationException` | `502 Bad Gateway` | `https://api.atelier.andeva.com/errors/stripe-integration-error` | Stripe Integration Error | `ERR_STRIPE_INTEGRATION` | Fallo de enlace o comunicación remota telemática con la pasarela Stripe. |
 | `StripeWebhookProcessingException` | `422 Unprocessable Entity` | `https://api.atelier.andeva.com/errors/webhook-processing-failed` | Webhook Processing Failed | `ERR_STRIPE_WEBHOOK_PROCESSING` | Error al deserializar la carga útil JSON de Stripe o inconsistencia en metadatos del evento. |
 | `BillingDomainException` | `400 Bad Request` | `https://api.atelier.andeva.com/errors/billing-domain-violation` | Billing Domain Violation | `ERR_BILLING_DOMAIN_VIOLATION` | Falla genérica de invariantes del modelo comercial (ej. importes negativos o periodos inconsistentes). |
 
@@ -998,13 +1281,13 @@ La Capa de Interfaz del Bounded Context Billing implementa un interceptor unific
 ```java
 package com.andeva.atelier.platform.billing.interfaces.rest.advice;
 
-import com.andeva.atelier.platform.billing.domain.model.exceptions.BillingDomainException;
-import com.andeva.atelier.platform.billing.domain.model.exceptions.DuplicateActiveSubscriptionException;
-import com.andeva.atelier.platform.billing.domain.model.exceptions.InvalidWebhookSignatureException;
-import com.andeva.atelier.platform.billing.domain.model.exceptions.PlanNotFoundException;
-import com.andeva.atelier.platform.billing.domain.model.exceptions.QuotaExceededException;
-import com.andeva.atelier.platform.billing.domain.model.exceptions.StripeWebhookProcessingException;
-import com.andeva.atelier.platform.billing.domain.model.exceptions.SubscriptionNotFoundException;
+import com.andeva.atelier.platform.billing.domain.exceptions.BillingDomainException;
+import com.andeva.atelier.platform.billing.domain.exceptions.DuplicateActiveSubscriptionException;
+import com.andeva.atelier.platform.billing.domain.exceptions.InvalidWebhookSignatureException;
+import com.andeva.atelier.platform.billing.domain.exceptions.PlanNotFoundException;
+import com.andeva.atelier.platform.billing.domain.exceptions.QuotaExceededException;
+import com.andeva.atelier.platform.billing.domain.exceptions.StripeWebhookProcessingException;
+import com.andeva.atelier.platform.billing.domain.exceptions.SubscriptionNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1154,15 +1437,26 @@ public class BillingExceptionHandler {
 
 ### 10.4. 2.6.8.3. Application Layer
 
-#### 10.4.1. Command Services (Handlers)
+#### 10.4.1. Command Services & Implementations
 
-##### 1. `TenantSubscriptionCommandServiceImpl`
+La Capa de Aplicación segrega estrictamente sus contratos de orquestación de comandos en interfaces públicas (`com.andeva.atelier.platform.billing.application.commandservices`) e implementaciones de paquete interno (`com.andeva.atelier.platform.billing.application.internal.commandservices`), garantizando el desacoplamiento arquitectónico de CQRS:
+
+##### 1. `SubscriptionPlanCommandService` y `SubscriptionPlanCommandServiceImpl`
+* **Contrato:** `com.andeva.atelier.platform.billing.application.commandservices.SubscriptionPlanCommandService`
+* **Implementación:** `com.andeva.atelier.platform.billing.application.internal.commandservices.SubscriptionPlanCommandServiceImpl`
+* **Responsabilidad:** Administrar la creación administrativa de planes comerciales, su actualización de precios y cuotas, y la activación o desactivación en el catálogo público, sincronizando identificadores de precios con Stripe.
+
+##### 2. `TenantSubscriptionCommandService` y `TenantSubscriptionCommandServiceImpl`
+* **Contrato:** `com.andeva.atelier.platform.billing.application.commandservices.TenantSubscriptionCommandService`
+* **Implementación:** `com.andeva.atelier.platform.billing.application.internal.commandservices.TenantSubscriptionCommandServiceImpl`
 * **Responsabilidad:** Orquestar el flujo de contratación y gestión de suscripciones:
-  1. Para nuevas suscripciones: Invoca a `StripeClientGateway` para inicializar una sesión de checkout y retorna la URL segura al frontend.
+  1. Para nuevas suscripciones: Invoca a `StripeGatewayPort` para inicializar una sesión de checkout y retorna la URL segura al frontend.
   2. Al procesar webhooks de Stripe: Actualiza de forma atómica el estado de la suscripción, extiende periodos contables y actualiza la tabla de auditoría `subscriptions`.
   3. Despacha eventos de integración inter-contexto y purga la caché local de Caffeine para el taller afectado.
 
-##### 2. `StripeWebhookCommandServiceImpl`
+##### 3. `StripeWebhookCommandService` y `StripeWebhookCommandServiceImpl`
+* **Contrato:** `com.andeva.atelier.platform.billing.application.commandservices.StripeWebhookCommandService`
+* **Implementación:** `com.andeva.atelier.platform.billing.application.internal.commandservices.StripeWebhookCommandServiceImpl`
 * **Responsabilidad:** Procesamiento seguro e idempotente de webhooks:
   1. Verifica la firma HMAC-SHA256 con `StripeWebhookSignatureVerificationService`.
   2. Comprueba si el `stripe_event_id` ya existe en la tabla `stripe_events`. Si existe, retorna éxito inmediato (`200 OK`) sin volver a ejecutar la lógica de negocio.
@@ -1174,23 +1468,26 @@ public class BillingExceptionHandler {
      * `customer.subscription.deleted`: Transiciona la suscripción a `CANCELED`.
   5. Marca el evento como `PROCESSED`.
 
-##### 3. `SubscriptionPlanCommandServiceImpl`
-* **Responsabilidad:** Crear y actualizar planes sincronizados con productos y precios de Stripe.
-
-##### 4. `SaasInvoiceCommandServiceImpl`
-* **Responsabilidad:** Registrar comprobantes y emitir notificaciones de pago exitoso.
+##### 4. `SaasInvoiceCommandService` y `SaasInvoiceCommandServiceImpl`
+* **Contrato:** `com.andeva.atelier.platform.billing.application.commandservices.SaasInvoiceCommandService`
+* **Implementación:** `com.andeva.atelier.platform.billing.application.internal.commandservices.SaasInvoiceCommandServiceImpl`
+* **Responsabilidad:** Registrar comprobantes devengados por Stripe y emitir notificaciones de pago exitoso o contingencia bancaria.
 
 ---
 
-#### 10.4.2. Query Services (Handlers)
+#### 10.4.2. Query Services & Implementations
 
-##### `TenantSubscriptionQueryServiceImpl`
+Las consultas se segregan en contratos públicos (`com.andeva.atelier.platform.billing.application.queryservices`) e implementaciones internas (`com.andeva.atelier.platform.billing.application.internal.queryservices`):
+
+##### 1. `TenantSubscriptionQueryService` y `TenantSubscriptionQueryServiceImpl`
+* **Contrato:** `com.andeva.atelier.platform.billing.application.queryservices.TenantSubscriptionQueryService`
+* **Implementación:** `com.andeva.atelier.platform.billing.application.internal.queryservices.TenantSubscriptionQueryServiceImpl`
 * **Responsabilidad:** Resuelve consultas de suscripción implementando **Caffeine Cache**:
 ```java
 package com.andeva.atelier.platform.billing.application.internal.queryservices;
 
 import com.andeva.atelier.platform.billing.domain.model.aggregates.TenantSubscription;
-import com.andeva.atelier.platform.billing.domain.model.valueobjects.SubscriptionStatus;
+import com.andeva.atelier.platform.billing.domain.model.enums.SubscriptionStatus;
 import com.andeva.atelier.platform.billing.domain.repositories.TenantSubscriptionRepository;
 import com.andeva.atelier.platform.shared.domain.model.valueobjects.TenantId;
 import org.springframework.cache.annotation.CacheEvict;
@@ -1222,29 +1519,249 @@ public class TenantSubscriptionQueryServiceImpl {
 }
 ```
 
+##### 2. `SubscriptionPlanQueryService` y `SubscriptionPlanQueryServiceImpl`
+* **Contrato:** `com.andeva.atelier.platform.billing.application.queryservices.SubscriptionPlanQueryService`
+* **Implementación:** `com.andeva.atelier.platform.billing.application.internal.queryservices.SubscriptionPlanQueryServiceImpl`
+* **Responsabilidad:** Recuperar el catálogo de planes comerciales activos, búsqueda por identificador interno y resolución por precio de Stripe.
+
+##### 3. `SaasInvoiceQueryService` y `SaasInvoiceQueryServiceImpl`
+* **Contrato:** `com.andeva.atelier.platform.billing.application.queryservices.SaasInvoiceQueryService`
+* **Implementación:** `com.andeva.atelier.platform.billing.application.internal.queryservices.SaasInvoiceQueryServiceImpl`
+* **Responsabilidad:** Consultar el historial de recibos devengados por taller con soporte para paginación y ordenamiento cronológico descendente.
+
 ---
 
-#### 10.4.3. Domain Event Handlers
+#### 10.4.3. Domain Event Handlers e Integration Listeners
 
-* **`SubscriptionDomainEventHandler`:**
-  * Al recibir `TenantSubscriptionActivatedEvent` o `TenantSubscriptionRenewedEvent`: Purga la caché de Caffeine del taller y envía un correo de confirmación de facturación a través de `ResendEmailAdapter`.
+Los manejadores de eventos coordinan las reacciones desacopladas ante mutaciones de dominio e integración:
+
+##### 1. `SubscriptionDomainEventHandler`
+* **Paquete:** `com.andeva.atelier.platform.billing.application.internal.eventhandlers`
+* **Responsabilidad:**
+  * Al recibir `TenantSubscriptionActivatedEvent` o `TenantSubscriptionRenewedEvent`: Purga la caché de Caffeine del taller y envía un correo de confirmación de facturación a través de `TenantBillingNotificationGatewayPort`.
   * Al recibir `TenantSubscriptionPastDueEvent`: Despacha un correo urgente al administrador del taller informando el fallo de cobro a la tarjeta y proveyendo un enlace al Stripe Customer Portal para regularizar su medio de pago antes de la suspensión de la cuenta.
 
+##### 2. `TenantLifecycleIntegrationEventHandler`
+* **Paquete:** `com.andeva.atelier.platform.billing.application.internal.eventhandlers`
+* **Responsabilidad:** Escucha eventos de integración como `TenantRegisteredIntegrationEvent` emitidos por IAM & Tenancy para inicializar el registro contractual del taller en periodo de prueba gratuito (*Trialing*).
+
+##### 3. `BillingTransactionalOutboxPublisher`
+* **Paquete:** `com.andeva.atelier.platform.billing.application.internal.eventhandlers`
+* **Responsabilidad:** Persiste de forma atómica los eventos de integración (`TenantSubscriptionActivatedIntegrationEvent`, `TenantPlanChangedIntegrationEvent`, `TenantSubscriptionPastDueIntegrationEvent`, etc.) en la tabla de Outbox transaccional dentro de la misma transacción de PostgreSQL, asegurando entrega garantizada (*At-Least-Once Delivery*) hacia el bus de eventos de la plataforma.
+
 ---
 
-#### 10.4.4. Outbound ACL Services & Remote Adapters
+#### 10.4.4. Outbound ACL Services & Gateways
 
-##### `StripeAclService`
-* **Paquete:** `com.andeva.atelier.platform.billing.application.internal.outboundservices.acl`
-* **Propósito:** Encapsula las clases nativas del SDK `com.stripe.*` y transforma excepciones externas (`StripeException`, `CardException`) en excepciones de dominio semánticas de Atelier.
+La capa de aplicación define los puertos de salida requeridos para interactuar con infraestructura externa bajo el patrón de Puertos y Adaptadores:
+
+##### 1. `StripeGatewayPort`
+* **Paquete:** `com.andeva.atelier.platform.billing.application.internal.outbound.acl`
+* **Propósito:** Puerto saliente para interactuar con la pasarela de pagos Stripe (creación de Checkout Sessions, Customer Billing Portals y consulta de suscripciones y facturas).
+
+##### 2. `TenantBillingNotificationGatewayPort`
+* **Paquete:** `com.andeva.atelier.platform.billing.application.internal.outbound.acl`
+* **Propósito:** Puerto saliente para el despacho de notificaciones transaccionales y comprobantes PDF vía correo electrónico mediante Resend.
+
+##### 3. `IamTenantValidationAclPort`
+* **Paquete:** `com.andeva.atelier.platform.billing.application.internal.outbound.acl`
+* **Propósito:** Puerto anticorrupción para validar la existencia y razón social del taller automotriz contra el contexto de IAM & Tenancy.
+
+##### 4. `BillingCachePort`
+* **Paquete:** `com.andeva.atelier.platform.billing.application.internal.outbound.acl`
+* **Propósito:** Puerto de abstracción para la gestión de caché de alto rendimiento en memoria local RAM con Caffeine.
+
+---
+
+#### 10.4.5. Implementación de Fachada Inbound ACL (Open Host Service - OHS)
+
+La implementación canónica de la fachada reside en `com.andeva.atelier.platform.billing.application.acl.SubscriptionContextFacadeImpl`. Implementa la interfaz pública `SubscriptionContextFacade` expuesta en `interfaces.acl`, coordinando las consultas de cuotas con la capa de caché Caffeine para garantizar latencias sub-milisegundo (< 0.05 ms):
+
+```java
+package com.andeva.atelier.platform.billing.application.acl;
+
+import com.andeva.atelier.platform.billing.domain.model.aggregates.SubscriptionPlan;
+import com.andeva.atelier.platform.billing.domain.model.aggregates.TenantSubscription;
+import com.andeva.atelier.platform.billing.domain.repositories.SubscriptionPlanRepository;
+import com.andeva.atelier.platform.billing.domain.repositories.TenantSubscriptionRepository;
+import com.andeva.atelier.platform.billing.interfaces.acl.SubscriptionContextFacade;
+import com.andeva.atelier.platform.billing.interfaces.acl.dto.FeatureEntitlementDto;
+import com.andeva.atelier.platform.billing.interfaces.acl.dto.TenantQuotaLimitsDto;
+import com.andeva.atelier.platform.billing.interfaces.acl.dto.TenantSubscriptionStatusDto;
+import com.andeva.atelier.platform.shared.domain.model.valueobjects.TenantId;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import java.time.Duration;
+import java.util.Collections;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+@Service
+public class SubscriptionContextFacadeImpl implements SubscriptionContextFacade {
+
+    private static final Logger log = LoggerFactory.getLogger(SubscriptionContextFacadeImpl.class);
+
+    private final TenantSubscriptionRepository subscriptionRepository;
+    private final SubscriptionPlanRepository planRepository;
+
+    // Estructura lock-free en RAM que permite resolver consultas de cuotas en < 0.05 ms
+    private final Cache<UUID, CachedTenantSubscriptionPolicy> policyCache;
+
+    public SubscriptionContextFacadeImpl(
+            TenantSubscriptionRepository subscriptionRepository,
+            SubscriptionPlanRepository planRepository) {
+        this.subscriptionRepository = subscriptionRepository;
+        this.planRepository = planRepository;
+        this.policyCache = Caffeine.newBuilder()
+                .maximumSize(10_000)
+                .expireAfterWrite(Duration.ofMinutes(30))
+                .recordStats()
+                .build();
+    }
+
+    @Override
+    public boolean isTenantSubscriptionActive(UUID tenantId) {
+        return getOrLoadPolicy(tenantId).isActive();
+    }
+
+    @Override
+    public TenantQuotaLimitsDto getTenantQuotaLimits(UUID tenantId) {
+        return getOrLoadPolicy(tenantId).quotas();
+    }
+
+    @Override
+    public TenantSubscriptionStatusDto getTenantSubscriptionStatus(UUID tenantId) {
+        CachedTenantSubscriptionPolicy policy = getOrLoadPolicy(tenantId);
+        return new TenantSubscriptionStatusDto(
+                tenantId,
+                policy.planName(),
+                policy.tier(),
+                policy.status(),
+                policy.isActive(),
+                policy.periodEnd(),
+                policy.cancelAtPeriodEnd()
+        );
+    }
+
+    @Override
+    public boolean canAddBranch(UUID tenantId, int currentBranchCount) {
+        CachedTenantSubscriptionPolicy policy = getOrLoadPolicy(tenantId);
+        return policy.isActive() && currentBranchCount < policy.quotas().maxBranches();
+    }
+
+    @Override
+    public boolean canAddStaffMember(UUID tenantId, int currentStaffCount) {
+        CachedTenantSubscriptionPolicy policy = getOrLoadPolicy(tenantId);
+        return policy.isActive() && currentStaffCount < policy.quotas().maxActiveStaff();
+    }
+
+    @Override
+    public boolean canCreateWorkOrder(UUID tenantId, int currentMonthlyWorkOrders) {
+        CachedTenantSubscriptionPolicy policy = getOrLoadPolicy(tenantId);
+        return policy.isActive() && currentMonthlyWorkOrders < policy.quotas().maxMonthlyWorkOrders();
+    }
+
+    @Override
+    public boolean isFeatureAllowed(UUID tenantId, String featureKey) {
+        CachedTenantSubscriptionPolicy policy = getOrLoadPolicy(tenantId);
+        return policy.isActive() && policy.allowedFeatures().contains(featureKey);
+    }
+
+    @Override
+    public FeatureEntitlementDto checkFeatureEntitlement(UUID tenantId, String featureKey) {
+        CachedTenantSubscriptionPolicy policy = getOrLoadPolicy(tenantId);
+        boolean isEntitled = policy.isActive() && policy.allowedFeatures().contains(featureKey);
+        return new FeatureEntitlementDto(tenantId, featureKey, isEntitled, 0, 0);
+    }
+
+    /**
+     * Invalida de forma reactiva la caché in-memory al recibirse eventos de cambio de estado o upgrade.
+     */
+    public void evictCache(UUID tenantId) {
+        policyCache.invalidate(tenantId);
+        log.debug("Caché de suscripción invalidada en RAM para el taller: {}", tenantId);
+    }
+
+    private CachedTenantSubscriptionPolicy getOrLoadPolicy(UUID tenantId) {
+        return policyCache.get(tenantId, id -> {
+            log.debug("Cache miss para el taller {}. Cargando estado desde PostgreSQL...", id);
+            return subscriptionRepository.findByTenantId(new TenantId(id))
+                    .map(sub -> {
+                        SubscriptionPlan plan = planRepository.findById(sub.getPlanId())
+                                .orElseThrow(() -> new IllegalStateException("Plan no hallado para suscripción activa"));
+                        
+                        TenantQuotaLimitsDto quotaDto = new TenantQuotaLimitsDto(
+                                plan.getQuotaLimits().maxBranches(),
+                                plan.getQuotaLimits().maxActiveStaff(),
+                                plan.getQuotaLimits().maxActiveObd2Devices(),
+                                plan.getQuotaLimits().maxPhotosPerWorkOrder(),
+                                plan.getQuotaLimits().maxMonthlyAiReports(),
+                                plan.getQuotaLimits().companyRegistrationAllowed(),
+                                plan.getQuotaLimits().multiWarehouseAllowed(),
+                                plan.getQuotaLimits().marketplaceListed(),
+                                plan.getQuotaLimits().maxMonthlyWorkOrders(),
+                                plan.getQuotaLimits().iotTelemetryEnabled(),
+                                plan.getQuotaLimits().aiDiagnosticsEnabled()
+                        );
+
+                        Set<String> features = plan.getFeatures().stream()
+                                .filter(f -> f.isEnabled())
+                                .map(f -> f.getFeatureKey())
+                                .collect(Collectors.toUnmodifiableSet());
+
+                        return new CachedTenantSubscriptionPolicy(
+                                sub.isAccessGranted(),
+                                plan.getName(),
+                                plan.getTier().name(),
+                                sub.getStatus().name(),
+                                sub.getCurrentPeriod().endDate(),
+                                sub.isCancelAtPeriodEnd(),
+                                quotaDto,
+                                features
+                        );
+                    })
+                    .orElseGet(() -> CachedTenantSubscriptionPolicy.inactiveDefault());
+        });
+    }
+
+    private record CachedTenantSubscriptionPolicy(
+            boolean isActive,
+            String planName,
+            String tier,
+            String status,
+            java.time.Instant periodEnd,
+            boolean cancelAtPeriodEnd,
+            TenantQuotaLimitsDto quotas,
+            Set<String> allowedFeatures
+    ) {
+        public static CachedTenantSubscriptionPolicy inactiveDefault() {
+            return new CachedTenantSubscriptionPolicy(
+                    false,
+                    "Sin Plan",
+                    "NONE",
+                    "INACTIVE",
+                    java.time.Instant.EPOCH,
+                    false,
+                    new TenantQuotaLimitsDto(0, 0, 0, 0, 0, false, false, false, 0, false, false),
+                    Collections.emptySet()
+            );
+        }
+    }
+}
+```
 
 ---
 
 ### 10.5. 2.6.8.4. Infrastructure Layer
 
-#### 10.5.1. JPA Entities
+#### 10.5.1. JPA Persistence Entities
 
-##### 1. `SubscriptionPlanJpaEntity`
+##### 1. `SubscriptionPlanPersistenceEntity`
 * **Tabla Relacional:** `plans`
 * **Mapeo:**
 ```java
@@ -1259,7 +1776,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "plans")
-public class SubscriptionPlanJpaEntity extends AuditableAbstractPersistenceEntity {
+public class SubscriptionPlanPersistenceEntity extends AuditableAbstractPersistenceEntity {
     @Id
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
@@ -1298,13 +1815,13 @@ public class SubscriptionPlanJpaEntity extends AuditableAbstractPersistenceEntit
     private boolean isActive = true;
 
     @OneToMany(mappedBy = "plan", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<PlanFeatureJpaEntity> features = new ArrayList<>();
+    private List<PlanFeaturePersistenceEntity> features = new ArrayList<>();
 
     // Constructores, Getters y Setters JPA
 }
 ```
 
-##### 2. `PlanFeatureJpaEntity`
+##### 2. `PlanFeaturePersistenceEntity`
 * **Tabla Relacional:** `plan_features`
 * **Mapeo:**
 ```java
@@ -1317,14 +1834,14 @@ import java.util.UUID;
 @Table(name = "plan_features", uniqueConstraints = {
     @UniqueConstraint(name = "uk_plan_features_plan_key", columnNames = {"plan_id", "feature_key"})
 })
-public class PlanFeatureJpaEntity {
+public class PlanFeaturePersistenceEntity {
     @Id
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "plan_id", nullable = false)
-    private SubscriptionPlanJpaEntity plan;
+    private SubscriptionPlanPersistenceEntity plan;
 
     @Column(name = "feature_key", nullable = false, length = 50)
     private String featureKey;
@@ -1342,7 +1859,7 @@ public class PlanFeatureJpaEntity {
 }
 ```
 
-##### 3. `TenantSubscriptionJpaEntity`
+##### 3. `TenantSubscriptionPersistenceEntity`
 * **Tabla Relacional:** `subscriptions`
 * **Mapeo:**
 ```java
@@ -1360,7 +1877,7 @@ import java.util.UUID;
     @Index(name = "idx_subscriptions_stripe_sub", columnList = "stripe_sub_id"),
     @Index(name = "idx_subscriptions_status", columnList = "status")
 })
-public class TenantSubscriptionJpaEntity extends AuditableAbstractPersistenceEntity {
+public class TenantSubscriptionPersistenceEntity extends AuditableAbstractPersistenceEntity {
     @Id
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
@@ -1399,7 +1916,7 @@ public class TenantSubscriptionJpaEntity extends AuditableAbstractPersistenceEnt
 }
 ```
 
-##### 4. `SaasInvoiceJpaEntity`
+##### 4. `SaasInvoicePersistenceEntity`
 * **Tabla Relacional:** `invoices`
 * **Mapeo:**
 ```java
@@ -1416,7 +1933,7 @@ import java.util.UUID;
     @Index(name = "idx_invoices_tenant", columnList = "tenant_id"),
     @Index(name = "idx_invoices_stripe_inv", columnList = "stripe_invoice_id")
 })
-public class SaasInvoiceJpaEntity extends AuditableAbstractPersistenceEntity {
+public class SaasInvoicePersistenceEntity extends AuditableAbstractPersistenceEntity {
     @Id
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
@@ -1452,7 +1969,7 @@ public class SaasInvoiceJpaEntity extends AuditableAbstractPersistenceEntity {
 }
 ```
 
-##### 5. `StripeWebhookEventJpaEntity`
+##### 5. `StripeWebhookEventPersistenceEntity`
 * **Tabla Relacional:** `stripe_events`
 * **Mapeo:**
 ```java
@@ -1466,7 +1983,7 @@ import java.util.UUID;
 @Table(name = "stripe_events", uniqueConstraints = {
     @UniqueConstraint(name = "uk_stripe_events_event_id", columnNames = {"stripe_event_id"})
 })
-public class StripeWebhookEventJpaEntity {
+public class StripeWebhookEventPersistenceEntity {
     @Id
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
@@ -1508,24 +2025,24 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface SpringDataSubscriptionPlanRepository extends JpaRepository<SubscriptionPlanJpaEntity, UUID> {
-    Optional<SubscriptionPlanJpaEntity> findByStripePriceId(String stripePriceId);
-    List<SubscriptionPlanJpaEntity> findAllByIsActiveTrue();
+public interface SubscriptionPlanPersistenceRepository extends JpaRepository<SubscriptionPlanPersistenceEntity, UUID> {
+    Optional<SubscriptionPlanPersistenceEntity> findByStripePriceId(String stripePriceId);
+    List<SubscriptionPlanPersistenceEntity> findAllByIsActiveTrue();
 }
 
-public interface SpringDataTenantSubscriptionRepository extends JpaRepository<TenantSubscriptionJpaEntity, UUID> {
-    Optional<TenantSubscriptionJpaEntity> findByTenantId(UUID tenantId);
-    Optional<TenantSubscriptionJpaEntity> findByStripeSubscriptionId(String stripeSubscriptionId);
+public interface TenantSubscriptionPersistenceRepository extends JpaRepository<TenantSubscriptionPersistenceEntity, UUID> {
+    Optional<TenantSubscriptionPersistenceEntity> findByTenantId(UUID tenantId);
+    Optional<TenantSubscriptionPersistenceEntity> findByStripeSubscriptionId(String stripeSubscriptionId);
     boolean existsByTenantIdAndStatusIn(UUID tenantId, Collection<String> statuses);
 }
 
-public interface SpringDataSaasInvoiceRepository extends JpaRepository<SaasInvoiceJpaEntity, UUID> {
-    Optional<SaasInvoiceJpaEntity> findByStripeInvoiceId(String stripeInvoiceId);
-    List<SaasInvoiceJpaEntity> findAllByTenantIdOrderByCreatedAtDesc(UUID tenantId, Pageable pageable);
+public interface SaasInvoicePersistenceRepository extends JpaRepository<SaasInvoicePersistenceEntity, UUID> {
+    Optional<SaasInvoicePersistenceEntity> findByStripeInvoiceId(String stripeInvoiceId);
+    List<SaasInvoicePersistenceEntity> findAllByTenantIdOrderByCreatedAtDesc(UUID tenantId, Pageable pageable);
 }
 
-public interface SpringDataStripeWebhookEventRepository extends JpaRepository<StripeWebhookEventJpaEntity, UUID> {
-    Optional<StripeWebhookEventJpaEntity> findByStripeEventId(String stripeEventId);
+public interface StripeWebhookEventPersistenceRepository extends JpaRepository<StripeWebhookEventPersistenceEntity, UUID> {
+    Optional<StripeWebhookEventPersistenceEntity> findByStripeEventId(String stripeEventId);
     boolean existsByStripeEventId(String stripeEventId);
 }
 ```
@@ -1535,11 +2052,12 @@ public interface SpringDataStripeWebhookEventRepository extends JpaRepository<St
 #### 10.5.3. Repository Implementations & Adapters
 
 ```java
-package com.andeva.atelier.platform.billing.infrastructure.persistence.jpa.repositories;
+package com.andeva.atelier.platform.billing.infrastructure.persistence.jpa.adapters;
 
 import com.andeva.atelier.platform.billing.domain.model.aggregates.*;
 import com.andeva.atelier.platform.billing.domain.repositories.*;
-import com.andeva.atelier.platform.billing.infrastructure.persistence.jpa.transform.*;
+import com.andeva.atelier.platform.billing.infrastructure.persistence.jpa.assemblers.*;
+import com.andeva.atelier.platform.billing.infrastructure.persistence.jpa.repositories.*;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
@@ -1547,10 +2065,10 @@ import java.util.*;
 @Repository
 @Transactional(readOnly = true)
 public class SubscriptionPlanRepositoryImpl implements SubscriptionPlanRepository {
-    private final SpringDataSubscriptionPlanRepository springRepo;
+    private final SubscriptionPlanPersistenceRepository springRepo;
     private final SubscriptionPlanPersistenceAssembler assembler;
 
-    public SubscriptionPlanRepositoryImpl(SpringDataSubscriptionPlanRepository springRepo, SubscriptionPlanPersistenceAssembler assembler) {
+    public SubscriptionPlanRepositoryImpl(SubscriptionPlanPersistenceRepository springRepo, SubscriptionPlanPersistenceAssembler assembler) {
         this.springRepo = springRepo;
         this.assembler = assembler;
     }
@@ -1578,39 +2096,40 @@ public class SubscriptionPlanRepositoryImpl implements SubscriptionPlanRepositor
 }
 ```
 
-* **`TenantSubscriptionRepositoryImpl`:** Implementa `TenantSubscriptionRepository` delegando en `SpringDataTenantSubscriptionRepository` y transformando mediante `TenantSubscriptionPersistenceAssembler`.
-* **`SaasInvoiceRepositoryImpl`:** Implementa `SaasInvoiceRepository` delegando en `SpringDataSaasInvoiceRepository` y `SaasInvoicePersistenceAssembler`.
-* **`StripeWebhookEventRepositoryImpl`:** Implementa `StripeWebhookEventRepository` persistiendo eventos en la tabla `stripe_events` para asegurar control de idempotencia sin colisiones transaccionales.
+* **`TenantSubscriptionRepositoryImpl`:** Implementa `TenantSubscriptionRepository` delegando en `TenantSubscriptionPersistenceRepository` y ensamblando mediante `TenantSubscriptionPersistenceAssembler`.
+* **`SaasInvoiceRepositoryImpl`:** Implementa `SaasInvoiceRepository` delegando en `SaasInvoicePersistenceRepository` y `SaasInvoicePersistenceAssembler`.
+* **`StripeWebhookEventRepositoryImpl`:** Implementa `StripeWebhookEventRepository` persistiendo eventos en la tabla `stripe_events` delegando en `StripeWebhookEventPersistenceRepository` y `StripeWebhookEventPersistenceAssembler` para asegurar control de idempotencia sin colisiones transaccionales.
 
 ---
 
 #### 10.5.4. Persistence Assemblers & Data Mappers
 
-* **`SubscriptionPlanPersistenceAssembler`:** Transforma agregados `SubscriptionPlan` hacia `SubscriptionPlanJpaEntity` (desplegando sus cuotas en columnas escalares y sus características en entidades hijas `PlanFeatureJpaEntity`) y viceversa.
-* **`TenantSubscriptionPersistenceAssembler`:** Reconstruye la raíz de agregado `TenantSubscription` a partir de `TenantSubscriptionJpaEntity` mapeando cadenas de estado hacia el enum de dominio `SubscriptionStatus`.
-* **`SaasInvoicePersistenceAssembler`:** Mapea el agregado `SaasInvoice` hacia `SaasInvoiceJpaEntity` y traduce el estado de facturación `InvoiceStatus`.
-* **`StripeWebhookEventPersistenceAssembler`:** Transforma la raíz de agregado `StripeWebhookEvent` hacia `StripeWebhookEventJpaEntity`.
+* **`SubscriptionPlanPersistenceAssembler`:** Ensambla agregados `SubscriptionPlan` hacia `SubscriptionPlanPersistenceEntity` (desplegando sus cuotas en columnas escalares y sus características en entidades dependientes `PlanFeaturePersistenceEntity`) y viceversa.
+* **`TenantSubscriptionPersistenceAssembler`:** Reconstruye la raíz de agregado `TenantSubscription` a partir de `TenantSubscriptionPersistenceEntity` mapeando cadenas de estado hacia el enum de dominio `SubscriptionStatus`.
+* **`SaasInvoicePersistenceAssembler`:** Mapea el agregado `SaasInvoice` hacia `SaasInvoicePersistenceEntity` y traduce el estado de facturación `InvoiceStatus`.
+* **`StripeWebhookEventPersistenceAssembler`:** Convierte la raíz de agregado `StripeWebhookEvent` hacia `StripeWebhookEventPersistenceEntity`.
 
 ---
 
 #### 10.5.5. JPA Attribute Converters
 
-* **`PlanTierConverter`:** Implementa `AttributeConverter<PlanTier, String>` persistiendo los valores `COMMUNITY`, `STARTER`, `PROFESSIONAL`, `ENTERPRISE`.
+* **`PlanTierConverter`:** Implementa `AttributeConverter<PlanTier, String>` persistiendo los valores `GO`, `PRO`, `MAX`, `ENTERPRISE`.
 * **`SubscriptionStatusConverter`:** Implementa `AttributeConverter<SubscriptionStatus, String>` mapeando `INCOMPLETE`, `TRIALING`, `ACTIVE`, `PAST_DUE`, `CANCELED`, `UNPAID`.
 * **`InvoiceStatusConverter`:** Implementa `AttributeConverter<InvoiceStatus, String>` mapeando `DRAFT`, `OPEN`, `PAID`, `VOID`, `UNCOLLECTIBLE`.
 * **`BillingCycleConverter`:** Implementa `AttributeConverter<BillingCycle, String>` mapeando `MONTHLY` y `ANNUAL`.
+* **`WebhookProcessingStatusConverter`:** Implementa `AttributeConverter<WebhookProcessingStatus, String>` mapeando `PENDING`, `PROCESSED`, `FAILED`, `IGNORED`.
 
 ---
 
-#### 10.5.6. External Gateways & Cloud Adapters
+#### 10.5.6. External Gateways & Outbound Adapters
 
-##### 1. `StripeGatewayAdapter`
-* **Paquete:** `com.andeva.atelier.platform.billing.infrastructure.gateways`
-* **Propósito:** Implementa el puerto saliente `StripeGateway` de la capa de aplicación, encapsulando la interacción remota con la API de Stripe mediante el SDK oficial `stripe-java`:
+##### 1. `StripeGatewayAdapter` y `StripeWebhookSignatureVerifierAdapter`
+* **Paquete:** `com.andeva.atelier.platform.billing.infrastructure.external.payment.stripe`
+* **Propósito:** Implementa el puerto saliente `StripeGatewayPort` de la capa de aplicación, encapsulando la interacción remota con la API de Stripe mediante el SDK oficial `stripe-java`:
 ```java
-package com.andeva.atelier.platform.billing.infrastructure.gateways;
+package com.andeva.atelier.platform.billing.infrastructure.external.payment.stripe;
 
-import com.andeva.atelier.platform.billing.application.ports.outbound.StripeGateway;
+import com.andeva.atelier.platform.billing.application.internal.outbound.acl.StripeGatewayPort;
 import com.andeva.atelier.platform.billing.domain.exceptions.BillingDomainException;
 import com.stripe.StripeClient;
 import com.stripe.exception.StripeException;
@@ -1619,20 +2138,21 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public class StripeGatewayAdapter implements StripeGateway {
+public class StripeGatewayAdapter implements StripeGatewayPort {
+
     private final StripeClient stripeClient;
 
-    public StripeGatewayAdapter(@Value("${stripe.secret-key}") String secretKey) {
-        this.stripeClient = new StripeClient(secretKey);
+    public StripeGatewayAdapter(@Value("${stripe.api.key}") String apiKey) {
+        this.stripeClient = new StripeClient(apiKey);
     }
 
     @Override
     public String createCheckoutSession(String customerId, String priceId, String successUrl, String cancelUrl) {
         try {
             SessionCreateParams params = SessionCreateParams.builder()
-                .setCustomer(customerId)
                 .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
-                .setSuccessUrl(successUrl + "?session_id={CHECKOUT_SESSION_ID}")
+                .setCustomer(customerId)
+                .setSuccessUrl(successUrl)
                 .setCancelUrl(cancelUrl)
                 .addLineItem(SessionCreateParams.LineItem.builder()
                     .setPrice(priceId)
@@ -1647,19 +2167,19 @@ public class StripeGatewayAdapter implements StripeGateway {
 }
 ```
 
-##### 2. `ResendEmailAdapter`
-* **Paquete:** `com.andeva.atelier.platform.billing.infrastructure.gateways`
-* **Propósito:** Implementa el puerto saliente `EmailGateway` de la capa de aplicación. Envía notificaciones de bienvenida, recibos de suscripción y alertas de mora bancaria utilizando el servicio REST transaccional de Resend.
+##### 2. `ResendBillingNotificationAdapter`
+* **Paquete:** `com.andeva.atelier.platform.billing.infrastructure.external.mail.resend`
+* **Propósito:** Implementa el puerto saliente `TenantBillingNotificationGatewayPort` de la capa de aplicación. Envía notificaciones de bienvenida, recibos de suscripción y alertas de mora bancaria utilizando el servicio REST transaccional de Resend.
 
-##### 3. `IamClientAdapter`
-* **Paquete:** `com.andeva.atelier.platform.billing.infrastructure.gateways`
-* **Propósito:** Implementa el puerto saliente `IamClientPort` de la capa de aplicación consumiendo la fachada en memoria `TenancyContextFacade` del contexto IAM & Tenancy para verificar existencia y datos fiscales del taller sin generar dependencias de base de datos intermodulares.
+##### 3. `IamTenantValidationAdapter`
+* **Paquete:** `com.andeva.atelier.platform.billing.infrastructure.external.acl.iam`
+* **Propósito:** Implementa el puerto saliente `IamTenantValidationAclPort` de la capa de aplicación consumiendo la fachada en memoria `TenancyContextFacade` del contexto IAM & Tenancy para verificar existencia y datos corporativos del taller sin generar acoplamientos de persistencia intermodulares.
 
-##### 4. `CaffeineCacheConfig`
-* **Paquete:** `com.andeva.atelier.platform.billing.infrastructure.cache`
+##### 4. `CaffeineBillingCacheAdapter` y `CaffeineCacheConfiguration`
+* **Paquete:** `com.andeva.atelier.platform.billing.infrastructure.external.cache.caffeine`
 * **Propósito:** Configura los cachés locales de alto rendimiento para `tenantSubscriptionStatus` y `activePlans` con tiempo de expiración tras escritura (5 minutos) y capacidad máxima de 10,000 entradas para ofrecer validaciones de cuota en latencia sub-milisegundo (< 0.05 ms).
 ```java
-package com.andeva.atelier.platform.billing.infrastructure.cache;
+package com.andeva.atelier.platform.billing.infrastructure.external.cache.caffeine;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.cache.CacheManager;
@@ -1669,7 +2189,7 @@ import org.springframework.context.annotation.Configuration;
 import java.util.concurrent.TimeUnit;
 
 @Configuration
-public class CaffeineCacheConfig {
+public class CaffeineCacheConfiguration {
     @Bean
     public CacheManager billingCacheManager() {
         CaffeineCacheManager cacheManager = new CaffeineCacheManager("tenantSubscriptionStatus", "activePlans");
@@ -1682,6 +2202,10 @@ public class CaffeineCacheConfig {
     }
 }
 ```
+
+##### 5. `BillingOutboxMessageRelayAdapter`
+* **Paquete:** `com.andeva.atelier.platform.billing.infrastructure.external.messaging.outbox`
+* **Propósito:** Implementa el relevo asíncrono y despacho telemático de mensajes almacenados en la tabla de Outbox de Billing hacia el broker de eventos del sistema, garantizando entrega resiliente con reintentos exponenciales.
 
 ---
 
@@ -1708,7 +2232,7 @@ A continuación se transcribe la definición formal de los componentes y sus int
 
 ```dsl
 // Definición de componentes del Bounded Context SaaS Billing & Subscriptions dentro de API Application
-billing_controllers = component "Billing REST Controllers & Resource Assemblers Component" "Expone endpoints REST perimetrales para catálogo comercial de planes, checkout sessions, acceso al portal de cliente Stripe, historial de recibos y webhooks asíncronos; valida contratos DTO y proyecta recursos con hipermedios." "Spring MVC, SpringDoc OpenAPI, Jakarta Validation, Spring HATEOAS"
+billing_controllers = component "Billing REST Controllers & Resource Assemblers Component" "Expone endpoints REST perimetrales para catálogo comercial de planes, checkout sessions, acceso al portal de cliente Stripe, historial de recibos y webhooks asíncronos, valida contratos DTO y proyecta recursos con hipermedios." "Spring MVC, SpringDoc OpenAPI, Jakarta Validation, Spring HATEOAS"
 billing_app_services = component "Billing CQRS Application Services Component" "Orquesta casos de uso de membresía, transiciones de estado, cancelaciones y registro de comprobantes bajo transacciones ACID, canalizando respuestas mediante tipos Result." "Spring Service, Transactional, CQRS"
 billing_event_handlers = component "Billing Event Handlers & Webhook Processing Component" "Procesa notificaciones asíncronas de Stripe con validación de idempotencia sobre la tabla stripe_events y despacha eventos de dominio de activación y morosidad." "Spring Events, TransactionalEventListener, Webhook Processor"
 billing_domain = component "Billing Domain Model & Quota Governance Engines Component" "Encapsula invariantes de cuotas, raíces de agregado SubscriptionPlan, TenantSubscription, SaasInvoice y StripeWebhookEvent, y verificación de firma criptográfica HMAC-SHA256." "Java 24, Domain Model, Records, Inmutabilidad"
@@ -1823,9 +2347,9 @@ En caso de fallo de caché (*Cache Miss*), la fachada delega en **Billing Persis
 
 ---
 
-### 10.7. 2.6.8.6. Code Level Diagrams
+### 10.7. 2.6.8.6. Bounded Context Software Architecture Code Level Diagrams
 
-#### 10.7.1. 2.6.8.6.1. Domain Class Diagram
+#### 10.7.1. 2.6.8.6.1. Bounded Context Domain Layer Class Diagrams
 
 El Diagrama de Clases de la Capa de Dominio formaliza los contratos en memoria, agregados transaccionales, entidades subordinadas, identificadores fuertemente tipados, objetos de valor inmutables, servicios de dominio puros y puertos de persistencia del Bounded Context **SaaS Billing & Subscriptions** (`com.andeva.atelier.platform.billing.domain`). En la siguiente figura se exhibe el diagrama compilado a partir del código fuente canónico en PlantUML:
 
@@ -1871,7 +2395,7 @@ El modelo de dominio de SaaS Billing & Subscriptions se estructura en 9 paquetes
    * `SubscriptionPeriod`: Registro inmutable que delimita el intervalo cronológico de vigencia pagada (`startDate`, `endDate`).
    * `Money`, `Currency`: Tipos monetarios universales de Shared Kernel para cuantías económicas y divisas oficiales.
 5. **`billing.domain.model.enums` (Enumeraciones de Dominio):**
-   * `PlanTier`: Niveles comerciales del catálogo (`STARTER`, `PROFESSIONAL`, `ENTERPRISE`).
+   * `PlanTier`: Niveles comerciales del catálogo (`GO`, `PRO`, `MAX`, `ENTERPRISE`).
    * `BillingCycle`: Periodicidades de cobro recurrente (`MONTHLY`, `YEARLY`).
    * `SubscriptionStatus`: Estados operativos de la membresía (`TRIALING`, `ACTIVE`, `PAST_DUE`, `CANCELED`, `UNPAID`, `INCOMPLETE`).
    * `InvoiceStatus`: Estados de liquidación contable (`PAID`, `OPEN`, `VOID`, `UNCOLLECTIBLE`).
@@ -1879,12 +2403,13 @@ El modelo de dominio de SaaS Billing & Subscriptions se estructura en 9 paquetes
 6. **`billing.domain.services` (Servicios de Dominio Puros):**
    * `SubscriptionQuotaEnforcementService`: Motor algorítmico que fiscaliza el consumo operativo frente a las cuotas del plan contratado.
    * `StripeWebhookSignatureVerificationService`: Servicio criptográfico que autentica firmas digitales HMAC-SHA256 de webhooks entrantes.
+   * `SubscriptionLifecycleDomainService`: Servicio de dominio que orquesta transiciones de ciclo de vida contractual y periodos de gracia.
 7. **`billing.domain.repositories` (Puertos de Repositorio):**
    * `SubscriptionPlanRepository`, `TenantSubscriptionRepository`, `SaasInvoiceRepository`, `StripeWebhookEventRepository`: Interfaces puras de persistencia agnóstica de infraestructura.
 8. **`billing.domain.events` (Eventos de Dominio):**
    * Eventos inmutables emitidos por los agregados ante mutaciones transaccionales (`SubscriptionPlanCreatedEvent`, `TenantSubscriptionActivatedEvent`, `TenantSubscriptionRenewedEvent`, `TenantSubscriptionPastDueEvent`, `TenantSubscriptionCanceledEvent`, `SaasInvoicePaidEvent`, `SaasInvoicePaymentFailedEvent`, `StripeWebhookProcessedEvent`).
 9. **`billing.domain.exceptions` (Jerarquía de Excepciones Semánticas):**
-   * `BillingDomainException` y subclases semánticas (`PlanNotFoundException`, `SubscriptionNotFoundException`, `QuotaExceededException`, `DuplicateActiveSubscriptionException`, `InvalidWebhookSignatureException`, `StripeWebhookProcessingException`, `SubscriptionPastDueException`) que derivan de `DomainException`.
+   * `BillingDomainException` y 10 subclases semánticas (`DuplicateActiveSubscriptionException`, `InvalidPlanPricingException`, `InvalidWebhookSignatureException`, `PlanNotFoundException`, `QuotaExceededException`, `SaasInvoiceNotFoundException`, `StripeIntegrationException`, `StripeWebhookProcessingException`, `SubscriptionNotFoundException`, `SubscriptionPastDueException`) que derivan de `DomainException`.
 
 ##### 3. Diccionario Completo de Atributos, Métodos y Relaciones de Dominio
 
@@ -1900,9 +2425,10 @@ En la siguiente tabla técnica se detalla el catálogo pormenorizado de clases, 
 | **SaasInvoice** | Factorías y Métodos | `static SaasInvoice recordPaid(SubscriptionId, TenantId, StripeInvoiceId, Money, String, String, Instant)`<br>`void markPaymentFailed(String)`<br>`void markVoid()`<br>`SaasInvoiceId id()`<br>`SubscriptionId subscriptionId()`<br>`TenantId tenantId()`<br>`StripeInvoiceId stripeInvoiceId()`<br>`Money amountPaid()`<br>`Currency currency()`<br>`InvoiceStatus status()`<br>`String invoicePdfUrl()`<br>`String hostedInvoiceUrl()`<br>`Optional<Instant> paidAt()` | Público | `recordPaid()` registra un recibo saldado exitosamente en estado `PAID` y emite `SaasInvoicePaidEvent`. `markPaymentFailed()` asienta el motivo del fallo y emite `SaasInvoicePaymentFailedEvent`. `markVoid()` anula el recibo contable. |
 | **StripeWebhookEvent** | Atributos | `UUID id`<br>`StripeEventId stripeEventId`<br>`String eventType`<br>`String eventPayload`<br>`WebhookProcessingStatus status`<br>`Optional<Instant> processedAt`<br>`Optional<String> errorMessage` | Privado | Raíz de agregado de auditoría e idempotencia. Extiende `AbstractDomainAggregateRoot<UUID>`. Garantiza que las notificaciones telemáticas asíncronas se procesen exactamente una vez. |
 | **StripeWebhookEvent** | Factorías y Métodos | `static StripeWebhookEvent receive(StripeEventId, String, String)`<br>`void markProcessed(Instant)`<br>`void markFailed(String)`<br>`void markIgnored()`<br>`UUID id()`<br>`StripeEventId stripeEventId()`<br>`String eventType()`<br>`String eventPayload()`<br>`WebhookProcessingStatus status()`<br>`Optional<Instant> processedAt()`<br>`Optional<String> errorMessage()` | Público | `receive()` instancia el evento en estado `PENDING`. `markProcessed()` asienta la ejecución conforme y emite `StripeWebhookProcessedEvent`. `markFailed()` retiene la excepción para diagnóstico forense. `markIgnored()` clasifica eventos irrelevantes para la plataforma. |
-| **PlanFeature** | Entidad Dependiente | `UUID id`<br>`PlanId planId`<br>`String featureKey`<br>`String description`<br>`boolean isEnabled` | Privado / Público | Entidad subordinada a `SubscriptionPlan`. Modela un módulo funcional (telemetría OBD-II, predicción IA). Métodos `of()`, `enable()`, `disable()` y selectores de lectura. |
-| **SubscriptionQuotaEnforcementService** | Servicio de Dominio | `void validateBranchCreationAllowed(TenantSubscription, SubscriptionPlan, int)`<br>`void validateStaffAdditionAllowed(TenantSubscription, SubscriptionPlan, int)`<br>`void validateWorkOrderCreationAllowed(TenantSubscription, SubscriptionPlan, int)`<br>`boolean isFeatureEnabled(TenantSubscription, SubscriptionPlan, String)` | Público | Servicio de dominio puro sin estado. Fiscaliza límites de sucursales, personal y órdenes de trabajo frente a los consumos acumulados, emitiendo `QuotaExceededException` si se sobrepasa la capacidad contratada. |
+| **PlanFeature** | Entidad Dependiente | `PlanFeatureId id`<br>`PlanId planId`<br>`String featureKey`<br>`String description`<br>`boolean isEnabled` | Privado / Público | Entidad subordinada a `SubscriptionPlan`. Modela un módulo funcional (telemetría OBD-II, predicción IA). Métodos `of()`, `enable()`, `disable()` y selectores de lectura. |
+| **SubscriptionQuotaEnforcementService** | Servicio de Dominio | `void validateBranchCreationAllowed(TenantSubscription, SubscriptionPlan, int)`<br>`void validateStaffAdditionAllowed(TenantSubscription, SubscriptionPlan, int)`<br>`void validateWorkOrderCreationAllowed(TenantSubscription, SubscriptionPlan, int)`<br>`void validateObd2DeviceRegistrationAllowed(TenantSubscription, SubscriptionPlan, int)`<br>`void validatePhotoUploadAllowed(TenantSubscription, SubscriptionPlan, int)`<br>`void validateCompanyCustomerRegistrationAllowed(TenantSubscription, SubscriptionPlan)`<br>`void validateAiReportGenerationAllowed(TenantSubscription, SubscriptionPlan, int)`<br>`void validateMultiWarehouseTransferAllowed(TenantSubscription, SubscriptionPlan)`<br>`boolean isFeatureEnabled(TenantSubscription, SubscriptionPlan, String)` | Público | Servicio de dominio puro sin estado. Fiscaliza límites de sucursales, personal, órdenes de trabajo, telemetría OBD-II, fotos periciales, clientes jurídicos, informes predictivos IA y multi-almacén, emitiendo `QuotaExceededException` si se sobrepasa la capacidad contratada. |
 | **StripeWebhookSignatureVerificationService** | Servicio de Dominio | `boolean verifySignature(String, String, String)`<br>`long extractTimestamp(String)` | Público | Servicio criptográfico sin estado. Computa el hash HMAC-SHA256 sobre el cuerpo del webhook con el secreto de endpoint y valida la firma recibida en la cabecera `Stripe-Signature`. |
+| **SubscriptionLifecycleDomainService** | Servicio de Dominio | `boolean isGracePeriodActive(TenantSubscription, Instant)`<br>`boolean canReactivate(TenantSubscription)`<br>`void evaluateExpirationPolicy(TenantSubscription, Instant)` | Público | Servicio de dominio puro sin estado. Evalúa ventanas de gracia, reactivaciones y políticas de suspensión o cancelación ante impagos reiterados. |
 | **SubscriptionPlanRepository** | Puerto de Repositorio | `SubscriptionPlan save(SubscriptionPlan)`<br>`Optional<SubscriptionPlan> findById(PlanId)`<br>`Optional<SubscriptionPlan> findByStripePriceId(StripePriceId)`<br>`List<SubscriptionPlan> findAllActive()` | Público | Contrato de persistencia agnóstica para el catálogo comercial de planes con recuperación por precio de pasarela o estado activo. |
 | **TenantSubscriptionRepository** | Puerto de Repositorio | `TenantSubscription save(TenantSubscription)`<br>`Optional<TenantSubscription> findById(SubscriptionId)`<br>`Optional<TenantSubscription> findByTenantId(TenantId)`<br>`Optional<TenantSubscription> findByStripeSubscriptionId(StripeSubscriptionId)`<br>`List<TenantSubscription> findAllByStatus(SubscriptionStatus)` | Público | Contrato de persistencia para membresías activas, búsqueda única por taller abonado (`TenantId`) y consultas de regularización por estado. |
 | **SaasInvoiceRepository** | Puerto de Repositorio | `SaasInvoice save(SaasInvoice)`<br>`Optional<SaasInvoice> findById(SaasInvoiceId)`<br>`Optional<SaasInvoice> findByStripeInvoiceId(StripeInvoiceId)`<br>`List<SaasInvoice> findAllByTenantId(TenantId)` | Público | Contrato de persistencia para comprobantes de recaudación con soporte para historial de recibos por taller. |
@@ -1916,9 +2442,9 @@ En la siguiente tabla técnica se detalla el catálogo pormenorizado de clases, 
 | **StripePriceId** | Identificador Tipado | `String value` | Público | Registro inmutable (`record`) que implementa `TypedId<String>`. Valida prefijo `price_`. |
 | **StripeInvoiceId** | Identificador Tipado | `String value` | Público | Registro inmutable (`record`) que implementa `TypedId<String>`. Valida prefijo `in_`. |
 | **PlanPricing** | Objeto de Valor | `Money price`<br>`BillingCycle billingCycle` | Público | Registro inmutable (`record`). Modela la cuantía monetaria y el intervalo temporal recurrente de cobro. |
-| **TenantQuotaLimits** | Objeto de Valor | `int maxBranches`<br>`int maxActiveStaff`<br>`boolean iotTelemetryEnabled`<br>`boolean aiDiagnosticsEnabled`<br>`int maxMonthlyWorkOrders` | Público | Registro inmutable (`record`). Define los techos contractuales de consumo y accesos a módulos de la plataforma. Métodos `canAddBranch()`, `canAddStaff()` y `canCreateWorkOrder()`. |
+| **TenantQuotaLimits** | Objeto de Valor | `int maxBranches`<br>`int maxActiveStaff`<br>`int maxActiveObd2Devices`<br>`int maxPhotosPerWorkOrder`<br>`int maxMonthlyAiReports`<br>`boolean companyRegistrationAllowed`<br>`boolean multiWarehouseAllowed`<br>`boolean marketplaceListed`<br>`int maxMonthlyWorkOrders`<br>`boolean iotTelemetryEnabled`<br>`boolean aiDiagnosticsEnabled` | Público | Registro inmutable (`record`). Define los techos contractuales de consumo y accesos a módulos de la plataforma. Métodos de consulta de cuotas y autorizaciones. |
 | **SubscriptionPeriod** | Objeto de Valor | `Instant startDate`<br>`Instant endDate` | Público | Registro inmutable (`record`). Intervalo temporal de cobertura pagada con métodos de verificación `isActiveAt()` y `daysRemaining()`. |
-| **PlanTier** | Enumeración | `STARTER, PROFESSIONAL, ENTERPRISE` | Público | Clasificación de niveles de paquetes comerciales ofertados. |
+| **PlanTier** | Enumeración | `GO, PRO, MAX, ENTERPRISE` | Público | Clasificación de niveles de paquetes comerciales ofertados. |
 | **BillingCycle** | Enumeración | `MONTHLY, YEARLY` | Público | Periodicidades de liquidación recurrente. |
 | **SubscriptionStatus** | Enumeración | `TRIALING, ACTIVE, PAST_DUE, CANCELED, UNPAID, INCOMPLETE` | Público | Estados del ciclo de vida operativo de la membresía del taller. |
 | **InvoiceStatus** | Enumeración | `PAID, OPEN, VOID, UNCOLLECTIBLE` | Público | Estados de liquidación contable del comprobante SaaS. |
@@ -2146,7 +2672,7 @@ package "billing.domain.model.aggregates" as aggregates #FDFEFE {
 package "billing.domain.model.entities" as entities #FDFEFE {
 
     class PlanFeature <<Entity>> {
-        - id: UUID
+        - id: PlanFeatureId
         - planId: PlanId
         - featureKey: String
         - description: String
@@ -2155,7 +2681,7 @@ package "billing.domain.model.entities" as entities #FDFEFE {
         + {static} of(planId: PlanId, featureKey: String, description: String, isEnabled: boolean): PlanFeature
         + enable(): void
         + disable(): void
-        + id(): UUID
+        + id(): PlanFeatureId
         + planId(): PlanId
         + featureKey(): String
         + description(): String
@@ -2173,6 +2699,11 @@ package "billing.domain.services" as services #FDFEFE {
         + validateBranchCreationAllowed(subscription: TenantSubscription, plan: SubscriptionPlan, currentBranchCount: int): void
         + validateStaffAdditionAllowed(subscription: TenantSubscription, plan: SubscriptionPlan, currentStaffCount: int): void
         + validateWorkOrderCreationAllowed(subscription: TenantSubscription, plan: SubscriptionPlan, currentMonthlyOrders: int): void
+        + validateObd2DeviceRegistrationAllowed(subscription: TenantSubscription, plan: SubscriptionPlan, currentActiveObd2Devices: int): void
+        + validatePhotoUploadAllowed(subscription: TenantSubscription, plan: SubscriptionPlan, currentPhotosInWorkOrder: int): void
+        + validateCompanyCustomerRegistrationAllowed(subscription: TenantSubscription, plan: SubscriptionPlan): void
+        + validateAiReportGenerationAllowed(subscription: TenantSubscription, plan: SubscriptionPlan, currentMonthlyAiReports: int): void
+        + validateMultiWarehouseTransferAllowed(subscription: TenantSubscription, plan: SubscriptionPlan): void
         + isFeatureEnabled(subscription: TenantSubscription, plan: SubscriptionPlan, featureKey: String): boolean
     }
 
@@ -2286,6 +2817,14 @@ package "billing.domain.model.ids" as ids #FDFEFE {
         + value(): String
     }
 
+    class PlanFeatureId <<TypedId>> {
+        - value: UUID
+        --
+        + {static} of(value: UUID): PlanFeatureId
+        + {static} generate(): PlanFeatureId
+        + value(): UUID
+    }
+
     class TenantId <<SharedKernel>> {
         - value: UUID
         --
@@ -2311,19 +2850,27 @@ package "billing.domain.model.valueobjects" as valueobjects #FDFEFE {
     class TenantQuotaLimits <<ValueObject>> {
         - maxBranches: int
         - maxActiveStaff: int
+        - maxActiveObd2Devices: int
+        - maxPhotosPerWorkOrder: int
+        - maxMonthlyAiReports: int
+        - companyRegistrationAllowed: boolean
+        - multiWarehouseAllowed: boolean
+        - marketplaceListed: boolean
+        - maxMonthlyWorkOrders: int
         - iotTelemetryEnabled: boolean
         - aiDiagnosticsEnabled: boolean
-        - maxMonthlyWorkOrders: int
         --
-        + {static} of(branches: int, staff: int, iot: boolean, ai: boolean, orders: int): TenantQuotaLimits
-        + canAddBranch(currentCount: int): boolean
-        + canAddStaff(currentCount: int): boolean
-        + canCreateWorkOrder(currentMonthlyCount: int): boolean
         + maxBranches(): int
         + maxActiveStaff(): int
+        + maxActiveObd2Devices(): int
+        + maxPhotosPerWorkOrder(): int
+        + maxMonthlyAiReports(): int
+        + companyRegistrationAllowed(): boolean
+        + multiWarehouseAllowed(): boolean
+        + marketplaceListed(): boolean
+        + maxMonthlyWorkOrders(): int
         + iotTelemetryEnabled(): boolean
         + aiDiagnosticsEnabled(): boolean
-        + maxMonthlyWorkOrders(): int
     }
 
     class SubscriptionPeriod <<ValueObject>> {
@@ -2360,8 +2907,9 @@ package "billing.domain.model.valueobjects" as valueobjects #FDFEFE {
 package "billing.domain.model.enums" as enums #FDFEFE {
 
     enum PlanTier {
-        STARTER
-        PROFESSIONAL
+        GO
+        PRO
+        MAX
         ENTERPRISE
     }
 
@@ -2824,7 +3372,7 @@ classDiagram
 
     class PlanFeature {
         <<Entity>>
-        -UUID id
+        -PlanFeatureId id
         -String featureKey
         -String description
         -boolean isEnabled
@@ -2913,7 +3461,7 @@ classDiagram
 
 ---
 
-#### 10.7.2. 2.6.8.6.2. Database Design ERD
+#### 10.7.2. 2.6.8.6.2. Bounded Context Database Design Diagram
 
 El diseño de persistencia física del Bounded Context SaaS Billing & Subscriptions modela el almacenamiento relacional requerido para asegurar el gobierno estricto de cuotas operativas, la gestión del ciclo contractual de membresías B2B y la conciliación asíncrona de cobros internacionales mediante Stripe bajo los estándares de cumplimiento PCI-DSS Nivel 1. La arquitectura se despliega de manera armónica en dos componentes complementarios: el motor relacional central PostgreSQL 16 para la plataforma web y API de backend (**API Application**), y el motor relacional embebido SQLite 3 para la aplicación técnica móvil de taller (**Mobile Workshop**).
 
@@ -2958,16 +3506,22 @@ A continuación se detalla la especificación técnica pormenorizada de los esqu
 | :--- | :---: | :---: | :---: | :--- | :--- |
 | id | UUID | NOT NULL | `gen_random_uuid()` | PK (`pk_plans`) | Identificador único universal del plan comercial. |
 | stripe_price_id | VARCHAR(100) | NOT NULL | - | UK (`uk_plans_stripe_price`) | Identificador oficial del precio en Stripe (ej. price_...). |
-| name | VARCHAR(100) | NOT NULL | - | Atributo | Nombre comercial formal (ej. Starter, Professional, Enterprise). |
-| tier | VARCHAR(20) | NOT NULL | - | CHECK (`chk_plans_tier`) | Nivel: COMMUNITY, STARTER, PROFESSIONAL, ENTERPRISE. |
+| name | VARCHAR(100) | NOT NULL | - | Atributo | Nombre comercial formal (ej. "Go", "Pro", "Max", "Enterprise"). |
+| tier | VARCHAR(20) | NOT NULL | - | CHECK (`chk_plans_tier`) | Nivel comercial: GO, PRO, MAX, ENTERPRISE. |
 | price | DECIMAL(10,2) | NOT NULL | - | CHECK (`chk_plans_price`) | Tarifa monetaria recurrente (`price >= 0.00`). |
-| currency | VARCHAR(3) | NOT NULL | 'USD' | CHECK (`chk_plans_currency`) | Divisa normalizada ISO 4217: USD, PEN. |
+| currency | VARCHAR(3) | NOT NULL | 'PEN' | CHECK (`chk_plans_currency`) | Divisa formal ISO 4217: PEN, USD. |
 | billing_cycle | VARCHAR(20) | NOT NULL | - | CHECK (`chk_plans_cycle`) | Frecuencia de cobro: MONTHLY, YEARLY. |
-| max_branches | INTEGER | NOT NULL | - | CHECK (`chk_plans_quotas`) | Techo máximo de sucursales autorizadas por taller (> 0). |
-| max_active_staff | INTEGER | NOT NULL | - | CHECK (`chk_plans_quotas`) | Límite máximo de mecánicos y personal activo (> 0). |
-| max_monthly_work_orders | INTEGER | NOT NULL | - | CHECK (`chk_plans_quotas`) | Techo mensual de órdenes de trabajo permitidas (> 0). |
+| max_branches | INTEGER | NOT NULL | - | CHECK (`chk_plans_quotas`) | Techo máximo de sucursales físicas permitidas por taller (> 0). |
+| max_active_staff | INTEGER | NOT NULL | - | CHECK (`chk_plans_quotas`) | Límite máximo de mecánicos y personal activo simultáneo (> 0). |
+| max_active_obd2_devices | INTEGER | NOT NULL | 0 | Atributo | Límite de dispositivos OBD-II activos vinculados (0 en Go, 5 en Pro, 15 en Max, -1 Enterprise). |
+| max_photos_per_work_order | INTEGER | NOT NULL | 10 | Atributo | Límite de fotos por orden en evidencias (10 en Go, -1 ilimitado en Pro/Max/Enterprise). |
+| max_monthly_ai_reports | INTEGER | NOT NULL | 0 | Atributo | Cupo mensual de Reportes PDF de Salud Vehicular con IA (0 en Go/Pro, 60 en Max, -1 Enterprise). |
+| company_registration_allowed | BOOLEAN | NOT NULL | FALSE | Atributo | Habilitación para registrar empresas y flotas `COMPANY` (false en Go/Pro, true en Max/Enterprise). |
+| multi_warehouse_allowed | BOOLEAN | NOT NULL | FALSE | Atributo | Habilitación de gestión multi-almacén FIFO inter-sede (false en Go/Pro, true en Max/Enterprise). |
+| marketplace_listed | BOOLEAN | NOT NULL | FALSE | Atributo | Presencia y verificación en el marketplace B2B *Atelier Bussiness* (false en Go/Pro, true en Max/Enterprise). |
+| max_monthly_work_orders | INTEGER | NOT NULL | - | CHECK (`chk_plans_quotas`) | Techo mensual de órdenes de trabajo permitidas (> 0 o -1 ilimitado). |
 | iot_telemetry_enabled | BOOLEAN | NOT NULL | FALSE | Atributo | Autorización de acceso a telemetría OBD-II en tiempo real. |
-| ai_diagnostics_enabled | BOOLEAN | NOT NULL | FALSE | Atributo | Autorización de acceso a predicción de averías con IA. |
+| ai_diagnostics_enabled | BOOLEAN | NOT NULL | FALSE | Atributo | Autorización de acceso a diagnósticos asistidos por IA. |
 | is_active | BOOLEAN | NOT NULL | TRUE | Atributo | Estado comercial del plan para nuevas contrataciones. |
 | created_at | TIMESTAMPTZ | NOT NULL | `CURRENT_TIMESTAMP` | Auditoría | Auditoría temporal heredada del arquetipo JPA. |
 | updated_at | TIMESTAMPTZ | NOT NULL | `CURRENT_TIMESTAMP` | Auditoría | Auditoría temporal heredada del arquetipo JPA. |
@@ -3056,12 +3610,15 @@ A continuación se detalla la especificación técnica pormenorizada de los esqu
 | :--- | :---: | :---: | :---: | :--- | :--- |
 | id | TEXT | NOT NULL | - | PK (`pk_local_subscription_cache`) | Identificador canónico UUID de la suscripción en formato texto. |
 | tenant_id | TEXT | NOT NULL | - | UK (`uk_local_sub_tenant`) | Identificador del taller abonado para resolución unívoca. |
-| plan_name | TEXT | NOT NULL | - | Atributo | Nombre comercial del plan contratado (ej. Professional). |
-| plan_tier | TEXT | NOT NULL | - | Atributo | Nivel comercial (COMMUNITY, STARTER, PROFESSIONAL, ENTERPRISE). |
+| plan_name | TEXT | NOT NULL | - | Atributo | Nombre comercial del plan contratado (ej. "Go", "Pro", "Max", "Enterprise"). |
+| plan_tier | TEXT | NOT NULL | - | Atributo | Nivel comercial (GO, PRO, MAX, ENTERPRISE). |
 | subscription_status | TEXT | NOT NULL | - | Atributo | Estado contractual vigente (active, trialing, past_due, canceled). |
 | max_branches | INTEGER | NOT NULL | - | Atributo | Cuota local máxima autorizada de sedes físicas. |
-| max_active_staff | INTEGER | NOT NULL | - | Atributo | Límite local de mecánicos y personal activo simultáneo. |
-| max_monthly_work_orders | INTEGER | NOT NULL | - | Atributo | Techo mensual de órdenes de trabajo permitidas. |
+| max_active_staff | INTEGER | NOT NULL | - | Atributo | Límite local de colaboradores activos simultáneos. |
+| max_active_obd2_devices | INTEGER | NOT NULL | 0 | Atributo | Límite local de dispositivos OBD-II activos vinculados. |
+| max_photos_per_work_order | INTEGER | NOT NULL | 10 | Atributo | Límite local de fotos por orden (-1 para ilimitado). |
+| max_monthly_work_orders | INTEGER | NOT NULL | - | Atributo | Techo mensual de órdenes de trabajo permitidas (-1 ilimitado). |
+| company_registration_allowed | INTEGER | NOT NULL | 0 | Atributo | Flag numérico SQLite (1 = Habilitado, 0 = Bloqueado) para registrar empresas. |
 | iot_telemetry_enabled | INTEGER | NOT NULL | 0 | Atributo | Flag numérico SQLite (1 = Habilitado, 0 = Bloqueado) para telemetría. |
 | ai_diagnostics_enabled | INTEGER | NOT NULL | 0 | Atributo | Flag numérico SQLite (1 = Habilitado, 0 = Bloqueado) para IA diagnóstica. |
 | current_period_end | TEXT | NOT NULL | - | Atributo | Marca temporal UTC en formato ISO-8601 de expiración de cobertura. |
@@ -3085,7 +3642,7 @@ A continuación se detalla la especificación técnica pormenorizada de los esqu
 | :--- | :--- | :---: | :--- | :--- |
 | plans | pk_plans | Clave Primaria | `(id)` | Identificador técnico inmutable UUID v4. |
 | plans | uk_plans_stripe_price | Clave Única | `(stripe_price_id)` | Impide asociar múltiples planes al mismo precio en Stripe. |
-| plans | chk_plans_tier | Verificación (CHECK) | `tier IN ('COMMUNITY', 'STARTER', 'PROFESSIONAL', 'ENTERPRISE')` | Valida niveles comerciales formales de la plataforma. |
+| plans | chk_plans_tier | Verificación (CHECK) | `tier IN ('GO', 'PRO', 'MAX', 'ENTERPRISE')` | Valida niveles comerciales formales de la plataforma. |
 | plans | chk_plans_cycle | Verificación (CHECK) | `billing_cycle IN ('MONTHLY', 'YEARLY')` | Normaliza periodicidades de cobro recurrente. |
 | plans | chk_plans_price | Verificación (CHECK) | `price >= 0.00` | Asegura tarifas no negativas en planes gratuitos o de pago. |
 | plans | chk_plans_quotas | Verificación (CHECK) | `max_branches > 0 AND max_active_staff > 0 AND max_monthly_work_orders > 0` | Salvaguarda cuotas operativas estrictamente positivas. |
@@ -3221,7 +3778,7 @@ package "PostgreSQL 16 (API Application - Backend Central)" as pg_backend #F8F9F
         <b>Restricciones (Constraints):</b>
         + pk_plans : PRIMARY KEY (id)
         + uk_plans_stripe_price : UNIQUE (stripe_price_id)
-        + chk_plans_tier : CHECK (tier IN ('COMMUNITY', 'STARTER', 'PROFESSIONAL', 'ENTERPRISE'))
+        + chk_plans_tier : CHECK (tier IN ('GO', 'PRO', 'MAX', 'ENTERPRISE'))
         + chk_plans_cycle : CHECK (billing_cycle IN ('MONTHLY', 'YEARLY'))
         + chk_plans_price : CHECK (price >= 0.00)
         + chk_plans_quotas : CHECK (max_branches > 0 AND max_active_staff > 0 AND max_monthly_work_orders > 0)
@@ -3453,13 +4010,19 @@ erDiagram
     plans {
         uuid id PK "uuid_generate_v4()"
         varchar(100) stripe_price_id UK "ID oficial de precio en Stripe (price_...)"
-        varchar(100) name "Nombre comercial (Starter, Professional, Enterprise)"
-        varchar(20) tier "COMMUNITY | STARTER | PROFESSIONAL | ENTERPRISE"
-        decimal(10_2) price "Monto recurrente (USD o PEN)"
-        varchar(3) currency "Moneda formal (USD, PEN)"
+        varchar(100) name "Nombre comercial (Go, Pro, Max, Enterprise)"
+        varchar(20) tier "GO | PRO | MAX | ENTERPRISE"
+        decimal(10_2) price "Monto recurrente (PEN o USD)"
+        varchar(3) currency "Moneda formal (PEN, USD)"
         varchar(20) billing_cycle "MONTHLY | YEARLY"
         int max_branches "Límite máximo de sucursales autorizadas"
         int max_active_staff "Límite de mecánicos y personal activo"
+        int max_active_obd2_devices "Límite de dispositivos OBD-II activos vinculados"
+        int max_photos_per_work_order "Límite de fotos por orden (-1 ilimitado)"
+        int max_monthly_ai_reports "Cupo mensual de reportes IA predictivos"
+        boolean companyRegistrationAllowed "Permite registrar empresas y flotas"
+        boolean multiWarehouseAllowed "Habilita gestión multi-almacén FIFO"
+        boolean marketplaceListed "Listado en marketplace Atelier Bussiness"
         int max_monthly_work_orders "Límite mensual de órdenes de trabajo"
         boolean iot_telemetry_enabled "Acceso habilitado a telemetría OBD-II"
         boolean ai_diagnostics_enabled "Acceso habilitado a predicción con IA"
@@ -3506,7 +4069,7 @@ erDiagram
         varchar(3) currency "Moneda del cobro (USD, PEN)"
         varchar(20) status "paid | open | void | uncollectible | draft"
         varchar(255) invoice_pdf_url "URL pública de descarga del PDF en Stripe"
-        varchar(255) hosted_invoice_url "URL de la página de pago alojada en Stripe"
+        varchar(255) hosted_invoice_url "URL del portal de pago alojado en Stripe"
         timestamp paid_at "Timestamp del cargo bancario exitoso"
         timestamp created_at "Fecha de generación del recibo"
         timestamp updated_at "Última modificación"
@@ -3528,11 +4091,14 @@ erDiagram
         text id PK "Identificador UUID en SQLite"
         text tenant_id UK "ID del taller automotriz"
         text plan_name "Nombre comercial del plan contratado"
-        text plan_tier "COMMUNITY | STARTER | PROFESSIONAL | ENTERPRISE"
+        text plan_tier "GO | PRO | MAX | ENTERPRISE"
         text subscription_status "active | trialing | past_due | canceled"
         integer max_branches "Cuota autorizada de sucursales"
         integer max_active_staff "Cuota de mecánicos y personal activo"
+        integer max_active_obd2_devices "Cuota de dispositivos OBD-II vinculados"
+        integer max_photos_per_work_order "Cuota de fotos por orden (-1 ilimitado)"
         integer max_monthly_work_orders "Cuota mensual de órdenes de trabajo"
+        integer company_registration_allowed "1 = Habilitado | 0 = Bloqueado"
         integer iot_telemetry_enabled "1 = Habilitado | 0 = Bloqueado"
         integer ai_diagnostics_enabled "1 = Habilitado | 0 = Bloqueado"
         text current_period_end "Fecha de expiración (ISO-8601)"

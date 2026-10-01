@@ -10,14 +10,13 @@
 .antigravitycli
 .mimocode/
 .agents/
+.codegraph/
 skills-lock.json
 docs/superpowers
+.superpowers/
 
-# Local notes, inputs and build output
-notes/
+# Build Output
 build/
-.inputs/
-.codegraph
 
 # Heavy binaries
 *.jar

@@ -41,5 +41,6 @@
 |0.40.0|14/09/2026|Granda Ibarra, Luis Daniel|Inserción de diagramas de Impact Mapping en la especificación de requisitos.|
 |0.41.0|15/09/2026|Huamani Estefanero, Joel|Reestructuración y reformulación integral de las 10 Epics, 43 ***User Stories*** como 24 Technical Stories bajo formato BDD Gherkin y el ***Product Backlog***.|
 |0.42.0|16/09/2026|Sanchez Santin, Adiel Abdiaz|Actualización de enlace a tablero Miro de Big Picture EventStorming y redacción de Student Outcome.|
+|0.43.0|01/10/2026|Huamani Estefanero, Joel|Inserción de User Stories del Website y correciones de la documentación backend de Atelier Workshop.|
 
 \newpage

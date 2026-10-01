@@ -9,7 +9,8 @@ Este archivo proporciona el contexto del proyecto, las restricciones del entorno
 **Atelier** es una plataforma SaaS B2B multiplataforma diseñada para profesionalizar y digitalizar talleres mecánicos automotrices micro y pequeños (MYPE) en Lima Metropolitana y el mercado latinoamericano.
 
 ### Núcleo de Valor y Dominio Tecnológico
-- **Ecosistema SaaS B2B:** Compuesto por una aplicación móvil nativa Android de uso rudo (*Atelier Workshop Mobile*) con arquitectura *Offline-First* para mecánicos en bahía/fosa, un panel administrativo web (*Dashboard*) y un backend modular (*Atelier Platform Backend*).
+- **Ecosistema SaaS B2B:** Compuesto por una aplicación móvil nativa Android de uso rudo (*Atelier Workshop Mobile*) con arquitectura *Offline-First* para mecánicos en bahía/fosa, un panel administrativo web de escritorio (*Atelier Workshop WebApp*) y un backend modular (*Atelier Platform Backend*).
+- **Sistema de Diseño y Frontend:** Estandarización sobre Tailwind CSS v4 mediante la directiva `@theme`, tipografía de interfaz **Satoshi** (Variable WOFF2), tipografía corporativa de imagotipo **Albert Sans ExtraBold**, y paleta cromática oficial (Azul Eléctrico `#0071EB`, Azul Marino `#031A6B`, Naranja Ámbar de Acento `#F68B01`) documentada en `docs/frontend-documentation/`.
 - **Ingesta Telemática IoT:** Diagnóstico vehicular computarizado mediante conectividad Bluetooth con escáneres OBD-II estándar, decodificación de códigos de falla DTC y telemetría de parámetros en vivo (PIDs) complementada con inferencia predictiva (*Spring AI*).
 - **Control de Patio y Bahías:** Órdenes de trabajo digitales, evidencias fotográficas periciales inmutables *Direct-to-Cloud*, cronometraje de labor efectiva por tarea y control perimétrico de asistencia mediante geocerca (*Haversine*).
 - **Inventario y Finanzas:** Gestión de stock valorizada bajo el método contable **FIFO estricto por lote** (*First-In, First-Out*) y facturación electrónica nativa bajo estándar UBL 2.1 ante la SUNAT (Régimen MYPE Tributario).
@@ -85,6 +86,10 @@ Al redactar o modificar cualquier archivo dentro de `report/` o `docs/`, se debe
 │   ├── atelier-architecture-guide.md
 │   ├── atelier-database-schema.md
 │   ├── atelier-documentation.md
+│   ├── frontend-documentation/ # Sistema de diseño canónico, branding y estilos Tailwind CSS v4
+│   │   ├── branding/           # Activos de marca (isotipos calados, imagotipos, favicon) y fuentes
+│   │   ├── styles/             # Hojas de estilo CSS (global.css, theme.css, typography.css, index.css)
+│   │   └── design-system.md    # Especificación canónica de diseño, componentes y tokens @theme
 │   ├── how-to-use.md
 │   └── project-statement.md
 ├── pandoc/           # Configuración de compilación Pandoc, filtros Lua, CSL y plantillas

@@ -1,4 +1,4 @@
-## 5. Fase 2: Bounded Context 2 — Customer & Fleet Management Context (CRM) (`com.andeva.atelier.platform.crm`)
+## 5. Fase 2: Bounded Context 2: Customer & Fleet Management Context (CRM) (`com.andeva.atelier.platform.crm`)
 
 ### 5.1. Diccionario y Propósito del Contexto
 
@@ -14,9 +14,235 @@ El **Customer & Fleet Management Context (CRM)** centraliza la gestión comercia
 * **Geocodificación con Google Places API:** Para empresas de transporte y flotas B2B, la captura de domicilios fiscales y patios de maniobras se asiste mediante la API de **Google Places**, normalizando direcciones y resolviendo coordenadas geográficas.
 * **Fachada de Dominio Abierta (Inbound ACL / OHS):** IAM y CRM no comparten repositorios. CRM expone `CustomerFleetContextFacade` para que *Workshop Operations* resuelva los datos del vehículo y propietario al aperturar una orden de trabajo, e *Invoicing* obtenga el RUC/DNI y razón social para comprobantes SUNAT.
 
+#### 5.1.3. Estructura Canónica de Paquetes y Archivos del Bounded Context
+
+La siguiente estructura de directorios y archivos representa la taxonomía canónica definitiva de **Customer & Fleet Management Context (CRM)** (`com.andeva.atelier.platform.crm`), alineada estrictamente con el estándar arquitectónico de *Learning Center* y los patrones tácticos de DDD Hexagonal:
+
+```text
+com.andeva.atelier.platform.crm/
+├── domain/
+│   ├── exceptions/
+│   │   ├── AppointmentAlreadyArrivedException.java
+│   │   ├── AppointmentInvalidStateTransitionException.java
+│   │   ├── AppointmentNotFoundException.java
+│   │   ├── AppointmentPastDateException.java
+│   │   ├── AppointmentSlotUnavailableException.java
+│   │   ├── CrmDomainException.java
+│   │   ├── CustomerAlreadyExistsException.java
+│   │   ├── CustomerInactiveException.java
+│   │   ├── CustomerNotFoundException.java
+│   │   ├── InvalidLicensePlateException.java
+│   │   ├── InvalidVinException.java
+│   │   ├── VehicleActiveOwnershipNotFoundException.java
+│   │   ├── VehicleAlreadyExistsException.java
+│   │   ├── VehicleHasOpenWorkOrdersException.java
+│   │   └── VehicleNotFoundException.java
+│   ├── model/
+│   │   ├── aggregates/
+│   │   │   ├── Appointment.java
+│   │   │   ├── Customer.java
+│   │   │   └── Vehicle.java
+│   │   ├── commands/
+│   │   │   ├── CancelAppointmentCommand.java
+│   │   │   ├── ConfirmAppointmentCommand.java
+│   │   │   ├── DeactivateCustomerCommand.java
+│   │   │   ├── InviteCustomerMemberCommand.java
+│   │   │   ├── MarkAppointmentArrivedCommand.java
+│   │   │   ├── RegisterCompanyCustomerCommand.java
+│   │   │   ├── RegisterIndividualCustomerCommand.java
+│   │   │   ├── RegisterVehicleCommand.java
+│   │   │   ├── RescheduleAppointmentCommand.java
+│   │   │   ├── RevokeCustomerMemberCommand.java
+│   │   │   ├── ScheduleAppointmentCommand.java
+│   │   │   ├── TransferVehicleOwnershipCommand.java
+│   │   │   └── UpdateCustomerContactCommand.java
+│   │   ├── entities/
+│   │   │   ├── CustomerMembership.java
+│   │   │   └── VehicleOwnership.java
+│   │   ├── enums/
+│   │   │   ├── AppointmentStatus.java
+│   │   │   ├── CustomerMembershipStatus.java
+│   │   │   ├── CustomerStatus.java
+│   │   │   ├── CustomerType.java
+│   │   │   ├── EngineType.java
+│   │   │   └── FleetRole.java
+│   │   ├── events/
+│   │   │   ├── AppointmentArrivedEvent.java
+│   │   │   ├── AppointmentCanceledEvent.java
+│   │   │   ├── AppointmentConfirmedEvent.java
+│   │   │   ├── AppointmentRescheduledEvent.java
+│   │   │   ├── AppointmentScheduledEvent.java
+│   │   │   ├── CustomerContactUpdatedEvent.java
+│   │   │   ├── CustomerMemberInvitedEvent.java
+│   │   │   ├── CustomerMemberRevokedEvent.java
+│   │   │   ├── CustomerRegisteredEvent.java
+│   │   │   ├── VehicleOwnershipTransferredEvent.java
+│   │   │   └── VehicleRegisteredEvent.java
+│   │   ├── ids/
+│   │   │   ├── AppointmentId.java
+│   │   │   ├── CustomerId.java
+│   │   │   ├── CustomerMembershipId.java
+│   │   │   ├── VehicleId.java
+│   │   │   └── VehicleOwnershipId.java
+│   │   ├── queries/
+│   │   │   ├── GetAppointmentByIdQuery.java
+│   │   │   ├── GetAppointmentsByCustomerQuery.java
+│   │   │   ├── GetAppointmentsByDateRangeQuery.java
+│   │   │   ├── GetAppointmentsByTenantAndBranchQuery.java
+│   │   │   ├── GetAppointmentsByVehicleQuery.java
+│   │   │   ├── GetCustomerByIdQuery.java
+│   │   │   ├── GetCustomerByTaxIdQuery.java
+│   │   │   ├── GetCustomerMembersByCustomerIdQuery.java
+│   │   │   ├── GetCustomerMembershipsByUserIdQuery.java
+│   │   │   ├── GetCustomersByTenantIdQuery.java
+│   │   │   ├── GetVehicleByIdQuery.java
+│   │   │   ├── GetVehicleByPlateQuery.java
+│   │   │   ├── GetVehicleOwnershipHistoryQuery.java
+│   │   │   ├── GetVehiclesByCustomerIdQuery.java
+│   │   │   └── GetVehiclesByUserIdQuery.java
+│   │   └── valueobjects/
+│   │       ├── LicensePlate.java
+│   │       ├── PersonName.java
+│   │       ├── PhoneNumber.java
+│   │       └── Vin.java
+│   ├── repositories/
+│   │   ├── AppointmentRepository.java
+│   │   ├── CustomerMembershipRepository.java
+│   │   ├── CustomerRepository.java
+│   │   ├── VehicleOwnershipRepository.java
+│   │   └── VehicleRepository.java
+│   └── services/
+│       ├── AppointmentSchedulingService.java
+│       └── VehicleTransferDomainService.java
+├── application/
+│   ├── acl/
+│   │   └── CustomerFleetContextFacadeImpl.java
+│   ├── commandservices/
+│   │   ├── AppointmentCommandService.java
+│   │   ├── CustomerCommandService.java
+│   │   ├── CustomerMembershipCommandService.java
+│   │   └── VehicleCommandService.java
+│   ├── queryservices/
+│   │   ├── AppointmentQueryService.java
+│   │   ├── CustomerMembershipQueryService.java
+│   │   ├── CustomerQueryService.java
+│   │   └── VehicleQueryService.java
+│   └── internal/
+│       ├── commandservices/
+│       │   ├── AppointmentCommandServiceImpl.java
+│       │   ├── CustomerCommandServiceImpl.java
+│       │   ├── CustomerMembershipCommandServiceImpl.java
+│       │   └── VehicleCommandServiceImpl.java
+│       ├── queryservices/
+│       │   ├── AppointmentQueryServiceImpl.java
+│       │   ├── CustomerMembershipQueryServiceImpl.java
+│       │   ├── CustomerQueryServiceImpl.java
+│       │   └── VehicleQueryServiceImpl.java
+│       ├── eventhandlers/
+│       │   ├── AppointmentDomainEventsHandler.java
+│       │   ├── CustomerDomainEventsHandler.java
+│       │   └── VehicleDomainEventsHandler.java
+│       └── outbound/acl/
+│           ├── DriverAppPushGateway.java
+│           ├── PlacesAddressVerificationGateway.java
+│           └── SubscriptionValidationService.java
+├── infrastructure/
+│   ├── external/
+│   │   ├── billing/
+│   │   │   └── SubscriptionValidationClient.java
+│   │   ├── firebase/
+│   │   │   └── DriverAppFcmClient.java
+│   │   └── google/
+│   │       └── GooglePlacesClient.java
+│   └── persistence/jpa/
+│       ├── adapters/
+│       │   ├── AppointmentRepositoryImpl.java
+│       │   ├── CustomerMembershipRepositoryImpl.java
+│       │   ├── CustomerRepositoryImpl.java
+│       │   ├── VehicleOwnershipRepositoryImpl.java
+│       │   └── VehicleRepositoryImpl.java
+│       ├── assemblers/
+│       │   ├── AppointmentPersistenceAssembler.java
+│       │   ├── CustomerMembershipPersistenceAssembler.java
+│       │   ├── CustomerPersistenceAssembler.java
+│       │   ├── VehicleOwnershipPersistenceAssembler.java
+│       │   └── VehiclePersistenceAssembler.java
+│       ├── converters/
+│       │   ├── AppointmentStatusAttributeConverter.java
+│       │   ├── CustomerTypeAttributeConverter.java
+│       │   ├── EmailAddressAttributeConverter.java
+│       │   ├── EngineTypeAttributeConverter.java
+│       │   ├── LicensePlateAttributeConverter.java
+│       │   ├── TaxIdAttributeConverter.java
+│       │   └── VinAttributeConverter.java
+│       ├── entities/
+│       │   ├── AppointmentPersistenceEntity.java
+│       │   ├── CustomerMembershipPersistenceEntity.java
+│       │   ├── CustomerPersistenceEntity.java
+│       │   ├── VehicleOwnershipPersistenceEntity.java
+│       │   └── VehiclePersistenceEntity.java
+│       └── repositories/
+│           ├── AppointmentPersistenceRepository.java
+│           ├── CustomerMembershipPersistenceRepository.java
+│           ├── CustomerPersistenceRepository.java
+│           ├── VehicleOwnershipPersistenceRepository.java
+│           └── VehiclePersistenceRepository.java
+└── interfaces/
+    ├── acl/
+    │   ├── CustomerFleetContextFacade.java
+    │   └── dto/
+    │       ├── AppointmentAclDto.java
+    │       ├── CustomerAclDto.java
+    │       ├── CustomerMembershipAclDto.java
+    │       └── VehicleAclDto.java
+    ├── events/
+    │   ├── AppointmentArrivedIntegrationEvent.java
+    │   ├── AppointmentScheduledIntegrationEvent.java
+    │   ├── CustomerCreatedIntegrationEvent.java
+    │   ├── VehicleOwnershipTransferredIntegrationEvent.java
+    │   └── VehicleRegisteredIntegrationEvent.java
+    └── rest/
+        ├── controllers/
+        │   ├── AppointmentsController.java
+        │   ├── CustomerMembershipsController.java
+        │   ├── CustomersController.java
+        │   └── VehiclesController.java
+        ├── resources/
+        │   ├── requests/
+        │   │   ├── CancelAppointmentResource.java
+        │   │   ├── CreateCompanyCustomerResource.java
+        │   │   ├── CreateIndividualCustomerResource.java
+        │   │   ├── CreateVehicleResource.java
+        │   │   ├── InviteCustomerMemberResource.java
+        │   │   ├── RescheduleAppointmentResource.java
+        │   │   ├── ScheduleAppointmentResource.java
+        │   │   ├── TransferVehicleOwnershipResource.java
+        │   │   └── UpdateCustomerContactResource.java
+        │   └── responses/
+        │       ├── AppointmentResource.java
+        │       ├── CustomerMembershipResource.java
+        │       ├── CustomerResource.java
+        │       ├── VehicleOwnershipResource.java
+        │       └── VehicleResource.java
+        └── transform/
+            ├── AppointmentResourceFromAggregateAssembler.java
+            ├── CancelAppointmentCommandFromResourceAssembler.java
+            ├── CustomerMembershipResourceFromEntityAssembler.java
+            ├── CustomerResourceFromAggregateAssembler.java
+            ├── InviteCustomerMemberCommandFromResourceAssembler.java
+            ├── RegisterCustomerCommandFromResourceAssembler.java
+            ├── RegisterVehicleCommandFromResourceAssembler.java
+            ├── RescheduleAppointmentCommandFromResourceAssembler.java
+            ├── ScheduleAppointmentCommandFromResourceAssembler.java
+            ├── TransferVehicleOwnershipCommandFromResourceAssembler.java
+            ├── UpdateCustomerContactCommandFromResourceAssembler.java
+            ├── VehicleOwnershipResourceFromEntityAssembler.java
+            └── VehicleResourceFromAggregateAssembler.java
+```
+
 ---
 
-### 5.2. 2.6.2.1. Domain Layer
+### 5.2. 2.6.3.1. Domain Layer
 
 #### 5.2.1. Aggregates & Aggregate Roots
 
@@ -25,15 +251,15 @@ El **Customer & Fleet Management Context (CRM)** centraliza la gestión comercia
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<Customer>`
 * **Propósito:** Representa a la persona natural o jurídica titular de una cuenta de cliente dentro de la cartera comercial de un taller específico.
 * **Atributos:**
-  * `id: CustomerId` — Identificador universal del cliente (UUID).
-  * `tenantId: TenantId` — Taller mecánico al que pertenece la ficha comercial.
-  * `type: CustomerType` — Naturaleza jurídica del cliente (`INDIVIDUAL` para particulares, `COMPANY` para empresas/flotas).
-  * `name: PersonName` — Nombres y apellidos (obligatorio si `type == INDIVIDUAL`, nulo si `type == COMPANY`).
-  * `companyName: String` — Razón social o denominación comercial (obligatorio si `type == COMPANY`, nulo si `type == INDIVIDUAL`).
-  * `taxId: TaxId` — Documento de identidad tributaria (DNI de 8 dígitos para persona natural o RUC de 11 dígitos para empresa/persona jurídica).
-  * `email: EmailAddress` — Correo electrónico de contacto y notificaciones comerciales.
-  * `phone: PhoneNumber` — Teléfono o celular de contacto.
-  * `status: CustomerStatus` — Estado de la ficha comercial (`ACTIVE`, `INACTIVE`).
+  * `id: CustomerId`: Identificador universal del cliente (UUID).
+  * `tenantId: TenantId`: Taller mecánico al que pertenece la ficha comercial.
+  * `type: CustomerType`: Naturaleza jurídica del cliente (`INDIVIDUAL` para particulares, `COMPANY` para empresas/flotas).
+  * `name: PersonName`: Nombres y apellidos (obligatorio si `type == INDIVIDUAL`, nulo si `type == COMPANY`).
+  * `companyName: String`: Razón social o denominación comercial (obligatorio si `type == COMPANY`, nulo si `type == INDIVIDUAL`).
+  * `taxId: TaxId`: Documento de identidad tributaria (DNI de 8 dígitos para persona natural o RUC de 11 dígitos para empresa/persona jurídica).
+  * `email: EmailAddress`: Correo electrónico de contacto y notificaciones comerciales.
+  * `phone: PhoneNumber`: Teléfono o celular de contacto.
+  * `status: CustomerStatus`: Estado de la ficha comercial (`ACTIVE`, `INACTIVE`).
 * **Invariantes y Reglas de Negocio:**
   * Si `type == INDIVIDUAL`, el atributo `name` no puede ser nulo y el `companyName` debe ser nulo.
   * Si `type == COMPANY`, el atributo `companyName` no puede ser nulo ni vacío y el `name` debe ser nulo.
@@ -41,8 +267,8 @@ El **Customer & Fleet Management Context (CRM)** centraliza la gestión comercia
   * La tupla `(tenantId, taxId)` es única en el sistema (un cliente no puede duplicarse dentro del mismo taller).
   * Al menos uno entre `email` o `phone` debe estar provisto para asegurar un canal de contacto.
 * **Métodos:**
-  * `+ static Customer registerIndividual(TenantId tenantId, PersonName name, TaxId taxId, EmailAddress email, PhoneNumber phone): Customer`: Factoría de dominio para personas naturales; registra `CustomerRegisteredEvent`.
-  * `+ static Customer registerCompany(TenantId tenantId, String companyName, TaxId taxId, EmailAddress email, PhoneNumber phone): Customer`: Factoría de dominio para flotas corporativas; registra `CustomerRegisteredEvent`.
+  * `+ static Customer registerIndividual(TenantId tenantId, PersonName name, TaxId taxId, EmailAddress email, PhoneNumber phone): Customer`: Factoría de dominio para personas naturales. Registra `CustomerRegisteredEvent`.
+  * `+ static Customer registerCompany(TenantId tenantId, String companyName, TaxId taxId, EmailAddress email, PhoneNumber phone): Customer`: Factoría de dominio para flotas corporativas. Registra `CustomerRegisteredEvent`.
   * `+ void updateContact(EmailAddress newEmail, PhoneNumber newPhone): void`: Actualiza los canales de contacto del cliente.
   * `+ void updateProfile(PersonName newName): void`: Actualiza el nombre de la persona natural (solo válido para `INDIVIDUAL`).
   * `+ void updateCompanyDetails(String newCompanyName): void`: Actualiza la razón social de la empresa (solo válido para `COMPANY`).
@@ -55,24 +281,25 @@ El **Customer & Fleet Management Context (CRM)** centraliza la gestión comercia
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<Vehicle>`
 * **Propósito:** Representa la unidad automotriz física. Es una entidad global e independiente del `tenantId` que consolida la historia técnica y la cadena de custodia del vehículo.
 * **Atributos:**
-  * `id: VehicleId` — Identificador universal del vehículo (UUID).
-  * `plate: LicensePlate` — Placa de rodaje única a nivel nacional (ej. "ABC-123").
-  * `vin: Vin` — Número de Identificación Vehicular / Número de Chasis (17 caracteres alfanuméricos ISO 3779, nullable).
-  * `brand: String` — Marca del vehículo (ej. Toyota, Hyundai, Nissan).
-  * `model: String` — Modelo comercial (ej. Yaris, Tucson, Sentra).
-  * `year: int` — Año del modelo de fabricación (ej. 2022).
-  * `engineType: EngineType` — Tipo de motorización (`GASOLINE`, `DIESEL`, `ELECTRIC`, `HYBRID`).
-  * `ownershipHistory: List<VehicleOwnership>` — Colección histórica de propietarios que han poseído este vehículo.
+  * `id: VehicleId`: Identificador universal del vehículo (UUID).
+  * `plate: LicensePlate`: Placa de rodaje única a nivel nacional (ej. "ABC-123").
+  * `vin: Vin`: Número de Identificación Vehicular / Número de Chasis (17 caracteres alfanuméricos ISO 3779, nullable).
+  * `brand: String`: Marca del vehículo (ej. Toyota, Hyundai, Nissan).
+  * `model: String`: Modelo comercial (ej. Yaris, Tucson, Sentra).
+  * `year: int`: Año del modelo de fabricación (ej. 2022).
+  * `engineType: EngineType`: Tipo de motorización (`GASOLINE`, `DIESEL`, `ELECTRIC`, `HYBRID`).
+  * `ownershipHistory: List<VehicleOwnership>`: Colección histórica de propietarios que han poseído este vehículo.
 * **Invariantes y Reglas de Negocio:**
   * La placa `plate` es obligatoria, única globalmente y se almacena normalizada en mayúsculas sin guiones ni caracteres especiales.
   * El año `year` debe situarse entre `1950` y el año actual más uno (`Year.now().getValue() + 1`).
   * La marca `brand` y modelo `model` no pueden ser cadenas vacías.
   * Solo puede existir **exactamente un registro activo** en `ownershipHistory` con `endDate == null`.
 * **Métodos:**
-  * `+ static Vehicle register(LicensePlate plate, Vin vin, String brand, String model, int year, EngineType engineType, CustomerId initialOwnerId): Vehicle`: Factoría de dominio que crea el vehículo, inicializa su primer registro de propiedad activo y registra `VehicleRegisteredEvent`.
+  * `+ static Vehicle register(LicensePlate plate, Vin vin, String brand, String model, int year, EngineType engineType, Optional<CustomerId> initialOwnerId, Optional<UserId> initialUserId): Vehicle`: Factoría de dominio que crea el vehículo, inicializa su primer registro de propiedad activo validando que al menos uno entre `initialOwnerId` o `initialUserId` esté presente, y registra `VehicleRegisteredEvent`.
   * `+ VehicleOwnership transferOwnership(CustomerId newOwnerId, LocalDate transferDate): VehicleOwnership`: Cierra el registro de propiedad activo actual fijando su `endDate = transferDate`, añade un nuevo `VehicleOwnership` con `startDate = transferDate` y registra `VehicleOwnershipTransferredEvent`.
+  * `+ void linkCustomer(CustomerId customerId): void`: Vincula el cliente del taller a una tenencia activa originada mediante pre-registro móvil.
   * `+ Optional<VehicleOwnership> getActiveOwnership(): Optional<VehicleOwnership>`: Retorna el registro de titularidad vigente.
-  * `+ Optional<CustomerId> getCurrentOwnerId(): Optional<CustomerId>`: Retorna el identificador del cliente dueño actual.
+  * `+ Optional<CustomerId> getCurrentOwnerId(): Optional<CustomerId>`: Retorna el identificador del cliente dueño actual si se encuentra asignado.
   * `+ void updateTechnicalDetails(Vin newVin, EngineType newEngineType): void`: Actualiza especificaciones técnicas del vehículo.
 
 ##### 3. `Appointment` (Aggregate Root)
@@ -80,16 +307,16 @@ El **Customer & Fleet Management Context (CRM)** centraliza la gestión comercia
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<Appointment>`
 * **Propósito:** Modela la reserva o cita previa agendada por el cliente o recepcionista para la atención automotriz en una sucursal física determinada.
 * **Atributos:**
-  * `id: AppointmentId` — Identificador universal de la cita (UUID).
-  * `tenantId: TenantId` — Taller receptor de la cita.
-  * `branchId: BranchId` — Sede física donde se llevará a cabo la revisión.
-  * `customerId: CustomerId` — Cliente titular que solicita la atención.
-  * `vehicleId: VehicleId` — Vehículo objeto del servicio técnico.
-  * `scheduledAt: Instant` — Fecha y hora pactada para la recepción del vehículo.
-  * `estimatedDurationMinutes: int` — Tiempo estimado de recepción e inspección inicial (default: 30 minutos).
-  * `reason: String` — Motivo descriptivo de la cita (ej. "Mantenimiento preventivo 10,000 km", "Ruido en tren delantero", "Alerta predictiva OBD2 de sobrecalentamiento").
-  * `status: AppointmentStatus` — Estado del ciclo de vida de la cita (`PENDING`, `CONFIRMED`, `ARRIVED`, `CANCELED`).
-  * `cancellationReason: String` — Justificación en caso de anulación (nullable).
+  * `id: AppointmentId`: Identificador universal de la cita (UUID).
+  * `tenantId: TenantId`: Taller receptor de la cita.
+  * `branchId: BranchId`: Sede física donde se llevará a cabo la revisión.
+  * `customerId: CustomerId`: Cliente titular que solicita la atención.
+  * `vehicleId: VehicleId`: Vehículo objeto del servicio técnico.
+  * `scheduledAt: Instant`: Fecha y hora pactada para la recepción del vehículo.
+  * `estimatedDurationMinutes: int`: Tiempo estimado de recepción e inspección inicial (default: 30 minutos).
+  * `reason: String`: Motivo descriptivo de la cita (ej. "Mantenimiento preventivo 10,000 km", "Ruido en tren delantero", "Alerta predictiva OBD2 de sobrecalentamiento").
+  * `status: AppointmentStatus`: Estado del ciclo de vida de la cita (`PENDING`, `CONFIRMED`, `ARRIVED`, `CANCELED`).
+  * `cancellationReason: String`: Justificación en caso de anulación (nullable).
 * **Invariantes y Reglas de Negocio:**
   * Al crearse, la fecha `scheduledAt` debe ser posterior al instante actual (`scheduledAt.isAfter(Instant.now())`).
   * No se puede cancelar una cita que ya se encuentre en estado `ARRIVED`.
@@ -108,16 +335,47 @@ El **Customer & Fleet Management Context (CRM)** centraliza la gestión comercia
 
 ##### 1. `VehicleOwnership` (Entidad Dependiente de `Vehicle`)
 * **Paquete:** `com.andeva.atelier.platform.crm.domain.model.entities`
-* **Propósito:** Modela el vínculo de titularidad y custodia entre un `Customer` y un `Vehicle` en un intervalo de tiempo específico.
+* **Propósito:** Modela el vínculo de titularidad y custodia entre un cliente (`Customer`), un usuario conductor (`UserId`) y un vehículo (`Vehicle`) en un intervalo temporal específico.
 * **Atributos:**
-  * `id: VehicleOwnershipId` — Identificador de la relación (UUID).
-  * `vehicleId: VehicleId` — Vehículo en cuestión.
-  * `customerId: CustomerId` — Cliente propietario.
-  * `startDate: LocalDate` — Fecha de adquisición o inicio de custodia en el taller.
-  * `endDate: LocalDate` — Fecha de enajenación o fin de custodia (`null` si es el propietario actual).
+  * `id: VehicleOwnershipId`: Identificador de la relación (UUID).
+  * `vehicleId: VehicleId`: Vehículo en cuestión.
+  * `customerId: CustomerId`: Cliente del taller mecánico (opcional, nullable).
+  * `userId: UserId`: Usuario conductor registrado en la plataforma móvil (opcional, nullable).
+  * `startDate: LocalDate`: Fecha de adquisición o inicio de custodia en el taller.
+  * `endDate: LocalDate`: Fecha de enajenación o fin de custodia (`null` si es el custodio activo).
+* **Invariantes y Reglas de Negocio:**
+  * Al menos uno de los dos atributos entre `customerId` y `userId` debe estar provisto obligatoriamente, garantizando que el vehículo posea siempre un responsable asignado.
+  * Si el registro se produce en la recepción del taller, se suministra `customerId` como titular comercial.
+  * Si el registro corresponde a un pre-registro desde la aplicación móvil Atelier Driver antes de visitar un taller, se asigna `userId` manteniendo `customerId` en nulo.
+  * Cuando el vehículo ingresa por primera vez al taller, el método `linkCustomer` concilia la titularidad enlazando la ficha comercial creada en el taller sin interrumpir la vigencia del registro.
 * **Métodos:**
   * `+ boolean isCurrent(): boolean`: Retorna `true` si `endDate == null`.
   * `+ void terminate(LocalDate terminationDate): void`: Fija la fecha de finalización de propiedad garantizando que sea posterior a `startDate`.
+  * `+ void linkCustomer(CustomerId newCustomerId): void`: Asocia el identificador de cliente del taller al vínculo activo, validando que el cliente previo sea nulo y que la titularidad permanezca vigente.
+  * `+ boolean isOwnedByCustomer(CustomerId customerId): boolean`: Verifica si la titularidad corresponde al cliente provisto.
+  * `+ boolean isOwnedByUser(UserId userId): boolean`: Verifica si la titularidad corresponde al usuario conductor provisto.
+
+##### 2. `CustomerMembership` (Entidad Dependiente de `Customer` / Flota Corporativa)
+* **Paquete:** `com.andeva.atelier.platform.crm.domain.model.entities`
+* **Propósito:** Modela el esquema de autorización y delegación para la administración de flotas comerciales B2B, permitiendo a una empresa titular (`Customer` de tipo `COMPANY`) conceder acceso operativo y de gestión sobre sus unidades vehiculares y citas a usuarios registrados en la plataforma.
+* **Atributos:**
+  * `id: CustomerMembershipId`: Identificador universal de la membresía corporativa (UUID).
+  * `customerId: CustomerId`: Empresa titular de la flota vehicular.
+  * `userId: UserId`: Usuario delegado con credenciales en la plataforma.
+  * `role: FleetRole`: Rol asignado en la flota (`FLEET_ADMIN`, `FLEET_OPERATOR`).
+  * `status: CustomerMembershipStatus`: Estado de la delegación (`ACTIVE`, `SUSPENDED`, `REVOKED`).
+* **Invariantes y Reglas de Negocio:**
+  * Únicamente las cuentas comerciales con `type == CustomerType.COMPANY` pueden conceder membresías corporativas.
+  * La tupla compuesta `(customerId, userId)` es unívoca en el dominio, prohibiendo membresías duplicadas para un mismo usuario dentro de la misma organización empresarial.
+  * El rol `FLEET_ADMIN` faculta para invitar miembros, gestionar el parque vehicular completo, agendar atenciones y consultar estados comerciales, mientras que `FLEET_OPERATOR` restringe el alcance a la consulta y agendamiento técnico de vehículos asignados.
+* **Métodos:**
+  * `+ static CustomerMembership create(CustomerMembershipId id, CustomerId customerId, UserId userId, FleetRole role): CustomerMembership`: Factoría de dominio en estado inicial `ACTIVE` que emite `CustomerMemberInvitedEvent`.
+  * `+ void activate(): void`: Transiciona el estado a `ACTIVE` si se encontraba suspendida.
+  * `+ void suspend(): void`: Congela temporalmente las facultades del miembro fijando el estado en `SUSPENDED`.
+  * `+ void revoke(): void`: Da de baja definitiva a la membresía corporativa marcando el estado como `REVOKED` y registrando `CustomerMemberRevokedEvent`.
+  * `+ void changeRole(FleetRole newRole): void`: Reasigna las atribuciones operativas del miembro de flota.
+  * `+ boolean isActive(): boolean`: Retorna `true` si el estado actual es `ACTIVE`.
+  * `+ boolean hasAdminPrivileges(): boolean`: Retorna `true` si el miembro ostenta el rol `FLEET_ADMIN`.
 
 ---
 
@@ -135,6 +393,9 @@ Java Records inmutables con validación estricta en su constructor compacto:
 * **`CustomerStatus` (Enum):** `ACTIVE`, `INACTIVE`.
 * **`EngineType` (Enum):** `GASOLINE`, `DIESEL`, `ELECTRIC`, `HYBRID`.
 * **`AppointmentStatus` (Enum):** `PENDING`, `CONFIRMED`, `ARRIVED`, `CANCELED`.
+* **`CustomerMembershipId(UUID value)`:** Identificador tipado de membresía corporativa de flota. Valida `Objects.requireNonNull(value)`.
+* **`FleetRole` (Enum):** `FLEET_ADMIN`, `FLEET_OPERATOR`. Define las jerarquías de privilegios dentro de las flotas comerciales B2B.
+* **`CustomerMembershipStatus` (Enum):** `ACTIVE`, `SUSPENDED`, `REVOKED`. Modela los estados del ciclo de vida de la vinculación corporativa.
 
 ---
 
@@ -145,8 +406,10 @@ Comandos inmutables que encapsulan casos de uso de escritura:
 * `RegisterIndividualCustomerCommand(TenantId tenantId, String firstName, String lastName, String taxId, String email, String phone)`
 * `RegisterCompanyCustomerCommand(TenantId tenantId, String companyName, String taxId, String email, String phone)`
 * `UpdateCustomerContactCommand(CustomerId customerId, String email, String phone)`
-* `RegisterVehicleCommand(String plate, String vin, String brand, String model, int year, EngineType engineType, CustomerId initialOwnerId)`
+* `RegisterVehicleCommand(String plate, String vin, String brand, String model, int year, EngineType engineType, Optional<CustomerId> customerId, Optional<UserId> userId)`
 * `TransferVehicleOwnershipCommand(VehicleId vehicleId, CustomerId newOwnerId, LocalDate transferDate)`
+* `InviteCustomerMemberCommand(CustomerId customerId, UserId userId, FleetRole role)`
+* `RevokeCustomerMemberCommand(CustomerId customerId, UserId userId)`
 * `ScheduleAppointmentCommand(TenantId tenantId, BranchId branchId, CustomerId customerId, VehicleId vehicleId, Instant scheduledAt, int estimatedDurationMinutes, String reason)`
 * `ConfirmAppointmentCommand(AppointmentId appointmentId)`
 * `MarkAppointmentArrivedCommand(AppointmentId appointmentId)`
@@ -162,9 +425,12 @@ Consultas de lectura inmutables para CRM:
 * `GetCustomerByIdQuery(CustomerId customerId)`
 * `GetCustomersByTenantIdQuery(TenantId tenantId)`
 * `GetCustomerByTaxIdQuery(TenantId tenantId, TaxId taxId)`
+* `GetCustomerMembershipsByUserIdQuery(UserId userId)`
+* `GetCustomerMembersByCustomerIdQuery(CustomerId customerId)`
 * `GetVehicleByIdQuery(VehicleId vehicleId)`
 * `GetVehicleByPlateQuery(LicensePlate plate)`
 * `GetVehiclesByCustomerIdQuery(CustomerId customerId)`
+* `GetVehiclesByUserIdQuery(UserId userId)`
 * `GetAppointmentByIdQuery(AppointmentId appointmentId)`
 * `GetAppointmentsByTenantAndBranchQuery(TenantId tenantId, BranchId branchId, LocalDate date)`
 * `GetAppointmentsByCustomerQuery(CustomerId customerId)`
@@ -177,6 +443,8 @@ Consultas de lectura inmutables para CRM:
 Eventos atómicos que registran hechos consumados dentro del dominio CRM:
 
 * `CustomerRegisteredEvent(CustomerId customerId, TenantId tenantId, CustomerType type, String displayName, TaxId taxId, Instant occurredOn)`
+* `CustomerMemberInvitedEvent(CustomerMembershipId membershipId, CustomerId customerId, UserId userId, FleetRole role, Instant occurredOn)`
+* `CustomerMemberRevokedEvent(CustomerMembershipId membershipId, CustomerId customerId, UserId userId, Instant occurredOn)`
 * `VehicleRegisteredEvent(VehicleId vehicleId, LicensePlate plate, CustomerId initialOwnerId, Instant occurredOn)`
 * `VehicleOwnershipTransferredEvent(VehicleId vehicleId, CustomerId previousOwnerId, CustomerId newOwnerId, LocalDate transferDate, Instant occurredOn)`
 * `AppointmentScheduledEvent(AppointmentId appointmentId, TenantId tenantId, BranchId branchId, CustomerId customerId, VehicleId vehicleId, Instant scheduledAt, Instant occurredOn)`
@@ -209,6 +477,14 @@ Puertos de salida de persistencia puros:
   * `VehicleOwnership save(VehicleOwnership ownership)`
   * `List<VehicleOwnership> findByVehicleId(VehicleId vehicleId)`
   * `Optional<VehicleOwnership> findActiveOwnershipByVehicleId(VehicleId vehicleId)`
+  * `List<VehicleOwnership> findByUserIdAndEndDateIsNull(UserId userId)`
+* **`CustomerMembershipRepository`:**
+  * `CustomerMembership save(CustomerMembership membership)`
+  * `Optional<CustomerMembership> findById(CustomerMembershipId id)`
+  * `Optional<CustomerMembership> findByCustomerIdAndUserId(CustomerId customerId, UserId userId)`
+  * `List<CustomerMembership> findByCustomerId(CustomerId customerId)`
+  * `List<CustomerMembership> findByUserIdAndStatus(UserId userId, CustomerMembershipStatus status)`
+  * `boolean existsByCustomerIdAndUserIdAndStatus(CustomerId customerId, UserId userId, CustomerMembershipStatus status)`
 * **`AppointmentRepository`:**
   * `Appointment save(Appointment appointment)`
   * `Optional<Appointment> findById(AppointmentId id)`
@@ -265,7 +541,7 @@ Taxonomía de excepciones de dominio semánticas derivadas de `DomainException` 
 
 ---
 
-### 5.3. 2.6.2.2. Interface Layer
+### 5.3. 2.6.3.2. Interface Layer
 
 La Capa de Interfaz (*Interface Layer*) actúa como el adaptador primario o de entrada (*inbound adapter*) dentro de la arquitectura hexagonal de Atelier para el contexto de **Customer & Fleet Management (CRM)**. Su responsabilidad técnica es exponer los puertos de entrada del sistema ante solicitudes externas e intermodulares, aislando el núcleo de dominio y coordinando la mediación entre los protocolos de transporte y los servicios de aplicación. Esta capa implementa tres componentes esenciales:
 
@@ -277,7 +553,7 @@ La Capa de Interfaz (*Interface Layer*) actúa como el adaptador primario o de e
 
 #### 5.3.1. REST Controllers
 
-Los controladores web residen en el paquete `com.andeva.atelier.platform.crm.interfaces.rest`. Se encuentran anotados con `@RestController`, `@RequestMapping`, `@Validated` de Jakarta Validation, y cuentan con documentación OpenAPI 3 mediante `@Tag`, `@Operation` y `@ApiResponses`.
+Los controladores web residen en el paquete `com.andeva.atelier.platform.crm.interfaces.rest.controllers`. Se encuentran anotados con `@RestController`, `@RequestMapping`, `@Validated` de Jakarta Validation, y cuentan con documentación OpenAPI 3 mediante `@Tag`, `@Operation` y `@ApiResponses`.
 
 ##### 1. `CustomersController`
 * **Ruta Base:** `/api/v1/customers`
@@ -333,6 +609,10 @@ Los controladores web residen en el paquete `com.andeva.atelier.platform.crm.int
     * **Parámetros de Ruta:** `vehicleId` (UUID).
     * **Respuesta Exitosa:** `List<VehicleOwnershipResource>` (HTTP 200 OK).
     * **Códigos de Error:** HTTP 404 Not Found (`VEHICLE_NOT_FOUND`).
+  * `GET /my-vehicles`: Consulta de vehículos registrados o bajo custodia activa del conductor autenticado.
+    * **Seguridad y Parámetros:** Resuelve el `userId` directamente desde los claims del token JWT validado en el contexto de seguridad.
+    * **Respuesta Exitosa:** `List<VehicleResource>` (HTTP 200 OK).
+    * **Códigos de Error:** HTTP 401 Unauthorized si el token es inexistente o inválido.
 
 ##### 3. `AppointmentsController`
 * **Ruta Base:** `/api/v1/appointments`
@@ -368,13 +648,31 @@ Los controladores web residen en el paquete `com.andeva.atelier.platform.crm.int
     * **Respuesta Exitosa:** `AppointmentResource` (HTTP 200 OK, transicionando a estado `CANCELED`).
     * **Códigos de Error:** HTTP 400 Bad Request (`APPOINTMENT_ALREADY_ARRIVED`), HTTP 404 Not Found (`APPOINTMENT_NOT_FOUND`).
 
+##### 4. `CustomerMembershipsController`
+* **Ruta Base:** `/api/v1/customers/{customerId}/members`
+* **Propósito:** Administración de membresías y delegación de roles para clientes corporativos B2B con flotas comerciales.
+* **Endpoints:**
+  * `POST`: Registro o invitación formal de un miembro a la flota corporativa.
+    * **Parámetros de Ruta:** `customerId` (UUID).
+    * **Cuerpo de Petición:** `InviteCustomerMemberResource` con `userId` y `role` (`FLEET_ADMIN`, `FLEET_OPERATOR`).
+    * **Respuesta Exitosa:** `CustomerMembershipResource` (HTTP 201 Created con cabecera `Location: /api/v1/customers/{customerId}/members/{membershipId}`).
+    * **Códigos de Error:** HTTP 400 Bad Request (rol no reconocido o datos faltantes), HTTP 404 Not Found (`CUSTOMER_NOT_FOUND`, `USER_NOT_FOUND`), HTTP 409 Conflict (`CUSTOMER_MEMBERSHIP_ALREADY_EXISTS`).
+  * `GET`: Listado de todos los miembros autorizados y delegados en la flota del cliente empresarial.
+    * **Parámetros de Ruta:** `customerId` (UUID).
+    * **Respuesta Exitosa:** `List<CustomerMembershipResource>` (HTTP 200 OK).
+    * **Códigos de Error:** HTTP 404 Not Found (`CUSTOMER_NOT_FOUND`).
+  * `DELETE /{userId}`: Revocación definitiva de los permisos de un miembro sobre la flota comercial.
+    * **Parámetros de Ruta:** `customerId` (UUID), `userId` (UUID).
+    * **Respuesta Exitosa:** HTTP 204 No Content.
+    * **Códigos de Error:** HTTP 404 Not Found (`CUSTOMER_MEMBERSHIP_NOT_FOUND`).
+
 ---
 
 #### 5.3.2. Resources / DTOs
 
-Estructuras de datos inmutables modeladas estrictamente como Java Records en el paquete `com.andeva.atelier.platform.crm.interfaces.rest.resources`. Cada record de entrada incorpora validaciones formales de Jakarta Bean Validation (`jakarta.validation.constraints.*`) para garantizar la integridad perimetral antes de invocar la capa de aplicación:
+Estructuras de datos inmutables modeladas estrictamente como Java Records distribuidas canónicamente en los paquetes `com.andeva.atelier.platform.crm.interfaces.rest.resources.requests` y `com.andeva.atelier.platform.crm.interfaces.rest.resources.responses`. Cada record de entrada incorpora validaciones formales de Jakarta Bean Validation (`jakarta.validation.constraints.*`) para garantizar la integridad perimetral antes de invocar la capa de aplicación:
 
-##### Recursos de Petición (Requests)
+##### Recursos de Petición (Requests) (`com.andeva.atelier.platform.crm.interfaces.rest.resources.requests`)
 
 1. **`CreateIndividualCustomerResource`:**
 ```java
@@ -521,7 +819,19 @@ public record CancelAppointmentResource(
 ) {}
 ```
 
-##### Recursos de Respuesta (Responses)
+9. **`InviteCustomerMemberResource`:**
+```java
+public record InviteCustomerMemberResource(
+    @NotNull(message = "El identificador del usuario delegado es obligatorio")
+    UUID userId,
+
+    @NotBlank(message = "El rol de flota es obligatorio")
+    @Pattern(regexp = "^(FLEET_ADMIN|FLEET_OPERATOR)$", message = "El rol de flota debe ser FLEET_ADMIN o FLEET_OPERATOR")
+    String role
+) {}
+```
+
+##### Recursos de Respuesta (Responses) (`com.andeva.atelier.platform.crm.interfaces.rest.resources.responses`)
 
 1. **`CustomerResource`:**
 ```java
@@ -584,11 +894,23 @@ public record AppointmentResource(
 ) {}
 ```
 
+5. **`CustomerMembershipResource`:**
+```java
+public record CustomerMembershipResource(
+    UUID id,
+    UUID customerId,
+    UUID userId,
+    String role,
+    String status,
+    Instant createdAt
+) {}
+```
+
 ---
 
 #### 5.3.3. Resource Assemblers
 
-Los ensambladores de recursos residen en el paquete `com.andeva.atelier.platform.crm.interfaces.rest.assemblers`. Implementan el desacoplamiento bidireccional entre los contratos de transporte REST (Resources) y el modelo de aplicación y dominio:
+Los ensambladores de recursos residen en el paquete `com.andeva.atelier.platform.crm.interfaces.rest.transform`. Implementan el desacoplamiento bidireccional entre los contratos de transporte REST (Resources) y el modelo de aplicación y dominio:
 
 ##### Inbound Assemblers (Mapeo de Resources a Commands)
 * **`RegisterCustomerCommandFromResourceAssembler`:** Transforma `CreateIndividualCustomerResource` o `CreateCompanyCustomerResource` en `RegisterIndividualCustomerCommand` o `RegisterCompanyCustomerCommand` respectivamente, vinculando el `TenantId` del contexto de seguridad autenticado.
@@ -598,12 +920,14 @@ Los ensambladores de recursos residen en el paquete `com.andeva.atelier.platform
 * **`ScheduleAppointmentCommandFromResourceAssembler`:** Transforma `ScheduleAppointmentResource` en `ScheduleAppointmentCommand`, incorporando el identificador del taller (`TenantId`) resuelto en sesión.
 * **`RescheduleAppointmentCommandFromResourceAssembler`:** Convierte `RescheduleAppointmentResource` y el `AppointmentId` en `RescheduleAppointmentCommand`.
 * **`CancelAppointmentCommandFromResourceAssembler`:** Convierte `CancelAppointmentResource` y el `AppointmentId` en `CancelAppointmentCommand`.
+* **`InviteCustomerMemberCommandFromResourceAssembler`:** Transforma `InviteCustomerMemberResource` y el identificador `CustomerId` de la ruta URI en un comando `InviteCustomerMemberCommand`.
 
 ##### Outbound Assemblers (Mapeo de Entities/Aggregates a Resources)
 * **`CustomerResourceFromAggregateAssembler`:** Transforma la raíz de agregado `Customer` en su representación externa `CustomerResource`, calculando el nombre para mostrar (`displayName`) según el tipo de cliente.
 * **`VehicleResourceFromAggregateAssembler`:** Transforma la raíz de agregado `Vehicle`, resolviendo a través del historial de titularidad vigente (`VehicleOwnership`) los metadatos del dueño actual para componer `VehicleResource`.
 * **`VehicleOwnershipResourceFromEntityAssembler`:** Convierte la entidad de dominio `VehicleOwnership` en `VehicleOwnershipResource`, resolviendo el nombre comercial o nombre completo del titular histórico.
 * **`AppointmentResourceFromAggregateAssembler`:** Transforma la raíz de agregado `Appointment` en `AppointmentResource`, enriqueciendo la carga útil con la denominación del cliente y la placa del automóvil para su consumo inmediato en interfaces de usuario web y móvil.
+* **`CustomerMembershipResourceFromEntityAssembler`:** Transforma la entidad de dominio `CustomerMembership` en su representación externa `CustomerMembershipResource` para su presentación en portales web y aplicaciones móviles.
 
 ---
 
@@ -694,6 +1018,33 @@ public interface CustomerFleetContextFacade {
      * @return true si la transición de estado fue procesada exitosamente; false en caso contrario.
      */
     boolean markAppointmentAsConvertedToWorkOrder(UUID appointmentId);
+
+    /**
+     * Consulta las membresías corporativas activas asignadas a un usuario en la plataforma.
+     *
+     * @param userId Identificador único del usuario autenticado.
+     * @return Colección inmutable de membresías de flota activas.
+     */
+    List<CustomerMembershipAclDto> fetchActiveMembershipsByUserId(UUID userId);
+
+    /**
+     * Valida si un usuario ostenta un rol corporativo específico dentro de la flota de un cliente.
+     *
+     * @param customerId   Identificador del cliente empresa titular de la flota.
+     * @param userId       Identificador del usuario a verificar.
+     * @param requiredRole Rol requerido para la acción (FLEET_ADMIN o FLEET_OPERATOR).
+     * @return true si el usuario posee la membresía activa con el rol exigido o superior, false en caso contrario.
+     */
+    boolean hasFleetRole(UUID customerId, UUID userId, String requiredRole);
+
+    /**
+     * Consulta el registro de membresía corporativa entre un cliente y un usuario.
+     *
+     * @param customerId Identificador del cliente corporativo.
+     * @param userId     Identificador del usuario delegado.
+     * @return DTO inmutable de membresía si se encuentra registrada.
+     */
+    Optional<CustomerMembershipAclDto> fetchMembership(UUID customerId, UUID userId);
 }
 ```
 
@@ -743,6 +1094,17 @@ public record AppointmentAclDto(
 ) {}
 ```
 
+4. **`CustomerMembershipAclDto`:**
+```java
+public record CustomerMembershipAclDto(
+    UUID id,
+    UUID customerId,
+    UUID userId,
+    String role,
+    String status
+) {}
+```
+
 ---
 
 #### 5.3.5. Integration Events (Published Language)
@@ -751,19 +1113,19 @@ Los eventos de integración residen en el paquete `com.andeva.atelier.platform.c
 
 1. **`CustomerCreatedIntegrationEvent`:**
    * **Atributos Inmutables:** `UUID customerId`, `UUID tenantId`, `String type`, `String displayName`, `String taxId`, `String email`, `String phone`, `Instant occurredOn`.
-   * **Propósito y Módulos Receptores:** Notifica a *Invoicing* para pre-cargar la ficha tributaria del cliente y emitir comprobantes de pago electrónicos de forma inmediata; notifica a *IAM & Tenancy* cuando se requiere vincular el perfil de usuario conductor con su ficha de cliente.
+   * **Propósito y Módulos Receptores:** Notifica a *Invoicing* para pre-cargar la ficha tributaria del cliente y emitir comprobantes de pago electrónicos de forma inmediata. Asimismo, notifica a *IAM & Tenancy* cuando se requiere vincular el perfil de usuario conductor con su ficha de cliente.
 
 2. **`VehicleRegisteredIntegrationEvent`:**
    * **Atributos Inmutables:** `UUID vehicleId`, `String plate`, `String vin`, `String brand`, `String model`, `int year`, `String engineType`, `UUID ownerId`, `Instant occurredOn`.
-   * **Propósito y Módulos Receptores:** Notifica a *IoT Telemetry* para registrar la unidad automotriz en el catálogo del broker MQTT y habilitar el emparejamiento con hardware OBD2; notifica a *Workshop Operations* para habilitar la apertura inmediata de órdenes de servicio técnico.
+   * **Propósito y Módulos Receptores:** Notifica a *IoT Telemetry* para registrar la unidad automotriz en el catálogo del broker MQTT y habilitar el emparejamiento con hardware OBD2. También notifica a *Workshop Operations* para habilitar la apertura inmediata de órdenes de servicio técnico.
 
 3. **`VehicleOwnershipTransferredIntegrationEvent`:**
    * **Atributos Inmutables:** `UUID vehicleId`, `UUID previousOwnerId`, `UUID newOwnerId`, `LocalDate transferDate`, `Instant occurredOn`.
-   * **Propósito y Módulos Receptores:** Notifica a *IoT Telemetry* para reasignar la visualización del streaming de telemetría y diagnóstico en vivo al nuevo cliente en Atelier Driver, revocando el acceso del titular anterior; notifica a *Invoicing* para dar de baja cuentas corrientes o cobros recurrentes de mantenimiento de flotas vinculados al cliente previo.
+   * **Propósito y Módulos Receptores:** Notifica a *IoT Telemetry* para reasignar la visualización del streaming de telemetría y diagnóstico en vivo al nuevo cliente en Atelier Driver, revocando el acceso del titular anterior. Adicionalmente, notifica a *Invoicing* para dar de baja cuentas corrientes o cobros recurrentes de mantenimiento de flotas vinculados al cliente previo.
 
 4. **`AppointmentScheduledIntegrationEvent`:**
    * **Atributos Inmutables:** `UUID appointmentId`, `UUID tenantId`, `UUID branchId`, `UUID customerId`, `UUID vehicleId`, `Instant scheduledAt`, `int estimatedDurationMinutes`, `String reason`, `Instant occurredOn`.
-   * **Propósito y Módulos Receptores:** Notifica a *Workshop Operations* para reservar el aforo operativo en las bahías de inspección física; notifica al subsistema de *Notificaciones* para programar recordatorios preventivos automatizados vía correo electrónico y push FCM hacia el conductor.
+   * **Propósito y Módulos Receptores:** Notifica a *Workshop Operations* para reservar el aforo operativo en las bahías de inspección física. Del mismo modo, notifica al subsistema de *Notificaciones* para programar recordatorios preventivos automatizados vía correo electrónico y push FCM hacia el conductor.
 
 5. **`AppointmentArrivedIntegrationEvent`:**
    * **Atributos Inmutables:** `UUID appointmentId`, `UUID tenantId`, `UUID branchId`, `UUID customerId`, `UUID vehicleId`, `Instant occurredOn`.
@@ -771,25 +1133,27 @@ Los eventos de integración residen en el paquete `com.andeva.atelier.platform.c
 
 ---
 
-### 5.4. 2.6.2.3. Application Layer
+### 5.4. 2.6.3.3. Application Layer
 
 La Capa de Aplicación (*Application Layer*) orquesta los flujos de procesos de negocio y casos de uso del Bounded Context **Customer & Fleet Management (CRM)**, actuando como mediadora directa entre la capa de interfaz y el modelo de dominio puro. Siguiendo el patrón arquitectónico **CQRS (Command Query Responsibility Segregation)**, esta capa separa con rigor las operaciones mutacionales de escritura de las proyecciones optimizadas de solo lectura.
 
-Residiendo bajo el paquete raíz `com.andeva.atelier.platform.crm.application`, sus responsabilidades se distribuyen en cuatro subsistemas técnicos:
+Residiendo bajo el paquete raíz `com.andeva.atelier.platform.crm.application`, sus responsabilidades se distribuyen en cinco subsistemas técnicos:
 
-1. **Servicios de Comando (`@Service`):** Coordinan transacciones atómicas de escritura, ejecutan validaciones previas de negocio contra repositorios, invocan factorías y métodos de negocio de los agregados (`Customer`, `Vehicle`, `Appointment`) y retornan tipos de resultado sellados `Result<T, ApplicationError>`.
-2. **Servicios de Consulta (`@Service`):** Ejecutan lecturas optimizadas decoradas con `@Transactional(readOnly = true)`, prescindiendo de la sobrecarga de seguimiento de cambios (*dirty checking*) de JPA.
-3. **Manejadores de Eventos (`Event Handlers`):** Reaccionan tanto a eventos de dominio en memoria mediante oyentes locales inmediatos (`@EventListener`), como a eventos que requieren confirmación transaccional (`@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)`) para construir y depositar eventos del lenguaje publicado en el *Transactional Outbox*.
-4. **Puertos de Salida y Pasarelas (`Outbound ACL Gateways`):** Definen contratos de interfaz para interactuar con servicios externos (Google Places API para validación geográfica, Firebase Cloud Messaging para notificaciones push a *Atelier Driver*, y verificación de cuotas SaaS en *Billing*).
+1. **Servicios de Comando:** Interfaces públicas en `application.commandservices` e implementaciones encapsuladas en `application.internal.commandservices`, orquestando transacciones atómicas de escritura bajo consistencia ACID y retornando tipos de resultado sellados `Result<T, ApplicationError>`.
+2. **Servicios de Consulta:** Interfaces públicas en `application.queryservices` e implementaciones en `application.internal.queryservices`, ejecutando lecturas optimizadas decoradas con `@Transactional(readOnly = true)`.
+3. **Manejadores de Eventos:** Clases oyentes en `application.internal.eventhandlers` que reaccionan a eventos de dominio en memoria o depositan eventos de integración en el *Transactional Outbox*.
+4. **Puertos de Salida y Pasarelas:** Contratos puros en `application.internal.outbound.acl` para interactuar con servicios externos (Google Places API, Firebase Cloud Messaging, cuotas SaaS en *Billing*).
+5. **Implementación de Fachada Inbound ACL:** Clase `application.acl.CustomerFleetContextFacadeImpl` que realiza el contrato OHS público para otros Bounded Contexts.
 
 ---
 
 #### 5.4.1. Command Services & Implementations
 
-Los servicios de comando se encuentran anotados con `@Service` y `@Transactional(isolation = Isolation.READ_COMMITTED, rollbackFor = Exception.class)`, garantizando consistencia transaccional ACID en cada caso de uso:
+Los servicios de comando se encuentran anotados con `@Service` y `@Transactional(isolation = Isolation.READ_COMMITTED, rollbackFor = Exception.class)`, garantizando consistencia transaccional ACID en cada caso de uso. Las interfaces públicas se ubican en `com.andeva.atelier.platform.crm.application.commandservices`, mientras que sus implementaciones privadas se resguardan en `com.andeva.atelier.platform.crm.application.internal.commandservices`:
 
 ##### 1. `CustomerCommandService` & `CustomerCommandServiceImpl`
-* Paquete: `com.andeva.atelier.platform.crm.application.services`
+* Interfaces: `com.andeva.atelier.platform.crm.application.commandservices.CustomerCommandService`
+* Implementación: `com.andeva.atelier.platform.crm.application.internal.commandservices.CustomerCommandServiceImpl`
 * Contratos y Casos de Uso:
   * `Result<Customer, ApplicationError> handle(RegisterIndividualCustomerCommand command)`:
     1. Resuelve el taller activo (`tenantId`) a partir del contexto de seguridad autenticado.
@@ -799,10 +1163,11 @@ Los servicios de comando se encuentran anotados con `@Service` y `@Transactional
     5. Instancia el agregado `Customer` mediante la factoría estática `Customer.registerIndividual(CustomerId.generate(), tenantId, new PersonName(command.firstName(), command.lastName()), new TaxId(command.taxId(), TaxIdType.DNI), new EmailAddress(command.email()), new PhoneNumber(command.phone()))`.
     6. Persiste la entidad mediante `CustomerRepository.save(customer)` y retorna `Result.success(customer)`.
   * `Result<Customer, ApplicationError> handle(RegisterCompanyCustomerCommand command)`:
-    1. Verifica la unicidad del RUC corporativo dentro del taller mediante `CustomerRepository.existsByTenantIdAndTaxId(tenantId, command.taxId())`.
-    2. Valida la existencia y geocodificación del domicilio fiscal de la flota a través de `PlacesAddressVerificationGateway.verifyAddress(command.address())`.
-    3. Instancia el agregado `Customer` vía `Customer.registerCompany(CustomerId.generate(), tenantId, command.companyName(), new TaxId(command.taxId(), TaxIdType.RUC), new EmailAddress(command.email()), new PhoneNumber(command.phone()))`.
-    4. Persiste el cliente y retorna `Result.success(customer)`.
+    1. Comprueba la autorización de registro de empresas mediante `SubscriptionContextFacade.validateCompanyCustomerRegistrationAllowed(tenantId)`. Si el taller opera bajo un plan **Go** o **Pro** (`companyRegistrationAllowed == false`), retorna `Result.failure(CustomerErrors.companyRegistrationNotAllowed())` (mapeado a HTTP 403 Forbidden bajo RFC 7807), reservando el registro corporativo y gestión de flotas exclusivamente para los planes **Max** y **Enterprise**.
+    2. Verifica la unicidad del RUC corporativo dentro del taller mediante `CustomerRepository.existsByTenantIdAndTaxId(tenantId, command.taxId())`.
+    3. Valida la existencia y geocodificación del domicilio fiscal de la flota a través de `PlacesAddressVerificationGateway.verifyAddress(command.address())`.
+    4. Instancia el agregado `Customer` vía `Customer.registerCompany(CustomerId.generate(), tenantId, command.companyName(), new TaxId(command.taxId(), TaxIdType.RUC), new EmailAddress(command.email()), new PhoneNumber(command.phone()))`.
+    5. Persiste el cliente y retorna `Result.success(customer)`.
   * `Result<Customer, ApplicationError> handle(UpdateCustomerContactCommand command)`:
     1. Recupera el cliente mediante `CustomerRepository.findByIdAndTenantId(command.customerId(), tenantId)`. Si no existe, retorna `Result.failure(CustomerErrors.notFound())`.
     2. Ejecuta el método de dominio `customer.updateContactInfo(new EmailAddress(command.email()), new PhoneNumber(command.phone()))`.
@@ -813,15 +1178,17 @@ Los servicios de comando se encuentran anotados con `@Service` y `@Transactional
     3. Ejecuta `customer.deactivate()` y persiste la actualización.
 
 ##### 2. `VehicleCommandService` & `VehicleCommandServiceImpl`
-* Paquete: `com.andeva.atelier.platform.crm.application.services`
+* Interfaces: `com.andeva.atelier.platform.crm.application.commandservices.VehicleCommandService`
+* Implementación: `com.andeva.atelier.platform.crm.application.internal.commandservices.VehicleCommandServiceImpl`
 * Contratos y Casos de Uso:
   * `Result<Vehicle, ApplicationError> handle(RegisterVehicleCommand command)`:
     1. Normaliza la placa automotriz a mayúsculas sin guiones y verifica que no exista en el catálogo global mediante `VehicleRepository.existsByPlate(command.normalizedPlate())`. Si existe, retorna `Result.failure(VehicleErrors.plateAlreadyExists())`.
     2. Si se suministró número de chasis (VIN), verifica su unicidad global mediante `VehicleRepository.existsByVin(command.vin())`.
-    3. Comprueba que el cliente titular inicial exista y pertenezca al taller activo (`CustomerRepository.findByIdAndTenantId(command.initialOwnerId(), tenantId)`).
-    4. Instancia el agregado universal `Vehicle` mediante la factoría estática `Vehicle.register(VehicleId.generate(), new LicensePlate(command.normalizedPlate()), command.vin() != null ? new Vin(command.vin()) : null, command.brand(), command.model(), command.year(), command.engineType(), command.initialOwnerId(), command.registrationDate())`.
+    3. Valida la titularidad inicial flexible: si se suministró `customerId`, comprueba que el cliente exista y pertenezca al taller activo (`CustomerRepository.findByIdAndTenantId(command.customerId().get(), tenantId)`). Si se suministró `userId` (pre-registro desde Atelier Driver), verifica la validez del identificador. Al menos uno de ellos debe estar provisto.
+    4. Instancia el agregado universal `Vehicle` mediante la factoría estática `Vehicle.register(VehicleId.generate(), new LicensePlate(command.normalizedPlate()), command.vin() != null ? new Vin(command.vin()) : null, command.brand(), command.model(), command.year(), command.engineType(), command.customerId(), command.userId())`.
     5. Persiste el agregado con su primer registro en la colección de titularidades (`VehicleOwnership`) mediante `VehicleRepository.save(vehicle)`.
-    6. Retorna `Result.success(vehicle)`.
+    6. Si posteriormente el vehículo visita el taller mecánico por primera vez, el servicio admite la invocación de `linkCustomer(customerId)` para asociar la ficha del cliente a la tenencia activa previa.
+    7. Retorna `Result.success(vehicle)`.
   * `Result<Vehicle, ApplicationError> handle(TransferVehicleOwnershipCommand command)`:
     1. Recupera el vehículo universal por ID mediante `VehicleRepository.findById(command.vehicleId())`. Si no existe, retorna `Result.failure(VehicleErrors.notFound())`.
     2. Comprueba la existencia y vigencia del nuevo cliente titular (`CustomerRepository.findByIdAndTenantId(command.newOwnerId(), tenantId)`).
@@ -830,7 +1197,8 @@ Los servicios de comando se encuentran anotados con `@Service` y `@Transactional
     5. Retorna `Result.success(vehicle)`.
 
 ##### 3. `AppointmentCommandService` & `AppointmentCommandServiceImpl`
-* Paquete: `com.andeva.atelier.platform.crm.application.services`
+* Interfaces: `com.andeva.atelier.platform.crm.application.commandservices.AppointmentCommandService`
+* Implementación: `com.andeva.atelier.platform.crm.application.internal.commandservices.AppointmentCommandServiceImpl`
 * Contratos y Casos de Uso:
   * `Result<Appointment, ApplicationError> handle(ScheduleAppointmentCommand command)`:
     1. Valida que la fecha y hora programada sea estrictamente futura y respete el horario de atención de la sede física (`command.scheduledAt().isAfter(Instant.now().plus(Duration.ofHours(2)))`).
@@ -857,40 +1225,68 @@ Los servicios de comando se encuentran anotados con `@Service` y `@Transactional
     2. Ejecuta `appointment.cancel(command.reason())` registrando el motivo formal de anulación.
     3. Persiste la cita en estado `CANCELED` y emite `AppointmentCanceledEvent`.
 
+##### 4. `CustomerMembershipCommandService` & `CustomerMembershipCommandServiceImpl`
+* Interfaces: `com.andeva.atelier.platform.crm.application.commandservices.CustomerMembershipCommandService`
+* Implementación: `com.andeva.atelier.platform.crm.application.internal.commandservices.CustomerMembershipCommandServiceImpl`
+* Contratos y Casos de Uso:
+  * `Result<CustomerMembership, ApplicationError> handle(InviteCustomerMemberCommand command)`:
+    1. Recupera el cliente mediante `CustomerRepository.findById(command.customerId())`. Si no existe, retorna `Result.failure(CustomerErrors.notFound())`.
+    2. Valida que la cuenta comercial corresponda al tipo `COMPANY`. Las cuentas particulares no admiten miembros de flota corporativa.
+    3. Comprueba mediante `CustomerMembershipRepository.existsByCustomerIdAndUserIdAndStatus(command.customerId(), command.userId(), CustomerMembershipStatus.ACTIVE)` que el usuario no posea ya una membresía activa en la misma empresa. Si existe colisión, retorna `Result.failure(CustomerMembershipErrors.alreadyActiveMember())`.
+    4. Instancia la entidad de dominio `CustomerMembership` mediante la factoría estática `CustomerMembership.create(CustomerMembershipId.generate(), command.customerId(), command.userId(), command.role())`.
+    5. Persiste la entidad mediante `CustomerMembershipRepository.save(membership)` y emite `CustomerMemberInvitedEvent`.
+    6. Retorna `Result.success(membership)`.
+  * `Result<Void, ApplicationError> handle(RevokeCustomerMemberCommand command)`:
+    1. Recupera la membresía corporativa vigente mediante `CustomerMembershipRepository.findByCustomerIdAndUserId(command.customerId(), command.userId())`. Si no existe, retorna `Result.failure(CustomerMembershipErrors.notFound())`.
+    2. Invoca el método de dominio `membership.revoke()`.
+    3. Persiste la actualización a través de `CustomerMembershipRepository.save(membership)` y emite `CustomerMemberRevokedEvent`.
+    4. Retorna `Result.success(null)`.
+
 ---
 
 #### 5.4.2. Query Services & Implementations
 
-Los servicios de consulta se implementan bajo `@Transactional(readOnly = true)` y retornan proyecciones inmutables sin efectos colaterales sobre el estado de la base de datos:
+Los servicios de consulta se implementan bajo `@Transactional(readOnly = true)` y retornan proyecciones inmutables sin efectos colaterales sobre el estado de la base de datos. Sus interfaces públicas se ubican en `com.andeva.atelier.platform.crm.application.queryservices`, mientras que sus implementaciones privadas residen en `com.andeva.atelier.platform.crm.application.internal.queryservices`:
 
 ##### 1. `CustomerQueryService` & `CustomerQueryServiceImpl`
-* Paquete: `com.andeva.atelier.platform.crm.application.services`
+* Interfaces: `com.andeva.atelier.platform.crm.application.queryservices.CustomerQueryService`
+* Implementación: `com.andeva.atelier.platform.crm.application.internal.queryservices.CustomerQueryServiceImpl`
 * Métodos:
   * `Optional<Customer> handle(GetCustomerByIdQuery query)`: Recupera un cliente por su identificador único dentro del taller autenticado.
   * `List<Customer> handle(GetCustomersByTenantIdQuery query)`: Lista los clientes del taller aplicando filtros opcionales de tipo (`INDIVIDUAL`, `COMPANY`), criterio de búsqueda por texto y paginación.
   * `Optional<Customer> handle(GetCustomerByTaxIdQuery query)`: Localiza un cliente a partir de su número de DNI o RUC.
 
 ##### 2. `VehicleQueryService` & `VehicleQueryServiceImpl`
-* Paquete: `com.andeva.atelier.platform.crm.application.services`
+* Interfaces: `com.andeva.atelier.platform.crm.application.queryservices.VehicleQueryService`
+* Implementación: `com.andeva.atelier.platform.crm.application.internal.queryservices.VehicleQueryServiceImpl`
 * Métodos:
   * `Optional<Vehicle> handle(GetVehicleByIdQuery query)`: Recupera las especificaciones técnicas del vehículo universal por ID.
   * `Optional<Vehicle> handle(GetVehicleByPlateQuery query)`: Resuelve un vehículo automotor a partir de su placa de rodaje normalizada.
   * `List<Vehicle> handle(GetVehiclesByCustomerIdQuery query)`: Lista todos los vehículos que se encuentran actualmente bajo la titularidad activa del cliente.
   * `List<VehicleOwnership> handle(GetVehicleOwnershipHistoryQuery query)`: Recupera el historial cronológico completo de transferencias de custodia de un vehículo.
+  * `List<Vehicle> handle(GetVehiclesByUserIdQuery query)`: Resuelve y retorna todas las unidades vehiculares vinculadas al usuario conductor autenticado mediante titularidades activas sin fecha de fin.
 
 ##### 3. `AppointmentQueryService` & `AppointmentQueryServiceImpl`
-* Paquete: `com.andeva.atelier.platform.crm.application.services`
+* Interfaces: `com.andeva.atelier.platform.crm.application.queryservices.AppointmentQueryService`
+* Implementación: `com.andeva.atelier.platform.crm.application.internal.queryservices.AppointmentQueryServiceImpl`
 * Métodos:
   * `Optional<Appointment> handle(GetAppointmentByIdQuery query)`: Recupera la ficha integral de una cita por su identificador.
   * `List<Appointment> handle(GetAppointmentsByTenantAndBranchQuery query)`: Lista las citas agendadas para una sede física y fecha de calendario específica, con filtro opcional por estado operativo.
   * `List<Appointment> handle(GetAppointmentsByCustomerQuery query)`: Recupera el historial de citas programadas por un cliente particular o empresa.
   * `List<Appointment> handle(GetAppointmentsByDateRangeQuery query)`: Proyecta la demanda de citas dentro de un rango de fechas para planificación de turnos técnicos.
 
+##### 4. `CustomerMembershipQueryService` & `CustomerMembershipQueryServiceImpl`
+* Interfaces: `com.andeva.atelier.platform.crm.application.queryservices.CustomerMembershipQueryService`
+* Implementación: `com.andeva.atelier.platform.crm.application.internal.queryservices.CustomerMembershipQueryServiceImpl`
+* Métodos:
+  * `List<CustomerMembership> handle(GetCustomerMembershipsByUserIdQuery query)`: Recupera todas las membresías corporativas activas adscritas al usuario identificado por `query.userId()`.
+  * `List<CustomerMembership> handle(GetCustomerMembersByCustomerIdQuery query)`: Lista todos los operadores y administradores asignados a la flota comercial del cliente identificado por `query.customerId()`.
+
 ---
 
 #### 5.4.3. Event Handlers & Listeners
 
-El desacoplamiento entre casos de uso mutacionales y los efectos colaterales del negocio se instrumenta a través de tres manejadores de eventos en el paquete `com.andeva.atelier.platform.crm.application.events`:
+El desacoplamiento entre casos de uso mutacionales y los efectos colaterales del negocio se instrumenta a través de tres manejadores de eventos en el paquete `com.andeva.atelier.platform.crm.application.internal.eventhandlers`:
 
 ##### 1. `CustomerDomainEventsHandler`
 * `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)`
@@ -912,7 +1308,7 @@ El desacoplamiento entre casos de uso mutacionales y los efectos colaterales del
 
 #### 5.4.4. Outbound ACL Gateways
 
-Para preservar la independencia del núcleo de aplicación frente a protocolos de transporte o SDKs propietarios de terceros, la capa define contratos puros de pasarela en el paquete `com.andeva.atelier.platform.crm.application.acl`:
+Para preservar la independencia del núcleo de aplicación frente a protocolos de transporte o SDKs propietarios de terceros, la capa define contratos puros de pasarela en el paquete `com.andeva.atelier.platform.crm.application.internal.outbound.acl`:
 
 ##### 1. `PlacesAddressVerificationGateway`
 * **Propósito:** Validación y estandarización geográfica de domicilios corporativos para clientes empresa.
@@ -944,7 +1340,62 @@ Para preservar la independencia del núcleo de aplicación frente a protocolos d
 
 ---
 
-### 5.5. 2.6.2.4. Infrastructure Layer
+#### 5.4.5. Inbound ACL / Customer Fleet Facade Implementation
+
+Implementación operativa de la fachada Open Host Service (OHS), ubicada en `com.andeva.atelier.platform.crm.application.acl.CustomerFleetContextFacadeImpl`. Esta clase implementa la interfaz pública `CustomerFleetContextFacade` expuesta en `interfaces.acl`, orquestando llamadas directas en memoria hacia los servicios de consulta (`CustomerQueryService`, `VehicleQueryService`, `AppointmentQueryService`) y comandos transaccionales controlados (`AppointmentCommandService`), traduciendo los agregados de dominio hacia DTOs inmutables de ACL (`CustomerAclDto`, `VehicleAclDto`, `AppointmentAclDto`) para el consumo seguro de otros Bounded Contexts (Workshop Operations, Electronic Invoicing, IoT Telemetry):
+
+```java
+package com.andeva.atelier.platform.crm.application.acl;
+
+import com.andeva.atelier.platform.crm.application.commandservices.AppointmentCommandService;
+import com.andeva.atelier.platform.crm.application.commandservices.CustomerMembershipCommandService;
+import com.andeva.atelier.platform.crm.application.queryservices.AppointmentQueryService;
+import com.andeva.atelier.platform.crm.application.queryservices.CustomerMembershipQueryService;
+import com.andeva.atelier.platform.crm.application.queryservices.CustomerQueryService;
+import com.andeva.atelier.platform.crm.application.queryservices.VehicleQueryService;
+import com.andeva.atelier.platform.crm.interfaces.acl.CustomerFleetContextFacade;
+import com.andeva.atelier.platform.crm.interfaces.acl.dto.AppointmentAclDto;
+import com.andeva.atelier.platform.crm.interfaces.acl.dto.CustomerAclDto;
+import com.andeva.atelier.platform.crm.interfaces.acl.dto.CustomerMembershipAclDto;
+import com.andeva.atelier.platform.crm.interfaces.acl.dto.VehicleAclDto;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+@Service
+public class CustomerFleetContextFacadeImpl implements CustomerFleetContextFacade {
+    private final CustomerQueryService customerQueryService;
+    private final VehicleQueryService vehicleQueryService;
+    private final AppointmentQueryService appointmentQueryService;
+    private final AppointmentCommandService appointmentCommandService;
+    private final CustomerMembershipQueryService customerMembershipQueryService;
+    private final CustomerMembershipCommandService customerMembershipCommandService;
+
+    public CustomerFleetContextFacadeImpl(
+            CustomerQueryService customerQueryService,
+            VehicleQueryService vehicleQueryService,
+            AppointmentQueryService appointmentQueryService,
+            AppointmentCommandService appointmentCommandService,
+            CustomerMembershipQueryService customerMembershipQueryService,
+            CustomerMembershipCommandService customerMembershipCommandService) {
+        this.customerQueryService = customerQueryService;
+        this.vehicleQueryService = vehicleQueryService;
+        this.appointmentQueryService = appointmentQueryService;
+        this.appointmentCommandService = appointmentCommandService;
+        this.customerMembershipQueryService = customerMembershipQueryService;
+        this.customerMembershipCommandService = customerMembershipCommandService;
+    }
+
+    // Métodos de delegación operativa hacia query services y command services con mapeo a DTOs de ACL
+    // Implementa resolución de membresías corporativas y validación de permisos de flota
+}
+```
+
+---
+
+### 5.5. 2.6.3.4. Infrastructure Layer
 
 La Capa de Infraestructura del contexto **Customer & Fleet Management (CRM)** materializa técnicamente los puertos de persistencia y comunicación externa definidos en las capas de Dominio y Aplicación. Provee el soporte para el almacenamiento físico relacional en PostgreSQL 16 (alojado en Aiven Cloud) a través de Spring Data JPA y Hibernate ORM, encapsula la conversión de objetos de valor tipados mediante convertidores JPA estandarizados, implementa los adaptadores de repositorio con despacho atómico de eventos hacia la tabla del *Transactional Outbox* (`outbox_messages`), y gestiona la integración con pasarelas de nube externas (Google Maps Places API y Firebase Cloud Messaging) y clientes de cuotas SaaS (*Billing*).
 
@@ -992,13 +1443,15 @@ Clases mapeadas físicamente a las tablas relacionales de PostgreSQL bajo el paq
 * **Herencia:** Extiende `AuditableAbstractPersistenceEntity`.
 * **Anotaciones de Mapeo:**
   * `@Entity`
-  * `@Table(name = "vehicle_ownerships", indexes = { @Index(name = "idx_vo_vehicle_dates", columnList = "vehicle_id, start_date, end_date"), @Index(name = "idx_vo_customer_active", columnList = "customer_id, end_date") })`
-* **Índice Parcial en Base de Datos:** `idx_vo_active` definido a nivel de DDL (`CREATE UNIQUE INDEX idx_vo_active ON vehicle_ownerships (vehicle_id) WHERE end_date IS NULL;`), garantizando a nivel de motor relacional la invariante de que un vehículo automotor solo puede ostentar un único propietario activo simultáneamente.
+  * `@Table(name = "vehicle_ownerships", indexes = { @Index(name = "idx_vo_vehicle_dates", columnList = "vehicle_id, start_date, end_date"), @Index(name = "idx_vo_customer_active", columnList = "customer_id, end_date"), @Index(name = "idx_vo_user_active", columnList = "user_id, end_date") })`
+* **Índice Parcial en Base de Datos:** `idx_vo_active` definido a nivel de DDL (`CREATE UNIQUE INDEX idx_vo_active ON vehicle_ownerships (vehicle_id) WHERE end_date IS NULL`), garantizando a nivel de motor relacional la invariante de que un vehículo automotor solo puede ostentar un único propietario activo simultáneamente.
 * **Atributos y Columnas Físicas:**
-  * `@Column(name = "customer_id", nullable = false)`: Identificador UUID del cliente titular (asociación lógica hacia `customers.id`).
+  * `@Column(name = "customer_id")`: Identificador UUID del cliente titular (asociación lógica hacia `customers.id`, nullable en pre-registro móvil).
+  * `@Column(name = "user_id")`: Identificador UUID del usuario conductor en IAM (asociación lógica hacia `users.id`, nullable en registros directos de taller).
   * `@ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "vehicle_id", nullable = false, foreignKey = @ForeignKey(name = "fk_vo_vehicle"))`: Asociación relacional hacia la entidad física de persistencia `VehiclePersistenceEntity`.
   * `@Column(name = "start_date", nullable = false)`: Fecha de inicio de titularidad y custodia del vehículo (`DATE`).
-  * `@Column(name = "end_date")`: Fecha de culminación o transferencia de la titularidad (`DATE`, nullable; el valor `null` explicita que es el custodio vigente).
+  * `@Column(name = "end_date")`: Fecha de culminación o transferencia de la titularidad (`DATE`, nullable, donde el valor `null` explicita que es el custodio vigente).
+* **Restricción de Verificación (CHECK):** `chk_ownership_owner` que asegura `customer_id IS NOT NULL OR user_id IS NOT NULL`.
 
 ##### 4. `AppointmentPersistenceEntity` (Tabla `appointments`)
 * **Paquete:** `com.andeva.atelier.platform.crm.infrastructure.persistence.jpa.entities`
@@ -1016,6 +1469,18 @@ Clases mapeadas físicamente a las tablas relacionales de PostgreSQL bajo el paq
   * `@Column(name = "reason", length = 2000)`: Exposición de motivos, requerimientos de mantenimiento preventivo o fallas reportadas por el cliente.
   * `@Convert(converter = AppointmentStatusAttributeConverter.class) @Column(name = "status", nullable = false, length = 20)`: Estado operativo del ciclo de vida (`pending`, `confirmed`, `arrived`, `canceled`).
   * `@Column(name = "cancellation_reason", length = 500)`: Justificación formal requerida ante la anulación de una reserva (nullable).
+
+##### 5. `CustomerMembershipPersistenceEntity` (Tabla `customer_memberships`)
+* **Paquete:** `com.andeva.atelier.platform.crm.infrastructure.persistence.jpa.entities`
+* **Herencia:** Extiende `AuditableAbstractPersistenceEntity`.
+* **Anotaciones de Mapeo:**
+  * `@Entity`
+  * `@Table(name = "customer_memberships", uniqueConstraints = { @UniqueConstraint(name = "uk_cm_customer_user", columnNames = {"customer_id", "user_id"}) }, indexes = { @Index(name = "idx_cm_customer", columnList = "customer_id"), @Index(name = "idx_cm_user", columnList = "user_id, status") })`
+* **Atributos y Columnas Físicas:**
+  * `@Column(name = "customer_id", nullable = false)`: Identificador UUID del cliente empresa titular de la flota comercial.
+  * `@Column(name = "user_id", nullable = false)`: Identificador UUID del usuario delegado registrado en IAM.
+  * `@Enumerated(EnumType.STRING) @Column(name = "role", nullable = false, length = 20)`: Rol de gestión asignado en la flota (`FLEET_ADMIN`, `FLEET_OPERATOR`).
+  * `@Enumerated(EnumType.STRING) @Column(name = "status", nullable = false, length = 20)`: Estado operativo de la membresía (`ACTIVE`, `SUSPENDED`, `REVOKED`).
 
 ---
 
@@ -1085,6 +1550,8 @@ public interface VehicleOwnershipPersistenceRepository extends JpaRepository<Veh
 
     List<VehicleOwnershipPersistenceEntity> findAllByCustomerIdAndEndDateIsNull(UUID customerId);
 
+    List<VehicleOwnershipPersistenceEntity> findAllByUserIdAndEndDateIsNull(UUID userId);
+
     boolean existsByVehicleIdAndCustomerIdAndEndDateIsNull(UUID vehicleId, UUID customerId);
 }
 ```
@@ -1127,6 +1594,20 @@ public interface AppointmentPersistenceRepository extends JpaRepository<Appointm
     List<AppointmentPersistenceEntity> findByCustomerIdOrderByScheduledAtDesc(UUID customerId);
 
     List<AppointmentPersistenceEntity> findByVehicleIdOrderByScheduledAtDesc(UUID vehicleId);
+}
+```
+
+##### 5. `CustomerMembershipPersistenceRepository`
+```java
+public interface CustomerMembershipPersistenceRepository extends JpaRepository<CustomerMembershipPersistenceEntity, UUID> {
+
+    List<CustomerMembershipPersistenceEntity> findAllByCustomerId(UUID customerId);
+
+    List<CustomerMembershipPersistenceEntity> findAllByUserIdAndStatus(UUID userId, CustomerMembershipStatus status);
+
+    Optional<CustomerMembershipPersistenceEntity> findByCustomerIdAndUserId(UUID customerId, UUID userId);
+
+    boolean existsByCustomerIdAndUserIdAndStatus(UUID customerId, UUID userId, CustomerMembershipStatus status);
 }
 ```
 
@@ -1183,6 +1664,7 @@ Cada operación de escritura en los adaptadores sigue un flujo estricto y atómi
   * `List<VehicleOwnership> findByVehicleId(VehicleId vehicleId)`: Consulta cronológica completa de custodia para un vehículo.
   * `Optional<VehicleOwnership> findActiveOwnershipByVehicleId(VehicleId vehicleId)`: Resuelve el titular vigente (`endDate == null`).
   * `List<VehicleOwnership> findActiveByCustomerId(CustomerId customerId)`: Lista las titularidades vigentes asociadas a un cliente.
+  * `List<VehicleOwnership> findByUserIdAndEndDateIsNull(UserId userId)`: Recupera las titularidades activas adscritas a un usuario conductor móvil.
 
 ##### 4. `AppointmentRepositoryImpl`
 * **Implementa:** `AppointmentRepository`
@@ -1194,6 +1676,17 @@ Cada operación de escritura en los adaptadores sigue un flujo estricto y atómi
   * `List<Appointment> findByCustomerId(CustomerId customerId)`: Historial de citas agendadas por un cliente.
   * `List<Appointment> findByVehicleId(VehicleId vehicleId)`: Historial de citas vinculadas a un vehículo.
   * `long countActiveByBranchAndSlot(TenantId tenantId, BranchId branchId, Instant slotStart, Instant slotEnd)`: Cuantifica citas solapadas en la ventana de tiempo para gobernar la capacidad de recepción técnica.
+
+##### 5. `CustomerMembershipRepositoryImpl`
+* **Implementa:** `CustomerMembershipRepository`
+* **Dependencias:** `CustomerMembershipPersistenceRepository`, `CustomerMembershipPersistenceAssembler`, `OutboxMessageRepository`
+* **Métodos Implementados:**
+  * `CustomerMembership save(CustomerMembership membership)`: Mapea a `CustomerMembershipPersistenceEntity`, guarda en base de datos relacional, persiste eventos en `outbox_messages` y limpia la cola de la entidad.
+  * `Optional<CustomerMembership> findById(CustomerMembershipId id)`: Resuelve la membresía por identificador universal.
+  * `Optional<CustomerMembership> findByCustomerIdAndUserId(CustomerId customerId, UserId userId)`: Consulta unívoca de membresía entre empresa y usuario delegado.
+  * `List<CustomerMembership> findByCustomerId(CustomerId customerId)`: Lista todos los miembros y operadores autorizados de una flota.
+  * `List<CustomerMembership> findByUserIdAndStatus(UserId userId, CustomerMembershipStatus status)`: Recupera las membresías vigentes asignadas a un usuario en la plataforma.
+  * `boolean existsByCustomerIdAndUserIdAndStatus(CustomerId customerId, UserId userId, CustomerMembershipStatus status)`: Verificación rápida de estado para autorización perimetral.
 
 ---
 
@@ -1207,7 +1700,7 @@ Los métodos `toDomain` reconstituyen los agregados y entidades sin invocar mét
 ##### 1. `CustomerPersistenceAssembler`
 * **`CustomerPersistenceEntity toPersistence(Customer domain)`:**
   * Extrae los valores escalares primitivos de los Value Objects del agregado (`id.value()`, `tenantId.value()`, `taxId.value()`, `email.value()`, `phone.value()`, `status`).
-  * Discrimina según el tipo (`INDIVIDUAL` mapea `firstName` y `lastName`; `COMPANY` mapea `companyName`).
+  * Discrimina según el tipo (`INDIVIDUAL` mapea `firstName` y `lastName`, mientras que `COMPANY` mapea `companyName`).
   * Si la entidad JPA ya existe, actualiza sus campos mutables preservando la versión e identidad de Hibernate.
 * **`Customer toDomain(CustomerPersistenceEntity entity)`:**
   * Reconstituye el agregado `Customer` mediante su factoría estática de reconstitución interna (`Customer.reconstitute(...)`), instanciando de forma segura los Value Objects (`CustomerId`, `TenantId`, `PersonName`, `TaxId`, `EmailAddress`, `PhoneNumber`, `CustomerStatus`).
@@ -1221,15 +1714,21 @@ Los métodos `toDomain` reconstituyen los agregados y entidades sin invocar mét
 
 ##### 3. `VehicleOwnershipPersistenceAssembler`
 * **`VehicleOwnershipPersistenceEntity toPersistence(VehicleOwnership domain, VehiclePersistenceEntity vehicleEntity)`:**
-  * Asocia la clave foránea hacia la entidad de persistencia del vehículo (`vehicleEntity`), el identificador del cliente (`domain.customerId().value()`), `startDate` y `endDate`.
+  * Asocia la clave foránea hacia la entidad de persistencia del vehículo (`vehicleEntity`), el identificador del cliente (`domain.customerId().map(CustomerId::value).orElse(null)`), el identificador del usuario (`domain.userId().map(UserId::value).orElse(null)`), `startDate` y `endDate`.
 * **`VehicleOwnership toDomain(VehicleOwnershipPersistenceEntity entity)`:**
-  * Reconstituye la entidad de dominio `VehicleOwnership` instanciando `VehicleOwnershipId`, `VehicleId`, `CustomerId`, `startDate` y `endDate`.
+  * Reconstituye la entidad de dominio `VehicleOwnership` instanciando `VehicleOwnershipId`, `VehicleId`, `Optional<CustomerId>`, `Optional<UserId>`, `startDate` y `endDate`.
 
 ##### 4. `AppointmentPersistenceAssembler`
 * **`AppointmentPersistenceEntity toPersistence(Appointment domain)`:**
   * Mapea los identificadores foráneos (`tenantId`, `branchId`, `customerId`, `vehicleId`), la fecha `scheduledAt`, duración en minutos, motivo, estado y motivo de cancelación.
 * **`Appointment toDomain(AppointmentPersistenceEntity entity)`:**
   * Reconstituye el agregado `Appointment` mediante su factoría de reconstitución (`Appointment.reconstitute(...)`), asignando el estado operativo actual sin emitir eventos iniciales de agendamiento.
+
+##### 5. `CustomerMembershipPersistenceAssembler`
+* **`CustomerMembershipPersistenceEntity toPersistence(CustomerMembership domain)`:**
+  * Mapea los identificadores escalares primitivos (`domain.id().value()`, `domain.customerId().value()`, `domain.userId().value()`), el rol de flota y el estado operativo hacia columnas JPA.
+* **`CustomerMembership toDomain(CustomerMembershipPersistenceEntity entity)`:**
+  * Reconstituye la entidad de dominio `CustomerMembership` instanciando `CustomerMembershipId`, `CustomerId`, `UserId`, `FleetRole` y `CustomerMembershipStatus` sin disparar eventos de dominio.
 
 ---
 
@@ -1279,14 +1778,14 @@ Ubicados en `com.andeva.atelier.platform.crm.infrastructure.persistence.jpa.conv
 Implementaciones técnicas de los puertos de salida de la Capa de Aplicación (`PlacesAddressVerificationGateway`, `DriverAppPushGateway`, `SubscriptionValidationService`), ubicadas bajo el paquete `com.andeva.atelier.platform.crm.infrastructure.external`:
 
 ##### 1. `GooglePlacesClient` (Google Maps Places API Gateway)
-* **Paquete:** `com.andeva.atelier.platform.crm.infrastructure.external.places`
+* **Paquete:** `com.andeva.atelier.platform.crm.infrastructure.external.google`
 * **Implementa:** `PlacesAddressVerificationGateway`
 * **Tecnología:** Spring 6 `RestClient` sobre protocolo seguro HTTPS (puerto 443), invocando los endpoints oficiales de Google Places API (`/maps/api/place/findplacefromtext/json` y `/maps/api/place/details/json`).
 * **Responsabilidad:** Validación, estandarización y enriquecimiento de domicilios fiscales y bases operativas de flotas comerciales B2B. Obtiene las coordenadas geográficas de precisión (latitud y longitud en formato WGS 84), componentes estructurados de dirección (calle, numeración, distrito, provincia, departamento) y código postal.
 * **Resiliencia y Seguridad:** Autenticación mediante API Key de Google Cloud inyectada desde la variable de entorno protegida `GOOGLE_MAPS_API_KEY`. Configura una política de tiempos límite estrictos (timeout de conexión de 3 segundos y timeout de lectura de 5 segundos) y un patrón de *fallback* resiliente que preserva la dirección original no verificada en caso de degradación temporal del servicio de Google.
 
 ##### 2. `DriverAppFcmClient` (Firebase Cloud Messaging Gateway)
-* **Paquete:** `com.andeva.atelier.platform.crm.infrastructure.external.fcm`
+* **Paquete:** `com.andeva.atelier.platform.crm.infrastructure.external.firebase`
 * **Implementa:** `DriverAppPushGateway`
 * **Tecnología:** SDK oficial de **Firebase Admin** (`com.google.firebase:firebase-admin:9.3.0`).
 * **Responsabilidad:** Construcción, empaquetado y despacho seguro de notificaciones push móviles hacia las instancias de la aplicación **Atelier Driver** desplegadas en dispositivos Android e iOS de los conductores y propietarios de vehículos.
@@ -1308,7 +1807,7 @@ Implementaciones técnicas de los puertos de salida de la Capa de Aplicación (`
 
 ---
 
-### 5.6. 2.6.2.5. Bounded Context Software Architecture Component Level Diagram
+### 5.6. 2.6.3.5. Bounded Context Software Architecture Component Level Diagram
 
 En esta sección se expone la descomposición arquitectónica interna del contenedor central **API Application** (`com.andeva.atelier.platform`) para el Bounded Context **Customer & Fleet Management (CRM)**, siguiendo las directrices del **Modelo C4 en su Nivel 3 (Component Diagram)** y los estándares de ingeniería definidos en la plataforma.
 
@@ -1322,13 +1821,13 @@ A continuación, se detalla la especificación formal de los siete componentes d
 
 | Componente | Tipo C4 | Tecnología | Responsabilidad Arquitectónica | Componentes e Interfaces Relacionadas |
 | :--- | :---: | :--- | :--- | :--- |
-| **CRM REST Controllers & Resource Assemblers Component** | Component | Spring MVC `@RestController`, SpringDoc OpenAPI 2.8, Jakarta Bean Validation 3.0 | Expone los endpoints REST perimetrales para la gestión de clientes particulares y corporativos, catálogo automotriz universal, transferencias de tenencia vehicular y el ciclo de vida completo de citas técnicas. Valida sintácticamente las cargas útiles de entrada y proyecta las respuestas HTTP mediante ensambladores de recursos REST. | Invocado por Web Application, Mobile Workshop y Mobile Driver; despacha comandos y consultas hacia **CRM CQRS Application Services Component**; utiliza ensambladores de recursos (`CustomerResourceAssembler`, `VehicleResourceAssembler`, `AppointmentResourceAssembler`). |
-| **CRM CQRS Application Services Component** | Component | Spring `@Service`, `@Transactional`, Java 26 Records, Railway-Oriented Programming | Orquesta la ejecución de casos de uso de negocio bajo demarcación transaccional ACID. Coordina el alta de clientes verificando solvencia fiscal y cuotas SaaS, el registro automotriz con validación de bastidor ISO 3779, el traspaso inmutable de titularidades vehiculares y las transiciones de la máquina de estados de citas técnicas. | Implementa contratos de comandos y consultas (`CustomerCommandService`, `VehicleCommandService`, `AppointmentCommandService`, etc.); invoca invariantes en **CRM Domain Model & Aggregate Roots Component**; delega persistencia en **CRM Persistence Repositories & JPA Adapters Component**; consulta cuotas y normalización en **External Gateways & Cloud Integration Component**; emite eventos hacia **CRM Domain Event Listeners & Integration Dispatcher Component**. |
-| **CRM Domain Event Listeners & Integration Dispatcher Component** | Component | Spring Events (`@EventListener`, `@TransactionalEventListener`), Transactional Outbox Pattern | Captura eventos de dominio síncronos y transaccionales emitidos por las raíces de agregado ante mutaciones de estado (confirmación de citas, arribo a taller, transferencias de propiedad). Despacha alertas push móviles hacia las apps de conductores y transforma los eventos de dominio en eventos de integración estructurados para su almacenamiento atómico en el Transactional Outbox. | Suscrito a eventos de dominio de `Appointment` y `Vehicle`; delega en **External Gateways & Cloud Integration Component** (`DriverAppFcmClient`) para notificaciones móviles; persiste eventos de integración (`AppointmentArrivedIntegrationEvent`, etc.) en la tabla `outbox_messages` para sincronización con MRO, Invoicing e IoT Telemetry. |
-| **CRM Domain Model & Aggregate Roots Component** | Component | Java 26 Domain Model puro, `AbstractDomainAggregateRoot`, Records inmutables, Value Objects | Encapsula el núcleo de reglas de negocio, invariantes y políticas de consistencia de clientes y vehículos sin acoplamiento a frameworks de infraestructura. Modela las raíces de agregado `Customer`, `Vehicle`, `VehicleOwnership` y `Appointment`, gobernando identidades tipadas, validaciones formales de VIN y placas de rodaje, y la acumulación de eventos de dominio en memoria. | Contiene los agregados `Customer`, `Vehicle`, `VehicleOwnership`, `Appointment`, entidades y Value Objects inmutables (`TaxId`, `LicensePlate`, `Vin`, `EngineType`, `PersonName`, `EmailAddress`, `PhoneNumber`); instanciado y mutado exclusivamente por **CRM CQRS Application Services Component**. |
-| **CRM Persistence Repositories & JPA Adapters Component** | Component | Jakarta Persistence 3.1, Spring Data JPA, Hibernate 6.x, PostgreSQL 16 | Materializa los puertos de persistencia definidos en la capa de dominio, gobernando la traducción bidireccional entre agregados puros y entidades relacionales JPA mediante ensambladores dedicados. Ejecuta operaciones SQL transaccionales en PostgreSQL 16 sobre las tablas `customers`, `vehicles`, `vehicle_ownerships` y `appointments` con aislamiento multi-tenant estricto por `tenant_id`. | Implementa interfaces de repositorio de dominio (`CustomerRepository`, `VehicleRepository`, `VehicleOwnershipRepository`, `AppointmentRepository`); interactúa directamente con PostgreSQL 16 vía JDBC/TCP; consumido por **CRM CQRS Application Services Component** e **Inbound ACL & Customer Fleet Facade Component**. |
-| **Inbound ACL & Customer Fleet Facade Component** | Component | Spring `@Service`, In-Memory ACL, Open Host Service (OHS), Published Language DTOs | Publica una interfaz de servicio abierto (OHS) y capa anticorrupción (ACL) en memoria que provee fichas técnicas vehiculares, titulares activos y perfiles fiscales de clientes a bounded contexts adyacentes, desacoplando completamente su lógica de los modelos internos de CRM. | Consumido directamente por Workshop Operations (`mro_comp`), Invoicing & Compliance (`invoicing_comp`) e IoT Telemetry (`iot_comp`); delega lecturas optimizadas en **CRM Persistence Repositories & JPA Adapters Component**; proyecta DTOs inmutables (`CustomerAclDto`, `VehicleAclDto`). |
-| **External Gateways & Cloud Integration Component** | Component | Spring 6 `RestClient` (HTTPS 443), Firebase Admin SDK (FCM), Billing Quota Client | Conecta con servicios externos en la nube y módulos perimetrales de la plataforma. Realiza peticiones HTTPS seguras hacia Google Maps Places API para normalizar domicilios de flotas; despacha notificaciones push móviles hacia Atelier Driver vía Firebase Cloud Messaging; y audita en tiempo real contra SaaS Billing las cuotas contratadas por el taller. | Invocado por **CRM CQRS Application Services Component** y **CRM Domain Event Listeners & Integration Dispatcher Component**; conecta con Google Maps Platform, Firebase Cloud Messaging y con el módulo `billing_comp`. |
+| **CRM REST Controllers & Resource Assemblers Component** | Component | Spring MVC `@RestController`, SpringDoc OpenAPI 2.8, Jakarta Bean Validation 3.0 | Expone los endpoints REST perimetrales para la gestión de clientes particulares y corporativos, catálogo automotriz universal, transferencias de tenencia vehicular y el ciclo de vida completo de citas técnicas. Valida sintácticamente las cargas útiles de entrada y proyecta las respuestas HTTP mediante ensambladores de recursos REST. | Invocado por Web Application, Mobile Workshop y Mobile Driver. Despacha comandos y consultas hacia **CRM CQRS Application Services Component**. Utiliza ensambladores de recursos (`CustomerResourceAssembler`, `VehicleResourceAssembler`, `AppointmentResourceAssembler`). |
+| **CRM CQRS Application Services Component** | Component | Spring `@Service`, `@Transactional`, Java 26 Records, Railway-Oriented Programming | Orquesta la ejecución de casos de uso de negocio bajo demarcación transaccional ACID. Coordina el alta de clientes verificando solvencia fiscal y cuotas SaaS, el registro automotriz con validación de bastidor ISO 3779, el traspaso inmutable de titularidades vehiculares y las transiciones de la máquina de estados de citas técnicas. | Implementa contratos de comandos y consultas (`CustomerCommandService`, `VehicleCommandService`, `AppointmentCommandService`, etc.). Invoca invariantes en **CRM Domain Model & Aggregate Roots Component**. Delega persistencia en **CRM Persistence Repositories & JPA Adapters Component**. Consulta cuotas y normalización en **External Gateways & Cloud Integration Component**. Emite eventos hacia **CRM Domain Event Listeners & Integration Dispatcher Component**. |
+| **CRM Domain Event Listeners & Integration Dispatcher Component** | Component | Spring Events (`@EventListener`, `@TransactionalEventListener`), Transactional Outbox Pattern | Captura eventos de dominio síncronos y transaccionales emitidos por las raíces de agregado ante mutaciones de estado (confirmación de citas, arribo a taller, transferencias de propiedad). Despacha alertas push móviles hacia las apps de conductores y transforma los eventos de dominio en eventos de integración estructurados para su almacenamiento atómico en el Transactional Outbox. | Suscrito a eventos de dominio de `Appointment` y `Vehicle`. Delega en **External Gateways & Cloud Integration Component** (`DriverAppFcmClient`) para notificaciones móviles. Persiste eventos de integración (`AppointmentArrivedIntegrationEvent`, etc.) en la tabla `outbox_messages` para sincronización con MRO, Invoicing e IoT Telemetry. |
+| **CRM Domain Model & Aggregate Roots Component** | Component | Java 26 Domain Model puro, `AbstractDomainAggregateRoot`, Records inmutables, Value Objects | Encapsula el núcleo de reglas de negocio, invariantes y políticas de consistencia de clientes y vehículos sin acoplamiento a frameworks de infraestructura. Modela las raíces de agregado `Customer`, `Vehicle`, `VehicleOwnership` y `Appointment`, gobernando identidades tipadas, validaciones formales de VIN y placas de rodaje, y la acumulación de eventos de dominio en memoria. | Contiene los agregados `Customer`, `Vehicle`, `VehicleOwnership`, `Appointment`, entidades y Value Objects inmutables (`TaxId`, `LicensePlate`, `Vin`, `EngineType`, `PersonName`, `EmailAddress`, `PhoneNumber`). Es instanciado y mutado exclusivamente por **CRM CQRS Application Services Component**. |
+| **CRM Persistence Repositories & JPA Adapters Component** | Component | Jakarta Persistence 3.1, Spring Data JPA, Hibernate 6.x, PostgreSQL 16 | Materializa los puertos de persistencia definidos en la capa de dominio, gobernando la traducción bidireccional entre agregados puros y entidades relacionales JPA mediante ensambladores dedicados. Ejecuta operaciones SQL transaccionales en PostgreSQL 16 sobre las tablas `customers`, `vehicles`, `vehicle_ownerships` y `appointments` con aislamiento multi-tenant estricto por `tenant_id`. | Implementa interfaces de repositorio de dominio (`CustomerRepository`, `VehicleRepository`, `VehicleOwnershipRepository`, `AppointmentRepository`). Interactúa directamente con PostgreSQL 16 vía JDBC/TCP. Es consumido por **CRM CQRS Application Services Component** e **Inbound ACL & Customer Fleet Facade Component**. |
+| **Inbound ACL & Customer Fleet Facade Component** | Component | Spring `@Service`, In-Memory ACL, Open Host Service (OHS), Published Language DTOs | Publica una interfaz de servicio abierto (OHS) y capa anticorrupción (ACL) en memoria que provee fichas técnicas vehiculares, titulares activos y perfiles fiscales de clientes a bounded contexts adyacentes, desacoplando completamente su lógica de los modelos internos de CRM. | Consumido directamente por Workshop Operations (`mro_comp`), Invoicing & Compliance (`invoicing_comp`) e IoT Telemetry (`iot_comp`). Delega lecturas optimizadas en **CRM Persistence Repositories & JPA Adapters Component**. Proyecta DTOs inmutables (`CustomerAclDto`, `VehicleAclDto`). |
+| **External Gateways & Cloud Integration Component** | Component | Spring 6 `RestClient` (HTTPS 443), Firebase Admin SDK (FCM), Billing Quota Client | Conecta con servicios externos en la nube y módulos perimetrales de la plataforma. Realiza peticiones HTTPS seguras hacia Google Maps Places API para normalizar domicilios de flotas. Despacha notificaciones push móviles hacia Atelier Driver vía Firebase Cloud Messaging. Audita en tiempo real contra SaaS Billing las cuotas contratadas por el taller. | Invocado por **CRM CQRS Application Services Component** y **CRM Domain Event Listeners & Integration Dispatcher Component**. Conecta con Google Maps Platform, Firebase Cloud Messaging y con el módulo `billing_comp`. |
 
 ---
 
@@ -1556,8 +2055,11 @@ En la siguiente tabla se documenta el catálogo exhaustivo de clases, estructura
 | **Vehicle** | Atributos | `VehicleId id`<br>`LicensePlate plate`<br>`Vin vin`<br>`String brand`<br>`String model`<br>`int year`<br>`EngineType engineType`<br>`List<VehicleOwnership> ownershipHistory` | Privado | Raíz de agregado del parque automotor universal. Extiende `AbstractDomainAggregateRoot<VehicleId>`. Composición 1 a 1..* con `VehicleOwnership`. |
 | **Vehicle** | Factorías | `Vehicle register(LicensePlate, Vin, String, String, int, EngineType, CustomerId)` | Público | Factoría estática. Normaliza la placa, valida que el año se sitúe entre 1950 y el año en curso más uno, e inicializa el primer registro de propiedad vigente. Dispara `VehicleRegisteredEvent`. |
 | **Vehicle** | Custodia | `VehicleOwnership transferOwnership(CustomerId, LocalDate)`<br>`Optional<VehicleOwnership> getActiveOwnership()`<br>`Optional<CustomerId> getCurrentOwnerId()`<br>`void updateTechnicalDetails(Vin, EngineType)` | Público | Cierra la titularidad anterior fijando su fecha de fin y añade un nuevo `VehicleOwnership` con fecha de inicio pactada. Emite `VehicleOwnershipTransferredEvent`. |
-| **VehicleOwnership** | Atributos | `VehicleOwnershipId id`<br>`VehicleId vehicleId`<br>`CustomerId customerId`<br>`LocalDate startDate`<br>`LocalDate endDate` | Privado | Entidad interna dependiente de `Vehicle`. Representa el vínculo temporal de posesión o custodia de una unidad automotriz por parte de un cliente. |
-| **VehicleOwnership** | Operaciones | `boolean isCurrent()`<br>`void terminate(LocalDate)` | Público | `isCurrent()` verifica si `endDate == null`. `terminate()` fija la fecha de cierre de custodia validando que sea posterior a `startDate`. |
+| **VehicleOwnership** | Atributos | `VehicleOwnershipId id`<br>`VehicleId vehicleId`<br>`CustomerId customerId`<br>`UserId userId`<br>`LocalDate startDate`<br>`LocalDate endDate` | Privado | Entidad interna dependiente de `Vehicle`. Representa el vínculo temporal de posesión o custodia de una unidad automotriz por parte de un cliente o usuario conductor móvil. |
+| **VehicleOwnership** | Operaciones | `boolean isCurrent()`<br>`void terminate(LocalDate)`<br>`void linkCustomer(CustomerId)`<br>`boolean isOwnedByCustomer(CustomerId)`<br>`boolean isOwnedByUser(UserId)` | Público | `isCurrent()` verifica si `endDate == null`. `terminate()` fija la fecha de cierre de custodia validando que sea posterior a `startDate`. `linkCustomer()` asocia el cliente del taller a una tenencia iniciada desde la aplicación móvil. |
+| **CustomerMembership** | Atributos | `CustomerMembershipId id`<br>`CustomerId customerId`<br>`UserId userId`<br>`FleetRole role`<br>`CustomerMembershipStatus status` | Privado | Entidad interna de delegación para flotas corporativas B2B. Asocia una empresa titular con un usuario del sistema y delimita sus capacidades de gestión vehicular. |
+| **CustomerMembership** | Factorías | `CustomerMembership create(CustomerMembershipId, CustomerId, UserId, FleetRole)` | Público | Factoría estática de dominio. Asigna estado inicial `ACTIVE` y registra `CustomerMemberInvitedEvent`. |
+| **CustomerMembership** | Operaciones | `void activate()`<br>`void suspend()`<br>`void revoke()`<br>`void changeRole(FleetRole)`<br>`boolean isActive()`<br>`boolean hasAdminPrivileges()` | Público | Mutaciones controladas del ciclo de vida de la membresía. `revoke()` transiciona a `REVOKED` y registra `CustomerMemberRevokedEvent`. `hasAdminPrivileges()` valida rol de administración. |
 | **Appointment** | Atributos | `AppointmentId id`<br>`TenantId tenantId`<br>`BranchId branchId`<br>`CustomerId customerId`<br>`VehicleId vehicleId`<br>`Instant scheduledAt`<br>`int estimatedDurationMinutes`<br>`String reason`<br>`AppointmentStatus status`<br>`String cancellationReason` | Privado | Raíz de agregado para la reserva técnica en sucursal. Extiende `AbstractDomainAggregateRoot<AppointmentId>`. |
 | **Appointment** | Factorías | `Appointment schedule(TenantId, BranchId, CustomerId, VehicleId, Instant, int, String)` | Público | Factoría de reserva. Valida antelación mínima de 2 horas. Estado inicial `PENDING`. Emite `AppointmentScheduledEvent`. |
 | **Appointment** | Ciclo de Vida | `void confirm()`<br>`void markArrived()`<br>`void cancel(String)`<br>`void reschedule(Instant)` | Público | Transiciones de estado. `confirm()` transiciona a `CONFIRMED`. `markArrived()` transiciona a `ARRIVED` y emite evento que dispara la apertura de WorkOrder en MRO. `cancel()` exige justificación y prohíbe anular citas ya arribadas. |
@@ -1565,17 +2067,21 @@ En la siguiente tabla se documenta el catálogo exhaustivo de clases, estructura
 | **VehicleId** | Identificador | `UUID value` | Público | Registro inmutable (`record`) que realiza `TypedId<UUID>`. Identificador universal del vehículo. |
 | **VehicleOwnershipId** | Identificador | `UUID value` | Público | Registro inmutable (`record`) que realiza `TypedId<UUID>`. Identificador del periodo de tenencia. |
 | **AppointmentId** | Identificador | `UUID value` | Público | Registro inmutable (`record`) que realiza `TypedId<UUID>`. Identificador universal de la cita técnica. |
+| **CustomerMembershipId** | Identificador | `UUID value` | Público | Registro inmutable (`record`) que realiza `TypedId<UUID>`. Identificador universal de la membresía de flota. |
 | **LicensePlate** | Objeto de Valor | `String value` | Público | Registro inmutable (`record`). Sanitiza espacios y guiones, convierte a mayúsculas y valida formatos de rodaje según normativa oficial del MTC peruano. |
 | **Vin** | Objeto de Valor | `String value` | Público | Registro inmutable (`record`). Valida longitud de 17 caracteres alfanuméricos según norma ISO 3779, excluyendo caracteres ambiguos (`I`, `O`, `Q`). |
 | **CustomerType** | Enumeración | `INDIVIDUAL, COMPANY` | Público | Naturaleza jurídica del cliente: particular o flota empresarial. |
 | **CustomerStatus** | Enumeración | `ACTIVE, INACTIVE` | Público | Estado operativo de la cartera comercial del taller. |
+| **FleetRole** | Enumeración | `FLEET_ADMIN, FLEET_OPERATOR` | Público | Roles de delegación y permisos operativos en flotas comerciales B2B. |
+| **CustomerMembershipStatus** | Enumeración | `ACTIVE, SUSPENDED, REVOKED` | Público | Estados del ciclo de vida de la vinculación corporativa de flota. |
 | **EngineType** | Enumeración | `GASOLINE, DIESEL, ELECTRIC, HYBRID` | Público | Clasificación tecnológica del sistema motriz del automóvil. |
 | **AppointmentStatus** | Enumeración | `PENDING, CONFIRMED, ARRIVED, CANCELED` | Público | Estados de la máquina de estados finitos de recepción técnica. |
 | **AppointmentSchedulingService** | Servicio | `Result<Void, DomainException> validateSlotAvailability(TenantId, BranchId, Instant, int)` | Público | Servicio de dominio. Evalúa ventanas de atención y aforo concurrente de recepción en la sucursal antes de agendar o reprogramar. |
 | **VehicleTransferDomainService** | Servicio | `Result<VehicleOwnership, DomainException> transferVehicle(Vehicle, Customer, LocalDate)` | Público | Servicio de dominio. Valida vigencia de ambas partes y orquesta el cierre de custodia previa y apertura de la nueva titularidad en un límite atómico. |
 | **CustomerRepository** | Puerto | Métodos `save`, `findById`, `findByTenantIdAndTaxId`, `findByTenantId`, `existsByTenantIdAndTaxId` | Público | Puerto de repositorio para el ciclo de vida de clientes en el taller. |
 | **VehicleRepository** | Puerto | Métodos `save`, `findById`, `findByPlate`, `findByVin`, `existsByPlate`, `findByCurrentOwnerId` | Público | Puerto de repositorio para el parque automotor global. |
-| **VehicleOwnershipRepository** | Puerto | Métodos `save`, `findByVehicleId`, `findActiveOwnershipByVehicleId` | Público | Puerto de persistencia para el historial de custodia vehicular. |
+| **VehicleOwnershipRepository** | Puerto | Métodos `save`, `findByVehicleId`, `findActiveOwnershipByVehicleId`, `findByUserIdAndEndDateIsNull` | Público | Puerto de persistencia para el historial de custodia vehicular. |
+| **CustomerMembershipRepository** | Puerto | Métodos `save`, `findById`, `findByCustomerIdAndUserId`, `findByCustomerId`, `findByUserIdAndStatus`, `existsByCustomerIdAndUserIdAndStatus` | Público | Puerto de repositorio para las membresías corporativas de flota comercial. |
 | **AppointmentRepository** | Puerto | Métodos `save`, `findById`, `findByTenantIdAndBranchIdAndDate`, `findByCustomerId`, `findByVehicleId`, `countActiveByBranchAndSlot` | Público | Puerto de persistencia para el agendamiento y control de citas de taller. |
 | **DomainException** | Jerarquía | Subclases semánticas: `CustomerNotFoundException`, `CustomerAlreadyExistsException`, `CustomerInactiveException`, `VehicleNotFoundException`, `VehicleAlreadyExistsException`, `InvalidLicensePlateException`, `InvalidVinException`, `VehicleActiveOwnershipNotFoundException`, `AppointmentNotFoundException`, `AppointmentSlotUnavailableException`, `AppointmentInvalidStateTransitionException`, `AppointmentAlreadyArrivedException` | Público | Jerarquía de excepciones de dominio no comprobadas con códigos legibles por máquina para canalización perimetral hacia respuestas HTTP 4xx. |
 
@@ -1748,16 +2254,42 @@ package "crm.domain.model.entities" as entities #FDFEFE {
         - id: VehicleOwnershipId
         - vehicleId: VehicleId
         - customerId: CustomerId
+        - userId: UserId
         - startDate: LocalDate
         - endDate: LocalDate
         --
         + isCurrent(): boolean
         + terminate(terminationDate: LocalDate): void
+        + linkCustomer(customerId: CustomerId): void
+        + isOwnedByCustomer(customerId: CustomerId): boolean
+        + isOwnedByUser(userId: UserId): boolean
         + id(): VehicleOwnershipId
         + vehicleId(): VehicleId
         + customerId(): CustomerId
+        + userId(): UserId
         + startDate(): LocalDate
         + endDate(): LocalDate
+    }
+
+    class CustomerMembership <<Entity>> {
+        - id: CustomerMembershipId
+        - customerId: CustomerId
+        - userId: UserId
+        - role: FleetRole
+        - status: CustomerMembershipStatus
+        --
+        + {static} create(id: CustomerMembershipId, customerId: CustomerId, userId: UserId, role: FleetRole): CustomerMembership
+        + activate(): void
+        + suspend(): void
+        + revoke(): void
+        + changeRole(newRole: FleetRole): void
+        + isActive(): boolean
+        + hasAdminPrivileges(): boolean
+        + id(): CustomerMembershipId
+        + customerId(): CustomerId
+        + userId(): UserId
+        + role(): FleetRole
+        + status(): CustomerMembershipStatus
     }
 }
 
@@ -1804,6 +2336,16 @@ package "crm.domain.repositories" as repositories #FDFEFE {
         + save(ownership: VehicleOwnership): VehicleOwnership
         + findByVehicleId(vehicleId: VehicleId): List<VehicleOwnership>
         + findActiveOwnershipByVehicleId(vehicleId: VehicleId): Optional<VehicleOwnership>
+        + findByUserIdAndEndDateIsNull(userId: UserId): List<VehicleOwnership>
+    }
+
+    interface CustomerMembershipRepository <<Repository>> {
+        + save(membership: CustomerMembership): CustomerMembership
+        + findById(id: CustomerMembershipId): Optional<CustomerMembership>
+        + findByCustomerIdAndUserId(customerId: CustomerId, userId: UserId): Optional<CustomerMembership>
+        + findByCustomerId(customerId: CustomerId): List<CustomerMembership>
+        + findByUserIdAndStatus(userId: UserId, status: CustomerMembershipStatus): List<CustomerMembership>
+        + existsByCustomerIdAndUserIdAndStatus(customerId: CustomerId, userId: UserId, status: CustomerMembershipStatus): boolean
     }
 
     interface AppointmentRepository <<Repository>> {
@@ -1847,6 +2389,12 @@ package "crm.domain.model.ids" as ids #FDFEFE {
         + {static} of(value: UUID): AppointmentId
         + value(): UUID
     }
+
+    class CustomerMembershipId <<TypedId, record>> {
+        - value: UUID
+        + {static} of(value: UUID): CustomerMembershipId
+        + value(): UUID
+    }
 }
 
 package "crm.domain.model.valueobjects" as valueobjects #FDFEFE {
@@ -1879,6 +2427,17 @@ package "crm.domain.model.enums" as enums #FDFEFE {
     enum CustomerStatus <<Enum>> {
         ACTIVE
         INACTIVE
+    }
+
+    enum FleetRole <<Enum>> {
+        FLEET_ADMIN
+        FLEET_OPERATOR
+    }
+
+    enum CustomerMembershipStatus <<Enum>> {
+        ACTIVE
+        SUSPENDED
+        REVOKED
     }
 
     enum EngineType <<Enum>> {
@@ -1977,7 +2536,14 @@ Vehicle "1" o-- "1" VehicleId : "identificado por >"
 
 ' Relaciones de VehicleOwnership
 VehicleOwnership "1" o-- "1" VehicleOwnershipId : "identificado por >"
-VehicleOwnership "1" o-- "1" CustomerId : "titular asignado >"
+VehicleOwnership "1" o-- "0..1" CustomerId : "titular asignado >"
+
+' Relaciones de CustomerMembership
+Customer "1" *-- "0..*" CustomerMembership : "delega gestión >"
+CustomerMembership "1" o-- "1" CustomerMembershipId : "identificada por >"
+CustomerMembership "1" o-- "1" FleetRole : "rol asignado >"
+CustomerMembership "1" o-- "1" CustomerMembershipStatus : "estado operativo >"
+CustomerMembership "1" o-- "1" CustomerId : "empresa titular >"
 
 ' Relaciones de Appointment
 Appointment "1" o-- "1" AppointmentStatus : "estado operativo >"
@@ -1990,6 +2556,7 @@ TypedId <|.. CustomerId
 TypedId <|.. VehicleId
 TypedId <|.. VehicleOwnershipId
 TypedId <|.. AppointmentId
+TypedId <|.. CustomerMembershipId
 
 ' Generalizaciones de Excepciones
 DomainException <|-- CustomerNotFoundException
@@ -2009,6 +2576,7 @@ DomainException <|-- AppointmentAlreadyArrivedException
 CustomerRepository ..up> Customer : "persiste"
 VehicleRepository ..up> Vehicle : "persiste"
 VehicleOwnershipRepository ..up> VehicleOwnership : "persiste"
+CustomerMembershipRepository ..up> CustomerMembership : "persiste"
 AppointmentRepository ..up> Appointment : "persiste"
 
 ' Enlaces de Servicios de Dominio
@@ -2137,15 +2705,40 @@ classDiagram
         -id: VehicleOwnershipId
         -vehicleId: VehicleId
         -customerId: CustomerId
+        -userId: UserId
         -startDate: LocalDate
         -endDate: LocalDate
         +isCurrent() boolean
         +terminate(terminationDate: LocalDate) void
+        +linkCustomer(customerId: CustomerId) void
+        +isOwnedByCustomer(customerId: CustomerId) boolean
+        +isOwnedByUser(userId: UserId) boolean
         +getId() VehicleOwnershipId
         +getVehicleId() VehicleId
         +getCustomerId() CustomerId
+        +getUserId() UserId
         +getStartDate() LocalDate
         +getEndDate() LocalDate
+    }
+
+    class CustomerMembership {
+        -id: CustomerMembershipId
+        -customerId: CustomerId
+        -userId: UserId
+        -role: FleetRole
+        -status: CustomerMembershipStatus
+        +create(id: CustomerMembershipId, customerId: CustomerId, userId: UserId, role: FleetRole)$ CustomerMembership
+        +activate() void
+        +suspend() void
+        +revoke() void
+        +changeRole(newRole: FleetRole) void
+        +isActive() boolean
+        +hasAdminPrivileges() boolean
+        +getId() CustomerMembershipId
+        +getCustomerId() CustomerId
+        +getUserId() UserId
+        +getRole() FleetRole
+        +getStatus() CustomerMembershipStatus
     }
 
     class Appointment {
@@ -2207,6 +2800,17 @@ classDiagram
         +save(ownership: VehicleOwnership) VehicleOwnership
         +findByVehicleId(vehicleId: VehicleId) List~VehicleOwnership~
         +findActiveOwnershipByVehicleId(vehicleId: VehicleId) Optional~VehicleOwnership~
+        +findByUserIdAndEndDateIsNull(userId: UserId) List~VehicleOwnership~
+    }
+
+    class CustomerMembershipRepository {
+        <<interface>>
+        +save(membership: CustomerMembership) CustomerMembership
+        +findById(id: CustomerMembershipId) Optional~CustomerMembership~
+        +findByCustomerIdAndUserId(customerId: CustomerId, userId: UserId) Optional~CustomerMembership~
+        +findByCustomerId(customerId: CustomerId) List~CustomerMembership~
+        +findByUserIdAndStatus(userId: UserId, status: CustomerMembershipStatus) List~CustomerMembership~
+        +existsByCustomerIdAndUserIdAndStatus(customerId: CustomerId, userId: UserId, status: CustomerMembershipStatus) boolean
     }
 
     class AppointmentRepository {
@@ -2239,6 +2843,11 @@ classDiagram
         +value: UUID
     }
 
+    class CustomerMembershipId {
+        <<record>>
+        +value: UUID
+    }
+
     class LicensePlate {
         <<record>>
         +value: String
@@ -2261,6 +2870,19 @@ classDiagram
         <<enumeration>>
         ACTIVE
         INACTIVE
+    }
+
+    class FleetRole {
+        <<enumeration>>
+        FLEET_ADMIN
+        FLEET_OPERATOR
+    }
+
+    class CustomerMembershipStatus {
+        <<enumeration>>
+        ACTIVE
+        SUSPENDED
+        REVOKED
     }
 
     class EngineType {
@@ -2293,8 +2915,13 @@ classDiagram
     Vehicle o-- "1" EngineType : motorización
     Vehicle o-- "1" VehicleId : identificado por
 
-    VehicleOwnership o-- "1" CustomerId : asignado a cliente
+    VehicleOwnership o-- "0..1" CustomerId : asignado a cliente
     VehicleOwnership o-- "1" VehicleOwnershipId : identificado por
+
+    Customer "1" *-- "0..*" CustomerMembership : delega gestion
+    CustomerMembership o-- "1" CustomerMembershipId : identificada por
+    CustomerMembership o-- "1" FleetRole : rol asignado
+    CustomerMembership o-- "1" CustomerMembershipStatus : estado operativo
 
     Appointment o-- "1" CustomerId : solicitado por
     Appointment o-- "1" VehicleId : sobre vehículo
@@ -2304,6 +2931,7 @@ classDiagram
     CustomerRepository ..> Customer : persiste
     VehicleRepository ..> Vehicle : persiste
     VehicleOwnershipRepository ..> VehicleOwnership : persiste
+    CustomerMembershipRepository ..> CustomerMembership : persiste
     AppointmentRepository ..> Appointment : persiste
 
     AppointmentSchedulingService ..> AppointmentRepository : consulta
@@ -2373,8 +3001,8 @@ El Bounded Context **Customer & Fleet Management (CRM)** asume el gobierno de la
    * *Buffer Transaccional de Mutaciones Desconectadas (`offline_reception_mutations`):* Cuando el operario registra el arribo físico de un vehículo o completa la lista de verificación preliminar sin señal de red, la operación se serializa como un comando en JSON y se encola en `offline_reception_mutations` con estado `PENDING`. Al restablecerse la conectividad HTTPS, un servicio de sincronización en segundo plano drena las mutaciones hacia el endpoint central `POST /api/v1/appointments/{id}/arrive`, garantizando entrega exactamente una vez mediante reintentos exponenciales y conciliación determinista.
 
 3. **Correspondencia de Tipos Físicos entre Motores:**
-   * *PostgreSQL 16:* `UUID` nativo de 128 bits para claves primarias y foráneas; `VARCHAR(n)` y `TEXT` con restricciones de longitud; `DATE` para fechas de tenencia sin componente horario; `TIMESTAMPTZ` para marcas temporales UTC; `INTEGER` para duraciones y años de fabricación; y `BIGINT` para números de versión.
-   * *SQLite 3:* `TEXT` para UUIDs formateados según RFC 4122, marcas temporales en estándar ISO-8601 UTC y cargas útiles JSON serializadas; e `INTEGER` para contadores de reintento y versiones de esquema.
+   * *PostgreSQL 16:* `UUID` nativo de 128 bits para claves primarias y foráneas, `VARCHAR(n)` y `TEXT` con restricciones de longitud, `DATE` para fechas de tenencia sin componente horario, `TIMESTAMPTZ` para marcas temporales UTC, `INTEGER` para duraciones y años de fabricación, y `BIGINT` para números de versión.
+   * *SQLite 3:* `TEXT` para UUIDs formateados según RFC 4122, marcas temporales en estándar ISO-8601 UTC y cargas útiles JSON serializadas, e `INTEGER` para contadores de reintento y versiones de esquema.
 
 ---
 
@@ -2395,7 +3023,7 @@ Estructura de columnas uniforme inyectada transversalmente mediante la superclas
 | `created_at` | `TIMESTAMPTZ` | NOT NULL | `clock_timestamp()` | Auditoría de Creación | Marca temporal inmutable en UTC asignada automáticamente al persistir el registro por primera vez. |
 | `updated_at` | `TIMESTAMPTZ` | NOT NULL | `clock_timestamp()` | Auditoría de Actualización | Marca temporal en UTC actualizada automáticamente por el listener JPA en cada mutación de la tupla. |
 | `version` | `BIGINT` | NOT NULL | `0` | Bloqueo Optimista | Contador incremental gestionado por el motor ORM para evitar sobreescrituras concurrentes (*lost updates*). |
-| `deleted_at` | `TIMESTAMPTZ` | NULL | Ninguno | Borrado Lógico (*Soft-Delete*) | Marca temporal de deshabilitación. Si es `NULL`, la entidad está activa; si posee valor, se considera archivada. |
+| `deleted_at` | `TIMESTAMPTZ` | NULL | Ninguno | Borrado Lógico (*Soft-Delete*) | Marca temporal de deshabilitación. Si es `NULL`, la entidad está activa, mientras que si posee valor se considera archivada. |
 
 **2. Tabla Física: `customers` (Clientes Particulares B2C y Flotas Corporativas B2B)**
 
@@ -2455,14 +3083,15 @@ Entidad global que modela los automóviles físicos atendidos en la red de talle
 
 **4. Tabla Física: `vehicle_ownerships` (Historial de Titularidad y Cadena de Custodia)**
 
-Registra los periodos formales de posesión y custodia de un cliente sobre una unidad vehicular.
+Registra los periodos formales de posesión y custodia de un cliente o usuario conductor sobre una unidad vehicular.
 
 | Columna | Tipo de Dato Físico | Nulidad | Valor por Defecto | Rol / Restricción | Descripción Técnica y Regla de Persistencia |
 | :--- | :--- | :---: | :--- | :--- | :--- |
 | `id` | `UUID` | NOT NULL | `gen_random_uuid()` | Clave Primaria (`pk_vehicle_ownerships`) | Identificador único del registro de titularidad. |
-| `customer_id` | `UUID` | NOT NULL | Ninguno | Clave Foránea (`fk_ownerships_customer_id`) | Referencia al cliente poseedor en `customers(id)`. |
+| `customer_id` | `UUID` | NULL | Ninguno | Clave Foránea (`fk_ownerships_customer_id`) | Referencia al cliente poseedor en `customers(id)`. Nullable si proviene de pre-registro móvil. |
+| `user_id` | `UUID` | NULL | Ninguno | Clave Foránea (`fk_ownerships_user_id`) | Referencia al usuario conductor en `users(id)`. Nullable si fue registrado en taller. |
 | `vehicle_id` | `UUID` | NOT NULL | Ninguno | Clave Foránea (`fk_ownerships_vehicle_id`) | Referencia al vehículo automotor en `vehicles(id)`. |
-| `start_date` | `DATE` | NOT NULL | `CURRENT_DATE` | Inicio de Custodia | Fecha formal de adquisición o inicio de custodia por parte del cliente. |
+| `start_date` | `DATE` | NOT NULL | `CURRENT_DATE` | Inicio de Custodia | Fecha formal de adquisición o inicio de custodia por parte del cliente o conductor. |
 | `end_date` | `DATE` | NULL | Ninguno | Cese de Custodia | Fecha de venta, baja o traspaso. Es `NULL` mientras sea el propietario legal activo. |
 | `created_at` | `TIMESTAMPTZ` | NOT NULL | `clock_timestamp()` | Auditoría Inmutable | Marca temporal UTC de formalización de la titularidad. |
 | `updated_at` | `TIMESTAMPTZ` | NOT NULL | `clock_timestamp()` | Auditoría Mutable | Marca temporal UTC de cese de custodia o actualización de fechas. |
@@ -2472,10 +3101,13 @@ Registra los periodos formales de posesión y custodia de un cliente sobre una u
 *Restricciones e Índices Físicos:*
 * `pk_vehicle_ownerships`: PRIMARY KEY (`id`).
 * `fk_ownerships_customer_id`: FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`).
+* `fk_ownerships_user_id`: FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE.
 * `fk_ownerships_vehicle_id`: FOREIGN KEY (`vehicle_id`) REFERENCES `vehicles` (`id`).
+* `chk_ownership_owner`: CHECK (`customer_id` IS NOT NULL OR `user_id` IS NOT NULL). Garantiza que al menos una referencia de titular esté definida.
 * `chk_ownership_dates`: CHECK (`end_date` IS NULL OR `end_date` >= `start_date`). Impide inconsistencias temporales en el cese de custodia.
 * `uk_vehicle_active_ownership`: CREATE UNIQUE INDEX `uk_vehicle_active_ownership` ON `vehicle_ownerships` (`vehicle_id`) WHERE `end_date` IS NULL. Garantiza matemáticamente que un vehículo no tenga más de un titular activo concurrente.
 * `idx_ownerships_customer`: CREATE INDEX `idx_ownerships_customer` ON `vehicle_ownerships` (`customer_id`). Recupera la flota automotriz activa e histórica de un cliente.
+* `idx_ownerships_user`: CREATE INDEX `idx_ownerships_user` ON `vehicle_ownerships` (`user_id`). Recupera las titularidades activas del conductor móvil.
 * `idx_ownerships_vehicle`: CREATE INDEX `idx_ownerships_vehicle` ON `vehicle_ownerships` (`vehicle_id`, `end_date`). Proyecta la línea de tiempo completa de tenencia de una unidad.
 
 **5. Tabla Física: `appointments` (Citas Técnicas y Agendamiento de Recepción)**
@@ -2509,6 +3141,32 @@ Gobierna la reserva de capacidad operativa en las sucursales físicas y actúa c
 * `idx_appointments_tenant_branch_date`: CREATE INDEX `idx_appointments_tenant_branch_date` ON `appointments` (`tenant_id`, `branch_id`, `scheduled_at`). Acelera la proyección de la grilla de ocupación por sede y fecha.
 * `idx_appointments_customer`: CREATE INDEX `idx_appointments_customer` ON `appointments` (`customer_id`). Agiliza la consulta de citas históricas y pendientes de un cliente.
 * `idx_appointments_vehicle`: CREATE INDEX `idx_appointments_vehicle` ON `appointments` (`vehicle_id`). Optimiza la verificación de citas previas asociadas a la unidad automotriz.
+
+**6. Tabla Física: `customer_memberships` (Membresías Corporativas de Flota B2B)**
+
+Formaliza la delegación de permisos de administración y operación sobre la cartera vehicular de un cliente corporativo hacia usuarios autenticados.
+
+| Columna | Tipo de Dato Físico | Nulidad | Valor por Defecto | Rol / Restricción | Descripción Técnica y Regla de Persistencia |
+| :--- | :--- | :---: | :--- | :--- | :--- |
+| `id` | `UUID` | NOT NULL | `gen_random_uuid()` | Clave Primaria (`pk_customer_memberships`) | Identificador único de la membresía delegada. |
+| `customer_id` | `UUID` | NOT NULL | Ninguno | Clave Foránea (`fk_memberships_customer_id`) | Referencia a la empresa titular en `customers(id)`. |
+| `user_id` | `UUID` | NOT NULL | Ninguno | Clave Foránea (`fk_memberships_user_id`) | Referencia al usuario delegado en `users(id)`. |
+| `role` | `VARCHAR(20)` | NOT NULL | Ninguno | Restricción CHECK (`chk_membership_role`) | Rol operativo o directivo en la flota: `'FLEET_ADMIN'` o `'FLEET_OPERATOR'`. |
+| `status` | `VARCHAR(20)` | NOT NULL | `'ACTIVE'` | Restricción CHECK (`chk_membership_status`) | Estado operativo de la membresía: `'ACTIVE'`, `'SUSPENDED'` o `'REVOKED'`. |
+| `created_at` | `TIMESTAMPTZ` | NOT NULL | `clock_timestamp()` | Auditoría Inmutable | Marca temporal UTC de invitación e incorporación de la membresía. |
+| `updated_at` | `TIMESTAMPTZ` | NOT NULL | `clock_timestamp()` | Auditoría Mutable | Marca temporal UTC de cambio de estado o reasignación de rol. |
+| `version` | `BIGINT` | NOT NULL | `0` | Bloqueo Optimista | Versión secuencial de control de concurrencia. |
+| `deleted_at` | `TIMESTAMPTZ` | NULL | Ninguno | Borrado Lógico | Marca de revocación administrativa de la membresía. |
+
+*Restricciones e Índices Físicos:*
+* `pk_customer_memberships`: PRIMARY KEY (`id`).
+* `fk_memberships_customer_id`: FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE.
+* `fk_memberships_user_id`: FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE.
+* `uk_customer_memberships_customer_user`: UNIQUE (`customer_id`, `user_id`). Impide membresías duplicadas del mismo usuario en una empresa.
+* `chk_membership_role`: CHECK (`role` IN (`'FLEET_ADMIN'`, `'FLEET_OPERATOR'`)).
+* `chk_membership_status`: CHECK (`status` IN (`'ACTIVE'`, `'SUSPENDED'`, `'REVOKED'`)).
+* `idx_cm_customer`: CREATE INDEX `idx_cm_customer` ON `customer_memberships` (`customer_id`). Agiliza el listado de miembros adscritos a una empresa.
+* `idx_cm_user`: CREATE INDEX `idx_cm_user` ON `customer_memberships` (`user_id`, `status`). Optimiza la verificación de permisos y flotas asociadas a un usuario.
 
 ---
 
@@ -2601,8 +3259,12 @@ La siguiente matriz consolida los índices de base de datos definidos en ambos p
 | PostgreSQL 16 | `idx_vehicles_plate` | `vehicles` | B-Tree Simple (UK) | `plate` | Ninguna | Resolución unívoca de fichas técnicas vehiculares por placa en sub-milisegundo. |
 | PostgreSQL 16 | `idx_vehicles_vin` | `vehicles` | B-Tree Parcial | `vin` | `WHERE vin IS NOT NULL` | Localización de vehículos por número de chasis ISO 3779 sin indexar valores nulos. |
 | PostgreSQL 16 | `idx_ownerships_customer` | `vehicle_ownerships` | B-Tree Simple | `customer_id` | Ninguna | Proyecta la flota de vehículos bajo custodia activa o histórica de un cliente corporativo B2B. |
+| PostgreSQL 16 | `idx_ownerships_user` | `vehicle_ownerships` | B-Tree Simple | `user_id` | Ninguna | Consulta los vehículos pre-registrados o bajo custodia activa del usuario conductor. |
 | PostgreSQL 16 | `idx_ownerships_vehicle` | `vehicle_ownerships` | B-Tree Compuesto | `vehicle_id`, `end_date` | Ninguna | Recupera la cronología completa de tenencia de una unidad para trazabilidad forense. |
 | PostgreSQL 16 | `uk_vehicle_active_ownership` | `vehicle_ownerships` | B-Tree Único Parcial | `vehicle_id` | `WHERE end_date IS NULL` | Impide a nivel de motor de datos que un vehículo posea más de un propietario activo en simultáneo. |
+| PostgreSQL 16 | `idx_cm_customer` | `customer_memberships` | B-Tree Simple | `customer_id` | Ninguna | Acelera la recuperación del directorio de miembros autorizados de una flota empresarial. |
+| PostgreSQL 16 | `idx_cm_user` | `customer_memberships` | B-Tree Compuesto | `user_id`, `status` | Ninguna | Resuelve de forma inmediata las flotas y roles activos asignados a un usuario autenticado. |
+| PostgreSQL 16 | `uk_customer_memberships_customer_user` | `customer_memberships` | B-Tree Único Compuesto | `customer_id`, `user_id` | Ninguna | Impide a nivel de base de datos la duplicidad de membresías para un usuario dentro de la misma flota. |
 | PostgreSQL 16 | `idx_appointments_tenant_branch_date` | `appointments` | B-Tree Compuesto | `tenant_id`, `branch_id`, `scheduled_at` | Ninguna | Proyecta el calendario y grilla de ocupación de citas por sede física y rango de fechas. |
 | PostgreSQL 16 | `idx_appointments_customer` | `appointments` | B-Tree Simple | `customer_id` | Ninguna | Historial de citas agendadas por un cliente particular o corporativo. |
 | PostgreSQL 16 | `idx_appointments_vehicle` | `vehicle_ownerships` | B-Tree Simple | `vehicle_id` | Ninguna | Historial de citas y atenciones mecánicas previas vinculadas a una unidad automotriz. |
@@ -2723,6 +3385,31 @@ package "PostgreSQL 16 (API Application - Backend Central)" as pg_backend #F8F9F
         + idx_customers_search : (tenant_id, status)
     }
 
+    entity "customer_memberships" as customer_memberships <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * customer_id : UUID <<FK>>
+        * user_id : UUID <<FK>>
+        * role : VARCHAR(20)
+        * status : VARCHAR(20)
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_customer_memberships : PRIMARY KEY (id)
+        + fk_memberships_customer_id : FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE
+        + fk_memberships_user_id : FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        + uk_membership_customer_user : UNIQUE (customer_id, user_id)
+        + chk_membership_role : CHECK (role IN ('FLEET_ADMIN', 'FLEET_OPERATOR'))
+        + chk_membership_status : CHECK (status IN ('active', 'suspended', 'revoked'))
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_memberships_customer : (customer_id)
+        + idx_memberships_user_status : (user_id, status)
+    }
+
     entity "appointments" as appointments <<table, PostgreSQL>> #FFFFFF {
         * id : UUID <<PK>>
         --
@@ -2755,8 +3442,48 @@ package "PostgreSQL 16 (API Application - Backend Central)" as pg_backend #F8F9F
     }
 
     ' ==========================================================================
-    ' COLUMNA 3: PARQUE AUTOMOTOR Y CADENA DE CUSTODIA
+    ' COLUMNA 3: IDENTIDAD DE USUARIO, PARQUE AUTOMOTOR Y TENENCIA
     ' ==========================================================================
+    entity "users" as users <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        * email : VARCHAR(150) <<UK>>
+        * auth_provider : VARCHAR(20)
+        * status : VARCHAR(20)
+        --
+        <b>Contexto Externo (IAM & Tenancy):</b>
+        + Identidad global del usuario o conductor
+        + Titular en app móvil y flotas corporativas
+    }
+
+    entity "vehicle_ownerships" as vehicle_ownerships <<table, PostgreSQL>> #FFFFFF {
+        * id : UUID <<PK>>
+        --
+        customer_id : UUID <<FK>>
+        user_id : UUID <<FK>>
+        * vehicle_id : UUID <<FK>>
+        * start_date : DATE
+        end_date : DATE
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+        * version : BIGINT
+        deleted_at : TIMESTAMPTZ
+        --
+        <b>Restricciones (Constraints):</b>
+        + pk_vehicle_ownerships : PRIMARY KEY (id)
+        + fk_ownerships_customer_id : FOREIGN KEY (customer_id) REFERENCES customers(id)
+        + fk_ownerships_user_id : FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        + fk_ownerships_vehicle_id : FOREIGN KEY (vehicle_id) REFERENCES vehicles(id)
+        + chk_ownership_owner : CHECK (customer_id IS NOT NULL OR user_id IS NOT NULL)
+        + chk_ownership_dates : CHECK (end_date IS NULL OR end_date >= start_date)
+        --
+        <b>Índices Físicos (B-Tree):</b>
+        + idx_ownerships_customer : (customer_id) WHERE customer_id IS NOT NULL
+        + idx_ownerships_user : (user_id) WHERE user_id IS NOT NULL
+        + idx_ownerships_vehicle : (vehicle_id, end_date)
+        + uk_vehicle_active_ownership : UNIQUE (vehicle_id) WHERE end_date IS NULL
+    }
+
     entity "vehicles" as vehicles <<table, PostgreSQL>> #FFFFFF {
         * id : UUID <<PK>>
         --
@@ -2785,41 +3512,24 @@ package "PostgreSQL 16 (API Application - Backend Central)" as pg_backend #F8F9F
         + Activo físico universal sin tenant_id
     }
 
-    entity "vehicle_ownerships" as vehicle_ownerships <<table, PostgreSQL>> #FFFFFF {
-        * id : UUID <<PK>>
-        --
-        * customer_id : UUID <<FK>>
-        * vehicle_id : UUID <<FK>>
-        * start_date : DATE
-        end_date : DATE
-        * created_at : TIMESTAMPTZ
-        * updated_at : TIMESTAMPTZ
-        * version : BIGINT
-        deleted_at : TIMESTAMPTZ
-        --
-        <b>Restricciones (Constraints):</b>
-        + pk_vehicle_ownerships : PRIMARY KEY (id)
-        + fk_ownerships_customer_id : FOREIGN KEY (customer_id) REFERENCES customers(id)
-        + fk_ownerships_vehicle_id : FOREIGN KEY (vehicle_id) REFERENCES vehicles(id)
-        + chk_ownership_dates : CHECK (end_date IS NULL OR end_date >= start_date)
-        --
-        <b>Índices Físicos (B-Tree):</b>
-        + idx_ownerships_customer : (customer_id)
-        + idx_ownerships_vehicle : (vehicle_id, end_date)
-        + uk_vehicle_active_ownership : UNIQUE (vehicle_id) WHERE end_date IS NULL
-    }
-
     ' Disposición vertical forzada por columnas
     auditable_abstract_entity -[hidden]down-> tenants
     tenants -[hidden]down-> branches
 
-    customers -[hidden]down-> appointments
+    customers -[hidden]down-> customer_memberships
+    customer_memberships -[hidden]down-> appointments
 
+    users -[hidden]down-> vehicle_ownerships
     vehicle_ownerships -[hidden]down-> vehicles
 
     ' Disposición horizontal entre columnas de Backend
     tenants -[hidden]right-> customers
-    customers -[hidden]right-> vehicle_ownerships
+    customers -[hidden]right-> users
+
+    branches -[hidden]right-> customer_memberships
+    customer_memberships -[hidden]right-> vehicle_ownerships
+
+    appointments -[hidden]right-> vehicles
 
     ' Relaciones de Herencia JPA
     auditable_abstract_entity <|-- customers : "herencia física JPA\n(@MappedSuperclass)"
@@ -2829,8 +3539,12 @@ package "PostgreSQL 16 (API Application - Backend Central)" as pg_backend #F8F9F
     tenants "1  " ||--o{ "0..* " appointments : "gestiona citas"
     branches "1  " ||--o{ "0..* " appointments : "sede física"
 
-    customers "1  " ||--o{ "0..* " vehicle_ownerships : "\ntitularidad"
+    customers "1  " ||--o{ "0..* " customer_memberships : "membresías B2B"
     customers "1  " ||--o{ "0..* " appointments : "agenda cita"
+    customers "0..1  " ||--o{ "0..* " vehicle_ownerships : "\ntitularidad taller"
+
+    users "1  " ||--o{ "0..* " customer_memberships : "miembro operador"
+    users "0..1  " ||--o{ "0..* " vehicle_ownerships : "garaje digital"
 
     vehicles "1  " ||--o{ "0..* " vehicle_ownerships : "historial tenencia"
     vehicles "1  " ||--o{ "0..* " appointments : "sujeto atención"
@@ -2931,7 +3645,9 @@ package "SQLite 3 (Mobile Workshop - Cliente Técnico Offline)" as sqlite_mobile
 }
 
 ' Disposición horizontal entre paquetes
-vehicle_ownerships -[hidden]right-> local_customers_cache
+users -[hidden]right-> local_customers_cache
+vehicle_ownerships -[hidden]right-> local_vehicles_cache
+vehicles -[hidden]right-> local_appointments_cache
 pg_backend -[hidden]right-> sqlite_mobile
 
 ' ==============================================================================
@@ -2958,7 +3674,11 @@ erDiagram
     branches ||--o{ appointments : "recibe en sede física"
 
     customers ||--o{ vehicle_ownerships : "posee titularidad"
+    customers ||--o{ customer_memberships : "cuenta corporativa"
     customers ||--o{ appointments : "agenda cita"
+
+    users ||--o{ customer_memberships : "miembro delegado"
+    users ||--o{ vehicle_ownerships : "pre-registro conductor"
 
     vehicles ||--o{ vehicle_ownerships : "historial de tenencia"
     vehicles ||--o{ appointments : "sujeto de atención"
@@ -2994,12 +3714,31 @@ erDiagram
         timestamptz deleted_at "Borrado logico"
     }
 
+    users {
+        uuid id PK "gen_random_uuid()"
+        varchar email UK "Correo unico en plataforma"
+        varchar status "active | suspended"
+    }
+
     vehicle_ownerships {
         uuid id PK "gen_random_uuid()"
-        uuid customer_id FK "Referencia al cliente titular"
+        uuid customer_id FK "Cliente titular nullable"
+        uuid user_id FK "Conductor en IAM nullable"
         uuid vehicle_id FK "Referencia al vehiculo poseido"
         date start_date "Fecha de inicio de custodia"
         date end_date "Fecha de fin (null si es titular activo)"
+        timestamptz created_at "Auditoria UTC inmutable"
+        timestamptz updated_at "Auditoria UTC mutable"
+        bigint version "Bloqueo optimista"
+        timestamptz deleted_at "Borrado logico"
+    }
+
+    customer_memberships {
+        uuid id PK "gen_random_uuid()"
+        uuid customer_id FK "Empresa de flota"
+        uuid user_id FK "Usuario delegado en IAM"
+        varchar role "FLEET_ADMIN | FLEET_OPERATOR"
+        varchar status "ACTIVE | SUSPENDED | REVOKED"
         timestamptz created_at "Auditoria UTC inmutable"
         timestamptz updated_at "Auditoria UTC mutable"
         bigint version "Bloqueo optimista"

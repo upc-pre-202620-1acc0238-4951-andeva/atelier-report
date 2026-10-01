@@ -49,7 +49,7 @@ Entidad raíz del aislamiento lógico de la plataforma SaaS. Representa la empre
   * `1:N` hacia `branches` (Un taller posee una o múltiples sedes operativas).
   * `1:N` hacia `tenant_memberships` (Un taller emplea a múltiples colaboradores).
   * `1:N` hacia `invitations` (Un taller emite invitaciones para nuevo personal).
-  * `1:N` hacia `roles` (Un taller define roles personalizados de seguridad).
+  * `1:N` hacia `roles` (Un taller posee roles de fábrica aprovisionados y roles personalizados de seguridad).
 * **Restricciones (Constraints):**
   * `pk_tenants`: `PRIMARY KEY (id)`
   * `uk_tenants_tax_id`: `UNIQUE (tax_id)`
@@ -110,6 +110,8 @@ Entidad global del sistema. Representa una persona física con credenciales para
   * `1:1` hacia `profiles` (Un usuario posee exactamente un perfil demográfico).
   * `1:N` hacia `verification_tokens` (Un usuario recibe códigos y enlaces de seguridad).
   * `1:N` hacia `tenant_memberships` (Un usuario puede pertenecer a uno o varios talleres).
+  * `1:N` hacia `customer_memberships` en CRM (Un usuario puede gestionar flotas comerciales en empresas cliente).
+  * `1:N` hacia `vehicle_ownerships` en CRM (Un usuario puede registrar vehículos propios desde Atelier Driver).
 * **Restricciones (Constraints):**
   * `pk_users`: `PRIMARY KEY (id)`
   * `uk_users_email`: `UNIQUE (email)`
@@ -197,31 +199,34 @@ Materializa el vínculo laboral y contractual entre un usuario global y un talle
   * `idx_memberships_user_id`: B-Tree sobre `(user_id)`
 
 ### 1.7 `roles` (Roles de Seguridad RBAC)
-Define perfiles de privilegios y facultades. Soporta tanto roles del sistema globales preconfigurados como roles soberanos creados por cada taller.
+Define perfiles de privilegios y facultades de autorización. Almacena tanto los roles de fábrica aprovisionados automáticamente a cada taller al momento de su registro como los roles personalizados creados por el propio taller. Todos los roles pertenecen soberanamente a un taller específico.
 
 | Atributo | Tipo de Dato | Llave | Req. | Default | Descripción |
 |---|---|---|---|---|---|
-| `id` | `UUID` | PK | Sí | `uuid()` | Identificador del rol de autorización |
-| `tenant_id` | `UUID` | FK | No | `null` | Taller propietario (`FK -> tenants(id)`, null si es rol del sistema) |
-| `name` | `VARCHAR(100)` | - | Sí | - | Denominación del rol (ej. `ADMIN`, `MECHANIC`, `CASHIER`) |
+| `id` | `UUID` | PK | Sí | `uuid()` | Identificador único del rol de autorización |
+| `tenant_id` | `UUID` | FK | Sí | - | Taller propietario (`FK -> tenants(id) ON DELETE CASCADE`) |
+| `code` | `VARCHAR(50)` | UK | No | `null` | Código canónico de fábrica (ej. `ROLE_WORKSHOP_OWNER`, `ROLE_MECHANIC`), null para roles personalizados |
+| `name` | `VARCHAR(100)` | UK | Sí | - | Denominación legible del rol (ej. Dueño de Taller, Técnico Mecánico) |
 | `description` | `VARCHAR(255)` | - | Sí | - | Descripción funcional de las facultades del rol |
-| `is_system_role` | `BOOLEAN` | - | Sí | `false` | Indica si es un rol global inmutable de plataforma |
+| `is_system_role` | `BOOLEAN` | - | Sí | `false` | Indica si el rol proviene de plantilla de fábrica (protegido contra borrado con permisos editables) |
 | `created_at` | `TIMESTAMPTZ` | - | Sí | `NOW()` | Marca temporal de creación |
 | `updated_at` | `TIMESTAMPTZ` | - | Sí | `NOW()` | Marca temporal de última modificación |
 | `version` | `BIGINT` | - | Sí | `0` | Versión para bloqueo optimista JPA |
 | `deleted_at` | `TIMESTAMPTZ` | - | No | `null` | Marca temporal para borrado lógico (*Soft Delete*) |
 
 * **Relaciones (Integridad Referencial):**
-  * `N:1` hacia `tenants` (`tenant_id` nullable, referencia a `tenants.id` con borrado en cascada).
+  * `N:1` hacia `tenants` (`tenant_id` obligatorio, referencia a `tenants.id` con borrado en cascada).
   * `1:N` hacia `membership_roles` (Asociación con miembros del taller).
   * `1:N` hacia `role_permissions` (Privilegios granulares asignados al rol).
   * `1:N` hacia `invitations` (Rol predeterminado asignado en invitaciones de onboarding).
 * **Restricciones (Constraints):**
   * `pk_roles`: `PRIMARY KEY (id)`
   * `fk_roles_tenant_id`: `FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE`
-  * `chk_roles_tenant_or_system`: `CHECK ((is_system_role = TRUE AND tenant_id IS NULL) OR (is_system_role = FALSE AND tenant_id IS NOT NULL))`
+  * `uk_roles_tenant_name`: `UNIQUE (tenant_id, name)`
+  * `uk_roles_tenant_code`: `UNIQUE (tenant_id, code)` condicional donde `code IS NOT NULL`
 * **Índices Físicos (B-Tree):**
   * `idx_roles_tenant_name`: B-Tree sobre `(tenant_id, name)`
+  * `idx_roles_tenant_code`: B-Tree parcial sobre `(tenant_id, code)` donde `code IS NOT NULL`
 
 ### 1.8 `permissions` (Permisos Atómicos del Sistema)
 Catálogo inmutable de operaciones elementales protegidas del sistema (recursos y acciones).
@@ -335,6 +340,7 @@ Entidad raíz que custodia el padrón de clientes atendidos por cada taller auto
 * **Relaciones (Integridad Referencial):**
   * `N:1` hacia `tenants` (`tenant_id` referencia a `tenants.id`).
   * `1:N` hacia `vehicle_ownerships` (Un cliente registra historial de titularidad sobre vehículos).
+  * `1:N` hacia `customer_memberships` (Una empresa cliente registra colaboradores y gestores de flota).
   * `1:N` hacia `appointments` (Un cliente agenda citas de servicio).
   * `1:N` hacia `work_orders` en MRO (Un cliente es el titular o solicitante de órdenes de trabajo).
 * **Restricciones (Constraints):**
@@ -378,12 +384,13 @@ Representa la unidad vehicular como un activo físico universal en el mundo real
   * `idx_vehicles_vin`: B-Tree parcial sobre `(vin) WHERE vin IS NOT NULL`
 
 ### 2.3 `vehicle_ownerships` (Cadena de Custodia y Tenencia Vehicular)
-Registra el historial cronológico de titularidad, vinculando a un cliente con un vehículo físico durante una ventana temporal delimitada.
+Registra el historial cronológico de titularidad y custodia vehicular. Permite vincular un vehículo físico con un cliente comercial (`customer_id`) registrado en un taller, con un usuario de la aplicación móvil Atelier Driver (`user_id`), o con ambos simultáneamente al consolidarse la relación comercial.
 
 | Atributo | Tipo de Dato | Llave | Req. | Default | Descripción |
 |---|---|---|---|---|---|
 | `id` | `UUID` | PK | Sí | `uuid()` | Identificador técnico del periodo de custodia |
-| `customer_id` | `UUID` | FK | Sí | - | Cliente poseedor o propietario (`FK -> customers(id)`) |
+| `customer_id` | `UUID` | FK | No | `null` | Cliente poseedor o titular en taller (`FK -> customers(id)`) |
+| `user_id` | `UUID` | FK | No | `null` | Conductor o usuario en app Atelier Driver (`FK -> users(id)`) |
 | `vehicle_id` | `UUID` | FK | Sí | - | Vehículo custodiado (`FK -> vehicles(id)`) |
 | `start_date` | `DATE` | - | Sí | `CURRENT_DATE` | Fecha de inicio de titularidad o registro |
 | `end_date` | `DATE` | - | No | `null` | Fecha fin de tenencia (null indica titularidad vigente) |
@@ -394,15 +401,19 @@ Registra el historial cronológico de titularidad, vinculando a un cliente con u
 
 * **Relaciones (Integridad Referencial):**
   * `N:1` hacia `customers` (`customer_id` referencia a `customers.id`).
+  * `N:1` hacia `users` (`user_id` referencia a `users.id` con eliminación en cascada).
   * `N:1` hacia `vehicles` (`vehicle_id` referencia a `vehicles.id`).
 * **Restricciones (Constraints):**
   * `pk_vehicle_ownerships`: `PRIMARY KEY (id)`
   * `fk_ownerships_customer_id`: `FOREIGN KEY (customer_id) REFERENCES customers(id)`
+  * `fk_ownerships_user_id`: `FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE`
   * `fk_ownerships_vehicle_id`: `FOREIGN KEY (vehicle_id) REFERENCES vehicles(id)`
+  * `chk_ownership_owner`: `CHECK (customer_id IS NOT NULL OR user_id IS NOT NULL)`
   * `chk_ownership_dates`: `CHECK (end_date IS NULL OR end_date >= start_date)`
   * `uk_vehicle_active_ownership`: `UNIQUE (vehicle_id) WHERE end_date IS NULL`
 * **Índices Físicos (B-Tree):**
-  * `idx_ownerships_customer`: B-Tree sobre `(customer_id)`
+  * `idx_ownerships_customer`: B-Tree parcial sobre `(customer_id) WHERE customer_id IS NOT NULL`
+  * `idx_ownerships_user`: B-Tree parcial sobre `(user_id) WHERE user_id IS NOT NULL`
   * `idx_ownerships_vehicle`: B-Tree compuesto sobre `(vehicle_id, end_date)`
 
 ### 2.4 `appointments` (Agenda Técnica y Citas de Recepción)
@@ -442,6 +453,35 @@ Gestiona la programación de atenciones en patio y citas de mantenimiento preven
   * `idx_appointments_tenant_branch_date`: B-Tree sobre `(tenant_id, branch_id, scheduled_at)`
   * `idx_appointments_customer`: B-Tree sobre `(customer_id)`
   * `idx_appointments_vehicle`: B-Tree sobre `(vehicle_id)`
+
+### 2.5 `customer_memberships` (Membresías Corporativas de Clientes B2B)
+Materializa el vínculo de autorización y delegación entre una cuenta de usuario global (`users`) y una empresa o flota comercial registrada en el taller (`customers`). Permite a personas físicas operar en la plataforma web de escritorio Atelier Business administrando una o múltiples flotas automotrices con roles y privilegios delimitados.
+
+| Atributo | Tipo de Dato | Llave | Req. | Default | Descripción |
+|---|---|---|---|---|---|
+| `id` | `UUID` | PK | Sí | `uuid()` | Identificador único de la membresía corporativa |
+| `customer_id` | `UUID` | FK | Sí | - | Empresa o cliente corporativo titular (`FK -> customers(id)`) |
+| `user_id` | `UUID` | FK | Sí | - | Cuenta de usuario autorizada (`FK -> users(id)`) |
+| `role` | `VARCHAR(20)` | - | Sí | `'FLEET_OPERATOR'` | Rol operativo (`FLEET_ADMIN`, `FLEET_OPERATOR`) |
+| `status` | `VARCHAR(20)` | - | Sí | `'active'` | Estado (`active`, `suspended`, `revoked`) |
+| `created_at` | `TIMESTAMPTZ` | - | Sí | `NOW()` | Marca temporal de alta |
+| `updated_at` | `TIMESTAMPTZ` | - | Sí | `NOW()` | Marca temporal de última modificación |
+| `version` | `BIGINT` | - | Sí | `0` | Versión para bloqueo optimista JPA |
+| `deleted_at` | `TIMESTAMPTZ` | - | No | `null` | Marca temporal para borrado lógico (*Soft Delete*) |
+
+* **Relaciones (Integridad Referencial):**
+  * `N:1` hacia `customers` (`customer_id` referencia a `customers.id` con eliminación en cascada).
+  * `N:1` hacia `users` (`user_id` referencia a `users.id` con eliminación en cascada).
+* **Restricciones (Constraints):**
+  * `pk_customer_memberships`: `PRIMARY KEY (id)`
+  * `fk_customer_memberships_customer_id`: `FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE`
+  * `fk_customer_memberships_user_id`: `FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE`
+  * `uk_customer_memberships`: `UNIQUE (customer_id, user_id)`
+  * `chk_customer_membership_role`: `CHECK (role IN ('FLEET_ADMIN', 'FLEET_OPERATOR'))`
+  * `chk_customer_membership_status`: `CHECK (status IN ('active', 'suspended', 'revoked'))`
+* **Índices Físicos (B-Tree):**
+  * `idx_customer_memberships_user_status`: B-Tree sobre `(user_id, status)`
+  * `idx_customer_memberships_customer`: B-Tree sobre `(customer_id, status)`
 
 ---
 
@@ -1250,14 +1290,20 @@ Entidad maestra global de plataforma. Define la oferta comercial de planes SaaS,
 |---|---|---|---|---|---|
 | `id` | `UUID` | PK | Sí | `uuid()` | Identificador único universal del plan comercial |
 | `stripe_price_id` | `VARCHAR(100)` | UK | Sí | - | Identificador oficial del precio en Stripe (ej. `price_...`) |
-| `name` | `VARCHAR(100)` | - | Sí | - | Nombre comercial formal (ej. "Starter", "Professional", "Enterprise") |
-| `tier` | `VARCHAR(20)` | - | Sí | - | Nivel (`COMMUNITY`, `STARTER`, `PROFESSIONAL`, `ENTERPRISE`) |
+| `name` | `VARCHAR(100)` | - | Sí | - | Nombre comercial formal (ej. "Go", "Pro", "Max", "Enterprise") |
+| `tier` | `VARCHAR(20)` | - | Sí | - | Nivel (`GO`, `PRO`, `MAX`, `ENTERPRISE`) |
 | `price` | `DECIMAL(10,2)` | - | Sí | - | Tarifa monetaria recurrente ($price \ge 0.00$) |
-| `currency` | `VARCHAR(3)` | - | Sí | `'USD'` | Divisa formal ISO 4217 (`USD`, `PEN`) |
+| `currency` | `VARCHAR(3)` | - | Sí | `'PEN'` | Divisa formal ISO 4217 (`PEN`, `USD`) |
 | `billing_cycle` | `VARCHAR(20)` | - | Sí | - | Frecuencia de cobro (`MONTHLY`, `YEARLY`) |
 | `max_branches` | `INTEGER` | - | Sí | - | Techo máximo de sedes físicas permitidas por taller ($max > 0$) |
 | `max_active_staff` | `INTEGER` | - | Sí | - | Límite de colaboradores activos simultáneos ($max > 0$) |
-| `max_monthly_work_orders` | `INTEGER` | - | Sí | - | Techo mensual de órdenes de trabajo permitidas ($max > 0$) |
+| `max_active_obd2_devices` | `INTEGER` | - | Sí | `0` | Límite de dispositivos OBD-II activos en clientes (0 en Go, 5 en Pro, 15 en Max, -1 Enterprise) |
+| `max_photos_per_work_order` | `INTEGER` | - | Sí | `10` | Límite de fotos por orden en `work_order_images` y tareas (10 en Go, -1 ilimitado en Pro/Max/Enterprise) |
+| `max_monthly_ai_reports` | `INTEGER` | - | Sí | `0` | Cupo mensual de Reportes PDF de Salud Vehicular con IA (0 en Go/Pro, 60 en Max, -1 Enterprise) |
+| `company_registration_allowed`| `BOOLEAN` | - | Sí | `false` | Habilitación para registrar empresas y flotas `COMPANY` (false en Go/Pro, true en Max/Enterprise) |
+| `multi_warehouse_allowed` | `BOOLEAN` | - | Sí | `false` | Habilitación para gestión multi-almacén FIFO inter-sede (false en Go/Pro, true en Max/Enterprise) |
+| `marketplace_listed` | `BOOLEAN` | - | Sí | `false` | Presencia y verificación en el marketplace B2B *Atelier Bussiness* (false en Go/Pro, true en Max/Enterprise) |
+| `max_monthly_work_orders` | `INTEGER` | - | Sí | - | Techo mensual de órdenes de trabajo permitidas ($max > 0$ o -1 ilimitado) |
 | `iot_telemetry_enabled` | `BOOLEAN` | - | Sí | `false` | Autorización de acceso a telemetría OBD-II en tiempo real |
 | `ai_diagnostics_enabled` | `BOOLEAN` | - | Sí | `false` | Autorización de acceso a diagnósticos asistidos por IA |
 | `is_active` | `BOOLEAN` | - | Sí | `true` | Bandera de disponibilidad comercial del plan para contratación |
@@ -1272,11 +1318,11 @@ Entidad maestra global de plataforma. Define la oferta comercial de planes SaaS,
 * **Restricciones (Constraints):**
   * `pk_plans`: `PRIMARY KEY (id)`
   * `uk_plans_stripe_price`: `UNIQUE (stripe_price_id)`
-  * `chk_plans_tier`: `CHECK (tier IN ('COMMUNITY', 'STARTER', 'PROFESSIONAL', 'ENTERPRISE'))`
+  * `chk_plans_tier`: `CHECK (tier IN ('GO', 'PRO', 'MAX', 'ENTERPRISE'))`
   * `chk_plans_cycle`: `CHECK (billing_cycle IN ('MONTHLY', 'YEARLY'))`
   * `chk_plans_currency`: `CHECK (currency IN ('USD', 'PEN'))`
   * `chk_plans_price`: `CHECK (price >= 0.00)`
-  * `chk_plans_quotas`: `CHECK (max_branches > 0 AND max_active_staff > 0 AND max_monthly_work_orders > 0)`
+  * `chk_plans_quotas`: `CHECK (max_branches > 0 AND max_active_staff > 0)`
 * **Índices Físicos (B-Tree):**
   * `idx_plans_tier`: B-Tree sobre `(tier)`
   * `idx_plans_tier_active`: B-Tree compuesto sobre `(tier, is_active)`
@@ -2153,12 +2199,15 @@ Almacena una réplica local compacta de los límites cuantitativos autorizados d
 |---|---|---|---|---|---|
 | `id` | `TEXT` | PK | Sí | - | Identificador único canónico de la suscripción (UUID texto) |
 | `tenant_id` | `TEXT` | UK | Sí | - | Taller titular para resolución unívoca |
-| `plan_name` | `TEXT` | - | Sí | - | Nombre comercial del plan contratado (ej. "Professional") |
-| `plan_tier` | `TEXT` | - | Sí | - | Nivel comercial (`COMMUNITY`, `STARTER`, `PROFESSIONAL`, `ENTERPRISE`) |
+| `plan_name` | `TEXT` | - | Sí | - | Nombre comercial del plan contratado (ej. "Go", "Pro", "Max", "Enterprise") |
+| `plan_tier` | `TEXT` | - | Sí | - | Nivel comercial (`GO`, `PRO`, `MAX`, `ENTERPRISE`) |
 | `subscription_status` | `TEXT` | - | Sí | - | Estado contractual vigente (`active`, `trialing`, `past_due`, `canceled`) |
 | `max_branches` | `INTEGER` | - | Sí | - | Cuota local máxima autorizada de sedes físicas |
 | `max_active_staff` | `INTEGER` | - | Sí | - | Límite local de colaboradores activos simultáneos |
-| `max_monthly_work_orders` | `INTEGER` | - | Sí | - | Techo mensual de órdenes de trabajo permitidas |
+| `max_active_obd2_devices` | `INTEGER` | - | Sí | `0` | Límite local de dispositivos OBD-II activos vinculados |
+| `max_photos_per_work_order` | `INTEGER` | - | Sí | `10` | Límite local de fotos por orden (-1 para ilimitado) |
+| `max_monthly_work_orders` | `INTEGER` | - | Sí | - | Techo mensual de órdenes de trabajo permitidas (-1 ilimitado) |
+| `company_registration_allowed` | `INTEGER` | - | Sí | `0` | Flag numérico (`1` = Habilitado, `0` = Bloqueado) para registrar empresas |
 | `iot_telemetry_enabled` | `INTEGER` | - | Sí | `0` | Flag numérico SQLite (`1` = Habilitado, `0` = Bloqueado) para telemetría |
 | `ai_diagnostics_enabled` | `INTEGER` | - | Sí | `0` | Flag numérico SQLite (`1` = Habilitado, `0` = Bloqueado) para IA diagnóstica |
 | `current_period_end` | `TEXT` | - | Sí | - | Marca temporal UTC en formato ISO-8601 de expiración de cobertura |

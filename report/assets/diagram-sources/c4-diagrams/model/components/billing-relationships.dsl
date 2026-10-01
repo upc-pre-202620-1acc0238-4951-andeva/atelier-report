@@ -28,5 +28,8 @@ billing_external_gateways -> iam_comp "Consulta datos fiscales del taller para i
 
 // Fachada OHS consumida por contextos hermanos
 iam_comp -> billing_facade "Consulta límites de sucursales y personal antes de registrar recursos vía" "In-Memory ACL"
-mro_comp -> billing_facade "Verifica membresía activa y permisos de módulos avanzados vía" "In-Memory ACL"
+mro_comp -> billing_facade "Verifica cuotas mensuales de órdenes de trabajo y límites de peritaje fotográfico vía" "In-Memory ACL"
+customer_fleet_comp -> billing_facade "Valida autorización de registro de empresas y flotas comerciales vía" "In-Memory ACL"
+iot_comp -> billing_facade "Valida cupos de escáneres OBD-II y reportes predictivos de salud vehicular vía" "In-Memory ACL"
+inventory_comp -> billing_facade "Valida autorización para transferencias y gestión multi-almacén inter-sede vía" "In-Memory ACL"
 billing_facade -> billing_persistence "Consulta cuotas y vigencia de suscripción en" "Domain Repositories"

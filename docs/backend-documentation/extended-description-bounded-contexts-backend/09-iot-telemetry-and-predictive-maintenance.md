@@ -1,9 +1,9 @@
-## 11. Fase 8: Bounded Context 8 — IoT Telemetry & Predictive Maintenance Context (`com.andeva.atelier.platform.iot`)
+## 11. Fase 8: Bounded Context 8: IoT Telemetry & Predictive Maintenance Context (`com.andeva.atelier.platform.iot`)
 
 ### 11.1. Diccionario y Propósito del Contexto
 
 #### 11.1.1. Propósito y Límites de Responsabilidad
-El **IoT Telemetry & Predictive Maintenance Context** constituye el núcleo de innovación y el principal factor diferenciador de la plataforma Atelier en el mercado automotriz. Transforma al taller mecánico tradicional en un centro de servicio inteligente, conectado y predictivo. Su delimitación arquitectónica responde a cuatro objetivos fundamentales:
+El **IoT Telemetry & Predictive Maintenance Context** constituye el núcleo de innovación y el principal factor diferenciador de la plataforma Atelier en el mercado automotriz. Convierte al taller mecánico tradicional en un centro de servicio inteligente, conectado y predictivo. Su delimitación arquitectónica responde a cuatro objetivos fundamentales:
 1. **Ingesta y Almacenamiento Masivo de Series Temporales (*Time-Series*):** Los escáneres OBD-II conectados a los vehículos transmiten periódicamente parámetros del motor (RPM, velocidad, temperatura del refrigerante, nivel de combustible y voltaje de batería) con frecuencias de 1 a 5 segundos. En una flota activa de cientos de vehículos, esto genera millones de registros diarios. Si estos datos se insertaran en las tablas transaccionales del ERP relacional (PostgreSQL), provocarían bloqueos de tablas, saturación del buffer pool y degradación de tiempos de respuesta en MRO y Facturación. Este contexto aísla dicha carga utilizando **TimescaleDB** (extensión relacional optimizada para series temporales desplegada en Aiven Cloud).
 2. **Gestión del Hardware OBD-II y Ciclo de Instalación (`Obd2Device` y `DeviceInstallation`):** Administra el inventario de escáneres OBD-II adquiridos por el taller bajo el esquema *BYOD (Bring Your Own Device)* o provistos por Andeva, registrando sus identificadores físicos unívocos (dirección MAC para Bluetooth BLE o número IMEI para dispositivos celulares con tarjeta SIM) y controlando su vinculación física temporal con los vehículos de los clientes.
 3. **Detección y Trazabilidad de Códigos de Falla (`VehicleFault`):** Cuando la computadora del vehículo (ECU / PCM) detecta un desperfecto electrónico, mecánico o de emisiones, genera un código de diagnóstico estandarizado (**DTC - *Diagnostic Trouble Code***, tales como `P0300` por falla de encendido o `P0420` por degradación del convertidor catalítico). El contexto captura estos códigos, evalúa su nivel de severidad (`LOW`, `MEDIUM`, `CRITICAL`) y los asienta en el historial clínico del vehículo.
@@ -19,9 +19,263 @@ El **IoT Telemetry & Predictive Maintenance Context** constituye el núcleo de i
   * *Dispositivos Bluetooth (BLE) / WiFi:* La aplicación móvil del conductor (`Atelier Driver`) o la del mecánico en patio (`Atelier Workshop`) se enlaza mediante Bluetooth Low Energy al escáner, actúa como *Gateway* en segundo plano, acumula lecturas y las remite en ráfagas por lotes (*batches*) al backend.
 * **Fachada Open Host Service (OHS) hacia CRM y MRO:** Los módulos de CRM y MRO no consultan TimescaleDB directamente. Invocan `IoTTelemetryContextFacade.getVehicleLatestTelemetry(vehicleId)` para desplegar el tacómetro digital y odómetro en la ficha del vehículo, y `getActiveFaultsForVehicle(vehicleId)` para precargar diagnósticos en la orden de trabajo.
 
+#### 11.1.3. Estructura Canónica de Directorios y Archivos
+
+La siguiente estructura de directorios y archivos representa la taxonomía canónica definitiva de **IoT Telemetry & Predictive Maintenance Context** (`com.andeva.atelier.platform.iot`), alineada estrictamente con el estándar arquitectónico de Atelier Platform y los patrones tácticos de Domain-Driven Design (DDD) Hexagonal y Clean Architecture:
+
+```text
+com.andeva.atelier.platform.iot/
+├── domain/
+│   ├── exceptions/
+│   │   ├── ActiveInstallationConflictException.java
+│   │   ├── DeviceAlreadyInstalledException.java
+│   │   ├── DeviceNotFoundException.java
+│   │   ├── InstallationNotFoundException.java
+│   │   ├── InvalidDeviceIdentifierException.java
+│   │   ├── InvalidDtcCodeException.java
+│   │   ├── IoTDomainException.java
+│   │   ├── PredictiveAlertNotFoundException.java
+│   │   ├── TimescaleIngestionException.java
+│   │   └── VehicleFaultNotFoundException.java
+│   ├── model/
+│   │   ├── aggregates/
+│   │   │   ├── DeviceInstallation.java
+│   │   │   ├── Obd2Device.java
+│   │   │   ├── PredictiveAlert.java
+│   │   │   ├── TelemetryRecord.java
+│   │   │   └── VehicleFault.java
+│   │   ├── commands/
+│   │   │   ├── AcknowledgePredictiveAlertCommand.java
+│   │   │   ├── DismissPredictiveAlertCommand.java
+│   │   │   ├── GeneratePredictiveAlertCommand.java
+│   │   │   ├── GenerateVehicleHealthReportCommand.java
+│   │   │   ├── IngestTelemetryBatchCommand.java
+│   │   │   ├── InstallDeviceOnVehicleCommand.java
+│   │   │   ├── RegisterObd2DeviceCommand.java
+│   │   │   └── RegisterVehicleFaultCommand.java
+│   │   ├── dto/
+│   │   │   ├── TelemetryStatisticalSummary.java
+│   │   │   └── ai/
+│   │   │       ├── DtcTelemetryCorrelationDto.java
+│   │   │       ├── PredictiveRiskDto.java
+│   │   │       ├── RecommendedServiceActionDto.java
+│   │   │       ├── SubsystemEvaluationDto.java
+│   │   │       └── VehicleHealthReportAiDto.java
+│   │   ├── entities/
+│   │   │   └── DtcCatalogEntry.java
+│   │   ├── enums/
+│   │   │   ├── AlertSeverity.java
+│   │   │   ├── AlertStatus.java
+│   │   │   ├── ConnectionType.java
+│   │   │   ├── DeviceStatus.java
+│   │   │   ├── FaultSeverity.java
+│   │   │   └── RiskLevel.java
+│   │   ├── events/
+│   │   │   ├── CriticalEngineAnomalyDetectedEvent.java
+│   │   │   ├── DeviceInstalledOnVehicleEvent.java
+│   │   │   ├── DeviceUninstalledFromVehicleEvent.java
+│   │   │   ├── Obd2DeviceBrokenEvent.java
+│   │   │   ├── Obd2DeviceLostEvent.java
+│   │   │   ├── Obd2DeviceRegisteredEvent.java
+│   │   │   ├── PredictiveAlertAcknowledgedEvent.java
+│   │   │   ├── PredictiveAlertDispatchedEvent.java
+│   │   │   ├── TelemetryBatchIngestedEvent.java
+│   │   │   └── VehicleFaultDetectedEvent.java
+│   │   ├── ids/
+│   │   │   ├── AlertId.java
+│   │   │   ├── DeviceId.java
+│   │   │   ├── DtcCatalogId.java
+│   │   │   ├── FaultId.java
+│   │   │   └── InstallationId.java
+│   │   ├── queries/
+│   │   │   ├── ExportVehicleHealthReportPdfQuery.java
+│   │   │   ├── GetDeviceByIdQuery.java
+│   │   │   ├── GetDeviceByVehicleIdQuery.java
+│   │   │   ├── GetLatestVehicleHealthReportQuery.java
+│   │   │   ├── GetTelemetryHistoryQuery.java
+│   │   │   └── GetVehicleLatestTelemetryQuery.java
+│   │   └── valueobjects/
+│   │       ├── BatteryVoltage.java
+│   │       ├── ConfidenceScore.java
+│   │       ├── DeviceIdentifier.java
+│   │       ├── DtcCode.java
+│   │       ├── EngineRpm.java
+│   │       ├── EngineTemperature.java
+│   │       ├── FuelLevel.java
+│   │       ├── GeoCoordinates.java
+│   │       ├── TelemetryPids.java
+│   │       └── VehicleSpeed.java
+│   ├── repositories/
+│   │   ├── DeviceInstallationRepository.java
+│   │   ├── DtcCatalogRepository.java
+│   │   ├── Obd2DeviceRepository.java
+│   │   ├── PredictiveAlertRepository.java
+│   │   ├── TelemetryLogRepository.java
+│   │   └── VehicleFaultRepository.java
+│   └── services/
+│       ├── DtcCodeEvaluationService.java
+│       ├── PredictiveAnomalyDetectionEngine.java
+│       └── VehicleThermodynamicEvaluationService.java
+├── application/
+│   ├── acl/
+│   │   └── IoTTelemetryContextFacadeImpl.java
+│   ├── commandservices/
+│   │   ├── DeviceInstallationCommandService.java
+│   │   ├── Obd2DeviceCommandService.java
+│   │   ├── PredictiveAlertCommandService.java
+│   │   ├── TelemetryIngestionCommandService.java
+│   │   ├── VehicleFaultCommandService.java
+│   │   └── VehicleHealthReportCommandService.java
+│   ├── internal/
+│   │   ├── commandservices/
+│   │   │   ├── DeviceInstallationCommandServiceImpl.java
+│   │   │   ├── Obd2DeviceCommandServiceImpl.java
+│   │   │   ├── PredictiveAlertCommandServiceImpl.java
+│   │   │   ├── TelemetryIngestionCommandServiceImpl.java
+│   │   │   ├── VehicleFaultCommandServiceImpl.java
+│   │   │   └── VehicleHealthReportCommandServiceImpl.java
+│   │   ├── eventhandlers/
+│   │   │   ├── IoTTransactionalOutboxPublisher.java
+│   │   │   ├── PredictiveAlertDomainEventHandler.java
+│   │   │   ├── TelemetryDomainEventHandler.java
+│   │   │   ├── VehicleFaultDomainEventHandler.java
+│   │   │   └── VehicleLifecycleIntegrationEventHandler.java
+│   │   ├── outbound/
+│   │   │   └── acl/
+│   │   │       ├── AiInferenceDiagnosticPort.java
+│   │   │       ├── CrmFleetAclPort.java
+│   │   │       ├── FcmNotificationAclPort.java
+│   │   │       ├── OperationsAclPort.java
+│   │   │       ├── TimescaleBatchJdbcClientPort.java
+│   │   │       └── VehicleHealthReportPdfGeneratorPort.java
+│   │   └── queryservices/
+│   │       ├── DeviceInstallationQueryServiceImpl.java
+│   │       ├── Obd2DeviceQueryServiceImpl.java
+│   │       ├── PredictiveAlertQueryServiceImpl.java
+│   │       ├── TelemetryLogQueryServiceImpl.java
+│   │       ├── VehicleFaultQueryServiceImpl.java
+│   │       └── VehicleHealthReportQueryServiceImpl.java
+│   └── queryservices/
+│       ├── DeviceInstallationQueryService.java
+│       ├── Obd2DeviceQueryService.java
+│       ├── PredictiveAlertQueryService.java
+│       ├── TelemetryLogQueryService.java
+│       ├── VehicleFaultQueryService.java
+│       └── VehicleHealthReportQueryService.java
+├── infrastructure/
+│   ├── external/
+│   │   ├── acl/
+│   │   │   ├── crm/
+│   │   │   │   └── CrmFleetAclAdapter.java
+│   │   │   └── mro/
+│   │   │       └── WorkshopOperationsAclAdapter.java
+│   │   ├── ai/
+│   │   │   └── groq/
+│   │   │       └── GroqSpringAiDiagnosticAdapter.java
+│   │   ├── messaging/
+│   │   │   └── outbox/
+│   │   │       └── IoTOutboxMessageRelayAdapter.java
+│   │   ├── notification/
+│   │   │   └── firebase/
+│   │   │       └── FirebaseCloudMessagingGatewayAdapter.java
+│   │   └── reporting/
+│   │       └── openpdf/
+│   │           └── OpenPdfVehicleHealthReportGeneratorAdapter.java
+│   └── persistence/
+│       ├── jpa/
+│       │   ├── adapters/
+│       │   │   ├── DeviceInstallationRepositoryAdapter.java
+│       │   │   ├── DtcCatalogRepositoryAdapter.java
+│       │   │   ├── Obd2DeviceRepositoryAdapter.java
+│       │   │   ├── PredictiveAlertRepositoryAdapter.java
+│       │   │   └── VehicleFaultRepositoryAdapter.java
+│       │   ├── assemblers/
+│       │   │   ├── DeviceInstallationPersistenceAssembler.java
+│       │   │   ├── DtcCatalogPersistenceAssembler.java
+│       │   │   ├── Obd2DevicePersistenceAssembler.java
+│       │   │   ├── PredictiveAlertPersistenceAssembler.java
+│       │   │   └── VehicleFaultPersistenceAssembler.java
+│       │   ├── converters/
+│       │   │   ├── AlertSeverityConverter.java
+│       │   │   ├── AlertStatusConverter.java
+│       │   │   ├── ConnectionTypeConverter.java
+│       │   │   ├── DeviceStatusConverter.java
+│       │   │   ├── FaultSeverityConverter.java
+│       │   │   └── RiskLevelConverter.java
+│       │   ├── entities/
+│       │   │   ├── DeviceInstallationPersistenceEntity.java
+│       │   │   ├── DtcCatalogEntryPersistenceEntity.java
+│       │   │   ├── Obd2DevicePersistenceEntity.java
+│       │   │   ├── PredictiveAlertPersistenceEntity.java
+│       │   │   └── VehicleFaultPersistenceEntity.java
+│       │   └── repositories/
+│       │       ├── DeviceInstallationPersistenceRepository.java
+│       │       ├── DtcCatalogEntryPersistenceRepository.java
+│       │       ├── Obd2DevicePersistenceRepository.java
+│       │       ├── PredictiveAlertPersistenceRepository.java
+│       │       └── VehicleFaultPersistenceRepository.java
+│       └── timescale/
+│           ├── adapters/
+│           │   └── TimescaleTelemetryRepositoryImpl.java
+│           ├── assemblers/
+│           │   └── TimescaleTelemetryPersistenceAssembler.java
+│           ├── entities/
+│           │   └── TelemetryLogPersistenceEntity.java
+│           └── repositories/
+│               ├── TimescaleTelemetryAnalyticsRepository.java
+│               └── TimescaleTelemetryJdbcRepository.java
+└── interfaces/
+    ├── acl/
+    │   ├── IoTTelemetryContextFacade.java
+    │   └── dto/
+    │       ├── ActiveVehicleFaultsDto.java
+    │       ├── VehicleLatestTelemetryDto.java
+    │       └── VehicleTelemetryHealthDto.java
+    ├── events/
+    │   ├── PredictiveAlertGeneratedIntegrationEvent.java
+    │   ├── VehicleAnomalyDetectedIntegrationEvent.java
+    │   ├── VehicleFaultLoggedIntegrationEvent.java
+    │   └── VehicleHealthReportGeneratedIntegrationEvent.java
+    └── rest/
+        ├── controllers/
+        │   ├── DeviceInstallationsController.java
+        │   ├── Obd2DevicesController.java
+        │   ├── PredictiveAlertsController.java
+        │   ├── TelemetryIngestionController.java
+        │   ├── VehicleFaultsController.java
+        │   └── VehicleHealthReportsController.java
+        ├── resources/
+        │   ├── requests/
+        │   │   ├── AcknowledgeAlertRequest.java
+        │   │   ├── GenerateHealthReportRequest.java
+        │   │   ├── InstallDeviceRequest.java
+        │   │   ├── RegisterDeviceRequest.java
+        │   │   ├── RegisterVehicleFaultRequest.java
+        │   │   ├── TelemetryBatchRequest.java
+        │   │   └── UpdateDeviceStatusRequest.java
+        │   └── responses/
+        │       ├── DeviceInstallationResponse.java
+        │       ├── HealthReportCreatedResponse.java
+        │       ├── Obd2DeviceResponse.java
+        │       ├── PredictiveAlertResponse.java
+        │       ├── TelemetryIngestionAckResponse.java
+        │       └── VehicleFaultResponse.java
+        └── transform/
+            ├── DeviceInstallationResourceAssembler.java
+            ├── Obd2DeviceResourceAssembler.java
+            ├── PredictiveAlertResourceAssembler.java
+            ├── TelemetryResourceAssembler.java
+            ├── VehicleFaultResourceAssembler.java
+            └── VehicleHealthReportResourceAssembler.java
+```
+
 ---
 
 ### 11.2. 2.6.9.1. Domain Layer
+
+La Capa de Dominio de **IoT Telemetry & Predictive Maintenance** (`com.andeva.atelier.platform.iot.domain`) encapsula la lógica medular del negocio automotriz telemático, modelando las entidades físicas del vehículo, los escáneres OBD-II, las lecturas sensoriales continuas, el diagnóstico normativo de averías y los algoritmos predictivos sin acoplamiento con librerías de infraestructura, frameworks de persistencia o controladores web.
+
+---
 
 #### 11.2.1. Aggregates & Aggregate Roots
 
@@ -30,20 +284,20 @@ El **IoT Telemetry & Predictive Maintenance Context** constituye el núcleo de i
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<Obd2Device>`
 * **Propósito:** Representa el equipo físico de hardware de diagnóstico a bordo (OBD-II) perteneciente al taller.
 * **Atributos:**
-  * `id: DeviceId` — Identificador universal interno del dispositivo (UUID).
-  * `tenantId: TenantId` — Taller automotriz propietario del hardware.
-  * `deviceIdentifier: DeviceIdentifier` — Identificador unívoco del hardware: Dirección MAC Bluetooth (ej. `00:1A:7D:DA:71:13`) o código IMEI de 15 dígitos para módems celulares. **Restricción UNIQUE a nivel de base de datos**.
-  * `connectionType: ConnectionType` — Canal de enlace (`BLUETOOTH_BLE`, `SIM_CELLULAR`, `WIFI`).
-  * `status: DeviceStatus` — Situación operativa (`ACTIVE`, `INACTIVE`, `LOST`, `BROKEN`).
-  * `hardwareModel: String` — Denominación del modelo (ej. "ELM327 v2.1 BLE", "Teltonika FMB920 OBD").
-  * `firmwareVersion: String` — Versión del software embebido.
+  * `id: DeviceId`: Identificador universal interno del dispositivo (UUID).
+  * `tenantId: TenantId`: Taller automotriz propietario del hardware.
+  * `deviceIdentifier: DeviceIdentifier`: Identificador unívoco del hardware: Dirección MAC Bluetooth (ej. `00:1A:7D:DA:71:13`) o código IMEI de 15 dígitos para módems celulares. **Restricción UNIQUE a nivel de base de datos**.
+  * `connectionType: ConnectionType`: Canal de enlace (`BLUETOOTH_BLE`, `SIM_CELLULAR`, `WIFI`).
+  * `status: DeviceStatus`: Situación operativa (`ACTIVE`, `INACTIVE`, `LOST`, `BROKEN`).
+  * `hardwareModel: String`: Denominación del modelo (ej. "ELM327 v2.1 BLE", "Teltonika FMB920 OBD").
+  * `firmwareVersion: String`: Versión del software embebido.
 * **Invariantes y Reglas de Negocio:**
   * El identificador del dispositivo debe respetar el formato estricto de MAC Address (6 pares hexadecimales) o IMEI (15 dígitos numéricos).
   * No puede registrarse dos veces el mismo `deviceIdentifier` en toda la plataforma.
 * **Métodos:**
-  * `+ static Obd2Device register(TenantId tenantId, DeviceIdentifier identifier, ConnectionType type, String model, String firmware): Obd2Device`: Factoría de dominio; valida sintaxis del identificador, asigna estado `ACTIVE` y registra `Obd2DeviceRegisteredEvent`.
-  * `+ void markLost(): void`: Marca el hardware como extraviado, inhabilitando su aceptación en la ingesta.
-  * `+ void markBroken(): void`: Marca el hardware como averiado.
+  * `+ static Obd2Device register(TenantId tenantId, DeviceIdentifier identifier, ConnectionType type, String model, String firmware): Obd2Device`: Factoría de dominio, valida sintaxis del identificador, asigna estado `ACTIVE` y registra `Obd2DeviceRegisteredEvent`.
+  * `+ void markLost(): void`: Marca el hardware como extraviado, inhabilitando su aceptación en la ingesta y registrando `Obd2DeviceLostEvent`.
+  * `+ void markBroken(): void`: Marca el hardware como averiado y emite `Obd2DeviceBrokenEvent`.
   * `+ void updateFirmware(String newVersion): void`: Actualiza metadatos de firmware.
 
 ##### 2. `DeviceInstallation` (Aggregate Root)
@@ -51,14 +305,14 @@ El **IoT Telemetry & Predictive Maintenance Context** constituye el núcleo de i
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<DeviceInstallation>`
 * **Propósito:** Representa la vinculación operativa y física de un escáner OBD-II en el puerto de diagnóstico de un vehículo automotriz.
 * **Atributos:**
-  * `id: InstallationId` — Identificador universal de la instalación (UUID).
-  * `deviceId: DeviceId` — Escáner OBD-II utilizado.
-  * `vehicleId: VehicleId` — Vehículo intervenido.
-  * `tenantId: TenantId` — Taller prestador del servicio de telemetría.
-  * `installedAt: Instant` — Timestamp de inicio de la instalación y monitoreo.
-  * `uninstalledAt: Optional<Instant>` — Timestamp de desconexión física (nullable hasta que culmine el servicio).
-  * `initialOdometerKm: int` — Kilometraje registrado al momento de la conexión.
-  * `finalOdometerKm: Optional<Integer>` — Kilometraje al desinstalar.
+  * `id: InstallationId`: Identificador universal de la instalación (UUID).
+  * `deviceId: DeviceId`: Escáner OBD-II utilizado.
+  * `vehicleId: VehicleId`: Vehículo intervenido.
+  * `tenantId: TenantId`: Taller prestador del servicio de telemetría.
+  * `installedAt: Instant`: Timestamp de inicio de la instalación y monitoreo.
+  * `uninstalledAt: Optional<Instant>`: Timestamp de desconexión física (nullable hasta que culmine el servicio).
+  * `initialOdometerKm: int`: Kilometraje registrado al momento de la conexión.
+  * `finalOdometerKm: Optional<Integer>`: Kilometraje al desinstalar.
 * **Invariantes y Reglas de Negocio:**
   * Un dispositivo no puede tener más de una instalación activa simultáneamente (`uninstalledAt == null`).
   * Un vehículo no puede tener más de un escáner instalado al mismo tiempo.
@@ -72,15 +326,15 @@ El **IoT Telemetry & Predictive Maintenance Context** constituye el núcleo de i
 * **Paquete:** `com.andeva.atelier.platform.iot.domain.model.aggregates`
 * **Propósito:** Modela una lectura instantánea de telemetría vehicular capturada por el escáner y persistida en la Hipertabla de TimescaleDB.
 * **Atributos:**
-  * `timestamp: Instant` — Momento cronológico de captura satelital/vehicular (Clave de particionamiento temporal en TimescaleDB).
-  * `vehicleId: VehicleId` — Vehículo emisor (Clave primaria compuesta junto con timestamp).
-  * `tenantId: TenantId` — Taller desnormalizado para consultas analíticas de alto rendimiento.
-  * `location: Optional<GeoCoordinates>` — Coordenadas GPS satelitales (latitud, longitud) provistas por el smartphone o módem.
-  * `speed: VehicleSpeed` — Velocidad instantánea en km/h reportada por la ECU.
-  * `engineTemperature: EngineTemperature` — Temperatura del refrigerante del motor en grados Celsius ($^\circ\text{C}$).
-  * `engineRpm: EngineRpm` — Revoluciones por minuto del cigüeñal.
-  * `fuelLevel: Optional<FuelLevel>` — Porcentaje de combustible remanente (0% a 100%).
-  * `batteryVoltage: Optional<BatteryVoltage>` — Tensión eléctrica en voltios del alternador/batería.
+  * `timestamp: Instant`: Momento cronológico de captura satelital/vehicular (Clave de particionamiento temporal en TimescaleDB).
+  * `vehicleId: VehicleId`: Vehículo emisor (Clave primaria compuesta junto con timestamp).
+  * `tenantId: TenantId`: Taller desnormalizado para consultas analíticas de alto rendimiento.
+  * `location: Optional<GeoCoordinates>`: Coordenadas GPS satelitales (latitud, longitud) provistas por el smartphone o módem.
+  * `speed: VehicleSpeed`: Velocidad instantánea en km/h reportada por la ECU.
+  * `engineTemperature: EngineTemperature`: Temperatura del refrigerante del motor en grados Celsius ($^\circ\text{C}$).
+  * `engineRpm: EngineRpm`: Revoluciones por minuto del cigüeñal.
+  * `fuelLevel: Optional<FuelLevel>`: Porcentaje de combustible remanente (0% a 100%).
+  * `batteryVoltage: Optional<BatteryVoltage>`: Tensión eléctrica en voltios del alternador/batería.
 * **Invariantes y Reglas de Negocio:**
   * Las lecturas son de naturaleza inmutable y de solo inserción (*Append-Only*).
   * La velocidad no puede ser negativa ni exceder 350 km/h.
@@ -91,40 +345,39 @@ El **IoT Telemetry & Predictive Maintenance Context** constituye el núcleo de i
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<VehicleFault>`
 * **Propósito:** Representa un código de error de diagnóstico (**DTC**) emitido por la computadora a bordo del automóvil.
 * **Atributos:**
-  * `id: FaultId` — Identificador universal del fallo (UUID).
-  * `vehicleId: VehicleId` — Vehículo afectado.
-  * `tenantId: TenantId` — Taller que supervisa la unidad.
-  * `dtcCode: DtcCode` — Código alfanumérico normalizado SAE J2019 / ISO 15031 (ej. `P0300`, `P0420`, `B0001`).
-  * `severity: FaultSeverity` — Gravedad del problema (`LOW`, `MEDIUM`, `CRITICAL`).
-  * `description: String` — Glosa técnica explicativa del subsistema comprometido.
-  * `detectedAt: Instant` — Momento exacto de emisión por el escáner.
-  * `isResolved: boolean` — Bandera que indica si el código fue subsanado o limpiado (*cleared*).
-  * `resolvedAt: Optional<Instant>` — Momento de resolución mecánica en taller (nullable).
+  * `id: FaultId`: Identificador universal del fallo (UUID).
+  * `vehicleId: VehicleId`: Vehículo afectado.
+  * `tenantId: TenantId`: Taller que supervisa la unidad.
+  * `dtcCode: DtcCode`: Código alfanumérico normalizado SAE J2019 / ISO 15031 (ej. `P0300`, `P0420`, `B0001`).
+  * `severity: FaultSeverity`: Gravedad del problema (`LOW`, `MEDIUM`, `CRITICAL`).
+  * `description: String`: Glosa técnica explicativa del subsistema comprometido.
+  * `detectedAt: Instant`: Momento exacto de emisión por el escáner.
+  * `isResolved: boolean`: Bandera que indica si el código fue subsanado o limpiado (*cleared*).
+  * `resolvedAt: Optional<Instant>`: Momento de resolución mecánica en taller (nullable).
 * **Métodos:**
-  * `+ static VehicleFault detect(VehicleId vehicleId, TenantId tenantId, DtcCode dtcCode, FaultSeverity severity, String description): VehicleFault`: Factoría de dominio; registra `VehicleFaultDetectedEvent`.
-  * `+ void resolve(): void`: Marca el código como reparado tras intervención en foso de servicio.
+  * `+ static VehicleFault detect(VehicleId vehicleId, TenantId tenantId, DtcCode dtcCode, FaultSeverity severity, String description): VehicleFault`: Factoría de dominio, registra `VehicleFaultDetectedEvent`.
+  * `+ void markResolved(Instant resolvedTimestamp): void`: Asienta la corrección de la avería.
 
 ##### 5. `PredictiveAlert` (Aggregate Root)
 * **Paquete:** `com.andeva.atelier.platform.iot.domain.model.aggregates`
 * **Herencia:** Extiende `AbstractDomainAggregateRoot<PredictiveAlert>`
-* **Propósito:** Representa una advertencia proactiva generada por el motor de inteligencia de telemetría anticipando una avería mecánica grave.
+* **Propósito:** Advertencia analítica generada por el motor de inferencia algorítmico o Spring AI que predice una falla vehicular antes de su manifestación física catastrófica.
 * **Atributos:**
-  * `id: AlertId` — Identificador universal de la alerta (UUID).
-  * `vehicleId: VehicleId` — Vehículo en riesgo.
-  * `tenantId: TenantId` — Taller automotriz responsable.
-  * `recommendedServiceId: Optional<ServiceId>` — Servicio mecánico preventivo sugerido del catálogo de MRO.
-  * `alertType: AlertType` — Tipo de riesgo (`ENGINE_OVERHEATING_RISK`, `BATTERY_FAILURE_RISK`, `CATALYTIC_SYSTEM_DEGRADATION`, `CYLINDER_MISFIRE_HAZARD`).
-  * `confidenceScore: ConfidenceScore` — Probabilidad porcentual estimada del fallo inminente (ej. 89.50%).
-  * `message: String` — Mensaje preventivo comprensible para el conductor.
-  * `status: AlertStatus` — Estado de la alerta (`DISPATCHED`, `ACKNOWLEDGED`, `RESOLVED`, `DISMISSED`).
-  * `fcmMessageId: Optional<String>` — Identificador de mensaje retornado por Firebase Cloud Messaging.
-  * `createdAt: Instant` — Momento de formulación matemática de la alerta.
+  * `id: AlertId`: Identificador universal de la alerta (UUID).
+  * `vehicleId: VehicleId`: Vehículo en riesgo.
+  * `tenantId: TenantId`: Taller automotriz responsable.
+  * `recommendedServiceId: Optional<ServiceId>`: Servicio mecánico preventivo sugerido del catálogo de MRO.
+  * `alertType: AlertType`: Tipo de riesgo (`ENGINE_OVERHEATING_RISK`, `BATTERY_FAILURE_RISK`, `CATALYTIC_SYSTEM_DEGRADATION`, `CYLINDER_MISFIRE_HAZARD`).
+  * `confidenceScore: ConfidenceScore`: Probabilidad porcentual estimada del fallo inminente ($0.00$ a $100.00$).
+  * `message: String`: Mensaje preventivo comprensible para el conductor.
+  * `status: AlertStatus`: Estado de la alerta (`DISPATCHED`, `ACKNOWLEDGED`, `RESOLVED`, `DISMISSED`).
+  * `fcmMessageId: Optional<String>`: Identificador de mensaje retornado por Firebase Cloud Messaging.
+  * `createdAt: Instant`: Momento de formulación matemática de la alerta.
 * **Métodos:**
-  * `+ static PredictiveAlert generate(VehicleId vehicleId, TenantId tenantId, Optional<ServiceId> serviceId, AlertType type, ConfidenceScore score, String message): PredictiveAlert`: Factoría que inicializa la alerta en estado `DISPATCHED` y registra `PredictiveAlertDispatchedEvent`.
-  * `+ void markDispatched(String fcmMessageId): void`: Registra el ID de entrega del push de Firebase.
-  * `+ void acknowledge(): void`: Registra que el cliente o el taller abrió la notificación.
-  * `+ void resolve(): void`: Registra que el vehículo ingresó al taller y fue reparado preventivamente.
-  * `+ void dismiss(): void`: Descarta la alerta por falsa alarma o decisión del usuario.
+  * `+ static PredictiveAlert create(VehicleId vehicleId, TenantId tenantId, Optional<ServiceId> serviceId, AlertType type, ConfidenceScore score, String msg): PredictiveAlert`: Factoría que asigna estado `DISPATCHED` y emite `PredictiveAlertDispatchedEvent`.
+  * `+ void acknowledge(): void`: Registra lectura por el cliente o taller y emite `PredictiveAlertAcknowledgedEvent`.
+  * `+ void resolve(): void`: Cierra la alerta tras intervención preventiva en foso.
+  * `+ void dismiss(): void`: Descarta la advertencia por falsos positivos o rechazo explícito del conductor.
 
 ---
 
@@ -134,44 +387,67 @@ El **IoT Telemetry & Predictive Maintenance Context** constituye el núcleo de i
 * **Paquete:** `com.andeva.atelier.platform.iot.domain.model.entities`
 * **Propósito:** Catálogo maestro estandarizado de códigos DTC de automoción (SAE/ISO) para enriquecimiento semántico de descripciones técnicas y gravedades predeterminadas.
 * **Atributos:**
-  * `code: DtcCode` — Código alfanumérico (ej. `P0171`).
-  * `category: DtcCategory` — Subsistema (`POWERTRAIN_P`, `CHASSIS_C`, `BODY_B`, `NETWORK_U`).
-  * `standardDescription: String` — Glosa oficial (ej. "Sistema de combustible demasiado pobre (Banco 1)").
-  * `defaultSeverity: FaultSeverity` — Gravedad estimada estándar.
+  * `id: DtcCatalogId`: Identificador tipado inmutable de la entrada del catálogo.
+  * `code: DtcCode`: Código alfanumérico (ej. `P0171`).
+  * `category: DtcCategory`: Subsistema (`POWERTRAIN_P`, `CHASSIS_C`, `BODY_B`, `NETWORK_U`).
+  * `standardDescription: String`: Glosa oficial (ej. "Sistema de combustible demasiado pobre (Banco 1)").
+  * `defaultSeverity: FaultSeverity`: Gravedad estimada estándar.
 
 ---
 
-#### 11.2.3. Value Objects
+#### 11.2.3. Value Objects, Typed IDs & Domain Enums
 
-* **`DeviceId`:** Identificador universal inmutable de un hardware (`record DeviceId(UUID value)`).
-* **`InstallationId`:** Identificador inmutable de una instalación (`record InstallationId(UUID value)`).
-* **`FaultId`:** Identificador inmutable de un código DTC (`record FaultId(UUID value)`).
+##### 1. Identificadores Fuertemente Tipados (`com.andeva.atelier.platform.iot.domain.model.ids`)
+
+* **`DeviceId`:** Identificador universal inmutable de un hardware OBD-II (`record DeviceId(UUID value)`).
+* **`InstallationId`:** Identificador inmutable de una sesión física de instalación (`record InstallationId(UUID value)`).
+* **`FaultId`:** Identificador inmutable de un código DTC detectado (`record FaultId(UUID value)`).
 * **`AlertId`:** Identificador inmutable de una alerta predictiva (`record AlertId(UUID value)`).
+* **`DtcCatalogId`:** Identificador inmutable de una entrada del catálogo normativo (`record DtcCatalogId(UUID value)`).
+
+##### 2. Enumeraciones de Dominio (`com.andeva.atelier.platform.iot.domain.model.enums`)
+
+* **`ConnectionType`:** Enumeración del canal físico de transmisión (`BLUETOOTH_BLE`, `SIM_CELLULAR`, `WIFI`).
+* **`DeviceStatus`:** Situación operativa del hardware (`ACTIVE`, `INACTIVE`, `LOST`, `BROKEN`).
+* **`FaultSeverity`:** Severidad de la falla detectada en la ECU (`LOW`, `MEDIUM`, `CRITICAL`).
+* **`AlertSeverity`:** Nivel de gravedad predictiva para el conductor y taller (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`).
+* **`AlertStatus`:** Estados del ciclo de atención de una advertencia (`DISPATCHED`, `ACKNOWLEDGED`, `RESOLVED`, `DISMISSED`).
+* **`RiskLevel`:** Nivel de riesgo integral estimado por el motor analítico (`LOW`, `MODERATE`, `HIGH`, `CRITICAL`).
+
+##### 3. Objetos de Valor (`com.andeva.atelier.platform.iot.domain.model.valueobjects`)
+
 * **`DeviceIdentifier`:** Objeto de valor que valida el formato de identificador MAC o IMEI (`record DeviceIdentifier(String value)`). Valida que cumpla el patrón `^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$` o `^[0-9]{15}$`.
-* **`ConnectionType`:** Enumeración del canal físico (`BLUETOOTH_BLE`, `SIM_CELLULAR`, `WIFI`).
-* **`DeviceStatus`:** Situación del hardware (`ACTIVE`, `INACTIVE`, `LOST`, `BROKEN`).
-* **`DtcCode`:** Objeto de valor para códigos de fallo (`record DtcCode(String value)`). Valida el patrón `^[P|C|B|U][0-9]{4}$`.
-* **`FaultSeverity`:** Severidad de la falla detectada (`LOW`, `MEDIUM`, `CRITICAL`).
-* **`ConfidenceScore`:** Probabilidad matemática de fallo (`record ConfidenceScore(BigDecimal value)`). Valida que $0.00 \le \text{value} \le 100.00$.
-* **`EngineTemperature`:** Temperatura del motor (`record EngineTemperature(double celsius)`). Contiene método de dominio `boolean isCriticalOverheating()` ($\text{celsius} > 105.0$).
-* **`EngineRpm`:** Revoluciones del motor (`record EngineRpm(int rpm)`). Contiene método `boolean isExcessiveRpm()` ($\text{rpm} > 6000$).
-* **`VehicleSpeed`:** Velocidad del auto (`record VehicleSpeed(int kmh)`).
-* **`BatteryVoltage`:** Tensión eléctrica (`record BatteryVoltage(double volts)`). Contiene método `boolean isLowBattery()` ($\text{volts} < 11.8$).
-* **`FuelLevel`:** Nivel de tanque (`record FuelLevel(double percentage)`).
-* **`AlertType`:** Tipos analíticos de alerta (`ENGINE_OVERHEATING_RISK`, `BATTERY_FAILURE_RISK`, `CATALYTIC_SYSTEM_DEGRADATION`, `CYLINDER_MISFIRE_HAZARD`).
-* **`AlertStatus`:** Estados de atención (`DISPATCHED`, `ACKNOWLEDGED`, `RESOLVED`, `DISMISSED`).
+* **`DtcCode`:** Objeto de valor para códigos de fallo estandarizados (`record DtcCode(String value)`). Valida el patrón `^[P|C|B|U][0-9]{4}$`.
+* **`ConfidenceScore`:** Probabilidad matemática de fallo inminente (`record ConfidenceScore(BigDecimal value)`). Valida que $0.00 \le \text{value} \le 100.00$.
+* **`EngineTemperature`:** Temperatura del motor en grados Celsius (`record EngineTemperature(double celsius)`). Contiene método de dominio `boolean isCriticalOverheating()` ($\text{celsius} > 105.0$).
+* **`EngineRpm`:** Revoluciones por minuto del cigüeñal (`record EngineRpm(int rpm)`). Contiene método `boolean isExcessiveRpm()` ($\text{rpm} > 6000$).
+* **`VehicleSpeed`:** Velocidad lineal instantánea del automóvil (`record VehicleSpeed(int kmh)`).
+* **`BatteryVoltage`:** Tensión eléctrica del alternador o batería (`record BatteryVoltage(double volts)`). Contiene método `boolean isLowBattery()` ($\text{volts} < 11.8$).
+* **`FuelLevel`:** Porcentaje de combustible remanente en el tanque (`record FuelLevel(double percentage)`).
+* **`GeoCoordinates`:** Coordenadas satelitales GPS de posicionamiento vehicular (`record GeoCoordinates(double latitude, double longitude)`).
+* **`TelemetryPids`:** Mapeo inmutable de identificadores de parámetros OBD-II estandarizados (PIDs) soportados por el firmware telemático.
+
+##### 4. DTOs de Dominio y Diagnóstico Predictivo con Inteligencia Artificial (`com.andeva.atelier.platform.iot.domain.model.dto` y `com.andeva.atelier.platform.iot.domain.model.dto.ai`)
+
+* **`TelemetryStatisticalSummary` (`model/dto`):** Agregación estadística diaria de métricas de telemetría extraídas de TimescaleDB mediante `time_bucket()`, incluyendo medias, desvíos estándar y cotas extremas de temperatura, tensión y velocidad para alimentar a Spring AI.
+* **`VehicleHealthReportAiDto` (`model/dto/ai`):** Estructura principal generada por Spring AI mediante `ChatClient` con `BeanOutputConverter`. Contiene el índice general de salud (0 a 100), el semáforo global de condición mecánica y el resumen ejecutivo de diagnóstico al inicio del informe.
+* **`SubsystemEvaluationDto` (`model/dto/ai`):** Evaluación desglosada por subsistema vehicular (Motor, Refrigeración, Sistema Eléctrico, Frenos, Transmisión), con estado cualitativo, puntuación y hallazgos técnicos.
+* **`PredictiveRiskDto` (`model/dto/ai`):** Modelado de riesgos mecánicos predictivos detectados, asociando categoría, probabilidad porcentual, horizonte temporal estimado hasta la falla crítica y consecuencias mecánicas asociadas.
+* **`RecommendedServiceActionDto` (`model/dto/ai`):** Paquetes de servicio de mantenimiento preventivo o correctivo recomendados, estrictamente anclados a los servicios reales del taller provistos por el catálogo de MRO a través de `OperationsAclPort`.
+* **`DtcTelemetryCorrelationDto` (`model/dto/ai`):** Correlación causal analítica entre códigos de avería electrónicos DTC y el comportamiento térmico/eléctrico registrado en los sensores de telemetría.
 
 ---
 
 #### 11.2.4. Domain Commands
 
-* **`RegisterObd2DeviceCommand`:** Alta de hardware (`TenantId tenantId, DeviceIdentifier identifier, ConnectionType type, String model, String firmware`).
-* **`InstallDeviceOnVehicleCommand`:** Conexión de escáner a auto (`DeviceId deviceId, VehicleId vehicleId, TenantId tenantId, int currentOdometerKm`).
-* **`UninstallDeviceFromVehicleCommand`:** Retiro del escáner (`InstallationId installationId, int finalOdometerKm`).
-* **`IngestTelemetryBatchCommand`:** Ráfaga masiva de lecturas (`VehicleId vehicleId, TenantId tenantId, List<TelemetryReadingDto> readings`).
-* **`RegisterVehicleFaultCommand`:** Asentamiento de código DTC (`VehicleId vehicleId, TenantId tenantId, DtcCode code`).
-* **`GeneratePredictiveAlertCommand`:** Formulación de alerta preventiva (`VehicleId vehicleId, TenantId tenantId, Optional<ServiceId> serviceId, AlertType type, ConfidenceScore score, String message`).
-* **`AcknowledgeAlertCommand`:** Notificación leída por usuario (`AlertId alertId`).
+* **`RegisterObd2DeviceCommand`:** Alta de hardware en el inventario del taller (`TenantId tenantId, DeviceIdentifier identifier, ConnectionType type, String model, String firmware`).
+* **`InstallDeviceOnVehicleCommand`:** Conexión y acople de escáner a vehículo (`DeviceId deviceId, VehicleId vehicleId, TenantId tenantId, int currentOdometerKm`).
+* **`UninstallDeviceFromVehicleCommand`:** Retiro del escáner y registro de odómetro final (`InstallationId installationId, int finalOdometerKm`).
+* **`IngestTelemetryBatchCommand`:** Ráfaga masiva de lecturas para persistencia temporal e inferencia analítica (`VehicleId vehicleId, TenantId tenantId, List<TelemetryReadingItemDto> readings`).
+* **`RegisterVehicleFaultCommand`:** Asentamiento de código DTC detectado por la ECU (`VehicleId vehicleId, TenantId tenantId, DtcCode code, FaultSeverity severity, String description`).
+* **`GeneratePredictiveAlertCommand`:** Formulación de alerta preventiva con índice de confianza (`VehicleId vehicleId, TenantId tenantId, Optional<ServiceId> serviceId, AlertType type, ConfidenceScore score, String message`).
+* **`AcknowledgePredictiveAlertCommand`:** Notificación leída y confirmada por usuario o asesor de taller (`AlertId alertId`).
+* **`GenerateVehicleHealthReportCommand`:** Disparo y orquestación del análisis pericial predictivo mediante Spring AI (`TenantId tenantId, VehicleId vehicleId, int daysToAnalyze, boolean includeResolvedDtcHistory`).
 
 ---
 
@@ -179,22 +455,25 @@ El **IoT Telemetry & Predictive Maintenance Context** constituye el núcleo de i
 
 * **`GetDeviceByIdQuery`:** Consulta de hardware por ID (`DeviceId deviceId`).
 * **`GetDeviceByVehicleIdQuery`:** Consulta el escáner instalado actualmente en un vehículo (`VehicleId vehicleId`).
-* **`GetVehicleLatestTelemetryQuery`:** Tacómetro y última lectura en tiempo real (`VehicleId vehicleId`).
+* **`GetVehicleLatestTelemetryQuery`:** Tacómetro e instrumental digital en tiempo real (`VehicleId vehicleId`).
 * **`GetTelemetryHistoryQuery`:** Consulta histórica agregada con TimescaleDB (`VehicleId vehicleId, Instant from, Instant to, String bucketInterval`).
-* **`ListActiveFaultsByVehicleQuery`:** Fallas DTC activas (`VehicleId vehicleId`).
-* **`ListPredictiveAlertsByTenantQuery`:** Tablero de alertas predictivas del taller (`TenantId tenantId, Optional<AlertStatus> status`).
+* **`GetLatestVehicleHealthReportQuery`:** Consulta consolidada del último informe pericial de salud mecánica calculado (`TenantId tenantId, VehicleId vehicleId`).
+* **`ExportVehicleHealthReportPdfQuery`:** Petición de renderizado pericial del informe en binario PDF institucional (`TenantId tenantId, VehicleId vehicleId, UUID reportId`).
 
 ---
 
 #### 11.2.6. Domain Events
 
-* **`Obd2DeviceRegisteredEvent`:** Emitido al dar de alta un equipo en el inventario (`DeviceId deviceId, TenantId tenantId, DeviceIdentifier identifier`).
-* **`DeviceInstalledOnVehicleEvent`:** Emitido al conectar un escáner al puerto OBD-II del vehículo (`InstallationId installationId, DeviceId deviceId, VehicleId vehicleId, Instant timestamp`).
-* **`DeviceUninstalledFromVehicleEvent`:** Emitido al desvincular el escáner (`InstallationId installationId, VehicleId vehicleId, Instant timestamp`).
-* **`TelemetryBatchIngestedEvent`:** Emitido tras persistir con éxito un lote masivo en TimescaleDB (`VehicleId vehicleId, int recordsCount, Instant latestTimestamp`).
-* **`CriticalEngineAnomalyDetectedEvent`:** Emitido por el motor de inferencia cuando los PIDs superan umbrales peligrosos (`VehicleId vehicleId, TenantId tenantId, AlertType type, ConfidenceScore score, String message`).
-* **`VehicleFaultDetectedEvent`:** Emitido al reportarse un código de avería DTC activo (`FaultId faultId, VehicleId vehicleId, DtcCode dtcCode, FaultSeverity severity`).
-* **`PredictiveAlertDispatchedEvent`:** Emitido al despacharse la notificación push por FCM (`AlertId alertId, VehicleId vehicleId, TenantId tenantId, String fcmMessageId`).
+* **`Obd2DeviceRegisteredEvent`:** Emitido al catalogar un nuevo hardware en el inventario del taller (`DeviceId deviceId, TenantId tenantId, DeviceIdentifier identifier, Instant occurredOn`).
+* **`Obd2DeviceLostEvent`:** Emitido al marcar un equipo como extraviado (`DeviceId deviceId, TenantId tenantId, Instant occurredOn`).
+* **`Obd2DeviceBrokenEvent`:** Emitido al marcar un equipo como averiado (`DeviceId deviceId, TenantId tenantId, Instant occurredOn`).
+* **`DeviceInstalledOnVehicleEvent`:** Emitido al conectar un escáner al puerto OBD-II iniciando monitoreo (`InstallationId installationId, DeviceId deviceId, VehicleId vehicleId, Instant timestamp`).
+* **`DeviceUninstalledFromVehicleEvent`:** Emitido al desvincular el escáner registrando odómetro de foso (`InstallationId installationId, VehicleId vehicleId, int finalOdometerKm, Instant timestamp`).
+* **`TelemetryBatchIngestedEvent`:** Emitido tras persistir con éxito un lote masivo en TimescaleDB (`VehicleId vehicleId, TenantId tenantId, int recordsCount, Instant latestTimestamp`).
+* **`CriticalEngineAnomalyDetectedEvent`:** Emitido por el motor de inferencia cuando los sensores superan umbrales térmicos o eléctricos peligrosos (`VehicleId vehicleId, TenantId tenantId, AlertType type, ConfidenceScore score, String message`).
+* **`VehicleFaultDetectedEvent`:** Emitido al reportarse un código de avería DTC activo en la ECU (`FaultId faultId, VehicleId vehicleId, TenantId tenantId, DtcCode dtcCode, FaultSeverity severity`).
+* **`PredictiveAlertDispatchedEvent`:** Emitido al despacharse la notificación push mediante Firebase Cloud Messaging (`AlertId alertId, VehicleId vehicleId, TenantId tenantId, String fcmMessageId, Instant dispatchedAt`).
+* **`PredictiveAlertAcknowledgedEvent`:** Emitido cuando el conductor o asesor de servicio confirma la lectura de la alerta (`AlertId alertId, VehicleId vehicleId, Instant acknowledgedAt`).
 
 ---
 
@@ -202,6 +481,19 @@ El **IoT Telemetry & Predictive Maintenance Context** constituye el núcleo de i
 
 ```java
 package com.andeva.atelier.platform.iot.domain.repositories;
+
+import com.andeva.atelier.platform.iot.domain.model.aggregates.*;
+import com.andeva.atelier.platform.iot.domain.model.entities.DtcCatalogEntry;
+import com.andeva.atelier.platform.iot.domain.model.enums.AlertStatus;
+import com.andeva.atelier.platform.iot.domain.model.ids.*;
+import com.andeva.atelier.platform.iot.domain.model.valueobjects.DeviceIdentifier;
+import com.andeva.atelier.platform.iot.domain.model.valueobjects.DtcCode;
+import com.andeva.atelier.platform.shared.domain.model.ids.TenantId;
+import com.andeva.atelier.platform.shared.domain.model.ids.VehicleId;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
 
 public interface Obd2DeviceRepository {
     Obd2Device save(Obd2Device device);
@@ -220,9 +512,6 @@ public interface DeviceInstallationRepository {
 }
 
 public interface TelemetryLogRepository {
-    /**
-     * Inserción masiva ultra rápida en la Hipertabla de TimescaleDB mediante JDBC Batch
-     */
     void saveAllBatch(List<TelemetryRecord> records);
     Optional<TelemetryRecord> findLatestByVehicleId(VehicleId vehicleId);
     List<TelemetryRecord> findHistoryAggregated(VehicleId vehicleId, Instant from, Instant to, String timeBucket);
@@ -241,6 +530,12 @@ public interface PredictiveAlertRepository {
     List<PredictiveAlert> findAllByVehicleId(VehicleId vehicleId);
     List<PredictiveAlert> findAllByTenantIdAndStatus(TenantId tenantId, AlertStatus status);
 }
+
+public interface DtcCatalogRepository {
+    Optional<DtcCatalogEntry> findByCode(DtcCode code);
+    List<DtcCatalogEntry> findAllByCategory(String systemCategory);
+    boolean existsByCode(DtcCode code);
+}
 ```
 
 ---
@@ -249,7 +544,7 @@ public interface PredictiveAlertRepository {
 
 ##### 1. `PredictiveAnomalyDetectionEngine` (Motor Analítico de Anomalías Predictivas)
 * **Paquete:** `com.andeva.atelier.platform.iot.domain.services`
-* **Propósito:** Evalúa en tiempo real las lecturas de telemetría vehicular recién arribadas para formular diagnósticos preventivos antes de que ocurra una avería catastrófica:
+* **Propósito:** Evalúa en tiempo real las lecturas de telemetría vehicular recién arribadas para formular diagnósticos preventivos deterministas antes de que ocurra una rotura catastrófica:
 ```java
 package com.andeva.atelier.platform.iot.domain.services;
 
@@ -276,7 +571,7 @@ public class PredictiveAnomalyDetectionEngine {
             ));
         }
 
-        // 2. Detección de Degradación Severa de Batería / Alternador
+        // 2. Detección de Degradación Severa de Batería o Alternador
         if (record.batteryVoltage().isPresent() && record.batteryVoltage().get().isLowBattery() && record.speed().kmh() == 0) {
             double voltage = record.batteryVoltage().get().volts();
             return Optional.of(new AnomalyEvaluationResult(
@@ -299,14 +594,18 @@ public record AnomalyEvaluationResult(
 
 ##### 2. `DtcCodeEvaluationService` (Servicio de Evaluación de Códigos de Falla)
 * **Paquete:** `com.andeva.atelier.platform.iot.domain.services`
-* **Propósito:** Mapea códigos DTC capturados por el escáner OBD-II contra la severidad reglamentaria:
+* **Propósito:** Mapea códigos DTC capturados por el escáner OBD-II contra la severidad reglamentaria SAE J2012 e ISO 15031-6:
   * Códigos de encendido de cilindros (`P0300` - `P0304`): Clasificados como `CRITICAL` (riesgo de daño irreversible al catalizador por combustible crudo).
   * Códigos de emisiones y sensores de oxígeno (`P0420`, `P0130`): Clasificados como `MEDIUM`.
-  * Códigos de accesorios menores: Clasificados como `LOW`.
+  * Códigos de accesorios menores y chasis: Clasificados como `LOW`.
+
+##### 3. `VehicleThermodynamicEvaluationService` (Servicio de Evaluación Termodinámica y Cinemática)
+* **Paquete:** `com.andeva.atelier.platform.iot.domain.services`
+* **Propósito:** Evalúa los gradientes térmicos y curvas cinemáticas del motor basándose en leyes físicas de combustión interna. Analiza la correlación dinámica entre el régimen de revoluciones (`EngineRpm`), la velocidad lineal (`VehicleSpeed`) y la inercia térmica del refrigerante (`EngineTemperature`) para identificar anomalías incipientes en el termostato, electroventilador o bomba de agua antes de que se produzca una sobretemperatura catastrófica.
 
 ---
 
-#### 11.2.9. Domain Exceptions (RFC 7807 Problem Details)
+#### 11.2.9. Domain Exceptions (Jerarquía RFC 7807)
 
 La capa de dominio define una jerarquía de excepciones semánticas no comprobadas derivadas de `IoTDomainException`. Cada excepción encapsula un código legible estandarizado bajo la norma RFC 7807 y su estatus HTTP representativo proyectado en el perímetro REST:
 
@@ -327,19 +626,24 @@ public abstract class IoTDomainException extends RuntimeException {
 }
 ```
 
-* **`DeviceAlreadyAssignedException`:** Código `ERR_DEVICE_ALREADY_ASSIGNED` (HTTP 409 Conflict). Lanzada cuando se intenta vincular un escáner OBD-II a un vehículo mientras ya mantiene una sesión de instalación activa en otra unidad sin concluir previamente.
 * **`ActiveInstallationConflictException`:** Código `ERR_ACTIVE_INSTALLATION_CONFLICT` (HTTP 409 Conflict). Lanzada si se intenta acoplar un escáner a un automóvil que ya cuenta con otro dispositivo físico transmitiendo en paralelo.
+* **`DeviceAlreadyInstalledException`:** Código `ERR_DEVICE_ALREADY_INSTALLED` (HTTP 409 Conflict). Lanzada cuando se intenta vincular un escáner OBD-II a un vehículo mientras ya mantiene una sesión de instalación activa en otra unidad sin concluir previamente.
 * **`DeviceNotFoundException`:** Código `ERR_DEVICE_NOT_FOUND` (HTTP 404 Not Found). Lanzada al buscar un escáner por su identificador UUID o hardware MAC/IMEI y no encontrar coincidencia en la base de datos del taller.
 * **`InstallationNotFoundException`:** Código `ERR_INSTALLATION_NOT_FOUND` (HTTP 404 Not Found). Lanzada cuando se intenta desinstalar o consultar una sesión de montaje telemático inexistente.
 * **`InvalidDeviceIdentifierException`:** Código `ERR_INVALID_DEVICE_IDENTIFIER` (HTTP 422 Unprocessable Entity). Lanzada si la dirección física no cumple el formato estricto de MAC Address (6 pares hexadecimales) ni de IMEI celular (15 dígitos numéricos).
 * **`InvalidDtcCodeException`:** Código `ERR_INVALID_DTC_CODE` (HTTP 422 Unprocessable Entity). Lanzada cuando la trama del código de avería transgrede el estándar SAE J2012 (prefijos válidos P, C, B, U seguidos de cuatro dígitos numéricos).
-* **`TelemetryIngestionException`:** Código `ERR_TELEMETRY_INGESTION_FAILED` (HTTP 422 Unprocessable Entity). Lanzada cuando las lecturas cinemáticas o térmicas contienen valores fuera del dominio físico plausible (ej. velocidad negativa, revoluciones superiores a 12000 RPM o temperatura de refrigerante anómala).
-* **`AlertNotFoundException`:** Código `ERR_ALERT_NOT_FOUND` (HTTP 404 Not Found). Lanzada al intentar confirmar lectura o resolver una advertencia de mantenimiento predictivo inexistente.
-* **`UnsupportedPidException`:** Código `ERR_UNSUPPORTED_PID` (HTTP 400 Bad Request). Lanzada si la trama OBD-II reporta identificadores de parámetros no admitidos por el decodificador de telemetría de Atelier.
+* **`IoTDomainException`:** Excepción base abstracta no comprobada de la que derivan todas las contingencias semánticas del contexto telemático.
+* **`PredictiveAlertNotFoundException`:** Código `ERR_PREDICTIVE_ALERT_NOT_FOUND` (HTTP 404 Not Found). Lanzada al intentar confirmar lectura o resolver una advertencia de mantenimiento predictivo inexistente.
+* **`TimescaleIngestionException`:** Código `ERR_TIMESCALE_INGESTION_FAILED` (HTTP 422 Unprocessable Entity). Lanzada cuando las lecturas cinemáticas o térmicas contienen valores fuera del dominio físico plausible o ante errores irrecuperables en la ingesta por lotes en TimescaleDB.
+* **`VehicleFaultNotFoundException`:** Código `ERR_VEHICLE_FAULT_NOT_FOUND` (HTTP 404 Not Found). Lanzada cuando se intenta consultar o dar por resuelta una avería DTC inexistente en el registro de la unidad.
 
 ---
 
 ### 11.3. 2.6.9.2. Interface Layer
+
+La Capa de Interfaz del Bounded Context **IoT Telemetry & Predictive Maintenance** (`com.andeva.atelier.platform.iot.interfaces`) gestiona la exposición perimetral del sistema. Provee endpoints REST para la ingesta de telemetría de alta frecuencia y administración de hardware, implementa el contrato de fachada Open Host Service (OHS) hacia contextos satélite y publica eventos de integración hacia el bus del sistema.
+
+---
 
 #### 11.3.1. REST Controllers & Ingestion Endpoints
 
@@ -347,32 +651,32 @@ public abstract class IoTDomainException extends RuntimeException {
 * **Ruta Base:** `/api/v1/iot/devices`
 * **Responsabilidad:** Inventario de escáneres OBD-II pertenecientes a los talleres.
 * **Endpoints:**
-  * `POST /`: Registra un nuevo escáner en el taller (`RegisterObd2DeviceCommand`). Responde `201 Created` con `Obd2DeviceResource`.
+  * `POST /`: Registra un nuevo escáner en el taller (`RegisterDeviceRequest`). Responde `201 Created` con `Obd2DeviceResponse`.
   * `GET /{id}`: Obtiene detalles de un hardware específico. Responde `200 OK`.
   * `GET /`: Lista todos los dispositivos del taller autenticado. Responde `200 OK`.
-  * `PATCH /{id}/status`: Actualiza la situación del hardware (`LOST`, `BROKEN`, `ACTIVE`). Responde `200 OK`.
+  * `PATCH /{id}/status`: Actualiza la situación del hardware (`UpdateDeviceStatusRequest`). Responde `200 OK`.
 
 ##### 2. `DeviceInstallationsController`
 * **Ruta Base:** `/api/v1/iot/installations`
 * **Responsabilidad:** Conexión y retiro físico de escáneres en vehículos.
 * **Endpoints:**
-  * `POST /install`: Vincula un escáner a un automóvil de cliente (`InstallDeviceOnVehicleCommand`). Responde `201 Created`.
-  * `POST /{id}/uninstall`: Registra la desconexión física y kilometraje final. Responde `200 OK`.
+  * `POST /install`: Vincula un escáner a un automóvil de cliente (`InstallDeviceRequest`). Responde `201 Created` con `DeviceInstallationResponse`.
+  * `POST /{id}/uninstall`: Registra la desconexión física y kilometraje final (`UninstallDeviceRequest`). Responde `200 OK`.
   * `GET /vehicle/{vehicleId}/active`: Consulta el escáner actualmente activo en el vehículo. Responde `200 OK`.
 
 ##### 3. `TelemetryIngestionController`
 * **Ruta Base:** `/api/v1/iot/telemetry`
 * **Responsabilidad:** Endpoint de ingestión por ráfagas de altísimo rendimiento consumido por las aplicaciones móviles (`Gateway BLE`) y módems SIM celulares.
 * **Endpoints:**
-  * `POST /batch`: Ingesta un lote de 1 a 100 lecturas temporales de telemetría de un vehículo (`IngestTelemetryBatchCommand`). Ejecuta persistencia JDBC en TimescaleDB y dispara el motor analítico de anomalías. Responde `202 Accepted` con `TelemetryIngestionAckResource`.
-  * `GET /vehicle/{vehicleId}/latest`: Retorna el tacómetro en tiempo real con la última lectura válida. Responde `200 OK`.
+  * `POST /batch`: Ingesta un lote de lecturas temporales de un vehículo (`TelemetryBatchRequest`). Ejecuta persistencia JDBC en TimescaleDB y dispara el motor analítico de anomalías. Responde `202 Accepted` con `TelemetryIngestionAckResponse`.
+  * `GET /vehicle/{vehicleId}/latest`: Retorna el tacómetro en tiempo real con la última lectura válida. Responde `200 OK` con `VehicleLatestTelemetryResponse`.
   * `GET /vehicle/{vehicleId}/history`: Consulta métricas históricas agrupadas por intervalos temporales (`time_bucket`). Responde `200 OK`.
 
 ##### 4. `VehicleFaultsController`
 * **Ruta Base:** `/api/v1/iot/faults`
 * **Responsabilidad:** Diagnóstico electrónico vehicular.
 * **Endpoints:**
-  * `POST /`: Asienta un código DTC reportado por el escáner. Responde `201 Created`.
+  * `POST /`: Asienta un código DTC reportado por el escáner (`RegisterVehicleFaultRequest`). Responde `201 Created` con `VehicleFaultResponse`.
   * `GET /vehicle/{vehicleId}/active`: Lista las averías electrónicas activas del vehículo. Responde `200 OK`.
   * `POST /{id}/resolve`: Marca la falla como subsanada tras reparación en foso. Responde `200 OK`.
 
@@ -380,38 +684,58 @@ public abstract class IoTDomainException extends RuntimeException {
 * **Ruta Base:** `/api/v1/iot/alerts`
 * **Responsabilidad:** Gestión de alertas predictivas y oportunidades de servicio preventivo.
 * **Endpoints:**
-  * `GET /tenant`: Tablero de control de alertas predictivas activas del taller. Responde `200 OK`.
+  * `GET /tenant`: Tablero de control de alertas predictivas activas del taller. Responde `200 OK` con lista de `PredictiveAlertResponse`.
   * `GET /vehicle/{vehicleId}`: Historial de alertas emitidas para un vehículo. Responde `200 OK`.
-  * `PATCH /{id}/acknowledge`: Marca la alerta como leída. Responde `200 OK`.
-  * `POST /{id}/convert-to-appointment`: Redirige al módulo de CRM/MRO para agendar cita preventiva a partir de la alerta. Responde `200 OK`.
+  * `PATCH /{id}/acknowledge`: Marca la alerta como leída (`AcknowledgeAlertRequest`). Responde `200 OK`.
+  * `POST /{id}/convert-to-appointment`: Redirige al módulo de CRM o MRO para agendar cita preventiva a partir de la alerta. Responde `200 OK`.
 
 ##### 6. `VehicleHealthReportsController`
 * **Ruta Base:** `/api/v1/iot/vehicles/{vehicleId}/health-reports`
 * **Responsabilidad:** Orquestación perimetral del motor de diagnóstico predictivo vehicular con Inteligencia Artificial (Spring AI), consolidación de reportes de salud mecánica y exportación documental en PDF.
 * **Endpoints:**
-  * `POST /generate`: Dispara la evaluación analítica sobre las series temporales de TimescaleDB y averías activas (`GenerateVehicleHealthReportCommand`), persiste alertas predictivas >= 70% y responde `201 Created` con cabecera `Location` y recurso `HealthReportSummaryResource`.
-  * `POST /generate-async`: Encola la generación del informe para flotas masivas o procesamiento en segundo plano (`EnqueueVehicleHealthReportAnalysisCommand`). Responde `202 Accepted`.
-  * `GET /latest`: Consulta en memoria/caché el último informe de salud mecánica calculado (`GetLatestVehicleHealthReportQuery`). Responde `200 OK` con `VehicleHealthReportResource`.
-  * `GET /{reportId}/pdf`: Renderiza y descarga el informe pericial en formato binario PDF mediante el adaptador de maquetación (`ExportVehicleHealthReportPdfQuery`). Responde `200 OK` con `Content-Type: application/pdf` y cabecera `Content-Disposition`.
+  * `POST /generate`: Dispara la evaluación analítica sobre series temporales de TimescaleDB y averías activas (`GenerateHealthReportRequest`), persiste alertas predictivas y responde `201 Created` con `HealthReportCreatedResponse`.
+  * `POST /generate-async`: Encola la generación del informe para flotas masivas o procesamiento en segundo plano. Responde `202 Accepted`.
+  * `GET /latest`: Consulta en memoria o caché el último informe de salud mecánica calculado. Responde `200 OK` con `HealthReportCreatedResponse`.
+  * `GET /{reportId}/pdf`: Renderiza y descarga el informe pericial en formato binario PDF mediante el adaptador de maquetación institucional. Responde `200 OK` con `Content-Type: application/pdf` y cabecera `Content-Disposition`.
 
 ---
 
 #### 11.3.2. REST Resources & DTOs (Records)
 
+##### 1. Recursos de Solicitud (`com.andeva.atelier.platform.iot.interfaces.rest.resources.requests`)
+
 ```java
-package com.andeva.atelier.platform.iot.interfaces.rest.resources;
+package com.andeva.atelier.platform.iot.interfaces.rest.resources.requests;
+
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
 
 public record RegisterDeviceRequest(
-    @NotBlank String deviceIdentifier, // MAC o IMEI
-    @NotBlank String connectionType,   // BLUETOOTH_BLE, SIM_CELLULAR, WIFI
+    @NotBlank String deviceIdentifier,
+    @NotBlank String connectionType,
     String hardwareModel,
     String firmwareVersion
+) {}
+
+public record UpdateDeviceStatusRequest(
+    @NotBlank String status
 ) {}
 
 public record InstallDeviceRequest(
     @NotNull UUID deviceId,
     @NotNull UUID vehicleId,
     @Min(0) int currentOdometerKm
+) {}
+
+public record UninstallDeviceRequest(
+    @Min(0) int finalOdometerKm,
+    Instant uninstalledAt
 ) {}
 
 public record TelemetryBatchRequest(
@@ -430,44 +754,15 @@ public record TelemetryReadingItemDto(
     Double batteryVoltage
 ) {}
 
-public record TelemetryIngestionAckResource(
-    UUID vehicleId,
-    int ingestedCount,
-    boolean anomalyDetected,
-    String alertMessage
+public record RegisterVehicleFaultRequest(
+    @NotNull UUID vehicleId,
+    @NotBlank String dtcCode,
+    @NotBlank String severity,
+    String description
 ) {}
 
-public record VehicleLatestTelemetryResource(
-    UUID vehicleId,
-    Instant timestamp,
-    Double latitude,
-    Double longitude,
-    int speedKmh,
-    double engineTempCelsius,
-    int engineRpm,
-    Double batteryVoltage,
-    Double fuelPercentage
-) {}
-
-public record VehicleFaultResource(
-    UUID id,
-    UUID vehicleId,
-    String dtcCode,
-    String severity,
-    String description,
-    Instant detectedAt,
-    boolean isResolved
-) {}
-
-public record PredictiveAlertResource(
-    UUID id,
-    UUID vehicleId,
-    UUID recommendedServiceId,
-    String alertType,
-    BigDecimal confidenceScore,
-    String message,
-    String status,
-    Instant createdAt
+public record AcknowledgeAlertRequest(
+    String acknowledgedBy
 ) {}
 
 public record GenerateHealthReportRequest(
@@ -483,6 +778,80 @@ public record GenerateHealthReportRequest(
         if (triggerReason == null) triggerReason = "MANUAL_REQUEST";
     }
 }
+```
+
+##### 2. Recursos de Respuesta (`com.andeva.atelier.platform.iot.interfaces.rest.resources.responses`)
+
+```java
+package com.andeva.atelier.platform.iot.interfaces.rest.resources.responses;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.UUID;
+
+public record Obd2DeviceResponse(
+    UUID id,
+    UUID tenantId,
+    String deviceIdentifier,
+    String connectionType,
+    String status,
+    String hardwareModel,
+    String firmwareVersion,
+    Instant createdAt
+) {}
+
+public record DeviceInstallationResponse(
+    UUID id,
+    UUID deviceId,
+    UUID vehicleId,
+    UUID tenantId,
+    Instant installedAt,
+    Instant uninstalledAt,
+    int initialOdometerKm,
+    Integer finalOdometerKm,
+    boolean isActive
+) {}
+
+public record TelemetryIngestionAckResponse(
+    UUID vehicleId,
+    int ingestedCount,
+    boolean anomalyDetected,
+    String alertMessage
+) {}
+
+public record VehicleLatestTelemetryResponse(
+    UUID vehicleId,
+    Instant timestamp,
+    Double latitude,
+    Double longitude,
+    int speedKmh,
+    double engineTempCelsius,
+    int engineRpm,
+    Double batteryVoltage,
+    Double fuelPercentage
+) {}
+
+public record VehicleFaultResponse(
+    UUID id,
+    UUID vehicleId,
+    String dtcCode,
+    String severity,
+    String description,
+    Instant detectedAt,
+    boolean isResolved,
+    Instant resolvedAt
+) {}
+
+public record PredictiveAlertResponse(
+    UUID id,
+    UUID vehicleId,
+    UUID recommendedServiceId,
+    String alertType,
+    BigDecimal confidenceScore,
+    String message,
+    String status,
+    Instant createdAt
+) {}
 
 public record HealthReportCreatedResponse(
     UUID reportId,
@@ -494,67 +863,55 @@ public record HealthReportCreatedResponse(
     String jsonResourceUrl,
     String pdfDownloadUrl
 ) {}
-
-public record VehicleHealthReportResource(
-    UUID reportId,
-    UUID vehicleId,
-    int overallHealthScore,
-    String executiveSummary,
-    List<SubsystemEvaluationDto> subsystemEvaluations,
-    List<PredictiveRiskDto> predictiveRisks,
-    List<RecommendedServiceActionDto> recommendedActions,
-    List<DtcTelemetryCorrelationDto> dtcCorrelations,
-    Instant generatedAt
-) {}
 ```
 
 ---
 
 #### 11.3.3. REST Assemblers (Mappers)
 
-* **`Obd2DeviceResourceAssembler`:** Transforma agregados `Obd2Device` a `Obd2DeviceResource`.
-* **`TelemetryResourceAssembler`:** Mapea lecturas de la Hipertabla de TimescaleDB a DTOs `VehicleLatestTelemetryResource`.
-* **`VehicleFaultResourceAssembler`:** Mapea `VehicleFault` a `VehicleFaultResource`.
-* **`PredictiveAlertResourceAssembler`:** Transforma agregados `PredictiveAlert` a `PredictiveAlertResource`.
-* **`VehicleHealthReportResourceAssembler`:** Transforma el DTO analítico `VehicleHealthReportAiDto` generado por Spring AI hacia `VehicleHealthReportResource` y `HealthReportCreatedResponse` con enlaces HATEOAS REST.
+Los ensambladores de recursos REST residen bajo el paquete `com.andeva.atelier.platform.iot.interfaces.rest.transform` y transforman los agregados y DTOs de dominio en recursos REST perimetrales con soporte de hipermedios HATEOAS:
+
+* **`Obd2DeviceResourceAssembler`:** Transforma agregados `Obd2Device` en recursos `Obd2DeviceResponse`.
+* **`DeviceInstallationResourceAssembler`:** Mapea el ciclo de vida de `DeviceInstallation` hacia `DeviceInstallationResponse`.
+* **`TelemetryResourceAssembler`:** Mapea lecturas de la Hipertabla de TimescaleDB a DTOs `VehicleLatestTelemetryResponse`.
+* **`VehicleFaultResourceAssembler`:** Mapea entidades `VehicleFault` a recursos `VehicleFaultResponse`.
+* **`PredictiveAlertResourceAssembler`:** Transforma agregados `PredictiveAlert` a recursos `PredictiveAlertResponse`.
+* **`VehicleHealthReportResourceAssembler`:** Transforma el DTO analítico `VehicleHealthReportAiDto` generado por Spring AI hacia `HealthReportCreatedResponse` con hipervínculos de descarga JSON y binario PDF.
 
 ---
 
 #### 11.3.4. Inbound ACL Facade (Open Host Service - OHS)
 
-Para que los módulos de CRM y Operaciones de Taller (MRO) consuman diagnósticos telemáticos sin acoplarse a las tramas OBD-II ni a TimescaleDB, IoT expone su fachada canónica:
+Para que los módulos colaboradores de CRM y Operaciones de Taller (MRO) consuman diagnósticos telemáticos sin acoplarse a las tramas OBD-II ni al motor de base de datos TimescaleDB, IoT expone su contrato público de fachada Open Host Service (OHS). Su implementación concreta `IoTTelemetryContextFacadeImpl` se aloja en la capa de aplicación (`application.acl`):
 
 ```java
 package com.andeva.atelier.platform.iot.interfaces.acl;
 
-import java.time.Instant;
+import com.andeva.atelier.platform.iot.interfaces.acl.dto.ActiveVehicleFaultsDto;
+import com.andeva.atelier.platform.iot.interfaces.acl.dto.VehicleLatestTelemetryDto;
+import com.andeva.atelier.platform.iot.interfaces.acl.dto.VehicleTelemetryHealthDto;
+import com.andeva.atelier.platform.shared.domain.model.ids.VehicleId;
+
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 public interface IoTTelemetryContextFacade {
-    /**
-     * Utilizado por CRM y MRO para desplegar el odómetro digital y última lectura en patio.
-     */
-    Optional<VehicleTelemetrySnapshotDto> getVehicleLatestTelemetry(UUID vehicleId);
-
-    /**
-     * Utilizado por MRO al abrir una Orden de Trabajo para precargar fallas electrónicas detectadas.
-     */
-    List<VehicleDtcFaultDto> getActiveFaultsForVehicle(UUID vehicleId);
-
-    /**
-     * Retorna si el vehículo cuenta con un escáner OBD-II conectado activamente.
-     */
-    boolean hasActiveDeviceInstallation(UUID vehicleId);
-
-    /**
-     * Calcula el índice de salud mecánica (0 a 100) basado en fallas activas y anomalías telemáticas.
-     */
-    int calculateVehicleHealthScore(UUID vehicleId);
+    Optional<VehicleLatestTelemetryDto> getVehicleLatestTelemetry(VehicleId vehicleId);
+    List<ActiveVehicleFaultsDto> getActiveFaultsForVehicle(VehicleId vehicleId);
+    boolean hasActiveDeviceInstallation(VehicleId vehicleId);
+    VehicleTelemetryHealthDto getVehicleTelemetryHealth(VehicleId vehicleId);
 }
+```
 
-public record VehicleTelemetrySnapshotDto(
+Los objetos de transferencia asociados residen bajo el subpaquete `com.andeva.atelier.platform.iot.interfaces.acl.dto`:
+
+```java
+package com.andeva.atelier.platform.iot.interfaces.acl.dto;
+
+import java.time.Instant;
+import java.util.UUID;
+
+public record VehicleLatestTelemetryDto(
     UUID vehicleId,
     Instant timestamp,
     int speedKmh,
@@ -563,11 +920,20 @@ public record VehicleTelemetrySnapshotDto(
     Double batteryVoltage
 ) {}
 
-public record VehicleDtcFaultDto(
+public record ActiveVehicleFaultsDto(
+    UUID faultId,
     String dtcCode,
     String severity,
     String description,
     Instant detectedAt
+) {}
+
+public record VehicleTelemetryHealthDto(
+    UUID vehicleId,
+    int overallHealthScore,
+    String healthStatusTrafficLight,
+    int activeFaultCount,
+    boolean hasPendingPredictiveAlerts
 ) {}
 ```
 
@@ -575,12 +941,15 @@ public record VehicleDtcFaultDto(
 
 #### 11.3.5. Integration Events (Published / Consumed)
 
-##### 1. Eventos Publicados por IoT hacia otros Bounded Contexts
-* **`VehicleAnomalyDetectedIntegrationEvent`:** Emitido al confirmarse una anomalía cinemática o térmica severa en el motor. Consumido por CRM & Customer Experience para contactar de inmediato al conductor y coordinar una inspección preventiva prioritaria.
-* **`PredictiveAlertGeneratedIntegrationEvent`:** Emitido al generarse una alerta con servicio sugerido de mantenimiento. Consumido por Workshop Operations (MRO) para preconfigurar presupuestos y cotizaciones de servicios correctivos antes de que el cliente ingrese al taller.
-* **`VehicleFaultLoggedIntegrationEvent`:** Emitido al detectar un nuevo código DTC persistente en la ECU vehicular. Consumido por Workshop Operations (MRO) para precargar los diagnósticos mecánicos preliminares al aperturar la orden de trabajo.
+##### 1. Eventos Publicados por IoT hacia otros Bounded Contexts (`com.andeva.atelier.platform.iot.interfaces.events`)
+
+* **`VehicleAnomalyDetectedIntegrationEvent`:** Emitido al confirmarse una anomalía cinemática o térmica severa en el motor. Consumido por CRM & Customer Experience para coordinar inspección prioritaria con el conductor.
+* **`PredictiveAlertGeneratedIntegrationEvent`:** Emitido al generarse una alerta con servicio sugerido de mantenimiento. Consumido por Workshop Operations (MRO) para preconfigurar presupuestos antes de que el cliente ingrese al taller.
+* **`VehicleFaultLoggedIntegrationEvent`:** Emitido al detectar un nuevo código DTC persistente en la ECU vehicular. Consumido por Workshop Operations (MRO) para precargar los diagnósticos mecánicos al aperturar la orden de trabajo.
+* **`VehicleHealthReportGeneratedIntegrationEvent`:** Emitido al culminar la inferencia pericial con Spring AI. Notifica a MRO y CRM sobre la disponibilidad de un nuevo informe de salud consolidado para la unidad.
 
 ##### 2. Eventos Consumidos por IoT desde otros Bounded Contexts
+
 * **`VehicleDecommissionedIntegrationEvent` (emitido por CRM):** Desactiva automáticamente cualquier instalación activa de escáner en el vehículo dado de baja definitiva en la flota o sistema.
 * **`VehicleOwnershipTransferredIntegrationEvent` (emitido por CRM):** Desvincula el escáner OBD-II actual y resetea las líneas base de telemetría predictiva ante la transferencia de titularidad vehicular.
 * **`WorkOrderCompletedIntegrationEvent` (emitido por MRO):** Sincroniza la resolución de fallas DTC asociadas tras la culminación de reparaciones mecánicas en foso.
@@ -589,163 +958,61 @@ public record VehicleDtcFaultDto(
 
 #### 11.3.6. Global Exception Handling (RFC 7807 Problem Details)
 
-La Capa de Interfaz implementa un controlador global de excepciones perimetrales mediante la clase `IoTExceptionHandler` anotada con `@RestControllerAdvice`. Este componente intercepta las excepciones de dominio emitidas por los agregados, entidades y servicios de dominio de IoT Telemetry & Predictive Maintenance, transformándolas en respuestas estandarizadas bajo la especificación **RFC 7807 Problem Details** (`application/problem+json`).
-
-```java
-package com.andeva.atelier.platform.iot.interfaces.rest.exceptions;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ProblemDetail;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.net.URI;
-import java.time.Instant;
-import java.util.stream.Collectors;
-
-@RestControllerAdvice(basePackages = "com.andeva.atelier.platform.iot.interfaces.rest")
-public class IoTExceptionHandler {
-
-    private static final String PROBLEM_BASE_URL = "https://api.atelier.andeva.com/errors/iot/";
-
-    @ExceptionHandler(DeviceNotFoundException.class)
-    public ProblemDetail handleDeviceNotFound(DeviceNotFoundException ex) {
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
-        problem.setType(URI.create(PROBLEM_BASE_URL + "device-not-found"));
-        problem.setTitle("Dispositivo OBD-II No Encontrado");
-        problem.setProperty("errorCode", "ERR_DEVICE_NOT_FOUND");
-        problem.setProperty("timestamp", Instant.now());
-        return problem;
-    }
-
-    @ExceptionHandler(InstallationNotFoundException.class)
-    public ProblemDetail handleInstallationNotFound(InstallationNotFoundException ex) {
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
-        problem.setType(URI.create(PROBLEM_BASE_URL + "installation-not-found"));
-        problem.setTitle("Instalación Telemática No Encontrada");
-        problem.setProperty("errorCode", "ERR_INSTALLATION_NOT_FOUND");
-        problem.setProperty("timestamp", Instant.now());
-        return problem;
-    }
-
-    @ExceptionHandler(AlertNotFoundException.class)
-    public ProblemDetail handleAlertNotFound(AlertNotFoundException ex) {
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
-        problem.setType(URI.create(PROBLEM_BASE_URL + "alert-not-found"));
-        problem.setTitle("Alerta Predictiva No Encontrada");
-        problem.setProperty("errorCode", "ERR_ALERT_NOT_FOUND");
-        problem.setProperty("timestamp", Instant.now());
-        return problem;
-    }
-
-    @ExceptionHandler(DeviceAlreadyAssignedException.class)
-    public ProblemDetail handleDeviceAlreadyAssigned(DeviceAlreadyAssignedException ex) {
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
-        problem.setType(URI.create(PROBLEM_BASE_URL + "device-already-assigned"));
-        problem.setTitle("Conflicto de Asignación de Dispositivo");
-        problem.setProperty("errorCode", "ERR_DEVICE_ALREADY_ASSIGNED");
-        problem.setProperty("timestamp", Instant.now());
-        return problem;
-    }
-
-    @ExceptionHandler(ActiveInstallationConflictException.class)
-    public ProblemDetail handleActiveInstallationConflict(ActiveInstallationConflictException ex) {
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
-        problem.setType(URI.create(PROBLEM_BASE_URL + "active-installation-conflict"));
-        problem.setTitle("Vehículo con Instalación Activa Existente");
-        problem.setProperty("errorCode", "ERR_ACTIVE_INSTALLATION_CONFLICT");
-        problem.setProperty("timestamp", Instant.now());
-        return problem;
-    }
-
-    @ExceptionHandler(InvalidDeviceIdentifierException.class)
-    public ProblemDetail handleInvalidDeviceIdentifier(InvalidDeviceIdentifierException ex) {
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
-        problem.setType(URI.create(PROBLEM_BASE_URL + "invalid-device-identifier"));
-        problem.setTitle("Identificador de Dispositivo Inválido");
-        problem.setProperty("errorCode", "ERR_INVALID_DEVICE_IDENTIFIER");
-        problem.setProperty("timestamp", Instant.now());
-        return problem;
-    }
-
-    @ExceptionHandler(InvalidDtcCodeException.class)
-    public ProblemDetail handleInvalidDtcCode(InvalidDtcCodeException ex) {
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
-        problem.setType(URI.create(PROBLEM_BASE_URL + "invalid-dtc-code"));
-        problem.setTitle("Código de Falla DTC Inválido");
-        problem.setProperty("errorCode", "ERR_INVALID_DTC_CODE");
-        problem.setProperty("timestamp", Instant.now());
-        return problem;
-    }
-
-    @ExceptionHandler(TelemetryIngestionException.class)
-    public ProblemDetail handleTelemetryIngestion(TelemetryIngestionException ex) {
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
-        problem.setType(URI.create(PROBLEM_BASE_URL + "telemetry-ingestion-failed"));
-        problem.setTitle("Error de Ingesta Telemática");
-        problem.setProperty("errorCode", "ERR_TELEMETRY_INGESTION_FAILED");
-        problem.setProperty("timestamp", Instant.now());
-        return problem;
-    }
-
-    @ExceptionHandler(UnsupportedPidException.class)
-    public ProblemDetail handleUnsupportedPid(UnsupportedPidException ex) {
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
-        problem.setType(URI.create(PROBLEM_BASE_URL + "unsupported-pid"));
-        problem.setTitle("Parámetro OBD-II PID No Soportado");
-        problem.setProperty("errorCode", "ERR_UNSUPPORTED_PID");
-        problem.setProperty("timestamp", Instant.now());
-        return problem;
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ProblemDetail handleValidationException(MethodArgumentNotValidException ex) {
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Parámetros de entrada inválidos");
-        problem.setType(URI.create(PROBLEM_BASE_URL + "validation-error"));
-        problem.setTitle("Violación de Reglas de Validación de Interfaz");
-        problem.setProperty("errorCode", "ERR_VALIDATION_FAILED");
-        problem.setProperty("timestamp", Instant.now());
-        problem.setProperty("fieldErrors", ex.getBindingResult().getFieldErrors().stream()
-            .map(f -> f.getField() + ": " + f.getDefaultMessage())
-            .collect(Collectors.toList()));
-        return problem;
-    }
-}
-```
+La Capa de Interfaz implementa un controlador global de excepciones perimetrales mediante la clase `IoTExceptionHandler` anotada con `@RestControllerAdvice`. Este componente intercepta las excepciones de dominio emitidas por los agregados, entidades y servicios de dominio de IoT Telemetry & Predictive Maintenance, convirtiéndolas en respuestas estandarizadas bajo la norma **RFC 7807 Problem Details** (`application/problem+json`).
 
 ---
 
 ### 11.4. 2.6.9.3. Application Layer
 
-La Capa de Aplicación del Bounded Context **IoT Telemetry & Predictive Maintenance** (`com.andeva.atelier.platform.iot.application`) implementa el patrón **CQRS** (*Command Query Responsibility Segregation*), desacoplando estrictamente las mutaciones transaccionales del estado del dominio de las consultas optimizadas de alto rendimiento sobre hipertablas de series temporales en TimescaleDB. Asimismo, orquesta la integración con sistemas externos (Firebase Cloud Messaging, Workshop Operations MRO y Customer & Fleet Management CRM) mediante Capas Anticorrupción (*Anticorruption Layers - ACL*).
+La Capa de Aplicación del Bounded Context **IoT Telemetry & Predictive Maintenance** (`com.andeva.atelier.platform.iot.application`) implementa el patrón **CQRS** (*Command Query Responsibility Segregation*), desacoplando estrictamente las mutaciones transaccionales del estado del dominio de las consultas optimizadas de alto rendimiento sobre hipertablas de series temporales en TimescaleDB. Asimismo, orquesta la integración con sistemas externos y contextos colaboradores mediante puertos de salida desacoplados y maneja eventos de dominio con el patrón Transactional Outbox.
 
-```
-com.andeva.atelier.platform.iot.application
-├── internal
-│   ├── commandservices
-│   │   ├── TelemetryIngestionCommandServiceImpl.java
+```text
+com.andeva.atelier.platform.iot.application/
+├── acl/
+│   └── IoTTelemetryContextFacadeImpl.java
+├── commandservices/
+│   ├── DeviceInstallationCommandService.java
+│   ├── Obd2DeviceCommandService.java
+│   ├── PredictiveAlertCommandService.java
+│   ├── TelemetryIngestionCommandService.java
+│   ├── VehicleFaultCommandService.java
+│   └── VehicleHealthReportCommandService.java
+├── internal/
+│   ├── commandservices/
 │   │   ├── DeviceInstallationCommandServiceImpl.java
-│   │   ├── PredictiveAlertCommandServiceImpl.java
 │   │   ├── Obd2DeviceCommandServiceImpl.java
-│   │   └── VehicleFaultCommandServiceImpl.java
-│   ├── queryservices
-│   │   ├── TelemetryLogQueryServiceImpl.java
-│   │   ├── VehicleFaultQueryServiceImpl.java
-│   │   ├── PredictiveAlertQueryServiceImpl.java
-│   │   ├── Obd2DeviceQueryServiceImpl.java
-│   │   └── DeviceInstallationQueryServiceImpl.java
-│   ├── eventhandlers
-│   │   ├── TelemetryDomainEventHandler.java
+│   │   ├── PredictiveAlertCommandServiceImpl.java
+│   │   ├── TelemetryIngestionCommandServiceImpl.java
+│   │   ├── VehicleFaultCommandServiceImpl.java
+│   │   └── VehicleHealthReportCommandServiceImpl.java
+│   ├── eventhandlers/
+│   │   ├── IoTTransactionalOutboxPublisher.java
 │   │   ├── PredictiveAlertDomainEventHandler.java
+│   │   ├── TelemetryDomainEventHandler.java
 │   │   ├── VehicleFaultDomainEventHandler.java
 │   │   └── VehicleLifecycleIntegrationEventHandler.java
-│   └── outboundservices
-│       └── acl
-│           ├── FcmNotificationAclService.java
-│           ├── OperationsAclService.java
-│           ├── CrmFleetAclService.java
-│           └── TimescaleBatchJdbcClientPort.java
+│   ├── outbound/
+│   │   └── acl/
+│   │       ├── AiInferenceDiagnosticPort.java
+│   │       ├── CrmFleetAclPort.java
+│   │       ├── FcmNotificationAclPort.java
+│   │       ├── OperationsAclPort.java
+│   │       ├── TimescaleBatchJdbcClientPort.java
+│   │       └── VehicleHealthReportPdfGeneratorPort.java
+│   └── queryservices/
+│       ├── DeviceInstallationQueryServiceImpl.java
+│       ├── Obd2DeviceQueryServiceImpl.java
+│       ├── PredictiveAlertQueryServiceImpl.java
+│       ├── TelemetryLogQueryServiceImpl.java
+│       ├── VehicleFaultQueryServiceImpl.java
+│       └── VehicleHealthReportQueryServiceImpl.java
+└── queryservices/
+    ├── DeviceInstallationQueryService.java
+    ├── Obd2DeviceQueryService.java
+    ├── PredictiveAlertQueryService.java
+    ├── TelemetryLogQueryService.java
+    ├── VehicleFaultQueryService.java
+    └── VehicleHealthReportQueryService.java
 ```
 
 ---
@@ -753,219 +1020,141 @@ com.andeva.atelier.platform.iot.application
 #### 11.4.1. Command Services (CQRS Write Side)
 
 ##### 1. `TelemetryIngestionCommandServiceImpl`
+* **Contrato Público:** `com.andeva.atelier.platform.iot.application.commandservices.TelemetryIngestionCommandService`
 * **Paquete:** `com.andeva.atelier.platform.iot.application.internal.commandservices`
 * **Anotaciones:** `@Service`, `@Transactional`
-* **Dependencias:** `DeviceInstallationRepository`, `TelemetryLogRepository`, `PredictiveAnomalyDetectionEngine`, `OperationsAclService`, `FcmNotificationAclService`, `PredictiveAlertRepository`, `DomainEventPublisher`.
+* **Dependencias:** `DeviceInstallationRepository`, `TelemetryLogRepository`, `PredictiveAnomalyDetectionEngine`, `OperationsAclPort`, `FcmNotificationAclPort`, `PredictiveAlertRepository`, `DomainEventPublisher`.
 * **Responsabilidad y Flujo Transaccional:**
   1. **Validación de Instalación:** Verifica que el vehículo especificado en el comando mantenga una sesión de instalación activa (`hasActiveDeviceInstallation`) mediante `DeviceInstallationRepository`. Si no existe sesión activa, rechaza el lote lanzando `InstallationNotFoundException`.
-  2. **Transformación de Registros:** Transforma la lista de lecturas de transferencia en agregados inmutables `TelemetryRecord`, validando rangos cinemáticos y térmicos plausibles.
+  2. **Conversión de Registros:** Convierte la lista de lecturas de transferencia en agregados inmutables `TelemetryRecord`, validando rangos cinemáticos y térmicos plausibles.
   3. **Persistencia Masiva en Bloque (*JDBC Batch Update*):** Delega en `TelemetryLogRepository` la inserción masiva en bloque sobre la Hipertabla `telemetry_logs` de TimescaleDB, garantizando latencias de persistencia inferiores a 25 milisegundos para lotes de hasta 100 lecturas.
   4. **Inferencia Analítica en Tiempo Real:** Extrae la lectura temporal más reciente del lote y la somete al análisis del motor matemático `PredictiveAnomalyDetectionEngine`.
   5. **Disparo Predictivo:** Si el motor infiere una anomalía de alta confianza:
-     - Consulta el catálogo de servicios de taller recomendados a través de `OperationsAclService`.
+     - Consulta el catálogo de servicios de taller recomendados a través de `OperationsAclPort`.
      - Construye y persiste el agregado `PredictiveAlert`.
-     - Despacha inmediatamente la notificación push crítica mediante `FcmNotificationAclService` hacia los teléfonos de los conductores y la consola del taller.
-     - Publica el evento de dominio `CriticalEngineAnomalyDetectedEvent`.
-
-```java
-package com.andeva.atelier.platform.iot.application.internal.commandservices;
-
-import com.andeva.atelier.platform.iot.domain.model.aggregates.PredictiveAlert;
-import com.andeva.atelier.platform.iot.domain.model.commands.IngestTelemetryBatchCommand;
-import com.andeva.atelier.platform.iot.domain.model.entities.TelemetryRecord;
-import com.andeva.atelier.platform.iot.domain.model.events.CriticalEngineAnomalyDetectedEvent;
-import com.andeva.atelier.platform.iot.domain.model.exceptions.InstallationNotFoundException;
-import com.andeva.atelier.platform.iot.domain.repositories.DeviceInstallationRepository;
-import com.andeva.atelier.platform.iot.domain.repositories.PredictiveAlertRepository;
-import com.andeva.atelier.platform.iot.domain.repositories.TelemetryLogRepository;
-import com.andeva.atelier.platform.iot.domain.services.PredictiveAnomalyDetectionEngine;
-import com.andeva.atelier.platform.iot.application.internal.outboundservices.acl.FcmNotificationAclService;
-import com.andeva.atelier.platform.iot.application.internal.outboundservices.acl.OperationsAclService;
-import com.andeva.atelier.platform.shared.domain.events.DomainEventPublisher;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-
-@Service
-@Transactional
-public class TelemetryIngestionCommandServiceImpl {
-
-    private final DeviceInstallationRepository installationRepository;
-    private final TelemetryLogRepository telemetryLogRepository;
-    private final PredictiveAnomalyDetectionEngine anomalyDetectionEngine;
-    private final OperationsAclService operationsAclService;
-    private final FcmNotificationAclService fcmNotificationAclService;
-    private final PredictiveAlertRepository alertRepository;
-    private final DomainEventPublisher eventPublisher;
-
-    public TelemetryIngestionCommandServiceImpl(
-            DeviceInstallationRepository installationRepository,
-            TelemetryLogRepository telemetryLogRepository,
-            PredictiveAnomalyDetectionEngine anomalyDetectionEngine,
-            OperationsAclService operationsAclService,
-            FcmNotificationAclService fcmNotificationAclService,
-            PredictiveAlertRepository alertRepository,
-            DomainEventPublisher eventPublisher) {
-        this.installationRepository = installationRepository;
-        this.telemetryLogRepository = telemetryLogRepository;
-        this.anomalyDetectionEngine = anomalyDetectionEngine;
-        this.operationsAclService = operationsAclService;
-        this.fcmNotificationAclService = fcmNotificationAclService;
-        this.alertRepository = alertRepository;
-        this.eventPublisher = eventPublisher;
-    }
-
-    public int handle(IngestTelemetryBatchCommand command) {
-        if (!installationRepository.hasActiveInstallationForVehicle(command.vehicleId())) {
-            throw new InstallationNotFoundException("No existe sesión de instalación activa para el vehículo: " + command.vehicleId());
-        }
-
-        List<TelemetryRecord> records = command.readings().stream()
-                .map(r -> TelemetryRecord.create(
-                        command.vehicleId(),
-                        r.timestamp(),
-                        r.speedKmh(),
-                        r.engineTempCelsius(),
-                        r.engineRpm(),
-                        r.fuelPercentage(),
-                        r.batteryVoltage(),
-                        r.latitude(),
-                        r.longitude()))
-                .toList();
-
-        telemetryLogRepository.saveAllBatch(records);
-
-        TelemetryRecord latest = records.get(records.size() - 1);
-        anomalyDetectionEngine.analyze(latest).ifPresent(anomaly -> {
-            var serviceRecommendation = operationsAclService.recommendServiceForAnomaly(anomaly.type());
-            PredictiveAlert alert = PredictiveAlert.create(
-                    command.vehicleId(),
-                    serviceRecommendation.serviceId(),
-                    anomaly.type().name(),
-                    anomaly.confidenceScore(),
-                    anomaly.diagnosticMessage());
-            alertRepository.save(alert);
-
-            fcmNotificationAclService.sendPredictiveAlertPush(
-                    command.vehicleId(),
-                    "Alerta Mecánica Preventiva",
-                    anomaly.diagnosticMessage(),
-                    alert.getId());
-
-            eventPublisher.publish(new CriticalEngineAnomalyDetectedEvent(
-                    command.vehicleId(),
-                    alert.getId(),
-                    anomaly.type().name(),
-                    anomaly.confidenceScore()));
-        });
-
-        return records.size();
-    }
-}
-```
+     - Despacha inmediatamente la notificación push crítica mediante `FcmNotificationAclPort` hacia los teléfonos de los conductores y la consola del asesor de servicio.
+  6. **Publicación Asíncrona:** Publica el evento de dominio `TelemetryBatchIngestedEvent`.
 
 ##### 2. `DeviceInstallationCommandServiceImpl`
+* **Contrato Público:** `com.andeva.atelier.platform.iot.application.commandservices.DeviceInstallationCommandService`
 * **Paquete:** `com.andeva.atelier.platform.iot.application.internal.commandservices`
 * **Anotaciones:** `@Service`, `@Transactional`
-* **Dependencias:** `DeviceInstallationRepository`, `Obd2DeviceRepository`, `DomainEventPublisher`.
-* **Operaciones:**
-  - `handle(InstallDeviceOnVehicleCommand command)`: Verifica que el escáner se encuentre en estado `AVAILABLE` y que el vehículo no tenga otra instalación activa. Instancia el agregado `DeviceInstallation`, actualiza el estado del escáner a `INSTALLED` y persiste la sesión.
-  - `handle(UninstallDeviceCommand command)`: Obtiene la instalación activa, valida que el kilometraje final sea consistente con el inicial, concluye la sesión con marca temporal y devuelve el escáner al inventario en estado `AVAILABLE`.
+* **Dependencias:** `DeviceInstallationRepository`, `Obd2DeviceRepository`, `CrmFleetAclPort`, `DomainEventPublisher`.
+* **Responsabilidad y Flujo:**
+  - `handle(InstallDeviceOnVehicleCommand command)`: Valida que el escáner exista y esté en estado `ACTIVE`, valida que no existan instalaciones simultáneas para el mismo hardware ni para el vehículo objetivo, instancia `DeviceInstallation` y publica `DeviceInstalledOnVehicleEvent`.
+  - `handle(UninstallDeviceFromVehicleCommand command)`: Recupera la instalación activa, registra el odómetro final de retiro y publica `DeviceUninstalledFromVehicleEvent`.
 
 ##### 3. `PredictiveAlertCommandServiceImpl`
+* **Contrato Público:** `com.andeva.atelier.platform.iot.application.commandservices.PredictiveAlertCommandService`
 * **Paquete:** `com.andeva.atelier.platform.iot.application.internal.commandservices`
 * **Anotaciones:** `@Service`, `@Transactional`
-* **Dependencias:** `PredictiveAlertRepository`, `OperationsAclService`, `DomainEventPublisher`.
+* **Dependencias:** `PredictiveAlertRepository`, `OperationsAclPort`, `DomainEventPublisher`.
 * **Operaciones:**
-  - `handle(AcknowledgePredictiveAlertCommand command)`: Transiciona el estado de la alerta a `ACKNOWLEDGED` registrando el técnico revisor.
-  - `handle(DismissPredictiveAlertCommand command)`: Exige motivo justificado de descarte y transiciona el estado a `DISMISSED`.
-  - `handle(ConvertAlertToAppointmentCommand command)`: Invoca a `OperationsAclService` para generar una pre-orden de trabajo y agendar una cita preventiva en MRO.
+  - `handle(GeneratePredictiveAlertCommand command)`: Registra y persiste la advertencia preventiva calculada.
+  - `handle(AcknowledgePredictiveAlertCommand command)`: Marca la alerta como reconocida por el conductor o personal de taller y emite `PredictiveAlertAcknowledgedEvent`.
+  - `handle(DismissPredictiveAlertCommand command)`: Descarta la alerta por razones operativas fundamentadas.
 
 ##### 4. `Obd2DeviceCommandServiceImpl`
+* **Contrato Público:** `com.andeva.atelier.platform.iot.application.commandservices.Obd2DeviceCommandService`
 * **Paquete:** `com.andeva.atelier.platform.iot.application.internal.commandservices`
 * **Anotaciones:** `@Service`, `@Transactional`
-* **Dependencias:** `Obd2DeviceRepository`.
+* **Dependencias:** `Obd2DeviceRepository`, `SubscriptionContextFacade`, `DomainEventPublisher`.
 * **Operaciones:**
-  - `handle(RegisterObd2DeviceCommand command)`: Da de alta un nuevo dispositivo telemático verificando la unicidad del identificador físico (MAC Address o IMEI).
-  - `handle(UpdateDeviceStatusCommand command)`: Actualiza la condición operativa del hardware (ej. `MAINTENANCE`, `LOST`).
+  - `handle(RegisterObd2DeviceCommand command)`:
+    1. Comprueba la cuota de dispositivos OBD-II activos mediante `SubscriptionContextFacade.validateObd2DeviceRegistrationAllowed(tenantId, currentActiveDevices)`: 0 en Go (telemetría deshabilitada), hasta 5 escáneres activos en Pro, hasta 15 escáneres activos en Max, y cuota elástica en Enterprise. Si se supera el límite contratado, deniega la inscripción arrojando `QuotaExceededException` (HTTP 403 Forbidden).
+    2. Valida la unicidad del identificador físico (MAC o IMEI) y da de alta el hardware emitiendo `Obd2DeviceRegisteredEvent`.
+  - `handle(UpdateDeviceStatusCommand command)`: Conmuta el estado operativo del dispositivo a `LOST`, `BROKEN` o `ACTIVE`.
 
 ##### 5. `VehicleFaultCommandServiceImpl`
+* **Contrato Público:** `com.andeva.atelier.platform.iot.application.commandservices.VehicleFaultCommandService`
 * **Paquete:** `com.andeva.atelier.platform.iot.application.internal.commandservices`
 * **Anotaciones:** `@Service`, `@Transactional`
-* **Dependencias:** `VehicleFaultRepository`, `DomainEventPublisher`.
+* **Dependencias:** `VehicleFaultRepository`, `DtcCatalogRepository`, `DtcCodeEvaluationService`, `DomainEventPublisher`.
 * **Operaciones:**
-  - `handle(RegisterVehicleFaultCommand command)`: Valida el código DTC según SAE J2012 y persiste la avería electrónica no resuelta.
-  - `handle(ResolveVehicleFaultCommand command)`: Asienta la resolución de la avería vinculando notas mecánicas y la orden de trabajo ejecutada.
+  - `handle(RegisterVehicleFaultCommand command)`: Evalúa el código DTC recibido mediante `DtcCodeEvaluationService` y el catálogo normativo, persiste el fallo activo en `VehicleFault` y emite `VehicleFaultDetectedEvent`.
+  - `handle(ResolveVehicleFaultCommand command)`: Registra la resolución mecánica de la avería vinculando notas de taller.
 
 ##### 6. `VehicleHealthReportCommandServiceImpl`
+* **Contrato Público:** `com.andeva.atelier.platform.iot.application.commandservices.VehicleHealthReportCommandService`
 * **Paquete:** `com.andeva.atelier.platform.iot.application.internal.commandservices`
 * **Anotaciones:** `@Service`, `@Transactional`
-* **Dependencias:** `VehicleHealthAiDiagnosticService`, `PredictiveAlertRepository`, `DomainEventPublisher`.
+* **Dependencias:** `SubscriptionContextFacade`, `AiInferenceDiagnosticPort`, `PredictiveAlertRepository`, `DomainEventPublisher`.
 * **Operaciones:**
-  - `handle(GenerateVehicleHealthReportCommand command)`: Coordina la extracción de características de telemetría e historial DTC, ejecuta la inferencia estructurada de salud mecánica mediante el servicio de IA, persiste las alertas predictivas de confianza >= 70% y publica el evento de integración `VehicleHealthReportGeneratedIntegrationEvent`.
-  - `handle(EnqueueVehicleHealthReportAnalysisCommand command)`: Encola una orden asíncrona de procesamiento analítico para flotas vehiculares o ejecuciones por lotes sin bloquear la interfaz.
+  - `handle(GenerateVehicleHealthReportCommand command)`:
+    1. Comprueba la cuota mensual de reportes asistidos por IA mediante `SubscriptionContextFacade.validateAiReportGenerationAllowed(tenantId, currentMonthlyReports)`: 0 en Go y Pro (en Pro solo se permite telemetría y DTC en pantalla interactiva), hasta 60 reportes PDF con IA al mes en Max, e ilimitado en Enterprise. Si se supera el cupo, deniega la generación con `QuotaExceededException` (HTTP 403 Forbidden RFC 7807).
+    2. Coordina la extracción de series temporales de 30 días en TimescaleDB y fallos activos, ejecuta la inferencia diagnóstica estructurada mediante `AiInferenceDiagnosticPort`, persiste las alertas resultantes y publica el evento de integración `VehicleHealthReportGeneratedIntegrationEvent`.
 
 ---
 
 #### 11.4.2. Query Services (CQRS Read Side)
 
 ##### 1. `TelemetryLogQueryServiceImpl`
+* **Contrato Público:** `com.andeva.atelier.platform.iot.application.queryservices.TelemetryLogQueryService`
 * **Paquete:** `com.andeva.atelier.platform.iot.application.internal.queryservices`
 * **Anotaciones:** `@Service`, `@Transactional(readOnly = true)`
 * **Responsabilidad:** Consultas optimizadas de telemetría:
-  - `getLatestTelemetry(UUID vehicleId)`: Consulta la última lectura en TimescaleDB para alimentar cuadros de tacómetro digital en tiempo real.
-  - `getAggregatedTelemetry(UUID vehicleId, Instant from, Instant to, Duration bucketInterval)`: Ejecuta la función nativa SQL `time_bucket()` de TimescaleDB retornando promedios y cotas máximas de velocidad, RPM y temperatura.
+  - `getLatestTelemetry(VehicleId vehicleId)`: Consulta la última lectura en TimescaleDB para alimentar cuadros de tacómetro digital en tiempo real.
+  - `getAggregatedTelemetry(VehicleId vehicleId, Instant from, Instant to, String bucketInterval)`: Ejecuta la función nativa SQL `time_bucket()` de TimescaleDB retornando promedios y cotas máximas de velocidad, RPM y temperatura.
 
 ##### 2. `VehicleFaultQueryServiceImpl`
+* **Contrato Público:** `com.andeva.atelier.platform.iot.application.queryservices.VehicleFaultQueryService`
 * **Paquete:** `com.andeva.atelier.platform.iot.application.internal.queryservices`
 * **Anotaciones:** `@Service`, `@Transactional(readOnly = true)`
 * **Responsabilidad:** Provee consultas de averías electrónicas vehiculares:
-  - `getActiveFaultsByVehicle(UUID vehicleId)`: Lista de códigos DTC activos no subsanados.
-  - `getFaultHistoryByVehicle(UUID vehicleId)`: Historial cronológico de fallas detectadas en la ECU.
+  - `getActiveFaultsByVehicle(VehicleId vehicleId)`: Lista de códigos DTC activos no subsanados.
+  - `getFaultHistoryByVehicle(VehicleId vehicleId)`: Historial cronológico de fallas detectadas en la ECU.
 
 ##### 3. `PredictiveAlertQueryServiceImpl`
+* **Contrato Público:** `com.andeva.atelier.platform.iot.application.queryservices.PredictiveAlertQueryService`
 * **Paquete:** `com.andeva.atelier.platform.iot.application.internal.queryservices`
 * **Anotaciones:** `@Service`, `@Transactional(readOnly = true)`
 * **Responsabilidad:** Consultas para tableros de control preventivo:
-  - `getActiveAlertsByTenant(UUID tenantId, AlertSeverity severity, AlertStatus status)`: Tablero de oportunidades de servicio del taller.
-  - `getAlertsByVehicle(UUID vehicleId)`: Historial de advertencias del automóvil.
+  - `getActiveAlertsByTenant(TenantId tenantId, AlertStatus status)`: Tablero de oportunidades de servicio del taller.
+  - `getAlertsByVehicle(VehicleId vehicleId)`: Historial de advertencias del automóvil.
 
 ##### 4. `Obd2DeviceQueryServiceImpl`
+* **Contrato Público:** `com.andeva.atelier.platform.iot.application.queryservices.Obd2DeviceQueryService`
 * **Paquete:** `com.andeva.atelier.platform.iot.application.internal.queryservices`
 * **Anotaciones:** `@Service`, `@Transactional(readOnly = true)`
-* **Responsabilidad:** Inventario de dispositivos con soporte de paginación (`Pageable`) y filtrado por taller.
+* **Responsabilidad:** Inventario de dispositivos con soporte de filtrado por taller y búsqueda por identificador.
 
 ##### 5. `DeviceInstallationQueryServiceImpl`
+* **Contrato Público:** `com.andeva.atelier.platform.iot.application.queryservices.DeviceInstallationQueryService`
 * **Paquete:** `com.andeva.atelier.platform.iot.application.internal.queryservices`
 * **Anotaciones:** `@Service`, `@Transactional(readOnly = true)`
 * **Responsabilidad:** Consultas de vinculación física activa e histórico de montajes.
 
 ##### 6. `VehicleHealthReportQueryServiceImpl`
+* **Contrato Público:** `com.andeva.atelier.platform.iot.application.queryservices.VehicleHealthReportQueryService`
 * **Paquete:** `com.andeva.atelier.platform.iot.application.internal.queryservices`
 * **Anotaciones:** `@Service`, `@Transactional(readOnly = true)`
 * **Responsabilidad:** Consultas especializadas de diagnóstico pericial y exportación documental:
   - `handle(GetLatestVehicleHealthReportQuery query)`: Retorna el modelo de lectura consolidado del último diagnóstico de salud mecánica para visualización en aplicaciones cliente.
-  - `handle(ExportVehicleHealthReportPdfQuery query)`: Invoca al puerto `VehicleHealthReportPdfGeneratorPort` para renderizar el informe analítico completo en binario PDF aplicando maquetación institucional con membrete, semáforos de salud y presupuesto preventivo sugerido.
+  - `handle(ExportVehicleHealthReportPdfQuery query)`: Invoca al puerto `VehicleHealthReportPdfGeneratorPort` para renderizar el informe pericial unificado completo en binario PDF aplicando maquetación institucional con membrete, semáforo de salud y recomendaciones del catálogo del taller.
 
 ---
 
 #### 11.4.3. Event Handlers (Domain & Integration)
 
-##### 1. `TelemetryDomainEventHandler`
+##### 1. `IoTTransactionalOutboxPublisher`
 * **Paquete:** `com.andeva.atelier.platform.iot.application.internal.eventhandlers`
 * **Anotaciones:** `@Component`
-* **Responsabilidad:** Escucha `CriticalEngineAnomalyDetectedEvent` tras confirmación transaccional (`@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)`). Invoca asíncronamente a `FcmNotificationAclService` para despachar notificaciones push a los dispositivos móviles del conductor (`Atelier Driver`) y al tablero de recepción de taller (`Atelier Workshop`).
+* **Responsabilidad:** Intercepta eventos de dominio del contexto telemático y persiste mensajes en la tabla de Outbox dentro de la misma transacción de negocio, garantizando entrega confiable hacia sistemas externos sin pérdidas ante fallos de conectividad.
 
-##### 2. `PredictiveAlertDomainEventHandler`
+##### 2. `TelemetryDomainEventHandler`
 * **Paquete:** `com.andeva.atelier.platform.iot.application.internal.eventhandlers`
-* **Responsabilidad:** Escucha `PredictiveAlertGeneratedEvent` y emite el evento de integración `PredictiveAlertGeneratedIntegrationEvent` hacia CRM & Customer Experience y Workshop Operations (MRO).
+* **Anotaciones:** `@Component`
+* **Responsabilidad:** Escucha `CriticalEngineAnomalyDetectedEvent` tras confirmación transaccional (`@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)`). Invoca asíncronamente a `FcmNotificationAclPort` para despachar notificaciones push a los dispositivos móviles del conductor (`Atelier Driver`) y al tablero de recepción de taller (`Atelier Workshop`).
 
-##### 3. `VehicleFaultDomainEventHandler`
+##### 3. `PredictiveAlertDomainEventHandler`
 * **Paquete:** `com.andeva.atelier.platform.iot.application.internal.eventhandlers`
-* **Responsabilidad:** Escucha `VehicleFaultLoggedEvent` y publica `VehicleFaultLoggedIntegrationEvent` para enriquecer la ficha técnica automotriz en los demás Bounded Contexts.
+* **Responsabilidad:** Escucha `PredictiveAlertDispatchedEvent` y emite el evento de integración `PredictiveAlertGeneratedIntegrationEvent` hacia CRM & Customer Experience y Workshop Operations (MRO).
 
-##### 4. `VehicleLifecycleIntegrationEventHandler`
+##### 4. `VehicleFaultDomainEventHandler`
+* **Paquete:** `com.andeva.atelier.platform.iot.application.internal.eventhandlers`
+* **Responsabilidad:** Escucha `VehicleFaultDetectedEvent` y publica `VehicleFaultLoggedIntegrationEvent` para enriquecer la ficha técnica automotriz en los demás Bounded Contexts.
+
+##### 5. `VehicleLifecycleIntegrationEventHandler`
 * **Paquete:** `com.andeva.atelier.platform.iot.application.internal.eventhandlers`
 * **Responsabilidad:** Suscriptor de eventos de integración emitidos por CRM y MRO:
   - `on(VehicleDecommissionedIntegrationEvent event)`: Desconecta automáticamente instalaciones activas en unidades dadas de baja definitiva.
@@ -974,63 +1163,152 @@ public class TelemetryIngestionCommandServiceImpl {
 
 ---
 
-#### 11.4.4. Outbound ACL Services & Remote Adapters
+#### 11.4.4. Outbound ACL Ports
 
-##### 1. `FcmNotificationAclService`
-* **Paquete:** `com.andeva.atelier.platform.iot.application.internal.outboundservices.acl`
-* **Propósito:** Capa Anticorrupción que aísla el SDK oficial de Firebase Admin (`com.google.firebase.messaging`), estructurando las notificaciones push de alta prioridad:
+Los puertos de salida residen bajo el paquete `com.andeva.atelier.platform.iot.application.internal.outbound.acl` y definen las interfaces desacopladas mediante las cuales la aplicación consume servicios de infraestructura externa:
 
 ```java
-package com.andeva.atelier.platform.iot.application.internal.outboundservices.acl;
+package com.andeva.atelier.platform.iot.application.internal.outbound.acl;
 
-import com.andeva.atelier.platform.iot.infrastructure.gateways.FirebaseCloudMessagingGateway;
-import org.springframework.stereotype.Service;
+import com.andeva.atelier.platform.iot.domain.model.aggregates.TelemetryRecord;
+import com.andeva.atelier.platform.iot.domain.model.dto.ai.VehicleHealthReportAiDto;
+import com.andeva.atelier.platform.shared.domain.model.ids.TenantId;
+import com.andeva.atelier.platform.shared.domain.model.ids.VehicleId;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-@Service
-public class FcmNotificationAclService {
-    private final FirebaseCloudMessagingGateway fcmGateway;
+public interface AiInferenceDiagnosticPort {
+    VehicleHealthReportAiDto generateVehicleDiagnostic(TenantId tenantId, VehicleId vehicleId, int daysToAnalyze, boolean includeResolvedDtcHistory);
+}
 
-    public FcmNotificationAclService(FirebaseCloudMessagingGateway fcmGateway) {
-        this.fcmGateway = fcmGateway;
-    }
+public interface CrmFleetAclPort {
+    String getDriverFcmDeviceToken(VehicleId vehicleId);
+    boolean isVehicleRegistered(VehicleId vehicleId);
+}
 
-    public String sendPredictiveAlertPush(UUID vehicleId, String title, String body, UUID alertId) {
-        Map<String, String> data = Map.of(
-                "alertId", alertId.toString(),
-                "vehicleId", vehicleId.toString(),
-                "type", "PREDICTIVE_MAINTENANCE_ALERT"
-        );
-        return fcmGateway.sendHighPriorityNotification(vehicleId, title, body, data);
-    }
+public interface FcmNotificationAclPort {
+    String sendHighPriorityNotification(VehicleId vehicleId, String title, String body, Map<String, String> data);
+}
+
+public interface OperationsAclPort {
+    List<WorkshopServiceCatalogItemDto> getAvailableWorkshopServices(TenantId tenantId);
+    record WorkshopServiceCatalogItemDto(UUID serviceId, String serviceCode, String name, String category) {}
+}
+
+public interface TimescaleBatchJdbcClientPort {
+    void executeBatchInsert(List<TelemetryRecord> records);
+}
+
+public interface VehicleHealthReportPdfGeneratorPort {
+    byte[] generateHealthReportPdf(VehicleHealthReportAiDto reportData, VehicleMetadataDto metadata);
+    record VehicleMetadataDto(String licensePlate, String vin, String brand, String model, int year, String ownerName) {}
 }
 ```
 
-##### 2. `OperationsAclService`
-* **Paquete:** `com.andeva.atelier.platform.iot.application.internal.outboundservices.acl`
-* **Propósito:** Capa Anticorrupción hacia *Workshop Operations (MRO)* para mapear anomalías detectadas hacia servicios de taller preconcebidos y consultar disponibilidad de citas de servicio.
+---
 
-##### 3. `CrmFleetAclService`
-* **Paquete:** `com.andeva.atelier.platform.iot.application.internal.outboundservices.acl`
-* **Propósito:** Capa Anticorrupción hacia *Customer and Fleet Management (CRM)* para consultar titulares, conductores autorizados y teléfonos para el despacho de alertas y validaciones de flota.
+#### 11.4.5. Implementación de la Fachada Open Host Service (`application.acl`)
 
-##### 4. `TimescaleBatchJdbcClientPort`
-* **Paquete:** `com.andeva.atelier.platform.iot.application.internal.outboundservices.acl`
-* **Propósito:** Puerto de persistencia masiva para inserción de series temporales por ráfagas de alta frecuencia en TimescaleDB.
+La implementación concreta del contrato de integración pública reside en la capa de aplicación, asegurando la adecuada orquestación de repositorios y servicios de dominio sin violar la dirección de dependencias de la arquitectura hexagonal:
 
-##### 5. `VehicleHealthReportPdfGeneratorPort`
-* **Paquete:** `com.andeva.atelier.platform.iot.application.internal.outboundservices.acl`
-* **Propósito:** Puerto de salida de infraestructura para la renderización tipográfica del informe pericial de diagnóstico y salud mecánica vehicular en formato binario PDF.
+```java
+package com.andeva.atelier.platform.iot.application.acl;
+
+import com.andeva.atelier.platform.iot.domain.model.aggregates.TelemetryRecord;
+import com.andeva.atelier.platform.iot.domain.model.aggregates.VehicleFault;
+import com.andeva.atelier.platform.iot.domain.repositories.DeviceInstallationRepository;
+import com.andeva.atelier.platform.iot.domain.repositories.TelemetryLogRepository;
+import com.andeva.atelier.platform.iot.domain.repositories.VehicleFaultRepository;
+import com.andeva.atelier.platform.iot.interfaces.acl.IoTTelemetryContextFacade;
+import com.andeva.atelier.platform.iot.interfaces.acl.dto.ActiveVehicleFaultsDto;
+import com.andeva.atelier.platform.iot.interfaces.acl.dto.VehicleLatestTelemetryDto;
+import com.andeva.atelier.platform.iot.interfaces.acl.dto.VehicleTelemetryHealthDto;
+import com.andeva.atelier.platform.shared.domain.model.ids.VehicleId;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+@Transactional(readOnly = true)
+public class IoTTelemetryContextFacadeImpl implements IoTTelemetryContextFacade {
+
+    private final TelemetryLogRepository telemetryLogRepository;
+    private final VehicleFaultRepository vehicleFaultRepository;
+    private final DeviceInstallationRepository deviceInstallationRepository;
+
+    public IoTTelemetryContextFacadeImpl(
+            TelemetryLogRepository telemetryLogRepository,
+            VehicleFaultRepository vehicleFaultRepository,
+            DeviceInstallationRepository deviceInstallationRepository) {
+        this.telemetryLogRepository = telemetryLogRepository;
+        this.vehicleFaultRepository = vehicleFaultRepository;
+        this.deviceInstallationRepository = deviceInstallationRepository;
+    }
+
+    @Override
+    public Optional<VehicleLatestTelemetryDto> getVehicleLatestTelemetry(VehicleId vehicleId) {
+        return telemetryLogRepository.findLatestByVehicleId(vehicleId)
+                .map(r -> new VehicleLatestTelemetryDto(
+                        r.vehicleId().value(),
+                        r.timestamp(),
+                        r.speed().kmh(),
+                        r.engineTemperature().celsius(),
+                        r.engineRpm().rpm(),
+                        r.batteryVoltage().map(b -> b.volts()).orElse(null)
+                ));
+    }
+
+    @Override
+    public List<ActiveVehicleFaultsDto> getActiveFaultsForVehicle(VehicleId vehicleId) {
+        return vehicleFaultRepository.findActiveByVehicleId(vehicleId).stream()
+                .map(f -> new ActiveVehicleFaultsDto(
+                        f.getId().value(),
+                        f.getDtcCode().value(),
+                        f.getSeverity().name(),
+                        f.getDescription(),
+                        f.getDetectedAt()
+                ))
+                .toList();
+    }
+
+    @Override
+    public boolean hasActiveDeviceInstallation(VehicleId vehicleId) {
+        return deviceInstallationRepository.findActiveByVehicleId(vehicleId).isPresent();
+    }
+
+    @Override
+    public VehicleTelemetryHealthDto getVehicleTelemetryHealth(VehicleId vehicleId) {
+        List<VehicleFault> activeFaults = vehicleFaultRepository.findActiveByVehicleId(vehicleId);
+        int faultCount = activeFaults.size();
+        int score = Math.max(0, 100 - (faultCount * 20));
+        String trafficLight = score >= 80 ? "GREEN" : score >= 50 ? "YELLOW" : "RED";
+        return new VehicleTelemetryHealthDto(
+                vehicleId.value(),
+                score,
+                trafficLight,
+                faultCount,
+                faultCount > 0
+        );
+    }
+}
+```
 
 ---
 
 ### 11.5. 2.6.9.4. Infrastructure Layer
 
-#### 11.5.1. JPA Entities & TimescaleDB Hypertables
+La Capa de Infraestructura del Bounded Context **IoT Telemetry & Predictive Maintenance** (`com.andeva.atelier.platform.iot.infrastructure`) materializa la persistencia física dual (PostgreSQL 16 para datos relacionales y TimescaleDB para series temporales de alta velocidad), implementa los adaptadores de repositorios y conecta con servicios perimetrales como Firebase Cloud Messaging, modelos fundacionales de IA mediante Spring AI y renderizadores periciales en PDF.
 
-##### 1. `Obd2DeviceJpaEntity`
+---
+
+#### 11.5.1. Persistence Entities (JPA & TimescaleDB)
+
+##### 1. `Obd2DevicePersistenceEntity`
+* **Paquete:** `com.andeva.atelier.platform.iot.infrastructure.persistence.jpa.entities`
 * **Tabla Relacional:** `obd2_devices`
 * **Mapeo:**
 ```java
@@ -1044,7 +1322,7 @@ import java.util.UUID;
 @Table(name = "obd2_devices", uniqueConstraints = {
     @UniqueConstraint(name = "uk_obd2_devices_identifier", columnNames = {"device_identifier"})
 })
-public class Obd2DeviceJpaEntity extends AuditableAbstractPersistenceEntity {
+public class Obd2DevicePersistenceEntity extends AuditableAbstractPersistenceEntity {
     @Id
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
@@ -1067,11 +1345,12 @@ public class Obd2DeviceJpaEntity extends AuditableAbstractPersistenceEntity {
     @Column(name = "firmware_version", length = 50)
     private String firmwareVersion;
 
-    // Getters y Setters JPA
+    // Métodos accesores y mutadores JPA
 }
 ```
 
-##### 2. `DeviceInstallationJpaEntity`
+##### 2. `DeviceInstallationPersistenceEntity`
+* **Paquete:** `com.andeva.atelier.platform.iot.infrastructure.persistence.jpa.entities`
 * **Tabla Relacional:** `device_installations`
 * **Mapeo:**
 ```java
@@ -1087,7 +1366,7 @@ import java.util.UUID;
     @Index(name = "idx_installations_vehicle", columnList = "vehicle_id"),
     @Index(name = "idx_installations_device", columnList = "device_id")
 })
-public class DeviceInstallationJpaEntity extends AuditableAbstractPersistenceEntity {
+public class DeviceInstallationPersistenceEntity extends AuditableAbstractPersistenceEntity {
     @Id
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
@@ -1113,91 +1392,91 @@ public class DeviceInstallationJpaEntity extends AuditableAbstractPersistenceEnt
     @Column(name = "final_odometer_km")
     private Integer finalOdometerKm;
 
-    // Getters y Setters JPA
+    // Métodos accesores y mutadores JPA
 }
 ```
 
-##### 3. `TelemetryLogJpaEntity` (Mapeo de Hipertabla TimescaleDB)
+##### 3. `TelemetryLogPersistenceEntity` (Mapeo de Hipertabla TimescaleDB)
+* **Paquete:** `com.andeva.atelier.platform.iot.infrastructure.persistence.timescale.entities`
 * **Tabla Relacional:** `telemetry_logs` (Convertida a Hypertable mediante DDL en TimescaleDB)
 * **Mapeo con Clave Primaria Compuesta:**
 ```java
-package com.andeva.atelier.platform.iot.infrastructure.persistence.jpa.entities;
+package com.andeva.atelier.platform.iot.infrastructure.persistence.timescale.entities;
 
 import jakarta.persistence.*;
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
 
 @Entity
-@Table(name = "telemetry_logs", indexes = {
-    @Index(name = "idx_telemetry_tenant_time", columnList = "tenant_id, timestamp DESC")
-})
-@IdClass(TelemetryLogId.class)
-public class TelemetryLogJpaEntity {
-    @Id
-    @Column(name = "timestamp", nullable = false)
-    private Instant timestamp;
+@Table(name = "telemetry_logs")
+public class TelemetryLogPersistenceEntity {
 
-    @Id
-    @Column(name = "vehicle_id", nullable = false)
-    private UUID vehicleId;
+    @EmbeddedId
+    private TelemetryRecordId id;
 
     @Column(name = "tenant_id", nullable = false)
     private UUID tenantId;
 
-    @Column(name = "latitude", precision = 10, scale = 8)
-    private BigDecimal latitude;
+    @Column(name = "latitude")
+    private Double latitude;
 
-    @Column(name = "longitude", precision = 11, scale = 8)
-    private BigDecimal longitude;
+    @Column(name = "longitude")
+    private Double longitude;
 
     @Column(name = "speed", nullable = false)
     private int speed;
 
-    @Column(name = "engine_temp_c", nullable = false, precision = 5, scale = 2)
-    private BigDecimal engineTemperatureCelsius;
+    @Column(name = "engine_temp_c", nullable = false)
+    private double engineTempC;
 
-    @Column(name = "rpm", nullable = false)
-    private int rpm;
+    @Column(name = "engine_rpm", nullable = false)
+    private int engineRpm;
 
-    @Column(name = "fuel_level", precision = 5, scale = 2)
-    private BigDecimal fuelLevel;
+    @Column(name = "fuel_level_pct")
+    private Double fuelLevelPct;
 
-    @Column(name = "battery_voltage", precision = 4, scale = 2)
-    private BigDecimal batteryVoltage;
+    @Column(name = "battery_voltage")
+    private Double batteryVoltage;
 
-    // Getters y Setters
-}
+    @Embeddable
+    public static class TelemetryRecordId implements Serializable {
+        @Column(name = "timestamp", nullable = false)
+        private Instant timestamp;
 
-public class TelemetryLogId implements Serializable {
-    private Instant timestamp;
-    private UUID vehicleId;
+        @Column(name = "vehicle_id", nullable = false)
+        private UUID vehicleId;
 
-    public TelemetryLogId() {}
+        public TelemetryRecordId() {}
 
-    public TelemetryLogId(Instant timestamp, UUID vehicleId) {
-        this.timestamp = timestamp;
-        this.vehicleId = vehicleId;
+        public TelemetryRecordId(Instant timestamp, UUID vehicleId) {
+            this.timestamp = timestamp;
+            this.vehicleId = vehicleId;
+        }
+
+        public Instant getTimestamp() { return timestamp; }
+        public UUID getVehicleId() { return vehicleId; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof TelemetryRecordId that)) return false;
+            return Objects.equals(timestamp, that.timestamp) && Objects.equals(vehicleId, that.vehicleId);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(timestamp, vehicleId);
+        }
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        TelemetryLogId that = (TelemetryLogId) o;
-        return Objects.equals(timestamp, that.timestamp) && Objects.equals(vehicleId, that.vehicleId);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(timestamp, vehicleId);
-    }
+    // Métodos accesores y mutadores JPA
 }
 ```
 
-##### 4. `VehicleFaultJpaEntity`
+##### 4. `VehicleFaultPersistenceEntity`
+* **Paquete:** `com.andeva.atelier.platform.iot.infrastructure.persistence.jpa.entities`
 * **Tabla Relacional:** `vehicle_faults`
 * **Mapeo:**
 ```java
@@ -1210,18 +1489,19 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "vehicle_faults", indexes = {
-    @Index(name = "idx_faults_vehicle", columnList = "vehicle_id, is_resolved")
+    @Index(name = "idx_faults_vehicle_dtc", columnList = "vehicle_id, dtc_code"),
+    @Index(name = "idx_faults_detected_at", columnList = "detected_at")
 })
-public class VehicleFaultJpaEntity extends AuditableAbstractPersistenceEntity {
+public class VehicleFaultPersistenceEntity extends AuditableAbstractPersistenceEntity {
     @Id
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
-    @Column(name = "tenant_id", nullable = false, updatable = false)
-    private UUID tenantId;
-
     @Column(name = "vehicle_id", nullable = false)
     private UUID vehicleId;
+
+    @Column(name = "tenant_id", nullable = false)
+    private UUID tenantId;
 
     @Column(name = "dtc_code", nullable = false, length = 10)
     private String dtcCode;
@@ -1236,16 +1516,17 @@ public class VehicleFaultJpaEntity extends AuditableAbstractPersistenceEntity {
     private Instant detectedAt;
 
     @Column(name = "is_resolved", nullable = false)
-    private boolean isResolved = false;
+    private boolean isResolved;
 
     @Column(name = "resolved_at")
     private Instant resolvedAt;
 
-    // Getters y Setters JPA
+    // Métodos accesores y mutadores JPA
 }
 ```
 
-##### 5. `PredictiveAlertJpaEntity`
+##### 5. `PredictiveAlertPersistenceEntity`
+* **Paquete:** `com.andeva.atelier.platform.iot.infrastructure.persistence.jpa.entities`
 * **Tabla Relacional:** `predictive_alerts`
 * **Mapeo:**
 ```java
@@ -1254,23 +1535,24 @@ package com.andeva.atelier.platform.iot.infrastructure.persistence.jpa.entities;
 import com.andeva.atelier.platform.shared.infrastructure.persistence.jpa.entities.AuditableAbstractPersistenceEntity;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity
 @Table(name = "predictive_alerts", indexes = {
     @Index(name = "idx_alerts_vehicle", columnList = "vehicle_id"),
-    @Index(name = "idx_alerts_tenant_status", columnList = "tenant_id, status")
+    @Index(name = "idx_alerts_status", columnList = "status")
 })
-public class PredictiveAlertJpaEntity extends AuditableAbstractPersistenceEntity {
+public class PredictiveAlertPersistenceEntity extends AuditableAbstractPersistenceEntity {
     @Id
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
-    @Column(name = "tenant_id", nullable = false, updatable = false)
-    private UUID tenantId;
-
     @Column(name = "vehicle_id", nullable = false)
     private UUID vehicleId;
+
+    @Column(name = "tenant_id", nullable = false)
+    private UUID tenantId;
 
     @Column(name = "recommended_service_id")
     private UUID recommendedServiceId;
@@ -1281,7 +1563,7 @@ public class PredictiveAlertJpaEntity extends AuditableAbstractPersistenceEntity
     @Column(name = "confidence_score", nullable = false, precision = 5, scale = 2)
     private BigDecimal confidenceScore;
 
-    @Column(name = "message", nullable = false, length = 255)
+    @Column(name = "message", nullable = false, length = 500)
     private String message;
 
     @Column(name = "status", nullable = false, length = 20)
@@ -1290,11 +1572,15 @@ public class PredictiveAlertJpaEntity extends AuditableAbstractPersistenceEntity
     @Column(name = "fcm_message_id", length = 100)
     private String fcmMessageId;
 
-    // Getters y Setters JPA
+    @Column(name = "created_at", nullable = false)
+    private Instant createdAt;
+
+    // Métodos accesores y mutadores JPA
 }
 ```
 
-##### 6. `DtcCatalogEntryJpaEntity`
+##### 6. `DtcCatalogEntryPersistenceEntity`
+* **Paquete:** `com.andeva.atelier.platform.iot.infrastructure.persistence.jpa.entities`
 * **Tabla Relacional:** `dtc_catalog`
 * **Mapeo:**
 ```java
@@ -1308,7 +1594,7 @@ import java.util.UUID;
 @Table(name = "dtc_catalog", uniqueConstraints = {
     @UniqueConstraint(name = "uk_dtc_catalog_code", columnNames = {"dtc_code"})
 })
-public class DtcCatalogEntryJpaEntity extends AuditableAbstractPersistenceEntity {
+public class DtcCatalogEntryPersistenceEntity extends AuditableAbstractPersistenceEntity {
     @Id
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
@@ -1319,25 +1605,21 @@ public class DtcCatalogEntryJpaEntity extends AuditableAbstractPersistenceEntity
     @Column(name = "system_category", nullable = false, length = 50)
     private String systemCategory;
 
-    @Column(name = "description_es", nullable = false, length = 255)
-    private String descriptionEs;
-
-    @Column(name = "description_en", length = 255)
-    private String descriptionEn;
+    @Column(name = "standard_description", nullable = false, length = 500)
+    private String standardDescription;
 
     @Column(name = "default_severity", nullable = false, length = 20)
     private String defaultSeverity;
 
-    @Column(name = "is_critical", nullable = false)
-    private boolean isCritical = false;
-
-    // Getters y Setters JPA
+    // Métodos accesores y mutadores JPA
 }
 ```
 
 ---
 
-#### 11.5.2. Spring Data JPA Repositories
+#### 11.5.2. Spring Data Repositories
+
+##### 1. Repositorios Relacionales Spring Data JPA (`infrastructure.persistence.jpa.repositories`)
 
 ```java
 package com.andeva.atelier.platform.iot.infrastructure.persistence.jpa.repositories;
@@ -1348,32 +1630,77 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface SpringDataObd2DeviceRepository extends JpaRepository<Obd2DeviceJpaEntity, UUID> {
-    Optional<Obd2DeviceJpaEntity> findByDeviceIdentifier(String deviceIdentifier);
-    List<Obd2DeviceJpaEntity> findAllByTenantId(UUID tenantId);
+public interface Obd2DevicePersistenceRepository extends JpaRepository<Obd2DevicePersistenceEntity, UUID> {
+    Optional<Obd2DevicePersistenceEntity> findByDeviceIdentifier(String deviceIdentifier);
+    List<Obd2DevicePersistenceEntity> findAllByTenantId(UUID tenantId);
     boolean existsByDeviceIdentifier(String deviceIdentifier);
 }
 
-public interface SpringDataDeviceInstallationRepository extends JpaRepository<DeviceInstallationJpaEntity, UUID> {
-    Optional<DeviceInstallationJpaEntity> findByVehicleIdAndUninstalledAtIsNull(UUID vehicleId);
-    Optional<DeviceInstallationJpaEntity> findByDeviceIdAndUninstalledAtIsNull(UUID deviceId);
-    List<DeviceInstallationJpaEntity> findAllByVehicleIdOrderByInstalledAtDesc(UUID vehicleId);
+public interface DeviceInstallationPersistenceRepository extends JpaRepository<DeviceInstallationPersistenceEntity, UUID> {
+    Optional<DeviceInstallationPersistenceEntity> findByVehicleIdAndUninstalledAtIsNull(UUID vehicleId);
+    Optional<DeviceInstallationPersistenceEntity> findByDeviceIdAndUninstalledAtIsNull(UUID deviceId);
+    List<DeviceInstallationPersistenceEntity> findAllByVehicleIdOrderByInstalledAtDesc(UUID vehicleId);
 }
 
-public interface SpringDataVehicleFaultRepository extends JpaRepository<VehicleFaultJpaEntity, UUID> {
-    List<VehicleFaultJpaEntity> findAllByVehicleIdAndIsResolvedFalse(UUID vehicleId);
-    List<VehicleFaultJpaEntity> findAllByVehicleIdOrderByDetectedAtDesc(UUID vehicleId);
+public interface VehicleFaultPersistenceRepository extends JpaRepository<VehicleFaultPersistenceEntity, UUID> {
+    List<VehicleFaultPersistenceEntity> findAllByVehicleIdAndIsResolvedFalse(UUID vehicleId);
+    List<VehicleFaultPersistenceEntity> findAllByVehicleIdOrderByDetectedAtDesc(UUID vehicleId);
 }
 
-public interface SpringDataPredictiveAlertRepository extends JpaRepository<PredictiveAlertJpaEntity, UUID> {
-    List<PredictiveAlertJpaEntity> findAllByVehicleIdOrderByCreatedAtDesc(UUID vehicleId);
-    List<PredictiveAlertJpaEntity> findAllByTenantIdAndStatus(UUID tenantId, String status);
+public interface PredictiveAlertPersistenceRepository extends JpaRepository<PredictiveAlertPersistenceEntity, UUID> {
+    List<PredictiveAlertPersistenceEntity> findAllByVehicleIdOrderByCreatedAtDesc(UUID vehicleId);
+    List<PredictiveAlertPersistenceEntity> findAllByTenantIdAndStatus(UUID tenantId, String status);
 }
 
-public interface SpringDataDtcCatalogRepository extends JpaRepository<DtcCatalogEntryJpaEntity, UUID> {
-    Optional<DtcCatalogEntryJpaEntity> findByDtcCode(String dtcCode);
-    List<DtcCatalogEntryJpaEntity> findAllBySystemCategory(String systemCategory);
+public interface DtcCatalogEntryPersistenceRepository extends JpaRepository<DtcCatalogEntryPersistenceEntity, UUID> {
+    Optional<DtcCatalogEntryPersistenceEntity> findByDtcCode(String dtcCode);
+    List<DtcCatalogEntryPersistenceEntity> findAllBySystemCategory(String systemCategory);
     boolean existsByDtcCode(String dtcCode);
+}
+```
+
+##### 2. Repositorios de Series Temporales en TimescaleDB (`infrastructure.persistence.timescale.repositories`)
+
+```java
+package com.andeva.atelier.platform.iot.infrastructure.persistence.timescale.repositories;
+
+import com.andeva.atelier.platform.iot.domain.model.dto.TelemetryStatisticalSummary;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.Repository;
+import org.springframework.data.repository.query.Param;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
+
+public interface TimescaleTelemetryAnalyticsRepository extends Repository<Void, Void> {
+
+    @Query(value = """
+        SELECT 
+            time_bucket('1 day', timestamp) AS bucket_time,
+            ROUND(AVG(engine_temp_c)::numeric, 2) AS avg_engine_temp,
+            MAX(engine_temp_c) AS max_engine_temp,
+            ROUND(STDDEV(engine_temp_c)::numeric, 2) AS stddev_engine_temp,
+            ROUND(AVG(battery_voltage)::numeric, 2) AS avg_battery_voltage,
+            MIN(battery_voltage) AS min_battery_voltage,
+            MAX(speed) AS max_speed_kmh,
+            COUNT(*) AS total_data_points
+        FROM telemetry_logs
+        WHERE vehicle_id = :vehicleId
+          AND timestamp >= :since
+        GROUP BY bucket_time
+        ORDER BY bucket_time ASC
+        """, nativeQuery = true)
+    List<TelemetryStatisticalSummary> getTelemetryMetricsDaily(
+            @Param("vehicleId") UUID vehicleId,
+            @Param("since") Instant since
+    );
+}
+
+public interface TimescaleTelemetryJdbcRepository {
+    void batchInsert(List<com.andeva.atelier.platform.iot.domain.model.aggregates.TelemetryRecord> records);
+    java.util.Optional<com.andeva.atelier.platform.iot.domain.model.aggregates.TelemetryRecord> findLatestByVehicleId(UUID vehicleId);
+    List<com.andeva.atelier.platform.iot.domain.model.aggregates.TelemetryRecord> findAggregated(UUID vehicleId, Instant from, Instant to, String timeBucket);
 }
 ```
 
@@ -1381,287 +1708,364 @@ public interface SpringDataDtcCatalogRepository extends JpaRepository<DtcCatalog
 
 #### 11.5.3. Repository Adapters (Domain Port Implementations)
 
+##### 1. Adaptadores Secundarios JPA (`com.andeva.atelier.platform.iot.infrastructure.persistence.jpa.adapters`)
+
 ```java
 package com.andeva.atelier.platform.iot.infrastructure.persistence.jpa.adapters;
 
-import com.andeva.atelier.platform.iot.domain.model.aggregates.*;
-import com.andeva.atelier.platform.iot.domain.model.valueobjects.*;
-import com.andeva.atelier.platform.iot.domain.repositories.*;
-import com.andeva.atelier.platform.iot.infrastructure.persistence.jpa.assemblers.*;
-import com.andeva.atelier.platform.iot.infrastructure.persistence.jpa.repositories.*;
+import com.andeva.atelier.platform.iot.domain.model.aggregates.Obd2Device;
+import com.andeva.atelier.platform.iot.domain.model.ids.DeviceId;
+import com.andeva.atelier.platform.iot.domain.model.valueobjects.DeviceIdentifier;
+import com.andeva.atelier.platform.iot.domain.repositories.Obd2DeviceRepository;
+import com.andeva.atelier.platform.iot.infrastructure.persistence.jpa.assemblers.Obd2DevicePersistenceAssembler;
+import com.andeva.atelier.platform.iot.infrastructure.persistence.jpa.repositories.Obd2DevicePersistenceRepository;
+import com.andeva.atelier.platform.shared.domain.model.ids.TenantId;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Repository
 public class Obd2DeviceRepositoryAdapter implements Obd2DeviceRepository {
-    private final SpringDataObd2DeviceRepository springDataRepository;
+    private final Obd2DevicePersistenceRepository persistenceRepository;
     private final Obd2DevicePersistenceAssembler assembler;
 
-    public Obd2DeviceRepositoryAdapter(SpringDataObd2DeviceRepository springDataRepository, Obd2DevicePersistenceAssembler assembler) {
-        this.springDataRepository = springDataRepository;
+    public Obd2DeviceRepositoryAdapter(Obd2DevicePersistenceRepository persistenceRepository, Obd2DevicePersistenceAssembler assembler) {
+        this.persistenceRepository = persistenceRepository;
         this.assembler = assembler;
     }
 
     @Override
     public Obd2Device save(Obd2Device device) {
         var entity = assembler.toEntity(device);
-        var saved = springDataRepository.save(entity);
-        return assembler.toDomain(saved);
+        return assembler.toDomain(persistenceRepository.save(entity));
     }
 
     @Override
     public Optional<Obd2Device> findById(DeviceId id) {
-        return springDataRepository.findById(id.value()).map(assembler::toDomain);
+        return persistenceRepository.findById(id.value()).map(assembler::toDomain);
     }
 
     @Override
-    public Optional<Obd2Device> findByDeviceIdentifier(DeviceIdentifier identifier) {
-        return springDataRepository.findByDeviceIdentifier(identifier.value()).map(assembler::toDomain);
+    public Optional<Obd2Device> findByIdentifier(DeviceIdentifier identifier) {
+        return persistenceRepository.findByDeviceIdentifier(identifier.value()).map(assembler::toDomain);
     }
 
     @Override
     public List<Obd2Device> findAllByTenantId(TenantId tenantId) {
-        return springDataRepository.findAllByTenantId(tenantId.value()).stream()
-                .map(assembler::toDomain)
-                .collect(Collectors.toList());
+        return persistenceRepository.findAllByTenantId(tenantId.value()).stream().map(assembler::toDomain).toList();
     }
 
     @Override
-    public boolean existsByDeviceIdentifier(DeviceIdentifier identifier) {
-        return springDataRepository.existsByDeviceIdentifier(identifier.value());
+    public boolean existsByIdentifier(DeviceIdentifier identifier) {
+        return persistenceRepository.existsByDeviceIdentifier(identifier.value());
     }
 }
+```
+
+```java
+package com.andeva.atelier.platform.iot.infrastructure.persistence.jpa.adapters;
+
+import com.andeva.atelier.platform.iot.domain.model.aggregates.DeviceInstallation;
+import com.andeva.atelier.platform.iot.domain.model.ids.DeviceId;
+import com.andeva.atelier.platform.iot.domain.model.ids.InstallationId;
+import com.andeva.atelier.platform.iot.domain.repositories.DeviceInstallationRepository;
+import com.andeva.atelier.platform.iot.infrastructure.persistence.jpa.assemblers.DeviceInstallationPersistenceAssembler;
+import com.andeva.atelier.platform.iot.infrastructure.persistence.jpa.repositories.DeviceInstallationPersistenceRepository;
+import com.andeva.atelier.platform.shared.domain.model.ids.VehicleId;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class DeviceInstallationRepositoryAdapter implements DeviceInstallationRepository {
-    private final SpringDataDeviceInstallationRepository springDataRepository;
+    private final DeviceInstallationPersistenceRepository persistenceRepository;
     private final DeviceInstallationPersistenceAssembler assembler;
 
-    public DeviceInstallationRepositoryAdapter(SpringDataDeviceInstallationRepository springDataRepository,
-                                                DeviceInstallationPersistenceAssembler assembler) {
-        this.springDataRepository = springDataRepository;
+    public DeviceInstallationRepositoryAdapter(DeviceInstallationPersistenceRepository persistenceRepository, DeviceInstallationPersistenceAssembler assembler) {
+        this.persistenceRepository = persistenceRepository;
         this.assembler = assembler;
     }
 
     @Override
     public DeviceInstallation save(DeviceInstallation installation) {
-        var entity = assembler.toEntity(installation);
-        var saved = springDataRepository.save(entity);
-        return assembler.toDomain(saved);
+        return assembler.toDomain(persistenceRepository.save(assembler.toEntity(installation)));
     }
 
     @Override
     public Optional<DeviceInstallation> findById(InstallationId id) {
-        return springDataRepository.findById(id.value()).map(assembler::toDomain);
+        return persistenceRepository.findById(id.value()).map(assembler::toDomain);
     }
 
     @Override
     public Optional<DeviceInstallation> findActiveByVehicleId(VehicleId vehicleId) {
-        return springDataRepository.findByVehicleIdAndUninstalledAtIsNull(vehicleId.value()).map(assembler::toDomain);
+        return persistenceRepository.findByVehicleIdAndUninstalledAtIsNull(vehicleId.value()).map(assembler::toDomain);
     }
 
     @Override
     public Optional<DeviceInstallation> findActiveByDeviceId(DeviceId deviceId) {
-        return springDataRepository.findByDeviceIdAndUninstalledAtIsNull(deviceId.value()).map(assembler::toDomain);
+        return persistenceRepository.findByDeviceIdAndUninstalledAtIsNull(deviceId.value()).map(assembler::toDomain);
     }
 
     @Override
-    public List<DeviceInstallation> findAllByVehicleId(VehicleId vehicleId) {
-        return springDataRepository.findAllByVehicleIdOrderByInstalledAtDesc(vehicleId.value()).stream()
-                .map(assembler::toDomain)
-                .collect(Collectors.toList());
+    public List<DeviceInstallation> findAllHistoryByVehicleId(VehicleId vehicleId) {
+        return persistenceRepository.findAllByVehicleIdOrderByInstalledAtDesc(vehicleId.value()).stream().map(assembler::toDomain).toList();
     }
 }
+```
+
+```java
+package com.andeva.atelier.platform.iot.infrastructure.persistence.jpa.adapters;
+
+import com.andeva.atelier.platform.iot.domain.model.aggregates.VehicleFault;
+import com.andeva.atelier.platform.iot.domain.model.ids.FaultId;
+import com.andeva.atelier.platform.iot.domain.repositories.VehicleFaultRepository;
+import com.andeva.atelier.platform.iot.infrastructure.persistence.jpa.assemblers.VehicleFaultPersistenceAssembler;
+import com.andeva.atelier.platform.iot.infrastructure.persistence.jpa.repositories.VehicleFaultPersistenceRepository;
+import com.andeva.atelier.platform.shared.domain.model.ids.VehicleId;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class VehicleFaultRepositoryAdapter implements VehicleFaultRepository {
-    private final SpringDataVehicleFaultRepository springDataRepository;
+    private final VehicleFaultPersistenceRepository persistenceRepository;
     private final VehicleFaultPersistenceAssembler assembler;
 
-    public VehicleFaultRepositoryAdapter(SpringDataVehicleFaultRepository springDataRepository,
-                                         VehicleFaultPersistenceAssembler assembler) {
-        this.springDataRepository = springDataRepository;
+    public VehicleFaultRepositoryAdapter(VehicleFaultPersistenceRepository persistenceRepository, VehicleFaultPersistenceAssembler assembler) {
+        this.persistenceRepository = persistenceRepository;
         this.assembler = assembler;
     }
 
     @Override
     public VehicleFault save(VehicleFault fault) {
-        var entity = assembler.toEntity(fault);
-        var saved = springDataRepository.save(entity);
-        return assembler.toDomain(saved);
+        return assembler.toDomain(persistenceRepository.save(assembler.toEntity(fault)));
     }
 
     @Override
     public Optional<VehicleFault> findById(FaultId id) {
-        return springDataRepository.findById(id.value()).map(assembler::toDomain);
+        return persistenceRepository.findById(id.value()).map(assembler::toDomain);
     }
 
     @Override
-    public List<VehicleFault> findAllActiveByVehicleId(VehicleId vehicleId) {
-        return springDataRepository.findAllByVehicleIdAndIsResolvedFalse(vehicleId.value()).stream()
-                .map(assembler::toDomain)
-                .collect(Collectors.toList());
+    public List<VehicleFault> findActiveByVehicleId(VehicleId vehicleId) {
+        return persistenceRepository.findAllByVehicleIdAndIsResolvedFalse(vehicleId.value()).stream().map(assembler::toDomain).toList();
     }
 
     @Override
     public List<VehicleFault> findAllByVehicleId(VehicleId vehicleId) {
-        return springDataRepository.findAllByVehicleIdOrderByDetectedAtDesc(vehicleId.value()).stream()
-                .map(assembler::toDomain)
-                .collect(Collectors.toList());
+        return persistenceRepository.findAllByVehicleIdOrderByDetectedAtDesc(vehicleId.value()).stream().map(assembler::toDomain).toList();
     }
 }
+```
+
+```java
+package com.andeva.atelier.platform.iot.infrastructure.persistence.jpa.adapters;
+
+import com.andeva.atelier.platform.iot.domain.model.aggregates.PredictiveAlert;
+import com.andeva.atelier.platform.iot.domain.model.enums.AlertStatus;
+import com.andeva.atelier.platform.iot.domain.model.ids.AlertId;
+import com.andeva.atelier.platform.iot.domain.repositories.PredictiveAlertRepository;
+import com.andeva.atelier.platform.iot.infrastructure.persistence.jpa.assemblers.PredictiveAlertPersistenceAssembler;
+import com.andeva.atelier.platform.iot.infrastructure.persistence.jpa.repositories.PredictiveAlertPersistenceRepository;
+import com.andeva.atelier.platform.shared.domain.model.ids.TenantId;
+import com.andeva.atelier.platform.shared.domain.model.ids.VehicleId;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class PredictiveAlertRepositoryAdapter implements PredictiveAlertRepository {
-    private final SpringDataPredictiveAlertRepository springDataRepository;
+    private final PredictiveAlertPersistenceRepository persistenceRepository;
     private final PredictiveAlertPersistenceAssembler assembler;
 
-    public PredictiveAlertRepositoryAdapter(SpringDataPredictiveAlertRepository springDataRepository,
-                                            PredictiveAlertPersistenceAssembler assembler) {
-        this.springDataRepository = springDataRepository;
+    public PredictiveAlertRepositoryAdapter(PredictiveAlertPersistenceRepository persistenceRepository, PredictiveAlertPersistenceAssembler assembler) {
+        this.persistenceRepository = persistenceRepository;
         this.assembler = assembler;
     }
 
     @Override
     public PredictiveAlert save(PredictiveAlert alert) {
-        var entity = assembler.toEntity(alert);
-        var saved = springDataRepository.save(entity);
-        return assembler.toDomain(saved);
+        return assembler.toDomain(persistenceRepository.save(assembler.toEntity(alert)));
     }
 
     @Override
     public Optional<PredictiveAlert> findById(AlertId id) {
-        return springDataRepository.findById(id.value()).map(assembler::toDomain);
+        return persistenceRepository.findById(id.value()).map(assembler::toDomain);
     }
 
     @Override
     public List<PredictiveAlert> findAllByVehicleId(VehicleId vehicleId) {
-        return springDataRepository.findAllByVehicleIdOrderByCreatedAtDesc(vehicleId.value()).stream()
-                .map(assembler::toDomain)
-                .collect(Collectors.toList());
+        return persistenceRepository.findAllByVehicleIdOrderByCreatedAtDesc(vehicleId.value()).stream().map(assembler::toDomain).toList();
     }
 
     @Override
     public List<PredictiveAlert> findAllByTenantIdAndStatus(TenantId tenantId, AlertStatus status) {
-        return springDataRepository.findAllByTenantIdAndStatus(tenantId.value(), status.name()).stream()
-                .map(assembler::toDomain)
-                .collect(Collectors.toList());
-    }
-}
-
-@Repository
-public class DtcCatalogRepositoryAdapter implements DtcCatalogRepository {
-    private final SpringDataDtcCatalogRepository springDataRepository;
-    private final DtcCatalogPersistenceAssembler assembler;
-
-    public DtcCatalogRepositoryAdapter(SpringDataDtcCatalogRepository springDataRepository,
-                                       DtcCatalogPersistenceAssembler assembler) {
-        this.springDataRepository = springDataRepository;
-        this.assembler = assembler;
-    }
-
-    @Override
-    public Optional<DtcCatalogEntry> findByDtcCode(DtcCode dtcCode) {
-        return springDataRepository.findByDtcCode(dtcCode.value()).map(assembler::toDomain);
-    }
-
-    @Override
-    public List<DtcCatalogEntry> findAllBySystemCategory(String systemCategory) {
-        return springDataRepository.findAllBySystemCategory(systemCategory).stream()
-                .map(assembler::toDomain)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public boolean existsByDtcCode(DtcCode dtcCode) {
-        return springDataRepository.existsByDtcCode(dtcCode.value());
+        return persistenceRepository.findAllByTenantIdAndStatus(tenantId.value(), status.name()).stream().map(assembler::toDomain).toList();
     }
 }
 ```
 
-##### Adaptador de Persistencia Temporal con TimescaleDB (`TimescaleTelemetryJdbcRepositoryImpl`)
 ```java
-package com.andeva.atelier.platform.iot.infrastructure.persistence.timescale;
+package com.andeva.atelier.platform.iot.infrastructure.persistence.jpa.adapters;
+
+import com.andeva.atelier.platform.iot.domain.model.entities.DtcCatalogEntry;
+import com.andeva.atelier.platform.iot.domain.model.valueobjects.DtcCode;
+import com.andeva.atelier.platform.iot.domain.repositories.DtcCatalogRepository;
+import com.andeva.atelier.platform.iot.infrastructure.persistence.jpa.assemblers.DtcCatalogPersistenceAssembler;
+import com.andeva.atelier.platform.iot.infrastructure.persistence.jpa.repositories.DtcCatalogEntryPersistenceRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public class DtcCatalogRepositoryAdapter implements DtcCatalogRepository {
+    private final DtcCatalogEntryPersistenceRepository persistenceRepository;
+    private final DtcCatalogPersistenceAssembler assembler;
+
+    public DtcCatalogRepositoryAdapter(DtcCatalogEntryPersistenceRepository persistenceRepository, DtcCatalogPersistenceAssembler assembler) {
+        this.persistenceRepository = persistenceRepository;
+        this.assembler = assembler;
+    }
+
+    @Override
+    public Optional<DtcCatalogEntry> findByCode(DtcCode code) {
+        return persistenceRepository.findByDtcCode(code.value()).map(assembler::toDomain);
+    }
+
+    @Override
+    public List<DtcCatalogEntry> findAllByCategory(String systemCategory) {
+        return persistenceRepository.findAllBySystemCategory(systemCategory).stream().map(assembler::toDomain).toList();
+    }
+
+    @Override
+    public boolean existsByCode(DtcCode code) {
+        return persistenceRepository.existsByDtcCode(code.value());
+    }
+}
+```
+
+##### 2. Adaptador de Persistencia Temporal con TimescaleDB (`TimescaleTelemetryRepositoryImpl`)
+
+El adaptador de telemetría implementa el puerto `TelemetryLogRepository` mediante inserción masiva JDBC directa sobre la hipertabla particionada de TimescaleDB, garantizando tiempos de respuesta mínimos bajo ráfagas intensivas:
+
+```java
+package com.andeva.atelier.platform.iot.infrastructure.persistence.timescale.adapters;
 
 import com.andeva.atelier.platform.iot.domain.model.aggregates.TelemetryRecord;
-import com.andeva.atelier.platform.iot.domain.model.valueobjects.*;
 import com.andeva.atelier.platform.iot.domain.repositories.TelemetryLogRepository;
+import com.andeva.atelier.platform.iot.infrastructure.persistence.timescale.assemblers.TimescaleTelemetryPersistenceAssembler;
+import com.andeva.atelier.platform.iot.infrastructure.persistence.timescale.entities.TelemetryLogPersistenceEntity;
+import com.andeva.atelier.platform.shared.domain.model.ids.VehicleId;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.sql.PreparedStatement;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Repository
-public class TimescaleTelemetryJdbcRepositoryImpl implements TelemetryLogRepository {
-    private final JdbcTemplate jdbcTemplate;
+public class TimescaleTelemetryRepositoryImpl implements TelemetryLogRepository {
 
-    public TimescaleTelemetryJdbcRepositoryImpl(JdbcTemplate jdbcTemplate) {
+    private final JdbcTemplate jdbcTemplate;
+    private final TimescaleTelemetryPersistenceAssembler assembler;
+
+    public TimescaleTelemetryRepositoryImpl(JdbcTemplate jdbcTemplate, TimescaleTelemetryPersistenceAssembler assembler) {
         this.jdbcTemplate = jdbcTemplate;
+        this.assembler = assembler;
     }
 
     @Override
     public void saveAllBatch(List<TelemetryRecord> records) {
         String sql = """
-            INSERT INTO telemetry_logs (timestamp, vehicle_id, tenant_id, latitude, longitude, speed, engine_temp_c, rpm, fuel_level, battery_voltage)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """;
+            INSERT INTO telemetry_logs (
+                timestamp, vehicle_id, tenant_id, latitude, longitude,
+                speed, engine_temp_c, engine_rpm, fuel_level_pct, battery_voltage
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """;
 
-        jdbcTemplate.batchUpdate(sql, records, records.size(), (ps, record) -> {
+        jdbcTemplate.batchUpdate(sql, records, records.size(), (PreparedStatement ps, TelemetryRecord record) -> {
             ps.setTimestamp(1, Timestamp.from(record.timestamp()));
             ps.setObject(2, record.vehicleId().value());
             ps.setObject(3, record.tenantId().value());
-            ps.setObject(4, record.location().map(loc -> loc.latitude()).orElse(null));
-            ps.setObject(5, record.location().map(loc -> loc.longitude()).orElse(null));
+            ps.setObject(4, record.location().map(l -> l.latitude()).orElse(null));
+            ps.setObject(5, record.location().map(l -> l.longitude()).orElse(null));
             ps.setInt(6, record.speed().kmh());
             ps.setDouble(7, record.engineTemperature().celsius());
             ps.setInt(8, record.engineRpm().rpm());
             ps.setObject(9, record.fuelLevel().map(f -> f.percentage()).orElse(null));
-            ps.setObject(10, record.batteryVoltage().map(v -> v.volts()).orElse(null));
+            ps.setObject(10, record.batteryVoltage().map(b -> b.volts()).orElse(null));
         });
     }
 
     @Override
     public Optional<TelemetryRecord> findLatestByVehicleId(VehicleId vehicleId) {
         String sql = """
-            SELECT timestamp, vehicle_id, tenant_id, latitude, longitude, speed, engine_temp_c, rpm, fuel_level, battery_voltage
+            SELECT timestamp, vehicle_id, tenant_id, latitude, longitude, speed,
+                   engine_temp_c, engine_rpm, fuel_level_pct, battery_voltage
             FROM telemetry_logs
             WHERE vehicle_id = ?
             ORDER BY timestamp DESC
             LIMIT 1
-        """;
-        List<TelemetryRecord> results = jdbcTemplate.query(sql, (rs, rowNum) -> {
-            Instant ts = rs.getTimestamp("timestamp").toInstant();
-            UUID vId = (UUID) rs.getObject("vehicle_id");
-            UUID tId = (UUID) rs.getObject("tenant_id");
-            Double lat = (Double) rs.getObject("latitude");
-            Double lon = (Double) rs.getObject("longitude");
-            int speed = rs.getInt("speed");
-            double temp = rs.getDouble("engine_temp_c");
-            int rpm = rs.getInt("rpm");
-            Double fuel = (Double) rs.getObject("fuel_level");
-            Double battery = (Double) rs.getObject("battery_voltage");
+            """;
 
-            return new TelemetryRecord(
-                ts,
-                new VehicleId(vId),
-                new TenantId(tId),
-                (lat != null && lon != null) ? Optional.of(new GeoLocation(lat, lon)) : Optional.empty(),
-                new SpeedKmh(speed),
-                new EngineTemperature(temp),
-                new EngineRpm(rpm),
-                fuel != null ? Optional.of(new FuelLevel(fuel)) : Optional.empty(),
-                battery != null ? Optional.of(new BatteryVoltage(battery)) : Optional.empty()
-            );
+        List<TelemetryLogPersistenceEntity> results = jdbcTemplate.query(sql, (rs, rowNum) -> {
+            var entity = new TelemetryLogPersistenceEntity();
+            entity.setId(new TelemetryLogPersistenceEntity.TelemetryRecordId(
+                rs.getTimestamp("timestamp").toInstant(),
+                (java.util.UUID) rs.getObject("vehicle_id")
+            ));
+            entity.setTenantId((java.util.UUID) rs.getObject("tenant_id"));
+            entity.setLatitude((Double) rs.getObject("latitude"));
+            entity.setLongitude((Double) rs.getObject("longitude"));
+            entity.setSpeed(rs.getInt("speed"));
+            entity.setEngineTempC(rs.getDouble("engine_temp_c"));
+            entity.setEngineRpm(rs.getInt("engine_rpm"));
+            entity.setFuelLevelPct((Double) rs.getObject("fuel_level_pct"));
+            entity.setBatteryVoltage((Double) rs.getObject("battery_voltage"));
+            return entity;
         }, vehicleId.value());
 
-        return results.isEmpty() ? Optional.empty() : Optional.of(results.get(0));
+        return results.isEmpty() ? Optional.empty() : Optional.of(assembler.toDomain(results.get(0)));
+    }
+
+    @Override
+    public List<TelemetryRecord> findHistoryAggregated(VehicleId vehicleId, Instant from, Instant to, String timeBucket) {
+        String sql = """
+            SELECT time_bucket(?, timestamp) AS bucket,
+                   vehicle_id, tenant_id,
+                   AVG(latitude) AS latitude, AVG(longitude) AS longitude,
+                   AVG(speed)::int AS speed, AVG(engine_temp_c) AS engine_temp_c,
+                   AVG(engine_rpm)::int AS engine_rpm,
+                   AVG(fuel_level_pct) AS fuel_level_pct, AVG(battery_voltage) AS battery_voltage
+            FROM telemetry_logs
+            WHERE vehicle_id = ? AND timestamp >= ? AND timestamp <= ?
+            GROUP BY bucket, vehicle_id, tenant_id
+            ORDER BY bucket ASC
+            """;
+
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            var entity = new TelemetryLogPersistenceEntity();
+            entity.setId(new TelemetryLogPersistenceEntity.TelemetryRecordId(
+                rs.getTimestamp("bucket").toInstant(),
+                (java.util.UUID) rs.getObject("vehicle_id")
+            ));
+            entity.setTenantId((java.util.UUID) rs.getObject("tenant_id"));
+            entity.setLatitude((Double) rs.getObject("latitude"));
+            entity.setLongitude((Double) rs.getObject("longitude"));
+            entity.setSpeed(rs.getInt("speed"));
+            entity.setEngineTempC(rs.getDouble("engine_temp_c"));
+            entity.setEngineRpm(rs.getInt("engine_rpm"));
+            entity.setFuelLevelPct((Double) rs.getObject("fuel_level_pct"));
+            entity.setBatteryVoltage((Double) rs.getObject("battery_voltage"));
+            return assembler.toDomain(entity);
+        }, timeBucket, vehicleId.value(), Timestamp.from(from), Timestamp.from(to));
     }
 }
 ```
@@ -1670,18 +2074,26 @@ public class TimescaleTelemetryJdbcRepositoryImpl implements TelemetryLogReposit
 
 #### 11.5.4. Persistence Assemblers & Type Converters
 
+##### 1. Ensambladores de Persistencia JPA (`com.andeva.atelier.platform.iot.infrastructure.persistence.jpa.assemblers`)
+
 ```java
 package com.andeva.atelier.platform.iot.infrastructure.persistence.jpa.assemblers;
 
 import com.andeva.atelier.platform.iot.domain.model.aggregates.*;
+import com.andeva.atelier.platform.iot.domain.model.enums.*;
+import com.andeva.atelier.platform.iot.domain.model.ids.*;
 import com.andeva.atelier.platform.iot.domain.model.valueobjects.*;
 import com.andeva.atelier.platform.iot.infrastructure.persistence.jpa.entities.*;
+import com.andeva.atelier.platform.shared.domain.model.ids.TenantId;
+import com.andeva.atelier.platform.shared.domain.model.ids.VehicleId;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 @Component
 public class Obd2DevicePersistenceAssembler {
-    public Obd2DeviceJpaEntity toEntity(Obd2Device domain) {
-        var entity = new Obd2DeviceJpaEntity();
+    public Obd2DevicePersistenceEntity toEntity(Obd2Device domain) {
+        var entity = new Obd2DevicePersistenceEntity();
         entity.setId(domain.getId().value());
         entity.setTenantId(domain.getTenantId().value());
         entity.setDeviceIdentifier(domain.getDeviceIdentifier().value());
@@ -1692,7 +2104,7 @@ public class Obd2DevicePersistenceAssembler {
         return entity;
     }
 
-    public Obd2Device toDomain(Obd2DeviceJpaEntity entity) {
+    public Obd2Device toDomain(Obd2DevicePersistenceEntity entity) {
         return new Obd2Device(
             new DeviceId(entity.getId()),
             new TenantId(entity.getTenantId()),
@@ -1707,37 +2119,37 @@ public class Obd2DevicePersistenceAssembler {
 
 @Component
 public class DeviceInstallationPersistenceAssembler {
-    public DeviceInstallationJpaEntity toEntity(DeviceInstallation domain) {
-        var entity = new DeviceInstallationJpaEntity();
+    public DeviceInstallationPersistenceEntity toEntity(DeviceInstallation domain) {
+        var entity = new DeviceInstallationPersistenceEntity();
         entity.setId(domain.getId().value());
         entity.setTenantId(domain.getTenantId().value());
         entity.setDeviceId(domain.getDeviceId().value());
         entity.setVehicleId(domain.getVehicleId().value());
         entity.setInstalledAt(domain.getInstalledAt());
-        entity.setUninstalledAt(domain.getUninstalledAt());
-        entity.setInitialOdometerKm(domain.getInitialOdometer().kilometers());
-        entity.setFinalOdometerKm(domain.getFinalOdometer() != null ? domain.getFinalOdometer().kilometers() : null);
+        entity.setUninstalledAt(domain.getUninstalledAt().orElse(null));
+        entity.setInitialOdometerKm(domain.getInitialOdometerKm());
+        entity.setFinalOdometerKm(domain.getFinalOdometerKm().orElse(null));
         return entity;
     }
 
-    public DeviceInstallation toDomain(DeviceInstallationJpaEntity entity) {
+    public DeviceInstallation toDomain(DeviceInstallationPersistenceEntity entity) {
         return new DeviceInstallation(
             new InstallationId(entity.getId()),
-            new TenantId(entity.getTenantId()),
             new DeviceId(entity.getDeviceId()),
             new VehicleId(entity.getVehicleId()),
+            new TenantId(entity.getTenantId()),
             entity.getInstalledAt(),
-            entity.getUninstalledAt(),
-            new Odometer(entity.getInitialOdometerKm()),
-            entity.getFinalOdometerKm() != null ? new Odometer(entity.getFinalOdometerKm()) : null
+            Optional.ofNullable(entity.getUninstalledAt()),
+            entity.getInitialOdometerKm(),
+            Optional.ofNullable(entity.getFinalOdometerKm())
         );
     }
 }
 
 @Component
 public class VehicleFaultPersistenceAssembler {
-    public VehicleFaultJpaEntity toEntity(VehicleFault domain) {
-        var entity = new VehicleFaultJpaEntity();
+    public VehicleFaultPersistenceEntity toEntity(VehicleFault domain) {
+        var entity = new VehicleFaultPersistenceEntity();
         entity.setId(domain.getId().value());
         entity.setTenantId(domain.getTenantId().value());
         entity.setVehicleId(domain.getVehicleId().value());
@@ -1746,223 +2158,376 @@ public class VehicleFaultPersistenceAssembler {
         entity.setDescription(domain.getDescription());
         entity.setDetectedAt(domain.getDetectedAt());
         entity.setResolved(domain.isResolved());
-        entity.setResolvedAt(domain.getResolvedAt());
+        entity.setResolvedAt(domain.getResolvedAt().orElse(null));
         return entity;
     }
 
-    public VehicleFault toDomain(VehicleFaultJpaEntity entity) {
+    public VehicleFault toDomain(VehicleFaultPersistenceEntity entity) {
         return new VehicleFault(
             new FaultId(entity.getId()),
-            new TenantId(entity.getTenantId()),
             new VehicleId(entity.getVehicleId()),
+            new TenantId(entity.getTenantId()),
             new DtcCode(entity.getDtcCode()),
             FaultSeverity.valueOf(entity.getSeverity()),
             entity.getDescription(),
             entity.getDetectedAt(),
             entity.isResolved(),
-            entity.getResolvedAt()
+            Optional.ofNullable(entity.getResolvedAt())
         );
     }
 }
 
 @Component
 public class PredictiveAlertPersistenceAssembler {
-    public PredictiveAlertJpaEntity toEntity(PredictiveAlert domain) {
-        var entity = new PredictiveAlertJpaEntity();
+    public PredictiveAlertPersistenceEntity toEntity(PredictiveAlert domain) {
+        var entity = new PredictiveAlertPersistenceEntity();
         entity.setId(domain.getId().value());
         entity.setTenantId(domain.getTenantId().value());
         entity.setVehicleId(domain.getVehicleId().value());
-        entity.setRecommendedServiceId(domain.getRecommendedServiceId());
+        entity.setRecommendedServiceId(domain.getRecommendedServiceId().map(s -> s.value()).orElse(null));
         entity.setAlertType(domain.getAlertType().name());
-        entity.setConfidenceScore(domain.getConfidenceScore().score());
+        entity.setConfidenceScore(domain.getConfidenceScore().value());
         entity.setMessage(domain.getMessage());
         entity.setStatus(domain.getStatus().name());
-        entity.setFcmMessageId(domain.getFcmMessageId());
+        entity.setFcmMessageId(domain.getFcmMessageId().orElse(null));
+        entity.setCreatedAt(domain.getCreatedAt());
         return entity;
     }
 
-    public PredictiveAlert toDomain(PredictiveAlertJpaEntity entity) {
+    public PredictiveAlert toDomain(PredictiveAlertPersistenceEntity entity) {
         return new PredictiveAlert(
             new AlertId(entity.getId()),
-            new TenantId(entity.getTenantId()),
             new VehicleId(entity.getVehicleId()),
-            entity.getRecommendedServiceId(),
+            new TenantId(entity.getTenantId()),
+            Optional.ofNullable(entity.getRecommendedServiceId()).map(com.andeva.atelier.platform.shared.domain.model.ids.ServiceId::new),
             AlertType.valueOf(entity.getAlertType()),
             new ConfidenceScore(entity.getConfidenceScore()),
             entity.getMessage(),
             AlertStatus.valueOf(entity.getStatus()),
-            entity.getFcmMessageId()
+            Optional.ofNullable(entity.getFcmMessageId()),
+            entity.getCreatedAt()
         );
     }
 }
 
 @Component
 public class DtcCatalogPersistenceAssembler {
-    public DtcCatalogEntryJpaEntity toEntity(DtcCatalogEntry domain) {
-        var entity = new DtcCatalogEntryJpaEntity();
+    public DtcCatalogEntryPersistenceEntity toEntity(com.andeva.atelier.platform.iot.domain.model.entities.DtcCatalogEntry domain) {
+        var entity = new DtcCatalogEntryPersistenceEntity();
         entity.setId(domain.getId().value());
-        entity.setDtcCode(domain.getDtcCode().value());
-        entity.setSystemCategory(domain.getSystemCategory());
-        entity.setDescriptionEs(domain.getDescriptionEs());
-        entity.setDescriptionEn(domain.getDescriptionEn());
+        entity.setDtcCode(domain.getCode().value());
+        entity.setSystemCategory(domain.getCategory().name());
+        entity.setStandardDescription(domain.getStandardDescription());
         entity.setDefaultSeverity(domain.getDefaultSeverity().name());
-        entity.setCritical(domain.isCritical());
         return entity;
     }
 
-    public DtcCatalogEntry toDomain(DtcCatalogEntryJpaEntity entity) {
-        return new DtcCatalogEntry(
-            new CatalogEntryId(entity.getId()),
+    public com.andeva.atelier.platform.iot.domain.model.entities.DtcCatalogEntry toDomain(DtcCatalogEntryPersistenceEntity entity) {
+        return new com.andeva.atelier.platform.iot.domain.model.entities.DtcCatalogEntry(
+            new DtcCatalogId(entity.getId()),
             new DtcCode(entity.getDtcCode()),
-            entity.getSystemCategory(),
-            entity.getDescriptionEs(),
-            entity.getDescriptionEn(),
-            FaultSeverity.valueOf(entity.getDefaultSeverity()),
-            entity.isCritical()
+            DtcCategory.valueOf(entity.getSystemCategory()),
+            entity.getStandardDescription(),
+            FaultSeverity.valueOf(entity.getDefaultSeverity())
         );
     }
 }
 ```
 
+##### 2. Ensamblador de Persistencia TimescaleDB (`com.andeva.atelier.platform.iot.infrastructure.persistence.timescale.assemblers`)
+
+```java
+package com.andeva.atelier.platform.iot.infrastructure.persistence.timescale.assemblers;
+
+import com.andeva.atelier.platform.iot.domain.model.aggregates.TelemetryRecord;
+import com.andeva.atelier.platform.iot.domain.model.valueobjects.*;
+import com.andeva.atelier.platform.iot.infrastructure.persistence.timescale.entities.TelemetryLogPersistenceEntity;
+import com.andeva.atelier.platform.shared.domain.model.ids.TenantId;
+import com.andeva.atelier.platform.shared.domain.model.ids.VehicleId;
+import org.springframework.stereotype.Component;
+
+import java.util.Optional;
+
+@Component
+public class TimescaleTelemetryPersistenceAssembler {
+
+    public TelemetryRecord toDomain(TelemetryLogPersistenceEntity entity) {
+        Optional<GeoCoordinates> location = (entity.getLatitude() != null && entity.getLongitude() != null)
+                ? Optional.of(new GeoCoordinates(entity.getLatitude(), entity.getLongitude()))
+                : Optional.empty();
+
+        return new TelemetryRecord(
+                entity.getId().getTimestamp(),
+                new VehicleId(entity.getId().getVehicleId()),
+                new TenantId(entity.getTenantId()),
+                location,
+                new VehicleSpeed(entity.getSpeed()),
+                new EngineTemperature(entity.getEngineTempC()),
+                new EngineRpm(entity.getEngineRpm()),
+                Optional.ofNullable(entity.getFuelLevelPct()).map(FuelLevel::new),
+                Optional.ofNullable(entity.getBatteryVoltage()).map(BatteryVoltage::new)
+        );
+    }
+}
+```
+
+##### 3. Convertidores de Atributos JPA (`com.andeva.atelier.platform.iot.infrastructure.persistence.jpa.converters`)
+
+Los convertidores JPA aseguran el mapeo canónico y seguro de tipos enumerados de dominio hacia columnas físicas de base de datos sin depender de ordinales frágiles:
+
+* **`AlertSeverityConverter`:** Mapea `AlertSeverity` hacia `VARCHAR(20)`.
+* **`AlertStatusConverter`:** Mapea `AlertStatus` hacia `VARCHAR(20)`.
+* **`ConnectionTypeConverter`:** Mapea `ConnectionType` hacia `VARCHAR(20)`.
+* **`DeviceStatusConverter`:** Mapea `DeviceStatus` hacia `VARCHAR(20)`.
+* **`FaultSeverityConverter`:** Mapea `FaultSeverity` hacia `VARCHAR(20)`.
+* **`RiskLevelConverter`:** Mapea `RiskLevel` hacia `VARCHAR(20)`.
+
 ---
 
 #### 11.5.5. External Gateways, Cloud Adapters & TimescaleDB Configuration
 
-##### 1. `FirebaseCloudMessagingGatewayImpl`
-* **Paquete:** `com.andeva.atelier.platform.iot.infrastructure.gateways`
-* **Propósito:** Despacho de notificaciones push de alta prioridad utilizando el SDK de Firebase Admin:
-```java
-package com.andeva.atelier.platform.iot.infrastructure.gateways;
+##### 1. `CrmFleetAclAdapter` (`infrastructure.external.acl.crm`)
+* **Paquete:** `com.andeva.atelier.platform.iot.infrastructure.external.acl.crm`
+* **Implementa:** `CrmFleetAclPort`
+* **Propósito:** Conecta con el contexto *Customer & Fleet Management (CRM)* para consultar titulares vehiculares, verificar si la unidad se encuentra debidamente registrada en la plataforma y recuperar tokens de dispositivo FCM para el despacho de notificaciones push de emergencia.
 
-import com.andeva.atelier.platform.iot.application.internal.outboundservices.acl.FirebaseCloudMessagingGateway;
-import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.Message;
-import com.google.firebase.messaging.Notification;
-import org.springframework.stereotype.Service;
+##### 2. `WorkshopOperationsAclAdapter` (`infrastructure.external.acl.mro`)
+* **Paquete:** `com.andeva.atelier.platform.iot.infrastructure.external.acl.mro`
+* **Implementa:** `OperationsAclPort`
+* **Propósito:** Conecta con el catálogo de servicios de mantenimiento del contexto *Workshop Operations (MRO)* (`mro_service_catalog`). Permite que el motor de inferencia predictiva y Spring AI consulten en tiempo real la lista de servicios mecánicos habilitados por el taller automotriz titular, garantizando que toda recomendación técnica preventiva emitida se ancle estrictamente a un servicio facturable real con su respectivo identificador y código.
+
+##### 3. `GroqSpringAiDiagnosticAdapter` (`infrastructure.external.ai.groq`)
+* **Paquete:** `com.andeva.atelier.platform.iot.infrastructure.external.ai.groq`
+* **Implementa:** `AiInferenceDiagnosticPort`
+* **Propósito:** Adaptador perimetral de inferencia analítica sustentado en Spring AI (`ChatClient`). Orquesta el diagnóstico pericial combinando dos dimensiones arquitectónicas fundamentales:
+  1. **Doble Horizonte Temporal:** Evalúa simultáneamente el estado instantáneo de la unidad (últimas lecturas de telemetría y códigos DTC activos no resueltos) y el historial acumulado (agregaciones estadísticas de 30 días calculadas en TimescaleDB mediante `time_bucket('1 day', timestamp)` e historial clínico de fallos).
+  2. **Anclaje Estricto al Catálogo del Taller:** Consulta a través de `OperationsAclPort` los servicios mecánicos disponibles en el taller. Instruye al modelo a priorizar la recomendación de dichos servicios reales con sus códigos normalizados. Si la avería analizada requiere una intervención que el taller no ofrece en su catálogo, el modelo genera una sugerencia preventiva general fundamentada en ingeniería automotriz sin inventar códigos apócrifos.
+
+```java
+package com.andeva.atelier.platform.iot.infrastructure.external.ai.groq;
+
+import com.andeva.atelier.platform.iot.application.internal.outbound.acl.AiInferenceDiagnosticPort;
+import com.andeva.atelier.platform.iot.application.internal.outbound.acl.OperationsAclPort;
+import com.andeva.atelier.platform.iot.domain.model.dto.TelemetryStatisticalSummary;
+import com.andeva.atelier.platform.iot.domain.model.dto.ai.VehicleHealthReportAiDto;
+import com.andeva.atelier.platform.iot.infrastructure.persistence.jpa.entities.VehicleFaultPersistenceEntity;
+import com.andeva.atelier.platform.iot.infrastructure.persistence.jpa.repositories.VehicleFaultPersistenceRepository;
+import com.andeva.atelier.platform.iot.infrastructure.persistence.timescale.repositories.TimescaleTelemetryAnalyticsRepository;
+import com.andeva.atelier.platform.shared.domain.model.ids.TenantId;
+import com.andeva.atelier.platform.shared.domain.model.ids.VehicleId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.prompt.PromptTemplate;
+import org.springframework.ai.converter.BeanOutputConverter;
+import org.springframework.stereotype.Component;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.Map;
+
+@Component
+public class GroqSpringAiDiagnosticAdapter implements AiInferenceDiagnosticPort {
+
+    private static final Logger log = LoggerFactory.getLogger(GroqSpringAiDiagnosticAdapter.class);
+
+    private final ChatClient chatClient;
+    private final TimescaleTelemetryAnalyticsRepository timescaleAnalyticsRepository;
+    private final VehicleFaultPersistenceRepository vehicleFaultPersistenceRepository;
+    private final OperationsAclPort operationsAclPort;
+
+    public GroqSpringAiDiagnosticAdapter(
+            ChatClient.Builder chatClientBuilder,
+            TimescaleTelemetryAnalyticsRepository timescaleAnalyticsRepository,
+            VehicleFaultPersistenceRepository vehicleFaultPersistenceRepository,
+            OperationsAclPort operationsAclPort) {
+        this.chatClient = chatClientBuilder.build();
+        this.timescaleAnalyticsRepository = timescaleAnalyticsRepository;
+        this.vehicleFaultPersistenceRepository = vehicleFaultPersistenceRepository;
+        this.operationsAclPort = operationsAclPort;
+    }
+
+    @Override
+    public VehicleHealthReportAiDto generateVehicleDiagnostic(
+            TenantId tenantId, VehicleId vehicleId, int daysToAnalyze, boolean includeResolvedDtcHistory) {
+
+        // 1. Doble Horizonte Temporal: Extracción de Historial Acumulado (TimescaleDB)
+        Instant since = Instant.now().minus(daysToAnalyze, ChronoUnit.DAYS);
+        List<TelemetryStatisticalSummary> telemetryStats =
+                timescaleAnalyticsRepository.getTelemetryMetricsDaily(vehicleId.value(), since);
+
+        // 2. Doble Horizonte Temporal: Estado Actual y Fallas Activas (PostgreSQL)
+        List<VehicleFaultPersistenceEntity> faults = includeResolvedDtcHistory
+                ? vehicleFaultPersistenceRepository.findAllByVehicleIdOrderByDetectedAtDesc(vehicleId.value())
+                : vehicleFaultPersistenceRepository.findAllByVehicleIdAndIsResolvedFalse(vehicleId.value());
+
+        // 3. Anclaje al Catálogo de Servicios de MRO
+        var availableServices = operationsAclPort.getAvailableWorkshopServices(tenantId);
+
+        // 4. Inferencia con Spring AI y BeanOutputConverter
+        BeanOutputConverter<VehicleHealthReportAiDto> outputConverter =
+                new BeanOutputConverter<>(VehicleHealthReportAiDto.class);
+
+        String promptString = """
+            Eres el motor pericial de diagnóstico automotriz inteligente de la plataforma Atelier.
+            Analiza el estado mecánico y emite un informe pericial unificado estructurado.
+
+            CATALOGO DE SERVICIOS DEL TALLER (Prioriza recomendar estos codigos exactos):
+            {serviceCatalog}
+
+            HISTORIAL ACUMULADO DE TELEMETRIA (Ultimos {days} dias en TimescaleDB):
+            {telemetryData}
+
+            HISTORIAL Y ESTADO ACTUAL DE CODIGOS DE AVERIA DTC:
+            {dtcData}
+
+            DIRECTRICES PERICIALES:
+            1. Proporciona el Semaforo Global de Salud y el Resumen Ejecutivo al inicio.
+            2. Si la falla corresponde a un servicio del catalogo, usa su codigo exacto en RecommendedServiceActionDto.
+            3. Si el taller no ofrece el servicio requerido, emite una sugerencia preventiva general sin inventar codigos.
+
+            {format}
+            """;
+
+        PromptTemplate template = new PromptTemplate(promptString);
+        Map<String, Object> modelMap = Map.of(
+                "serviceCatalog", availableServices,
+                "days", daysToAnalyze,
+                "telemetryData", telemetryStats,
+                "dtcData", faults,
+                "format", outputConverter.getFormat()
+        );
+
+        String responseContent = chatClient.prompt(template.create(modelMap)).call().content();
+        return outputConverter.convert(responseContent);
+    }
+}
+```
+
+##### 4. `IoTOutboxMessageRelayAdapter` (`infrastructure.external.messaging.outbox`)
+* **Paquete:** `com.andeva.atelier.platform.iot.infrastructure.external.messaging.outbox`
+* **Propósito:** Retransmisor transaccional en segundo plano que implementa el patrón Transactional Outbox. Realiza sondeos programados sobre la tabla de mensajes pendientes, despachando los eventos de integración hacia RabbitMQ o Kafka con confirmación asíncrona y garantías de entrega *at-least-once*.
+
+##### 5. `FirebaseCloudMessagingGatewayAdapter` (`infrastructure.external.notification.firebase`)
+* **Paquete:** `com.andeva.atelier.platform.iot.infrastructure.external.notification.firebase`
+* **Implementa:** `FcmNotificationAclPort`
+* **Propósito:** Adaptador que aísla el SDK oficial de Google Firebase Admin (`com.google.firebase.messaging`), estructurando y despachando notificaciones push de alta prioridad con carga útil enriquecida hacia las aplicaciones móviles de conductores y recepcionistas de taller:
+
+```java
+package com.andeva.atelier.platform.iot.infrastructure.external.notification.firebase;
+
+import com.andeva.atelier.platform.iot.application.internal.outbound.acl.CrmFleetAclPort;
+import com.andeva.atelier.platform.iot.application.internal.outbound.acl.FcmNotificationAclPort;
+import com.andeva.atelier.platform.shared.domain.model.ids.VehicleId;
+import com.google.firebase.messaging.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
-@Service
-public class FirebaseCloudMessagingGatewayImpl implements FirebaseCloudMessagingGateway {
+@Component
+public class FirebaseCloudMessagingGatewayAdapter implements FcmNotificationAclPort {
+
+    private static final Logger log = LoggerFactory.getLogger(FirebaseCloudMessagingGatewayAdapter.class);
+    private final CrmFleetAclPort crmFleetAclPort;
+
+    public FirebaseCloudMessagingGatewayAdapter(CrmFleetAclPort crmFleetAclPort) {
+        this.crmFleetAclPort = crmFleetAclPort;
+    }
 
     @Override
-    public String sendHighPriorityNotification(String targetToken, String title, String body, Map<String, String> data) {
+    public String sendHighPriorityNotification(VehicleId vehicleId, String title, String body, Map<String, String> data) {
+        String deviceToken = crmFleetAclPort.getDriverFcmDeviceToken(vehicleId);
+        if (deviceToken == null || deviceToken.isBlank()) {
+            log.warn("No se encontro FCM token registrado para el vehiculo {}", vehicleId.value());
+            return null;
+        }
+
         try {
             Message message = Message.builder()
-                    .setToken(targetToken)
+                    .setToken(deviceToken)
                     .setNotification(Notification.builder()
                             .setTitle(title)
                             .setBody(body)
                             .build())
+                    .setAndroidConfig(AndroidConfig.builder()
+                            .setPriority(AndroidConfig.Priority.HIGH)
+                            .setNotification(AndroidNotification.builder()
+                                    .setChannelId("atelier_critical_alerts")
+                                    .setSound("default")
+                                    .build())
+                            .build())
                     .putAllData(data)
                     .build();
 
-            return FirebaseMessaging.getInstance().send(message);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al despachar notificación push vía Firebase FCM: " + e.getMessage(), e);
+            String response = FirebaseMessaging.getInstance().send(message);
+            log.info("Notificacion push enviada con exito para vehiculo {}: {}", vehicleId.value(), response);
+            return response;
+        } catch (FirebaseMessagingException e) {
+            log.error("Fallo el envio de notificacion push FCM para vehiculo {}: {}", vehicleId.value(), e.getMessage());
+            return null;
         }
     }
 }
 ```
 
-##### 2. `WorkshopOperationsAclAdapter`
-* **Paquete:** `com.andeva.atelier.platform.iot.infrastructure.acl`
-* **Propósito:** Cliente de integración remota que consume la fachada OHS de *Workshop Operations (MRO)* para precarga de servicios de mantenimiento automotriz:
-```java
-package com.andeva.atelier.platform.iot.infrastructure.acl;
+##### 6. `OpenPdfVehicleHealthReportGeneratorAdapter` (`infrastructure.external.reporting.openpdf`)
+* **Paquete:** `com.andeva.atelier.platform.iot.infrastructure.external.reporting.openpdf`
+* **Implementa:** `VehicleHealthReportPdfGeneratorPort`
+* **Propósito:** Adaptador de maquetación pericial que implementa `VehicleHealthReportPdfGeneratorPort`. Renderiza el **Informe Pericial Unificado** como un documento técnico único y exhaustivo diseñado para todo el ecosistema del taller automotriz (mecánico de patio, jefe de taller / administrador y conductor / dueño del vehículo).
+* **Estructura Documental del Informe Pericial Unificado:**
+  1. **Encabezado y Membrete Institucional:** Logotipo del taller, número pericial, fecha y datos del vehículo (Placa, VIN, Kilometraje).
+  2. **Semáforo Global de Salud y Resumen Ejecutivo al Inicio:** Presentación inmediata del estado general (`overallHealthScore` de 0 a 100 con color verde, amarillo o rojo) y síntesis del diagnóstico en lenguaje comprensible tanto para el dueño como para el equipo técnico.
+  3. **Evaluación Detallada de Subsistemas:** Desglose analítico de Motor, Refrigeración, Sistema Eléctrico, Frenos y Transmisión con métricas sensoriales.
+  4. **Matriz de Riesgos Predictivos y Horizontes Temporales:** Severidad y probabilidad matemática de falla inminente.
+  5. **Paquetes de Mantenimiento Sugeridos:** Servicios recomendados anclados a códigos del catálogo del taller con repuestos sugeridos.
+  6. **Correlación Causal DTC vs. Telemetría:** Respaldo pericial con evidencia física registrada en sensores que valida o refuta los códigos de fallo de la ECU.
 
-import com.andeva.atelier.platform.iot.application.internal.outboundservices.acl.OperationsAclService;
-import com.andeva.atelier.platform.mro.interfaces.acl.WorkshopOperationsContextFacade;
-import org.springframework.stereotype.Component;
+##### 7. Script de Inicialización de Hipertabla en TimescaleDB
 
-import java.util.Optional;
-import java.util.UUID;
-
-@Component
-public class WorkshopOperationsAclAdapter implements OperationsAclService {
-    private final Optional<WorkshopOperationsContextFacade> mroFacade;
-
-    public WorkshopOperationsAclAdapter(Optional<WorkshopOperationsContextFacade> mroFacade) {
-        this.mroFacade = mroFacade;
-    }
-
-    @Override
-    public Optional<UUID> findRecommendedServiceIdByDtcCode(String dtcCode) {
-        return mroFacade.flatMap(facade -> facade.findServiceIdByDiagnosticCode(dtcCode));
-    }
-}
-```
-
-##### 3. `CrmFleetAclAdapter`
-* **Paquete:** `com.andeva.atelier.platform.iot.infrastructure.acl`
-* **Propósito:** Cliente de integración remota que consume la fachada OHS de *Customer and Fleet Management (CRM)* para consultar tokens móviles de notificación de conductores y propietarios:
-```java
-package com.andeva.atelier.platform.iot.infrastructure.acl;
-
-import com.andeva.atelier.platform.crm.interfaces.acl.CustomerContextFacade;
-import com.andeva.atelier.platform.iot.application.internal.outboundservices.acl.CrmFleetAclService;
-import org.springframework.stereotype.Component;
-
-import java.util.Optional;
-import java.util.UUID;
-
-@Component
-public class CrmFleetAclAdapter implements CrmFleetAclService {
-    private final Optional<CustomerContextFacade> customerFacade;
-
-    public CrmFleetAclAdapter(Optional<CustomerContextFacade> customerFacade) {
-        this.customerFacade = customerFacade;
-    }
-
-    @Override
-    public Optional<String> findFcmDeviceTokenByVehicleId(UUID vehicleId) {
-        return customerFacade.flatMap(facade -> facade.getPrimaryDriverFcmToken(vehicleId));
-    }
-}
-```
-
-##### 4. Script de Inicialización de Hipertabla en TimescaleDB
 ```sql
--- Extensión TimescaleDB en PostgreSQL 16
-CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;
+-- Creación de la tabla transaccional de registros telemáticos
+CREATE TABLE IF NOT EXISTS telemetry_logs (
+    timestamp TIMESTAMPTZ NOT NULL,
+    vehicle_id UUID NOT NULL,
+    tenant_id UUID NOT NULL,
+    latitude DOUBLE PRECISION,
+    longitude DOUBLE PRECISION,
+    speed INTEGER NOT NULL,
+    engine_temp_c DOUBLE PRECISION NOT NULL,
+    engine_rpm INTEGER NOT NULL,
+    fuel_level_pct DOUBLE PRECISION,
+    battery_voltage DOUBLE PRECISION,
+    CONSTRAINT pk_telemetry_logs PRIMARY KEY (timestamp, vehicle_id)
+);
 
--- Conversión de telemetry_logs a Hypertable con chunks temporales de 7 días
-SELECT create_hypertable('telemetry_logs', 'timestamp', chunk_time_interval => INTERVAL '7 days', if_not_exists => TRUE);
+-- Transformación de la tabla estándar a Hipertabla TimescaleDB con chunks de 7 días
+SELECT create_hypertable(
+    'telemetry_logs',
+    by_range('timestamp', INTERVAL '7 days'),
+    if_not_exists => TRUE
+);
 
--- Política de compresión columnar activa para chunks mayores a 30 días
+-- Índice optimizado para consultas de tacómetro digital en tiempo real
+CREATE INDEX IF NOT EXISTS idx_telemetry_vehicle_time 
+ON telemetry_logs (vehicle_id, timestamp DESC);
+
+-- Habilitación de la política de compresión columnar de TimescaleDB
 ALTER TABLE telemetry_logs SET (
     timescaledb.compress,
     timescaledb.compress_segmentby = 'vehicle_id, tenant_id',
     timescaledb.compress_orderby = 'timestamp DESC'
 );
 
+-- Activación automática de la compresión columnar para particiones con más de 30 días
 SELECT add_compression_policy('telemetry_logs', INTERVAL '30 days', if_not_exists => TRUE);
 ```
 
-##### 5. `VehicleHealthReportPdfGeneratorAdapter`
-* **Paquete:** `com.andeva.atelier.platform.iot.infrastructure.reporting`
-* **Propósito:** Adaptador de renderizado tipográfico que implementa `VehicleHealthReportPdfGeneratorPort`. Inyecta el modelo analítico estructurado `VehicleHealthReportAiDto` en una plantilla XHTML procesada por Thymeleaf y la compila a binario PDF mediante el motor OpenPDF, formateando el membrete de taller, el semáforo de salud mecánica y los paquetes de servicio preventivo recomendados.
-
-##### 6. `VehicleHealthAiDiagnosticService`
-* **Paquete:** `com.andeva.atelier.platform.iot.infrastructure.ai`
-* **Propósito:** Adaptador perimetral de inteligencia artificial estructurada sustentado en Spring AI (`ChatClient`). Extrae vectores estadísticos de telemetría mediante agregaciones continuas `time_bucket()` en TimescaleDB y el historial de averías de `vehicle_faults`, invocando el modelo fundacional con `BeanOutputConverter` para emitir diagnósticos estructurados y tipados en Java 21 Records (`VehicleHealthReportAiDto`).
-* **Estrategia Multiprovisionador y Neutralidad Tecnológica:**
-  El adaptador implementa neutralidad de proveedor (*Vendor Neutrality*) mediante el contrato desacoplado `ChatClient` y la especificación universal de API REST compatible con OpenAI (`/v1/chat/completions`), admitiendo conmutación por perfiles de Spring Boot sin alterar código Java:
-  1. **Groq Cloud LPU (Proveedor Primario en Producción):**
-     * **Arquitectura:** Unidad de Procesamiento de Lenguaje (LPU™) que alcanza velocidades de ~500 tokens/segundo con latencias totales inferiores a 0.8 segundos.
-     * **Modelo Primario (Diagnóstico Profundo):** `llama-3.3-70b-versatile` (Meta AI, 70B). Máxima capacidad de razonamiento causal automotriz para correlacionar desvíos sensoriales con códigos DTC.
-     * **Modelo Secundario (Flotas Masivas):** `llama-3.1-8b-instant` para encolado asíncrono en batch (`POST /health-reports/generate-async`).
-     * **Esquema de Uso:** Plan permanente de desarrollador gratuito sin caducidad de créditos (14,400 solicitudes/día).
-  2. **NVIDIA NIM API Catalog (Alternativa Cloud):**
-     * **Endpoint:** `https://integrate.api.nvidia.com/v1`
-     * **Modelo:** `meta/llama-3.1-70b-instruct` sobre infraestructura NVIDIA H100 Tensor Core. Respaldo secundario en caso de contingencia.
-  3. **Ollama (Despliegue Soberano On-Premise):**
-     * **Endpoint:** `http://localhost:11434` (Docker o Bare-Metal)
-     * **Modelo:** `llama3.1:8b`
-     * **Propósito:** Talleres mecánicos o concesionarias que operen en modalidad autónoma sin enlace continuo a internet o bajo normativas de estricta soberanía de datos locales.
+##### 8. Configuración en `application.yml` para Spring AI con Groq Cloud
 
 ```yaml
-# Configuración en application.yml para Spring AI con Groq Cloud
 spring:
   ai:
     openai:
@@ -1977,7 +2542,7 @@ spring:
 
 ---
 
-### 11.6. 2.6.9.5. Bounded Context Component Level Diagram
+### 11.6. 2.6.9.5. Bounded Context Software Architecture Component Level Diagrams
 
 El siguiente diagrama C4 Component Model (Nivel 3) descompone el contenedor central **API Application** para el Bounded Context **IoT Telemetry & Predictive Maintenance** (paquete canónico `com.andeva.atelier.platform.iot`). Modela la articulación entre controladores perimetrales, orquestadores CQRS, manejadores de eventos y Transactional Outbox, motores analíticos de inferencia predictiva, persistencia híbrida en PostgreSQL 16 y TimescaleDB, fachada Open Host Service (OHS) y pasarelas perimetrales hacia Google Firebase Cloud Messaging v1 y contextos satélite.
 
@@ -1986,7 +2551,7 @@ El siguiente diagrama C4 Component Model (Nivel 3) descompone el contenedor cent
 ##### Definición de Componentes (`iot-components.dsl`)
 ```dsl
 // Definición de componentes del Bounded Context IoT Telemetry & Predictive Maintenance dentro del contenedor API Application
-iot_controllers = component "IoT REST Controllers & Resource Assemblers Component" "Expone endpoints REST perimetrales para ingesta por lotes de telemetría, catálogo de escáneres OBD-II, emparejamiento físico, averías DTC, alertas predictivas y generación/descarga de informes periciales de salud vehicular; valida contratos DTO con Jakarta Validation y proyecta recursos con hipermedios." "Spring MVC, SpringDoc OpenAPI, Jakarta Validation, Spring HATEOAS"
+iot_controllers = component "IoT REST Controllers & Resource Assemblers Component" "Expone endpoints REST perimetrales para ingesta por lotes de telemetría, catálogo de escáneres OBD-II, emparejamiento físico, averías DTC, alertas predictivas y generación/descarga de informes periciales de salud vehicular, valida contratos DTO con Jakarta Validation y proyecta recursos con hipermedios." "Spring MVC, SpringDoc OpenAPI, Jakarta Validation, Spring HATEOAS"
 iot_app_services = component "IoT CQRS Application Services Component" "Orquesta casos de uso de ingesta telemática, montaje de escáneres, resolución de averías DTC, emisión de alertas preventivas y orquestación de diagnósticos periciales asistidos por IA bajo transacciones ACID, canalizando respuestas mediante tipos Result." "Spring Service, Transactional, CQRS"
 iot_event_handlers = component "IoT Event Handlers & Outbox Worker Component" "Procesa eventos de dominio e integración de anomalías detectadas y ráfagas telemáticas procesadas, despachando notificaciones push a conductores y coordinando con el patrón Transactional Outbox." "Spring Events, TransactionalEventListener, Domain Events"
 iot_domain = component "IoT Domain Model & Predictive Analytics Engines Component" "Encapsula invariantes automotrices, agregados Obd2Device, DeviceInstallation, VehicleFault, PredictiveAlert y DtcCatalogEntry, y motores de inferencia térmica y análisis de códigos SAE J2012." "Java 21, Domain Model, Records, Inmutabilidad"
@@ -2082,7 +2647,9 @@ C4Component
 
 ---
 
-### 11.7. 2.6.9.6. Code Level Diagrams
+---
+
+### 11.7. 2.6.9.6. Bounded Context Software Architecture Code Level Diagrams
 
 En esta sección se expone la especificación técnica de menor nivel de abstracción para la arquitectura de software del Bounded Context **IoT Telemetry & Predictive Maintenance**, formalizando las estructuras de datos en memoria, las reglas de consistencia de dominio automotriz y el esquema físico híbrido de persistencia relacional y series temporales.
 

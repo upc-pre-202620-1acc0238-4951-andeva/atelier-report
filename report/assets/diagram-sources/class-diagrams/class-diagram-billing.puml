@@ -236,6 +236,11 @@ package "billing.domain.services" as services #FDFEFE {
         + validateBranchCreationAllowed(subscription: TenantSubscription, plan: SubscriptionPlan, currentBranchCount: int): void
         + validateStaffAdditionAllowed(subscription: TenantSubscription, plan: SubscriptionPlan, currentStaffCount: int): void
         + validateWorkOrderCreationAllowed(subscription: TenantSubscription, plan: SubscriptionPlan, currentMonthlyOrders: int): void
+        + validateObd2DeviceRegistrationAllowed(subscription: TenantSubscription, plan: SubscriptionPlan, currentActiveDevices: int): void
+        + validatePhotoUploadAllowed(subscription: TenantSubscription, plan: SubscriptionPlan, currentOrderPhotos: int): void
+        + validateCompanyCustomerRegistrationAllowed(subscription: TenantSubscription, plan: SubscriptionPlan): void
+        + validateAiReportGenerationAllowed(subscription: TenantSubscription, plan: SubscriptionPlan, currentMonthlyReports: int): void
+        + validateMultiWarehouseTransferAllowed(subscription: TenantSubscription, plan: SubscriptionPlan): void
         + isFeatureEnabled(subscription: TenantSubscription, plan: SubscriptionPlan, featureKey: String): boolean
     }
 
@@ -374,19 +379,36 @@ package "billing.domain.model.valueobjects" as valueobjects #FDFEFE {
     class TenantQuotaLimits <<ValueObject>> {
         - maxBranches: int
         - maxActiveStaff: int
+        - maxActiveObd2Devices: int
+        - maxPhotosPerWorkOrder: int
+        - maxMonthlyAiReports: int
+        - companyRegistrationAllowed: boolean
+        - multiWarehouseAllowed: boolean
+        - marketplaceListed: boolean
+        - maxMonthlyWorkOrders: int
         - iotTelemetryEnabled: boolean
         - aiDiagnosticsEnabled: boolean
-        - maxMonthlyWorkOrders: int
         --
-        + {static} of(branches: int, staff: int, iot: boolean, ai: boolean, orders: int): TenantQuotaLimits
+        + {static} of(branches: int, staff: int, obd2: int, photos: int, aiReports: int, companyAllowed: boolean, multiWhAllowed: boolean, marketplaceListed: boolean, orders: int, iot: boolean, ai: boolean): TenantQuotaLimits
         + canAddBranch(currentCount: int): boolean
         + canAddStaff(currentCount: int): boolean
         + canCreateWorkOrder(currentMonthlyCount: int): boolean
+        + canRegisterObd2Device(currentActiveCount: int): boolean
+        + canUploadPhotos(currentOrderPhotos: int): boolean
+        + canRegisterCompanyCustomer(): boolean
+        + canGenerateAiReport(currentMonthlyCount: int): boolean
+        + canPerformMultiWarehouseTransfer(): boolean
         + maxBranches(): int
         + maxActiveStaff(): int
+        + maxActiveObd2Devices(): int
+        + maxPhotosPerWorkOrder(): int
+        + maxMonthlyAiReports(): int
+        + companyRegistrationAllowed(): boolean
+        + multiWarehouseAllowed(): boolean
+        + marketplaceListed(): boolean
+        + maxMonthlyWorkOrders(): int
         + iotTelemetryEnabled(): boolean
         + aiDiagnosticsEnabled(): boolean
-        + maxMonthlyWorkOrders(): int
     }
 
     class SubscriptionPeriod <<ValueObject>> {
@@ -423,8 +445,9 @@ package "billing.domain.model.valueobjects" as valueobjects #FDFEFE {
 package "billing.domain.model.enums" as enums #FDFEFE {
 
     enum PlanTier {
-        STARTER
-        PROFESSIONAL
+        GO
+        PRO
+        MAX
         ENTERPRISE
     }
 
