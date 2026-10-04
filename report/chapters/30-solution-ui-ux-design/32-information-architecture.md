@@ -220,14 +220,45 @@ En la aplicación móvil para mecánicos y personal de patio, las etiquetas resp
 
 #### 3.1.2.3. SEO Tags and Meta Tags
 
+En el ecosistema de Atelier Workshop, las etiquetas de optimización para motores de búsqueda (SEO) y las metaetiquetas se configuran para posicionar el producto en navegadores web y tiendas de aplicaciones móviles. El objetivo radica en atraer a propietarios de talleres mecánicos que buscan soluciones de digitalización y gestión automotriz.
 
+Para la página web de aterrizaje pública, las etiquetas se enfocan en comunicar el núcleo de valor comercial y técnico:
+
+- **Título (Title):** Atelier Workshop | Software de Gestión y Diagnóstico para Talleres Mecánicos
+- **Descripción Meta (Meta Description):** Digitaliza tu taller mecánico con Atelier Workshop. Controla órdenes de trabajo, inventario FIFO, facturación electrónica SUNAT y telemetría OBD-II en tiempo real.
+- **Palabras Clave (Keywords):** software taller mecánico, gestión automotriz, órdenes de trabajo, inventario FIFO, facturación electrónica, telemetría OBD-II, escáner Bluetooth, SUNAT.
+- **Autor (Author):** Atelier Workshop
+
+Para la aplicación móvil dirigida al personal técnico en patio y foso, se implementa la optimización para tiendas de aplicaciones (ASO) a fin de destacar su funcionalidad operativa y fuera de línea:
+
+- **Título de la Aplicación (Title):** Atelier Workshop: Mecánico y OBD-II
+- **Descripción Corta (Meta Description):** Aplicación móvil para mecánicos. Registra labores, toma fotos periciales y lee códigos de falla con el escáner Bluetooth sin depender de internet.
+- **Palabras Clave (Keywords):** mecánico, taller, OBD-II, códigos de falla, escáner automotriz, diagnóstico, orden de trabajo.
 
 #### 3.1.2.4. Searching Systems
 
+El sistema de búsqueda en Atelier Workshop facilita la recuperación rápida de información operativa y técnica dentro del flujo diario del taller. La barra de búsqueda global y los filtros modulares reducen el tiempo de consulta en catálogos extensos.
 
+Las funciones principales de búsqueda incluyen:
+
+- **Búsqueda por Placa Vehicular:** Permite localizar de inmediato el historial de reparaciones, órdenes de trabajo activas y registros de diagnóstico asociados a un vehículo específico.
+- **Filtros por Estado de Orden:** Facilita la vista rápida de los vehículos en recepción, en diagnóstico, en reparación, listos para entrega o cobrados.
+- **Búsqueda de Inventario y Repuestos:** Ubica piezas por código de fabricante, nombre o lote, advirtiendo sobre el nivel crítico de existencias bajo el método FIFO.
+- **Filtros Temporales e Históricos:** Permite consultar los comprobantes de pago emitidos para la SUNAT, las órdenes finalizadas y las horas laboradas por el personal dentro de un rango de fechas.
 
 #### 3.1.2.5. Navigation Systems
 
+El sistema de navegación de Atelier Workshop asegura que los usuarios mantengan el contexto de su ubicación en la plataforma y accedan a las herramientas con el menor número de interacciones. Se aplican diferentes componentes de navegación según el dispositivo y el perfil del usuario.
 
+**Navegación Global:**
+
+- **Barra de Navegación Web (Top Navigation):** Presente en la página de aterrizaje, ofrece acceso inmediato a la propuesta de valor, los módulos del sistema, los planes de suscripción y el portal de acceso al panel administrativo.
+- **Menú Lateral (Sidebar):** Ubicado en la aplicación web de gestión, agrupa los módulos principales en categorías lógicas (Operación, Abastecimiento, Tributación, Personal) para que el administrador cambie de contexto sin perder de vista los indicadores del taller.
+- **Barra Inferior Móvil (Bottom Navigation):** Implementada en la aplicación móvil de bahía, dispone botones anchos y de fácil alcance pulgar para las herramientas clave del mecánico: Mis Tareas, Escáner, Hallazgos y Perfil.
+
+**Navegación Local y Contextual:**
+
+- **Pestañas (Tabs):** Organizan la información dentro de un mismo módulo, como la separación entre boletas y facturas en facturación electrónica o entre parámetros en vivo y fallas DTC en el escáner.
+- **Navegación por Migas de Pan (Breadcrumbs):** Indica la ruta jerárquica al visualizar detalles profundos, como el desglose de una orden de trabajo o el lote específico de un repuesto, y permite regresar al listado anterior de un solo toque.
 
 \newpage
