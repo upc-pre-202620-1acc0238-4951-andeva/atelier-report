@@ -44,5 +44,6 @@
 |1.1.0|01/10/2026|Huamani Estefanero, Joel|Inserción de User Stories del Website y correciones de la documentación backend de Atelier Workshop.|
 |1.1.2|3/10/2026|Granda Ibarra, Luis Daniel| Inserción del **General Style Guidelines** para el capitulo 3.|
 |1.1.3|3/10/2026|Granda Ibarra, Luis Daniel| Inserción de todo el **Information Architecture** de Atelier.|
-|1.1.3|5/10/2026|Teran Zavala, Mauricio Alejandro|Inserción del **Web Style Guidelines** y **Mobile Style Guidelines**|
+|1.1.3|5/10/2026|Teran Zavala, Mauricio Alejandro|Inserción del **Web Style Guidelines** y **Mobile Style Guidelines** de la plataforma.|
+|1.1.4|6/10/2026|Teran Zavala, Mauricio Alejandro|Inserción de todo el **Landing Page UI Design** de Atelier.|
 \newpage
