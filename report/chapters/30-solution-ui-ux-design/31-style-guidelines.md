@@ -337,7 +337,110 @@ Usamos Git como sistema de control de versiones para gestionar los cambios en lo
 
 #### 3.1.1.3. Mobile Style Guidelines
 
+## 1. Layout and Grid
 
+| Elemento | Guía |
+|---|---|
+| Unidad base | Usar una retícula de 8 dp. Espaciados habituales: 8, 16, 24 y 32 dp. |
+| Márgenes laterales | Mantener 16 dp como margen de contenido en pantallas estándar. |
+| Barra superior | La app bar ocupa 64 dp, debajo de la barra de estado del sistema. Reservar espacio para volver, título, acciones y estado de sincronización sin solaparlos. |
+| Área de contenido | Desplazamiento vertical dentro del contenido. Usar 8 dp de separación inicial y 16–20 dp entre grupos, según densidad. |
+| Navegación inferior | Reservar 80 dp cuando la navegación principal esté presente. El contenido debe terminar antes de esta zona. |
+| Acciones persistentes | Para flujos como recepción o aprobación, ubicar la acción principal en un pie fijo, con fondo y separación suficientes respecto al contenido desplazable. |
+| Columnas | Priorizar una sola columna. Usar dos columnas solo para elementos visuales compactos que se entienden de forma independiente, como las casillas de fotos. |
+| Superficies | Usar tarjetas para agrupar información relacionada, no para cada línea de texto. Radio de tarjeta de 16 dp; campos de 16 dp y chips de 8 dp. |
+
+Organizar la pantalla por prioridad: estado de la tarea y sincronización, información necesaria para decidir, y acción principal. Mantener visibles las acciones críticas cuando sea posible, pero permitir que el contenido largo se desplace. Adaptar la composición a pantallas más estrechas o grandes sin reducir áreas táctiles ni truncar información necesaria.
+
+## 2. Navegación
+
+La navegación principal depende del rol. Mantener etiquetas e iconos consistentes entre pantallas y señalar claramente el destino actual. Las secciones secundarias y los flujos de varios pasos deben mostrar el título y una acción de retorno reconocible.
+
+| Rol | Destinos principales | Uso |
+|---|---|---|
+| Técnico | Inicio, Tareas, OBD-II, Perfil | Barra de navegación inferior con cuatro destinos principales. |
+| Administrador | Inicio, Órdenes, Recepción, Inventario, Configuración | Barra de navegación inferior con cinco destinos principales. |
+
+- Usar navegación inferior solo para destinos principales de uso frecuente; abrir detalles y pasos de una tarea dentro de su flujo.
+- En pantallas secundarias, ubicar «Volver» en la parte superior izquierda y presentar un título descriptivo.
+- En flujos secuenciales, como recepción fotográfica, mostrar progreso por pasos y permitir reconocer cuánto falta.
+- Mantener visible el estado de sincronización en el encabezado de la app: «Al día», «Sincronizando» o «N pendientes» cuando no hay conexión.
+- No usar el color o la posición como única señal del destino actual; combinar el indicador visual con etiquetas legibles y estado accesible.
+- No mezclar destinos de administrador y técnico: cada rol debe ver las secciones que necesita para su trabajo.
+
+## 3. Tipografía Mobile
+
+La familia principal es **Plus Jakarta Sans**. Usar **JetBrains Mono** para datos técnicos, identificadores, mediciones, temporizadores y cifras que se comparan dígito por dígito. En Android, mapear los tamaños a roles tipográficos y expresarlos en `sp`.
+
+| Rol | Tamaño / interlineado de referencia | Uso |
+|---|---:|---|
+| Display | 32 / 40 sp, ExtraBold | Valor o encabezado protagonista de una pantalla puntual. |
+| Headline | 24 / 32 sp, ExtraBold | Título principal o cifra destacada. |
+| Title Large | 20 / 28 sp, Bold | Encabezado de pantalla o sección importante. |
+| Title Medium | 16 / 24 sp, Bold | Títulos de tarjetas, filas y controles. |
+| Body Large | 16 / 24 sp, Regular | Instrucciones y texto que requiere lectura cómoda. |
+| Body Medium | 14 / 20 sp, Regular | Texto general y descripciones breves. |
+| Label Large | 14 / 20 sp, Bold | Etiquetas de acciones y controles. |
+| Label Medium | 12 / 16 sp, SemiBold | Metadatos, etiquetas auxiliares y chips. |
+
+- Mantener una jerarquía clara y frases breves; evitar reducir el texto para hacer caber contenido que debería reorganizarse.
+- Usar cifras monoespaciadas para placa, OT, códigos DTC, lecturas OBD-II, montos y tiempos cuando la alineación facilite la comparación.
+- Evitar usar 12 sp para instrucciones críticas o mensajes de error.
+- Permitir que textos de títulos y descripciones aumenten según el ajuste de accesibilidad del dispositivo; verificar saltos de línea y desplazamiento con tamaños grandes.
+- Usar español claro y directo, explicando términos técnicos cuando sean necesarios. Mantener la misma intención y jerarquía al localizar la interfaz al inglés.
+
+## 4. Colores en contexto móvil
+
+La aplicación ofrece tema oscuro por defecto y tema claro con el mismo nivel de cuidado. En ambos, el contraste debe seguir WCAG AA como mínimo y verificarse en las combinaciones reales de texto, fondo, iconos y controles.
+
+| Token / uso | Color de marca | Aplicación |
+|---|---|---|
+| Primario | `#0071EB` | Acciones principales, selección y énfasis interactivo. |
+| Primario oscuro | `#031A6B` | Acento de marca y contenedores o texto asociados según el tema. |
+| Primario suave | `#69B1FF` | Énfasis azul claro, especialmente en el tema oscuro. |
+| Acento | `#F68B01` | Advertencias y estados que requieren atención. |
+| Acento suave | `#F7B32B` | Variación cálida para espera o advertencia. |
+| Rojo | `#D81222` | Identidad de error o estado crítico; ajustar a variantes accesibles por tema. |
+| Verde | `#00D756` | Identidad de éxito; ajustar a variantes accesibles por tema. |
+| Fondo claro | `#F8F8FA` | Fondo base del tema claro. |
+| Superficie oscura | `#141416` | Fondo base del tema oscuro. |
+| Texto oscuro | `#262626` | Texto principal sobre superficies claras. |
+
+En uso real, preferir los tokens semánticos del tema (primario, superficie, texto, éxito, espera, error e información) en vez de asignar hexadecimales directamente a cada componente. El tema claro y el oscuro pueden usar variantes distintas de una misma identidad cromática para conservar contraste.
+
+- El color siempre debe acompañarse de texto, icono o forma. Por ejemplo, un error incluye icono y explicación, no solo un borde rojo.
+- Reservar el primario para acciones y selección; evitar usarlo como decoración en demasiados elementos simultáneos.
+- Mantener legibles los estados de sincronización y los avisos tanto bajo luz intensa como en entornos oscuros. No comunicar «sin conexión» solo con un tono tenue.
+- Probar contraste de texto normal y texto grande en cada tema, incluyendo chips, botones deshabilitados, campos, foco y mensajes superpuestos.
+- Usar superficies y divisores para separar contenido; no depender exclusivamente de sombras, especialmente en el modo oscuro.
+
+## 5. Interaction Design
+
+La interacción debe funcionar con una mano, atención dividida y guantes. Los controles deben ser previsibles, proporcionar respuesta inmediata y explicar qué ocurrió después de una acción.
+
+- Área táctil mínima de 48 × 48 dp; usar 56 dp para acciones principales y campos. Dejar al menos 8 dp entre objetivos táctiles vecinos.
+- Dar una acción principal clara por pantalla o paso. Usar texto explícito en acciones críticas, por ejemplo «Registrar entrada» o «Completar recepción».
+- En formularios, colocar la etiqueta sobre el campo, mantener una altura cercana a 56 dp y mostrar errores o ayuda junto al campo afectado. No depender del placeholder como única etiqueta.
+- Mostrar estados completos y distinguibles: carga, vacío, correcto, error, sin conexión, guardado pendiente y sincronización en curso.
+- Adoptar un comportamiento offline-first: permitir la captura que pueda completarse sin red, indicar que los datos quedaron guardados localmente y mostrar los pendientes hasta confirmar la sincronización. Evitar presentar una acción como enviada si todavía está pendiente.
+- Confirmar acciones destructivas o difíciles de revertir. Para errores recuperables, ofrecer una salida concreta, como reintentar o corregir el dato.
+- Mantener el progreso y las acciones principales visibles en flujos largos; evitar ocultar botones detrás de la navegación o del teclado.
+- Usar retroalimentación táctil y visual breve. El estado de foco debe ser visible y el estado presionado no debe cambiar la posición ni el tamaño del contenido de forma inesperada.
+- Usar animación solo para comunicar transición o cambio de estado. Respetar «reducir movimiento» del sistema y asegurar que la interfaz siga siendo comprensible sin animaciones.
+- No exigir gestos como deslizar o mantener pulsado cuando la acción no tenga una alternativa visible.
+
+## 6. Accesibilidad
+
+- Cumplir WCAG AA como piso para contraste y legibilidad en ambos temas. Revisar también estados deshabilitados, error, espera, foco y texto sobre imágenes.
+- Usar tamaños en `sp` en Android y respetar el escalado de fuente del usuario. El contenido debe reorganizarse, no desaparecer, cuando el texto crece.
+- Mantener objetivos táctiles de al menos 48 dp, con 56 dp para acciones principales y separación mínima de 8 dp.
+- Acompañar color con etiqueta, icono o texto. Los gráficos deben incluir una descripción o alternativa textual para comunicar los valores relevantes.
+- Proporcionar nombres accesibles para botones de solo icono, controles y estados. Usar orden de lectura lógico y semántica nativa de Android para campos, botones, pestañas, progreso y navegación.
+- No truncar mensajes de error, instrucciones, unidades o valores necesarios para completar una tarea. Permitir desplazamiento cuando el contenido supere el alto disponible.
+- Redactar mensajes con lenguaje simple, directo y respetuoso; evitar jerga innecesaria, especialmente en asistencia, pagos y errores.
+- Asegurar foco visible para navegación compatible y que el foco siga un orden coherente. No comunicar interacción solo mediante hover, color o sonido.
+- Respetar la preferencia del sistema para reducir animaciones y no usar destellos o movimiento continuo innecesario.
+- Validar pantallas con TalkBack, escala de fuente ampliada, contraste alto, tema claro y oscuro, y uso real bajo iluminación variable.
 
 \newpage
 
