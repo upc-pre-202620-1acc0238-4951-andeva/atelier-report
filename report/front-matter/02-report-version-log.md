@@ -42,5 +42,7 @@
 |0.41.0|15/09/2026|Huamani Estefanero, Joel|Reestructuración y reformulación integral de las 10 Epics, 43 ***User Stories*** como 24 Technical Stories bajo formato BDD Gherkin y el ***Product Backlog***.|
 |0.42.0|16/09/2026|Sanchez Santin, Adiel Abdiaz|Actualización de enlace a tablero Miro de Big Picture EventStorming y redacción de Student Outcome.|
 |1.1.0|01/10/2026|Huamani Estefanero, Joel|Inserción de User Stories del Website y correciones de la documentación backend de Atelier Workshop.|
-
+|1.1.2|3/10/2026|Granda Ibarra, Luis Daniel| Inserción del **General Style Guidelines** para el capitulo 3.|
+|1.1.3|3/10/2026|Granda Ibarra, Luis Daniel| Inserción de todo el **Information Architecture** de Atelier.|
+|1.1.3|5/10/2026|Teran Zavala, Mauricio Alejandro|Inserción del **Web Style Guidelines** y **Mobile Style Guidelines**|
 \newpage
