@@ -139,7 +139,201 @@ Los elementos interactivos del sistema están diseñados para facilitar la manip
 
 #### 3.1.1.2. Web Style Guidelines
 
+## 1. Layout
 
+### 1.1 Estructura general
+
+La página utiliza una estructura de una sola columna, organizada mediante secciones temáticas y separaciones visuales claras. El contenido presenta primero la propuesta del producto, continúa con el problema que resuelve, la explicación de su funcionamiento, las funcionalidades, los roles, los planes, las preguntas frecuentes, el equipo y finaliza con un llamado a la acción. Esta organización permite que el usuario recorra la propuesta de forma progresiva sin perder el contexto general del producto.
+
+### 1.2 Sistema de bloques
+
+La disposición se apoya en componentes reutilizables:
+
+- Secciones con ancho limitado y alineación central.
+- Encabezados con etiqueta visual, título y descripción.
+- Tarjetas con bordes, sombras, fondos contrastantes y espaciación uniforme.
+- Listas de características con iconos de comprobación.
+- Botones primarios y secundarios para acciones concretas.
+- Espaciado vertical consistente entre secciones.
+
+### 1.3 Jerarquía visual
+
+La jerarquía se define principalmente por:
+
+- Tamaños de tipografía diferentes para títulos, subtítulos y textos.
+- Uso de color para resaltar acciones y elementos importantes.
+- Peso visual del primer botón de cada sección.
+- Separación proporcional entre los distintos niveles de información.
+- Elementos gráficos que complementan el contenido sin competir con él.
+
+La importante información debe aparecer en la primera vista de cada sección, mientras que detalles secundarios y extensos se utilizan como apoyo visual o texto complementario.
+
+### 1.4 Paleta de colores
+
+| Color | Uso principal | Observación |
+|---|---|---|
+| Azul principal `#0071eb` | Acciones principales, enlaces y elementos destacados | Debe mantenerse como elemento visual dominante |
+| Azul oscuro `#031a6b` | Títulos, fondos oscuros y contraste de profundidad | Se utiliza para reforzar la identidad institucional |
+| Azul claro `#69b1ff` | Elementos secundarios, fondos suaves y detalles | Ideal para estados de apoyo o fondos de resaltado |
+| Naranja `#f68b01` | Accentos y elementos secundarios | Debe usarse con moderación |
+| Blanco `#ffffff` | Fondos claros y textos sobre fondos oscuros | Proporciona alto contraste |
+| Negro / gris oscuro `#262626` / `#141416` | Textos y fondos oscuros | Mantiene una apariencia moderna y sobria |
+| Verde `#00d756` | Confirmación, estados correctos y mensajes positivos | Se utiliza para representar éxito |
+| Rojo `#d81222` | Errores, mensajes negativos o eliminación | Se usa con claridad y sin exceso |
+
+## 2. Responsive Design
+
+### 2.1 Principio general
+
+El sitio debe adaptarse correctamente a distintos tamaños de pantalla, comenzando por dispositivos móviles y ampliándose hacia tabletas, portátiles y equipos de escritorio. La experiencia debe mantener su legibilidad, navegación y jerarquía visual en cada tamaño.
+
+### 2.2 Breakpoints
+
+El proyecto actualmente emplea reglas de diseño responsivo para adaptar la disposición de los elementos. La navegación, las tarjetas, el contenido de las secciones y los componentes de formulario deben validar su comportamiento en los rangos principales:
+
+| Dispositivo | Rango aproximado | Comportamiento esperado |
+|---|---|---|
+| Smartphone pequeño | 320–479 px | Diseño vertical, navegación compacta y elementos de tamaño táctil |
+| Smartphone grande | 480–767 px | Ajuste de espacios y reducción de contenido redundante |
+| Tablet | 768–1023 px | Aparición de columnas y mejor aprovechamiento del ancho |
+| Laptop | 1024–1439 px | Distribución de dos o más columnas según el contenido |
+| Escritorio amplio | 1440 px o más | Máximo aprovechamiento del ancho sin extender excesivamente las líneas de texto |
+
+Se recomienda verificar además los tamaños de pantalla de 390 px, 768 px y 1440 px, ya que corresponden a escenarios frecuentes de navegación móvil, tablet y escritorio.
+
+### 2.3 Navegación móvil
+
+La navegación en dispositivos pequeños utiliza un menú desplegable. Debe cumplir con las siguientes pautas:
+
+- El menú debe ser fácilmente accesible mediante un botón visible.
+- El estado de apertura debe reflejarse mediante `aria-expanded`.
+- El botón de cierre debe mantenerse visible y accesible.
+- La navegación debe cerrar al seleccionar una opción.
+- El contenido detrás del menú debe mantenerse bloqueado mientras esté abierto.
+- La transición debe ser fluida y no impedir la interacción.
+
+### 2.4 Texto y contenido
+
+- Se debe evitar texturar los bloques con excesivo contenido informativo.
+- Los textos largos deben organizarse en párrafos breves.
+- Las líneas de texto deben mantenerse con una longitud legible.
+- Los botones y enlaces deben tener áreas táctiles apropiadas.
+- Los textos importantes deben conservar contraste suficiente respecto al fondo.
+
+### 2.5 Compatibilidad y pruebas
+
+Antes de cerrar una entrega, es recomendable comprobar el sitio en:
+
+- Navegadores modernos: Chrome, Edge, Firefox y Safari.
+- Dispositivos móviles reales y emuladores.
+- Orientación horizontal y vertical.
+- Zoom del navegador en 200%.
+- Pantallas con diferentes factores de pixel density.
+- Sistemas con modo claro y oscuro.
+
+## 3. Interaction Design
+
+### 3.1 Interacciones principales
+
+El sitio utiliza animaciones para crear una presentación inicial, revelar contenido y dar continuidad visual. Las interacciones principales incluyen:
+
+- Entrada de la animación inicial del logotipo.
+- Desplazamiento de contenidos mediante efectos de revelación.
+- Cambio entre temas claro y oscuro.
+- Cambio entre los idiomas español e inglés.
+- Apertura y cierre del menú móvil.
+- Apertura de las preguntas frecuentes.
+- Cambio de frecuencia de pago y actualización de precios.
+- Apertura del modal para solicitar una demostración.
+- Botones de instalación que enlazan con la aplicación móvil o la versión web.
+
+### 3.2 Comportamiento de los botones
+
+Los botones deben:
+
+- Mostrar efecto visual al pasar el cursor.
+- Proporcionar un estado de foco visible.
+- Mantener una claridad suficiente en estados activos y presionados.
+- Indicar cuándo una acción está disponible o todavía no implementada.
+- Informar al usuario sobre el resultado de una acción, cuando corresponda.
+
+En particular, los botones de demostración y de instalación deben resultar intuitivos y deben conservar el contexto del plan seleccionado al abrir el formulario.
+
+### 3.3 Animaciones
+
+Las animaciones se utilizan para apoyar la narrativa, no para reemplazarla. Se recomienda:
+
+- Limitar la cantidad de elementos animados simultáneamente.
+- Dar prioridad a una transición breve y natural.
+- Evitar movimientos excesivos que distraigan la lectura.
+- Reducir o eliminar animaciones cuando el usuario habilita `prefers-reduced-motion`.
+- Utilizar animaciones con duración estable para mantener consistencia.
+
+### 3.4 Accesibilidad de interacción
+
+El sitio debe asegurar que todas las acciones sean operables mediante teclado y lectura de pantalla. Para ello:
+
+- Los controles deben tener foco visible.
+- Los enlaces y botones deben tener texto descriptivo o etiquetas apropiadas.
+- Los menus y modales deben gestionar correctamente su estado de accesibilidad.
+- Los elementos con estado desplegable deben informarse mediante propiedades ARIA.
+- Los modales deben bloquear la interacción con el contenido de fondo.
+- El contenido no debe depender únicamente de colores para transmitir información.
+- Los elementos interactivos deben mantener una distancia visual y táctil suficiente.
+
+## 4. Images and Icons
+
+### 4.1 Uso de imágenes
+
+El sitio utiliza imágenes de marca, fotografías de equipo y mockups de teléfono. Las imágenes deben:
+
+- Mantener una proporción adecuada en su contenedor.
+- Usar formatos optimizados para la web.
+- Cargar solo cuando son necesarias.
+- Aplicar atributos de carga diferida cuando el contenido no aparece inicialmente.
+- Usar texto alternativo descriptivo en elementos informativos.
+- Evitar imágenes que disminuyan la legibilidad del contenido.
+
+El mockup del teléfono se utiliza como representación visual de la aplicación y no debe confundirse con una captura real de la plataforma.
+
+### 4.2 Fotografía de equipo
+
+Las fotografías deben presentar una apariencia uniforme:
+
+- Tamaño y proporción similares.
+- Fondo uniforme o composición visual consistente.
+- Sonrisa y expresión profesional.
+- Enfoque limpio y buena exposición.
+- Recorte ajustado a la figura de cada integrante.
+
+### 4.3 Iconografía
+
+La iconografía utiliza Phosphor Icons, un conjunto moderno y uniforme. Se recomienda:
+
+- Mantener un tamaño visual consistente en cada bloque.
+- Usar los mismos estilos cuando comparten una función similar.
+- Evitar mezclar demasiados estilos o familias de iconos.
+- Utilizar iconos para reforzar conceptos, no como reemplazo de textos.
+- Mantener el nivel de detalle apropiado para tamaños pequeños.
+
+### 4.4 Imágenes en modo oscuro
+
+Al utilizar imágenes con fondo claro, debe evaluarse su contraste en modo oscuro. Si una imagen no se adapta correctamente, conviene:
+
+- Añadir un fondo de soporte.
+- Ajustar su brillo o contraste.
+- Usar una versión específica para modo oscuro.
+- Sustituir la imagen por una ilustración más simple.
+
+## 5. Repositorio Central
+
+### 5.1 Organización del proyecto
+
+El proyecto se organiza en archivos para la estructura, los estilos, la lógica, los recursos visuales y la documentación. Esta distribución facilita la actualización del contenido y la mantenibilidad de la página.
+
+### 5.2 Versionado
+
+Usamos Git como sistema de control de versiones para gestionar los cambios en los archivos de estilo y contenido.
 
 #### 3.1.1.3. Mobile Style Guidelines
 
