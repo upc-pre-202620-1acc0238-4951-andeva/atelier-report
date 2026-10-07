@@ -88,7 +88,123 @@ Exhibe el paso final de liberación del vehículo para el cliente. La primera pa
 
 #### 3.1.4.4. Mobile Applications User Flow Diagrams
 
+Un user flow o trayectoria del usuario es un diagrama que consiste en mostrar el trayecto del usuario representado por un diagrama de flujo e indica el camino que debe seguir el usuario para cumplir con un objetivo en específico en la aplicación. Además, el user flow debe determinar estos pasos para completar una experiencia digital satisfactoria para el usuario.
 
+- **User Goal 1:** Usuario (Técnico o Administrador) desea iniciar sesión en su cuenta
+
+**Happy Path**
+
+En esta ruta esperada, el flujo representa el proceso de inicio de sesión exitoso. El usuario es recibido por la pantalla de login, ingresa sus credenciales corporativas y accede a la pantalla de selección de sede operativa. Al confirmar su local de trabajo, ingresa satisfactoriamente a la pantalla principal (Home).
+
+![Userflow de inicio de sesión exitoso.](report/assets/userflows/userflow_1_happypath.png){#fig:userflow-login-happy}
+
+**Unhappy Paths**
+
+En esta ruta alterna, el usuario ha colocado alguna información de su cuenta erróneamente (contraseña incorrecta). El sistema le prohíbe el acceso y le muestra una alerta visual advirtiendo de los intentos restantes antes del bloqueo temporal.
+
+![Userflow de inicio de sesión con credenciales inválidas.](report/assets/userflows/userflow_1_unhappypath.png){#fig:userflow-login-unhappy}
+
+- **User Goal 2:** Usuario desea recuperar su contraseña olvidada
+
+**Happy Path**
+
+En esta ruta esperada, el usuario no recuerda su clave. Accede a la opción de recuperación desde el inicio de sesión, ingresa su correo institucional y solicita las instrucciones. El sistema valida el correo y envía un enlace. Al acceder al enlace, el usuario ingresa y confirma su nueva contraseña, restableciendo su acceso exitosamente.
+
+![Userflow de recuperación de contraseña exitosa.](report/assets/userflows/userflow_2_happypath.png){#fig:userflow-recovery-happy}
+
+**Unhappy Paths**
+
+En esta ruta alterna, el usuario intenta usar un enlace de recuperación que ya ha expirado por tiempo. La aplicación bloquea el cambio de contraseña mostrando una alerta roja ("El enlace venció") y le obliga a solicitar un nuevo enlace para continuar.
+
+![Userflow de recuperación con enlace expirado.](report/assets/userflows/userflow_2_unhappypath.png){#fig:userflow-recovery-unhappy}
+
+- **User Goal 3:** Técnico automotriz desea registrar su asistencia mediante geolocalización
+
+**Happy Path**
+
+En esta ruta esperada, el técnico se encuentra físicamente en el taller. Accede a la vista de "Registrar entrada" donde el mapa interactivo confirma que se encuentra dentro del perímetro (geocerca en verde). El botón se habilita, y al pulsarlo, el sistema registra su jornada exitosamente, regresándolo a la pantalla principal con su estado actualizado.
+
+![Userflow de marcación de asistencia exitosa.](report/assets/userflows/userflow_3_happypath.png){#fig:userflow-asistencia-happy}
+
+**Unhappy Paths**
+
+En esta ruta alterna, el técnico intenta marcar asistencia pero no cumple con los requisitos tecnológicos o de ubicación. El sistema detecta que el GPS del dispositivo está apagado o que el usuario se encuentra muy lejos del centro del taller, bloqueando el botón de registro de entrada de manera preventiva.
+
+![Userflow de marcación de asistencia bloqueada por GPS.](report/assets/userflows/userflow_3_unhappypath.png){#fig:userflow-asistencia-unhappy}
+
+- **User Goal 4:** Administrador o Asesor desea recibir un vehículo y aperturar una Orden de Trabajo (OT)
+
+**Happy Path**
+
+En esta ruta esperada, el encargado busca el vehículo del cliente ingresando la placa en el sistema. Al encontrar coincidencias, confirma la selección y es dirigido al formulario de apertura. Rellena el kilometraje, los síntomas reportados por el cliente y las tareas a realizar. Al guardar, el sistema le genera el ticket de la orden (ej. OT-0424) exitosamente.
+
+![Userflow de apertura de orden de trabajo.](report/assets/userflows/userflow_4_happypath.png){#fig:userflow-recepcion-happy}
+
+- **User Goal 5:** Técnico automotriz desea conectar el escáner OBD-II y leer los códigos de falla
+
+**Happy Path**
+
+En esta ruta esperada, el técnico accede a la sección OBD-II de la aplicación e inicia la búsqueda de dispositivos Bluetooth cercanos. Selecciona el escáner conectado al vehículo, y una vez vinculado correctamente, accede al menú de lectura y presiona la opción para extraer los códigos de falla del motor, visualizando la lista de errores detectados.
+
+![Userflow de lectura de diagnóstico electrónico.](report/assets/userflows/userflow_5_happypath.png){#fig:userflow-obd-happy}
+
+- **User Goal 6:** Técnico automotriz desea imputar (consumir) un repuesto del inventario hacia una tarea activa
+
+**Happy Path**
+
+En esta ruta esperada, el técnico, mientras ejecuta una tarea, se da cuenta de que necesita repuestos. Accede a la opción de "Imputar", busca el ítem en el catálogo de almacén (ej. bujías), ajusta la cantidad necesaria (ej. 4 unidades) validando que haya stock suficiente, y lo asigna directamente a la orden, volviendo a su cronómetro de tarea.
+
+![Userflow de asignación de repuestos.](report/assets/userflows/userflow_6_happypath.png){#fig:userflow-inventario-happy}
+
+- **User Goal 7:** Técnico automotriz desea cerrar una tarea completada
+
+**Happy Path**
+
+En esta ruta esperada, el técnico ha terminado su labor. Accede a la pantalla de "Cerrar tarea" donde el sistema verifica que todos los requisitos de calidad estén cumplidos (checks verdes en "Foto de labor completada" y "Repuestos consumidos"). Al estar todo en orden, el botón principal se habilita y permite confirmar el cierre técnico.
+
+![Userflow de cierre de tarea validado.](report/assets/userflows/userflow_7_happypath.png){#fig:userflow-cierre-happy}
+
+**Unhappy Paths**
+
+En esta ruta alterna, el técnico intenta cerrar la tarea pero olvidó adjuntar la evidencia fotográfica obligatoria. El sistema detecta la omisión, bloquea el botón principal de confirmación, marca el requisito en rojo ("Falta al menos una foto") y le despliega un botón secundario para forzar la captura fotográfica en ese instante.
+
+![Userflow de cierre de tarea bloqueado por falta de evidencia.](report/assets/userflows/userflow_7_unhappypath.png){#fig:userflow-cierre-unhappy}
+
+- **User Goal 8:** Administrador gestiona la resolución de un presupuesto con el cliente
+
+**Happy Path**
+
+En este flujo esperado, el administrador ha generado la proforma y la ha enviado por WhatsApp. El cliente revisa los costos y acepta el presupuesto. El administrador marca el estado como "Aceptado", lo que cambia el estado de la orden a "En progreso", notificando a los técnicos que ya pueden empezar a trabajar.
+
+![Userflow de aprobación de presupuesto.](report/assets/userflows/userflow_8_happypath.png){#fig:userflow-presupuesto-happy}
+
+**Alternative Path (Rechazo)**
+
+En esta ruta alterna, el cliente decide no realizar el servicio por el costo. El administrador marca la proforma como "Rechazada", lo que despliega un modal obligatorio para registrar el motivo de cancelación ("Precio fuera de presupuesto"). Al confirmar, el sistema cancela la orden y libera los repuestos reservados al inventario.
+
+![Userflow de cancelación y rechazo de presupuesto.](report/assets/userflows/userflow_8_unhappypath.png){#fig:userflow-presupuesto-unhappy}
+
+- **User Goal 9:** Administrador desea emitir el comprobante electrónico a SUNAT
+
+**Happy Path**
+
+En esta ruta esperada, el administrador finaliza la orden y procede con la facturación. El sistema envía la petición ("Enviando a SUNAT") y recibe una respuesta positiva casi de inmediato. Se muestra la pantalla de éxito ("Boleta emitida") con el número de comprobante, el código Hash validado y las opciones para descargar el PDF.
+
+![Userflow de emisión de comprobante electrónico.](report/assets/userflows/userflow_9_happypath.png){#fig:userflow-sunat-happy}
+
+**Unhappy Paths**
+
+En esta ruta alterna, ocurre una falla de conexión con los servidores de SUNAT en el momento de la emisión. Para no detener la operatividad del taller, el sistema reserva el número de comprobante, guarda el registro localmente con el estado "Comprobante pendiente" (alerta naranja) y habilita el botón para proceder con el cobro, programando un reintento automático.
+
+![Userflow de error de conectividad con SUNAT.](report/assets/userflows/userflow_9_unhappypath.png){#fig:userflow-sunat-unhappy}
+
+- **User Goal 10:** Administrador desea cobrar el servicio y entregar el vehículo al cliente
+
+**Happy Path**
+
+En este último flujo esperado, el administrador se encuentra en la pasarela de pagos con un saldo pendiente. Registra el abono del cliente (ej. por Efectivo o Yape) de modo que el saldo llegue a cero. Esto habilita la pantalla de entrega, donde el administrador le pide la firma digital al cliente en la pantalla del celular. Al confirmar, se genera el Código QR de pase de salida.
+
+![Userflow de registro de cobro y emisión de pase de salida.](report/assets/userflows/userflow_10_happypath.png){#fig:userflow-cobro-happy}
 
 #### 3.1.4.5. Mobile Applications Prototyping
 
