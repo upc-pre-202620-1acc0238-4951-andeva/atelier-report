@@ -17,35 +17,35 @@ Todos los endpoints documentados en esta especificación se adhieren a los sigui
 
 ## 2. Índice Canónico de Endpoints
 
-| Método | Ruta Relativa | Controlador Java | Permiso Atómico Requerido | Rol Mínimo Sugerido |
-| :--- | :--- | :--- | :--- | :--- |
-| `POST` | `/api/v1/hr/work-shifts` | `WorkShiftsController` | `hr:shifts:manage` | Administrador de Taller |
-| `GET` | `/api/v1/hr/work-shifts` | `WorkShiftsController` | `hr:shifts:read` | Técnico Mecánico |
-| `GET` | `/api/v1/hr/work-shifts/{shiftId}` | `WorkShiftsController` | `hr:shifts:read` | Técnico Mecánico |
-| `PUT` | `/api/v1/hr/work-shifts/{shiftId}` | `WorkShiftsController` | `hr:shifts:manage` | Administrador de Taller |
-| `PATCH` | `/api/v1/hr/work-shifts/{shiftId}/activate` | `WorkShiftsController` | `hr:shifts:manage` | Administrador de Taller |
-| `PATCH` | `/api/v1/hr/work-shifts/{shiftId}/deactivate` | `WorkShiftsController` | `hr:shifts:manage` | Administrador de Taller |
-| `POST` | `/api/v1/hr/attendances/clock-in` | `AttendanceController` | `hr:attendance:clock_in` | Técnico Mecánico |
-| `POST` | `/api/v1/hr/attendances/clock-out` | `AttendanceController` | `hr:attendance:clock_out` | Técnico Mecánico |
-| `POST` | `/api/v1/hr/attendances/{attendanceId}/justify` | `AttendanceController` | `hr:justifications:approve` | Mecánico Jefe |
-| `GET` | `/api/v1/hr/attendances/branch/{branchId}` | `AttendanceController` | `hr:attendance:audit_all` | Mecánico Jefe |
-| `GET` | `/api/v1/hr/attendances/employee/{membershipId}/history` | `AttendanceController` | `hr:attendance:audit_all` / `hr:attendance:read_own` | Técnico Mecánico |
-| `GET` | `/api/v1/hr/attendances/employee/{membershipId}/active` | `AttendanceController` | `hr:attendance:audit_all` / `hr:attendance:read_own` | Técnico Mecánico |
-| `POST` | `/api/v1/hr/payrolls/generate` | `PayrollPaymentsController` | `iam:members:compensate` | Administrador de Taller |
-| `GET` | `/api/v1/hr/payrolls` | `PayrollPaymentsController` | `iam:members:compensate` | Administrador de Taller |
-| `GET` | `/api/v1/hr/payrolls/{payrollId}` | `PayrollPaymentsController` | `iam:members:compensate` | Administrador de Taller |
-| `POST` | `/api/v1/hr/payrolls/{payrollId}/deductions` | `PayrollPaymentsController` | `iam:members:compensate` | Administrador de Taller |
-| `POST` | `/api/v1/hr/payrolls/{payrollId}/bonuses` | `PayrollPaymentsController` | `iam:members:compensate` | Administrador de Taller |
-| `POST` | `/api/v1/hr/payrolls/{payrollId}/calculate` | `PayrollPaymentsController` | `iam:members:compensate` | Administrador de Taller |
-| `POST` | `/api/v1/hr/payrolls/{payrollId}/disburse` | `PayrollPaymentsController` | `iam:members:compensate` | Administrador de Taller |
-| `GET` | `/api/v1/hr/payrolls/export/sunat-rem` | `PayrollPaymentsController` | `hr:plame:export` | Administrador de Taller |
-| `POST` | `/api/v1/hr/employees` | `StaffProfilesController` | `iam:members:manage_roles` | Administrador de Taller |
-| `GET` | `/api/v1/hr/employees/{profileId}` | `StaffProfilesController` | `iam:members:read` | Mecánico Jefe |
-| `GET` | `/api/v1/hr/employees/membership/{membershipId}` | `StaffProfilesController` | `iam:members:read` | Técnico Mecánico |
-| `GET` | `/api/v1/hr/employees/branch/{branchId}` | `StaffProfilesController` | `iam:members:read` | Mecánico Jefe |
-| `PUT` | `/api/v1/hr/employees/{profileId}/shift` | `StaffProfilesController` | `hr:shifts:manage` | Administrador de Taller |
-| `PUT` | `/api/v1/hr/employees/{profileId}/salary` | `StaffProfilesController` | `iam:members:compensate` | Administrador de Taller |
-| `PATCH` | `/api/v1/hr/employees/{profileId}/status` | `StaffProfilesController` | `iam:members:manage_roles` | Administrador de Taller |
+| No. | Método | Ruta Relativa | Controlador Java | Permiso Atómico Requerido | Rol Mínimo Sugerido |
+| :---: | :--- | :--- | :--- | :--- | :--- |
+| 1 | `POST` | `/api/v1/hr/work-shifts` | `WorkShiftsController` | `hr:shifts:manage` | Administrador de Taller |
+| 2 | `GET` | `/api/v1/hr/work-shifts` | `WorkShiftsController` | `hr:shifts:read` | Técnico Mecánico |
+| 3 | `GET` | `/api/v1/hr/work-shifts/{shiftId}` | `WorkShiftsController` | `hr:shifts:read` | Técnico Mecánico |
+| 4 | `PUT` | `/api/v1/hr/work-shifts/{shiftId}` | `WorkShiftsController` | `hr:shifts:manage` | Administrador de Taller |
+| 5 | `PATCH` | `/api/v1/hr/work-shifts/{shiftId}/deactivate` | `WorkShiftsController` | `hr:shifts:manage` | Administrador de Taller |
+| 6 | `PATCH` | `/api/v1/hr/work-shifts/{shiftId}/activate` | `WorkShiftsController` | `hr:shifts:manage` | Administrador de Taller |
+| 7 | `POST` | `/api/v1/hr/attendances/clock-in` | `AttendanceController` | `hr:attendance:clock_in` | Técnico Mecánico |
+| 8 | `POST` | `/api/v1/hr/attendances/clock-out` | `AttendanceController` | `hr:attendance:clock_out` | Técnico Mecánico |
+| 9 | `POST` | `/api/v1/hr/attendances/{attendanceId}/justify` | `AttendanceController` | `hr:justifications:approve` | Mecánico Jefe |
+| 10 | `GET` | `/api/v1/hr/attendances/branch/{branchId}/daily` | `AttendanceController` | `hr:attendance:audit_all` | Mecánico Jefe |
+| 11 | `GET` | `/api/v1/hr/attendances/employee/{membershipId}/history` | `AttendanceController` | `hr:attendance:audit_all` o `hr:attendance:read_own` | Técnico Mecánico |
+| 12 | `GET` | `/api/v1/hr/attendances/employee/{membershipId}/status-today` | `AttendanceController` | `hr:attendance:audit_all` o `hr:attendance:read_own` | Técnico Mecánico |
+| 13 | `POST` | `/api/v1/hr/payrolls/generate` | `PayrollPaymentsController` | `iam:members:compensate` | Administrador de Taller |
+| 14 | `GET` | `/api/v1/hr/payrolls` | `PayrollPaymentsController` | `iam:members:compensate` | Administrador de Taller |
+| 15 | `GET` | `/api/v1/hr/payrolls/{payrollId}` | `PayrollPaymentsController` | `iam:members:compensate` | Administrador de Taller |
+| 16 | `POST` | `/api/v1/hr/payrolls/{payrollId}/deductions` | `PayrollPaymentsController` | `iam:members:compensate` | Administrador de Taller |
+| 17 | `POST` | `/api/v1/hr/payrolls/{payrollId}/bonuses` | `PayrollPaymentsController` | `iam:members:compensate` | Administrador de Taller |
+| 18 | `POST` | `/api/v1/hr/payrolls/{payrollId}/approve` | `PayrollPaymentsController` | `iam:members:compensate` | Administrador de Taller |
+| 19 | `POST` | `/api/v1/hr/payrolls/{payrollId}/disburse` | `PayrollPaymentsController` | `iam:members:compensate` | Administrador de Taller |
+| 20 | `GET` | `/api/v1/hr/payrolls/export/sunat-rem` | `PayrollPaymentsController` | `hr:plame:export` | Administrador de Taller |
+| 21 | `POST` | `/api/v1/hr/employees` | `StaffProfilesController` | `iam:members:manage_roles` | Administrador de Taller |
+| 22 | `GET` | `/api/v1/hr/employees/{profileId}` | `StaffProfilesController` | `iam:members:read` | Mecánico Jefe |
+| 23 | `GET` | `/api/v1/hr/employees/membership/{membershipId}` | `StaffProfilesController` | `iam:members:read` | Técnico Mecánico |
+| 24 | `GET` | `/api/v1/hr/employees/branch/{branchId}` | `StaffProfilesController` | `iam:members:read` | Mecánico Jefe |
+| 25 | `PUT` | `/api/v1/hr/employees/{profileId}/shift` | `StaffProfilesController` | `hr:shifts:manage` | Administrador de Taller |
+| 26 | `PUT` | `/api/v1/hr/employees/{profileId}/salary` | `StaffProfilesController` | `iam:members:compensate` | Administrador de Taller |
+| 27 | `PATCH` | `/api/v1/hr/employees/{profileId}/status` | `StaffProfilesController` | `iam:members:manage_roles` | Administrador de Taller |
 
 ---
 
@@ -379,53 +379,6 @@ Actualiza los parámetros operativos de un turno de trabajo existente, incluyend
 
 ---
 
-### PATCH /api/v1/hr/work-shifts/{shiftId}/activate
-
-#### Identidad Técnica
-* **Controlador:** `com.andeva.atelier.platform.hr.interfaces.rest.WorkShiftsController`
-* **Método Java:** `public ResponseEntity<Void> activateWorkShift(@RequestHeader("X-Tenant-Id") UUID tenantId, @PathVariable("shiftId") UUID shiftId)`
-
-#### Descripción Funcional
-Restaura la vigencia y disponibilidad operativa de un turno laboral que se encontraba deshabilitado. Permite que vuelva a ser asignado a empleados o utilizado en marcaciones presenciales.
-
-#### Seguridad y Autorización
-* **Rol Mínimo:** Administrador de Taller (ROLE_WORKSHOP_ADMINISTRATOR) o Dueño de Taller (ROLE_WORKSHOP_OWNER).
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('hr:shifts:manage')")`
-* **Contexto Multi-Inquilino:** Exige concordancia entre el tenant_id del usuario y el turno objetivo.
-
-#### Parámetros de Petición
-* **Headers Obligatorios:**
-  * `Authorization: Bearer <JWT>`
-  * `X-Tenant-Id: <UUID>`
-* **Path Variables:**
-  * `shiftId` (UUID): Identificador único del turno que se activará
-* **Query Parameters:** Ninguno.
-
-#### Cuerpo de Respuesta (Response DTO)
-* **Estado HTTP:** `204 NO CONTENT`
-#### Errores y Excepciones Semánticas (RFC 7807)
-
-| Código HTTP | Error Type URI | Excepción de Dominio Java | Causa Operativa |
-| :--- | :--- | :--- | :--- |
-| 401 Unauthorized | `https://api.atelier.pe/errors/unauthorized` | `AuthenticationException` | Token JWT ausente o inválido |
-| 403 Forbidden | `https://api.atelier.pe/errors/forbidden` | `AccessDeniedException` | Permisos insuficientes para activar turnos |
-| 404 Not Found | `https://api.atelier.pe/errors/work-shift-not-found` | `WorkShiftNotFoundException` | Turno no encontrado en el taller |
-
-
-```json
-{
-  "type": "https://api.atelier.pe/errors/work-shift-not-found",
-  "title": "Turno No Encontrado",
-  "status": 404,
-  "detail": "No se pudo activar el turno debido a que el identificador no existe en el taller.",
-  "instance": "/api/v1/hr/work-shifts/e3b0c442-98fc-4c14-9afe-0c07c4587999/activate",
-  "timestamp": "2026-10-01T15:34:00Z",
-  "correlationId": "req-shift-404-02"
-}
-```
-
----
-
 ### PATCH /api/v1/hr/work-shifts/{shiftId}/deactivate
 
 #### Identidad Técnica
@@ -468,6 +421,53 @@ Inhabilita un turno laboral para impedir que nuevos colaboradores sean asignados
   "instance": "/api/v1/hr/work-shifts/e3b0c442-98fc-4c14-9afe-0c07c4587999/deactivate",
   "timestamp": "2026-10-01T15:35:00Z",
   "correlationId": "req-shift-404-03"
+}
+```
+
+---
+
+### PATCH /api/v1/hr/work-shifts/{shiftId}/activate
+
+#### Identidad Técnica
+* **Controlador:** `com.andeva.atelier.platform.hr.interfaces.rest.WorkShiftsController`
+* **Método Java:** `public ResponseEntity<Void> activateWorkShift(@RequestHeader("X-Tenant-Id") UUID tenantId, @PathVariable("shiftId") UUID shiftId)`
+
+#### Descripción Funcional
+Restaura la vigencia y disponibilidad operativa de un turno laboral que se encontraba deshabilitado. Permite que vuelva a ser asignado a empleados o utilizado en marcaciones presenciales.
+
+#### Seguridad y Autorización
+* **Rol Mínimo:** Administrador de Taller (ROLE_WORKSHOP_ADMINISTRATOR) o Dueño de Taller (ROLE_WORKSHOP_OWNER).
+* **Permiso Atómico:** `@PreAuthorize("hasAuthority('hr:shifts:manage')")`
+* **Contexto Multi-Inquilino:** Exige concordancia entre el tenant_id del usuario y el turno objetivo.
+
+#### Parámetros de Petición
+* **Headers Obligatorios:**
+  * `Authorization: Bearer <JWT>`
+  * `X-Tenant-Id: <UUID>`
+* **Path Variables:**
+  * `shiftId` (UUID): Identificador único del turno que se activará
+* **Query Parameters:** Ninguno.
+
+#### Cuerpo de Respuesta (Response DTO)
+* **Estado HTTP:** `204 NO CONTENT`
+#### Errores y Excepciones Semánticas (RFC 7807)
+
+| Código HTTP | Error Type URI | Excepción de Dominio Java | Causa Operativa |
+| :--- | :--- | :--- | :--- |
+| 401 Unauthorized | `https://api.atelier.pe/errors/unauthorized` | `AuthenticationException` | Token JWT ausente o inválido |
+| 403 Forbidden | `https://api.atelier.pe/errors/forbidden` | `AccessDeniedException` | Permisos insuficientes para activar turnos |
+| 404 Not Found | `https://api.atelier.pe/errors/work-shift-not-found` | `WorkShiftNotFoundException` | Turno no encontrado en el taller |
+
+
+```json
+{
+  "type": "https://api.atelier.pe/errors/work-shift-not-found",
+  "title": "Turno No Encontrado",
+  "status": 404,
+  "detail": "No se pudo activar el turno debido a que el identificador no existe en el taller.",
+  "instance": "/api/v1/hr/work-shifts/e3b0c442-98fc-4c14-9afe-0c07c4587999/activate",
+  "timestamp": "2026-10-01T15:34:00Z",
+  "correlationId": "req-shift-404-02"
 }
 ```
 
@@ -778,14 +778,14 @@ Permite a un supervisor administrativo o jefe de taller regularizar formalmente 
 
 ---
 
-### GET /api/v1/hr/attendances/branch/{branchId}
+### GET /api/v1/hr/attendances/branch/{branchId}/daily
 
 #### Identidad Técnica
 * **Controlador:** `com.andeva.atelier.platform.hr.interfaces.rest.AttendanceController`
-* **Método Java:** `public ResponseEntity<List<AttendanceResource>> getAttendancesByBranch(@RequestHeader("X-Tenant-Id") UUID tenantId, @PathVariable("branchId") UUID branchId, @RequestParam(value = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date)`
+* **Método Java:** `public ResponseEntity<List<AttendanceResource>> getDailyAttendancesByBranch(@RequestHeader("X-Tenant-Id") UUID tenantId, @PathVariable("branchId") UUID branchId, @RequestParam(value = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date)`
 
 #### Descripción Funcional
-Lista todas las marcaciones presenciales registradas en una sucursal física determinada para una fecha de corte específica. Si no se suministra el parámetro date, el backend asume la fecha actual del servidor en la zona horaria del taller.
+Lista todas las marcaciones presenciales registradas en una sucursal física determinada para una fecha de corte específica. Si no se suministra el parámetro de consulta date, el backend asume la fecha actual del servidor en la zona horaria del taller.
 
 #### Seguridad y Autorización
 * **Rol Mínimo:** Mecánico Jefe (ROLE_CHIEF_MECHANIC) o Administrador de Taller (ROLE_WORKSHOP_ADMINISTRATOR).
@@ -821,7 +821,6 @@ Lista todas las marcaciones presenciales registradas en una sucursal física det
 | `justifiedBy` | `UUID` | Supervisor que aprobó |
 | `justifiedAt` | `Instant` | Marca temporal de justificación |
 
-
 ```json
 [
   {
@@ -841,6 +840,7 @@ Lista todas las marcaciones presenciales registradas en una sucursal física det
   }
 ]
 ```
+
 #### Errores y Excepciones Semánticas (RFC 7807)
 
 | Código HTTP | Error Type URI | Excepción de Dominio Java | Causa Operativa |
@@ -849,19 +849,17 @@ Lista todas las marcaciones presenciales registradas en una sucursal física det
 | 403 Forbidden | `https://api.atelier.pe/errors/forbidden` | `AccessDeniedException` | Permiso hr:attendance:audit_all denegado |
 | 404 Not Found | `https://api.atelier.pe/errors/branch-not-found` | `BranchNotFoundException` | La sucursal solicitada no existe o no corresponde al taller |
 
-
 ```json
 {
   "type": "https://api.atelier.pe/errors/branch-not-found",
   "title": "Sucursal No Encontrada",
   "status": 404,
   "detail": "No se encontro la sede fisica especificada para consultar marcaciones.",
-  "instance": "/api/v1/hr/attendances/branch/b8c3d9a1-4567-4e89-9123-abcdef012999",
+  "instance": "/api/v1/hr/attendances/branch/b8c3d9a1-4567-4e89-9123-abcdef012999/daily",
   "timestamp": "2026-10-01T15:00:00Z",
   "correlationId": "req-branch-att-404-01"
 }
 ```
-
 ---
 
 ### GET /api/v1/hr/attendances/employee/{membershipId}/history
@@ -952,18 +950,18 @@ Recupera el historial cronológico detallado de marcaciones de asistencia de un 
 
 ---
 
-### GET /api/v1/hr/attendances/employee/{membershipId}/active
+### GET /api/v1/hr/attendances/employee/{membershipId}/status-today
 
 #### Identidad Técnica
 * **Controlador:** `com.andeva.atelier.platform.hr.interfaces.rest.AttendanceController`
-* **Método Java:** `public ResponseEntity<AttendanceResource> getActiveAttendance(@RequestHeader("X-Tenant-Id") UUID tenantId, @PathVariable("membershipId") UUID membershipId)`
+* **Método Java:** `public ResponseEntity<AttendanceResource> getTodayAttendanceStatus(@RequestHeader("X-Tenant-Id") UUID tenantId, @PathVariable("membershipId") UUID membershipId)`
 
 #### Descripción Funcional
-Consulta la marcación de asistencia actualmente abierta (con clock_in registrado y clock_out nulo) para un colaborador específico. Permite a los supervisores de patio y a la app móvil verificar si el mecánico se encuentra habilitado para recibir asignaciones de órdenes de trabajo.
+Consulta el estado actual de marcación de asistencia del día para un colaborador específico para su validación operativa en patio. Permite a los supervisores de taller y a la aplicación móvil verificar si el mecánico se encuentra presente con jornada abierta (ON_TIME o LATE tras ingreso), cerrada tras salida o ausente, validando su disponibilidad antes de asignarle órdenes de trabajo.
 
 #### Seguridad y Autorización
 * **Rol Mínimo:** Técnico Mecánico (ROLE_MECHANIC) para su propio estado, o Mecánico Jefe para cualquier técnico.
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('hr:attendance:audit_all o hr:attendance:read_own')")`
+* **Permiso Atómico:** `@PreAuthorize("hasAuthority('hr:attendance:audit_all') or hasAuthority('hr:attendance:read_own')")`
 * **Contexto Multi-Inquilino:** Valida correspondencia entre el membershipId y el tenant_id autenticado.
 
 #### Parámetros de Petición
@@ -980,7 +978,7 @@ Consulta la marcación de asistencia actualmente abierta (con clock_in registrad
 
 | Campo | Tipo Java | Descripción |
 | :--- | :--- | :--- |
-| `id` | `UUID` | Identificador del registro de asistencia activa |
+| `id` | `UUID` | Identificador del registro de asistencia del día |
 | `branchId` | `UUID` | Sucursal del taller donde se encuentra activo |
 | `membershipId` | `UUID` | Membresía del empleado |
 | `shiftId` | `UUID` | Turno en desarrollo |
@@ -993,7 +991,6 @@ Consulta la marcación de asistencia actualmente abierta (con clock_in registrad
 | `justificationReason` | `String` | Descargo si fue justificado |
 | `justifiedBy` | `UUID` | Supervisor |
 | `justifiedAt` | `Instant` | Marca temporal de justificación |
-
 
 ```json
 {
@@ -1012,27 +1009,26 @@ Consulta la marcación de asistencia actualmente abierta (con clock_in registrad
   "justifiedAt": null
 }
 ```
+
 #### Errores y Excepciones Semánticas (RFC 7807)
 
 | Código HTTP | Error Type URI | Excepción de Dominio Java | Causa Operativa |
 | :--- | :--- | :--- | :--- |
 | 401 Unauthorized | `https://api.atelier.pe/errors/unauthorized` | `AuthenticationException` | Token JWT ausente o inválido |
 | 403 Forbidden | `https://api.atelier.pe/errors/forbidden` | `AccessDeniedException` | Permiso denegado para consultar la marcación de este empleado |
-| 404 Not Found | `https://api.atelier.pe/errors/active-attendance-not-found` | `AttendanceRecordNotFoundException` | El colaborador no cuenta con una jornada laboral abierta en este momento |
-
+| 404 Not Found | `https://api.atelier.pe/errors/active-attendance-not-found` | `AttendanceRecordNotFoundException` | El colaborador no presenta una marcación de ingreso registrada para la fecha de hoy |
 
 ```json
 {
   "type": "https://api.atelier.pe/errors/active-attendance-not-found",
-  "title": "Sin Jornada Activa",
+  "title": "Sin Marcacion del Dia",
   "status": 404,
-  "detail": "El colaborador no presenta una marcacion de ingreso activa sin salida registrada.",
-  "instance": "/api/v1/hr/attendances/employee/c2d3e4f5-a6b7-4c8d-9e0f-1a2b3c4d5e6f/active",
+  "detail": "El colaborador no presenta una marcacion de ingreso activa en la jornada actual.",
+  "instance": "/api/v1/hr/attendances/employee/c2d3e4f5-a6b7-4c8d-9e0f-1a2b3c4d5e6f/status-today",
   "timestamp": "2026-10-01T15:05:00Z",
-  "correlationId": "req-active-att-404-01"
+  "correlationId": "req-status-att-404-01"
 }
 ```
-
 ---
 
 ## 5. Endpoints de PayrollPaymentsController
@@ -1592,14 +1588,14 @@ Registra un incentivo económico, bono por productividad, asignación familiar o
 
 ---
 
-### POST /api/v1/hr/payrolls/{payrollId}/calculate
+### POST /api/v1/hr/payrolls/{payrollId}/approve
 
 #### Identidad Técnica
 * **Controlador:** `com.andeva.atelier.platform.hr.interfaces.rest.PayrollPaymentsController`
-* **Método Java:** `public ResponseEntity<PayrollPaymentResource> calculateAndApprovePayroll(@RequestHeader("X-Tenant-Id") UUID tenantId, @PathVariable("payrollId") UUID payrollId)`
+* **Método Java:** `public ResponseEntity<PayrollPaymentResource> approvePayroll(@RequestHeader("X-Tenant-Id") UUID tenantId, @PathVariable("payrollId") UUID payrollId)`
 
 #### Descripción Funcional
-Ejecuta el recálculo matemático formal de la liquidación salarial consolidando base imponible, sumatoria de deducciones y bonos, validando que el saldo neto resultante no sea negativo. Tras el recálculo, congela la nómina pasando su estado de DRAFT a APPROVED para habilitar el desembolso bancario.
+Aprueba formalmente la liquidación salarial fijando los montos definitivos de la nómina mensual o quincenal. Consolida matemáticamente la remuneración básica pactada, deducciones de ley y bonificaciones acumuladas, validando que el saldo neto resultante no sea negativo. Tras la aprobación formal, congela la nómina pasando su estado de DRAFT a APPROVED para autorizar el desembolso bancario.
 
 #### Seguridad y Autorización
 * **Rol Mínimo:** Administrador de Taller (ROLE_WORKSHOP_ADMINISTRATOR) o Dueño de Taller (ROLE_WORKSHOP_OWNER).
@@ -1611,7 +1607,7 @@ Ejecuta el recálculo matemático formal de la liquidación salarial consolidand
   * `Authorization: Bearer <JWT>`
   * `X-Tenant-Id: <UUID>`
 * **Path Variables:**
-  * `payrollId` (UUID): Identificador único de la liquidación que se recalcula y aprueba
+  * `payrollId` (UUID): Identificador único de la liquidación que se aprueba formalmente
 * **Query Parameters:** Ninguno.
 
 #### Cuerpo de Respuesta (Response DTO)
@@ -1633,7 +1629,6 @@ Ejecuta el recálculo matemático formal de la liquidación salarial consolidand
 | `paidAt` | `Instant` | Fecha de pago |
 | `paymentReference` | `String` | Referencia bancaria |
 | `items` | `List<PayrollItemResource>` | Partidas analíticas |
-
 
 ```json
 {
@@ -1677,15 +1672,15 @@ Ejecuta el recálculo matemático formal de la liquidación salarial consolidand
   ]
 }
 ```
+
 #### Errores y Excepciones Semánticas (RFC 7807)
 
 | Código HTTP | Error Type URI | Excepción de Dominio Java | Causa Operativa |
 | :--- | :--- | :--- | :--- |
 | 401 Unauthorized | `https://api.atelier.pe/errors/unauthorized` | `AuthenticationException` | Token JWT ausente o inválido |
-| 403 Forbidden | `https://api.atelier.pe/errors/forbidden` | `AccessDeniedException` | Permiso denegado para recalcular o aprobar la nómina |
+| 403 Forbidden | `https://api.atelier.pe/errors/forbidden` | `AccessDeniedException` | Permiso denegado para aprobar la nómina |
 | 404 Not Found | `https://api.atelier.pe/errors/payroll-not-found` | `PayrollPaymentNotFoundException` | La liquidación solicitada no existe |
 | 409 Conflict | `https://api.atelier.pe/errors/invalid-total` | `InvalidPayrollModificationException` | El neto resultante es negativo o la nómina no se encuentra en estado DRAFT |
-
 
 ```json
 {
@@ -1693,12 +1688,11 @@ Ejecuta el recálculo matemático formal de la liquidación salarial consolidand
   "title": "Monto Neto Invalido",
   "status": 409,
   "detail": "Las deducciones acumuladas superan la suma de remuneracion basica y bonificaciones, produciendo un saldo negativo.",
-  "instance": "/api/v1/hr/payrolls/d4e5f6a7-b8c9-4012-3456-7890abcdef34/calculate",
+  "instance": "/api/v1/hr/payrolls/d4e5f6a7-b8c9-4012-3456-7890abcdef34/approve",
   "timestamp": "2026-10-01T15:15:00Z",
   "correlationId": "req-calc-409-01"
 }
 ```
-
 ---
 
 ### POST /api/v1/hr/payrolls/{payrollId}/disburse

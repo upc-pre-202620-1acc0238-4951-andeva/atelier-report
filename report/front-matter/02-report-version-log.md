@@ -47,4 +47,5 @@
 |1.1.3|5/10/2026|Teran Zavala, Mauricio Alejandro|Inserción del **Web Style Guidelines** y **Mobile Style Guidelines** de la plataforma.|
 |1.1.4|6/10/2026|Teran Zavala, Mauricio Alejandro|Inserción de todo el **Landing Page UI Design** de Atelier.|
 |1.1.5|07/10/2026|Huamani Estefanero, Joel|Inserción de la sección 4.1 Software Configuration Management (Entornos de desarrollo, GitFlow, Guía de estilos y Configuración de despliegue con C4).|
+|1.2.0|08/10/2026|Huamani Estefanero, Joel|Consolidación del ***Sprint 1***.|
 \newpage

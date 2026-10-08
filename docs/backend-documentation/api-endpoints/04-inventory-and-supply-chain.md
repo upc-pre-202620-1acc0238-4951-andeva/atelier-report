@@ -1,2322 +1,1816 @@
-# Especificación Canónica de Endpoints REST: Inventory & Supply Chain Context
+# Especificacion Canonica de Endpoints: Inventory & Supply Chain Context
 
-Este documento define la especificación técnica exhaustiva y canónica de los 22 endpoints REST correspondientes al Bounded Context **Inventory & Supply Chain Context** (`com.andeva.atelier.platform.inventory`) de la plataforma **Atelier Platform Backend**.
+Este documento constituye la referencia tecnica y exhaustiva de los 18 endpoints expuestos por el Bounded Context **Inventory & Supply Chain Context** (`com.andeva.atelier.platform.inventory`) dentro de la plataforma SaaS **Atelier Platform Backend**.
 
-El contexto gobierna la administración del catálogo de repuestos e insumos automotrices, el directorio homologado de proveedores mayoristas, el aprovisionamiento de stock mediante órdenes de compra multi-producto, la trazabilidad física y contable bajo el algoritmo estricto FIFO (First-In, First-Out) por lotes de adquisición y la detección proactiva de umbrales críticos de reposición mediante alertas automatizadas.
+## 1. Arquitectura de Catalogo, Lotes FIFO y Cadena de Suministro
 
----
+El modulo Inventory & Supply Chain gobierna la custodia fisica y valorizacion financiera de repuestos, lubricantes e insumos automotrices: la catalogacion estandarizada por codigos SKU, la administracion del directorio comercial de proveedores mayoristas, la gestion del ciclo de abastecimiento mediante ordenes de compra, el costeo y asignacion automatizada bajo el algoritmo estricto FIFO (First-In, First-Out) por lote fisico y el monitoreo preventivo de quiebres de stock mediante alertas automatizadas.
 
-## 1. Documentos de Referencia y Fuentes de Verdad
+### 1.1. Principios Fundamentales del Diseno de Dominio
+1. **Algoritmo Determinista FIFO de Costeo y Asignacion por Lote:** El sistema descarta el costeo promedio ponderado tradicional en favor del metodo First-In, First-Out por lote fisico de adquisicion. Cuando una orden de trabajo demanda repuestos, el motor FifoAllocationEngine consume las unidades del lote mas antiguo disponible, asegurando exactitud en el calculo contable del Costo de Ventas (COGS).
+2. **Trazabilidad Documental y Comprobante Probatorio de Factura:** Todo lote ingresado al almacen, sea mediante orden de compra formal o ingreso directo, exige vincular el numero de comprobante fiscal y la URL de la fotografia del documento escaneado en Firebase Storage, impidiendo la creacion de existencias ficticias.
+3. **Directorio Homologado de Proveedores con RUC Validado:** Los proveedores comerciales se auditan contra el padron tributario de SUNAT, exigiendo unicidad de RUC en el ambito de cada taller para asegurar consistencia pericial y tributaria.
+4. **Maquina de Estados de Abastecimiento:** Las ordenes de compra evolucionan mediante un flujo riguroso: DRAFT (confeccion de lineas), ISSUED (formalizada ante el proveedor e inmutable), RECEIVED (conformidad fisica con factura que genera lotes FIFO) o CANCELLED (anulacion justificada antes de la recepcion).
+5. **Monitoreo Proactivo de Umbrales Criticos de Reposicion:** El servicio de aplicacion evalua continuamente el saldo de existencias totales frente al parametro minStock, proyectando alertas reactivas para evitar paralizaciones operativas en bahia.
+6. **Aislamiento Multi-Inquilino y Valuacion Patrimonial:** Todo repuesto, lote, proveedor y orden de compra pertenece estrictamente a un tenantId soberano. La valuacion financiera agrega exclusivamente los lotes fisicos remanentes del taller autenticado.
+7. **Formato Estandar de Errores RFC 7807:** Cualquier transgresion de invariantes de negocio o excepcion tecnica produce una respuesta ProblemDetail estructurada.
 
-* [05-inventory-and-supply-chain.md](file:///home/shouy/development/atelier-report/docs/extended-description-bounded-contexts-backend/05-inventory-and-supply-chain.md): Especificación táctica extendida del Bounded Context Inventory & Supply Chain.
-* [atelier-roles.md](file:///home/shouy/development/atelier-report/docs/backend-documentation/atelier-roles.md): Matriz RBAC, catálogo inmutable de permisos atómicos y asignaciones por rol.
-* [atelier-database-schema.md](file:///home/shouy/development/atelier-report/docs/atelier-database-schema.md): Estructura relacional de tablas de inventario en PostgreSQL.
-* [28-tactical-level-domain-driven-design-2.md](file:///home/shouy/development/atelier-report/report/chapters/20-requirements-development-and-software-solution-design/28-tactical-level-domain-driven-design-2.md): Diseño táctico y diagramas de arquitectura de software.
+### 1.2. Catalogo Maestro de Endpoints de Inventory & Supply Chain
 
----
-
-## 2. Convenciones Globales del API
-
-* **Protocolo y Formato:** RESTful sobre HTTPS, payloads serializados en formato JSON (UTF-8).
-* **Prefijo Canónico de Enrutamiento:** `/api/v1/inventory`
-* **Aislamiento Multi-Inquilino (*Multi-Tenancy*):** Toda petición autenticada requiere el encabezado `Authorization: Bearer <token>`. El identificador de taller (`tenant_id`) se resuelve de forma inmutable desde los claims del token JWT (`claims.tenant_id`) y se valida opcionalmente contra la cabecera `X-Tenant-Id`. Las consultas y mutaciones quedan restringidas al espacio de datos del taller.
-* **Representación de Errores:** Todos los errores de validación, dominio y seguridad siguen estrictamente la norma RFC 7807 (*Problem Details for HTTP APIs*).
-* **Identificadores Técnicos:** Claves primarias universales en formato UUID v4.
-* **Moneda:** Soles peruanos (`PEN`) por defecto.
-
----
-
-## 3. Matriz General de Endpoints (22 Endpoints)
-
-| N° | Método | Ruta Canónica | Controlador | Permiso Atómico | Rol Mínimo |
-| :-: | :---: | :--- | :--- | :--- | :--- |
-| 1 | `GET` | `/api/v1/inventory/parts` | `PartsCatalogController` | `inventory:parts:read` | `ROLE_MECHANIC` |
-| 2 | `POST` | `/api/v1/inventory/parts` | `PartsCatalogController` | `inventory:parts:manage` | `ROLE_INVENTORY_MANAGER` |
-| 3 | `GET` | `/api/v1/inventory/parts/{id}` | `PartsCatalogController` | `inventory:parts:read` | `ROLE_MECHANIC` |
-| 4 | `PUT` | `/api/v1/inventory/parts/{id}` | `PartsCatalogController` | `inventory:parts:manage` | `ROLE_INVENTORY_MANAGER` |
-| 5 | `GET` | `/api/v1/inventory/parts/by-sku/{sku}` | `PartsCatalogController` | `inventory:parts:read` | `ROLE_MECHANIC` |
-| 6 | `GET` | `/api/v1/inventory/parts/by-category/{category}` | `PartsCatalogController` | `inventory:parts:read` | `ROLE_MECHANIC` |
-| 7 | `GET` | `/api/v1/inventory/suppliers` | `SuppliersController` | `inventory:suppliers:read` | `ROLE_INVENTORY_MANAGER` |
-| 8 | `POST` | `/api/v1/inventory/suppliers` | `SuppliersController` | `inventory:suppliers:manage` | `ROLE_INVENTORY_MANAGER` |
-| 9 | `GET` | `/api/v1/inventory/suppliers/{id}` | `SuppliersController` | `inventory:suppliers:read` | `ROLE_INVENTORY_MANAGER` |
-| 10 | `PUT` | `/api/v1/inventory/suppliers/{id}` | `SuppliersController` | `inventory:suppliers:manage` | `ROLE_INVENTORY_MANAGER` |
-| 11 | `GET` | `/api/v1/inventory/purchase-orders` | `PurchaseOrdersController` | `inventory:purchase_orders:read` | `ROLE_INVENTORY_MANAGER` |
-| 12 | `POST` | `/api/v1/inventory/purchase-orders` | `PurchaseOrdersController` | `inventory:purchase_orders:create` | `ROLE_INVENTORY_MANAGER` |
-| 13 | `GET` | `/api/v1/inventory/purchase-orders/{id}` | `PurchaseOrdersController` | `inventory:purchase_orders:read` | `ROLE_INVENTORY_MANAGER` |
-| 14 | `POST` | `/api/v1/inventory/purchase-orders/{id}/receive` | `PurchaseOrdersController` | `inventory:purchase_orders:receive` | `ROLE_INVENTORY_MANAGER` |
-| 15 | `POST` | `/api/v1/inventory/purchase-orders/{id}/cancel` | `PurchaseOrdersController` | `inventory:purchase_orders:cancel` | `ROLE_INVENTORY_MANAGER` |
-| 16 | `GET` | `/api/v1/inventory/batches/by-part/{partId}` | `BatchesController` | `inventory:batches:read` | `ROLE_CHIEF_MECHANIC` |
-| 17 | `POST` | `/api/v1/inventory/batches/receive` | `BatchesController` | `inventory:batches:receive` | `ROLE_INVENTORY_MANAGER` |
-| 18 | `POST` | `/api/v1/inventory/batches/dispatch` | `BatchesController` | `inventory:batches:dispatch_fifo` | `ROLE_MECHANIC` |
-| 19 | `POST` | `/api/v1/inventory/batches/restore` | `BatchesController` | `inventory:batches:restore` | `ROLE_CHIEF_MECHANIC` |
-| 20 | `GET` | `/api/v1/inventory/alerts` | `StockAlertsController` | `inventory:alerts:read` | `ROLE_CHIEF_MECHANIC` |
-| 21 | `POST` | `/api/v1/inventory/alerts/{id}/resolve` | `StockAlertsController` | `inventory:alerts:resolve` | `ROLE_INVENTORY_MANAGER` |
-| 22 | `POST` | `/api/v1/inventory/alerts/evaluate` | `StockAlertsController` | `inventory:alerts:evaluate` | `ROLE_INVENTORY_MANAGER` |
+| No. | Seccion | Metodo | Ruta | Controlador | Metodo Java | Permiso Requerido |
+| :---: | :---: | :---: | :--- | :--- | :--- | :--- |
+| 1 | 2.1 | `POST` | `/api/v1/inventory/items` | `InventoryItemsController` | `createInventoryItem()` | `@PreAuthorize("hasAuthority('inventory:parts:manage')")` |
+| 2 | 2.2 | `GET` | `/api/v1/inventory/items` | `InventoryItemsController` | `getInventoryItems()` | `@PreAuthorize("hasAuthority('inventory:parts:read')")` |
+| 3 | 2.3 | `GET` | `/api/v1/inventory/items/{id}` | `InventoryItemsController` | `getInventoryItemById()` | `@PreAuthorize("hasAuthority('inventory:parts:read')")` |
+| 4 | 2.4 | `PUT` | `/api/v1/inventory/items/{id}` | `InventoryItemsController` | `updateInventoryItem()` | `@PreAuthorize("hasAuthority('inventory:parts:manage')")` |
+| 5 | 2.5 | `GET` | `/api/v1/inventory/items/low-stock` | `InventoryItemsController` | `getLowStockItems()` | `@PreAuthorize("hasAuthority('inventory:parts:read')")` |
+| 6 | 2.6 | `GET` | `/api/v1/inventory/items/valuation` | `InventoryItemsController` | `getInventoryValuation()` | `@PreAuthorize("hasAuthority('inventory:parts:read')")` |
+| 7 | 3.1 | `POST` | `/api/v1/inventory/items/{itemId}/batches` | `InventoryBatchesController` | `addBatch()` | `@PreAuthorize("hasAuthority('inventory:batches:receive')")` |
+| 8 | 3.2 | `GET` | `/api/v1/inventory/items/{itemId}/batches` | `InventoryBatchesController` | `getBatchesByItem()` | `@PreAuthorize("hasAuthority('inventory:parts:read')")` |
+| 9 | 4.1 | `POST` | `/api/v1/inventory/suppliers` | `SuppliersController` | `createSupplier()` | `@PreAuthorize("hasAuthority('inventory:suppliers:manage')")` |
+| 10 | 4.2 | `GET` | `/api/v1/inventory/suppliers` | `SuppliersController` | `getSuppliers()` | `@PreAuthorize("hasAuthority('inventory:suppliers:read')")` |
+| 11 | 4.3 | `GET` | `/api/v1/inventory/suppliers/{id}` | `SuppliersController` | `getSupplierById()` | `@PreAuthorize("hasAuthority('inventory:suppliers:read')")` |
+| 12 | 4.4 | `PUT` | `/api/v1/inventory/suppliers/{id}` | `SuppliersController` | `updateSupplier()` | `@PreAuthorize("hasAuthority('inventory:suppliers:manage')")` |
+| 13 | 5.1 | `POST` | `/api/v1/inventory/purchase-orders` | `PurchaseOrdersController` | `createPurchaseOrder()` | `@PreAuthorize("hasAuthority('inventory:purchase_orders:create')")` |
+| 14 | 5.2 | `GET` | `/api/v1/inventory/purchase-orders` | `PurchaseOrdersController` | `getPurchaseOrders()` | `@PreAuthorize("hasAuthority('inventory:purchase_orders:read')")` |
+| 15 | 5.3 | `POST` | `/api/v1/inventory/purchase-orders/{id}/items` | `PurchaseOrdersController` | `addPurchaseOrderItem()` | `@PreAuthorize("hasAuthority('inventory:purchase_orders:create')")` |
+| 16 | 5.4 | `PUT` | `/api/v1/inventory/purchase-orders/{id}/issue` | `PurchaseOrdersController` | `issuePurchaseOrder()` | `@PreAuthorize("hasAuthority('inventory:purchase_orders:create')")` |
+| 17 | 5.5 | `PUT` | `/api/v1/inventory/purchase-orders/{id}/receive` | `PurchaseOrdersController` | `receivePurchaseOrder()` | `@PreAuthorize("hasAuthority('inventory:batches:receive')")` |
+| 18 | 5.6 | `PUT` | `/api/v1/inventory/purchase-orders/{id}/cancel` | `PurchaseOrdersController` | `cancelPurchaseOrder()` | `@PreAuthorize("hasAuthority('inventory:purchase_orders:cancel')")` |
 
 ---
 
-## 4. Catálogo Detallado de Endpoints REST
+## 2. Endpoints de Catalogo de Repuestos e Insumos (InventoryItemsController)
 
+### 2.1. [POST] /api/v1/inventory/items
 
-### 4.1. [GET] `/api/v1/inventory/parts`
+**Creacion de Nuevo Repuesto en Catalogo Maestro**
 
-#### Identidad Técnica
-* **Controlador:** `com.andeva.atelier.platform.inventory.interfaces.rest.PartsCatalogController`
-* **Método Java:** `public ResponseEntity<Page<PartSummaryResource>> getParts(Pageable pageable, @RequestParam(required = false) String search, @RequestParam(required = false) String category, @RequestParam(required = false) String status, @RequestParam(required = false) Boolean lowStockOnly)`
-* **Ruta Canónica:** `GET /api/v1/inventory/parts`
-* **Propósito Funcional:** Recupera el listado paginado y filtrado de repuestos e insumos automotrices del catálogo de almacén, proyectando saldos físicos consolidados, precios base y umbrales mínimos de reposición.
+#### Identidad Tecnica
+- **Controlador:** `com.andeva.atelier.platform.inventory.interfaces.rest.controllers.InventoryItemsController`
+- **Metodo Java:** `public ResponseEntity<InventoryItemResource> createInventoryItem(@Valid @RequestBody CreateInventoryItemResource resource)`
+- **Ruta Base:** `/api/v1/inventory/items`
+- **Ruta Completa:** `/api/v1/inventory/items`
+- **Proposito:** Registra una nueva pieza, fluido o repuesto en el catalogo maestro del taller automotriz. Valida la unicidad del codigo SKU en el ambito del taller, define el precio base sugerido, la categoria de clasificacion y el umbral de stock minimo para reposicion preventiva. Inicializa el stock total disponible en cero.
 
-#### Seguridad y Autorización
-* **Rol Mínimo Requerido:** `ROLE_MECHANIC`
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('inventory:parts:read')")`
-* **Contexto Multi-Inquilino:** Aislamiento multi-inquilino estricto. La petición debe incluir el token JWT en el encabezado Authorization. El filtro perimetral resuelve el tenant_id del token y lo inyecta en el contexto de seguridad. Todas las operaciones en la base de datos se filtran por tenant_id garantizando que ningún taller acceda al catálogo, lotes o proveedores de otra entidad.
+#### Seguridad y Autorizacion
+- **Nivel de Acceso:** Autenticado
+- **Rol Minimo Requerido:** Encargado de Repuestos (ROLE_INVENTORY_MANAGER)
+- **Permiso Atomico:** `@PreAuthorize("hasAuthority('inventory:parts:manage')")`
+- **Aislamiento Multi-Inquilino:** Aislamiento estricto por tenantId resuelto desde el token JWT. El codigo SKU es unico dentro de cada taller.
 
-#### Parámetros de Petición
+#### Parametros de Invocacion
+**Cabeceras HTTP (Headers):**
+- `Authorization: Bearer <token>`
+- `Content-Type: application/json`
+- `Accept: application/json`
 
-**Encabezados HTTP (Headers):**
+**Parametros de Ruta (Path Parameters):**
+No aplica (Sin parametros en la ruta).
 
-| Encabezado | Tipo | Requerido | Descripción |
-| :--- | :--- | :---: | :--- |
-| `Authorization` | `String` | Sí | Token de portador JWT Bearer con claims de usuario y permisos atómicos. |
-| `Accept` | `String` | No | application/json por defecto. |
-| `X-Tenant-Id` | `UUID` | No | Identificador opcional del taller para verificación cruzada de inquilino. |
+**Parametros de Consulta (Query Parameters):**
+No aplica (Sin parametros de consulta en la URL).
 
-**Parámetros de Ruta (Path Parameters):** No aplica.
+#### Recurso de Peticion (Request Body)
+- **Registro Java DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.requests.CreateInventoryItemResource`
+- **Definicion de Campos:**
+| Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripcion |
+| :--- | :--- | :--- | :--- | :--- |
+| name | String | Si | @NotBlank, @Size(max = 150) | Nombre comercial o descripcion tecnica del repuesto |
+| sku | String | Si | @NotBlank, @Size(max = 50) | Codigo SKU alfanumerico estandarizado |
+| category | String | Si | @NotBlank | Categoria funcional (BRAKES, SUSPENSION, ENGINE, FILTERS, FLUIDS, ELECTRICAL) |
+| basePrice | BigDecimal | Si | @NotNull, @Positive | Precio base de venta fijado para el taller |
+| minStock | BigDecimal | Si | @NotNull, @PositiveOrZero | Cantidad minima de seguridad en inventario |
+| currency | String | Si | @NotBlank, @Pattern(regexp = "PEN|USD") | Codigo ISO de la moneda |
 
-**Parámetros de Consulta (Query Parameters):**
-
-| Parámetro | Tipo | Requerido | Valor por Defecto | Descripción |
-| :--- | :--- | :---: | :---: | :--- |
-| `search` | `String` | No | `null` | Término de búsqueda por denominación comercial o código SKU. |
-| `category` | `String` | No | `null` | Familia de repuesto (Frenos, Filtros, Lubricantes, Suspensión, Motor, Eléctrico). |
-| `status` | `String` | No | `null` | Estado operativo del repuesto (active, inactive, discontinued). |
-| `lowStockOnly` | `Boolean` | No | `false` | Filtra exclusivamente aquellos ítems con saldo menor o igual al umbral mínimo. |
-| `page` | `Integer` | No | `0` | Índice de página base cero. |
-| `size` | `Integer` | No | `20` | Cantidad de elementos por bloque. |
-| `sort` | `String` | No | `name,asc` | Criterio y orden de clasificación. |
-
-#### Cuerpo de Petición (Request)
-
-No requiere cuerpo de petición (petición sin contenido o parámetros en URL).
-
-#### Cuerpo de Respuesta (Response)
-
-* **Estatus HTTP de Éxito:** `200 OK`
-* **Java Record DTO:** `org.springframework.data.domain.Page<com.andeva.atelier.platform.inventory.interfaces.rest.resources.PartSummaryResource>`
-
-| Campo | Tipo | Descripción |
-| :--- | :--- | :--- |
-| `content[].id` | `UUID` | Identificador técnico del repuesto. |
-| `content[].sku` | `String` | Código SKU de almacén unívoco en el taller. |
-| `content[].name` | `String` | Denominación comercial del repuesto o fluido. |
-| `content[].category` | `String` | Familia automotriz clasificada. |
-| `content[].basePrice` | `BigDecimal` | Precio sugerido de venta al cliente. |
-| `content[].totalStock` | `BigDecimal` | Saldo físico consolidado disponible en bodega. |
-| `content[].minimumStock` | `BigDecimal` | Umbral de seguridad para reposición automática. |
-| `content[].unitOfMeasure` | `String` | Unidad de medida (UNIDAD, LITRO, JUEGO). |
-| `content[].status` | `String` | Estado del artículo en catálogo (active). |
-| `content[].currency` | `String` | Moneda oficial (PEN). |
-| `content[].createdAt` | `Instant` | Marca temporal de alta en UTC. |
-
-**Ejemplo de Payload JSON (Respuesta Exitosa):**
-
+**Ejemplo de Carga Util JSON (Request):**
 ```json
 {
-  "content": [
-    {
-      "id": "6f2a3b4c-5d6e-7a8b-9c0d-1e2f3a4b5c6d",
-      "sku": "BRM-P83024",
-      "name": "Juego de Pastillas Cerámicas Delanteras Brembo P83024",
-      "category": "Frenos",
-      "basePrice": 450.50,
-      "totalStock": 12.00,
-      "minimumStock": 4.00,
-      "unitOfMeasure": "JUEGO",
-      "status": "active",
-      "currency": "PEN",
-      "createdAt": "2026-02-10T09:00:00Z"
-    }
-  ],
-  "pageable": {
-    "pageNumber": 0,
-    "pageSize": 20
-  },
-  "totalElements": 1,
-  "totalPages": 1,
-  "last": true,
-  "size": 20,
-  "number": 0,
-  "first": true,
-  "empty": false
+  "name": "Filtro de Aceite Blindado Sintetico Mann-Filter",
+  "sku": "FIL-OIL-W712-94",
+  "category": "FILTERS",
+  "basePrice": 45,
+  "minStock": 5,
+  "currency": "PEN"
+}
+```
+
+#### Recurso de Respuesta (Response Body)
+- **Estado HTTP Exitoso:** `201 Created`
+- **Registro Java DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.responses.InventoryItemResource`
+- **Definicion de Campos Proyectados:**
+| Campo | Tipo de Dato | Descripcion |
+| :--- | :--- | :--- |
+| id | UUID | Identificador universal unico del repuesto |
+| tenantId | UUID | Identificador del taller automotriz propietario |
+| name | String | Nombre del repuesto registrado |
+| sku | String | Codigo SKU unico en el taller |
+| category | String | Categoria del repuesto |
+| basePrice | BigDecimal | Precio base de venta |
+| totalStock | BigDecimal | Existencias fisicas consolidadas (0.0 al crear) |
+| minimumStock | BigDecimal | Umbral de stock minimo |
+| status | String | Estado en catalogo (ACTIVE) |
+| currency | String | Moneda de facturacion |
+
+**Ejemplo de Carga Util JSON (Response):**
+```json
+{
+  "id": "018f6c40-7e12-7000-8000-000000000710",
+  "tenantId": "018f6c40-7e12-7000-8000-000000000001",
+  "name": "Filtro de Aceite Blindado Sintetico Mann-Filter",
+  "sku": "FIL-OIL-W712-94",
+  "category": "FILTERS",
+  "basePrice": 45,
+  "totalStock": 0,
+  "minimumStock": 5,
+  "status": "ACTIVE",
+  "currency": "PEN"
 }
 ```
 
 #### Errores y Excepciones de Dominio (RFC 7807)
-
-| Código HTTP | Código RFC 7807 | Excepción de Dominio | Condición de Activación |
-| :---: | :--- | :--- | :--- |
-| 400 | `INVALID_QUERY_PARAMETER` | `IllegalArgumentException` | Parámetro de búsqueda o paginación no conforme. |
-
-**Ejemplo de Respuesta de Error (ProblemDetail RFC 7807):**
-
-```json
-{
-  "type": "https://api.atelier.andeva.pe/errors/invalid-query-parameter",
-  "title": "Parámetro Inválido",
-  "status": 400,
-  "detail": "El valor del parámetro de tamaño de página size debe ser estrictamente positivo.",
-  "instance": "/api/v1/inventory/parts",
-  "code": "INVALID_QUERY_PARAMETER",
-  "timestamp": "2026-10-01T12:00:01Z"
-}
-```
-
----
-
-### 4.2. [POST] `/api/v1/inventory/parts`
-
-#### Identidad Técnica
-* **Controlador:** `com.andeva.atelier.platform.inventory.interfaces.rest.PartsCatalogController`
-* **Método Java:** `public ResponseEntity<PartResource> createPart(@Valid @RequestBody CreatePartResource resource, UriComponentsBuilder ucb)`
-* **Ruta Canónica:** `POST /api/v1/inventory/parts`
-* **Propósito Funcional:** Registra formalmente una nueva referencia técnica en el catálogo de repuestos del taller automotriz, estableciendo código SKU único, familia técnica, precio sugerido y umbral de seguridad.
-
-#### Seguridad y Autorización
-* **Rol Mínimo Requerido:** `ROLE_INVENTORY_MANAGER`
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('inventory:parts:manage')")`
-* **Contexto Multi-Inquilino:** Aislamiento multi-inquilino estricto. La petición debe incluir el token JWT en el encabezado Authorization. El filtro perimetral resuelve el tenant_id del token y lo inyecta en el contexto de seguridad. Todas las operaciones en la base de datos se filtran por tenant_id garantizando que ningún taller acceda al catálogo, lotes o proveedores de otra entidad.
-
-#### Parámetros de Petición
-
-**Encabezados HTTP (Headers):**
-
-| Encabezado | Tipo | Requerido | Descripción |
-| :--- | :--- | :---: | :--- |
-| `Authorization` | `String` | Sí | Token de portador JWT Bearer con claims de usuario y permisos atómicos. |
-| `Content-Type` | `String` | Sí | application/json para el cuerpo del mensaje. |
-| `X-Tenant-Id` | `UUID` | No | Identificador opcional del taller para verificación cruzada de inquilino. |
-
-**Parámetros de Ruta (Path Parameters):** No aplica.
-
-**Parámetros de Consulta (Query Parameters):** No aplica.
-
-#### Cuerpo de Petición (Request)
-
-* **Java Record DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.CreatePartResource`
-
-| Campo | Tipo | Requerido | Validaciones de Dominio | Descripción |
-| :--- | :--- | :---: | :--- | :--- |
-| `name` | `String` | Sí | @NotBlank, @Size(max = 150) | Nombre comercial del repuesto o fluido. |
-| `sku` | `String` | Sí | @NotBlank, @Size(max = 50) | Código SKU único de almacén. |
-| `category` | `String` | Sí | @NotBlank, @Size(max = 50) | Familia de pertenencia (ej. Frenos, Filtros). |
-| `basePrice` | `BigDecimal` | Sí | @NotNull, @DecimalMin("0.00") | Precio de venta sugerido al cliente. |
-| `minimumStock` | `BigDecimal` | Sí | @NotNull, @DecimalMin("0.00") | Nivel de stock mínimo para alertas de reposición. |
-| `unitOfMeasure` | `String` | Sí | @NotBlank, @Size(max = 20) | Unidad de almacenamiento (UNIDAD, LITRO, JUEGO). |
-
-**Ejemplo de Payload JSON (Petición):**
-
-```json
-{
-  "name": "Juego de Pastillas Cerámicas Delanteras Brembo P83024",
-  "sku": "BRM-P83024",
-  "category": "Frenos",
-  "basePrice": 450.50,
-  "minimumStock": 4.00,
-  "unitOfMeasure": "JUEGO"
-}
-```
-
-#### Cuerpo de Respuesta (Response)
-
-* **Estatus HTTP de Éxito:** `201 Created`
-* **Cabecera de Ubicación (*Location Header*):** `/api/v1/inventory/parts/6f2a3b4c-5d6e-7a8b-9c0d-1e2f3a4b5c6d`
-* **Java Record DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.PartResource`
-
-| Campo | Tipo | Descripción |
+| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
 | :--- | :--- | :--- |
-| `id` | `UUID` | Identificador técnico universal del repuesto. |
-| `tenantId` | `UUID` | Identificador del taller titular. |
-| `name` | `String` | Denominación comercial registrada. |
-| `sku` | `String` | Código SKU validado. |
-| `category` | `String` | Familia automotriz asignada. |
-| `basePrice` | `BigDecimal` | Precio base de venta. |
-| `totalStock` | `BigDecimal` | Saldo inicial consolidado (0.00). |
-| `minimumStock` | `BigDecimal` | Umbral crítico de reposición. |
-| `unitOfMeasure` | `String` | Unidad de almacenamiento física. |
-| `status` | `String` | Estado operativo inicial (active). |
-| `createdAt` | `Instant` | Marca temporal de alta en UTC. |
-| `updatedAt` | `Instant` | Marca temporal de modificación en UTC. |
-| `version` | `Long` | Versión optimista de concurrencia. |
+| 400 Bad Request | MethodArgumentNotValidException | Datos de solicitud invalidos o campos en blanco |
+| 409 Conflict | DuplicateSkuException | El codigo SKU ya se encuentra registrado por otro repuesto en el taller |
 
-**Ejemplo de Payload JSON (Respuesta Exitosa):**
-
+**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
 ```json
 {
-  "id": "6f2a3b4c-5d6e-7a8b-9c0d-1e2f3a4b5c6d",
-  "tenantId": "550e8400-e29b-41d4-a716-446655440000",
-  "name": "Juego de Pastillas Cerámicas Delanteras Brembo P83024",
-  "sku": "BRM-P83024",
-  "category": "Frenos",
-  "basePrice": 450.50,
-  "totalStock": 0.00,
-  "minimumStock": 4.00,
-  "unitOfMeasure": "JUEGO",
-  "status": "active",
-  "createdAt": "2026-10-01T12:05:00Z",
-  "updatedAt": "2026-10-01T12:05:00Z",
-  "version": 0
-}
-```
-
-#### Errores y Excepciones de Dominio (RFC 7807)
-
-| Código HTTP | Código RFC 7807 | Excepción de Dominio | Condición de Activación |
-| :---: | :--- | :--- | :--- |
-| 400 | `INVALID_PART_DATA` | `IllegalArgumentException` | Precio base o umbral de stock negativo. |
-| 409 | `ERR_DUPLICATE_SKU` | `DuplicateSkuException` | Ya existe una referencia en el taller con el código SKU indicado. |
-
-**Ejemplo de Respuesta de Error (ProblemDetail RFC 7807):**
-
-```json
-{
-  "type": "https://api.atelier.andeva.pe/errors/duplicate-sku",
-  "title": "Código SKU Duplicado",
+  "type": "https://api.atelier.pe/errors/duplicate-sku",
+  "title": "Codigo SKU Duplicado",
   "status": 409,
-  "detail": "El código SKU 'BRM-P83024' ya se encuentra registrado para otro repuesto en este taller.",
-  "instance": "/api/v1/inventory/parts",
+  "detail": "Ya existe un repuesto en el catalogo con el codigo SKU FIL-OIL-W712-94",
+  "instance": "/api/v1/inventory/items",
   "code": "ERR_DUPLICATE_SKU",
-  "timestamp": "2026-10-01T12:05:01Z"
+  "timestamp": "2026-10-03T15:00:00Z"
 }
 ```
 
 ---
 
-### 4.3. [GET] `/api/v1/inventory/parts/{id}`
+### 2.2. [GET] /api/v1/inventory/items
 
-#### Identidad Técnica
-* **Controlador:** `com.andeva.atelier.platform.inventory.interfaces.rest.PartsCatalogController`
-* **Método Java:** `public ResponseEntity<PartResource> getPartById(@PathVariable UUID id)`
-* **Ruta Canónica:** `GET /api/v1/inventory/parts/{id}`
-* **Propósito Funcional:** Obtiene la información exhaustiva de un repuesto específico del catálogo, con el detalle de existencias consolidadas y parámetros de reaprovisionamiento.
+**Listado de Catalogo de Repuestos con Stock Disponible**
 
-#### Seguridad y Autorización
-* **Rol Mínimo Requerido:** `ROLE_MECHANIC`
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('inventory:parts:read')")`
-* **Contexto Multi-Inquilino:** Aislamiento multi-inquilino estricto. La petición debe incluir el token JWT en el encabezado Authorization. El filtro perimetral resuelve el tenant_id del token y lo inyecta en el contexto de seguridad. Todas las operaciones en la base de datos se filtran por tenant_id garantizando que ningún taller acceda al catálogo, lotes o proveedores de otra entidad.
+#### Identidad Tecnica
+- **Controlador:** `com.andeva.atelier.platform.inventory.interfaces.rest.controllers.InventoryItemsController`
+- **Metodo Java:** `public ResponseEntity<List<InventoryItemSummaryResource>> getInventoryItems()`
+- **Ruta Base:** `/api/v1/inventory/items`
+- **Ruta Completa:** `/api/v1/inventory/items`
+- **Proposito:** Retorna el resumen de todos los repuestos registrados en el catalogo maestro del taller automotriz, incluyendo el saldo consolidado de existencias fisicas y precios base para asignacion en foso.
 
-#### Parámetros de Petición
+#### Seguridad y Autorizacion
+- **Nivel de Acceso:** Autenticado
+- **Rol Minimo Requerido:** Mecanico (ROLE_MECHANIC), Recepcionista (ROLE_RECEPTIONIST) o Encargado de Repuestos (ROLE_INVENTORY_MANAGER)
+- **Permiso Atomico:** `@PreAuthorize("hasAuthority('inventory:parts:read')")`
+- **Aislamiento Multi-Inquilino:** Aislamiento estricto por tenantId del taller en sesion.
 
-**Encabezados HTTP (Headers):**
+#### Parametros de Invocacion
+**Cabeceras HTTP (Headers):**
+- `Authorization: Bearer <token>`
+- `Accept: application/json`
 
-| Encabezado | Tipo | Requerido | Descripción |
-| :--- | :--- | :---: | :--- |
-| `Authorization` | `String` | Sí | Token de portador JWT Bearer con claims de usuario y permisos atómicos. |
-| `Accept` | `String` | No | application/json por defecto. |
-| `X-Tenant-Id` | `UUID` | No | Identificador opcional del taller para verificación cruzada de inquilino. |
+**Parametros de Ruta (Path Parameters):**
+No aplica (Sin parametros en la ruta).
 
-**Parámetros de Ruta (Path Parameters):**
+**Parametros de Consulta (Query Parameters):**
+No aplica (Sin parametros de consulta en la URL).
 
-| Parámetro | Tipo | Requerido | Descripción |
-| :--- | :--- | :---: | :--- |
-| `id` | `UUID` | Sí | Identificador único global del repuesto. |
-
-**Parámetros de Consulta (Query Parameters):** No aplica.
-
-#### Cuerpo de Petición (Request)
-
-No requiere cuerpo de petición (petición sin contenido o parámetros en URL).
-
-#### Cuerpo de Respuesta (Response)
-
-* **Estatus HTTP de Éxito:** `200 OK`
-* **Java Record DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.PartResource`
-
-| Campo | Tipo | Descripción |
+#### Recurso de Respuesta (Response Body)
+- **Estado HTTP Exitoso:** `200 OK`
+- **Registro Java DTO:** `java.util.List<com.andeva.atelier.platform.inventory.interfaces.rest.resources.responses.InventoryItemSummaryResource>`
+- **Definicion de Campos Proyectados:**
+| Campo | Tipo de Dato | Descripcion |
 | :--- | :--- | :--- |
-| `id` | `UUID` | Identificador técnico del repuesto. |
-| `tenantId` | `UUID` | Identificador del taller titular. |
-| `name` | `String` | Denominación comercial. |
-| `sku` | `String` | Código SKU de almacén. |
-| `category` | `String` | Familia automotriz. |
-| `basePrice` | `BigDecimal` | Precio sugerido de venta. |
-| `totalStock` | `BigDecimal` | Saldo físico consolidado. |
-| `minimumStock` | `BigDecimal` | Umbral de seguridad. |
-| `unitOfMeasure` | `String` | Unidad de medida. |
-| `status` | `String` | Estado operativo (active). |
-| `createdAt` | `Instant` | Marca temporal de creación. |
-| `updatedAt` | `Instant` | Marca temporal de modificación. |
+| id | UUID | Identificador unico del repuesto |
+| name | String | Nombre comercial del repuesto |
+| sku | String | Codigo SKU de identificacion |
+| category | String | Categoria funcional |
+| basePrice | BigDecimal | Precio de venta al publico |
+| totalStock | BigDecimal | Saldo total consolidado disponible |
+| currency | String | Divisa de facturacion |
 
-**Ejemplo de Payload JSON (Respuesta Exitosa):**
+**Ejemplo de Carga Util JSON (Response):**
+```json
+[
+  {
+    "id": "018f6c40-7e12-7000-8000-000000000701",
+    "name": "Juego de Pastillas Ceramicas Delanteras Bosch",
+    "sku": "BRK-PAD-BOSCH-01",
+    "category": "BRAKES",
+    "basePrice": 180,
+    "totalStock": 8,
+    "currency": "PEN"
+  },
+  {
+    "id": "018f6c40-7e12-7000-8000-000000000710",
+    "name": "Filtro de Aceite Blindado Sintetico Mann-Filter",
+    "sku": "FIL-OIL-W712-94",
+    "category": "FILTERS",
+    "basePrice": 45,
+    "totalStock": 12,
+    "currency": "PEN"
+  }
+]
+```
 
+#### Errores y Excepciones de Dominio (RFC 7807)
+| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
+| :--- | :--- | :--- |
+| 401 Unauthorized | BadCredentialsException | Token JWT ausente o no valido |
+| 403 Forbidden | AccessDeniedException | Privilegio insuficiente inventory:parts:read |
+
+**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
 ```json
 {
-  "id": "6f2a3b4c-5d6e-7a8b-9c0d-1e2f3a4b5c6d",
-  "tenantId": "550e8400-e29b-41d4-a716-446655440000",
-  "name": "Juego de Pastillas Cerámicas Delanteras Brembo P83024",
-  "sku": "BRM-P83024",
-  "category": "Frenos",
-  "basePrice": 450.50,
-  "totalStock": 12.00,
-  "minimumStock": 4.00,
-  "unitOfMeasure": "JUEGO",
-  "status": "active",
-  "createdAt": "2026-02-10T09:00:00Z",
-  "updatedAt": "2026-10-01T11:00:00Z",
-  "version": 4
+  "type": "https://api.atelier.pe/errors/access-denied",
+  "title": "Acceso Denegado",
+  "status": 403,
+  "detail": "No cuenta con el privilegio requerido inventory:parts:read para consultar el catalogo de repuestos",
+  "instance": "/api/v1/inventory/items",
+  "code": "ACCESS_DENIED",
+  "timestamp": "2026-10-03T15:05:00Z"
+}
+```
+
+---
+
+### 2.3. [GET] /api/v1/inventory/items/{id}
+
+**Detalle de Repuesto con Desglose de Lotes FIFO Activos**
+
+#### Identidad Tecnica
+- **Controlador:** `com.andeva.atelier.platform.inventory.interfaces.rest.controllers.InventoryItemsController`
+- **Metodo Java:** `public ResponseEntity<InventoryItemDetailResource> getInventoryItemById(@PathVariable UUID id)`
+- **Ruta Base:** `/api/v1/inventory/items`
+- **Ruta Completa:** `/api/v1/inventory/items/{id}`
+- **Proposito:** Recupera la ficha pormenorizada de un repuesto incluyendo la composicion analitica de sus lotes fisicos activos ordenados cronologicamente por fecha de ingreso (FIFO), sus costos unitarios de adquisicion y cantidades remanentes.
+
+#### Seguridad y Autorizacion
+- **Nivel de Acceso:** Autenticado
+- **Rol Minimo Requerido:** Mecanico (ROLE_MECHANIC) o Encargado de Repuestos (ROLE_INVENTORY_MANAGER)
+- **Permiso Atomico:** `@PreAuthorize("hasAuthority('inventory:parts:read')")`
+- **Aislamiento Multi-Inquilino:** Aislamiento estricto por tenantId del taller en sesion.
+
+#### Parametros de Invocacion
+**Cabeceras HTTP (Headers):**
+- `Authorization: Bearer <token>`
+- `Accept: application/json`
+
+**Parametros de Ruta (Path Parameters):**
+- `id` (UUID): Identificador unico del repuesto consultado
+
+**Parametros de Consulta (Query Parameters):**
+No aplica (Sin parametros de consulta en la URL).
+
+#### Recurso de Respuesta (Response Body)
+- **Estado HTTP Exitoso:** `200 OK`
+- **Registro Java DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.responses.InventoryItemDetailResource`
+- **Definicion de Campos Proyectados:**
+| Campo | Tipo de Dato | Descripcion |
+| :--- | :--- | :--- |
+| id | UUID | Identificador unico del repuesto |
+| name | String | Nombre comercial del repuesto |
+| sku | String | Codigo SKU |
+| category | String | Categoria |
+| basePrice | BigDecimal | Precio base de venta |
+| totalStock | BigDecimal | Saldo total de existencias |
+| minimumStock | BigDecimal | Umbral de reposicion minima |
+| currency | String | Moneda |
+| batches | List<InventoryBatchResource> | Listado cronologico de lotes activos bajo algoritmo FIFO |
+
+**Ejemplo de Carga Util JSON (Response):**
+```json
+{
+  "id": "018f6c40-7e12-7000-8000-000000000701",
+  "name": "Juego de Pastillas Ceramicas Delanteras Bosch",
+  "sku": "BRK-PAD-BOSCH-01",
+  "category": "BRAKES",
+  "basePrice": 180,
+  "totalStock": 8,
+  "minimumStock": 4,
+  "currency": "PEN",
+  "batches": [
+    {
+      "id": "018f6c40-7e12-7000-8000-000000000780",
+      "itemId": "018f6c40-7e12-7000-8000-000000000701",
+      "supplierId": "018f6c40-7e12-7000-8000-000000000750",
+      "supplierName": "Distribuidora Automotriz del Centro S.A.C.",
+      "batchNumber": "LOTE-2026-089",
+      "initialQuantity": 10,
+      "remainingQuantity": 3,
+      "unitCost": 110,
+      "currency": "PEN",
+      "arrivalDate": "2026-09-15T09:30:00Z",
+      "receiptImageUrl": "https://firebasestorage.googleapis.com/v0/b/atelier-app.appspot.com/o/tenants%2F018f6c40-7e12-7000-8000-000000000001%2Fbatches%2Ffactura-f001-4921.jpg?alt=media"
+    },
+    {
+      "id": "018f6c40-7e12-7000-8000-000000000781",
+      "itemId": "018f6c40-7e12-7000-8000-000000000701",
+      "supplierId": "018f6c40-7e12-7000-8000-000000000750",
+      "supplierName": "Distribuidora Automotriz del Centro S.A.C.",
+      "batchNumber": "LOTE-2026-112",
+      "initialQuantity": 5,
+      "remainingQuantity": 5,
+      "unitCost": 115,
+      "currency": "PEN",
+      "arrivalDate": "2026-10-01T14:15:00Z",
+      "receiptImageUrl": "https://firebasestorage.googleapis.com/v0/b/atelier-app.appspot.com/o/tenants%2F018f6c40-7e12-7000-8000-000000000001%2Fbatches%2Ffactura-f001-5100.jpg?alt=media"
+    }
+  ]
 }
 ```
 
 #### Errores y Excepciones de Dominio (RFC 7807)
+| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
+| :--- | :--- | :--- |
+| 404 Not Found | InventoryItemNotFoundException | El repuesto solicitado no existe en el catalogo del taller |
 
-| Código HTTP | Código RFC 7807 | Excepción de Dominio | Condición de Activación |
-| :---: | :--- | :--- | :--- |
-| 404 | `ERR_ITEM_NOT_FOUND` | `InventoryItemNotFoundException` | No existe el repuesto con el identificador provisto en el taller. |
-
-**Ejemplo de Respuesta de Error (ProblemDetail RFC 7807):**
-
+**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
 ```json
 {
-  "type": "https://api.atelier.andeva.pe/errors/item-not-found",
+  "type": "https://api.atelier.pe/errors/inventory-item-not-found",
   "title": "Repuesto No Encontrado",
   "status": 404,
-  "detail": "No se localiza el repuesto con ID 6f2a3b4c-5d6e-7a8b-9c0d-1e2f3a4b5c6d.",
-  "instance": "/api/v1/inventory/parts/6f2a3b4c-5d6e-7a8b-9c0d-1e2f3a4b5c6d",
+  "detail": "No se encontro ningun repuesto con el identificador 018f6c40-7e12-7000-8000-000000000701",
+  "instance": "/api/v1/inventory/items/018f6c40-7e12-7000-8000-000000000701",
   "code": "ERR_ITEM_NOT_FOUND",
-  "timestamp": "2026-10-01T12:10:00Z"
+  "timestamp": "2026-10-03T15:10:00Z"
 }
 ```
 
 ---
 
-### 4.4. [PUT] `/api/v1/inventory/parts/{id}`
+### 2.4. [PUT] /api/v1/inventory/items/{id}
 
-#### Identidad Técnica
-* **Controlador:** `com.andeva.atelier.platform.inventory.interfaces.rest.PartsCatalogController`
-* **Método Java:** `public ResponseEntity<PartResource> updatePart(@PathVariable UUID id, @Valid @RequestBody UpdatePartResource resource)`
-* **Ruta Canónica:** `PUT /api/v1/inventory/parts/{id}`
-* **Propósito Funcional:** Actualiza las especificaciones maestras del artículo, modificando el precio sugerido de venta al público, denominación comercial o umbral crítico de reposición.
+**Actualizacion de Parametros y Precios de Repuesto**
 
-#### Seguridad y Autorización
-* **Rol Mínimo Requerido:** `ROLE_INVENTORY_MANAGER`
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('inventory:parts:manage')")`
-* **Contexto Multi-Inquilino:** Aislamiento multi-inquilino estricto. La petición debe incluir el token JWT en el encabezado Authorization. El filtro perimetral resuelve el tenant_id del token y lo inyecta en el contexto de seguridad. Todas las operaciones en la base de datos se filtran por tenant_id garantizando que ningún taller acceda al catálogo, lotes o proveedores de otra entidad.
+#### Identidad Tecnica
+- **Controlador:** `com.andeva.atelier.platform.inventory.interfaces.rest.controllers.InventoryItemsController`
+- **Metodo Java:** `public ResponseEntity<InventoryItemResource> updateInventoryItem(@PathVariable UUID id, @Valid @RequestBody UpdateInventoryItemResource resource)`
+- **Ruta Base:** `/api/v1/inventory/items`
+- **Ruta Completa:** `/api/v1/inventory/items/{id}`
+- **Proposito:** Actualiza los parametros operativos de un repuesto existente en el catalogo: nombre, categoria, precio base de venta fijado y umbral de stock minimo de reposicion. El codigo SKU no es modificable para salvaguardar la trazabilidad historica.
 
-#### Parámetros de Petición
+#### Seguridad y Autorizacion
+- **Nivel de Acceso:** Autenticado
+- **Rol Minimo Requerido:** Encargado de Repuestos (ROLE_INVENTORY_MANAGER)
+- **Permiso Atomico:** `@PreAuthorize("hasAuthority('inventory:parts:manage')")`
+- **Aislamiento Multi-Inquilino:** Aislamiento estricto por tenantId del taller en sesion.
 
-**Encabezados HTTP (Headers):**
+#### Parametros de Invocacion
+**Cabeceras HTTP (Headers):**
+- `Authorization: Bearer <token>`
+- `Content-Type: application/json`
+- `Accept: application/json`
 
-| Encabezado | Tipo | Requerido | Descripción |
-| :--- | :--- | :---: | :--- |
-| `Authorization` | `String` | Sí | Token de portador JWT Bearer con claims de usuario y permisos atómicos. |
-| `Content-Type` | `String` | Sí | application/json para el cuerpo del mensaje. |
-| `X-Tenant-Id` | `UUID` | No | Identificador opcional del taller para verificación cruzada de inquilino. |
+**Parametros de Ruta (Path Parameters):**
+- `id` (UUID): Identificador unico del repuesto a actualizar
 
-**Parámetros de Ruta (Path Parameters):**
+**Parametros de Consulta (Query Parameters):**
+No aplica (Sin parametros de consulta en la URL).
 
-| Parámetro | Tipo | Requerido | Descripción |
-| :--- | :--- | :---: | :--- |
-| `id` | `UUID` | Sí | Identificador único del repuesto a modificar. |
+#### Recurso de Peticion (Request Body)
+- **Registro Java DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.requests.UpdateInventoryItemResource`
+- **Definicion de Campos:**
+| Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripcion |
+| :--- | :--- | :--- | :--- | :--- |
+| name | String | Si | @NotBlank, @Size(max = 150) | Nombre comercial actualizado del repuesto |
+| category | String | Si | @NotBlank | Categoria funcional rectificada |
+| basePrice | BigDecimal | Si | @NotNull, @Positive | Nuevo precio base de venta |
+| minStock | BigDecimal | Si | @NotNull, @PositiveOrZero | Nuevo umbral de stock minimo |
+| currency | String | Si | @NotBlank, @Pattern(regexp = "PEN|USD") | Codigo ISO de la moneda |
 
-**Parámetros de Consulta (Query Parameters):** No aplica.
-
-#### Cuerpo de Petición (Request)
-
-* **Java Record DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.UpdatePartResource`
-
-| Campo | Tipo | Requerido | Validaciones de Dominio | Descripción |
-| :--- | :--- | :---: | :--- | :--- |
-| `name` | `String` | No | @Size(max = 150) | Denominación comercial corregida. |
-| `category` | `String` | No | @Size(max = 50) | Familia automotriz actualizada. |
-| `basePrice` | `BigDecimal` | No | @DecimalMin("0.00") | Nuevo precio de lista al público. |
-| `minimumStock` | `BigDecimal` | No | @DecimalMin("0.00") | Nuevo umbral de reposición. |
-| `status` | `String` | No | Enum(active, inactive, discontinued) | Estado operativo del repuesto. |
-
-**Ejemplo de Payload JSON (Petición):**
-
+**Ejemplo de Carga Util JSON (Request):**
 ```json
 {
-  "basePrice": 475.00,
-  "minimumStock": 6.00,
-  "status": "active"
+  "name": "Filtro de Aceite Blindado Sintetico Premium Mann-Filter",
+  "category": "FILTERS",
+  "basePrice": 48,
+  "minStock": 6,
+  "currency": "PEN"
 }
 ```
 
-#### Cuerpo de Respuesta (Response)
-
-* **Estatus HTTP de Éxito:** `200 OK`
-* **Java Record DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.PartResource`
-
-| Campo | Tipo | Descripción |
+#### Recurso de Respuesta (Response Body)
+- **Estado HTTP Exitoso:** `200 OK`
+- **Registro Java DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.responses.InventoryItemResource`
+- **Definicion de Campos Proyectados:**
+| Campo | Tipo de Dato | Descripcion |
 | :--- | :--- | :--- |
-| `id` | `UUID` | Identificador técnico del repuesto. |
-| `basePrice` | `BigDecimal` | Precio de lista actualizado (475.00 PEN). |
-| `minimumStock` | `BigDecimal` | Umbral de reposición actualizado (6.00). |
-| `updatedAt` | `Instant` | Marca temporal de la modificación en UTC. |
-| `version` | `Long` | Versión optimista incrementada. |
+| id | UUID | Identificador unico del repuesto |
+| tenantId | UUID | Identificador del taller |
+| name | String | Nombre actualizado |
+| sku | String | Codigo SKU inmutable |
+| category | String | Categoria |
+| basePrice | BigDecimal | Nuevo precio de venta |
+| totalStock | BigDecimal | Saldo total disponible |
+| minimumStock | BigDecimal | Nuevo stock minimo |
+| status | String | Estado en catalogo |
+| currency | String | Moneda |
 
-**Ejemplo de Payload JSON (Respuesta Exitosa):**
-
+**Ejemplo de Carga Util JSON (Response):**
 ```json
 {
-  "id": "6f2a3b4c-5d6e-7a8b-9c0d-1e2f3a4b5c6d",
-  "tenantId": "550e8400-e29b-41d4-a716-446655440000",
-  "name": "Juego de Pastillas Cerámicas Delanteras Brembo P83024",
-  "sku": "BRM-P83024",
-  "category": "Frenos",
-  "basePrice": 475.00,
-  "totalStock": 12.00,
-  "minimumStock": 6.00,
-  "unitOfMeasure": "JUEGO",
-  "status": "active",
-  "createdAt": "2026-02-10T09:00:00Z",
-  "updatedAt": "2026-10-01T12:15:00Z",
-  "version": 5
+  "id": "018f6c40-7e12-7000-8000-000000000710",
+  "tenantId": "018f6c40-7e12-7000-8000-000000000001",
+  "name": "Filtro de Aceite Blindado Sintetico Premium Mann-Filter",
+  "sku": "FIL-OIL-W712-94",
+  "category": "FILTERS",
+  "basePrice": 48,
+  "totalStock": 12,
+  "minimumStock": 6,
+  "status": "ACTIVE",
+  "currency": "PEN"
 }
 ```
 
 #### Errores y Excepciones de Dominio (RFC 7807)
-
-| Código HTTP | Código RFC 7807 | Excepción de Dominio | Condición de Activación |
-| :---: | :--- | :--- | :--- |
-| 404 | `ERR_ITEM_NOT_FOUND` | `InventoryItemNotFoundException` | No existe el repuesto especificado. |
-| 409 | `OPTIMISTIC_LOCKING_FAILURE` | `OptimisticLockingFailureException` | Conflicto de concurrencia al actualizar el artículo simultáneamente. |
-
-**Ejemplo de Respuesta de Error (ProblemDetail RFC 7807):**
-
-```json
-{
-  "type": "https://api.atelier.andeva.pe/errors/optimistic-locking-failure",
-  "title": "Conflicto de Concurrencia",
-  "status": 409,
-  "detail": "El artículo fue modificado concurrentemente por otra sesión.",
-  "instance": "/api/v1/inventory/parts/6f2a3b4c-5d6e-7a8b-9c0d-1e2f3a4b5c6d",
-  "code": "OPTIMISTIC_LOCKING_FAILURE",
-  "timestamp": "2026-10-01T12:15:01Z"
-}
-```
-
----
-
-### 4.5. [GET] `/api/v1/inventory/parts/by-sku/{sku}`
-
-#### Identidad Técnica
-* **Controlador:** `com.andeva.atelier.platform.inventory.interfaces.rest.PartsCatalogController`
-* **Método Java:** `public ResponseEntity<PartResource> getPartBySku(@PathVariable String sku)`
-* **Ruta Canónica:** `GET /api/v1/inventory/parts/by-sku/{sku}`
-* **Propósito Funcional:** Búsqueda indexada instantánea de repuesto mediante código SKU de almacén o código de barras del fabricante para identificación en mostrador o terminal móvil de foso.
-
-#### Seguridad y Autorización
-* **Rol Mínimo Requerido:** `ROLE_MECHANIC`
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('inventory:parts:read')")`
-* **Contexto Multi-Inquilino:** Aislamiento multi-inquilino estricto. La petición debe incluir el token JWT en el encabezado Authorization. El filtro perimetral resuelve el tenant_id del token y lo inyecta en el contexto de seguridad. Todas las operaciones en la base de datos se filtran por tenant_id garantizando que ningún taller acceda al catálogo, lotes o proveedores de otra entidad.
-
-#### Parámetros de Petición
-
-**Encabezados HTTP (Headers):**
-
-| Encabezado | Tipo | Requerido | Descripción |
-| :--- | :--- | :---: | :--- |
-| `Authorization` | `String` | Sí | Token de portador JWT Bearer con claims de usuario y permisos atómicos. |
-| `Accept` | `String` | No | application/json por defecto. |
-| `X-Tenant-Id` | `UUID` | No | Identificador opcional del taller para verificación cruzada de inquilino. |
-
-**Parámetros de Ruta (Path Parameters):**
-
-| Parámetro | Tipo | Requerido | Descripción |
-| :--- | :--- | :---: | :--- |
-| `sku` | `String` | Sí | Código SKU de almacén exacto. |
-
-**Parámetros de Consulta (Query Parameters):** No aplica.
-
-#### Cuerpo de Petición (Request)
-
-No requiere cuerpo de petición (petición sin contenido o parámetros en URL).
-
-#### Cuerpo de Respuesta (Response)
-
-* **Estatus HTTP de Éxito:** `200 OK`
-* **Java Record DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.PartResource`
-
-| Campo | Tipo | Descripción |
+| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
 | :--- | :--- | :--- |
-| `id` | `UUID` | Identificador del repuesto localizado. |
-| `sku` | `String` | Código SKU coincidente. |
-| `name` | `String` | Nombre comercial. |
-| `totalStock` | `BigDecimal` | Saldo físico disponible en almacén. |
+| 400 Bad Request | MethodArgumentNotValidException | Datos de actualizacion invalidos o campos requeridos omitidos |
+| 404 Not Found | InventoryItemNotFoundException | El repuesto no existe en el catalogo del taller |
 
-**Ejemplo de Payload JSON (Respuesta Exitosa):**
-
+**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
 ```json
 {
-  "id": "6f2a3b4c-5d6e-7a8b-9c0d-1e2f3a4b5c6d",
-  "tenantId": "550e8400-e29b-41d4-a716-446655440000",
-  "name": "Juego de Pastillas Cerámicas Delanteras Brembo P83024",
-  "sku": "BRM-P83024",
-  "category": "Frenos",
-  "basePrice": 475.00,
-  "totalStock": 12.00,
-  "minimumStock": 6.00,
-  "unitOfMeasure": "JUEGO",
-  "status": "active",
-  "createdAt": "2026-02-10T09:00:00Z",
-  "updatedAt": "2026-10-01T12:15:00Z",
-  "version": 5
-}
-```
-
-#### Errores y Excepciones de Dominio (RFC 7807)
-
-| Código HTTP | Código RFC 7807 | Excepción de Dominio | Condición de Activación |
-| :---: | :--- | :--- | :--- |
-| 404 | `ERR_ITEM_NOT_FOUND` | `InventoryItemNotFoundException` | No existe ningún repuesto registrado con el código SKU provisto. |
-
-**Ejemplo de Respuesta de Error (ProblemDetail RFC 7807):**
-
-```json
-{
-  "type": "https://api.atelier.andeva.pe/errors/item-not-found",
-  "title": "SKU No Encontrado",
+  "type": "https://api.atelier.pe/errors/inventory-item-not-found",
+  "title": "Repuesto No Encontrado",
   "status": 404,
-  "detail": "No se localiza ningún artículo con código SKU 'BRM-INEXISTENTE'.",
-  "instance": "/api/v1/inventory/parts/by-sku/BRM-INEXISTENTE",
+  "detail": "No se encontro el repuesto para actualizar con el identificador 018f6c40-7e12-7000-8000-000000000710",
+  "instance": "/api/v1/inventory/items/018f6c40-7e12-7000-8000-000000000710",
   "code": "ERR_ITEM_NOT_FOUND",
-  "timestamp": "2026-10-01T12:20:00Z"
+  "timestamp": "2026-10-03T15:15:00Z"
 }
 ```
 
 ---
 
-### 4.6. [GET] `/api/v1/inventory/parts/by-category/{category}`
+### 2.5. [GET] /api/v1/inventory/items/low-stock
 
-#### Identidad Técnica
-* **Controlador:** `com.andeva.atelier.platform.inventory.interfaces.rest.PartsCatalogController`
-* **Método Java:** `public ResponseEntity<List<PartSummaryResource>> getPartsByCategory(@PathVariable String category)`
-* **Ruta Canónica:** `GET /api/v1/inventory/parts/by-category/{category}`
-* **Propósito Funcional:** Recupera el conjunto de repuestos e insumos agrupados bajo una misma familia técnica automotriz para navegación por árbol de categorías en la aplicación de almacén.
+**Alerta de Repuestos por Debajo del Umbral Minimo**
 
-#### Seguridad y Autorización
-* **Rol Mínimo Requerido:** `ROLE_MECHANIC`
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('inventory:parts:read')")`
-* **Contexto Multi-Inquilino:** Aislamiento multi-inquilino estricto. La petición debe incluir el token JWT en el encabezado Authorization. El filtro perimetral resuelve el tenant_id del token y lo inyecta en el contexto de seguridad. Todas las operaciones en la base de datos se filtran por tenant_id garantizando que ningún taller acceda al catálogo, lotes o proveedores de otra entidad.
+#### Identidad Tecnica
+- **Controlador:** `com.andeva.atelier.platform.inventory.interfaces.rest.controllers.InventoryItemsController`
+- **Metodo Java:** `public ResponseEntity<List<InventoryItemSummaryResource>> getLowStockItems()`
+- **Ruta Base:** `/api/v1/inventory/items`
+- **Ruta Completa:** `/api/v1/inventory/items/low-stock`
+- **Proposito:** Ejecuta una verificacion sistematica del estado de inventario para proyectar aquellos repuestos cuyo saldo de existencias totales se encuentra por debajo o igual a su umbral de stock minimo parametrizado. Permite al encargado de compras alimentar proactivamente las ordenes de abastecimiento.
 
-#### Parámetros de Petición
+#### Seguridad y Autorizacion
+- **Nivel de Acceso:** Autenticado
+- **Rol Minimo Requerido:** Mecanico Jefe (ROLE_CHIEF_MECHANIC) o Encargado de Repuestos (ROLE_INVENTORY_MANAGER)
+- **Permiso Atomico:** `@PreAuthorize("hasAuthority('inventory:parts:read')")`
+- **Aislamiento Multi-Inquilino:** Aislamiento estricto por tenantId del taller en sesion.
 
-**Encabezados HTTP (Headers):**
+#### Parametros de Invocacion
+**Cabeceras HTTP (Headers):**
+- `Authorization: Bearer <token>`
+- `Accept: application/json`
 
-| Encabezado | Tipo | Requerido | Descripción |
-| :--- | :--- | :---: | :--- |
-| `Authorization` | `String` | Sí | Token de portador JWT Bearer con claims de usuario y permisos atómicos. |
-| `Accept` | `String` | No | application/json por defecto. |
-| `X-Tenant-Id` | `UUID` | No | Identificador opcional del taller para verificación cruzada de inquilino. |
+**Parametros de Ruta (Path Parameters):**
+No aplica (Sin parametros en la ruta).
 
-**Parámetros de Ruta (Path Parameters):**
+**Parametros de Consulta (Query Parameters):**
+No aplica (Sin parametros de consulta en la URL).
 
-| Parámetro | Tipo | Requerido | Descripción |
-| :--- | :--- | :---: | :--- |
-| `category` | `String` | Sí | Nombre de la categoría automotriz (ej. Frenos). |
-
-**Parámetros de Consulta (Query Parameters):** No aplica.
-
-#### Cuerpo de Petición (Request)
-
-No requiere cuerpo de petición (petición sin contenido o parámetros en URL).
-
-#### Cuerpo de Respuesta (Response)
-
-* **Estatus HTTP de Éxito:** `200 OK`
-* **Java Record DTO:** `java.util.List<com.andeva.atelier.platform.inventory.interfaces.rest.resources.PartSummaryResource>`
-
-| Campo | Tipo | Descripción |
+#### Recurso de Respuesta (Response Body)
+- **Estado HTTP Exitoso:** `200 OK`
+- **Registro Java DTO:** `java.util.List<com.andeva.atelier.platform.inventory.interfaces.rest.resources.responses.InventoryItemSummaryResource>`
+- **Definicion de Campos Proyectados:**
+| Campo | Tipo de Dato | Descripcion |
 | :--- | :--- | :--- |
-| `[].id` | `UUID` | Identificador del repuesto. |
-| `[].sku` | `String` | Código SKU. |
-| `[].name` | `String` | Nombre comercial. |
-| `[].category` | `String` | Categoría consultada. |
-| `[].basePrice` | `BigDecimal` | Precio sugerido de venta. |
-| `[].totalStock` | `BigDecimal` | Saldo físico disponible. |
+| id | UUID | Identificador unico del repuesto en alerta |
+| name | String | Nombre comercial del repuesto |
+| sku | String | Codigo SKU |
+| category | String | Categoria del repuesto |
+| basePrice | BigDecimal | Precio de venta al publico |
+| totalStock | BigDecimal | Saldo remanente en nivel critico |
+| currency | String | Moneda |
 
-**Ejemplo de Payload JSON (Respuesta Exitosa):**
-
+**Ejemplo de Carga Util JSON (Response):**
 ```json
 [
   {
-    "id": "6f2a3b4c-5d6e-7a8b-9c0d-1e2f3a4b5c6d",
-    "sku": "BRM-P83024",
-    "name": "Juego de Pastillas Cerámicas Delanteras Brembo P83024",
-    "category": "Frenos",
-    "basePrice": 475.00,
-    "totalStock": 12.00,
-    "minimumStock": 6.00,
-    "unitOfMeasure": "JUEGO",
-    "status": "active",
+    "id": "018f6c40-7e12-7000-8000-000000000705",
+    "name": "Liquido de Frenos Sintetico DOT 4 (500 ml)",
+    "sku": "FLD-BRK-DOT4-500",
+    "category": "FLUIDS",
+    "basePrice": 32,
+    "totalStock": 2,
+    "currency": "PEN"
+  }
+]
+```
+
+#### Errores y Excepciones de Dominio (RFC 7807)
+| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
+| :--- | :--- | :--- |
+| 401 Unauthorized | BadCredentialsException | Token JWT ausente o expirado |
+
+**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
+```json
+{
+  "type": "https://api.atelier.pe/errors/unauthorized",
+  "title": "Sesion No Autorizada",
+  "status": 401,
+  "detail": "Se requiere un token Bearer valido para consultar alertas de stock",
+  "instance": "/api/v1/inventory/items/low-stock",
+  "code": "UNAUTHORIZED",
+  "timestamp": "2026-10-03T15:20:00Z"
+}
+```
+
+---
+
+### 2.6. [GET] /api/v1/inventory/items/valuation
+
+**Calculo de Valuacion Total del Inventario a Costo FIFO**
+
+#### Identidad Tecnica
+- **Controlador:** `com.andeva.atelier.platform.inventory.interfaces.rest.controllers.InventoryItemsController`
+- **Metodo Java:** `public ResponseEntity<InventoryValuationResource> getInventoryValuation()`
+- **Ruta Base:** `/api/v1/inventory/items`
+- **Ruta Completa:** `/api/v1/inventory/items/valuation`
+- **Proposito:** Computa la valorizacion monetaria patrimonial completa del inventario del taller. Aplica la sumatoria del producto de la cantidad remanente de cada lote fisico activo por su costo unitario historico de adquisicion, reportando el valor patrimonial neto y numero de articulos distintos.
+
+#### Seguridad y Autorizacion
+- **Nivel de Acceso:** Autenticado
+- **Rol Minimo Requerido:** Encargado de Repuestos (ROLE_INVENTORY_MANAGER) o Administrador (ROLE_ADMIN)
+- **Permiso Atomico:** `@PreAuthorize("hasAuthority('inventory:parts:read')")`
+- **Aislamiento Multi-Inquilino:** Aislamiento estricto por tenantId del taller en sesion.
+
+#### Parametros de Invocacion
+**Cabeceras HTTP (Headers):**
+- `Authorization: Bearer <token>`
+- `Accept: application/json`
+
+**Parametros de Ruta (Path Parameters):**
+No aplica (Sin parametros en la ruta).
+
+**Parametros de Consulta (Query Parameters):**
+No aplica (Sin parametros de consulta en la URL).
+
+#### Recurso de Respuesta (Response Body)
+- **Estado HTTP Exitoso:** `200 OK`
+- **Registro Java DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.responses.InventoryValuationResource`
+- **Definicion de Campos Proyectados:**
+| Campo | Tipo de Dato | Descripcion |
+| :--- | :--- | :--- |
+| tenantId | UUID | Identificador del taller auditado |
+| totalValuation | BigDecimal | Monto consolidado de valuacion patrimonial a costo FIFO |
+| distinctItemsCount | int | Cantidad de articulos distintos con stock activo |
+| calculatedAt | Instant | Marca temporal exacta del calculo financiero |
+
+**Ejemplo de Carga Util JSON (Response):**
+```json
+{
+  "tenantId": "018f6c40-7e12-7000-8000-000000000001",
+  "totalValuation": 28450.75,
+  "distinctItemsCount": 142,
+  "calculatedAt": "2026-10-03T15:25:00Z"
+}
+```
+
+#### Errores y Excepciones de Dominio (RFC 7807)
+| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
+| :--- | :--- | :--- |
+| 401 Unauthorized | BadCredentialsException | Token JWT ausente o expirado |
+| 403 Forbidden | AccessDeniedException | Privilegio insuficiente para consultar valuaciones patrimoniales |
+
+**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
+```json
+{
+  "type": "https://api.atelier.pe/errors/access-denied",
+  "title": "Permiso Insuficiente",
+  "status": 403,
+  "detail": "No cuenta con el privilegio requerido inventory:parts:read para consultar valuacion contable",
+  "instance": "/api/v1/inventory/items/valuation",
+  "code": "ACCESS_DENIED",
+  "timestamp": "2026-10-03T15:26:00Z"
+}
+```
+
+---
+
+## 3. Endpoints de Trazabilidad y Lotes Fisicos (InventoryBatchesController)
+
+### 3.1. [POST] /api/v1/inventory/items/{itemId}/batches
+
+**Ingreso Manual de Lote Fisico con Costo Unitario y Factura**
+
+#### Identidad Tecnica
+- **Controlador:** `com.andeva.atelier.platform.inventory.interfaces.rest.controllers.InventoryBatchesController`
+- **Metodo Java:** `public ResponseEntity<InventoryBatchResource> addBatch(@PathVariable UUID itemId, @Valid @RequestBody AddInventoryBatchResource resource)`
+- **Ruta Base:** `/api/v1/inventory/items/{itemId}/batches`
+- **Ruta Completa:** `/api/v1/inventory/items/{itemId}/batches`
+- **Proposito:** Registra un ingreso fisico directo de lote para un repuesto en catalogo (ingreso manual por compras locales de emergencia o ajuste inicial de inventario). Registra el proveedor mayorista, numero de lote o comprobante, cantidad ingresada, costo unitario de adquisicion y URL de la fotografia de la factura.
+
+#### Seguridad y Autorizacion
+- **Nivel de Acceso:** Autenticado
+- **Rol Minimo Requerido:** Encargado de Repuestos (ROLE_INVENTORY_MANAGER)
+- **Permiso Atomico:** `@PreAuthorize("hasAuthority('inventory:batches:receive')")`
+- **Aislamiento Multi-Inquilino:** Aislamiento estricto por tenantId del taller en sesion.
+
+#### Parametros de Invocacion
+**Cabeceras HTTP (Headers):**
+- `Authorization: Bearer <token>`
+- `Content-Type: application/json`
+- `Accept: application/json`
+
+**Parametros de Ruta (Path Parameters):**
+- `itemId` (UUID): Identificador unico del repuesto receptor
+
+**Parametros de Consulta (Query Parameters):**
+No aplica (Sin parametros de consulta en la URL).
+
+#### Recurso de Peticion (Request Body)
+- **Registro Java DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.requests.AddInventoryBatchResource`
+- **Definicion de Campos:**
+| Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripcion |
+| :--- | :--- | :--- | :--- | :--- |
+| supplierId | UUID | Si | @NotNull | Identificador del proveedor mayorista emisor |
+| batchNumber | String | Si | @NotBlank, @Size(max = 50) | Numero de lote o serie de factura del proveedor |
+| quantity | BigDecimal | Si | @NotNull, @Positive | Cantidad fisica de unidades que ingresan al almacen |
+| unitCost | BigDecimal | Si | @NotNull, @Positive | Costo unitario de adquisicion gravado sin impuestos |
+| currency | String | Si | @NotBlank, @Pattern(regexp = "PEN|USD") | Codigo ISO de la moneda |
+| receiptImageUrl | String | Si | @NotBlank, @URL | URL segura HTTPS de la factura escaneada en Firebase Storage |
+
+**Ejemplo de Carga Util JSON (Request):**
+```json
+{
+  "supplierId": "018f6c40-7e12-7000-8000-000000000750",
+  "batchNumber": "F001-0006240",
+  "quantity": 20,
+  "unitCost": 108.5,
+  "currency": "PEN",
+  "receiptImageUrl": "https://firebasestorage.googleapis.com/v0/b/atelier-app.appspot.com/o/tenants%2F018f6c40-7e12-7000-8000-000000000001%2Fbatches%2Ffactura-f001-6240.jpg?alt=media"
+}
+```
+
+#### Recurso de Respuesta (Response Body)
+- **Estado HTTP Exitoso:** `201 Created`
+- **Registro Java DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.responses.InventoryBatchResource`
+- **Definicion de Campos Proyectados:**
+| Campo | Tipo de Dato | Descripcion |
+| :--- | :--- | :--- |
+| id | UUID | Identificador unico del lote fisico registrado |
+| itemId | UUID | Identificador del repuesto al que pertenece |
+| supplierId | UUID | Identificador del proveedor mayorista |
+| supplierName | String | Razon social del proveedor |
+| batchNumber | String | Numero de lote o factura |
+| initialQuantity | BigDecimal | Cantidad de ingreso original |
+| remainingQuantity | BigDecimal | Cantidad remanente disponible para despacho |
+| unitCost | BigDecimal | Costo unitario de adquisicion |
+| currency | String | Moneda de adquisicion |
+| arrivalDate | Instant | Marca temporal de recepcion e ingreso al stock |
+| receiptImageUrl | String | URL HTTPS de la factura probatoria |
+
+**Ejemplo de Carga Util JSON (Response):**
+```json
+{
+  "id": "018f6c40-7e12-7000-8000-000000000785",
+  "itemId": "018f6c40-7e12-7000-8000-000000000701",
+  "supplierId": "018f6c40-7e12-7000-8000-000000000750",
+  "supplierName": "Distribuidora Automotriz del Centro S.A.C.",
+  "batchNumber": "F001-0006240",
+  "initialQuantity": 20,
+  "remainingQuantity": 20,
+  "unitCost": 108.5,
+  "currency": "PEN",
+  "arrivalDate": "2026-10-03T15:30:00Z",
+  "receiptImageUrl": "https://firebasestorage.googleapis.com/v0/b/atelier-app.appspot.com/o/tenants%2F018f6c40-7e12-7000-8000-000000000001%2Fbatches%2Ffactura-f001-6240.jpg?alt=media"
+}
+```
+
+#### Errores y Excepciones de Dominio (RFC 7807)
+| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
+| :--- | :--- | :--- |
+| 400 Bad Request | MethodArgumentNotValidException | Datos de lote invalidos o campos requeridos omitidos |
+| 404 Not Found | InventoryItemNotFoundException | El repuesto no existe en el catalogo del taller |
+| 404 Not Found | SupplierNotFoundException | El proveedor comercial no existe en el directorio |
+| 422 Unprocessable Entity | InvalidBatchQuantityException | La cantidad del lote es menor o igual a cero |
+
+**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
+```json
+{
+  "type": "https://api.atelier.pe/errors/invalid-batch-quantity",
+  "title": "Cantidad de Lote Invalida",
+  "status": 422,
+  "detail": "La cantidad de unidades ingresadas en el lote debe ser estrictamente positiva",
+  "instance": "/api/v1/inventory/items/018f6c40-7e12-7000-8000-000000000701/batches",
+  "code": "ERR_INVALID_BATCH_QUANTITY",
+  "timestamp": "2026-10-03T15:31:00Z"
+}
+```
+
+---
+
+### 3.2. [GET] /api/v1/inventory/items/{itemId}/batches
+
+**Trazabilidad Historica de Lotes FIFO del Repuesto**
+
+#### Identidad Tecnica
+- **Controlador:** `com.andeva.atelier.platform.inventory.interfaces.rest.controllers.InventoryBatchesController`
+- **Metodo Java:** `public ResponseEntity<List<InventoryBatchResource>> getBatchesByItem(@PathVariable UUID itemId)`
+- **Ruta Base:** `/api/v1/inventory/items/{itemId}/batches`
+- **Ruta Completa:** `/api/v1/inventory/items/{itemId}/batches`
+- **Proposito:** Recupera el historial cronologico exhaustivo de todos los lotes ingresados para un repuesto especifico, tanto activos con saldo remanente como lotes agotados por consumo previo, permitiendo auditorias periciales y tributarias de costos.
+
+#### Seguridad y Autorizacion
+- **Nivel de Acceso:** Autenticado
+- **Rol Minimo Requerido:** Mecanico Jefe (ROLE_CHIEF_MECHANIC) o Encargado de Repuestos (ROLE_INVENTORY_MANAGER)
+- **Permiso Atomico:** `@PreAuthorize("hasAuthority('inventory:parts:read')")`
+- **Aislamiento Multi-Inquilino:** Aislamiento estricto por tenantId del taller en sesion.
+
+#### Parametros de Invocacion
+**Cabeceras HTTP (Headers):**
+- `Authorization: Bearer <token>`
+- `Accept: application/json`
+
+**Parametros de Ruta (Path Parameters):**
+- `itemId` (UUID): Identificador unico del repuesto consultado
+
+**Parametros de Consulta (Query Parameters):**
+No aplica (Sin parametros de consulta en la URL).
+
+#### Recurso de Respuesta (Response Body)
+- **Estado HTTP Exitoso:** `200 OK`
+- **Registro Java DTO:** `java.util.List<com.andeva.atelier.platform.inventory.interfaces.rest.resources.responses.InventoryBatchResource>`
+- **Definicion de Campos Proyectados:**
+| Campo | Tipo de Dato | Descripcion |
+| :--- | :--- | :--- |
+| id | UUID | Identificador unico del lote |
+| itemId | UUID | Identificador del repuesto |
+| supplierId | UUID | Identificador del proveedor |
+| supplierName | String | Nombre del proveedor mayorista |
+| batchNumber | String | Numero de serie de lote o factura |
+| initialQuantity | BigDecimal | Cantidad de ingreso original |
+| remainingQuantity | BigDecimal | Cantidad remanente actual |
+| unitCost | BigDecimal | Costo unitario historico |
+| currency | String | Moneda |
+| arrivalDate | Instant | Marca temporal de recepcion |
+| receiptImageUrl | String | URL HTTPS del comprobante escaneado |
+
+**Ejemplo de Carga Util JSON (Response):**
+```json
+[
+  {
+    "id": "018f6c40-7e12-7000-8000-000000000780",
+    "itemId": "018f6c40-7e12-7000-8000-000000000701",
+    "supplierId": "018f6c40-7e12-7000-8000-000000000750",
+    "supplierName": "Distribuidora Automotriz del Centro S.A.C.",
+    "batchNumber": "LOTE-2026-089",
+    "initialQuantity": 10,
+    "remainingQuantity": 3,
+    "unitCost": 110,
     "currency": "PEN",
-    "createdAt": "2026-02-10T09:00:00Z"
-  }
-]
-```
-
-#### Errores y Excepciones de Dominio (RFC 7807)
-
-| Código HTTP | Código RFC 7807 | Excepción de Dominio | Condición de Activación |
-| :---: | :--- | :--- | :--- |
-| 400 | `INVALID_QUERY_PARAMETER` | `IllegalArgumentException` | Categoría vacía o con formato inválido. |
-
-**Ejemplo de Respuesta de Error (ProblemDetail RFC 7807):**
-
-```json
-{
-  "type": "https://api.atelier.andeva.pe/errors/invalid-query-parameter",
-  "title": "Categoría Inválida",
-  "status": 400,
-  "detail": "El parámetro category no puede estar vacío.",
-  "instance": "/api/v1/inventory/parts/by-category/",
-  "code": "INVALID_QUERY_PARAMETER",
-  "timestamp": "2026-10-01T12:25:00Z"
-}
-```
-
----
-
-### 4.7. [GET] `/api/v1/inventory/suppliers`
-
-#### Identidad Técnica
-* **Controlador:** `com.andeva.atelier.platform.inventory.interfaces.rest.SuppliersController`
-* **Método Java:** `public ResponseEntity<List<SupplierResource>> getSuppliers(@RequestParam(required = false) String search, @RequestParam(required = false, defaultValue = "true") Boolean activeOnly)`
-* **Ruta Canónica:** `GET /api/v1/inventory/suppliers`
-* **Propósito Funcional:** Recupera el directorio comercial homologado de distribuidores mayoristas de repuestos y suministros del taller automotriz.
-
-#### Seguridad y Autorización
-* **Rol Mínimo Requerido:** `ROLE_INVENTORY_MANAGER`
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('inventory:suppliers:read')")`
-* **Contexto Multi-Inquilino:** Aislamiento multi-inquilino estricto. La petición debe incluir el token JWT en el encabezado Authorization. El filtro perimetral resuelve el tenant_id del token y lo inyecta en el contexto de seguridad. Todas las operaciones en la base de datos se filtran por tenant_id garantizando que ningún taller acceda al catálogo, lotes o proveedores de otra entidad.
-
-#### Parámetros de Petición
-
-**Encabezados HTTP (Headers):**
-
-| Encabezado | Tipo | Requerido | Descripción |
-| :--- | :--- | :---: | :--- |
-| `Authorization` | `String` | Sí | Token de portador JWT Bearer con claims de usuario y permisos atómicos. |
-| `Accept` | `String` | No | application/json por defecto. |
-| `X-Tenant-Id` | `UUID` | No | Identificador opcional del taller para verificación cruzada de inquilino. |
-
-**Parámetros de Ruta (Path Parameters):** No aplica.
-
-**Parámetros de Consulta (Query Parameters):**
-
-| Parámetro | Tipo | Requerido | Valor por Defecto | Descripción |
-| :--- | :--- | :---: | :---: | :--- |
-| `search` | `String` | No | `null` | Búsqueda por RUC, razón social o nombre comercial del proveedor. |
-| `activeOnly` | `Boolean` | No | `true` | Filtra proveedores activos comercialmente. |
-
-#### Cuerpo de Petición (Request)
-
-No requiere cuerpo de petición (petición sin contenido o parámetros en URL).
-
-#### Cuerpo de Respuesta (Response)
-
-* **Estatus HTTP de Éxito:** `200 OK`
-* **Java Record DTO:** `java.util.List<com.andeva.atelier.platform.inventory.interfaces.rest.resources.SupplierResource>`
-
-| Campo | Tipo | Descripción |
-| :--- | :--- | :--- |
-| `[].id` | `UUID` | Identificador único del proveedor. |
-| `[].tenantId` | `UUID` | Identificador del taller titular. |
-| `[].taxId` | `String` | Registro Único de Contribuyente (RUC 11 dígitos). |
-| `[].companyName` | `String` | Razón social inscrita ante SUNAT. |
-| `[].tradeName` | `String` | Nombre comercial del distribuidor. |
-| `[].contactName` | `String` | Nombre del ejecutivo de ventas asignado. |
-| `[].email` | `String` | Correo electrónico para pedidos y cotizaciones. |
-| `[].phone` | `String` | Teléfono de contacto comercial. |
-| `[].address` | `String` | Dirección fiscal o almacén de despacho. |
-| `[].status` | `String` | Estado operativo (active). |
-| `[].createdAt` | `Instant` | Marca temporal de alta en UTC. |
-
-**Ejemplo de Payload JSON (Respuesta Exitosa):**
-
-```json
-[
+    "arrivalDate": "2026-09-15T09:30:00Z",
+    "receiptImageUrl": "https://firebasestorage.googleapis.com/v0/b/atelier-app.appspot.com/o/tenants%2F018f6c40-7e12-7000-8000-000000000001%2Fbatches%2Ffactura-f001-4921.jpg?alt=media"
+  },
   {
-    "id": "8a9b0c1d-2e3f-4a5b-6c7d-8e9f0a1b2c3d",
-    "tenantId": "550e8400-e29b-41d4-a716-446655440000",
-    "taxId": "20601234567",
-    "companyName": "DISTRIBUIDORA AUTOMOTRIZ DEL PERU S.A.C.",
-    "tradeName": "DISAUTOP PERU",
-    "contactName": "Ing. Fernando Valdivia Paredes",
-    "email": "ventas@disautop.com.pe",
-    "phone": "+5114859000",
-    "address": "Av. Nicolás Arriola 1540, La Victoria, Lima",
-    "status": "active",
-    "createdAt": "2026-01-20T10:00:00Z"
+    "id": "018f6c40-7e12-7000-8000-000000000785",
+    "itemId": "018f6c40-7e12-7000-8000-000000000701",
+    "supplierId": "018f6c40-7e12-7000-8000-000000000750",
+    "supplierName": "Distribuidora Automotriz del Centro S.A.C.",
+    "batchNumber": "F001-0006240",
+    "initialQuantity": 20,
+    "remainingQuantity": 20,
+    "unitCost": 108.5,
+    "currency": "PEN",
+    "arrivalDate": "2026-10-03T15:30:00Z",
+    "receiptImageUrl": "https://firebasestorage.googleapis.com/v0/b/atelier-app.appspot.com/o/tenants%2F018f6c40-7e12-7000-8000-000000000001%2Fbatches%2Ffactura-f001-6240.jpg?alt=media"
   }
 ]
 ```
 
 #### Errores y Excepciones de Dominio (RFC 7807)
+| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
+| :--- | :--- | :--- |
+| 404 Not Found | InventoryItemNotFoundException | El repuesto no existe en el catalogo del taller |
 
-| Código HTTP | Código RFC 7807 | Excepción de Dominio | Condición de Activación |
-| :---: | :--- | :--- | :--- |
-| 400 | `INVALID_QUERY_PARAMETER` | `IllegalArgumentException` | Término de búsqueda inválido. |
-
-**Ejemplo de Respuesta de Error (ProblemDetail RFC 7807):**
-
+**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
 ```json
 {
-  "type": "https://api.atelier.andeva.pe/errors/invalid-query-parameter",
-  "title": "Búsqueda Inválida",
-  "status": 400,
-  "detail": "Parámetro search mal estructurado.",
-  "instance": "/api/v1/inventory/suppliers",
-  "code": "INVALID_QUERY_PARAMETER",
-  "timestamp": "2026-10-01T12:30:00Z"
+  "type": "https://api.atelier.pe/errors/inventory-item-not-found",
+  "title": "Repuesto No Encontrado",
+  "status": 404,
+  "detail": "No se encontro el repuesto solicitado para consultar su trazabilidad de lotes",
+  "instance": "/api/v1/inventory/items/018f6c40-7e12-7000-8000-000000000701/batches",
+  "code": "ERR_ITEM_NOT_FOUND",
+  "timestamp": "2026-10-03T15:35:00Z"
 }
 ```
 
 ---
 
-### 4.8. [POST] `/api/v1/inventory/suppliers`
+## 4. Endpoints de Directorio de Proveedores (SuppliersController)
 
-#### Identidad Técnica
-* **Controlador:** `com.andeva.atelier.platform.inventory.interfaces.rest.SuppliersController`
-* **Método Java:** `public ResponseEntity<SupplierResource> createSupplier(@Valid @RequestBody CreateSupplierResource resource, UriComponentsBuilder ucb)`
-* **Ruta Canónica:** `POST /api/v1/inventory/suppliers`
-* **Propósito Funcional:** Registra un nuevo distribuidor de repuestos en el directorio comercial homologado del taller, validando unicidad de RUC ante SUNAT y configurando canales de contacto.
+### 4.1. [POST] /api/v1/inventory/suppliers
 
-#### Seguridad y Autorización
-* **Rol Mínimo Requerido:** `ROLE_INVENTORY_MANAGER`
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('inventory:suppliers:manage')")`
-* **Contexto Multi-Inquilino:** Aislamiento multi-inquilino estricto. La petición debe incluir el token JWT en el encabezado Authorization. El filtro perimetral resuelve el tenant_id del token y lo inyecta en el contexto de seguridad. Todas las operaciones en la base de datos se filtran por tenant_id garantizando que ningún taller acceda al catálogo, lotes o proveedores de otra entidad.
+**Registro de Nuevo Proveedor Mayorista de Repuestos**
 
-#### Parámetros de Petición
+#### Identidad Tecnica
+- **Controlador:** `com.andeva.atelier.platform.inventory.interfaces.rest.controllers.SuppliersController`
+- **Metodo Java:** `public ResponseEntity<SupplierResource> createSupplier(@Valid @RequestBody CreateSupplierResource resource)`
+- **Ruta Base:** `/api/v1/inventory/suppliers`
+- **Ruta Completa:** `/api/v1/inventory/suppliers`
+- **Proposito:** Registra una nueva empresa proveedora de repuestos, lubricantes o consumibles en el directorio comercial del taller. Valida el numero de RUC de 11 digitos y su unicidad en el ambito del taller, asociando datos de contacto corporativo y direccion fiscal. Inicializa el estado del proveedor en activo.
 
-**Encabezados HTTP (Headers):**
+#### Seguridad y Autorizacion
+- **Nivel de Acceso:** Autenticado
+- **Rol Minimo Requerido:** Encargado de Repuestos (ROLE_INVENTORY_MANAGER)
+- **Permiso Atomico:** `@PreAuthorize("hasAuthority('inventory:suppliers:manage')")`
+- **Aislamiento Multi-Inquilino:** Aislamiento estricto por tenantId del taller en sesion.
 
-| Encabezado | Tipo | Requerido | Descripción |
-| :--- | :--- | :---: | :--- |
-| `Authorization` | `String` | Sí | Token de portador JWT Bearer con claims de usuario y permisos atómicos. |
-| `Content-Type` | `String` | Sí | application/json para el cuerpo del mensaje. |
-| `X-Tenant-Id` | `UUID` | No | Identificador opcional del taller para verificación cruzada de inquilino. |
+#### Parametros de Invocacion
+**Cabeceras HTTP (Headers):**
+- `Authorization: Bearer <token>`
+- `Content-Type: application/json`
+- `Accept: application/json`
 
-**Parámetros de Ruta (Path Parameters):** No aplica.
+**Parametros de Ruta (Path Parameters):**
+No aplica (Sin parametros en la ruta).
 
-**Parámetros de Consulta (Query Parameters):** No aplica.
+**Parametros de Consulta (Query Parameters):**
+No aplica (Sin parametros de consulta en la URL).
 
-#### Cuerpo de Petición (Request)
+#### Recurso de Peticion (Request Body)
+- **Registro Java DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.requests.CreateSupplierResource`
+- **Definicion de Campos:**
+| Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripcion |
+| :--- | :--- | :--- | :--- | :--- |
+| businessName | String | Si | @NotBlank, @Size(max = 150) | Razon social formal inscrita ante SUNAT |
+| taxId | String | Si | @NotBlank, @Pattern(regexp = "^(10|20)\d{9}$") | Numero de RUC valido de 11 digitos |
+| contactName | String | Si | @NotBlank, @Size(max = 100) | Nombres y apellidos del ejecutivo de cuentas |
+| phone | String | Si | @NotBlank, @Pattern(regexp = "^\+?[0-9]{9,15}$") | Numero telefonico de contacto directo |
+| email | String | Si | @NotBlank, @Email | Correo electronico para emision de pedidos |
+| address | String | Si | @NotBlank, @Size(max = 255) | Direccion fisica o almacen del proveedor |
 
-* **Java Record DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.CreateSupplierResource`
-
-| Campo | Tipo | Requerido | Validaciones de Dominio | Descripción |
-| :--- | :--- | :---: | :--- | :--- |
-| `taxId` | `String` | Sí | @NotBlank, @Pattern(regexp = "\d{11}") | Número de RUC de 11 dígitos numéricos. |
-| `companyName` | `String` | Sí | @NotBlank, @Size(max = 150) | Razón social formal del proveedor. |
-| `tradeName` | `String` | No | @Size(max = 150) | Nombre comercial de marca. |
-| `contactName` | `String` | Sí | @NotBlank, @Size(max = 100) | Nombre del asesor comercial asignado. |
-| `email` | `String` | Sí | @NotBlank, @Email | Buzón electrónico corporativo. |
-| `phone` | `String` | Sí | @NotBlank, @Size(max = 20) | Teléfono de pedidos y emergencias. |
-| `address` | `String` | No | @Size(max = 255) | Dirección fiscal o de almacén de retiro. |
-
-**Ejemplo de Payload JSON (Petición):**
-
+**Ejemplo de Carga Util JSON (Request):**
 ```json
 {
-  "taxId": "20601234567",
-  "companyName": "DISTRIBUIDORA AUTOMOTRIZ DEL PERU S.A.C.",
-  "tradeName": "DISAUTOP PERU",
-  "contactName": "Ing. Fernando Valdivia Paredes",
-  "email": "ventas@disautop.com.pe",
-  "phone": "+5114859000",
-  "address": "Av. Nicolás Arriola 1540, La Victoria, Lima"
+  "businessName": "DISTRIBUIDORA AUTOMOTRIZ DEL CENTRO S.A.C.",
+  "taxId": "20519842103",
+  "contactName": "Miguel Angel Ramirez",
+  "phone": "+51981234567",
+  "email": "ventas@distribuidoracentro.pe",
+  "address": "Av. Nicolas Ayllon 1420, Ate, Lima"
 }
 ```
 
-#### Cuerpo de Respuesta (Response)
-
-* **Estatus HTTP de Éxito:** `201 Created`
-* **Cabecera de Ubicación (*Location Header*):** `/api/v1/inventory/suppliers/8a9b0c1d-2e3f-4a5b-6c7d-8e9f0a1b2c3d`
-* **Java Record DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.SupplierResource`
-
-| Campo | Tipo | Descripción |
+#### Recurso de Respuesta (Response Body)
+- **Estado HTTP Exitoso:** `201 Created`
+- **Registro Java DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.responses.SupplierResource`
+- **Definicion de Campos Proyectados:**
+| Campo | Tipo de Dato | Descripcion |
 | :--- | :--- | :--- |
-| `id` | `UUID` | Identificador técnico del proveedor. |
-| `taxId` | `String` | RUC verificado. |
-| `companyName` | `String` | Razón social registrada. |
-| `status` | `String` | Estado operativo inicial (active). |
-| `createdAt` | `Instant` | Marca temporal de alta en UTC. |
+| id | UUID | Identificador unico del proveedor |
+| tenantId | UUID | Identificador del taller propietario |
+| businessName | String | Razon social registrada |
+| taxId | String | RUC validado |
+| contactName | String | Contacto comercial |
+| phone | String | Telefono corporativo |
+| email | String | Correo electronico |
+| address | String | Direccion registrada |
+| isActive | boolean | Estado operativo en directorio (true) |
 
-**Ejemplo de Payload JSON (Respuesta Exitosa):**
-
+**Ejemplo de Carga Util JSON (Response):**
 ```json
 {
-  "id": "8a9b0c1d-2e3f-4a5b-6c7d-8e9f0a1b2c3d",
-  "tenantId": "550e8400-e29b-41d4-a716-446655440000",
-  "taxId": "20601234567",
-  "companyName": "DISTRIBUIDORA AUTOMOTRIZ DEL PERU S.A.C.",
-  "tradeName": "DISAUTOP PERU",
-  "contactName": "Ing. Fernando Valdivia Paredes",
-  "email": "ventas@disautop.com.pe",
-  "phone": "+5114859000",
-  "address": "Av. Nicolás Arriola 1540, La Victoria, Lima",
-  "status": "active",
-  "createdAt": "2026-10-01T12:35:00Z"
+  "id": "018f6c40-7e12-7000-8000-000000000750",
+  "tenantId": "018f6c40-7e12-7000-8000-000000000001",
+  "businessName": "DISTRIBUIDORA AUTOMOTRIZ DEL CENTRO S.A.C.",
+  "taxId": "20519842103",
+  "contactName": "Miguel Angel Ramirez",
+  "phone": "+51981234567",
+  "email": "ventas@distribuidoracentro.pe",
+  "address": "Av. Nicolas Ayllon 1420, Ate, Lima",
+  "isActive": true
 }
 ```
 
 #### Errores y Excepciones de Dominio (RFC 7807)
+| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
+| :--- | :--- | :--- |
+| 400 Bad Request | MethodArgumentNotValidException | RUC invalido o campos de contacto omitidos |
+| 409 Conflict | DuplicateSupplierTaxIdException | El numero de RUC ya se encuentra registrado por otro proveedor en el taller |
 
-| Código HTTP | Código RFC 7807 | Excepción de Dominio | Condición de Activación |
-| :---: | :--- | :--- | :--- |
-| 400 | `INVALID_TAX_ID` | `IllegalArgumentException` | RUC no cumple con el algoritmo de verificación Módulo 11 de SUNAT. |
-| 409 | `ERR_DUPLICATE_SUPPLIER_RUC` | `DuplicateSupplierTaxIdException` | Ya existe un proveedor activo con ese número de RUC en el taller. |
-
-**Ejemplo de Respuesta de Error (ProblemDetail RFC 7807):**
-
+**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
 ```json
 {
-  "type": "https://api.atelier.andeva.pe/errors/duplicate-supplier-ruc",
+  "type": "https://api.atelier.pe/errors/duplicate-supplier-tax-id",
   "title": "RUC de Proveedor Duplicado",
   "status": 409,
-  "detail": "El RUC '20601234567' ya se encuentra registrado para otro proveedor en este taller.",
+  "detail": "Ya existe un proveedor registrado con el RUC 20519842103 en el directorio del taller",
   "instance": "/api/v1/inventory/suppliers",
   "code": "ERR_DUPLICATE_SUPPLIER_RUC",
-  "timestamp": "2026-10-01T12:35:01Z"
+  "timestamp": "2026-10-03T15:40:00Z"
 }
 ```
 
 ---
 
-### 4.9. [GET] `/api/v1/inventory/suppliers/{id}`
+### 4.2. [GET] /api/v1/inventory/suppliers
 
-#### Identidad Técnica
-* **Controlador:** `com.andeva.atelier.platform.inventory.interfaces.rest.SuppliersController`
-* **Método Java:** `public ResponseEntity<SupplierResource> getSupplierById(@PathVariable UUID id)`
-* **Ruta Canónica:** `GET /api/v1/inventory/suppliers/{id}`
-* **Propósito Funcional:** Obtiene el detalle comercial y crediticio de un proveedor homologado en el sistema del taller.
+**Consulta del Directorio de Proveedores del Taller**
 
-#### Seguridad y Autorización
-* **Rol Mínimo Requerido:** `ROLE_INVENTORY_MANAGER`
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('inventory:suppliers:read')")`
-* **Contexto Multi-Inquilino:** Aislamiento multi-inquilino estricto. La petición debe incluir el token JWT en el encabezado Authorization. El filtro perimetral resuelve el tenant_id del token y lo inyecta en el contexto de seguridad. Todas las operaciones en la base de datos se filtran por tenant_id garantizando que ningún taller acceda al catálogo, lotes o proveedores de otra entidad.
+#### Identidad Tecnica
+- **Controlador:** `com.andeva.atelier.platform.inventory.interfaces.rest.controllers.SuppliersController`
+- **Metodo Java:** `public ResponseEntity<List<SupplierResource>> getSuppliers()`
+- **Ruta Base:** `/api/v1/inventory/suppliers`
+- **Ruta Completa:** `/api/v1/inventory/suppliers`
+- **Proposito:** Retorna el directorio completo de proveedores comerciales mayoristas homologados por el taller automotriz, para la seleccion y elaboracion de ordenes de abastecimiento.
 
-#### Parámetros de Petición
+#### Seguridad y Autorizacion
+- **Nivel de Acceso:** Autenticado
+- **Rol Minimo Requerido:** Encargado de Repuestos (ROLE_INVENTORY_MANAGER)
+- **Permiso Atomico:** `@PreAuthorize("hasAuthority('inventory:suppliers:read')")`
+- **Aislamiento Multi-Inquilino:** Aislamiento estricto por tenantId del taller en sesion.
 
-**Encabezados HTTP (Headers):**
+#### Parametros de Invocacion
+**Cabeceras HTTP (Headers):**
+- `Authorization: Bearer <token>`
+- `Accept: application/json`
 
-| Encabezado | Tipo | Requerido | Descripción |
-| :--- | :--- | :---: | :--- |
-| `Authorization` | `String` | Sí | Token de portador JWT Bearer con claims de usuario y permisos atómicos. |
-| `Accept` | `String` | No | application/json por defecto. |
-| `X-Tenant-Id` | `UUID` | No | Identificador opcional del taller para verificación cruzada de inquilino. |
+**Parametros de Ruta (Path Parameters):**
+No aplica (Sin parametros en la ruta).
 
-**Parámetros de Ruta (Path Parameters):**
+**Parametros de Consulta (Query Parameters):**
+No aplica (Sin parametros de consulta en la URL).
 
-| Parámetro | Tipo | Requerido | Descripción |
-| :--- | :--- | :---: | :--- |
-| `id` | `UUID` | Sí | Identificador único del proveedor. |
-
-**Parámetros de Consulta (Query Parameters):** No aplica.
-
-#### Cuerpo de Petición (Request)
-
-No requiere cuerpo de petición (petición sin contenido o parámetros en URL).
-
-#### Cuerpo de Respuesta (Response)
-
-* **Estatus HTTP de Éxito:** `200 OK`
-* **Java Record DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.SupplierResource`
-
-| Campo | Tipo | Descripción |
+#### Recurso de Respuesta (Response Body)
+- **Estado HTTP Exitoso:** `200 OK`
+- **Registro Java DTO:** `java.util.List<com.andeva.atelier.platform.inventory.interfaces.rest.resources.responses.SupplierResource>`
+- **Definicion de Campos Proyectados:**
+| Campo | Tipo de Dato | Descripcion |
 | :--- | :--- | :--- |
-| `id` | `UUID` | Identificador del proveedor. |
-| `taxId` | `String` | RUC del proveedor. |
-| `companyName` | `String` | Razón social. |
-| `tradeName` | `String` | Nombre comercial. |
-| `contactName` | `String` | Contacto comercial. |
-| `email` | `String` | Correo electrónico. |
-| `phone` | `String` | Teléfono de contacto. |
-| `address` | `String` | Dirección fiscal. |
-| `status` | `String` | Estado operativo (active). |
+| id | UUID | Identificador unico del proveedor |
+| tenantId | UUID | Identificador del taller |
+| businessName | String | Razon social |
+| taxId | String | Numero de RUC |
+| contactName | String | Nombre del contacto |
+| phone | String | Telefono |
+| email | String | Correo corporativo |
+| address | String | Direccion |
+| isActive | boolean | Estado de actividad |
 
-**Ejemplo de Payload JSON (Respuesta Exitosa):**
+**Ejemplo de Carga Util JSON (Response):**
+```json
+[
+  {
+    "id": "018f6c40-7e12-7000-8000-000000000750",
+    "tenantId": "018f6c40-7e12-7000-8000-000000000001",
+    "businessName": "DISTRIBUIDORA AUTOMOTRIZ DEL CENTRO S.A.C.",
+    "taxId": "20519842103",
+    "contactName": "Miguel Angel Ramirez",
+    "phone": "+51981234567",
+    "email": "ventas@distribuidoracentro.pe",
+    "address": "Av. Nicolas Ayllon 1420, Ate, Lima",
+    "isActive": true
+  }
+]
+```
 
+#### Errores y Excepciones de Dominio (RFC 7807)
+| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
+| :--- | :--- | :--- |
+| 401 Unauthorized | BadCredentialsException | Token JWT ausente o expirado |
+
+**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
 ```json
 {
-  "id": "8a9b0c1d-2e3f-4a5b-6c7d-8e9f0a1b2c3d",
-  "tenantId": "550e8400-e29b-41d4-a716-446655440000",
-  "taxId": "20601234567",
-  "companyName": "DISTRIBUIDORA AUTOMOTRIZ DEL PERU S.A.C.",
-  "tradeName": "DISAUTOP PERU",
-  "contactName": "Ing. Fernando Valdivia Paredes",
-  "email": "ventas@disautop.com.pe",
-  "phone": "+5114859000",
-  "address": "Av. Nicolás Arriola 1540, La Victoria, Lima",
-  "status": "active",
-  "createdAt": "2026-01-20T10:00:00Z"
+  "type": "https://api.atelier.pe/errors/unauthorized",
+  "title": "Sesion No Autorizada",
+  "status": 401,
+  "detail": "Se requiere autenticacion para consultar proveedores",
+  "instance": "/api/v1/inventory/suppliers",
+  "code": "UNAUTHORIZED",
+  "timestamp": "2026-10-03T15:45:00Z"
+}
+```
+
+---
+
+### 4.3. [GET] /api/v1/inventory/suppliers/{id}
+
+**Detalle Exhaustivo de Proveedor Comercial**
+
+#### Identidad Tecnica
+- **Controlador:** `com.andeva.atelier.platform.inventory.interfaces.rest.controllers.SuppliersController`
+- **Metodo Java:** `public ResponseEntity<SupplierResource> getSupplierById(@PathVariable UUID id)`
+- **Ruta Base:** `/api/v1/inventory/suppliers`
+- **Ruta Completa:** `/api/v1/inventory/suppliers/{id}`
+- **Proposito:** Recupera la ficha detallada de un proveedor comercial especifico mediante su identificador unico.
+
+#### Seguridad y Autorizacion
+- **Nivel de Acceso:** Autenticado
+- **Rol Minimo Requerido:** Encargado de Repuestos (ROLE_INVENTORY_MANAGER)
+- **Permiso Atomico:** `@PreAuthorize("hasAuthority('inventory:suppliers:read')")`
+- **Aislamiento Multi-Inquilino:** Aislamiento estricto por tenantId del taller en sesion.
+
+#### Parametros de Invocacion
+**Cabeceras HTTP (Headers):**
+- `Authorization: Bearer <token>`
+- `Accept: application/json`
+
+**Parametros de Ruta (Path Parameters):**
+- `id` (UUID): Identificador unico del proveedor comercial
+
+**Parametros de Consulta (Query Parameters):**
+No aplica (Sin parametros de consulta en la URL).
+
+#### Recurso de Respuesta (Response Body)
+- **Estado HTTP Exitoso:** `200 OK`
+- **Registro Java DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.responses.SupplierResource`
+- **Definicion de Campos Proyectados:**
+| Campo | Tipo de Dato | Descripcion |
+| :--- | :--- | :--- |
+| id | UUID | Identificador unico del proveedor |
+| tenantId | UUID | Identificador del taller |
+| businessName | String | Razon social |
+| taxId | String | RUC validado |
+| contactName | String | Nombre del contacto |
+| phone | String | Telefono |
+| email | String | Correo electronico |
+| address | String | Direccion |
+| isActive | boolean | Estado en directorio |
+
+**Ejemplo de Carga Util JSON (Response):**
+```json
+{
+  "id": "018f6c40-7e12-7000-8000-000000000750",
+  "tenantId": "018f6c40-7e12-7000-8000-000000000001",
+  "businessName": "DISTRIBUIDORA AUTOMOTRIZ DEL CENTRO S.A.C.",
+  "taxId": "20519842103",
+  "contactName": "Miguel Angel Ramirez",
+  "phone": "+51981234567",
+  "email": "ventas@distribuidoracentro.pe",
+  "address": "Av. Nicolas Ayllon 1420, Ate, Lima",
+  "isActive": true
 }
 ```
 
 #### Errores y Excepciones de Dominio (RFC 7807)
+| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
+| :--- | :--- | :--- |
+| 404 Not Found | SupplierNotFoundException | El proveedor comercial no existe en el directorio del taller |
 
-| Código HTTP | Código RFC 7807 | Excepción de Dominio | Condición de Activación |
-| :---: | :--- | :--- | :--- |
-| 404 | `ERR_SUPPLIER_NOT_FOUND` | `SupplierNotFoundException` | No existe el proveedor con el identificador provisto. |
-
-**Ejemplo de Respuesta de Error (ProblemDetail RFC 7807):**
-
+**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
 ```json
 {
-  "type": "https://api.atelier.andeva.pe/errors/supplier-not-found",
+  "type": "https://api.atelier.pe/errors/supplier-not-found",
   "title": "Proveedor No Encontrado",
   "status": 404,
-  "detail": "No se localiza el proveedor 8a9b0c1d-2e3f-4a5b-6c7d-8e9f0a1b2c3d.",
-  "instance": "/api/v1/inventory/suppliers/8a9b0c1d-2e3f-4a5b-6c7d-8e9f0a1b2c3d",
+  "detail": "No se encontro ningun proveedor con el identificador 018f6c40-7e12-7000-8000-000000000750",
+  "instance": "/api/v1/inventory/suppliers/018f6c40-7e12-7000-8000-000000000750",
   "code": "ERR_SUPPLIER_NOT_FOUND",
-  "timestamp": "2026-10-01T12:40:00Z"
+  "timestamp": "2026-10-03T15:50:00Z"
 }
 ```
 
 ---
 
-### 4.10. [PUT] `/api/v1/inventory/suppliers/{id}`
+### 4.4. [PUT] /api/v1/inventory/suppliers/{id}
 
-#### Identidad Técnica
-* **Controlador:** `com.andeva.atelier.platform.inventory.interfaces.rest.SuppliersController`
-* **Método Java:** `public ResponseEntity<SupplierResource> updateSupplier(@PathVariable UUID id, @Valid @RequestBody UpdateSupplierResource resource)`
-* **Ruta Canónica:** `PUT /api/v1/inventory/suppliers/{id}`
-* **Propósito Funcional:** Actualiza los datos de contacto, ejecutivo de ventas asignado, dirección física o estado operativo de un proveedor homologado.
+**Actualizacion de Contacto y Direccion de Proveedor**
 
-#### Seguridad y Autorización
-* **Rol Mínimo Requerido:** `ROLE_INVENTORY_MANAGER`
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('inventory:suppliers:manage')")`
-* **Contexto Multi-Inquilino:** Aislamiento multi-inquilino estricto. La petición debe incluir el token JWT en el encabezado Authorization. El filtro perimetral resuelve el tenant_id del token y lo inyecta en el contexto de seguridad. Todas las operaciones en la base de datos se filtran por tenant_id garantizando que ningún taller acceda al catálogo, lotes o proveedores de otra entidad.
+#### Identidad Tecnica
+- **Controlador:** `com.andeva.atelier.platform.inventory.interfaces.rest.controllers.SuppliersController`
+- **Metodo Java:** `public ResponseEntity<SupplierResource> updateSupplier(@PathVariable UUID id, @Valid @RequestBody UpdateSupplierResource resource)`
+- **Ruta Base:** `/api/v1/inventory/suppliers`
+- **Ruta Completa:** `/api/v1/inventory/suppliers/{id}`
+- **Proposito:** Actualiza la informacion de contacto directo, numero telefonico, correo corporativo y direccion de despacho de un proveedor registrado. La razon social y el RUC se preservan inmutables para no alterar la consistencia de comprobantes historicos.
 
-#### Parámetros de Petición
+#### Seguridad y Autorizacion
+- **Nivel de Acceso:** Autenticado
+- **Rol Minimo Requerido:** Encargado de Repuestos (ROLE_INVENTORY_MANAGER)
+- **Permiso Atomico:** `@PreAuthorize("hasAuthority('inventory:suppliers:manage')")`
+- **Aislamiento Multi-Inquilino:** Aislamiento estricto por tenantId del taller en sesion.
 
-**Encabezados HTTP (Headers):**
+#### Parametros de Invocacion
+**Cabeceras HTTP (Headers):**
+- `Authorization: Bearer <token>`
+- `Content-Type: application/json`
+- `Accept: application/json`
 
-| Encabezado | Tipo | Requerido | Descripción |
-| :--- | :--- | :---: | :--- |
-| `Authorization` | `String` | Sí | Token de portador JWT Bearer con claims de usuario y permisos atómicos. |
-| `Content-Type` | `String` | Sí | application/json para el cuerpo del mensaje. |
-| `X-Tenant-Id` | `UUID` | No | Identificador opcional del taller para verificación cruzada de inquilino. |
+**Parametros de Ruta (Path Parameters):**
+- `id` (UUID): Identificador unico del proveedor comercial a actualizar
 
-**Parámetros de Ruta (Path Parameters):**
+**Parametros de Consulta (Query Parameters):**
+No aplica (Sin parametros de consulta en la URL).
 
-| Parámetro | Tipo | Requerido | Descripción |
-| :--- | :--- | :---: | :--- |
-| `id` | `UUID` | Sí | Identificador del proveedor a modificar. |
+#### Recurso de Peticion (Request Body)
+- **Registro Java DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.requests.UpdateSupplierResource`
+- **Definicion de Campos:**
+| Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripcion |
+| :--- | :--- | :--- | :--- | :--- |
+| contactName | String | Si | @NotBlank, @Size(max = 100) | Nombres actualizados del ejecutivo de cuentas |
+| phone | String | Si | @NotBlank, @Pattern(regexp = "^\+?[0-9]{9,15}$") | Nuevo numero telefonico de contacto |
+| email | String | Si | @NotBlank, @Email | Correo corporativo actualizado |
+| address | String | Si | @NotBlank, @Size(max = 255) | Nueva direccion fiscal o de almacen |
 
-**Parámetros de Consulta (Query Parameters):** No aplica.
-
-#### Cuerpo de Petición (Request)
-
-* **Java Record DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.UpdateSupplierResource`
-
-| Campo | Tipo | Requerido | Validaciones de Dominio | Descripción |
-| :--- | :--- | :---: | :--- | :--- |
-| `tradeName` | `String` | No | @Size(max = 150) | Nombre comercial actualizado. |
-| `contactName` | `String` | No | @Size(max = 100) | Nombre del nuevo ejecutivo de ventas. |
-| `email` | `String` | No | @Email | Nuevo correo de contacto. |
-| `phone` | `String` | No | @Size(max = 20) | Nuevo teléfono corporativo. |
-| `address` | `String` | No | @Size(max = 255) | Dirección actualizada. |
-| `status` | `String` | No | Enum(active, inactive) | Estado operativo del proveedor. |
-
-**Ejemplo de Payload JSON (Petición):**
-
+**Ejemplo de Carga Util JSON (Request):**
 ```json
 {
-  "contactName": "Lic. Patricia Morales Ríos",
-  "email": "pmorales@disautop.com.pe",
-  "phone": "+5114859005"
+  "contactName": "Miguel Angel Ramirez Alva",
+  "phone": "+51981234999",
+  "email": "mramirez@distribuidoracentro.pe",
+  "address": "Av. Nicolas Ayllon 1450, Ate, Lima"
 }
 ```
 
-#### Cuerpo de Respuesta (Response)
-
-* **Estatus HTTP de Éxito:** `200 OK`
-* **Java Record DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.SupplierResource`
-
-| Campo | Tipo | Descripción |
+#### Recurso de Respuesta (Response Body)
+- **Estado HTTP Exitoso:** `200 OK`
+- **Registro Java DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.responses.SupplierResource`
+- **Definicion de Campos Proyectados:**
+| Campo | Tipo de Dato | Descripcion |
 | :--- | :--- | :--- |
-| `id` | `UUID` | Identificador del proveedor. |
-| `contactName` | `String` | Contacto comercial actualizado. |
-| `email` | `String` | Correo actualizado. |
-| `phone` | `String` | Teléfono actualizado. |
+| id | UUID | Identificador unico del proveedor |
+| tenantId | UUID | Identificador del taller |
+| businessName | String | Razon social inmutable |
+| taxId | String | RUC inmutable |
+| contactName | String | Contacto comercial actualizado |
+| phone | String | Telefono actualizado |
+| email | String | Correo actualizado |
+| address | String | Direccion actualizada |
+| isActive | boolean | Estado en directorio |
 
-**Ejemplo de Payload JSON (Respuesta Exitosa):**
-
+**Ejemplo de Carga Util JSON (Response):**
 ```json
 {
-  "id": "8a9b0c1d-2e3f-4a5b-6c7d-8e9f0a1b2c3d",
-  "tenantId": "550e8400-e29b-41d4-a716-446655440000",
-  "taxId": "20601234567",
-  "companyName": "DISTRIBUIDORA AUTOMOTRIZ DEL PERU S.A.C.",
-  "tradeName": "DISAUTOP PERU",
-  "contactName": "Lic. Patricia Morales Ríos",
-  "email": "pmorales@disautop.com.pe",
-  "phone": "+5114859005",
-  "address": "Av. Nicolás Arriola 1540, La Victoria, Lima",
-  "status": "active",
-  "createdAt": "2026-01-20T10:00:00Z"
+  "id": "018f6c40-7e12-7000-8000-000000000750",
+  "tenantId": "018f6c40-7e12-7000-8000-000000000001",
+  "businessName": "DISTRIBUIDORA AUTOMOTRIZ DEL CENTRO S.A.C.",
+  "taxId": "20519842103",
+  "contactName": "Miguel Angel Ramirez Alva",
+  "phone": "+51981234999",
+  "email": "mramirez@distribuidoracentro.pe",
+  "address": "Av. Nicolas Ayllon 1450, Ate, Lima",
+  "isActive": true
 }
 ```
 
 #### Errores y Excepciones de Dominio (RFC 7807)
+| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
+| :--- | :--- | :--- |
+| 400 Bad Request | MethodArgumentNotValidException | Datos de contacto invalidos o formato de correo incorrecto |
+| 404 Not Found | SupplierNotFoundException | El proveedor comercial no existe en el taller |
 
-| Código HTTP | Código RFC 7807 | Excepción de Dominio | Condición de Activación |
-| :---: | :--- | :--- | :--- |
-| 404 | `ERR_SUPPLIER_NOT_FOUND` | `SupplierNotFoundException` | No existe el proveedor especificado. |
-
-**Ejemplo de Respuesta de Error (ProblemDetail RFC 7807):**
-
+**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
 ```json
 {
-  "type": "https://api.atelier.andeva.pe/errors/supplier-not-found",
+  "type": "https://api.atelier.pe/errors/supplier-not-found",
   "title": "Proveedor No Encontrado",
   "status": 404,
-  "detail": "No se encontró el proveedor con ID 8a9b0c1d-2e3f-4a5b-6c7d-8e9f0a1b2c3d.",
-  "instance": "/api/v1/inventory/suppliers/8a9b0c1d-2e3f-4a5b-6c7d-8e9f0a1b2c3d",
+  "detail": "No se encontro el proveedor para actualizar con el identificador 018f6c40-7e12-7000-8000-000000000750",
+  "instance": "/api/v1/inventory/suppliers/018f6c40-7e12-7000-8000-000000000750",
   "code": "ERR_SUPPLIER_NOT_FOUND",
-  "timestamp": "2026-10-01T12:45:00Z"
+  "timestamp": "2026-10-03T15:55:00Z"
 }
 ```
 
 ---
 
-### 4.11. [GET] `/api/v1/inventory/purchase-orders`
+## 5. Endpoints de Ordenes de Compra y Abastecimiento (PurchaseOrdersController)
 
-#### Identidad Técnica
-* **Controlador:** `com.andeva.atelier.platform.inventory.interfaces.rest.PurchaseOrdersController`
-* **Método Java:** `public ResponseEntity<Page<PurchaseOrderSummaryResource>> getPurchaseOrders(Pageable pageable, @RequestParam(required = false) UUID supplierId, @RequestParam(required = false) String status)`
-* **Ruta Canónica:** `GET /api/v1/inventory/purchase-orders`
-* **Propósito Funcional:** Recupera el listado paginado y filtrado de órdenes de compra emitidas a proveedores mayoristas, supervisando compromisos de abastecimiento y recepciones pendientes.
+### 5.1. [POST] /api/v1/inventory/purchase-orders
 
-#### Seguridad y Autorización
-* **Rol Mínimo Requerido:** `ROLE_INVENTORY_MANAGER`
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('inventory:purchase_orders:read')")`
-* **Contexto Multi-Inquilino:** Aislamiento multi-inquilino estricto. La petición debe incluir el token JWT en el encabezado Authorization. El filtro perimetral resuelve el tenant_id del token y lo inyecta en el contexto de seguridad. Todas las operaciones en la base de datos se filtran por tenant_id garantizando que ningún taller acceda al catálogo, lotes o proveedores de otra entidad.
+**Creacion de Orden de Compra en Estado Borrador**
 
-#### Parámetros de Petición
+#### Identidad Tecnica
+- **Controlador:** `com.andeva.atelier.platform.inventory.interfaces.rest.controllers.PurchaseOrdersController`
+- **Metodo Java:** `public ResponseEntity<PurchaseOrderResource> createPurchaseOrder(@Valid @RequestBody CreatePurchaseOrderResource resource)`
+- **Ruta Base:** `/api/v1/inventory/purchase-orders`
+- **Ruta Completa:** `/api/v1/inventory/purchase-orders`
+- **Proposito:** Inicia el proceso formal de abastecimiento de repuestos mediante la creacion de una orden de compra en estado DRAFT vinculada a un proveedor homologado y a una sucursal del taller. Inicializa el costo total en cero y la coleccion de lineas vacia.
 
-**Encabezados HTTP (Headers):**
+#### Seguridad y Autorizacion
+- **Nivel de Acceso:** Autenticado
+- **Rol Minimo Requerido:** Encargado de Repuestos (ROLE_INVENTORY_MANAGER)
+- **Permiso Atomico:** `@PreAuthorize("hasAuthority('inventory:purchase_orders:create')")`
+- **Aislamiento Multi-Inquilino:** Aislamiento estricto por tenantId del taller en sesion.
 
-| Encabezado | Tipo | Requerido | Descripción |
-| :--- | :--- | :---: | :--- |
-| `Authorization` | `String` | Sí | Token de portador JWT Bearer con claims de usuario y permisos atómicos. |
-| `Accept` | `String` | No | application/json por defecto. |
-| `X-Tenant-Id` | `UUID` | No | Identificador opcional del taller para verificación cruzada de inquilino. |
+#### Parametros de Invocacion
+**Cabeceras HTTP (Headers):**
+- `Authorization: Bearer <token>`
+- `Content-Type: application/json`
+- `Accept: application/json`
 
-**Parámetros de Ruta (Path Parameters):** No aplica.
+**Parametros de Ruta (Path Parameters):**
+No aplica (Sin parametros en la ruta).
 
-**Parámetros de Consulta (Query Parameters):**
+**Parametros de Consulta (Query Parameters):**
+No aplica (Sin parametros de consulta en la URL).
 
-| Parámetro | Tipo | Requerido | Valor por Defecto | Descripción |
-| :--- | :--- | :---: | :---: | :--- |
-| `supplierId` | `UUID` | No | `null` | Filtro por proveedor adjudicatario. |
-| `status` | `String` | No | `null` | Estado de la orden de compra (DRAFT, ISSUED, RECEIVED, CANCELLED). |
-| `page` | `Integer` | No | `0` | Índice de página base cero. |
-| `size` | `Integer` | No | `20` | Elementos por página. |
-| `sort` | `String` | No | `createdAt,desc` | Criterio de ordenamiento. |
+#### Recurso de Peticion (Request Body)
+- **Registro Java DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.requests.CreatePurchaseOrderResource`
+- **Definicion de Campos:**
+| Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripcion |
+| :--- | :--- | :--- | :--- | :--- |
+| supplierId | UUID | Si | @NotNull | Identificador del proveedor mayorista destinatario |
+| branchId | UUID | Si | @NotNull | Identificador de la sucursal del taller receptora |
+| orderNumber | String | Si | @NotBlank, @Size(max = 50) | Codigo correlativo interno de orden de compra |
 
-#### Cuerpo de Petición (Request)
-
-No requiere cuerpo de petición (petición sin contenido o parámetros en URL).
-
-#### Cuerpo de Respuesta (Response)
-
-* **Estatus HTTP de Éxito:** `200 OK`
-* **Java Record DTO:** `org.springframework.data.domain.Page<com.andeva.atelier.platform.inventory.interfaces.rest.resources.PurchaseOrderSummaryResource>`
-
-| Campo | Tipo | Descripción |
-| :--- | :--- | :--- |
-| `content[].id` | `UUID` | Identificador único de la orden de compra. |
-| `content[].orderNumber` | `String` | Código correlativo institucional (ej. OC-2026-00085). |
-| `content[].supplierId` | `UUID` | Identificador del proveedor. |
-| `content[].supplierName` | `String` | Razón social del proveedor. |
-| `content[].status` | `String` | Estado actual de la orden de compra. |
-| `content[].totalItemsCount` | `Integer` | Cantidad de líneas de repuestos incluidas. |
-| `content[].subtotalAmount` | `BigDecimal` | Monto neto antes de impuestos. |
-| `content[].taxAmount` | `BigDecimal` | IGV facturado (18%). |
-| `content[].totalAmount` | `BigDecimal` | Importe total bruto de la compra. |
-| `content[].currency` | `String` | Moneda oficial (PEN). |
-| `content[].issuedAt` | `Instant` | Marca temporal de emisión en UTC. |
-| `content[].receivedAt` | `Instant` | Marca temporal de recepción física en almacén. |
-
-**Ejemplo de Payload JSON (Respuesta Exitosa):**
-
+**Ejemplo de Carga Util JSON (Request):**
 ```json
 {
-  "content": [
-    {
-      "id": "e5f6a7b8-c9d0-1e2f-3a4b-5c6d7e8f9a0b",
-      "orderNumber": "OC-2026-00085",
-      "supplierId": "8a9b0c1d-2e3f-4a5b-6c7d-8e9f0a1b2c3d",
-      "supplierName": "DISTRIBUIDORA AUTOMOTRIZ DEL PERU S.A.C.",
-      "status": "RECEIVED",
-      "totalItemsCount": 1,
-      "subtotalAmount": 3000.00,
-      "taxAmount": 540.00,
-      "totalAmount": 3540.00,
-      "currency": "PEN",
-      "issuedAt": "2026-09-20T10:00:00Z",
-      "receivedAt": "2026-09-25T14:30:00Z"
-    }
-  ],
-  "pageable": {
-    "pageNumber": 0,
-    "pageSize": 20
-  },
-  "totalElements": 1,
-  "totalPages": 1,
-  "last": true,
-  "size": 20,
-  "number": 0,
-  "first": true,
-  "empty": false
+  "supplierId": "018f6c40-7e12-7000-8000-000000000750",
+  "branchId": "018f6c40-7e12-7000-8000-000000000050",
+  "orderNumber": "OC-2026-0045"
+}
+```
+
+#### Recurso de Respuesta (Response Body)
+- **Estado HTTP Exitoso:** `201 Created`
+- **Registro Java DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.responses.PurchaseOrderResource`
+- **Definicion de Campos Proyectados:**
+| Campo | Tipo de Dato | Descripcion |
+| :--- | :--- | :--- |
+| id | UUID | Identificador unico de la orden de compra |
+| tenantId | UUID | Identificador del taller |
+| supplierId | UUID | Identificador del proveedor mayorista |
+| supplierName | String | Razon social del proveedor |
+| branchId | UUID | Identificador de sucursal |
+| orderNumber | String | Numero correlativo de orden |
+| status | String | Estado operativo inicial (DRAFT) |
+| totalCost | BigDecimal | Costo consolidado acumulado (0.00 al inicio) |
+| currency | String | Moneda de operacion (PEN) |
+| receiptImageUrl | String | URL de factura escaneada (null al crear) |
+| receiptNumber | String | Numero de comprobante (null al crear) |
+| receivedAt | Instant | Marca temporal de recepcion (null al crear) |
+| items | List<PurchaseOrderItemResource> | Lineas de repuestos agregadas |
+
+**Ejemplo de Carga Util JSON (Response):**
+```json
+{
+  "id": "018f6c40-7e12-7000-8000-000000000880",
+  "tenantId": "018f6c40-7e12-7000-8000-000000000001",
+  "supplierId": "018f6c40-7e12-7000-8000-000000000750",
+  "supplierName": "DISTRIBUIDORA AUTOMOTRIZ DEL CENTRO S.A.C.",
+  "branchId": "018f6c40-7e12-7000-8000-000000000050",
+  "orderNumber": "OC-2026-0045",
+  "status": "DRAFT",
+  "totalCost": 0,
+  "currency": "PEN",
+  "receiptImageUrl": null,
+  "receiptNumber": null,
+  "receivedAt": null,
+  "items": []
 }
 ```
 
 #### Errores y Excepciones de Dominio (RFC 7807)
+| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
+| :--- | :--- | :--- |
+| 400 Bad Request | MethodArgumentNotValidException | Datos obligatorios omitidos o formato invalido |
+| 404 Not Found | SupplierNotFoundException | El proveedor comercial especificado no existe en el taller |
 
-| Código HTTP | Código RFC 7807 | Excepción de Dominio | Condición de Activación |
-| :---: | :--- | :--- | :--- |
-| 400 | `INVALID_QUERY_PARAMETER` | `IllegalArgumentException` | Estado de orden de compra no reconocido. |
-
-**Ejemplo de Respuesta de Error (ProblemDetail RFC 7807):**
-
+**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
 ```json
 {
-  "type": "https://api.atelier.andeva.pe/errors/invalid-query-parameter",
-  "title": "Parámetro Inválido",
-  "status": 400,
-  "detail": "El valor del estado no corresponde a la máquina de estados de órdenes de compra.",
+  "type": "https://api.atelier.pe/errors/supplier-not-found",
+  "title": "Proveedor No Encontrado",
+  "status": 404,
+  "detail": "No se localizo el proveedor indicado para la orden de compra",
   "instance": "/api/v1/inventory/purchase-orders",
-  "code": "INVALID_QUERY_PARAMETER",
-  "timestamp": "2026-10-01T12:50:00Z"
+  "code": "ERR_SUPPLIER_NOT_FOUND",
+  "timestamp": "2026-10-03T16:00:00Z"
 }
 ```
 
 ---
 
-### 4.12. [POST] `/api/v1/inventory/purchase-orders`
+### 5.2. [GET] /api/v1/inventory/purchase-orders
 
-#### Identidad Técnica
-* **Controlador:** `com.andeva.atelier.platform.inventory.interfaces.rest.PurchaseOrdersController`
-* **Método Java:** `public ResponseEntity<PurchaseOrderResource> createPurchaseOrder(@Valid @RequestBody CreatePurchaseOrderResource resource, UriComponentsBuilder ucb)`
-* **Ruta Canónica:** `POST /api/v1/inventory/purchase-orders`
-* **Propósito Funcional:** Crea y formaliza una nueva orden de compra para abastecimiento de repuestos e insumos, estableciendo líneas de productos, cantidades y precios acordados con el proveedor.
+**Listado de Ordenes de Compra del Taller**
 
-#### Seguridad y Autorización
-* **Rol Mínimo Requerido:** `ROLE_INVENTORY_MANAGER`
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('inventory:purchase_orders:create')")`
-* **Contexto Multi-Inquilino:** Aislamiento multi-inquilino estricto. La petición debe incluir el token JWT en el encabezado Authorization. El filtro perimetral resuelve el tenant_id del token y lo inyecta en el contexto de seguridad. Todas las operaciones en la base de datos se filtran por tenant_id garantizando que ningún taller acceda al catálogo, lotes o proveedores de otra entidad.
+#### Identidad Tecnica
+- **Controlador:** `com.andeva.atelier.platform.inventory.interfaces.rest.controllers.PurchaseOrdersController`
+- **Metodo Java:** `public ResponseEntity<List<PurchaseOrderResource>> getPurchaseOrders()`
+- **Ruta Base:** `/api/v1/inventory/purchase-orders`
+- **Ruta Completa:** `/api/v1/inventory/purchase-orders`
+- **Proposito:** Retorna el historial completo de ordenes de compra de abastecimiento del taller automotriz, permitiendo auditar el ciclo de adquisicion desde borradores, ordenes emitidas y mercaderia recibida.
 
-#### Parámetros de Petición
+#### Seguridad y Autorizacion
+- **Nivel de Acceso:** Autenticado
+- **Rol Minimo Requerido:** Encargado de Repuestos (ROLE_INVENTORY_MANAGER)
+- **Permiso Atomico:** `@PreAuthorize("hasAuthority('inventory:purchase_orders:read')")`
+- **Aislamiento Multi-Inquilino:** Aislamiento estricto por tenantId del taller en sesion.
 
-**Encabezados HTTP (Headers):**
+#### Parametros de Invocacion
+**Cabeceras HTTP (Headers):**
+- `Authorization: Bearer <token>`
+- `Accept: application/json`
 
-| Encabezado | Tipo | Requerido | Descripción |
-| :--- | :--- | :---: | :--- |
-| `Authorization` | `String` | Sí | Token de portador JWT Bearer con claims de usuario y permisos atómicos. |
-| `Content-Type` | `String` | Sí | application/json para el cuerpo del mensaje. |
-| `X-Tenant-Id` | `UUID` | No | Identificador opcional del taller para verificación cruzada de inquilino. |
+**Parametros de Ruta (Path Parameters):**
+No aplica (Sin parametros en la ruta).
 
-**Parámetros de Ruta (Path Parameters):** No aplica.
+**Parametros de Consulta (Query Parameters):**
+No aplica (Sin parametros de consulta en la URL).
 
-**Parámetros de Consulta (Query Parameters):** No aplica.
+#### Recurso de Respuesta (Response Body)
+- **Estado HTTP Exitoso:** `200 OK`
+- **Registro Java DTO:** `java.util.List<com.andeva.atelier.platform.inventory.interfaces.rest.resources.responses.PurchaseOrderResource>`
+- **Definicion de Campos Proyectados:**
+| Campo | Tipo de Dato | Descripcion |
+| :--- | :--- | :--- |
+| id | UUID | Identificador unico de la orden de compra |
+| tenantId | UUID | Identificador del taller |
+| supplierId | UUID | Identificador del proveedor |
+| supplierName | String | Nombre del proveedor |
+| branchId | UUID | Identificador de sucursal |
+| orderNumber | String | Numero correlativo |
+| status | String | Estado operativo (DRAFT, ISSUED, RECEIVED, CANCELLED) |
+| totalCost | BigDecimal | Costo total consolidado |
+| currency | String | Moneda |
+| receiptImageUrl | String | URL de factura |
+| receiptNumber | String | Numero de comprobante |
+| receivedAt | Instant | Marca de recepcion |
+| items | List<PurchaseOrderItemResource> | Lineas de repuestos |
 
-#### Cuerpo de Petición (Request)
+**Ejemplo de Carga Util JSON (Response):**
+```json
+[
+  {
+    "id": "018f6c40-7e12-7000-8000-000000000880",
+    "tenantId": "018f6c40-7e12-7000-8000-000000000001",
+    "supplierId": "018f6c40-7e12-7000-8000-000000000750",
+    "supplierName": "DISTRIBUIDORA AUTOMOTRIZ DEL CENTRO S.A.C.",
+    "branchId": "018f6c40-7e12-7000-8000-000000000050",
+    "orderNumber": "OC-2026-0045",
+    "status": "DRAFT",
+    "totalCost": 0,
+    "currency": "PEN",
+    "receiptImageUrl": null,
+    "receiptNumber": null,
+    "receivedAt": null,
+    "items": []
+  }
+]
+```
 
-* **Java Record DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.CreatePurchaseOrderResource`
+#### Errores y Excepciones de Dominio (RFC 7807)
+| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
+| :--- | :--- | :--- |
+| 401 Unauthorized | BadCredentialsException | Token JWT ausente o expirado |
 
-| Campo | Tipo | Requerido | Validaciones de Dominio | Descripción |
-| :--- | :--- | :---: | :--- | :--- |
-| `supplierId` | `UUID` | Sí | @NotNull | Identificador del proveedor adjudicado. |
-| `notes` | `String` | No | @Size(max = 1000) | Observaciones de entrega o condiciones de crédito comercial. |
-| `expectedDeliveryDate` | `LocalDate` | No | Opcional | Fecha estimada de arribo a bodega. |
-| `items` | `List<CreatePurchaseOrderItemResource>` | Sí | @NotEmpty | Colección de repuestos demandados con cantidades y costos unitarios. |
-
-**Ejemplo de Payload JSON (Petición):**
-
+**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
 ```json
 {
-  "supplierId": "8a9b0c1d-2e3f-4a5b-6c7d-8e9f0a1b2c3d",
-  "notes": "Entrega en almacén central. Crédito a 30 días según acuerdo marco.",
-  "expectedDeliveryDate": "2026-10-10",
+  "type": "https://api.atelier.pe/errors/unauthorized",
+  "title": "Sesion No Autorizada",
+  "status": 401,
+  "detail": "Se requiere autenticacion para consultar ordenes de compra",
+  "instance": "/api/v1/inventory/purchase-orders",
+  "code": "UNAUTHORIZED",
+  "timestamp": "2026-10-03T16:05:00Z"
+}
+```
+
+---
+
+### 5.3. [POST] /api/v1/inventory/purchase-orders/{id}/items
+
+**Adicion de Lineas de Repuestos a la Orden de Compra**
+
+#### Identidad Tecnica
+- **Controlador:** `com.andeva.atelier.platform.inventory.interfaces.rest.controllers.PurchaseOrdersController`
+- **Metodo Java:** `public ResponseEntity<PurchaseOrderResource> addPurchaseOrderItem(@PathVariable UUID id, @Valid @RequestBody AddPurchaseOrderItemResource resource)`
+- **Ruta Base:** `/api/v1/inventory/purchase-orders`
+- **Ruta Completa:** `/api/v1/inventory/purchase-orders/{id}/items`
+- **Proposito:** Agrega un repuesto especifico con su cantidad solicitada y costo unitario pactado a una orden de compra en estado DRAFT. Actualiza de manera automatica el importe total acumulado de la orden.
+
+#### Seguridad y Autorizacion
+- **Nivel de Acceso:** Autenticado
+- **Rol Minimo Requerido:** Encargado de Repuestos (ROLE_INVENTORY_MANAGER)
+- **Permiso Atomico:** `@PreAuthorize("hasAuthority('inventory:purchase_orders:create')")`
+- **Aislamiento Multi-Inquilino:** Aislamiento estricto por tenantId del taller en sesion.
+
+#### Parametros de Invocacion
+**Cabeceras HTTP (Headers):**
+- `Authorization: Bearer <token>`
+- `Content-Type: application/json`
+- `Accept: application/json`
+
+**Parametros de Ruta (Path Parameters):**
+- `id` (UUID): Identificador unico de la orden de compra
+
+**Parametros de Consulta (Query Parameters):**
+No aplica (Sin parametros de consulta en la URL).
+
+#### Recurso de Peticion (Request Body)
+- **Registro Java DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.requests.AddPurchaseOrderItemResource`
+- **Definicion de Campos:**
+| Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripcion |
+| :--- | :--- | :--- | :--- | :--- |
+| itemId | UUID | Si | @NotNull | Identificador del repuesto en catalogo maestro |
+| quantity | BigDecimal | Si | @NotNull, @Positive | Cantidad de unidades requeridas |
+| unitCost | BigDecimal | Si | @NotNull, @Positive | Costo unitario pactado sin impuestos |
+| currency | String | Si | @NotBlank, @Pattern(regexp = "PEN|USD") | Codigo ISO de la moneda |
+
+**Ejemplo de Carga Util JSON (Request):**
+```json
+{
+  "itemId": "018f6c40-7e12-7000-8000-000000000701",
+  "quantity": 15,
+  "unitCost": 105,
+  "currency": "PEN"
+}
+```
+
+#### Recurso de Respuesta (Response Body)
+- **Estado HTTP Exitoso:** `201 Created`
+- **Registro Java DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.responses.PurchaseOrderResource`
+- **Definicion de Campos Proyectados:**
+| Campo | Tipo de Dato | Descripcion |
+| :--- | :--- | :--- |
+| id | UUID | Identificador de la orden de compra |
+| tenantId | UUID | Identificador del taller |
+| supplierId | UUID | Identificador del proveedor |
+| supplierName | String | Nombre del proveedor |
+| branchId | UUID | Identificador de sucursal |
+| orderNumber | String | Numero correlativo |
+| status | String | Estado operativo (DRAFT) |
+| totalCost | BigDecimal | Nuevo costo consolidado |
+| currency | String | Moneda |
+| receiptImageUrl | String | URL de factura |
+| receiptNumber | String | Numero de comprobante |
+| receivedAt | Instant | Marca de recepcion |
+| items | List<PurchaseOrderItemResource> | Lineas de repuestos actualizadas |
+
+**Ejemplo de Carga Util JSON (Response):**
+```json
+{
+  "id": "018f6c40-7e12-7000-8000-000000000880",
+  "tenantId": "018f6c40-7e12-7000-8000-000000000001",
+  "supplierId": "018f6c40-7e12-7000-8000-000000000750",
+  "supplierName": "DISTRIBUIDORA AUTOMOTRIZ DEL CENTRO S.A.C.",
+  "branchId": "018f6c40-7e12-7000-8000-000000000050",
+  "orderNumber": "OC-2026-0045",
+  "status": "DRAFT",
+  "totalCost": 1575,
+  "currency": "PEN",
+  "receiptImageUrl": null,
+  "receiptNumber": null,
+  "receivedAt": null,
   "items": [
     {
-      "inventoryItemId": "6f2a3b4c-5d6e-7a8b-9c0d-1e2f3a4b5c6d",
-      "quantity": 10.00,
-      "unitCost": 300.00
+      "id": "018f6c40-7e12-7000-8000-000000000885",
+      "itemId": "018f6c40-7e12-7000-8000-000000000701",
+      "itemName": "Juego de Pastillas Ceramicas Delanteras Bosch",
+      "sku": "BRK-PAD-BOSCH-01",
+      "quantity": 15,
+      "unitCost": 105,
+      "totalCost": 1575,
+      "currency": "PEN"
     }
   ]
 }
 ```
 
-#### Cuerpo de Respuesta (Response)
-
-* **Estatus HTTP de Éxito:** `201 Created`
-* **Cabecera de Ubicación (*Location Header*):** `/api/v1/inventory/purchase-orders/e5f6a7b8-c9d0-1e2f-3a4b-5c6d7e8f9a0b`
-* **Java Record DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.PurchaseOrderResource`
-
-| Campo | Tipo | Descripción |
-| :--- | :--- | :--- |
-| `id` | `UUID` | Identificador técnico de la orden de compra. |
-| `orderNumber` | `String` | Código correlativo generado. |
-| `tenantId` | `UUID` | Identificador del taller titular. |
-| `supplierId` | `UUID` | Identificador del proveedor. |
-| `supplierName` | `String` | Razón social del proveedor. |
-| `status` | `String` | Estado inicial emitido (ISSUED). |
-| `subtotalAmount` | `BigDecimal` | Subtotal de la compra (3000.00 PEN). |
-| `taxAmount` | `BigDecimal` | IGV liquidado (540.00 PEN). |
-| `totalAmount` | `BigDecimal` | Monto total de la compra (3540.00 PEN). |
-| `currency` | `String` | Moneda oficial (PEN). |
-| `items` | `List<PurchaseOrderItemResource>` | Partidas detalladas incorporadas. |
-| `createdAt` | `Instant` | Marca temporal de emisión en UTC. |
-
-**Ejemplo de Payload JSON (Respuesta Exitosa):**
-
-```json
-{
-  "id": "e5f6a7b8-c9d0-1e2f-3a4b-5c6d7e8f9a0b",
-  "orderNumber": "OC-2026-00085",
-  "tenantId": "550e8400-e29b-41d4-a716-446655440000",
-  "supplierId": "8a9b0c1d-2e3f-4a5b-6c7d-8e9f0a1b2c3d",
-  "supplierName": "DISTRIBUIDORA AUTOMOTRIZ DEL PERU S.A.C.",
-  "status": "ISSUED",
-  "notes": "Entrega en almacén central. Crédito a 30 días según acuerdo marco.",
-  "expectedDeliveryDate": "2026-10-10",
-  "subtotalAmount": 3000.00,
-  "taxAmount": 540.00,
-  "totalAmount": 3540.00,
-  "currency": "PEN",
-  "items": [
-    {
-      "id": "9a0b1c2d-3e4f-5a6b-7c8d-9e0f1a2b3c4d",
-      "inventoryItemId": "6f2a3b4c-5d6e-7a8b-9c0d-1e2f3a4b5c6d",
-      "partName": "Juego de Pastillas Cerámicas Delanteras Brembo P83024",
-      "partSku": "BRM-P83024",
-      "quantity": 10.00,
-      "unitCost": 300.00,
-      "subtotal": 3000.00
-    }
-  ],
-  "createdAt": "2026-10-01T12:55:00Z",
-  "updatedAt": "2026-10-01T12:55:00Z"
-}
-```
-
 #### Errores y Excepciones de Dominio (RFC 7807)
+| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
+| :--- | :--- | :--- |
+| 400 Bad Request | InvalidPurchaseOrderTransitionException | La orden ya ha sido emitida o recibida y no permite agregar lineas |
+| 404 Not Found | PurchaseOrderNotFoundException | La orden de compra no existe |
+| 404 Not Found | InventoryItemNotFoundException | El repuesto especificado no existe en el catalogo |
 
-| Código HTTP | Código RFC 7807 | Excepción de Dominio | Condición de Activación |
-| :---: | :--- | :--- | :--- |
-| 400 | `ERR_EMPTY_PURCHASE_ORDER` | `PurchaseOrderEmptyException` | Se intenta emitir una orden de compra sin líneas de repuestos. |
-| 404 | `ERR_SUPPLIER_NOT_FOUND` | `SupplierNotFoundException` | No existe el proveedor referenciado. |
-
-**Ejemplo de Respuesta de Error (ProblemDetail RFC 7807):**
-
+**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
 ```json
 {
-  "type": "https://api.atelier.andeva.pe/errors/empty-purchase-order",
-  "title": "Orden de Compra Vacía",
+  "type": "https://api.atelier.pe/errors/invalid-po-transition",
+  "title": "Modificacion de Orden No Permitida",
   "status": 400,
-  "detail": "La orden de compra debe contener al menos un repuesto para ser formalizada.",
-  "instance": "/api/v1/inventory/purchase-orders",
-  "code": "ERR_EMPTY_PURCHASE_ORDER",
-  "timestamp": "2026-10-01T12:55:01Z"
-}
-```
-
----
-
-### 4.13. [GET] `/api/v1/inventory/purchase-orders/{id}`
-
-#### Identidad Técnica
-* **Controlador:** `com.andeva.atelier.platform.inventory.interfaces.rest.PurchaseOrdersController`
-* **Método Java:** `public ResponseEntity<PurchaseOrderResource> getPurchaseOrderById(@PathVariable UUID id)`
-* **Ruta Canónica:** `GET /api/v1/inventory/purchase-orders/{id}`
-* **Propósito Funcional:** Consulta el detalle exhaustivo de una orden de compra, incluyendo los repuestos demandados, costos pactados, comprobante de factura adjunto y estado de recepción física.
-
-#### Seguridad y Autorización
-* **Rol Mínimo Requerido:** `ROLE_INVENTORY_MANAGER`
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('inventory:purchase_orders:read')")`
-* **Contexto Multi-Inquilino:** Aislamiento multi-inquilino estricto. La petición debe incluir el token JWT en el encabezado Authorization. El filtro perimetral resuelve el tenant_id del token y lo inyecta en el contexto de seguridad. Todas las operaciones en la base de datos se filtran por tenant_id garantizando que ningún taller acceda al catálogo, lotes o proveedores de otra entidad.
-
-#### Parámetros de Petición
-
-**Encabezados HTTP (Headers):**
-
-| Encabezado | Tipo | Requerido | Descripción |
-| :--- | :--- | :---: | :--- |
-| `Authorization` | `String` | Sí | Token de portador JWT Bearer con claims de usuario y permisos atómicos. |
-| `Accept` | `String` | No | application/json por defecto. |
-| `X-Tenant-Id` | `UUID` | No | Identificador opcional del taller para verificación cruzada de inquilino. |
-
-**Parámetros de Ruta (Path Parameters):**
-
-| Parámetro | Tipo | Requerido | Descripción |
-| :--- | :--- | :---: | :--- |
-| `id` | `UUID` | Sí | Identificador único de la orden de compra. |
-
-**Parámetros de Consulta (Query Parameters):** No aplica.
-
-#### Cuerpo de Petición (Request)
-
-No requiere cuerpo de petición (petición sin contenido o parámetros en URL).
-
-#### Cuerpo de Respuesta (Response)
-
-* **Estatus HTTP de Éxito:** `200 OK`
-* **Java Record DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.PurchaseOrderResource`
-
-| Campo | Tipo | Descripción |
-| :--- | :--- | :--- |
-| `id` | `UUID` | Identificador técnico de la orden. |
-| `orderNumber` | `String` | Código correlativo de la compra. |
-| `status` | `String` | Estado operativo actual. |
-| `totalAmount` | `BigDecimal` | Monto total de la compra. |
-| `items` | `List<PurchaseOrderItemResource>` | Líneas de detalle de repuestos adquiridos. |
-
-**Ejemplo de Payload JSON (Respuesta Exitosa):**
-
-```json
-{
-  "id": "e5f6a7b8-c9d0-1e2f-3a4b-5c6d7e8f9a0b",
-  "orderNumber": "OC-2026-00085",
-  "tenantId": "550e8400-e29b-41d4-a716-446655440000",
-  "supplierId": "8a9b0c1d-2e3f-4a5b-6c7d-8e9f0a1b2c3d",
-  "supplierName": "DISTRIBUIDORA AUTOMOTRIZ DEL PERU S.A.C.",
-  "status": "ISSUED",
-  "notes": "Entrega en almacén central. Crédito a 30 días según acuerdo marco.",
-  "expectedDeliveryDate": "2026-10-10",
-  "subtotalAmount": 3000.00,
-  "taxAmount": 540.00,
-  "totalAmount": 3540.00,
-  "currency": "PEN",
-  "items": [
-    {
-      "id": "9a0b1c2d-3e4f-5a6b-7c8d-9e0f1a2b3c4d",
-      "inventoryItemId": "6f2a3b4c-5d6e-7a8b-9c0d-1e2f3a4b5c6d",
-      "partName": "Juego de Pastillas Cerámicas Delanteras Brembo P83024",
-      "partSku": "BRM-P83024",
-      "quantity": 10.00,
-      "unitCost": 300.00,
-      "subtotal": 3000.00
-    }
-  ],
-  "createdAt": "2026-10-01T12:55:00Z",
-  "updatedAt": "2026-10-01T12:55:00Z"
-}
-```
-
-#### Errores y Excepciones de Dominio (RFC 7807)
-
-| Código HTTP | Código RFC 7807 | Excepción de Dominio | Condición de Activación |
-| :---: | :--- | :--- | :--- |
-| 404 | `ERR_PO_NOT_FOUND` | `PurchaseOrderNotFoundException` | No existe la orden de compra solicitada. |
-
-**Ejemplo de Respuesta de Error (ProblemDetail RFC 7807):**
-
-```json
-{
-  "type": "https://api.atelier.andeva.pe/errors/purchase-order-not-found",
-  "title": "Orden de Compra No Encontrada",
-  "status": 404,
-  "detail": "No se localiza la orden de compra e5f6a7b8-c9d0-1e2f-3a4b-5c6d7e8f9a0b.",
-  "instance": "/api/v1/inventory/purchase-orders/e5f6a7b8-c9d0-1e2f-3a4b-5c6d7e8f9a0b",
-  "code": "ERR_PO_NOT_FOUND",
-  "timestamp": "2026-10-01T13:00:00Z"
-}
-```
-
----
-
-### 4.14. [POST] `/api/v1/inventory/purchase-orders/{id}/receive`
-
-#### Identidad Técnica
-* **Controlador:** `com.andeva.atelier.platform.inventory.interfaces.rest.PurchaseOrdersController`
-* **Método Java:** `public ResponseEntity<PurchaseOrderResource> receivePurchaseOrder(@PathVariable UUID id, @Valid @RequestBody ReceivePurchaseOrderResource resource)`
-* **Ruta Canónica:** `POST /api/v1/inventory/purchase-orders/{id}/receive`
-* **Propósito Funcional:** Otorga conformidad física a la recepción de mercadería contra orden de compra, verificando comprobante del proveedor (factura) y dando de alta automática a los lotes FIFO correspondientes.
-
-#### Seguridad y Autorización
-* **Rol Mínimo Requerido:** `ROLE_INVENTORY_MANAGER`
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('inventory:purchase_orders:receive')")`
-* **Contexto Multi-Inquilino:** Aislamiento multi-inquilino estricto. La petición debe incluir el token JWT en el encabezado Authorization. El filtro perimetral resuelve el tenant_id del token y lo inyecta en el contexto de seguridad. Todas las operaciones en la base de datos se filtran por tenant_id garantizando que ningún taller acceda al catálogo, lotes o proveedores de otra entidad.
-
-#### Parámetros de Petición
-
-**Encabezados HTTP (Headers):**
-
-| Encabezado | Tipo | Requerido | Descripción |
-| :--- | :--- | :---: | :--- |
-| `Authorization` | `String` | Sí | Token de portador JWT Bearer con claims de usuario y permisos atómicos. |
-| `Content-Type` | `String` | Sí | application/json para el cuerpo del mensaje. |
-| `X-Tenant-Id` | `UUID` | No | Identificador opcional del taller para verificación cruzada de inquilino. |
-
-**Parámetros de Ruta (Path Parameters):**
-
-| Parámetro | Tipo | Requerido | Descripción |
-| :--- | :--- | :---: | :--- |
-| `id` | `UUID` | Sí | Identificador único de la orden de compra a recibir. |
-
-**Parámetros de Consulta (Query Parameters):** No aplica.
-
-#### Cuerpo de Petición (Request)
-
-* **Java Record DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.ReceivePurchaseOrderResource`
-
-| Campo | Tipo | Requerido | Validaciones de Dominio | Descripción |
-| :--- | :--- | :---: | :--- | :--- |
-| `invoiceNumber` | `String` | Sí | @NotBlank, @Size(max = 50) | Serie y número de la factura comercial o guía de remisión del proveedor. |
-| `invoicePhotoUrl` | `String` | Sí | @NotBlank, @URL | Localizador HTTPS del comprobante escaneado en Cloud Storage. |
-| `receptionNotes` | `String` | No | @Size(max = 1000) | Observaciones de la inspección visual física de ingreso. |
-
-**Ejemplo de Payload JSON (Petición):**
-
-```json
-{
-  "invoiceNumber": "F001-00045892",
-  "invoicePhotoUrl": "https://storage.googleapis.com/atelier-evidence/tenants/550e8400/invoices/F001-00045892.pdf",
-  "receptionNotes": "Mercadería recibida en empaques originales sellados de fábrica sin daños aparentes."
-}
-```
-
-#### Cuerpo de Respuesta (Response)
-
-* **Estatus HTTP de Éxito:** `200 OK`
-* **Java Record DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.PurchaseOrderResource`
-
-| Campo | Tipo | Descripción |
-| :--- | :--- | :--- |
-| `id` | `UUID` | Identificador de la orden de compra. |
-| `status` | `String` | Nuevo estado (RECEIVED). |
-| `invoiceNumber` | `String` | Comprobante de compra registrado. |
-| `receivedAt` | `Instant` | Marca temporal de ingreso físico en UTC. |
-
-**Ejemplo de Payload JSON (Respuesta Exitosa):**
-
-```json
-{
-  "id": "e5f6a7b8-c9d0-1e2f-3a4b-5c6d7e8f9a0b",
-  "orderNumber": "OC-2026-00085",
-  "tenantId": "550e8400-e29b-41d4-a716-446655440000",
-  "supplierId": "8a9b0c1d-2e3f-4a5b-6c7d-8e9f0a1b2c3d",
-  "supplierName": "DISTRIBUIDORA AUTOMOTRIZ DEL PERU S.A.C.",
-  "status": "RECEIVED",
-  "invoiceNumber": "F001-00045892",
-  "invoicePhotoUrl": "https://storage.googleapis.com/atelier-evidence/tenants/550e8400/invoices/F001-00045892.pdf",
-  "subtotalAmount": 3000.00,
-  "taxAmount": 540.00,
-  "totalAmount": 3540.00,
-  "currency": "PEN",
-  "receivedAt": "2026-10-01T13:05:00Z",
-  "updatedAt": "2026-10-01T13:05:00Z"
-}
-```
-
-#### Errores y Excepciones de Dominio (RFC 7807)
-
-| Código HTTP | Código RFC 7807 | Excepción de Dominio | Condición de Activación |
-| :---: | :--- | :--- | :--- |
-| 400 | `ERR_INVALID_PO_TRANSITION` | `InvalidPurchaseOrderTransitionException` | La orden no se encuentra en estado emitido (ISSUED). |
-| 404 | `ERR_PO_NOT_FOUND` | `PurchaseOrderNotFoundException` | No existe la orden especificada. |
-| 422 | `ERR_MISSING_RECEIPT_DOC` | `MissingReceiptDocumentationException` | Falta adjuntar el número o imagen del comprobante de factura probatorio. |
-
-**Ejemplo de Respuesta de Error (ProblemDetail RFC 7807):**
-
-```json
-{
-  "type": "https://api.atelier.andeva.pe/errors/missing-receipt-doc",
-  "title": "Comprobante Faltante",
-  "status": 422,
-  "detail": "Es obligatorio adjuntar la factura del proveedor para validar la recepción.",
-  "instance": "/api/v1/inventory/purchase-orders/e5f6a7b8-c9d0-1e2f-3a4b-5c6d7e8f9a0b/receive",
-  "code": "ERR_MISSING_RECEIPT_DOC",
-  "timestamp": "2026-10-01T13:05:01Z"
-}
-```
-
----
-
-### 4.15. [POST] `/api/v1/inventory/purchase-orders/{id}/cancel`
-
-#### Identidad Técnica
-* **Controlador:** `com.andeva.atelier.platform.inventory.interfaces.rest.PurchaseOrdersController`
-* **Método Java:** `public ResponseEntity<PurchaseOrderResource> cancelPurchaseOrder(@PathVariable UUID id, @Valid @RequestBody CancelPurchaseOrderResource resource)`
-* **Ruta Canónica:** `POST /api/v1/inventory/purchase-orders/{id}/cancel`
-* **Propósito Funcional:** Ejecuta la cancelación justificada de una orden de compra antes de su recepción física en almacén.
-
-#### Seguridad y Autorización
-* **Rol Mínimo Requerido:** `ROLE_INVENTORY_MANAGER`
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('inventory:purchase_orders:cancel')")`
-* **Contexto Multi-Inquilino:** Aislamiento multi-inquilino estricto. La petición debe incluir el token JWT en el encabezado Authorization. El filtro perimetral resuelve el tenant_id del token y lo inyecta en el contexto de seguridad. Todas las operaciones en la base de datos se filtran por tenant_id garantizando que ningún taller acceda al catálogo, lotes o proveedores de otra entidad.
-
-#### Parámetros de Petición
-
-**Encabezados HTTP (Headers):**
-
-| Encabezado | Tipo | Requerido | Descripción |
-| :--- | :--- | :---: | :--- |
-| `Authorization` | `String` | Sí | Token de portador JWT Bearer con claims de usuario y permisos atómicos. |
-| `Content-Type` | `String` | Sí | application/json para el cuerpo del mensaje. |
-| `X-Tenant-Id` | `UUID` | No | Identificador opcional del taller para verificación cruzada de inquilino. |
-
-**Parámetros de Ruta (Path Parameters):**
-
-| Parámetro | Tipo | Requerido | Descripción |
-| :--- | :--- | :---: | :--- |
-| `id` | `UUID` | Sí | Identificador de la orden de compra a anular. |
-
-**Parámetros de Consulta (Query Parameters):** No aplica.
-
-#### Cuerpo de Petición (Request)
-
-* **Java Record DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.CancelPurchaseOrderResource`
-
-| Campo | Tipo | Requerido | Validaciones de Dominio | Descripción |
-| :--- | :--- | :---: | :--- | :--- |
-| `cancellationReason` | `String` | Sí | @NotBlank, @Size(min = 5, max = 500) | Motivo justificado de la anulación del pedido. |
-
-**Ejemplo de Payload JSON (Petición):**
-
-```json
-{
-  "cancellationReason": "Proveedor notificó quiebre de stock en fábrica y demora superior a 45 días hábiles."
-}
-```
-
-#### Cuerpo de Respuesta (Response)
-
-* **Estatus HTTP de Éxito:** `200 OK`
-* **Java Record DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.PurchaseOrderResource`
-
-| Campo | Tipo | Descripción |
-| :--- | :--- | :--- |
-| `id` | `UUID` | Identificador de la orden. |
-| `status` | `String` | Nuevo estado (CANCELLED). |
-| `updatedAt` | `Instant` | Marca temporal de anulación en UTC. |
-
-**Ejemplo de Payload JSON (Respuesta Exitosa):**
-
-```json
-{
-  "id": "e5f6a7b8-c9d0-1e2f-3a4b-5c6d7e8f9a0b",
-  "orderNumber": "OC-2026-00085",
-  "tenantId": "550e8400-e29b-41d4-a716-446655440000",
-  "status": "CANCELLED",
-  "updatedAt": "2026-10-01T13:10:00Z"
-}
-```
-
-#### Errores y Excepciones de Dominio (RFC 7807)
-
-| Código HTTP | Código RFC 7807 | Excepción de Dominio | Condición de Activación |
-| :---: | :--- | :--- | :--- |
-| 400 | `ERR_INVALID_PO_TRANSITION` | `InvalidPurchaseOrderTransitionException` | No se puede anular una orden que ya fue recibida en almacén. |
-| 404 | `ERR_PO_NOT_FOUND` | `PurchaseOrderNotFoundException` | No existe la orden especificada. |
-
-**Ejemplo de Respuesta de Error (ProblemDetail RFC 7807):**
-
-```json
-{
-  "type": "https://api.atelier.andeva.pe/errors/invalid-po-transition",
-  "title": "Transición Inválida",
-  "status": 400,
-  "detail": "No se puede anular una orden de compra en estado RECEIVED.",
-  "instance": "/api/v1/inventory/purchase-orders/e5f6a7b8-c9d0-1e2f-3a4b-5c6d7e8f9a0b/cancel",
+  "detail": "No se pueden incorporar lineas a una orden de compra que se encuentra en estado ISSUED",
+  "instance": "/api/v1/inventory/purchase-orders/018f6c40-7e12-7000-8000-000000000880/items",
   "code": "ERR_INVALID_PO_TRANSITION",
-  "timestamp": "2026-10-01T13:10:01Z"
+  "timestamp": "2026-10-03T16:10:00Z"
 }
 ```
 
 ---
 
-### 4.16. [GET] `/api/v1/inventory/batches/by-part/{partId}`
+### 5.4. [PUT] /api/v1/inventory/purchase-orders/{id}/issue
 
-#### Identidad Técnica
-* **Controlador:** `com.andeva.atelier.platform.inventory.interfaces.rest.BatchesController`
-* **Método Java:** `public ResponseEntity<List<BatchResource>> getBatchesByPartId(@PathVariable UUID partId)`
-* **Ruta Canónica:** `GET /api/v1/inventory/batches/by-part/{partId}`
-* **Propósito Funcional:** Recupera la trazabilidad cronológica y saldos remanentes de todos los lotes de adquisición asociados a una referencia de repuesto para inspección contable FIFO.
+**Emision Formal de la Orden de Compra al Proveedor**
 
-#### Seguridad y Autorización
-* **Rol Mínimo Requerido:** `ROLE_CHIEF_MECHANIC`
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('inventory:batches:read')")`
-* **Contexto Multi-Inquilino:** Aislamiento multi-inquilino estricto. La petición debe incluir el token JWT en el encabezado Authorization. El filtro perimetral resuelve el tenant_id del token y lo inyecta en el contexto de seguridad. Todas las operaciones en la base de datos se filtran por tenant_id garantizando que ningún taller acceda al catálogo, lotes o proveedores de otra entidad.
+#### Identidad Tecnica
+- **Controlador:** `com.andeva.atelier.platform.inventory.interfaces.rest.controllers.PurchaseOrdersController`
+- **Metodo Java:** `public ResponseEntity<PurchaseOrderResource> issuePurchaseOrder(@PathVariable UUID id)`
+- **Ruta Base:** `/api/v1/inventory/purchase-orders`
+- **Ruta Completa:** `/api/v1/inventory/purchase-orders/{id}/issue`
+- **Proposito:** Formaliza y emite la orden de compra al proveedor mayorista. Valida que la orden cuente al menos con un repuesto incorporado y transiciona el estado de DRAFT a ISSUED, bloqueando posteriores modificaciones de lineas.
 
-#### Parámetros de Petición
+#### Seguridad y Autorizacion
+- **Nivel de Acceso:** Autenticado
+- **Rol Minimo Requerido:** Encargado de Repuestos (ROLE_INVENTORY_MANAGER)
+- **Permiso Atomico:** `@PreAuthorize("hasAuthority('inventory:purchase_orders:create')")`
+- **Aislamiento Multi-Inquilino:** Aislamiento estricto por tenantId del taller en sesion.
 
-**Encabezados HTTP (Headers):**
+#### Parametros de Invocacion
+**Cabeceras HTTP (Headers):**
+- `Authorization: Bearer <token>`
+- `Accept: application/json`
 
-| Encabezado | Tipo | Requerido | Descripción |
-| :--- | :--- | :---: | :--- |
-| `Authorization` | `String` | Sí | Token de portador JWT Bearer con claims de usuario y permisos atómicos. |
-| `Accept` | `String` | No | application/json por defecto. |
-| `X-Tenant-Id` | `UUID` | No | Identificador opcional del taller para verificación cruzada de inquilino. |
+**Parametros de Ruta (Path Parameters):**
+- `id` (UUID): Identificador unico de la orden de compra a formalizar
 
-**Parámetros de Ruta (Path Parameters):**
+**Parametros de Consulta (Query Parameters):**
+No aplica (Sin parametros de consulta en la URL).
 
-| Parámetro | Tipo | Requerido | Descripción |
-| :--- | :--- | :---: | :--- |
-| `partId` | `UUID` | Sí | Identificador único del repuesto. |
-
-**Parámetros de Consulta (Query Parameters):** No aplica.
-
-#### Cuerpo de Petición (Request)
-
-No requiere cuerpo de petición (petición sin contenido o parámetros en URL).
-
-#### Cuerpo de Respuesta (Response)
-
-* **Estatus HTTP de Éxito:** `200 OK`
-* **Java Record DTO:** `java.util.List<com.andeva.atelier.platform.inventory.interfaces.rest.resources.BatchResource>`
-
-| Campo | Tipo | Descripción |
+#### Recurso de Respuesta (Response Body)
+- **Estado HTTP Exitoso:** `200 OK`
+- **Registro Java DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.responses.PurchaseOrderResource`
+- **Definicion de Campos Proyectados:**
+| Campo | Tipo de Dato | Descripcion |
 | :--- | :--- | :--- |
-| `[].id` | `UUID` | Identificador técnico del lote de adquisición. |
-| `[].inventoryItemId` | `UUID` | Identificador del repuesto. |
-| `[].batchNumber` | `String` | Código correlativo de lote de almacén (ej. LOT-2026-0812). |
-| `[].supplierId` | `UUID` | Identificador del proveedor mayorista. |
-| `[].supplierName` | `String` | Razón social del proveedor. |
-| `[].initialQuantity` | `BigDecimal` | Cantidad física ingresada inicialmente. |
-| `[].currentStock` | `BigDecimal` | Saldo físico remanente en este lote. |
-| `[].purchasePrice` | `BigDecimal` | Costo de adquisición unitario sin impuestos. |
-| `[].invoiceNumber` | `String` | Comprobante de factura de compra. |
-| `[].entryDate` | `LocalDate` | Fecha formal de ingreso a bodega. |
-| `[].status` | `String` | Estado del lote (ACTIVE, DEPLETED, EXPIRED). |
+| id | UUID | Identificador de la orden |
+| tenantId | UUID | Identificador del taller |
+| supplierId | UUID | Identificador del proveedor |
+| supplierName | String | Nombre del proveedor |
+| branchId | UUID | Identificador de sucursal |
+| orderNumber | String | Numero correlativo |
+| status | String | Nuevo estado operativo (ISSUED) |
+| totalCost | BigDecimal | Costo consolidado formalizado |
+| currency | String | Moneda |
+| receiptImageUrl | String | URL de factura |
+| receiptNumber | String | Numero de comprobante |
+| receivedAt | Instant | Marca de recepcion |
+| items | List<PurchaseOrderItemResource> | Lineas de repuestos |
 
-**Ejemplo de Payload JSON (Respuesta Exitosa):**
-
-```json
-[
-  {
-    "id": "7c8d9e0f-1a2b-3c4d-5e6f-7a8b9c0d1e2f",
-    "inventoryItemId": "6f2a3b4c-5d6e-7a8b-9c0d-1e2f3a4b5c6d",
-    "batchNumber": "LOT-2026-0812",
-    "supplierId": "8a9b0c1d-2e3f-4a5b-6c7d-8e9f0a1b2c3d",
-    "supplierName": "DISTRIBUIDORA AUTOMOTRIZ DEL PERU S.A.C.",
-    "initialQuantity": 10.00,
-    "currentStock": 7.00,
-    "purchasePrice": 300.00,
-    "invoiceNumber": "F001-00045892",
-    "invoicePhotoUrl": "https://storage.googleapis.com/atelier-evidence/tenants/550e8400/invoices/F001-00045892.pdf",
-    "entryDate": "2026-09-25",
-    "status": "ACTIVE"
-  }
-]
-```
-
-#### Errores y Excepciones de Dominio (RFC 7807)
-
-| Código HTTP | Código RFC 7807 | Excepción de Dominio | Condición de Activación |
-| :---: | :--- | :--- | :--- |
-| 404 | `ERR_ITEM_NOT_FOUND` | `InventoryItemNotFoundException` | No existe el repuesto referenciado en el catálogo. |
-
-**Ejemplo de Respuesta de Error (ProblemDetail RFC 7807):**
-
+**Ejemplo de Carga Util JSON (Response):**
 ```json
 {
-  "type": "https://api.atelier.andeva.pe/errors/item-not-found",
-  "title": "Repuesto No Encontrado",
-  "status": 404,
-  "detail": "No se localiza el repuesto con ID 6f2a3b4c-5d6e-7a8b-9c0d-1e2f3a4b5c6d.",
-  "instance": "/api/v1/inventory/batches/by-part/6f2a3b4c-5d6e-7a8b-9c0d-1e2f3a4b5c6d",
-  "code": "ERR_ITEM_NOT_FOUND",
-  "timestamp": "2026-10-01T13:15:00Z"
-}
-```
-
----
-
-### 4.17. [POST] `/api/v1/inventory/batches/receive`
-
-#### Identidad Técnica
-* **Controlador:** `com.andeva.atelier.platform.inventory.interfaces.rest.BatchesController`
-* **Método Java:** `public ResponseEntity<BatchResource> receiveBatch(@Valid @RequestBody ReceiveBatchResource resource, UriComponentsBuilder ucb)`
-* **Ruta Canónica:** `POST /api/v1/inventory/batches/receive`
-* **Propósito Funcional:** Registra el ingreso manual directo de un lote físico de repuestos al almacén con su costo de adquisición unitario y comprobante probatorio.
-
-#### Seguridad y Autorización
-* **Rol Mínimo Requerido:** `ROLE_INVENTORY_MANAGER`
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('inventory:batches:receive')")`
-* **Contexto Multi-Inquilino:** Aislamiento multi-inquilino estricto. La petición debe incluir el token JWT en el encabezado Authorization. El filtro perimetral resuelve el tenant_id del token y lo inyecta en el contexto de seguridad. Todas las operaciones en la base de datos se filtran por tenant_id garantizando que ningún taller acceda al catálogo, lotes o proveedores de otra entidad.
-
-#### Parámetros de Petición
-
-**Encabezados HTTP (Headers):**
-
-| Encabezado | Tipo | Requerido | Descripción |
-| :--- | :--- | :---: | :--- |
-| `Authorization` | `String` | Sí | Token de portador JWT Bearer con claims de usuario y permisos atómicos. |
-| `Content-Type` | `String` | Sí | application/json para el cuerpo del mensaje. |
-| `X-Tenant-Id` | `UUID` | No | Identificador opcional del taller para verificación cruzada de inquilino. |
-
-**Parámetros de Ruta (Path Parameters):** No aplica.
-
-**Parámetros de Consulta (Query Parameters):** No aplica.
-
-#### Cuerpo de Petición (Request)
-
-* **Java Record DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.ReceiveBatchResource`
-
-| Campo | Tipo | Requerido | Validaciones de Dominio | Descripción |
-| :--- | :--- | :---: | :--- | :--- |
-| `inventoryItemId` | `UUID` | Sí | @NotNull | Identificador del repuesto de catálogo. |
-| `supplierId` | `UUID` | Sí | @NotNull | Identificador del proveedor. |
-| `quantity` | `BigDecimal` | Sí | @NotNull, @DecimalMin("1.00") | Cantidad de unidades físicas adquiridas. |
-| `purchasePrice` | `BigDecimal` | Sí | @NotNull, @DecimalMin("0.01") | Costo unitario de adquisición. |
-| `invoiceNumber` | `String` | Sí | @NotBlank, @Size(max = 50) | Número de factura del proveedor. |
-| `invoicePhotoUrl` | `String` | Sí | @NotBlank, @URL | Localizador HTTPS de la factura probatoria. |
-| `manufacturingDate` | `LocalDate` | No | Opcional | Fecha de fabricación del lote si aplica. |
-| `expirationDate` | `LocalDate` | No | Opcional | Fecha de caducidad si aplica (ej. fluidos). |
-
-**Ejemplo de Payload JSON (Petición):**
-
-```json
-{
-  "inventoryItemId": "6f2a3b4c-5d6e-7a8b-9c0d-1e2f3a4b5c6d",
-  "supplierId": "8a9b0c1d-2e3f-4a5b-6c7d-8e9f0a1b2c3d",
-  "quantity": 10.00,
-  "purchasePrice": 300.00,
-  "invoiceNumber": "F001-00045892",
-  "invoicePhotoUrl": "https://storage.googleapis.com/atelier-evidence/tenants/550e8400/invoices/F001-00045892.pdf",
-  "manufacturingDate": "2026-05-10",
-  "expirationDate": null
-}
-```
-
-#### Cuerpo de Respuesta (Response)
-
-* **Estatus HTTP de Éxito:** `201 Created`
-* **Cabecera de Ubicación (*Location Header*):** `/api/v1/inventory/batches/7c8d9e0f-1a2b-3c4d-5e6f-7a8b9c0d1e2f`
-* **Java Record DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.BatchResource`
-
-| Campo | Tipo | Descripción |
-| :--- | :--- | :--- |
-| `id` | `UUID` | Identificador técnico del lote creado. |
-| `batchNumber` | `String` | Código correlativo unívoco de lote. |
-| `initialQuantity` | `BigDecimal` | Cantidad inicial registrada. |
-| `currentStock` | `BigDecimal` | Saldo remanente disponible. |
-| `purchasePrice` | `BigDecimal` | Costo de compra unitario. |
-| `status` | `String` | Estado operativo (ACTIVE). |
-
-**Ejemplo de Payload JSON (Respuesta Exitosa):**
-
-```json
-{
-  "id": "7c8d9e0f-1a2b-3c4d-5e6f-7a8b9c0d1e2f",
-  "inventoryItemId": "6f2a3b4c-5d6e-7a8b-9c0d-1e2f3a4b5c6d",
-  "batchNumber": "LOT-2026-0812",
-  "supplierId": "8a9b0c1d-2e3f-4a5b-6c7d-8e9f0a1b2c3d",
-  "supplierName": "DISTRIBUIDORA AUTOMOTRIZ DEL PERU S.A.C.",
-  "initialQuantity": 10.00,
-  "currentStock": 10.00,
-  "purchasePrice": 300.00,
-  "invoiceNumber": "F001-00045892",
-  "invoicePhotoUrl": "https://storage.googleapis.com/atelier-evidence/tenants/550e8400/invoices/F001-00045892.pdf",
-  "entryDate": "2026-10-01",
-  "status": "ACTIVE"
-}
-```
-
-#### Errores y Excepciones de Dominio (RFC 7807)
-
-| Código HTTP | Código RFC 7807 | Excepción de Dominio | Condición de Activación |
-| :---: | :--- | :--- | :--- |
-| 400 | `ERR_INVALID_BATCH_QUANTITY` | `InvalidBatchQuantityException` | Cantidad de lote o costo menor o igual a cero. |
-| 404 | `ERR_ITEM_NOT_FOUND` | `InventoryItemNotFoundException` | No existe el repuesto indicado. |
-
-**Ejemplo de Respuesta de Error (ProblemDetail RFC 7807):**
-
-```json
-{
-  "type": "https://api.atelier.andeva.pe/errors/invalid-batch-quantity",
-  "title": "Cantidad de Lote Inválida",
-  "status": 400,
-  "detail": "La cantidad ingresada debe ser estrictamente positiva.",
-  "instance": "/api/v1/inventory/batches/receive",
-  "code": "ERR_INVALID_BATCH_QUANTITY",
-  "timestamp": "2026-10-01T13:20:00Z"
-}
-```
-
----
-
-### 4.18. [POST] `/api/v1/inventory/batches/dispatch`
-
-#### Identidad Técnica
-* **Controlador:** `com.andeva.atelier.platform.inventory.interfaces.rest.BatchesController`
-* **Método Java:** `public ResponseEntity<StockDischargeResource> dispatchFifo(@Valid @RequestBody DispatchFifoResource resource)`
-* **Ruta Canónica:** `POST /api/v1/inventory/batches/dispatch`
-* **Propósito Funcional:** Ejecuta el descargo contable automatizado bajo el algoritmo estricto FIFO (First-In, First-Out), deduciendo unidades de los lotes más antiguos y valorizando el costo exacto de la salida imputada a una orden de trabajo.
-
-#### Seguridad y Autorización
-* **Rol Mínimo Requerido:** `ROLE_MECHANIC`
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('inventory:batches:dispatch_fifo')")`
-* **Contexto Multi-Inquilino:** Aislamiento multi-inquilino estricto. La petición debe incluir el token JWT en el encabezado Authorization. El filtro perimetral resuelve el tenant_id del token y lo inyecta en el contexto de seguridad. Todas las operaciones en la base de datos se filtran por tenant_id garantizando que ningún taller acceda al catálogo, lotes o proveedores de otra entidad.
-
-#### Parámetros de Petición
-
-**Encabezados HTTP (Headers):**
-
-| Encabezado | Tipo | Requerido | Descripción |
-| :--- | :--- | :---: | :--- |
-| `Authorization` | `String` | Sí | Token de portador JWT Bearer con claims de usuario y permisos atómicos. |
-| `Content-Type` | `String` | Sí | application/json para el cuerpo del mensaje. |
-| `X-Tenant-Id` | `UUID` | No | Identificador opcional del taller para verificación cruzada de inquilino. |
-
-**Parámetros de Ruta (Path Parameters):** No aplica.
-
-**Parámetros de Consulta (Query Parameters):** No aplica.
-
-#### Cuerpo de Petición (Request)
-
-* **Java Record DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.DispatchFifoResource`
-
-| Campo | Tipo | Requerido | Validaciones de Dominio | Descripción |
-| :--- | :--- | :---: | :--- | :--- |
-| `inventoryItemId` | `UUID` | Sí | @NotNull | Identificador del repuesto demandado. |
-| `workOrderId` | `UUID` | Sí | @NotNull | Identificador de la orden de trabajo receptora. |
-| `taskId` | `UUID` | Sí | @NotNull | Identificador de la labor mecánica específica. |
-| `quantity` | `BigDecimal` | Sí | @NotNull, @DecimalMin("0.01") | Cantidad de unidades demandadas para consumo. |
-
-**Ejemplo de Payload JSON (Petición):**
-
-```json
-{
-  "inventoryItemId": "6f2a3b4c-5d6e-7a8b-9c0d-1e2f3a4b5c6d",
-  "workOrderId": "7b8e5c12-3f84-4a21-9d10-8b45f1e29001",
-  "taskId": "f1a2b3c4-d5e6-7f8a-9b0c-1d2e3f4a5b6c",
-  "quantity": 1.00
-}
-```
-
-#### Cuerpo de Respuesta (Response)
-
-* **Estatus HTTP de Éxito:** `200 OK`
-* **Java Record DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.StockDischargeResource`
-
-| Campo | Tipo | Descripción |
-| :--- | :--- | :--- |
-| `dischargeId` | `UUID` | Identificador técnico de la transacción de descargo. |
-| `inventoryItemId` | `UUID` | Identificador del repuesto descargado. |
-| `workOrderId` | `UUID` | Identificador de la orden imputada. |
-| `taskId` | `UUID` | Identificador de la tarea mecánica. |
-| `totalQuantityDispatched` | `BigDecimal` | Cantidad total efectivamente descargada. |
-| `totalCostAmount` | `BigDecimal` | Costo total valorizado a precio de compra FIFO. |
-| `currency` | `String` | Moneda oficial (PEN). |
-| `dischargedAt` | `Instant` | Marca temporal del descargo en UTC. |
-| `allocations[].batchId` | `UUID` | Identificador del lote específico deducido. |
-| `allocations[].quantityDeducted` | `BigDecimal` | Cantidad tomada de este lote. |
-| `allocations[].unitCost` | `BigDecimal` | Costo unitario de este lote. |
-
-**Ejemplo de Payload JSON (Respuesta Exitosa):**
-
-```json
-{
-  "dischargeId": "3b4c5d6e-7f8a-9b0c-1d2e-3f4a5b6c7d8e",
-  "inventoryItemId": "6f2a3b4c-5d6e-7a8b-9c0d-1e2f3a4b5c6d",
-  "workOrderId": "7b8e5c12-3f84-4a21-9d10-8b45f1e29001",
-  "taskId": "f1a2b3c4-d5e6-7f8a-9b0c-1d2e3f4a5b6c",
-  "totalQuantityDispatched": 1.00,
-  "totalCostAmount": 300.00,
+  "id": "018f6c40-7e12-7000-8000-000000000880",
+  "tenantId": "018f6c40-7e12-7000-8000-000000000001",
+  "supplierId": "018f6c40-7e12-7000-8000-000000000750",
+  "supplierName": "DISTRIBUIDORA AUTOMOTRIZ DEL CENTRO S.A.C.",
+  "branchId": "018f6c40-7e12-7000-8000-000000000050",
+  "orderNumber": "OC-2026-0045",
+  "status": "ISSUED",
+  "totalCost": 1575,
   "currency": "PEN",
-  "dischargedAt": "2026-10-01T13:25:00Z",
-  "allocations": [
+  "receiptImageUrl": null,
+  "receiptNumber": null,
+  "receivedAt": null,
+  "items": [
     {
-      "batchId": "7c8d9e0f-1a2b-3c4d-5e6f-7a8b9c0d1e2f",
-      "quantityDeducted": 1.00,
-      "unitCost": 300.00
+      "id": "018f6c40-7e12-7000-8000-000000000885",
+      "itemId": "018f6c40-7e12-7000-8000-000000000701",
+      "itemName": "Juego de Pastillas Ceramicas Delanteras Bosch",
+      "sku": "BRK-PAD-BOSCH-01",
+      "quantity": 15,
+      "unitCost": 105,
+      "totalCost": 1575,
+      "currency": "PEN"
     }
   ]
 }
 ```
 
 #### Errores y Excepciones de Dominio (RFC 7807)
-
-| Código HTTP | Código RFC 7807 | Excepción de Dominio | Condición de Activación |
-| :---: | :--- | :--- | :--- |
-| 400 | `ERR_INVALID_BATCH_QUANTITY` | `InvalidBatchQuantityException` | Cantidad solicitada menor o igual a cero. |
-| 404 | `ERR_ITEM_NOT_FOUND` | `InventoryItemNotFoundException` | No existe el repuesto en catálogo. |
-| 409 | `ERR_INSUFFICIENT_STOCK` | `InsufficientStockException` | La cantidad solicitada supera el saldo total disponible en lotes activos. |
-
-**Ejemplo de Respuesta de Error (ProblemDetail RFC 7807):**
-
-```json
-{
-  "type": "https://api.atelier.andeva.pe/errors/insufficient-stock",
-  "title": "Stock Insuficiente",
-  "status": 409,
-  "detail": "El saldo disponible para el repuesto (0.00) es insuficiente para atender el descargo de 1.00 unidades.",
-  "instance": "/api/v1/inventory/batches/dispatch",
-  "code": "ERR_INSUFFICIENT_STOCK",
-  "timestamp": "2026-10-01T13:25:01Z"
-}
-```
-
----
-
-### 4.19. [POST] `/api/v1/inventory/batches/restore`
-
-#### Identidad Técnica
-* **Controlador:** `com.andeva.atelier.platform.inventory.interfaces.rest.BatchesController`
-* **Método Java:** `public ResponseEntity<BatchResource> restoreBatch(@Valid @RequestBody RestoreBatchResource resource)`
-* **Ruta Canónica:** `POST /api/v1/inventory/batches/restore`
-* **Propósito Funcional:** Reincorpora repuestos previamente descargados al almacén cuando una tarea mecánica ha sido cancelada o un repuesto no fue utilizado, restaurando existencias en el lote originario.
-
-#### Seguridad y Autorización
-* **Rol Mínimo Requerido:** `ROLE_CHIEF_MECHANIC`
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('inventory:batches:restore')")`
-* **Contexto Multi-Inquilino:** Aislamiento multi-inquilino estricto. La petición debe incluir el token JWT en el encabezado Authorization. El filtro perimetral resuelve el tenant_id del token y lo inyecta en el contexto de seguridad. Todas las operaciones en la base de datos se filtran por tenant_id garantizando que ningún taller acceda al catálogo, lotes o proveedores de otra entidad.
-
-#### Parámetros de Petición
-
-**Encabezados HTTP (Headers):**
-
-| Encabezado | Tipo | Requerido | Descripción |
-| :--- | :--- | :---: | :--- |
-| `Authorization` | `String` | Sí | Token de portador JWT Bearer con claims de usuario y permisos atómicos. |
-| `Content-Type` | `String` | Sí | application/json para el cuerpo del mensaje. |
-| `X-Tenant-Id` | `UUID` | No | Identificador opcional del taller para verificación cruzada de inquilino. |
-
-**Parámetros de Ruta (Path Parameters):** No aplica.
-
-**Parámetros de Consulta (Query Parameters):** No aplica.
-
-#### Cuerpo de Petición (Request)
-
-* **Java Record DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.RestoreBatchResource`
-
-| Campo | Tipo | Requerido | Validaciones de Dominio | Descripción |
-| :--- | :--- | :---: | :--- | :--- |
-| `batchId` | `UUID` | Sí | @NotNull | Identificador del lote receptor de la devolución. |
-| `workOrderId` | `UUID` | Sí | @NotNull | Identificador de la orden de trabajo de origen. |
-| `quantity` | `BigDecimal` | Sí | @NotNull, @DecimalMin("0.01") | Cantidad de piezas devueltas intactas. |
-| `restorationReason` | `String` | Sí | @NotBlank, @Size(max = 500) | Motivo justificado de la reincorporación al almacén. |
-
-**Ejemplo de Payload JSON (Petición):**
-
-```json
-{
-  "batchId": "7c8d9e0f-1a2b-3c4d-5e6f-7a8b9c0d1e2f",
-  "workOrderId": "7b8e5c12-3f84-4a21-9d10-8b45f1e29001",
-  "quantity": 1.00,
-  "restorationReason": "Repuesto solicitado por error de diagnóstico. Pieza se encuentra en empaque original sellado."
-}
-```
-
-#### Cuerpo de Respuesta (Response)
-
-* **Estatus HTTP de Éxito:** `200 OK`
-* **Java Record DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.BatchResource`
-
-| Campo | Tipo | Descripción |
+| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
 | :--- | :--- | :--- |
-| `id` | `UUID` | Identificador del lote. |
-| `currentStock` | `BigDecimal` | Saldo remanente incrementado tras la restitución. |
-| `status` | `String` | Estado operativo del lote (ACTIVE). |
+| 400 Bad Request | InvalidPurchaseOrderTransitionException | La orden no se encuentra en estado DRAFT |
+| 404 Not Found | PurchaseOrderNotFoundException | La orden de compra no existe |
+| 422 Unprocessable Entity | PurchaseOrderEmptyException | No se puede emitir una orden de compra que no contiene lineas de repuestos |
 
-**Ejemplo de Payload JSON (Respuesta Exitosa):**
-
+**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
 ```json
 {
-  "id": "7c8d9e0f-1a2b-3c4d-5e6f-7a8b9c0d1e2f",
-  "inventoryItemId": "6f2a3b4c-5d6e-7a8b-9c0d-1e2f3a4b5c6d",
-  "batchNumber": "LOT-2026-0812",
-  "currentStock": 8.00,
-  "status": "ACTIVE",
-  "updatedAt": "2026-10-01T13:30:00Z"
-}
-```
-
-#### Errores y Excepciones de Dominio (RFC 7807)
-
-| Código HTTP | Código RFC 7807 | Excepción de Dominio | Condición de Activación |
-| :---: | :--- | :--- | :--- |
-| 400 | `ERR_INVALID_BATCH_QUANTITY` | `InvalidBatchQuantityException` | Cantidad a restaurar inválida o excede la capacidad original. |
-| 404 | `BATCH_NOT_FOUND` | `EntityNotFoundException` | No existe el lote de almacenamiento indicado. |
-
-**Ejemplo de Respuesta de Error (ProblemDetail RFC 7807):**
-
-```json
-{
-  "type": "https://api.atelier.andeva.pe/errors/batch-not-found",
-  "title": "Lote No Encontrado",
-  "status": 404,
-  "detail": "No se localiza el lote con ID 7c8d9e0f-1a2b-3c4d-5e6f-7a8b9c0d1e2f.",
-  "instance": "/api/v1/inventory/batches/restore",
-  "code": "BATCH_NOT_FOUND",
-  "timestamp": "2026-10-01T13:30:01Z"
-}
-```
-
----
-
-### 4.20. [GET] `/api/v1/inventory/alerts`
-
-#### Identidad Técnica
-* **Controlador:** `com.andeva.atelier.platform.inventory.interfaces.rest.StockAlertsController`
-* **Método Java:** `public ResponseEntity<List<StockAlertResource>> getAlerts(@RequestParam(required = false, defaultValue = "false") Boolean resolved)`
-* **Ruta Canónica:** `GET /api/v1/inventory/alerts`
-* **Propósito Funcional:** Recupera la lista de alertas activas de inventario generadas automáticamente por repuestos cuyo stock disponible se encuentra por debajo del umbral mínimo de seguridad.
-
-#### Seguridad y Autorización
-* **Rol Mínimo Requerido:** `ROLE_CHIEF_MECHANIC`
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('inventory:alerts:read')")`
-* **Contexto Multi-Inquilino:** Aislamiento multi-inquilino estricto. La petición debe incluir el token JWT en el encabezado Authorization. El filtro perimetral resuelve el tenant_id del token y lo inyecta en el contexto de seguridad. Todas las operaciones en la base de datos se filtran por tenant_id garantizando que ningún taller acceda al catálogo, lotes o proveedores de otra entidad.
-
-#### Parámetros de Petición
-
-**Encabezados HTTP (Headers):**
-
-| Encabezado | Tipo | Requerido | Descripción |
-| :--- | :--- | :---: | :--- |
-| `Authorization` | `String` | Sí | Token de portador JWT Bearer con claims de usuario y permisos atómicos. |
-| `Accept` | `String` | No | application/json por defecto. |
-| `X-Tenant-Id` | `UUID` | No | Identificador opcional del taller para verificación cruzada de inquilino. |
-
-**Parámetros de Ruta (Path Parameters):** No aplica.
-
-**Parámetros de Consulta (Query Parameters):**
-
-| Parámetro | Tipo | Requerido | Valor por Defecto | Descripción |
-| :--- | :--- | :---: | :---: | :--- |
-| `resolved` | `Boolean` | No | `false` | Filtra alertas ya atendidas o resueltas. |
-
-#### Cuerpo de Petición (Request)
-
-No requiere cuerpo de petición (petición sin contenido o parámetros en URL).
-
-#### Cuerpo de Respuesta (Response)
-
-* **Estatus HTTP de Éxito:** `200 OK`
-* **Java Record DTO:** `java.util.List<com.andeva.atelier.platform.inventory.interfaces.rest.resources.StockAlertResource>`
-
-| Campo | Tipo | Descripción |
-| :--- | :--- | :--- |
-| `[].id` | `UUID` | Identificador técnico de la alerta. |
-| `[].tenantId` | `UUID` | Identificador del taller titular. |
-| `[].inventoryItemId` | `UUID` | Identificador del repuesto en quiebre. |
-| `[].partSku` | `String` | Código SKU del repuesto. |
-| `[].partName` | `String` | Denominación comercial. |
-| `[].currentStock` | `BigDecimal` | Saldo físico remanente al dispararse la alerta. |
-| `[].minimumStock` | `BigDecimal` | Umbral mínimo configurado. |
-| `[].deficitQuantity` | `BigDecimal` | Déficit cuantitativo respecto al umbral. |
-| `[].alertSeverity` | `String` | Nivel de gravedad (WARNING, CRITICAL, OUT_OF_STOCK). |
-| `[].isResolved` | `Boolean` | Indicador de atención de la alerta. |
-| `[].createdAt` | `Instant` | Marca temporal del disparo de la alerta en UTC. |
-
-**Ejemplo de Payload JSON (Respuesta Exitosa):**
-
-```json
-[
-  {
-    "id": "1d2e3f4a-5b6c-7d8e-9f0a-1b2c3d4e5f6a",
-    "tenantId": "550e8400-e29b-41d4-a716-446655440000",
-    "inventoryItemId": "6f2a3b4c-5d6e-7a8b-9c0d-1e2f3a4b5c6d",
-    "partSku": "BRM-P83024",
-    "partName": "Juego de Pastillas Cerámicas Delanteras Brembo P83024",
-    "currentStock": 2.00,
-    "minimumStock": 6.00,
-    "deficitQuantity": 4.00,
-    "alertSeverity": "CRITICAL",
-    "isResolved": false,
-    "resolvedAt": null,
-    "createdAt": "2026-10-01T11:00:00Z"
-  }
-]
-```
-
-#### Errores y Excepciones de Dominio (RFC 7807)
-
-| Código HTTP | Código RFC 7807 | Excepción de Dominio | Condición de Activación |
-| :---: | :--- | :--- | :--- |
-| 400 | `INVALID_QUERY_PARAMETER` | `IllegalArgumentException` | Parámetro resolved inválido. |
-
-**Ejemplo de Respuesta de Error (ProblemDetail RFC 7807):**
-
-```json
-{
-  "type": "https://api.atelier.andeva.pe/errors/invalid-query-parameter",
-  "title": "Parámetro Inválido",
-  "status": 400,
-  "detail": "El valor del parámetro resolved debe ser booleano.",
-  "instance": "/api/v1/inventory/alerts",
-  "code": "INVALID_QUERY_PARAMETER",
-  "timestamp": "2026-10-01T11:00:01Z"
-}
-```
-
----
-
-### 4.21. [POST] `/api/v1/inventory/alerts/{id}/resolve`
-
-#### Identidad Técnica
-* **Controlador:** `com.andeva.atelier.platform.inventory.interfaces.rest.StockAlertsController`
-* **Método Java:** `public ResponseEntity<StockAlertResource> resolveAlert(@PathVariable UUID id, @Valid @RequestBody ResolveAlertResource resource)`
-* **Ruta Canónica:** `POST /api/v1/inventory/alerts/{id}/resolve`
-* **Propósito Funcional:** Registra la resolución formal de una alerta de inventario tras emitirse una orden de reposición de mercadería o regularizarse físicamente el inventario.
-
-#### Seguridad y Autorización
-* **Rol Mínimo Requerido:** `ROLE_INVENTORY_MANAGER`
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('inventory:alerts:resolve')")`
-* **Contexto Multi-Inquilino:** Aislamiento multi-inquilino estricto. La petición debe incluir el token JWT en el encabezado Authorization. El filtro perimetral resuelve el tenant_id del token y lo inyecta en el contexto de seguridad. Todas las operaciones en la base de datos se filtran por tenant_id garantizando que ningún taller acceda al catálogo, lotes o proveedores de otra entidad.
-
-#### Parámetros de Petición
-
-**Encabezados HTTP (Headers):**
-
-| Encabezado | Tipo | Requerido | Descripción |
-| :--- | :--- | :---: | :--- |
-| `Authorization` | `String` | Sí | Token de portador JWT Bearer con claims de usuario y permisos atómicos. |
-| `Content-Type` | `String` | Sí | application/json para el cuerpo del mensaje. |
-| `X-Tenant-Id` | `UUID` | No | Identificador opcional del taller para verificación cruzada de inquilino. |
-
-**Parámetros de Ruta (Path Parameters):**
-
-| Parámetro | Tipo | Requerido | Descripción |
-| :--- | :--- | :---: | :--- |
-| `id` | `UUID` | Sí | Identificador de la alerta de inventario a resolver. |
-
-**Parámetros de Consulta (Query Parameters):** No aplica.
-
-#### Cuerpo de Petición (Request)
-
-* **Java Record DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.ResolveAlertResource`
-
-| Campo | Tipo | Requerido | Validaciones de Dominio | Descripción |
-| :--- | :--- | :---: | :--- | :--- |
-| `purchaseOrderId` | `UUID` | No | Opcional | Identificador de la orden de compra emitida para resolver el quiebre. |
-| `resolutionNotes` | `String` | Sí | @NotBlank, @Size(max = 500) | Explicación de la acción correctiva aplicada. |
-
-**Ejemplo de Payload JSON (Petición):**
-
-```json
-{
-  "purchaseOrderId": "e5f6a7b8-c9d0-1e2f-3a4b-5c6d7e8f9a0b",
-  "resolutionNotes": "Se emitió orden de compra OC-2026-00085 por 10 juegos de pastillas al distribuidor DISAUTOP."
-}
-```
-
-#### Cuerpo de Respuesta (Response)
-
-* **Estatus HTTP de Éxito:** `200 OK`
-* **Java Record DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.StockAlertResource`
-
-| Campo | Tipo | Descripción |
-| :--- | :--- | :--- |
-| `id` | `UUID` | Identificador de la alerta. |
-| `isResolved` | `Boolean` | Indicador de resolución (true). |
-| `resolvedAt` | `Instant` | Marca temporal de resolución en UTC. |
-
-**Ejemplo de Payload JSON (Respuesta Exitosa):**
-
-```json
-{
-  "id": "1d2e3f4a-5b6c-7d8e-9f0a-1b2c3d4e5f6a",
-  "inventoryItemId": "6f2a3b4c-5d6e-7a8b-9c0d-1e2f3a4b5c6d",
-  "partSku": "BRM-P83024",
-  "partName": "Juego de Pastillas Cerámicas Delanteras Brembo P83024",
-  "isResolved": true,
-  "resolvedAt": "2026-10-01T13:35:00Z"
-}
-```
-
-#### Errores y Excepciones de Dominio (RFC 7807)
-
-| Código HTTP | Código RFC 7807 | Excepción de Dominio | Condición de Activación |
-| :---: | :--- | :--- | :--- |
-| 404 | `ALERT_NOT_FOUND` | `EntityNotFoundException` | No existe la alerta especificada. |
-| 422 | `ALERT_ALREADY_RESOLVED` | `IllegalStateException` | La alerta ya fue resuelta con anterioridad. |
-
-**Ejemplo de Respuesta de Error (ProblemDetail RFC 7807):**
-
-```json
-{
-  "type": "https://api.atelier.andeva.pe/errors/alert-already-resolved",
-  "title": "Alerta Ya Resuelta",
+  "type": "https://api.atelier.pe/errors/empty-purchase-order",
+  "title": "Orden de Compra Vacia",
   "status": 422,
-  "detail": "La alerta 1d2e3f4a-5b6c-7d8e-9f0a-1b2c3d4e5f6a ya se encuentra marcada como resuelta.",
-  "instance": "/api/v1/inventory/alerts/1d2e3f4a-5b6c-7d8e-9f0a-1b2c3d4e5f6a/resolve",
-  "code": "ALERT_ALREADY_RESOLVED",
-  "timestamp": "2026-10-01T13:35:01Z"
+  "detail": "La orden de compra no cuenta con ningun item agregado para ser emitida formalmente",
+  "instance": "/api/v1/inventory/purchase-orders/018f6c40-7e12-7000-8000-000000000880/issue",
+  "code": "ERR_EMPTY_PURCHASE_ORDER",
+  "timestamp": "2026-10-03T16:15:00Z"
 }
 ```
 
 ---
 
-### 4.22. [POST] `/api/v1/inventory/alerts/evaluate`
+### 5.5. [PUT] /api/v1/inventory/purchase-orders/{id}/receive
 
-#### Identidad Técnica
-* **Controlador:** `com.andeva.atelier.platform.inventory.interfaces.rest.StockAlertsController`
-* **Método Java:** `public ResponseEntity<MessageResource> evaluateThresholds()`
-* **Ruta Canónica:** `POST /api/v1/inventory/alerts/evaluate`
-* **Propósito Funcional:** Ejecuta de forma inmediata el motor de evaluación de umbrales críticos de stock (StockReorderEvaluationService), auditando todas las referencias de inventario para generar alertas tempranas de reposición.
+**Conformidad de Recepcion con Subida de Factura Escaneada**
 
-#### Seguridad y Autorización
-* **Rol Mínimo Requerido:** `ROLE_INVENTORY_MANAGER`
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('inventory:alerts:evaluate')")`
-* **Contexto Multi-Inquilino:** Aislamiento multi-inquilino estricto. La petición debe incluir el token JWT en el encabezado Authorization. El filtro perimetral resuelve el tenant_id del token y lo inyecta en el contexto de seguridad. Todas las operaciones en la base de datos se filtran por tenant_id garantizando que ningún taller acceda al catálogo, lotes o proveedores de otra entidad.
+#### Identidad Tecnica
+- **Controlador:** `com.andeva.atelier.platform.inventory.interfaces.rest.controllers.PurchaseOrdersController`
+- **Metodo Java:** `public ResponseEntity<PurchaseOrderResource> receivePurchaseOrder(@PathVariable UUID id, @Valid @RequestBody ReceivePurchaseOrderResource resource)`
+- **Ruta Base:** `/api/v1/inventory/purchase-orders`
+- **Ruta Completa:** `/api/v1/inventory/purchase-orders/{id}/receive`
+- **Proposito:** Registra la recepcion fisica y fiscal de la mercaderia en el almacen del taller. Requiere obligatoriamente el numero de factura o comprobante fiscal y la URL de la fotografia del documento en Firebase Storage. Instancia automaticamente un lote fisico InventoryBatch por cada repuesto recibido bajo el algoritmo FIFO y transiciona la orden a RECEIVED.
 
-#### Parámetros de Petición
+#### Seguridad y Autorizacion
+- **Nivel de Acceso:** Autenticado
+- **Rol Minimo Requerido:** Encargado de Repuestos (ROLE_INVENTORY_MANAGER)
+- **Permiso Atomico:** `@PreAuthorize("hasAuthority('inventory:batches:receive')")`
+- **Aislamiento Multi-Inquilino:** Aislamiento estricto por tenantId del taller en sesion.
 
-**Encabezados HTTP (Headers):**
+#### Parametros de Invocacion
+**Cabeceras HTTP (Headers):**
+- `Authorization: Bearer <token>`
+- `Content-Type: application/json`
+- `Accept: application/json`
 
-| Encabezado | Tipo | Requerido | Descripción |
-| :--- | :--- | :---: | :--- |
-| `Authorization` | `String` | Sí | Token de portador JWT Bearer con claims de usuario y permisos atómicos. |
-| `Accept` | `String` | No | application/json por defecto. |
-| `X-Tenant-Id` | `UUID` | No | Identificador opcional del taller para verificación cruzada de inquilino. |
+**Parametros de Ruta (Path Parameters):**
+- `id` (UUID): Identificador unico de la orden de compra a recibir
 
-**Parámetros de Ruta (Path Parameters):** No aplica.
+**Parametros de Consulta (Query Parameters):**
+No aplica (Sin parametros de consulta en la URL).
 
-**Parámetros de Consulta (Query Parameters):** No aplica.
+#### Recurso de Peticion (Request Body)
+- **Registro Java DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.requests.ReceivePurchaseOrderResource`
+- **Definicion de Campos:**
+| Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripcion |
+| :--- | :--- | :--- | :--- | :--- |
+| receiptImageUrl | String | Si | @NotBlank, @URL | URL segura HTTPS de la factura escaneada en Firebase Storage |
+| receiptNumber | String | Si | @NotBlank, @Size(max = 50) | Numero de serie y correlativo de la factura del proveedor |
+| receivedAt | Instant | Si | @NotNull | Marca temporal de recepcion fisica de los repuestos |
 
-#### Cuerpo de Petición (Request)
-
-No requiere cuerpo de petición (petición sin contenido o parámetros en URL).
-
-#### Cuerpo de Respuesta (Response)
-
-* **Estatus HTTP de Éxito:** `200 OK`
-* **Java Record DTO:** `com.andeva.atelier.platform.shared.interfaces.rest.resources.MessageResource`
-
-| Campo | Tipo | Descripción |
-| :--- | :--- | :--- |
-| `message` | `String` | Resultado del proceso de evaluación masiva. |
-| `evaluatedItemsCount` | `Integer` | Cantidad total de ítems de catálogo analizados. |
-| `alertsTriggeredCount` | `Integer` | Cantidad de alertas nuevas generadas. |
-| `evaluatedAt` | `Instant` | Marca temporal del barrido en UTC. |
-
-**Ejemplo de Payload JSON (Respuesta Exitosa):**
-
+**Ejemplo de Carga Util JSON (Request):**
 ```json
 {
-  "message": "Evaluación de umbrales de stock completada exitosamente.",
-  "evaluatedItemsCount": 1420,
-  "alertsTriggeredCount": 3,
-  "evaluatedAt": "2026-10-01T13:40:00Z"
+  "receiptImageUrl": "https://firebasestorage.googleapis.com/v0/b/atelier-app.appspot.com/o/tenants%2F018f6c40-7e12-7000-8000-000000000001%2Fpurchase-orders%2Ffactura-f001-9980.jpg?alt=media",
+  "receiptNumber": "F001-0009980",
+  "receivedAt": "2026-10-03T16:20:00Z"
+}
+```
+
+#### Recurso de Respuesta (Response Body)
+- **Estado HTTP Exitoso:** `200 OK`
+- **Registro Java DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.responses.PurchaseOrderResource`
+- **Definicion de Campos Proyectados:**
+| Campo | Tipo de Dato | Descripcion |
+| :--- | :--- | :--- |
+| id | UUID | Identificador de la orden de compra |
+| tenantId | UUID | Identificador del taller |
+| supplierId | UUID | Identificador del proveedor |
+| supplierName | String | Nombre del proveedor |
+| branchId | UUID | Identificador de sucursal |
+| orderNumber | String | Numero correlativo |
+| status | String | Nuevo estado operativo (RECEIVED) |
+| totalCost | BigDecimal | Costo total de mercaderia ingresada |
+| currency | String | Moneda |
+| receiptImageUrl | String | URL de factura probatoria |
+| receiptNumber | String | Numero de factura validado |
+| receivedAt | Instant | Marca temporal de recepcion confirmada |
+| items | List<PurchaseOrderItemResource> | Lineas de repuestos |
+
+**Ejemplo de Carga Util JSON (Response):**
+```json
+{
+  "id": "018f6c40-7e12-7000-8000-000000000880",
+  "tenantId": "018f6c40-7e12-7000-8000-000000000001",
+  "supplierId": "018f6c40-7e12-7000-8000-000000000750",
+  "supplierName": "DISTRIBUIDORA AUTOMOTRIZ DEL CENTRO S.A.C.",
+  "branchId": "018f6c40-7e12-7000-8000-000000000050",
+  "orderNumber": "OC-2026-0045",
+  "status": "RECEIVED",
+  "totalCost": 1575,
+  "currency": "PEN",
+  "receiptImageUrl": "https://firebasestorage.googleapis.com/v0/b/atelier-app.appspot.com/o/tenants%2F018f6c40-7e12-7000-8000-000000000001%2Fpurchase-orders%2Ffactura-f001-9980.jpg?alt=media",
+  "receiptNumber": "F001-0009980",
+  "receivedAt": "2026-10-03T16:20:00Z",
+  "items": [
+    {
+      "id": "018f6c40-7e12-7000-8000-000000000885",
+      "itemId": "018f6c40-7e12-7000-8000-000000000701",
+      "itemName": "Juego de Pastillas Ceramicas Delanteras Bosch",
+      "sku": "BRK-PAD-BOSCH-01",
+      "quantity": 15,
+      "unitCost": 105,
+      "totalCost": 1575,
+      "currency": "PEN"
+    }
+  ]
 }
 ```
 
 #### Errores y Excepciones de Dominio (RFC 7807)
+| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
+| :--- | :--- | :--- |
+| 400 Bad Request | InvalidPurchaseOrderTransitionException | La orden debe encontrarse en estado ISSUED para poder recibirse |
+| 404 Not Found | PurchaseOrderNotFoundException | La orden de compra no existe |
+| 422 Unprocessable Entity | MissingReceiptDocumentationException | Falta la fotografia de la factura o el numero de comprobante fiscal |
 
-| Código HTTP | Código RFC 7807 | Excepción de Dominio | Condición de Activación |
-| :---: | :--- | :--- | :--- |
-| 500 | `INTERNAL_SERVER_ERROR` | `RuntimeException` | Error inesperado durante la auditoría masiva de existencias. |
-
-**Ejemplo de Respuesta de Error (ProblemDetail RFC 7807):**
-
+**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
 ```json
 {
-  "type": "https://api.atelier.andeva.pe/errors/internal-server-error",
-  "title": "Error Interno",
-  "status": 500,
-  "detail": "Falla al conectar con el motor de base de datos durante el barrido de inventario.",
-  "instance": "/api/v1/inventory/alerts/evaluate",
-  "code": "INTERNAL_SERVER_ERROR",
-  "timestamp": "2026-10-01T13:40:01Z"
+  "type": "https://api.atelier.pe/errors/missing-receipt-doc",
+  "title": "Documentacion de Recepcion Incompleta",
+  "status": 422,
+  "detail": "Se requiere adjuntar la URL de la fotografia de la factura para dar conformidad a la recepcion",
+  "instance": "/api/v1/inventory/purchase-orders/018f6c40-7e12-7000-8000-000000000880/receive",
+  "code": "ERR_MISSING_RECEIPT_DOC",
+  "timestamp": "2026-10-03T16:21:00Z"
 }
 ```
 
 ---
+
+### 5.6. [PUT] /api/v1/inventory/purchase-orders/{id}/cancel
+
+**Anulacion Justificada de Orden de Compra**
+
+#### Identidad Tecnica
+- **Controlador:** `com.andeva.atelier.platform.inventory.interfaces.rest.controllers.PurchaseOrdersController`
+- **Metodo Java:** `public ResponseEntity<PurchaseOrderResource> cancelPurchaseOrder(@PathVariable UUID id, @Valid @RequestBody CancelPurchaseOrderResource resource)`
+- **Ruta Base:** `/api/v1/inventory/purchase-orders`
+- **Ruta Completa:** `/api/v1/inventory/purchase-orders/{id}/cancel`
+- **Proposito:** Anula una orden de compra en estado DRAFT o ISSUED antes de la entrega de mercaderia. Registra obligatoriamente el motivo formal de cancelacion y transiciona la orden al estado CANCELLED.
+
+#### Seguridad y Autorizacion
+- **Nivel de Acceso:** Autenticado
+- **Rol Minimo Requerido:** Encargado de Repuestos (ROLE_INVENTORY_MANAGER)
+- **Permiso Atomico:** `@PreAuthorize("hasAuthority('inventory:purchase_orders:cancel')")`
+- **Aislamiento Multi-Inquilino:** Aislamiento estricto por tenantId del taller en sesion.
+
+#### Parametros de Invocacion
+**Cabeceras HTTP (Headers):**
+- `Authorization: Bearer <token>`
+- `Content-Type: application/json`
+- `Accept: application/json`
+
+**Parametros de Ruta (Path Parameters):**
+- `id` (UUID): Identificador unico de la orden de compra a anular
+
+**Parametros de Consulta (Query Parameters):**
+No aplica (Sin parametros de consulta en la URL).
+
+#### Recurso de Peticion (Request Body)
+- **Registro Java DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.requests.CancelPurchaseOrderResource`
+- **Definicion de Campos:**
+| Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripcion |
+| :--- | :--- | :--- | :--- | :--- |
+| reason | String | Si | @NotBlank, @Size(max = 1000) | Motivo justificado de la cancelacion de la orden |
+
+**Ejemplo de Carga Util JSON (Request):**
+```json
+{
+  "reason": "Proveedor informo quiebre de stock en planta matriz y demora de sesenta dias en reabastecimiento."
+}
+```
+
+#### Recurso de Respuesta (Response Body)
+- **Estado HTTP Exitoso:** `200 OK`
+- **Registro Java DTO:** `com.andeva.atelier.platform.inventory.interfaces.rest.resources.responses.PurchaseOrderResource`
+- **Definicion de Campos Proyectados:**
+| Campo | Tipo de Dato | Descripcion |
+| :--- | :--- | :--- |
+| id | UUID | Identificador de la orden de compra |
+| tenantId | UUID | Identificador del taller |
+| supplierId | UUID | Identificador del proveedor |
+| supplierName | String | Nombre del proveedor |
+| branchId | UUID | Identificador de sucursal |
+| orderNumber | String | Numero correlativo |
+| status | String | Nuevo estado operativo (CANCELLED) |
+| totalCost | BigDecimal | Costo total |
+| currency | String | Moneda |
+| receiptImageUrl | String | URL de factura |
+| receiptNumber | String | Numero de comprobante |
+| receivedAt | Instant | Marca de recepcion |
+| items | List<PurchaseOrderItemResource> | Lineas de repuestos |
+
+**Ejemplo de Carga Util JSON (Response):**
+```json
+{
+  "id": "018f6c40-7e12-7000-8000-000000000880",
+  "tenantId": "018f6c40-7e12-7000-8000-000000000001",
+  "supplierId": "018f6c40-7e12-7000-8000-000000000750",
+  "supplierName": "DISTRIBUIDORA AUTOMOTRIZ DEL CENTRO S.A.C.",
+  "branchId": "018f6c40-7e12-7000-8000-000000000050",
+  "orderNumber": "OC-2026-0045",
+  "status": "CANCELLED",
+  "totalCost": 1575,
+  "currency": "PEN",
+  "receiptImageUrl": null,
+  "receiptNumber": null,
+  "receivedAt": null,
+  "items": []
+}
+```
+
+#### Errores y Excepciones de Dominio (RFC 7807)
+| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
+| :--- | :--- | :--- |
+| 400 Bad Request | InvalidPurchaseOrderTransitionException | No se puede cancelar una orden que ya ha alcanzado el estado RECEIVED |
+| 404 Not Found | PurchaseOrderNotFoundException | La orden de compra no existe en el taller |
+
+**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
+```json
+{
+  "type": "https://api.atelier.pe/errors/invalid-po-transition",
+  "title": "Anulacion No Permitida",
+  "status": 400,
+  "detail": "No se puede anular una orden de compra cuya mercaderia ya fue recibida en almacen",
+  "instance": "/api/v1/inventory/purchase-orders/018f6c40-7e12-7000-8000-000000000880/cancel",
+  "code": "ERR_INVALID_PO_TRANSITION",
+  "timestamp": "2026-10-03T16:25:00Z"
+}
+```
+
+---
+

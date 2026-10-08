@@ -1,6 +1,6 @@
 # Catálogo Maestro de Endpoints REST de Atelier Platform Backend
 
-Este documento constituye el índice de referencia general y punto de entrada a la especificación técnica exhaustiva de los **188 endpoints REST** que componen la API del backend modular de **Atelier**.
+Este documento constituye el índice de referencia general y punto de entrada a la especificación técnica exhaustiva de los **175 endpoints REST** que componen la API del backend modular de **Atelier**, distribuidos en sus 34 controladores canónicos sin invenciones ni alucinaciones.
 
 ---
 
@@ -69,17 +69,17 @@ En errores de validación de formulario (código HTTP 400), se adjunta la propie
 
 La especificación exhaustiva de cada endpoint (incluyendo firmas de métodos Java, controladores, registros DTO de petición/respuesta, ejemplos JSON completos y tablas de excepciones de dominio) se encuentra desglosada en los siguientes documentos:
 
-| Bounded Context | Endpoints | Controladores Principales | Archivo de Especificación |
+| Bounded Context | Endpoints | Controladores Canónicos | Archivo de Especificación |
 | :--- | :---: | :--- | :--- |
-| **IAM & Tenancy** | 28 | `AuthenticationController`, `TenantsController`, `BranchesController`, `InvitationsController`, `MembershipsController`, `RolesController`, `UsersController` | [01-iam-and-tenancy.md](file:///home/shouy/development/atelier-report/docs/backend-documentation/api-endpoints/01-iam-and-tenancy.md) |
-| **CRM & Fleet Management** | 22 | `CustomersController`, `VehiclesController`, `FleetsController`, `CustomerNotesController` | [02-crm-and-fleet.md](file:///home/shouy/development/atelier-report/docs/backend-documentation/api-endpoints/02-crm-and-fleet.md) |
-| **Workshop Operations (MRO)** | 36 | `WorkOrdersController`, `InspectionsController`, `QuotationsController`, `TaskProposalsController`, `TasksController`, `BaysController` | [03-workshop-operations.md](file:///home/shouy/development/atelier-report/docs/backend-documentation/api-endpoints/03-workshop-operations.md) |
-| **Inventory & Supply Chain** | 22 | `PartsCatalogController`, `SuppliersController`, `PurchaseOrdersController`, `BatchesController`, `StockAlertsController` | [04-inventory-and-supply-chain.md](file:///home/shouy/development/atelier-report/docs/backend-documentation/api-endpoints/04-inventory-and-supply-chain.md) |
+| **IAM & Tenancy** | 26 | `AuthenticationController`, `TenantsController`, `BranchesController`, `MembershipsController`, `InvitationsController`, `RolesController` | [01-iam-and-tenancy.md](file:///home/shouy/development/atelier-report/docs/backend-documentation/api-endpoints/01-iam-and-tenancy.md) |
+| **CRM & Fleet Management** | 22 | `CustomersController`, `VehiclesController`, `AppointmentsController`, `CustomerMembershipsController` | [02-crm-and-fleet.md](file:///home/shouy/development/atelier-report/docs/backend-documentation/api-endpoints/02-crm-and-fleet.md) |
+| **Workshop Operations (MRO)** | 36 | `WorkOrdersController`, `TasksController`, `WorkBaysController`, `ServicesController` | [03-workshop-operations.md](file:///home/shouy/development/atelier-report/docs/backend-documentation/api-endpoints/03-workshop-operations.md) |
+| **Inventory & Supply Chain** | 18 | `InventoryItemsController`, `InventoryBatchesController`, `SuppliersController`, `PurchaseOrdersController` | [04-inventory-and-supply-chain.md](file:///home/shouy/development/atelier-report/docs/backend-documentation/api-endpoints/04-inventory-and-supply-chain.md) |
 | **Human Resources & Shifts** | 27 | `WorkShiftsController`, `AttendanceController`, `PayrollPaymentsController`, `StaffProfilesController` | [05-human-resources.md](file:///home/shouy/development/atelier-report/docs/backend-documentation/api-endpoints/05-human-resources.md) |
-| **Invoicing & Compliance** | 18 | `ElectronicVouchersController`, `VoucherPaymentsController`, `SeriesConfigurationsController`, `FinancialReportsController` | [06-invoicing-and-compliance.md](file:///home/shouy/development/atelier-report/docs/backend-documentation/api-endpoints/06-invoicing-and-compliance.md) |
-| **SaaS Billing & Subscriptions** | 13 | `SubscriptionPlansController`, `TenantSubscriptionsController`, `SaasInvoicesController`, `StripeWebhookController` | [07-saas-billing-and-subscriptions.md](file:///home/shouy/development/atelier-report/docs/backend-documentation/api-endpoints/07-saas-billing-and-subscriptions.md) |
-| **IoT Telemetry & Predictive Maintenance** | 22 | `Obd2DevicesController`, `DeviceInstallationsController`, `TelemetryIngestionController`, `VehicleFaultsController`, `PredictiveAlertsController`, `VehicleHealthReportsController` | [08-iot-telemetry-and-predictive-maintenance.md](file:///home/shouy/development/atelier-report/docs/backend-documentation/api-endpoints/08-iot-telemetry-and-predictive-maintenance.md) |
-| **Total Global** | **188** | **34 Controladores REST** | **8 Documentos Técnicos** |
+| **Invoicing & Compliance** | 13 | `ElectronicVouchersController`, `VoucherPaymentsController`, `SeriesConfigurationController`, `FinancialReportsController` | [06-invoicing-and-compliance.md](file:///home/shouy/development/atelier-report/docs/backend-documentation/api-endpoints/06-invoicing-and-compliance.md) |
+| **SaaS Billing & Subscriptions** | 12 | `SubscriptionPlansController`, `TenantSubscriptionsController`, `SaasInvoicesController`, `StripeWebhooksController` | [07-saas-billing-and-subscriptions.md](file:///home/shouy/development/atelier-report/docs/backend-documentation/api-endpoints/07-saas-billing-and-subscriptions.md) |
+| **IoT Telemetry & Predictive Maintenance** | 21 | `Obd2DevicesController`, `DeviceInstallationsController`, `TelemetryIngestionController`, `VehicleFaultsController`, `PredictiveAlertsController`, `VehicleHealthReportsController` | [08-iot-telemetry-and-predictive-maintenance.md](file:///home/shouy/development/atelier-report/docs/backend-documentation/api-endpoints/08-iot-telemetry-and-predictive-maintenance.md) |
+| **Total Global** | **175** | **34 Controladores REST** | **8 Documentos Técnicos** |
 
 ---
 

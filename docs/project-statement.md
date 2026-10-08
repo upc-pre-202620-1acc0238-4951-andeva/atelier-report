@@ -1270,9 +1270,6 @@ especificados en el Sprint. En el caso de los tests de BDD debe elaborarse los a
 programación. En esta sección se debe incluir la relación de tests diseñados. En el caso
 de los Unit Tests, debe indicarse con qué clases y comportamientos se relacionan. En
 el caso de los Integration Tests ó Acceptance Tests bajo el enfoque BDD, se incluye el
-| | | | Página 28 de 52 | | | V4.0 |
-| --- | --- | --- | ---------------- | --- | --- | ----- |
-
 código de los .feature Files, explicando con qué User Stories se relacionan. También
 debe incluirse la ruta del repositorio de control de versiones para los proyectos de
 Testing, junto con los id de commits relacionados con los avances en Testing para este
