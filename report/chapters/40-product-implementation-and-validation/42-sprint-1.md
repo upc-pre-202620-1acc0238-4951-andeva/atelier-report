@@ -112,20 +112,20 @@ El control del avance operativo y el seguimiento de las historias del sprint se 
 
 ![Tablero del Sprint 1 en Jira Software](report/assets/sprint-1/table-jira-sprint-1.png){#fig:table-jira-sprint-1}
 
-La @tbl:sprint-backlog-1 presenta la matriz consolidada del Sprint Backlog del Sprint 1, detallando las cuatro historias de usuario del portal web, las veinticuatro historias técnicas del backend y los tres spikes de arquitectura, junto con su asignación individual y su estado final de culminación.
+La @tbl:sprint-backlog-1 presenta la matriz consolidada del Sprint Backlog del Sprint 1, detallando las cuatro historias de usuario del portal web, las veinticuatro historias técnicas del backend y los tres spikes de arquitectura. Las historias se desglosan en ciento treinta y tres tareas registradas en Jira Software, cuya estimación conjunta asciende a doscientas setenta horas a razón de tres horas por Story Point, junto con su asignación individual y su estado final de culminación.
 
 \begingroup
 \scriptsize
 \setlength{\tabcolsep}{2pt}
 \renewcommand{\arraystretch}{1.2}
-\begin{longtable}{| >{\centering\arraybackslash}p{0.9cm} | >{\raggedright\arraybackslash}p{4.6cm} | >{\centering\arraybackslash}p{0.8cm} | >{\centering\arraybackslash}p{1.4cm} | >{\centering\arraybackslash}p{2.3cm} | >{\centering\arraybackslash}p{1.2cm} | >{\raggedright\arraybackslash}p{2.6cm} | >{\centering\arraybackslash}p{1.1cm} |}
+\begin{longtable}{| >{\centering\arraybackslash}p{0.9cm} | >{\raggedright\arraybackslash}p{2.8cm} | >{\centering\arraybackslash}p{1.0cm} | >{\centering\arraybackslash}p{1.6cm} | >{\raggedright\arraybackslash}p{4.4cm} | >{\centering\arraybackslash}p{1.0cm} | >{\raggedright\arraybackslash}p{2.1cm} | >{\centering\arraybackslash}p{1.1cm} |}
 \caption{Sprint Backlog del Sprint 1 y Estado de Ejecución de Ítems} \label{tbl:sprint-backlog-1} \\
 \hline
 \multicolumn{1}{|>{\centering\arraybackslash}p{0.9cm}|}{\textbf{Sprint \#}} & \multicolumn{7}{c|}{\textbf{Sprint 1}} \\
 \hline
 \multicolumn{2}{|c|}{\textbf{User Story}} & \multicolumn{6}{c|}{\textbf{Work-Item / Task}} \\
 \hline
-\multicolumn{1}{|>{\centering\arraybackslash}p{0.9cm}|}{\textbf{Id}} & \multicolumn{1}{>{\centering\arraybackslash}p{4.6cm}|}{\textbf{Title}} & \multicolumn{1}{>{\centering\arraybackslash}p{0.8cm}|}{\textbf{Id}} & \multicolumn{1}{>{\centering\arraybackslash}p{1.4cm}|}{\textbf{Title}} & \multicolumn{1}{>{\centering\arraybackslash}p{2.3cm}|}{\textbf{Description}} & \multicolumn{1}{>{\centering\arraybackslash}p{1.2cm}|}{\textbf{Estimation}\newline\textbf{(Hours)}} & \multicolumn{1}{>{\centering\arraybackslash}p{2.6cm}|}{\textbf{Assigned}\newline\textbf{To}} & \multicolumn{1}{>{\centering\arraybackslash}p{1.1cm}|}{\textbf{Status}} \\
+\multicolumn{1}{|>{\centering\arraybackslash}p{0.9cm}|}{\textbf{Id}} & \multicolumn{1}{>{\centering\arraybackslash}p{2.8cm}|}{\textbf{Title}} & \multicolumn{1}{>{\centering\arraybackslash}p{1.0cm}|}{\textbf{Id}} & \multicolumn{1}{>{\centering\arraybackslash}p{1.6cm}|}{\textbf{Title}} & \multicolumn{1}{>{\centering\arraybackslash}p{4.4cm}|}{\textbf{Description}} & \multicolumn{1}{>{\centering\arraybackslash}p{1.0cm}|}{\textbf{Estimation}\newline\textbf{(Hours)}} & \multicolumn{1}{>{\centering\arraybackslash}p{2.1cm}|}{\textbf{Assigned}\newline\textbf{To}} & \multicolumn{1}{>{\centering\arraybackslash}p{1.1cm}|}{\textbf{Status}} \\
 \hline
 \endfirsthead
 \hline
@@ -133,74 +133,278 @@ La @tbl:sprint-backlog-1 presenta la matriz consolidada del Sprint Backlog del S
 \hline
 \multicolumn{2}{|c|}{\textbf{User Story}} & \multicolumn{6}{c|}{\textbf{Work-Item / Task}} \\
 \hline
-\multicolumn{1}{|>{\centering\arraybackslash}p{0.9cm}|}{\textbf{Id}} & \multicolumn{1}{>{\centering\arraybackslash}p{4.6cm}|}{\textbf{Title}} & \multicolumn{1}{>{\centering\arraybackslash}p{0.8cm}|}{\textbf{Id}} & \multicolumn{1}{>{\centering\arraybackslash}p{1.4cm}|}{\textbf{Title}} & \multicolumn{1}{>{\centering\arraybackslash}p{2.3cm}|}{\textbf{Description}} & \multicolumn{1}{>{\centering\arraybackslash}p{1.2cm}|}{\textbf{Estimation}\newline\textbf{(Hours)}} & \multicolumn{1}{>{\centering\arraybackslash}p{2.6cm}|}{\textbf{Assigned}\newline\textbf{To}} & \multicolumn{1}{>{\centering\arraybackslash}p{1.1cm}|}{\textbf{Status}} \\
+\multicolumn{1}{|>{\centering\arraybackslash}p{0.9cm}|}{\textbf{Id}} & \multicolumn{1}{>{\centering\arraybackslash}p{2.8cm}|}{\textbf{Title}} & \multicolumn{1}{>{\centering\arraybackslash}p{1.0cm}|}{\textbf{Id}} & \multicolumn{1}{>{\centering\arraybackslash}p{1.6cm}|}{\textbf{Title}} & \multicolumn{1}{>{\centering\arraybackslash}p{4.4cm}|}{\textbf{Description}} & \multicolumn{1}{>{\centering\arraybackslash}p{1.0cm}|}{\textbf{Estimation}\newline\textbf{(Hours)}} & \multicolumn{1}{>{\centering\arraybackslash}p{2.1cm}|}{\textbf{Assigned}\newline\textbf{To}} & \multicolumn{1}{>{\centering\arraybackslash}p{1.1cm}|}{\textbf{Status}} \\
 \hline
 \endhead
 \hline
 \endfoot
 \hline
 \endlastfoot
-US45 & Presentación de la propuesta de valor central del ecosistema Atelier & - & - & - & - & Granda Ibarra, Luis Daniel & Done \\
+US45 & Presentación de la propuesta de valor central del ecosistema Atelier & AT-190 & Contenido & Redactar y estructurar el planteamiento del problema operativo, pérdidas por inventario y desorden, frente a los beneficios de Atelier & 1 & Rocha Cotrina, Alvaro & Done \\
+\cline{3-8}
+ &  & AT-191 & Diseño UX/UI & Diseñar el wireframe y la jerarquía visual de la sección de capacidades tecnológicas diferenciales: Offline, OBD-II e IA & 2 & Rocha Cotrina, Alvaro & Done \\
+\cline{3-8}
+ &  & AT-192 & Frontend & Integrar los bloques informativos de la propuesta de valor y la validez de los comprobantes tributarios en la interfaz de bienvenida & 2 & Rocha Cotrina, Alvaro & Done \\
+\cline{3-8}
+ &  & AT-193 & QA & Verificar la correcta visualización y legibilidad de los mensajes clave enfocados en el dueño de taller & 1 & Rocha Cotrina, Alvaro & Done \\
 \hline
-US46 & Exploración y comparativa dinámica de planes comerciales según periodicidad de facturación & - & - & - & - & Teran Zavala, Mauricio Alejandro & Done \\
+US46 & Exploración y comparativa dinámica de planes comerciales según periodicidad de facturación & AT-194 & Contenido & Redactar y estructurar los textos comparativos de precios, montos anualizados y beneficios acumulativos para los Planes Go, Pro y Max & 2 & Teran Zavala, Mauricio Alejandro & Done \\
+\cline{3-8}
+ &  & AT-195 & Diseño UX/UI & Diseñar los componentes interactivos de alternancia toggle switch entre las frecuencias de facturación mensual y anual en la interfaz web & 2 & Teran Zavala, Mauricio Alejandro & Done \\
+\cline{3-8}
+ &  & AT-196 & Frontend & Implementar la lógica de actualización dinámica de tarifas y el despliegue visual de los mensajes de ahorro y renovación flexible & 3 & Teran Zavala, Mauricio Alejandro & Done \\
+\cline{3-8}
+ &  & AT-197 & QA & Validar la precisión de los montos calculados de planes mensuales frente a anuales con descuento y el correcto comportamiento del selector de planes & 2 & Teran Zavala, Mauricio Alejandro & Done \\
 \hline
-US47 & Resolución interactiva de dudas operativas y condiciones del servicio & - & - & - & - & Rocha Cotrina, Alvaro & Done \\
+US47 & Resolución interactiva de dudas operativas y condiciones del servicio & AT-101 & Contenido & Redactar y estructurar las respuestas a las dudas operativas más comunes & 1 & Granda Ibarra, Luis Daniel & Done \\
+\cline{3-8}
+ &  & AT-102 & Frontend & Desarrollar el componente interactivo tipo acordeón para las dudas & 2 & Granda Ibarra, Luis Daniel & Done \\
+\cline{3-8}
+ &  & AT-103 & Frontend & Aplicar estilos visuales con Tailwind y animaciones de transición al acordeón & 2 & Granda Ibarra, Luis Daniel & Done \\
+\cline{3-8}
+ &  & AT-104 & QA & Verificar el correcto funcionamiento del clic en las preguntas & 1 & Granda Ibarra, Luis Daniel & Done \\
 \hline
-US48 & Redirección y transición hacia el flujo de registro de prueba gratuita en la aplicación principal & - & - & - & - & Rocha Cotrina, Alvaro & Done \\
+US48 & Redirección y transición hacia el flujo de registro de prueba gratuita en la aplicación principal & AT-97 & Diseño & Diseñar y definir los botones Call to Action para activar la prueba gratuita & 2 & Granda Ibarra, Luis Daniel & Done \\
+\cline{3-8}
+ &  & AT-98 & Frontend & Maquetar e implementar los botones de redirección en el Hero y en la sección de Precios & 2 & Granda Ibarra, Luis Daniel & Done \\
+\cline{3-8}
+ &  & AT-99 & Frontend & Configurar el enrutamiento para transicionar al flujo de alta conservando el ID del plan seleccionado & 3 & Granda Ibarra, Luis Daniel & Done \\
+\cline{3-8}
+ &  & AT-100 & QA & Validar que la redirección funcione en Mobile y Desktop sin pedir tarjeta de crédito & 2 & Granda Ibarra, Luis Daniel & Done \\
 \hline
-TS01 & Autenticación de credenciales y expedición de tokens JWT & - & - & - & - & Huamani Estefanero, Joel & Done \\
+TS01 & Autenticación de credenciales y expedición de tokens JWT & AT-198 & Endpoint REST & Exponer endpoint REST POST /api/v1/auth/sign-in en AuthenticationController & 1 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-199 & Autenticación & Implementar AuthenticateUserCommand en UserCommandServiceImpl con verificación BCrypt y rechazo HTTP 401 & 2 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-200 & Tokens JWT & Emitir par de tokens JWT de acceso y renovación con contexto de inquilino en BearerTokenServiceImpl & 2 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-201 & Pruebas unitarias & Implementar pruebas unitarias de autenticación exitosa y rechazo de credenciales inválidas & 1 & Huamani Estefanero, Joel & Done \\
 \hline
-TS02 & Registro fundacional de organización y aprovisionamiento de inquilino & - & - & - & - & Huamani Estefanero, Joel & Done \\
+TS02 & Registro fundacional de organización y aprovisionamiento de inquilino & AT-202 & Endpoint REST & Exponer endpoint REST POST /api/v1/auth/sign-up en AuthenticationController & 1 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-203 & Servicio de aplicación & Orquestar alta atómica de inquilino y administrador en TenantCommandServiceImpl con rechazo HTTP 409 por RUC duplicado & 2 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-204 & Persistencia & Mapear TenantPersistenceEntity, UserPersistenceEntity y TenantMembershipPersistenceEntity en PostgreSQL & 2 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-205 & Pruebas unitarias & Implementar pruebas unitarias de aprovisionamiento de inquilino y colisión tributaria & 1 & Huamani Estefanero, Joel & Done \\
 \hline
-TS03 & Verificación de correo y activación mediante código OTP & - & - & - & - & Huamani Estefanero, Joel & Done \\
+TS03 & Verificación de correo y activación mediante código OTP & AT-206 & Endpoint REST & Exponer endpoint REST POST /api/v1/auth/verify-email en AuthenticationController & 1 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-207 & Validación OTP & Validar código OTP de seis dígitos con vigencia de quince minutos en VerifyEmailTokenCommand y rechazo HTTP 400 & 2 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-208 & Persistencia y correo & Persistir VerificationTokenPersistenceEntity y despachar el código OTP mediante ResendEmailAdapter & 2 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-209 & Pruebas unitarias & Implementar pruebas unitarias de activación de cuenta y rechazo de OTP caducado & 1 & Huamani Estefanero, Joel & Done \\
 \hline
-TS04 & Emisión y despacho de invitaciones corporativas de personal & - & - & - & - & Huamani Estefanero, Joel & Done \\
+TS04 & Emisión y despacho de invitaciones corporativas de personal & AT-210 & Endpoint REST & Exponer endpoint REST POST /api/v1/invitations/tenant/\{tenantId\} protegido por rol administrador & 1 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-211 & Servicio de aplicación & Implementar InvitationCommandServiceImpl con token firmado de 48 horas y rechazo HTTP 409 por invitación pendiente & 2 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-212 & Persistencia y correo & Mapear InvitationPersistenceEntity y despachar correo transaccional mediante ResendEmailAdapter & 2 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-213 & Pruebas unitarias & Implementar pruebas unitarias de emisión de invitaciones y duplicidad pendiente & 1 & Huamani Estefanero, Joel & Done \\
 \hline
-TS05 & Alta de sucursales operativas y delimitación de geocercas & - & - & - & - & Huamani Estefanero, Joel & Done \\
+TS05 & Alta de sucursales operativas y delimitación de geocercas & AT-214 & Endpoint REST & Exponer endpoint REST POST /api/v1/branches en BranchesController con validación de coordenadas WGS84 & 2 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-215 & Servicio de aplicación & Implementar BranchCommandServiceImpl validando la cuota de suscripción con SubscriptionQuotaPort y rechazo HTTP 422 & 3 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-216 & Persistencia & Mapear BranchPersistenceEntity con GeoPointEmbeddable y radio perimétrico de geocerca & 2 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-217 & Pruebas unitarias & Implementar pruebas unitarias de alta de sucursales y coordenadas fuera de rango & 2 & Huamani Estefanero, Joel & Done \\
 \hline
-TS06 & Alta de clientes individuales con validación de identidad & - & - & - & - & Sanchez Santin, Adiel Abdiaz & Done \\
+TS06 & Alta de clientes individuales con validación de identidad & AT-105 & Endpoint REST & Exponer controlador REST POST clientes individuales con validacion DNI & 2 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+ &  & AT-153 & Servicio de aplicación & Implementar orquestacion en CustomerCommandService y unicidad scoped al inquilino HTTP 409 & 3 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+ &  & AT-154 & Persistencia & Mapear entidad JPA IndividualCustomerPersistenceEntity y repositorio en PostgreSQL & 2 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+ &  & AT-155 & Pruebas unitarias & Implementar pruebas unitarias BDD para alta de clientes y colision de identidad & 2 & Sanchez Santin, Adiel Abdiaz & Done \\
 \hline
-TS07 & Registro técnico de vehículos con homologación de placa y VIN & - & - & - & - & Sanchez Santin, Adiel Abdiaz & Done \\
+TS07 & Registro técnico de vehículos con homologación de placa y VIN & AT-142 & Endpoint REST & Exponer endpoint REST POST registro vehicular con validacion ISO 3779 & 2 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+ &  & AT-156 & Homologación de flota & Implementar homologacion de flota en VehicleFleetService y enlace de cliente custodio & 3 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+ &  & AT-157 & Persistencia & Configurar entidad VehiclePersistenceEntity y constraint UNIQUE de VIN por taller & 2 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+ &  & AT-158 & Pruebas unitarias & Implementar pruebas unitarias verificando rechazo HTTP 400 por VIN o placa invalidos & 2 & Sanchez Santin, Adiel Abdiaz & Done \\
 \hline
-TS08 & Agendamiento y reserva de citas de mantenimiento & - & - & - & - & Sanchez Santin, Adiel Abdiaz & Done \\
+TS08 & Agendamiento y reserva de citas de mantenimiento & AT-143 & Endpoint REST & Exponer endpoint REST POST agendamiento de citas de mantenimiento & 1 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+ &  & AT-159 & Motor de agendamiento & Implementar motor AppointmentSchedulingService evaluando capacidad y cupo de patio HTTP 409 & 2 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+ &  & AT-160 & Persistencia & Mapear entidad AppointmentPersistenceEntity en estado inicial SCHEDULED y confirmar cita & 2 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+ &  & AT-161 & Pruebas unitarias & Implementar pruebas unitarias de deteccion de sobreposicion horaria y franja disponible & 1 & Sanchez Santin, Adiel Abdiaz & Done \\
 \hline
-TS09 & Registro de arribo a patio y apertura automática de orden & - & - & - & - & Sanchez Santin, Adiel Abdiaz & Done \\
+TS09 & Registro de arribo a patio y apertura automática de orden & AT-144 & Endpoint REST & Exponer endpoint REST POST recepcion vehicular y check-in a patio & 1 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+ &  & AT-162 & Transición de cita & Implementar transicion de cita a CHECKED\_IN y rechazo de citas atendidas o canceladas HTTP 422 & 2 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+ &  & AT-163 & Evento de dominio & Orquestar despacho de AppointmentCheckedInEvent y apertura automatica de orden en borrador & 2 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+ &  & AT-164 & Pruebas unitarias & Implementar pruebas unitarias de transicion de recepcion y generacion reactiva de orden & 1 & Sanchez Santin, Adiel Abdiaz & Done \\
 \hline
-TS10 & Apertura y parametrización de órdenes de trabajo en taller & - & - & - & - & Sanchez Santin, Adiel Abdiaz & Done \\
+TS10 & Apertura y parametrización de órdenes de trabajo en taller & AT-145 & Endpoint REST & Exponer endpoint REST POST apertura de ordenes de trabajo en taller & 1 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+ &  & AT-165 & Control de concurrencia & Implementar WorkOrderConcurrencyService para bloquear apertura en vehiculo con orden activa HTTP 409 & 2 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+ &  & AT-166 & Correlativo y persistencia & Generar correlativo secuencial unico OT-YYYYMM-XXXX y persistir WorkOrderPersistenceEntity & 2 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+ &  & AT-167 & Pruebas unitarias & Implementar pruebas unitarias de validacion concurrente de patio y estados de orden & 1 & Sanchez Santin, Adiel Abdiaz & Done \\
 \hline
-TS11 & Asignación y conmutación de bahías de servicio en orden & - & - & - & - & Sanchez Santin, Adiel Abdiaz & Done \\
+TS11 & Asignación y conmutación de bahías de servicio en orden & AT-146 & Endpoint REST & Exponer endpoint REST PUT asignacion y conmutacion de bahias & 3 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+ &  & AT-168 & Asignación de bahía & Implementar ServiceBayAllocationService y rechazo de bahia ocupada con codigo HTTP 409 & 4 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+ &  & AT-169 & Conmutación de estado & Conmutar concurrentemente bahia a estado OCCUPIED en base de datos y actualizar orden & 4 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+ &  & AT-170 & Pruebas unitarias & Implementar pruebas unitarias de concurrencia y asignacion atomica de bahias & 4 & Sanchez Santin, Adiel Abdiaz & Done \\
 \hline
-TS12 & Incorporación de tareas técnicas a la orden de trabajo & - & - & - & - & Sanchez Santin, Adiel Abdiaz & Done \\
+TS12 & Incorporación de tareas técnicas a la orden de trabajo & AT-147 & Endpoint REST & Exponer endpoint REST POST incorporacion de labores mecanicas a orden & 3 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+ &  & AT-171 & Cálculo de subtotal & Copiar tarifa base de catalogo, inicializar tarea en PENDING y recalcular subtotal acumulado & 4 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+ &  & AT-172 & Regla de inmutabilidad & Validar regla de inmutabilidad rechazando mutaciones sobre ordenes cerradas o pagadas HTTP 422 & 4 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+ &  & AT-173 & Pruebas unitarias & Implementar pruebas unitarias de calculo aritmetico de subtotales y reglas de ciclo de vida & 4 & Sanchez Santin, Adiel Abdiaz & Done \\
 \hline
-TS13 & Control cronometrado y finalización técnica de faenas & - & - & - & - & Sanchez Santin, Adiel Abdiaz & Done \\
+TS13 & Control cronometrado y finalización técnica de faenas & AT-148 & Endpoint REST & Exponer endpoint REST POST reporte de finalizacion de faena mecanica & 2 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+ &  & AT-174 & Validación de estado & Validar precondicion de faena en progreso IN\_PROGRESS denegando tareas pendientes HTTP 422 & 3 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+ &  & AT-175 & Cierre de faena & Sellar estampa fin, computar duracion efectiva en minutos y transicionar orden a COMPLETED & 2 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+ &  & AT-176 & Pruebas unitarias & Implementar pruebas unitarias de medicion de labor efectiva y cierre automatico de orden & 2 & Sanchez Santin, Adiel Abdiaz & Done \\
 \hline
-TS14 & Requisición y descargo de repuestos bajo método FIFO & - & - & - & - & Sanchez Santin, Adiel Abdiaz & Done \\
+TS14 & Requisición y descargo de repuestos bajo método FIFO & AT-149 & Endpoint REST & Exponer endpoint REST POST requisicion e imputacion de repuestos a tarea & 1 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+ &  & AT-177 & Motor FIFO & Implementar FifoAllocationEngine consumiendo lotes fisicos por antiguedad arrival\_date ASC & 2 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+ &  & AT-178 & Validación de existencias & Validar existencias consolidadas con HTTP 409 y recalcular importes COGS de faena y orden & 2 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+ &  & AT-179 & Pruebas unitarias & Implementar pruebas unitarias de asignacion parcial y total de existencias bajo orden FIFO & 1 & Sanchez Santin, Adiel Abdiaz & Done \\
 \hline
-TS15 & Catálogo de repuestos con precio base y umbral crítico & - & - & - & - & Sanchez Santin, Adiel Abdiaz & Done \\
+TS15 & Catálogo de repuestos con precio base y umbral crítico & AT-150 & Endpoint REST & Exponer endpoint REST POST catalogo de repuestos con precio base y SKU & 2 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+ &  & AT-180 & Unicidad de SKU & Implementar validacion de unicidad de SKU scoped al taller respondiendo HTTP 409 ante colision & 3 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+ &  & AT-181 & Persistencia & Mapear PartPersistenceEntity, inicializar stock contable en cero y persistir en tabla parts & 2 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+ &  & AT-182 & Pruebas unitarias & Implementar pruebas unitarias de catalogo de repuestos y validacion de umbrales criticos & 2 & Sanchez Santin, Adiel Abdiaz & Done \\
 \hline
-TS16 & Ingreso y valorización de lotes por adquisición & - & - & - & - & Sanchez Santin, Adiel Abdiaz & Done \\
+TS16 & Ingreso y valorización de lotes por adquisición & AT-151 & Endpoint REST & Exponer endpoint REST POST ingreso de lotes de repuestos por compra & 2 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+ &  & AT-183 & Validación numérica & Validar valores numericos estrictamente positivos @Positive respondiendo HTTP 400 ante invalidos & 3 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+ &  & AT-184 & Persistencia de lotes & Persistir InventoryBatchPersistenceEntity, encolar en FIFO e incrementar stock contable & 2 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+ &  & AT-185 & Pruebas unitarias & Implementar pruebas unitarias de asentamiento de lotes y consistencia de inventario valorizado & 2 & Sanchez Santin, Adiel Abdiaz & Done \\
 \hline
-TS17 & Marcación geodésica de jornada laboral con validación Haversine & - & - & - & - & Sanchez Santin, Adiel Abdiaz & Done \\
+TS17 & Marcación geodésica de jornada laboral con validación Haversine & AT-152 & Endpoint REST & Exponer endpoint REST POST marcacion satelital de asistencia laboral & 1 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+ &  & AT-186 & Cálculo Haversine & Implementar HaversineGeofencingService con formula geodesica de radio terrestre 6371 km & 1 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+ &  & AT-187 & Validación de geocerca & Validar pertenencia a geocerca con rechazo HTTP 422 y calificar puntualidad ON\_TIME vs LATE & 2 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+ &  & AT-188 & Persistencia y eventos & Mapear AttendanceRecordPersistenceEntity, estampa inmutable y publicar EmployeeClockedInEvent & 1 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+ &  & AT-189 & Pruebas unitarias & Implementar pruebas unitarias de calculo geodesico Haversine y precision de geocerca & 1 & Sanchez Santin, Adiel Abdiaz & Done \\
 \hline
-TS18 & Emisión y timbrado de comprobantes electrónicos UBL 2.1 & - & - & - & - & Huamani Estefanero, Joel & Done \\
+TS18 & Emisión y timbrado de comprobantes electrónicos UBL 2.1 & AT-218 & Endpoint REST & Exponer endpoint REST POST /api/v1/invoicing/vouchers en ElectronicVouchersController & 2 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-219 & Cálculo tributario & Reservar correlativo con SeriesCorrelativeService y calcular IGV de 18 por ciento en PeruvianTaxCalculationEngine & 2 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-220 & Integración SUNAT & Generar XML UBL 2.1, transmitirlo vía NubefactPseFiscalAdapter y almacenar la constancia CDR en Firebase & 3 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-221 & Pruebas unitarias & Implementar pruebas unitarias de emisión de comprobantes y rechazo HTTP 422 por orden no completada & 2 & Huamani Estefanero, Joel & Done \\
 \hline
-TS19 & Registro transaccional de pagos y liquidación de comprobantes & - & - & - & - & Huamani Estefanero, Joel & Done \\
+TS19 & Registro transaccional de pagos y liquidación de comprobantes & AT-222 & Endpoint REST & Exponer endpoint REST POST /api/v1/invoicing/payments en VoucherPaymentsController & 2 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-223 & Servicio de aplicación & Implementar amortización de saldo en VoucherPaymentCommandServiceImpl con rechazo HTTP 400 por sobrepago & 3 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-224 & Persistencia y eventos & Mapear VoucherPaymentPersistenceEntity y publicar el evento de liquidación total hacia Operations & 2 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-225 & Pruebas unitarias & Implementar pruebas unitarias de pago total, pago parcial y abono excedente & 2 & Huamani Estefanero, Joel & Done \\
 \hline
-TS20 & Ingesta masiva de telemetría vehicular IoT en series temporales & - & - & - & - & Huamani Estefanero, Joel & Done \\
+TS20 & Ingesta masiva de telemetría vehicular IoT en series temporales & AT-226 & Endpoint REST & Exponer endpoint REST POST /api/v1/iot/telemetry/batch con validación de lote de 1 a 100 lecturas & 2 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-227 & Servicio de aplicación & Implementar TelemetryIngestionCommandServiceImpl con respuesta asíncrona HTTP 202 & 3 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-228 & Hipertabla TimescaleDB & Insertar lotes en la hipertabla TimescaleDB mediante TimescaleBatchJdbcClientPort y TelemetryLogPersistenceEntity & 4 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-229 & Detección de anomalías & Evaluar umbrales críticos con PredictiveAnomalyDetectionEngine y notificar alertas mediante FCM & 3 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-230 & Pruebas unitarias & Implementar pruebas unitarias de ingesta de ráfagas y rechazo HTTP 400 por lote inválido & 3 & Huamani Estefanero, Joel & Done \\
 \hline
-TS21 & Registro y catalogación de códigos de avería electrónica DTC & - & - & - & - & Huamani Estefanero, Joel & Done \\
+TS21 & Registro y catalogación de códigos de avería electrónica DTC & AT-231 & Endpoint REST & Exponer endpoint REST POST /api/v1/iot/faults en VehicleFaultsController & 2 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-232 & Validación DTC & Validar formato SAE J2012 en DtcCodeEvaluationService con rechazo HTTP 400 & 2 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-233 & Persistencia & Mapear VehicleFaultPersistenceEntity y DtcCatalogEntryPersistenceEntity en PostgreSQL & 3 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-234 & Pruebas unitarias & Implementar pruebas unitarias de registro de fallas y nomenclatura DTC inválida & 2 & Huamani Estefanero, Joel & Done \\
 \hline
-TS22 & Generación de informe pericial asistido por IA predictiva & - & - & - & - & Huamani Estefanero, Joel & Done \\
+TS22 & Generación de informe pericial asistido por IA predictiva & AT-235 & Endpoint REST & Exponer endpoint REST POST /api/v1/iot/health-reports/generate en VehicleHealthReportsController & 2 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-236 & Consolidación de datos & Consolidar telemetría con TimescaleTelemetryAnalyticsRepository y fallas DTC activas con rechazo HTTP 422 & 3 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-237 & Integración Spring AI & Integrar Spring AI con Groq en GroqSpringAiDiagnosticAdapter mediante prompt estructurado & 4 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-238 & Dictamen pericial & Persistir el dictamen pericial y responder HTTP 201 con cabecera Location & 3 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-239 & Pruebas unitarias & Implementar pruebas unitarias de generación de informe y datos sensoriales insuficientes & 3 & Huamani Estefanero, Joel & Done \\
 \hline
-TS23 & Descarga documental de estado de flujo de caja en formato PDF & - & - & - & - & Huamani Estefanero, Joel & Done \\
+TS23 & Descarga documental de estado de flujo de caja en formato PDF & AT-240 & Endpoint REST & Exponer endpoint REST GET /api/v1/invoicing/financial-reports/cash-flow/pdf con cabecera Content-Disposition & 1 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-241 & Consulta financiera & Consolidar ingresos y egresos en CashFlowQueryServiceImpl con rechazo HTTP 400 por rango invertido & 2 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-242 & Generación PDF & Renderizar el documento PDF de flujo de caja con OpenPdfCashFlowReportAdapter & 2 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-243 & Pruebas unitarias & Implementar pruebas unitarias de exportación PDF y validación de fechas & 1 & Huamani Estefanero, Joel & Done \\
 \hline
-TS24 & Descarga documental de informe pericial de salud vehicular en PDF & - & - & - & - & Huamani Estefanero, Joel & Done \\
+TS24 & Descarga documental de informe pericial de salud vehicular en PDF & AT-244 & Endpoint REST & Exponer endpoint REST GET /api/v1/iot/health-reports/\{reportId\}/pdf en VehicleHealthReportsController & 1 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-245 & Consulta de informe & Resolver el informe en VehicleHealthReportQueryServiceImpl con respuesta HTTP 404 ProblemDetail & 2 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-246 & Generación PDF & Renderizar el PDF con membrete y semáforos de criticidad en OpenPdfVehicleHealthReportGeneratorAdapter & 2 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-247 & Pruebas unitarias & Implementar pruebas unitarias de descarga de informe e identificador inexistente & 1 & Huamani Estefanero, Joel & Done \\
 \hline
-SP01 & Telemetría Bluetooth OBD-II e Inferencia Predictiva con Spring AI & - & - & - & - & Huamani Estefanero, Joel & Done \\
+SP01 & Telemetría Bluetooth OBD-II e Inferencia Predictiva con Spring AI & AT-248 & Bibliotecas BLE & Evaluar bibliotecas BLE en Flutter con flutter\_blue\_plus y canales nativos para escáneres ELM327 & 2 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-249 & Decodificador OBD-II & Validar el decodificador de tramas PID y códigos DTC bajo la norma SAE J2012 & 2 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-250 & Inferencia Spring AI & Evaluar la inferencia asistida por Spring AI con prompts estructurados y latencia de respuesta & 3 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-251 & Permisos móviles & Auditar permisos de radiofrecuencia y almacenamiento en Android 14 e iOS 18 & 2 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-252 & Latencia TimescaleDB & Medir latencia de red y rendimiento de inserción en hipertablas TimescaleDB & 2 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-253 & Prototipo & Construir el prototipo funcional OBD-II con informe predictivo en rama experimental & 3 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-254 & Informe y estimación & Consolidar el informe técnico y estimar el esfuerzo de las historias de diagnóstico & 1 & Huamani Estefanero, Joel & Done \\
 \hline
-SP02 & Pasarela de Pagos Stripe y Webhooks Asíncronos para Suscripciones SaaS & - & - & - & - & Huamani Estefanero, Joel & Done \\
+SP02 & Pasarela de Pagos Stripe y Webhooks Asíncronos para Suscripciones SaaS & AT-255 & Stripe Billing & Revisar la documentación de Stripe Billing y Stripe Checkout para suscripciones SaaS & 1 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-256 & SDK stripe-java & Evaluar el SDK stripe-java en Spring Boot con creación programática de clientes y sesiones & 2 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-257 & Webhooks & Implementar el controlador de webhooks con verificación Stripe-Signature e idempotencia de eventos & 2 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-258 & Auditoría PCI-DSS & Auditar el flujo de tokenización y certificar el nivel de cumplimiento SAQ-A & 1 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-259 & Prototipo & Construir el prototipo de suscripción con tarjetas de prueba y habilitación de cupos & 2 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-260 & Informe y estimación & Consolidar costos de transacción y estimar la épica de suscripciones SaaS & 1 & Huamani Estefanero, Joel & Done \\
 \hline
-SP03 & Persistencia Relacional Local SQLite 3 y Sincronización Offline-First en Fosa & - & - & - & - & Huamani Estefanero, Joel & Done \\
+SP03 & Persistencia Relacional Local SQLite 3 y Sincronización Offline-First en Fosa & AT-261 & Motor SQLite 3 & Evaluar el desempeño de SQLite 3 en Flutter frente a almacenes clave-valor & 2 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-262 & Cola de mutaciones & Diseñar la cola local de mutaciones sin conexión con marcas cronológicas inmutables & 2 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-263 & Resolución de conflictos & Definir la resolución determinista de conflictos de concurrencia por marcas temporales & 2 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-264 & Sincronización & Prototipar la sincronización con reintentos exponenciales sin duplicar peticiones HTTP & 2 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+ &  & AT-265 & Informe y dimensionamiento & Documentar las directrices offline-first y dimensionar el almacenamiento local & 1 & Huamani Estefanero, Joel & Done \\
 \hline
 \end{longtable}
 \endgroup
