@@ -1,1586 +1,1859 @@
-# Especificación Canónica de Endpoints: IoT Telemetry and Predictive Maintenance
+# Especificación Canónica de Endpoints REST: IoT Telemetry and Predictive Maintenance
 
-## 1. Identidad y Propósito del Bounded Context
-
-El Bounded Context **IoT Telemetry and Predictive Maintenance** (`com.andeva.atelier.platform.iot`) constituye el núcleo de innovación y diagnóstico avanzado de Atelier Platform. Transforma el taller automotriz convencional en un centro técnico predictivo mediante la captura masiva de telemetría vehicular en tiempo real, el aislamiento de series temporales en hipertablas de TimescaleDB, la detección de códigos de diagnóstico de falla (DTC) y la inferencia predictiva pericial asistida por modelos LPU de Groq con Spring AI.
-
-Para el detalle de diseño estratégico, agregados y entidades de dominio, consultar:
-* [09-iot-telemetry-and-predictive-maintenance.md](file:///home/shouy/development/atelier-report/docs/extended-description-bounded-contexts-backend/09-iot-telemetry-and-predictive-maintenance.md)
-* [spring-ai-iot-predictive-diagnostics-guide.md](file:///home/shouy/development/atelier-report/docs/backend-documentation/spring-ai-iot-predictive-diagnostics-guide.md)
-* [atelier-roles.md](file:///home/shouy/development/atelier-report/docs/backend-documentation/atelier-roles.md)
-* [atelier-database-schema.md](file:///home/shouy/development/atelier-report/docs/atelier-database-schema.md)
-
-### Principios Fundamentales del Módulo
-1. **Aislamiento de Carga en TimescaleDB:** Las lecturas telemétricas de alta frecuencia (RPM, velocidad, temperatura del refrigerante y voltaje de batería) se insertan de forma directa en hipertablas append-only particionadas por intervalos de 7 días, previniendo cuellos de botella en el esquema transaccional del ERP.
-2. **Ciclo de Vida de Escáneres e Instalaciones:** Soporte para adaptadores físicos OBD-II Bluetooth BLE y módems celulares SIM (BYOD o provistos por Andeva), gobernando el emparejamiento temporal con los vehículos en bahía y el registro de kilometraje pericial.
-3. **Diagnóstico Electrónico Estandarizado:** Decodificación de códigos DTC SAE J1979/ISO 15031, clasificación por severidad (`LOW`, `MEDIUM`, `CRITICAL`) y trazabilidad de resolución tras borrado computarizado en bahía.
-4. **Mantenimiento Predictivo con Spring AI:** Análisis termodinámico y correlación estadística de telemetría para predecir fallas catastróficas antes de su ocurrencia, generando alertas proactivas vinculadas a servicios recomendados del catálogo de MRO y despachando notificaciones push inmediatas mediante Firebase Cloud Messaging (FCM).
+El Bounded Context **IoT Telemetry and Predictive Maintenance** (`com.andeva.atelier.platform.iot`) constituye el núcleo de innovación telemática y diagnóstico predictivo de Atelier Platform. Transforma el taller mecánico automotriz convencional en un centro técnico de alta precisión mediante la captura masiva de telemetría vehicular en tiempo real, el almacenamiento de series temporales en hipertablas particionadas de TimescaleDB, la decodificación pericial de códigos de diagnóstico de falla (DTC) y la inferencia predictiva asistida por modelos LPU de Groq con Spring AI.
 
 ---
 
-## 2. Inventario de Controladores y Endpoints
+## 1. Arquitectura de Seguridad y Convenciones Globales
 
-El módulo expone un total de 22 endpoints REST organizados en 6 controladores:
+Todos los endpoints documentados en esta especificación técnica se adhieren rigurosamente a los estándares de arquitectura de Atelier Platform:
 
-1. **Obd2DevicesController** (`/api/v1/iot/devices`): 4 endpoints para inventario de hardware y estados operativos de escáneres OBD-II.
-2. **DeviceInstallationsController** (`/api/v1/iot/installations`): 4 endpoints para vinculación física, desinstalación e historial por vehículo.
-3. **TelemetryIngestionController** (`/api/v1/iot/telemetry`): 3 endpoints para ingesta por lotes a alta velocidad y consulta de tacómetro en vivo y series temporales agregadas.
-4. **VehicleFaultsController** (`/api/v1/iot/faults`): 3 endpoints para registro, listado y subsanación de códigos de falla DTC.
-5. **PredictiveAlertsController** (`/api/v1/iot/alerts`): 4 endpoints para tablero de alertas predictivas de taller y vehículo, descarte y reconocimiento formal.
-6. **VehicleHealthReportsController** (`/api/v1/iot/vehicles`): 4 endpoints para orquestación de reportes de salud mecánica, inferencia Groq LPU Spring AI y exportación PDF.
+* **Aislamiento de Carga en Hipertablas de TimescaleDB:** Las lecturas telemétricas de alta frecuencia (velocidad, revoluciones por minuto, temperatura del refrigerante y voltaje de batería) se persisten en la hipertabla particionada `telemetry_logs`. Las consultas analíticas históricas aprovechan la función nativa `time_bucket` para calcular agregaciones estadísticas sin degradar el rendimiento relacional de PostgreSQL.
+* **Autenticación y Autorización Basada en Privilegios Atómicos:** Todo acceso exige la cabecera obligatoria `Authorization: Bearer <JWT>`. La seguridad a nivel de controlador se aplica mediante `@PreAuthorize("hasAuthority('...')")`, verificando las autoridades asociadas al personal de bahía, asesores de servicio o pasarelas de hardware.
+* **Aislamiento Multi-Inquilino de Primer Nivel:** Cada escáner, instalación, registro telemático y reporte pericial se encuentra vinculado de forma obligatoria al `tenant_id` del taller. Se bloquea cualquier intento de vinculación o lectura inter-inquilino a nivel perimetral.
+* **Integración con Spring AI y Groq LPU:** La generación de reportes de salud mecánica evalúa simultáneamente las fallas activas y el comportamiento cinemático de los últimos 30 días, consumiendo el motor de inferencia Groq con structured output tipado para la recomendación preventiva de servicios de mantenimiento.
+* **Estandarización de Respuestas de Error (RFC 7807):** Cualquier falla de validación o excepción de dominio se proyecta como un documento `ProblemDetail` bajo el estándar `application/problem+json`.
 
 ---
 
-## 3. Especificación Detallada de Endpoints
+## 2. Índice Canónico de Endpoints
 
-### 3.1. Obd2DevicesController
+El módulo expone exactamente 21 endpoints distribuidos en 6 controladores especializados:
 
-Controlador encargado de la administración del inventario de adaptadores y escáneres telemáticos pertenecientes a la dotación del taller automotriz.
+| No. | Método | Ruta Relativa | Controlador Java | Método Java | Permiso Atómico Requerido | Rol Mínimo Sugerido |
+| :---: | :---: | :--- | :--- | :--- | :--- | :--- |
+| 1 | `POST` | `/api/v1/iot/devices` | `Obd2DevicesController` | `registerDevice()` | `iot:devices:register` | Administrador de Taller |
+| 2 | `GET` | `/api/v1/iot/devices/{id}` | `Obd2DevicesController` | `getDeviceById()` | `iot:devices:read` | Jefe de Taller |
+| 3 | `GET` | `/api/v1/iot/devices` | `Obd2DevicesController` | `listDevices()` | `iot:devices:read` | Jefe de Taller |
+| 4 | `PATCH` | `/api/v1/iot/devices/{id}/status` | `Obd2DevicesController` | `updateDeviceStatus()` | `iot:devices:manage` | Jefe de Taller |
+| 5 | `POST` | `/api/v1/iot/installations/install` | `DeviceInstallationsController` | `installDevice()` | `iot:installations:manage` | Mecánico |
+| 6 | `POST` | `/api/v1/iot/installations/{id}/uninstall` | `DeviceInstallationsController` | `uninstallDevice()` | `iot:installations:manage` | Mecánico |
+| 7 | `GET` | `/api/v1/iot/installations/vehicle/{vehicleId}/active` | `DeviceInstallationsController` | `getActiveInstallationByVehicle()` | `iot:installations:read` | Asesor de Servicio |
+| 8 | `POST` | `/api/v1/iot/telemetry/batch` | `TelemetryIngestionController` | `ingestTelemetryBatch()` | `iot:telemetry:ingest` | Dispositivo Telemático / Móvil |
+| 9 | `GET` | `/api/v1/iot/telemetry/vehicle/{vehicleId}/latest` | `TelemetryIngestionController` | `getLatestTelemetry()` | `iot:telemetry:read` | Mecánico |
+| 10 | `GET` | `/api/v1/iot/telemetry/vehicle/{vehicleId}/history` | `TelemetryIngestionController` | `getTelemetryHistory()` | `iot:telemetry:read` | Asesor de Servicio |
+| 11 | `POST` | `/api/v1/iot/faults` | `VehicleFaultsController` | `registerVehicleFault()` | `iot:faults:write` | Mecánico |
+| 12 | `GET` | `/api/v1/iot/faults/vehicle/{vehicleId}/active` | `VehicleFaultsController` | `getActiveFaultsByVehicle()` | `iot:faults:read` | Asesor de Servicio |
+| 13 | `POST` | `/api/v1/iot/faults/{id}/resolve` | `VehicleFaultsController` | `resolveVehicleFault()` | `iot:faults:resolve` | Mecánico |
+| 14 | `GET` | `/api/v1/iot/alerts/tenant` | `PredictiveAlertsController` | `getActiveAlertsForTenant()` | `iot:alerts:read` | Asesor de Servicio |
+| 15 | `GET` | `/api/v1/iot/alerts/vehicle/{vehicleId}` | `PredictiveAlertsController` | `getAlertsByVehicle()` | `iot:alerts:read` | Asesor de Servicio |
+| 16 | `PATCH` | `/api/v1/iot/alerts/{id}/acknowledge` | `PredictiveAlertsController` | `acknowledgeAlert()` | `iot:alerts:acknowledge` | Asesor de Servicio |
+| 17 | `POST` | `/api/v1/iot/alerts/{id}/convert-to-appointment` | `PredictiveAlertsController` | `convertAlertToAppointment()` | `iot:alerts:convert` | Asesor de Servicio |
+| 18 | `POST` | `/api/v1/iot/health-reports/generate` | `VehicleHealthReportsController` | `generateHealthReport()` | `iot:health_reports:generate` | Asesor de Servicio |
+| 19 | `POST` | `/api/v1/iot/health-reports/generate-async` | `VehicleHealthReportsController` | `generateHealthReportAsync()` | `iot:health_reports:generate` | Jefe de Taller |
+| 20 | `GET` | `/api/v1/iot/health-reports/latest` | `VehicleHealthReportsController` | `getLatestHealthReport()` | `iot:health_reports:read` | Mecánico |
+| 21 | `GET` | `/api/v1/iot/health-reports/{reportId}/pdf` | `VehicleHealthReportsController` | `downloadHealthReportPdf()` | `iot:health_reports:read` | Asesor de Servicio |
 
-#### GET /api/v1/iot/devices
+---
 
-##### Identidad Técnica
-* **Controlador:** `Obd2DevicesController` (`com.andeva.atelier.platform.iot.interfaces.rest.controllers`)
-* **Método Java:** `public ResponseEntity<List<Obd2DeviceResponse>> getWorkshopDevices(@RequestParam(required = false) String status, @AuthenticationPrincipal Jwt jwt)`
+## 3. Endpoints de Obd2DevicesController
 
-##### Descripción Funcional
-Lista todos los escáneres OBD-II físicos registrados en el inventario del taller automotriz autenticado, permitiendo filtrar por estado operativo (`ACTIVE`, `MAINTENANCE`, `DECOMMISSIONED`, `DEFECTIVE`).
+El controlador `Obd2DevicesController` administra el inventario de hardware de adaptadores y escáneres telemáticos pertenecientes a la dotación técnica del taller automotriz.
 
-##### Seguridad y Autorización
-* **Rol Mínimo:** `ROLE_WORKSHOP_ADMIN`, `ROLE_SERVICE_ADVISOR`, `ROLE_CHIEF_MECHANIC` o `ROLE_MECHANIC`.
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('iot:devices:read')")`
-* **Contexto Multi-Inquilino:** Aislamiento forzado mediante el claim `tenant_id` extraído del token JWT.
+### 3.1. [POST] /api/v1/iot/devices
 
-##### Parámetros de Petición
-* **Headers:**
-  * `Authorization: Bearer <JWT>` (Obligatorio)
-* **Path Variables:** Ninguna.
-* **Query Parameters:**
-  | Parámetro | Tipo | Requerido | Descripción |
-  | :--- | :--- | :--- | :--- |
-  | `status` | String | No | Filtro opcional por situación del escáner (`ACTIVE`, `MAINTENANCE`, `DECOMMISSIONED`, `DEFECTIVE`). |
+#### Identidad Técnica
+* **Controlador:** `com.andeva.atelier.platform.iot.interfaces.rest.controllers.Obd2DevicesController`
+* **Método Java:** `public ResponseEntity<Obd2DeviceResponse> registerDevice(@Valid @RequestBody RegisterDeviceRequest request, @AuthenticationPrincipal Jwt jwt)`
+* **Ruta Base:** `/api/v1/iot/devices`
+* **Ruta Completa:** `/api/v1/iot/devices`
+* **Propósito:** Registra un nuevo escáner o adaptador telemático en el inventario del taller automotriz.
 
-##### Request DTO
-No aplica para peticiones HTTP GET.
+#### Descripción Funcional
+Permite incorporar un dispositivo físico al parque tecnológico del taller. Valida que el identificador único de hardware (`deviceIdentifier`, tal como dirección MAC Bluetooth o número de serie IMEI) no se encuentre registrado previamente en el sistema. Asocia el dispositivo al `tenant_id` autenticado, inicializa su estado operativo como disponible (`AVAILABLE`) y persiste sus especificaciones de modelo y firmware para futuras actualizaciones remotas.
 
-##### Response DTO
-* **Estado HTTP:** `200 OK`
-* **Record Java:** `List<com.andeva.atelier.platform.iot.interfaces.rest.resources.responses.Obd2DeviceResponse>`
+#### Seguridad y Autorización
+* **Nivel de Acceso:** Protegido / Taller Autenticado
+* **Rol Mínimo Requerido:** Dueño de Taller (`ROLE_WORKSHOP_OWNER`) o Administrador de Taller (`ROLE_TENANT_ADMIN`)
+* **Permiso Atómico:** `@PreAuthorize("hasAuthority('iot:devices:register')")`
+* **Aislamiento Multi-Inquilino:** El hardware registrado queda vinculado exclusivamente al taller autenticado.
 
-Tabla de Campos:
-| Campo | Tipo Java | Descripción |
+#### Parámetros de Invocación
+* **Cabeceras HTTP (Headers):**
+  * `Authorization: Bearer <JWT>`
+  * `Content-Type: application/json`
+* **Parámetros de Ruta (Path Parameters):** No aplica.
+* **Parámetros de Consulta (Query Parameters):** No aplica.
+
+#### Recurso de Petición (Request Body)
+* **Registro Java DTO:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.requests.RegisterDeviceRequest`
+* **Definición de Campos:**
+
+| Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripción |
+| :--- | :--- | :---: | :--- | :--- |
+| `deviceIdentifier` | `String` | Sí | `@NotBlank` | Dirección MAC Bluetooth o código de serie físico único |
+| `connectionType` | `String` | Sí | `@NotBlank` | Protocolo de conectividad (BLUETOOTH_BLE, WIFI, CELLULAR_4G) |
+| `hardwareModel` | `String` | No | Sin restricción adicional | Fabricante y referencia técnica del microcontrolador |
+| `firmwareVersion` | `String` | No | Sin restricción adicional | Versión de software embebido instalado en el escáner |
+
+**Ejemplo de Carga Útil JSON (Request):**
+```json
+{
+  "deviceIdentifier": "00:1B:44:11:3A:B7",
+  "connectionType": "BLUETOOTH_BLE",
+  "hardwareModel": "ELM327-v2.2-Pro",
+  "firmwareVersion": "v1.4.2"
+}
+```
+
+#### Recurso de Respuesta (Response Body)
+* **Estado HTTP Exitoso:** `201 Created` con cabecera `Location: /api/v1/iot/devices/{id}`
+* **Registro Java DTO:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.responses.Obd2DeviceResponse`
+* **Definición de Campos Proyectados:**
+
+| Campo | Tipo de Dato | Descripción |
 | :--- | :--- | :--- |
-| `id` | UUID | Identificador unívoco del hardware en la plataforma Atelier. |
-| `tenantId` | UUID | Identificador del taller propietario del dispositivo. |
-| `deviceIdentifier` | String | Dirección MAC Bluetooth (ej. AA:BB:CC:11:22:33) o número IMEI celular. |
-| `connectionType` | String | Protocolo de conectividad (`BLUETOOTH_BLE` o `CELLULAR_SIM`). |
-| `status` | String | Estado operativo actual del dispositivo. |
-| `hardwareModel` | String | Modelo comercial o fabricante del adaptador OBD-II (ej. ELM327 v2.1, OBDLink MX+). |
-| `firmwareVersion` | String | Versión de firmware reportada por el escáner. |
-| `createdAt` | Instant | Fecha y hora de alta en el sistema. |
+| `id` | `UUID` | Identificador único del dispositivo en la base de datos |
+| `tenantId` | `UUID` | Identificador del taller propietario del hardware |
+| `deviceIdentifier` | `String` | Identificador físico de fábrica registrado |
+| `connectionType` | `String` | Protocolo de comunicación telemática |
+| `status` | `String` | Estado operativo inicial (AVAILABLE, INSTALLED, IN_MAINTENANCE) |
+| `hardwareModel` | `String` | Modelo comercial del escáner |
+| `firmwareVersion` | `String` | Versión del firmware registrado |
+| `createdAt` | `Instant` | Marca temporal de alta en formato ISO 8601 UTC |
 
-Ejemplo JSON de Respuesta:
+**Ejemplo de Carga Útil JSON (Response):**
+```json
+{
+  "id": "018f6c40-7e12-7000-8000-000000000501",
+  "tenantId": "018f6c40-7e12-7000-8000-000000000001",
+  "deviceIdentifier": "00:1B:44:11:3A:B7",
+  "connectionType": "BLUETOOTH_BLE",
+  "status": "AVAILABLE",
+  "hardwareModel": "ELM327-v2.2-Pro",
+  "firmwareVersion": "v1.4.2",
+  "createdAt": "2026-10-04T02:00:00Z"
+}
+```
+
+#### Errores y Excepciones de Dominio (RFC 7807)
+
+| Código HTTP | Excepción Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `400 Bad Request` | `MethodArgumentNotValidException` | Parámetros obligatorios ausentes en la solicitud |
+| `401 Unauthorized` | `AuthenticationException` | Token JWT ausente o inválido |
+| `403 Forbidden` | `AccessDeniedException` | Permisos insuficientes para registrar dispositivos telemáticos |
+| `409 Conflict` | `InvalidDeviceIdentifierException` | El identificador de hardware ya se encuentra registrado |
+
+**Ejemplo de Carga Útil de Error (RFC 7807 ProblemDetail):**
+```json
+{
+  "type": "https://api.atelier.andeva.com/errors/device-already-exists",
+  "title": "Device Identifier Conflict",
+  "status": 409,
+  "detail": "El escáner con identificador 00:1B:44:11:3A:B7 ya se encuentra registrado en el sistema",
+  "instance": "/api/v1/iot/devices",
+  "code": "ERR_DEVICE_ALREADY_EXISTS",
+  "timestamp": "2026-10-04T02:00:00Z"
+}
+```
+
+---
+
+### 3.2. [GET] /api/v1/iot/devices/{id}
+
+#### Identidad Técnica
+* **Controlador:** `com.andeva.atelier.platform.iot.interfaces.rest.controllers.Obd2DevicesController`
+* **Método Java:** `public ResponseEntity<Obd2DeviceResponse> getDeviceById(@PathVariable UUID id, @AuthenticationPrincipal Jwt jwt)`
+* **Ruta Base:** `/api/v1/iot/devices`
+* **Ruta Completa:** `/api/v1/iot/devices/{id}`
+* **Propósito:** Consulta los datos técnicos y operativos de un escáner específico.
+
+#### Descripción Funcional
+Recupera la entidad `Obd2Device` desde la base de datos validando su existencia y comprobando que pertenezca al `tenant_id` autenticado. Retorna el estado funcional del escáner, su identificador físico, protocolo de conexión y datos de versión.
+
+#### Seguridad y Autorización
+* **Nivel de Acceso:** Protegido / Taller Autenticado
+* **Rol Mínimo Requerido:** Jefe de Taller (`ROLE_HEAD_MECHANIC`) o Administrador de Taller (`ROLE_TENANT_ADMIN`)
+* **Permiso Atómico:** `@PreAuthorize("hasAuthority('iot:devices:read')")`
+* **Aislamiento Multi-Inquilino:** Filtrado estricto por `tenant_id`.
+
+#### Parámetros de Invocación
+* **Cabeceras HTTP (Headers):**
+  * `Authorization: Bearer <JWT>`
+  * `Accept: application/json`
+* **Parámetros de Ruta (Path Parameters):**
+  * `id` (`UUID`): Identificador universal del dispositivo consultado.
+* **Parámetros de Consulta (Query Parameters):** No aplica.
+
+#### Recurso de Petición (Request Body)
+No aplica (Solicitud de tipo HTTP GET sin cuerpo).
+
+#### Recurso de Respuesta (Response Body)
+* **Estado HTTP Exitoso:** `200 OK`
+* **Registro Java DTO:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.responses.Obd2DeviceResponse`
+* **Definición de Campos Proyectados:** Idéntica a la definición de `Obd2DeviceResponse`.
+
+**Ejemplo de Carga Útil JSON (Response):**
+```json
+{
+  "id": "018f6c40-7e12-7000-8000-000000000501",
+  "tenantId": "018f6c40-7e12-7000-8000-000000000001",
+  "deviceIdentifier": "00:1B:44:11:3A:B7",
+  "connectionType": "BLUETOOTH_BLE",
+  "status": "AVAILABLE",
+  "hardwareModel": "ELM327-v2.2-Pro",
+  "firmwareVersion": "v1.4.2",
+  "createdAt": "2026-10-04T02:00:00Z"
+}
+```
+
+#### Errores y Excepciones de Dominio (RFC 7807)
+
+| Código HTTP | Excepción Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `400 Bad Request` | `MethodArgumentTypeMismatchException` | El identificador proporcionado en la ruta no es un UUID válido |
+| `401 Unauthorized` | `AuthenticationException` | Token JWT ausente o expirado |
+| `403 Forbidden` | `AccessDeniedException` | Intento de acceder a hardware perteneciente a otro taller |
+| `404 Not Found` | `DeviceNotFoundException` | El dispositivo con el identificador indicado no existe en el taller |
+
+**Ejemplo de Carga Útil de Error (RFC 7807 ProblemDetail):**
+```json
+{
+  "type": "https://api.atelier.andeva.com/errors/device-not-found",
+  "title": "Device Not Found",
+  "status": 404,
+  "detail": "El escáner con identificador 018f6c40-7e12-7000-8000-000000000599 no fue localizado",
+  "instance": "/api/v1/iot/devices/018f6c40-7e12-7000-8000-000000000599",
+  "code": "ERR_DEVICE_NOT_FOUND",
+  "timestamp": "2026-10-04T02:05:00Z"
+}
+```
+
+---
+
+### 3.3. [GET] /api/v1/iot/devices
+
+#### Identidad Técnica
+* **Controlador:** `com.andeva.atelier.platform.iot.interfaces.rest.controllers.Obd2DevicesController`
+* **Método Java:** `public ResponseEntity<List<Obd2DeviceResponse>> listDevices(@RequestParam(required = false) String status, @AuthenticationPrincipal Jwt jwt)`
+* **Ruta Base:** `/api/v1/iot/devices`
+* **Ruta Completa:** `/api/v1/iot/devices`
+* **Propósito:** Lista el inventario completo de escáneres telemáticos del taller con filtro opcional por estado operativo.
+
+#### Descripción Funcional
+Permite a los jefes de taller y mecánicos visualizar todos los escáneres registrados para su sede o empresa. Admite un parámetro opcional de consulta `status` para filtrar dispositivos disponibles para instalación (`AVAILABLE`), en uso activo en vehículos de clientes (`INSTALLED`) o en mantenimiento técnico (`IN_MAINTENANCE`).
+
+#### Seguridad y Autorización
+* **Nivel de Acceso:** Protegido / Taller Autenticado
+* **Rol Mínimo Requerido:** Jefe de Taller (`ROLE_HEAD_MECHANIC`) o Administrador de Taller (`ROLE_TENANT_ADMIN`)
+* **Permiso Atómico:** `@PreAuthorize("hasAuthority('iot:devices:read')")`
+* **Aislamiento Multi-Inquilino:** Filtrado estricto por el `tenant_id` autenticado.
+
+#### Parámetros de Invocación
+* **Cabeceras HTTP (Headers):**
+  * `Authorization: Bearer <JWT>`
+  * `Accept: application/json`
+* **Parámetros de Ruta (Path Parameters):** No aplica.
+* **Parámetros de Consulta (Query Parameters):**
+  * `status` (`String`, Opcional): Filtro de situación operativa (AVAILABLE, INSTALLED, IN_MAINTENANCE).
+
+#### Recurso de Petición (Request Body)
+No aplica (Solicitud de tipo HTTP GET sin cuerpo).
+
+#### Recurso de Respuesta (Response Body)
+* **Estado HTTP Exitoso:** `200 OK`
+* **Registro Java DTO:** `List<com.andeva.atelier.platform.iot.interfaces.rest.resources.responses.Obd2DeviceResponse>`
+* **Definición de Campos Proyectados:** Idéntica a la definición de `Obd2DeviceResponse`.
+
+**Ejemplo de Carga Útil JSON (Response):**
 ```json
 [
   {
-    "id": "8a123456-789a-bcde-f012-3456789abc01",
-    "tenantId": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
-    "deviceIdentifier": "00:1D:A5:68:98:8B",
+    "id": "018f6c40-7e12-7000-8000-000000000501",
+    "tenantId": "018f6c40-7e12-7000-8000-000000000001",
+    "deviceIdentifier": "00:1B:44:11:3A:B7",
     "connectionType": "BLUETOOTH_BLE",
-    "status": "ACTIVE",
-    "hardwareModel": "OBDLink MX+ Bluetooth",
-    "firmwareVersion": "v5.6.1",
-    "createdAt": "2026-02-10T10:00:00Z"
+    "status": "AVAILABLE",
+    "hardwareModel": "ELM327-v2.2-Pro",
+    "firmwareVersion": "v1.4.2",
+    "createdAt": "2026-10-04T02:00:00Z"
   },
   {
-    "id": "8a123456-789a-bcde-f012-3456789abc02",
-    "tenantId": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
-    "deviceIdentifier": "864275039182745",
-    "connectionType": "CELLULAR_SIM",
-    "status": "MAINTENANCE",
-    "hardwareModel": "Teltonika FMB003 4G",
-    "firmwareVersion": "03.27.07",
-    "createdAt": "2026-03-01T14:30:00Z"
+    "id": "018f6c40-7e12-7000-8000-000000000502",
+    "tenantId": "018f6c40-7e12-7000-8000-000000000001",
+    "deviceIdentifier": "00:1B:44:22:9C:F1",
+    "connectionType": "BLUETOOTH_BLE",
+    "status": "INSTALLED",
+    "hardwareModel": "OBDLink-MX-Plus",
+    "firmwareVersion": "v2.1.0",
+    "createdAt": "2026-10-03T18:00:00Z"
   }
 ]
 ```
 
-##### Errores y RFC 7807
-| Código HTTP | Error Type | Excepción de Dominio | Causa Común |
-| :--- | :--- | :--- | :--- |
-| `401 Unauthorized` | `https://api.atelier.andeva.pe/errors/unauthorized` | `AuthenticationException` | Token de sesión no provisto o expirado. |
-| `403 Forbidden` | `https://api.atelier.andeva.pe/errors/forbidden` | `AccessDeniedException` | Usuario carece de permisos de lectura sobre el inventario telemático. |
+#### Errores y Excepciones de Dominio (RFC 7807)
 
----
+| Código HTTP | Excepción Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `401 Unauthorized` | `AuthenticationException` | Token JWT ausente o inválido |
+| `403 Forbidden` | `AccessDeniedException` | Permisos insuficientes para listar el inventario telemático |
 
-#### GET /api/v1/iot/devices/{id}
-
-##### Identidad Técnica
-* **Controlador:** `Obd2DevicesController` (`com.andeva.atelier.platform.iot.interfaces.rest.controllers`)
-* **Método Java:** `public ResponseEntity<Obd2DeviceResponse> getDeviceById(@PathVariable UUID id, @AuthenticationPrincipal Jwt jwt)`
-
-##### Descripción Funcional
-Consulta la ficha técnica detallada de un escáner OBD-II registrado en el taller a partir de su identificador UUID.
-
-##### Seguridad y Autorización
-* **Rol Mínimo:** `ROLE_WORKSHOP_ADMIN`, `ROLE_SERVICE_ADVISOR`, `ROLE_CHIEF_MECHANIC` o `ROLE_MECHANIC`.
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('iot:devices:read')")`
-* **Contexto Multi-Inquilino:** Valida que el dispositivo solicitado pertenezca al `tenant_id` autenticado.
-
-##### Parámetros de Petición
-* **Headers:**
-  * `Authorization: Bearer <JWT>` (Obligatorio)
-* **Path Variables:**
-  | Variable | Tipo | Descripción |
-  | :--- | :--- | :--- |
-  | `id` | UUID | Identificador unívoco del escáner en Atelier. |
-* **Query Parameters:** Ninguno.
-
-##### Request DTO
-No aplica para peticiones HTTP GET.
-
-##### Response DTO
-* **Estado HTTP:** `200 OK`
-* **Record Java:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.responses.Obd2DeviceResponse`
-
-Ejemplo JSON de Respuesta:
+**Ejemplo de Carga Útil de Error (RFC 7807 ProblemDetail):**
 ```json
 {
-  "id": "8a123456-789a-bcde-f012-3456789abc01",
-  "tenantId": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
-  "deviceIdentifier": "00:1D:A5:68:98:8B",
-  "connectionType": "BLUETOOTH_BLE",
-  "status": "ACTIVE",
-  "hardwareModel": "OBDLink MX+ Bluetooth",
-  "firmwareVersion": "v5.6.1",
-  "createdAt": "2026-02-10T10:00:00Z"
-}
-```
-
-##### Errores y RFC 7807
-| Código HTTP | Error Type | Excepción de Dominio | Causa Común |
-| :--- | :--- | :--- | :--- |
-| `400 Bad Request` | `https://api.atelier.andeva.pe/errors/invalid-identifier` | `IllegalArgumentException` | Formato UUID del parámetro de ruta malformado. |
-| `401 Unauthorized` | `https://api.atelier.andeva.pe/errors/unauthorized` | `AuthenticationException` | Token de sesión inválido. |
-| `403 Forbidden` | `https://api.atelier.andeva.pe/errors/forbidden` | `AccessDeniedException` | Intento de consultar un hardware asignado a otro taller. |
-| `404 Not Found` | `https://api.atelier.andeva.pe/errors/device-not-found` | `DeviceNotFoundException` | El escáner solicitado no existe en la base de datos. |
-
----
-
-#### POST /api/v1/iot/devices
-
-##### Identidad Técnica
-* **Controlador:** `Obd2DevicesController` (`com.andeva.atelier.platform.iot.interfaces.rest.controllers`)
-* **Método Java:** `public ResponseEntity<Obd2DeviceResponse> registerDevice(@Valid @RequestBody RegisterDeviceRequest request, @AuthenticationPrincipal Jwt jwt)`
-
-##### Descripción Funcional
-Registra un nuevo adaptador OBD-II en el inventario del taller automotriz. Valida la disponibilidad de cuotas de hardware bajo el plan SaaS contratado (`maxActiveObd2Devices`) e impide el registro duplicado de direcciones MAC o números IMEI a nivel global.
-
-##### Seguridad y Autorización
-* **Rol Mínimo:** `ROLE_WORKSHOP_ADMIN` o `ROLE_CHIEF_MECHANIC`.
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('iot:devices:register')")`
-* **Contexto Multi-Inquilino:** Asocia automáticamente el registro al `tenant_id` del token JWT.
-
-##### Parámetros de Petición
-* **Headers:**
-  * `Authorization: Bearer <JWT>` (Obligatorio)
-  * `Content-Type: application/json` (Obligatorio)
-* **Path Variables:** Ninguna.
-* **Query Parameters:** Ninguno.
-
-##### Request DTO
-* **Record Java:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.requests.RegisterDeviceRequest`
-
-Tabla de Campos:
-| Campo | Tipo Java | Validaciones Jakarta | Descripción |
-| :--- | :--- | :--- | :--- |
-| `deviceIdentifier` | String | `@NotBlank` | Dirección MAC física Bluetooth o código IMEI celular. |
-| `connectionType` | String | `@NotBlank`, patrón `BLUETOOTH_BLE\|CELLULAR_SIM` | Tipo de conectividad física del dispositivo. |
-| `hardwareModel` | String | Opcional | Modelo comercial del adaptador telemático. |
-| `firmwareVersion` | String | Opcional | Versión de firmware del fabricante. |
-
-Ejemplo JSON de Solicitud:
-```json
-{
-  "deviceIdentifier": "00:1D:A5:99:44:11",
-  "connectionType": "BLUETOOTH_BLE",
-  "hardwareModel": "Viecar Bluetooth 4.0 BLE",
-  "firmwareVersion": "v1.5"
-}
-```
-
-##### Response DTO
-* **Estado HTTP:** `201 Created`
-* **Headers:** `Location: /api/v1/iot/devices/{id}`
-* **Record Java:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.responses.Obd2DeviceResponse`
-
-Ejemplo JSON de Respuesta:
-```json
-{
-  "id": "9b234567-89ab-cdef-0123-456789abcdef",
-  "tenantId": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
-  "deviceIdentifier": "00:1D:A5:99:44:11",
-  "connectionType": "BLUETOOTH_BLE",
-  "status": "ACTIVE",
-  "hardwareModel": "Viecar Bluetooth 4.0 BLE",
-  "firmwareVersion": "v1.5",
-  "createdAt": "2026-10-01T15:40:00Z"
-}
-```
-
-##### Errores y RFC 7807
-| Código HTTP | Error Type | Excepción de Dominio | Causa Común |
-| :--- | :--- | :--- | :--- |
-| `400 Bad Request` | `https://api.atelier.andeva.pe/errors/validation-failed` | `MethodArgumentNotValidException` | Formato de identificador o tipo de conexión inválido. |
-| `401 Unauthorized` | `https://api.atelier.andeva.pe/errors/unauthorized` | `AuthenticationException` | Token de sesión ausente o revocado. |
-| `403 Forbidden` | `https://api.atelier.andeva.pe/errors/quota-exceeded` | `QuotaExceededException` | El taller alcanzó el límite de escáneres activos permitido en su plan SaaS. |
-| `409 Conflict` | `https://api.atelier.andeva.pe/errors/duplicate-device` | `DuplicateDeviceIdentifierException` | La dirección MAC o IMEI ya se encuentra registrada en la plataforma. |
-
-Ejemplo JSON ProblemDetail:
-```json
-{
-  "type": "https://api.atelier.andeva.pe/errors/quota-exceeded",
-  "title": "Limite de Dispositivos Copado",
+  "type": "https://api.atelier.andeva.com/errors/access-denied",
+  "title": "Access Denied",
   "status": 403,
-  "detail": "El Plan Pro autoriza un maximo de 5 escaneres OBD-II activos. Actualice al Plan Max para registrar mas dispositivos.",
+  "detail": "El usuario no cuenta con autorización para auditar los dispositivos telemáticos del taller",
   "instance": "/api/v1/iot/devices",
-  "code": "OBD2_DEVICE_QUOTA_REACHED",
-  "timestamp": "2026-10-01T15:40:30Z"
+  "code": "ERR_ACCESS_DENIED",
+  "timestamp": "2026-10-04T02:10:00Z"
 }
 ```
 
 ---
 
-#### PATCH /api/v1/iot/devices/{id}/status
+### 3.4. [PATCH] /api/v1/iot/devices/{id}/status
 
-##### Identidad Técnica
-* **Controlador:** `Obd2DevicesController` (`com.andeva.atelier.platform.iot.interfaces.rest.controllers`)
+#### Identidad Técnica
+* **Controlador:** `com.andeva.atelier.platform.iot.interfaces.rest.controllers.Obd2DevicesController`
 * **Método Java:** `public ResponseEntity<Obd2DeviceResponse> updateDeviceStatus(@PathVariable UUID id, @Valid @RequestBody UpdateDeviceStatusRequest request, @AuthenticationPrincipal Jwt jwt)`
+* **Ruta Base:** `/api/v1/iot/devices`
+* **Ruta Completa:** `/api/v1/iot/devices/{id}/status`
+* **Propósito:** Actualiza el estado operativo o administrativo de un dispositivo específico.
 
-##### Descripción Funcional
-Actualiza la situación técnica u operativa de un escáner OBD-II (`ACTIVE`, `MAINTENANCE`, `DECOMMISSIONED`, `DEFECTIVE`), permitiendo bloquear temporalmente hardware averiado para evitar instalaciones espurias en bahía.
+#### Descripción Funcional
+Permite cambiar el estado de un escáner para reflejar situaciones operativas como envío a laboratorio para calibración (`IN_MAINTENANCE`), reincorporación a inventario (`AVAILABLE`) o baja definitiva por daño físico irreparable (`DECOMMISSIONED`). Valida que el dispositivo no se encuentre actualmente vinculado a una sesión activa de instalación en un vehículo antes de pasarlo a mantenimiento o baja.
 
-##### Seguridad y Autorización
-* **Rol Mínimo:** `ROLE_WORKSHOP_ADMIN` o `ROLE_CHIEF_MECHANIC`.
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('iot:devices:register')")`
-* **Contexto Multi-Inquilino:** Verifica que el escáner pertenezca al taller autenticado.
+#### Seguridad y Autorización
+* **Nivel de Acceso:** Protegido / Taller Autenticado
+* **Rol Mínimo Requerido:** Jefe de Taller (`ROLE_HEAD_MECHANIC`) o Administrador de Taller (`ROLE_TENANT_ADMIN`)
+* **Permiso Atómico:** `@PreAuthorize("hasAuthority('iot:devices:manage')")`
+* **Aislamiento Multi-Inquilino:** Modificación restringida al taller propietario del hardware.
 
-##### Parámetros de Petición
-* **Headers:**
-  * `Authorization: Bearer <JWT>` (Obligatorio)
-  * `Content-Type: application/json` (Obligatorio)
-* **Path Variables:**
-  | Variable | Tipo | Descripción |
-  | :--- | :--- | :--- |
-  | `id` | UUID | Identificador unívoco del dispositivo a actualizar. |
-* **Query Parameters:** Ninguno.
+#### Parámetros de Invocación
+* **Cabeceras HTTP (Headers):**
+  * `Authorization: Bearer <JWT>`
+  * `Content-Type: application/json`
+* **Parámetros de Ruta (Path Parameters):**
+  * `id` (`UUID`): Identificador universal del dispositivo a modificar.
+* **Parámetros de Consulta (Query Parameters):** No aplica.
 
-##### Request DTO
-* **Record Java:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.requests.UpdateDeviceStatusRequest`
+#### Recurso de Petición (Request Body)
+* **Registro Java DTO:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.requests.UpdateDeviceStatusRequest`
+* **Definición de Campos:**
 
-Tabla de Campos:
-| Campo | Tipo Java | Validaciones Jakarta | Descripción |
-| :--- | :--- | :--- | :--- |
-| `status` | String | `@NotBlank`, patrón `ACTIVE\|MAINTENANCE\|DECOMMISSIONED\|DEFECTIVE` | Nuevo estado operativo del dispositivo. |
+| Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripción |
+| :--- | :--- | :---: | :--- | :--- |
+| `status` | `String` | Sí | `@NotBlank` | Nuevo estado operativo (AVAILABLE, IN_MAINTENANCE, DECOMMISSIONED) |
 
-Ejemplo JSON de Solicitud:
+**Ejemplo de Carga Útil JSON (Request):**
 ```json
 {
-  "status": "MAINTENANCE"
+  "status": "IN_MAINTENANCE"
 }
 ```
 
-##### Response DTO
-* **Estado HTTP:** `200 OK`
-* **Record Java:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.responses.Obd2DeviceResponse`
+#### Recurso de Respuesta (Response Body)
+* **Estado HTTP Exitoso:** `200 OK`
+* **Registro Java DTO:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.responses.Obd2DeviceResponse`
+* **Definición de Campos Proyectados:** Idéntica a la definición de `Obd2DeviceResponse`.
 
-Ejemplo JSON de Respuesta:
+**Ejemplo de Carga Útil JSON (Response):**
 ```json
 {
-  "id": "8a123456-789a-bcde-f012-3456789abc01",
-  "tenantId": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
-  "deviceIdentifier": "00:1D:A5:68:98:8B",
+  "id": "018f6c40-7e12-7000-8000-000000000501",
+  "tenantId": "018f6c40-7e12-7000-8000-000000000001",
+  "deviceIdentifier": "00:1B:44:11:3A:B7",
   "connectionType": "BLUETOOTH_BLE",
-  "status": "MAINTENANCE",
-  "hardwareModel": "OBDLink MX+ Bluetooth",
-  "firmwareVersion": "v5.6.1",
-  "createdAt": "2026-02-10T10:00:00Z"
+  "status": "IN_MAINTENANCE",
+  "hardwareModel": "ELM327-v2.2-Pro",
+  "firmwareVersion": "v1.4.2",
+  "createdAt": "2026-10-04T02:00:00Z"
 }
 ```
 
-##### Errores y RFC 7807
-| Código HTTP | Error Type | Excepción de Dominio | Causa Común |
-| :--- | :--- | :--- | :--- |
-| `400 Bad Request` | `https://api.atelier.andeva.pe/errors/validation-failed` | `MethodArgumentNotValidException` | Estado operativo no reconocido en la enumeración de dominio. |
-| `401 Unauthorized` | `https://api.atelier.andeva.pe/errors/unauthorized` | `AuthenticationException` | Token de sesión ausente o revocado. |
-| `404 Not Found` | `https://api.atelier.andeva.pe/errors/device-not-found` | `DeviceNotFoundException` | El dispositivo a modificar no existe en el inventario. |
+#### Errores y Excepciones de Dominio (RFC 7807)
+
+| Código HTTP | Excepción Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `400 Bad Request` | `MethodArgumentNotValidException` | Estado no válido o cuerpo de petición vacío |
+| `401 Unauthorized` | `AuthenticationException` | Token JWT ausente o expirado |
+| `403 Forbidden` | `AccessDeniedException` | Permisos insuficientes para actualizar el estado del dispositivo |
+| `404 Not Found` | `DeviceNotFoundException` | El dispositivo solicitado no existe en el inventario del taller |
+| `409 Conflict` | `DeviceAlreadyInstalledException` | No se puede alterar el estado porque el dispositivo está instalado en un automóvil |
+
+**Ejemplo de Carga Útil de Error (RFC 7807 ProblemDetail):**
+```json
+{
+  "type": "https://api.atelier.andeva.com/errors/device-already-installed",
+  "title": "Device Currently Installed",
+  "status": 409,
+  "detail": "El escáner se encuentra actualmente instalado en un vehículo y no puede pasar a mantenimiento sin desvincularse primero",
+  "instance": "/api/v1/iot/devices/018f6c40-7e12-7000-8000-000000000501/status",
+  "code": "ERR_DEVICE_ALREADY_INSTALLED",
+  "timestamp": "2026-10-04T02:15:00Z"
+}
+```
 
 ---
 
-### 3.2. DeviceInstallationsController
+## 4. Endpoints de DeviceInstallationsController
 
-Controlador encargado de gestionar las vinculaciones físicas temporales entre escáneres OBD-II y vehículos atendidos en el taller.
+El controlador `DeviceInstallationsController` gobierna el ciclo de vinculación física y operativa de los escáneres telemáticos sobre los vehículos de clientes en las bahías o fosas del taller automotriz.
 
-#### POST /api/v1/iot/installations/install
+### 4.1. [POST] /api/v1/iot/installations/install
 
-##### Identidad Técnica
-* **Controlador:** `DeviceInstallationsController` (`com.andeva.atelier.platform.iot.interfaces.rest.controllers`)
+#### Identidad Técnica
+* **Controlador:** `com.andeva.atelier.platform.iot.interfaces.rest.controllers.DeviceInstallationsController`
 * **Método Java:** `public ResponseEntity<DeviceInstallationResponse> installDevice(@Valid @RequestBody InstallDeviceRequest request, @AuthenticationPrincipal Jwt jwt)`
+* **Ruta Base:** `/api/v1/iot/installations`
+* **Ruta Completa:** `/api/v1/iot/installations/install`
+* **Propósito:** Vincula formalmente un escáner OBD-II disponible a un vehículo en el taller, registrando el kilometraje inicial de la sesión de diagnóstico.
 
-##### Descripción Funcional
-Asocia formalmente un escáner OBD-II disponible a un vehículo en bahía de trabajo, registrando el kilometraje inicial del odómetro y garantizando mediante invariantes de dominio que ni el vehículo ni el dispositivo posean otra instalación activa simultánea.
+#### Descripción Funcional
+Comprueba que el escáner se encuentre en estado disponible (`AVAILABLE`) y que el vehículo no cuente con otra sesión de escáner activa simultánea (`ActiveInstallationConflictException`). Verifica la cuota operativa del taller respecto al límite máximo de escáneres activos autorizados por su plan de suscripción (`maxActiveObd2Devices`). Crea el agregado `DeviceInstallation` con marca temporal de inicio y odómetro inicial, actualiza el estado del dispositivo a instalado (`INSTALLED`) y publica el evento `DeviceInstalledEvent`.
 
-##### Seguridad y Autorización
-* **Rol Mínimo:** `ROLE_WORKSHOP_ADMIN`, `ROLE_SERVICE_ADVISOR`, `ROLE_CHIEF_MECHANIC` o `ROLE_MECHANIC`.
+#### Seguridad y Autorización
+* **Nivel de Acceso:** Protegido / Taller Autenticado
+* **Rol Mínimo Requerido:** Mecánico (`ROLE_MECHANIC`), Jefe de Taller (`ROLE_HEAD_MECHANIC`) o Dueño de Taller (`ROLE_WORKSHOP_OWNER`)
 * **Permiso Atómico:** `@PreAuthorize("hasAuthority('iot:installations:manage')")`
-* **Contexto Multi-Inquilino:** Verifica que el escáner y el vehículo pertenezcan al mismo taller del token JWT.
+* **Aislamiento Multi-Inquilino:** El vehículo y el dispositivo deben pertenecer o encontrarse atendidos bajo el `tenant_id` del taller autenticado.
 
-##### Parámetros de Petición
-* **Headers:**
-  * `Authorization: Bearer <JWT>` (Obligatorio)
-  * `Content-Type: application/json` (Obligatorio)
-* **Path Variables:** Ninguna.
-* **Query Parameters:** Ninguno.
+#### Parámetros de Invocación
+* **Cabeceras HTTP (Headers):**
+  * `Authorization: Bearer <JWT>`
+  * `Content-Type: application/json`
+* **Parámetros de Ruta (Path Parameters):** No aplica.
+* **Parámetros de Consulta (Query Parameters):** No aplica.
 
-##### Request DTO
-* **Record Java:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.requests.InstallDeviceRequest`
+#### Recurso de Petición (Request Body)
+* **Registro Java DTO:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.requests.InstallDeviceRequest`
+* **Definición de Campos:**
 
-Tabla de Campos:
-| Campo | Tipo Java | Validaciones Jakarta | Descripción |
-| :--- | :--- | :--- | :--- |
-| `deviceId` | UUID | `@NotNull` | Identificador del escáner OBD-II a vincular. |
-| `vehicleId` | UUID | `@NotNull` | Identificador del vehículo automotriz receptor. |
-| `currentOdometerKm` | int | `@Min(0)` | Kilometraje actual asentado en el odómetro del tablero. |
+| Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripción |
+| :--- | :--- | :---: | :--- | :--- |
+| `deviceId` | `UUID` | Sí | `@NotNull` | Identificador único del escáner en inventario |
+| `vehicleId` | `UUID` | Sí | `@NotNull` | Identificador del vehículo automotriz a diagnosticar |
+| `currentOdometerKm` | `int` | Sí | `@Min(0)` | Lectura actual del cuentakilómetros del vehículo |
 
-Ejemplo JSON de Solicitud:
+**Ejemplo de Carga Útil JSON (Request):**
 ```json
 {
-  "deviceId": "8a123456-789a-bcde-f012-3456789abc01",
-  "vehicleId": "4c56789a-bcde-f012-3456-789abcdef012",
-  "currentOdometerKm": 68450
+  "deviceId": "018f6c40-7e12-7000-8000-000000000501",
+  "vehicleId": "018f6c40-7e12-7000-8000-000000000601",
+  "currentOdometerKm": 48520
 }
 ```
 
-##### Response DTO
-* **Estado HTTP:** `201 Created`
-* **Headers:** `Location: /api/v1/iot/installations/{id}`
-* **Record Java:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.responses.DeviceInstallationResponse`
+#### Recurso de Respuesta (Response Body)
+* **Estado HTTP Exitoso:** `201 Created` con cabecera `Location: /api/v1/iot/installations/{id}`
+* **Registro Java DTO:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.responses.DeviceInstallationResponse`
+* **Definición de Campos Proyectados:**
 
-Tabla de Campos:
-| Campo | Tipo Java | Descripción |
+| Campo | Tipo de Dato | Descripción |
 | :--- | :--- | :--- |
-| `id` | UUID | Identificador universal único del registro de instalación. |
-| `deviceId` | UUID | Identificador del escáner telemático asignado. |
-| `vehicleId` | UUID | Identificador del vehículo vinculado. |
-| `tenantId` | UUID | Identificador del taller automotriz. |
-| `installedAt` | Instant | Fecha y hora formal de instalación en bahía. |
-| `uninstalledAt` | Instant | Fecha de retiro (nulo mientras permanezca activa). |
-| `initialOdometerKm` | int | Kilometraje registrado al momento de la conexión física. |
-| `finalOdometerKm` | Integer | Kilometraje al retiro (nulo mientras permanezca activa). |
-| `isActive` | boolean | Indicador booleano de vigencia activa de la vinculación. |
+| `id` | `UUID` | Identificador único de la sesión de instalación |
+| `deviceId` | `UUID` | Identificador del escáner instalado |
+| `vehicleId` | `UUID` | Identificador del vehículo atendido |
+| `tenantId` | `UUID` | Identificador del taller que gestiona la instalación |
+| `installedAt` | `Instant` | Marca temporal de conexión en formato ISO 8601 UTC |
+| `uninstalledAt` | `Instant` | Marca temporal de desconexión (null mientras siga activo) |
+| `initialOdometerKm` | `int` | Kilometraje registrado al momento de la instalación |
+| `finalOdometerKm` | `Integer` | Kilometraje al momento del retiro (null mientras siga activo) |
+| `isActive` | `boolean` | Indica si la vinculación se encuentra operativa |
 
-Ejemplo JSON de Respuesta:
+**Ejemplo de Carga Útil JSON (Response):**
 ```json
 {
-  "id": "1b345678-9abc-def0-1234-56789abcdef0",
-  "deviceId": "8a123456-789a-bcde-f012-3456789abc01",
-  "vehicleId": "4c56789a-bcde-f012-3456-789abcdef012",
-  "tenantId": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
-  "installedAt": "2026-10-01T15:42:00Z",
+  "id": "018f6c40-7e12-7000-8000-000000000701",
+  "deviceId": "018f6c40-7e12-7000-8000-000000000501",
+  "vehicleId": "018f6c40-7e12-7000-8000-000000000601",
+  "tenantId": "018f6c40-7e12-7000-8000-000000000001",
+  "installedAt": "2026-10-04T02:20:00Z",
   "uninstalledAt": null,
-  "initialOdometerKm": 68450,
+  "initialOdometerKm": 48520,
   "finalOdometerKm": null,
   "isActive": true
 }
 ```
 
-##### Errores y RFC 7807
-| Código HTTP | Error Type | Excepción de Dominio | Causa Común |
-| :--- | :--- | :--- | :--- |
-| `400 Bad Request` | `https://api.atelier.andeva.pe/errors/validation-failed` | `MethodArgumentNotValidException` | Kilometraje negativo o identificadores UUID faltantes. |
-| `401 Unauthorized` | `https://api.atelier.andeva.pe/errors/unauthorized` | `AuthenticationException` | Token de sesión no provisto o inválido. |
-| `404 Not Found` | `https://api.atelier.andeva.pe/errors/resource-not-found` | `DeviceNotFoundException` | El escáner o el vehículo especificado no existen. |
-| `409 Conflict` | `https://api.atelier.andeva.pe/errors/active-installation-conflict` | `ActiveInstallationConflictException` | El vehículo ya cuenta con un escáner activo o el escáner ya está instalado en otro vehículo. |
+#### Errores y Excepciones de Dominio (RFC 7807)
 
-Ejemplo JSON ProblemDetail:
+| Código HTTP | Excepción Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `400 Bad Request` | `MethodArgumentNotValidException` | Campos obligatorios nulos o kilometraje negativo |
+| `401 Unauthorized` | `AuthenticationException` | Token JWT ausente o inválido |
+| `403 Forbidden` | `QuotaExceededException` | El taller superó el cupo de escáneres activos permitido por su plan SaaS |
+| `404 Not Found` | `DeviceNotFoundException` | El escáner indicado no fue localizado en el taller |
+| `409 Conflict` | `ActiveInstallationConflictException` | El vehículo ya cuenta con otro escáner activo conectado |
+
+**Ejemplo de Carga Útil de Error (RFC 7807 ProblemDetail):**
 ```json
 {
-  "type": "https://api.atelier.andeva.pe/errors/active-installation-conflict",
-  "title": "Conflicto de Instalacion Activa",
+  "type": "https://api.atelier.andeva.com/errors/active-installation-conflict",
+  "title": "Active Installation Conflict",
   "status": 409,
-  "detail": "El escaner 8a123456-789a-bcde-f012-3456789abc01 ya se encuentra vinculado activamente a otro vehiculo.",
+  "detail": "El vehículo ya posee una sesión de escáner telemático activa en este momento",
   "instance": "/api/v1/iot/installations/install",
-  "code": "DEVICE_ALREADY_INSTALLED",
-  "timestamp": "2026-10-01T15:42:30Z"
+  "code": "ERR_ACTIVE_INSTALLATION_CONFLICT",
+  "timestamp": "2026-10-04T02:20:00Z"
 }
 ```
 
 ---
 
-#### POST /api/v1/iot/installations/{id}/uninstall
+### 4.2. [POST] /api/v1/iot/installations/{id}/uninstall
 
-##### Identidad Técnica
-* **Controlador:** `DeviceInstallationsController` (`com.andeva.atelier.platform.iot.interfaces.rest.controllers`)
+#### Identidad Técnica
+* **Controlador:** `com.andeva.atelier.platform.iot.interfaces.rest.controllers.DeviceInstallationsController`
 * **Método Java:** `public ResponseEntity<DeviceInstallationResponse> uninstallDevice(@PathVariable UUID id, @Valid @RequestBody UninstallDeviceRequest request, @AuthenticationPrincipal Jwt jwt)`
+* **Ruta Base:** `/api/v1/iot/installations`
+* **Ruta Completa:** `/api/v1/iot/installations/{id}/uninstall`
+* **Propósito:** Registra la desconexión física de un escáner telemático y asienta el kilometraje final del vehículo.
 
-##### Descripción Funcional
-Registra la desvinculación física de un escáner OBD-II de un vehículo, asentando el kilometraje final y liberando el dispositivo en el inventario para futuras operaciones.
+#### Descripción Funcional
+Finaliza una sesión de monitoreo telemático activa. Valida que el kilometraje final no sea inferior al kilometraje registrado al momento de la instalación inicial. Marca la instalación como inactiva (`isActive = false`), asienta la marca temporal de desconexión (`uninstalledAt`), restituye el estado del escáner a disponible (`AVAILABLE`) y emite el evento de dominio `DeviceUninstalledEvent`.
 
-##### Seguridad y Autorización
-* **Rol Mínimo:** `ROLE_WORKSHOP_ADMIN`, `ROLE_SERVICE_ADVISOR`, `ROLE_CHIEF_MECHANIC` o `ROLE_MECHANIC`.
+#### Seguridad y Autorización
+* **Nivel de Acceso:** Protegido / Taller Autenticado
+* **Rol Mínimo Requerido:** Mecánico (`ROLE_MECHANIC`), Jefe de Taller (`ROLE_HEAD_MECHANIC`) o Dueño de Taller (`ROLE_WORKSHOP_OWNER`)
 * **Permiso Atómico:** `@PreAuthorize("hasAuthority('iot:installations:manage')")`
-* **Contexto Multi-Inquilino:** Verifica la pertenencia de la instalación al taller autenticado.
+* **Aislamiento Multi-Inquilino:** La sesión de instalación debe pertenecer al `tenant_id` autenticado.
 
-##### Parámetros de Petición
-* **Headers:**
-  * `Authorization: Bearer <JWT>` (Obligatorio)
-  * `Content-Type: application/json` (Obligatorio)
-* **Path Variables:**
-  | Variable | Tipo | Descripción |
-  | :--- | :--- | :--- |
-  | `id` | UUID | Identificador unívoco del registro de instalación a cerrar. |
-* **Query Parameters:** Ninguno.
+#### Parámetros de Invocación
+* **Cabeceras HTTP (Headers):**
+  * `Authorization: Bearer <JWT>`
+  * `Content-Type: application/json`
+* **Parámetros de Ruta (Path Parameters):**
+  * `id` (`UUID`): Identificador universal de la instalación activa a concluir.
+* **Parámetros de Consulta (Query Parameters):** No aplica.
 
-##### Request DTO
-* **Record Java:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.requests.UninstallDeviceRequest`
+#### Recurso de Petición (Request Body)
+* **Registro Java DTO:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.requests.UninstallDeviceRequest`
+* **Definición de Campos:**
 
-Tabla de Campos:
-| Campo | Tipo Java | Validaciones Jakarta | Descripción |
-| :--- | :--- | :--- | :--- |
-| `finalOdometerKm` | int | `@Min(0)` | Kilometraje final constatado en el odómetro al momento del retiro. |
-| `uninstalledAt` | Instant | Opcional | Marca temporal de retiro físico (toma la hora del servidor si no se envía). |
+| Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripción |
+| :--- | :--- | :---: | :--- | :--- |
+| `finalOdometerKm` | `int` | Sí | `@Min(0)` | Lectura del cuentakilómetros al momento de la desconexión |
+| `uninstalledAt` | `Instant` | No | Sin restricción adicional | Marca temporal del retiro físico (asume hora actual si es nulo) |
 
-Ejemplo JSON de Solicitud:
+**Ejemplo de Carga Útil JSON (Request):**
 ```json
 {
-  "finalOdometerKm": 68485,
-  "uninstalledAt": "2026-10-01T17:30:00Z"
+  "finalOdometerKm": 48550,
+  "uninstalledAt": "2026-10-04T02:25:00Z"
 }
 ```
 
-##### Response DTO
-* **Estado HTTP:** `200 OK`
-* **Record Java:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.responses.DeviceInstallationResponse`
+#### Recurso de Respuesta (Response Body)
+* **Estado HTTP Exitoso:** `200 OK`
+* **Registro Java DTO:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.responses.DeviceInstallationResponse`
+* **Definición de Campos Proyectados:** Idéntica a la definición de `DeviceInstallationResponse`.
 
-Ejemplo JSON de Respuesta:
+**Ejemplo de Carga Útil JSON (Response):**
 ```json
 {
-  "id": "1b345678-9abc-def0-1234-56789abcdef0",
-  "deviceId": "8a123456-789a-bcde-f012-3456789abc01",
-  "vehicleId": "4c56789a-bcde-f012-3456-789abcdef012",
-  "tenantId": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
-  "installedAt": "2026-10-01T15:42:00Z",
-  "uninstalledAt": "2026-10-01T17:30:00Z",
-  "initialOdometerKm": 68450,
-  "finalOdometerKm": 68485,
+  "id": "018f6c40-7e12-7000-8000-000000000701",
+  "deviceId": "018f6c40-7e12-7000-8000-000000000501",
+  "vehicleId": "018f6c40-7e12-7000-8000-000000000601",
+  "tenantId": "018f6c40-7e12-7000-8000-000000000001",
+  "installedAt": "2026-10-04T02:20:00Z",
+  "uninstalledAt": "2026-10-04T02:25:00Z",
+  "initialOdometerKm": 48520,
+  "finalOdometerKm": 48550,
   "isActive": false
 }
 ```
 
-##### Errores y RFC 7807
-| Código HTTP | Error Type | Excepción de Dominio | Causa Común |
-| :--- | :--- | :--- | :--- |
-| `400 Bad Request` | `https://api.atelier.andeva.pe/errors/invalid-odometer` | `IllegalArgumentException` | El kilometraje final es menor al kilometraje inicial registrado en la instalación. |
-| `401 Unauthorized` | `https://api.atelier.andeva.pe/errors/unauthorized` | `AuthenticationException` | Token de sesión no provisto o inválido. |
-| `404 Not Found` | `https://api.atelier.andeva.pe/errors/installation-not-found` | `InstallationNotFoundException` | La instalación especificada no existe en la base de datos. |
-| `409 Conflict` | `https://api.atelier.andeva.pe/errors/installation-already-closed` | `IllegalStateException` | La instalación ya se encuentra cerrada y dada de baja previamente. |
+#### Errores y Excepciones de Dominio (RFC 7807)
+
+| Código HTTP | Excepción Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `400 Bad Request` | `IoTDomainException` | El odómetro final es inferior al kilometraje registrado al instalar |
+| `401 Unauthorized` | `AuthenticationException` | Token JWT ausente o inválido |
+| `403 Forbidden` | `AccessDeniedException` | Permisos insuficientes para desvincular el escáner |
+| `404 Not Found` | `InstallationNotFoundException` | La sesión de instalación especificada no existe |
+
+**Ejemplo de Carga Útil de Error (RFC 7807 ProblemDetail):**
+```json
+{
+  "type": "https://api.atelier.andeva.com/errors/installation-not-found",
+  "title": "Installation Not Found",
+  "status": 404,
+  "detail": "La sesión de instalación con identificador 018f6c40-7e12-7000-8000-000000000799 no existe en el taller",
+  "instance": "/api/v1/iot/installations/018f6c40-7e12-7000-8000-000000000799/uninstall",
+  "code": "ERR_INSTALLATION_NOT_FOUND",
+  "timestamp": "2026-10-04T02:25:00Z"
+}
+```
 
 ---
 
-#### GET /api/v1/iot/installations/vehicle/{vehicleId}/active
+### 4.3. [GET] /api/v1/iot/installations/vehicle/{vehicleId}/active
 
-##### Identidad Técnica
-* **Controlador:** `DeviceInstallationsController` (`com.andeva.atelier.platform.iot.interfaces.rest.controllers`)
+#### Identidad Técnica
+* **Controlador:** `com.andeva.atelier.platform.iot.interfaces.rest.controllers.DeviceInstallationsController`
 * **Método Java:** `public ResponseEntity<DeviceInstallationResponse> getActiveInstallationByVehicle(@PathVariable UUID vehicleId, @AuthenticationPrincipal Jwt jwt)`
+* **Ruta Base:** `/api/v1/iot/installations`
+* **Ruta Completa:** `/api/v1/iot/installations/vehicle/{vehicleId}/active`
+* **Propósito:** Consulta los datos del escáner telemático actualmente conectado y en transmisión sobre un vehículo específico.
 
-##### Descripción Funcional
-Consulta la vinculación telemática actualmente activa de un vehículo, retornando los detalles del escáner enlazado, kilometraje de inicio y timestamp de conexión.
+#### Descripción Funcional
+Permite a la aplicación móvil del mecánico y al panel web de taller verificar si un vehículo en fosa o recepción dispone de un escáner conectado. Consulta la tabla de instalaciones filtrando por `vehicleId` y la condición `uninstalledAt IS NULL` y `isActive = true`. Si existe sesión activa, retorna la información completa de la instalación junto con el kilometraje de inicio.
 
-##### Seguridad y Autorización
-* **Rol Mínimo:** `ROLE_WORKSHOP_ADMIN`, `ROLE_SERVICE_ADVISOR`, `ROLE_CHIEF_MECHANIC`, `ROLE_MECHANIC` o `ROLE_VEHICLE_OWNER`.
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('iot:installations:manage') or hasAuthority('iot:devices:read')")`
-* **Contexto Multi-Inquilino:** Verifica que el vehículo pertenezca al `tenant_id` autenticado.
+#### Seguridad y Autorización
+* **Nivel de Acceso:** Protegido / Taller Autenticado
+* **Rol Mínimo Requerido:** Mecánico (`ROLE_MECHANIC`), Asesor de Servicio (`ROLE_SERVICE_ADVISOR`) o Jefe de Taller (`ROLE_HEAD_MECHANIC`)
+* **Permiso Atómico:** `@PreAuthorize("hasAuthority('iot:installations:read')")`
+* **Aislamiento Multi-Inquilino:** Comprobación estricta de pertenencia del vehículo al `tenant_id` autenticado.
 
-##### Parámetros de Petición
-* **Headers:**
-  * `Authorization: Bearer <JWT>` (Obligatorio)
-* **Path Variables:**
-  | Variable | Tipo | Descripción |
-  | :--- | :--- | :--- |
-  | `vehicleId` | UUID | Identificador universal del vehículo a consultar. |
-* **Query Parameters:** Ninguno.
+#### Parámetros de Invocación
+* **Cabeceras HTTP (Headers):**
+  * `Authorization: Bearer <JWT>`
+  * `Accept: application/json`
+* **Parámetros de Ruta (Path Parameters):**
+  * `vehicleId` (`UUID`): Identificador universal del vehículo consultado.
+* **Parámetros de Consulta (Query Parameters):** No aplica.
 
-##### Request DTO
-No aplica para peticiones HTTP GET.
+#### Recurso de Petición (Request Body)
+No aplica (Solicitud de tipo HTTP GET sin cuerpo).
 
-##### Response DTO
-* **Estado HTTP:** `200 OK`
-* **Record Java:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.responses.DeviceInstallationResponse`
+#### Recurso de Respuesta (Response Body)
+* **Estado HTTP Exitoso:** `200 OK`
+* **Registro Java DTO:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.responses.DeviceInstallationResponse`
+* **Definición de Campos Proyectados:** Idéntica a la definición de `DeviceInstallationResponse`.
 
-Ejemplo JSON de Respuesta:
+**Ejemplo de Carga Útil JSON (Response):**
 ```json
 {
-  "id": "1b345678-9abc-def0-1234-56789abcdef0",
-  "deviceId": "8a123456-789a-bcde-f012-3456789abc01",
-  "vehicleId": "4c56789a-bcde-f012-3456-789abcdef012",
-  "tenantId": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
-  "installedAt": "2026-10-01T15:42:00Z",
+  "id": "018f6c40-7e12-7000-8000-000000000701",
+  "deviceId": "018f6c40-7e12-7000-8000-000000000501",
+  "vehicleId": "018f6c40-7e12-7000-8000-000000000601",
+  "tenantId": "018f6c40-7e12-7000-8000-000000000001",
+  "installedAt": "2026-10-04T02:20:00Z",
   "uninstalledAt": null,
-  "initialOdometerKm": 68450,
+  "initialOdometerKm": 48520,
   "finalOdometerKm": null,
   "isActive": true
 }
 ```
 
-##### Errores y RFC 7807
-| Código HTTP | Error Type | Excepción de Dominio | Causa Común |
-| :--- | :--- | :--- | :--- |
-| `401 Unauthorized` | `https://api.atelier.andeva.pe/errors/unauthorized` | `AuthenticationException` | Token de sesión ausente o vencido. |
-| `404 Not Found` | `https://api.atelier.andeva.pe/errors/active-installation-not-found` | `InstallationNotFoundException` | El vehículo no tiene ningún escáner vinculado activamente. |
+#### Errores y Excepciones de Dominio (RFC 7807)
 
----
+| Código HTTP | Excepción Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `400 Bad Request` | `MethodArgumentTypeMismatchException` | El identificador del vehículo en la ruta no es un UUID válido |
+| `401 Unauthorized` | `AuthenticationException` | Token JWT ausente o inválido |
+| `403 Forbidden` | `AccessDeniedException` | Permisos insuficientes para consultar instalaciones del vehículo |
+| `404 Not Found` | `InstallationNotFoundException` | El vehículo no cuenta con un escáner telemático activo conectado |
 
-#### GET /api/v1/iot/installations/vehicle/{vehicleId}/history
-
-##### Identidad Técnica
-* **Controlador:** `DeviceInstallationsController` (`com.andeva.atelier.platform.iot.interfaces.rest.controllers`)
-* **Método Java:** `public ResponseEntity<List<DeviceInstallationResponse>> getInstallationHistoryByVehicle(@PathVariable UUID vehicleId, @AuthenticationPrincipal Jwt jwt)`
-
-##### Descripción Funcional
-Consulta la bitácora cronológica histórica de todas las instalaciones y desinstalaciones de escáneres efectuadas sobre un vehículo a lo largo de su ciclo de servicio en el taller.
-
-##### Seguridad y Autorización
-* **Rol Mínimo:** `ROLE_WORKSHOP_ADMIN`, `ROLE_SERVICE_ADVISOR`, `ROLE_CHIEF_MECHANIC` o `ROLE_MECHANIC`.
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('iot:installations:manage') or hasAuthority('iot:devices:read')")`
-* **Contexto Multi-Inquilino:** Filtrado forzado por `tenant_id` y `vehicle_id`.
-
-##### Parámetros de Petición
-* **Headers:**
-  * `Authorization: Bearer <JWT>` (Obligatorio)
-* **Path Variables:**
-  | Variable | Tipo | Descripción |
-  | :--- | :--- | :--- |
-  | `vehicleId` | UUID | Identificador universal del vehículo. |
-* **Query Parameters:** Ninguno.
-
-##### Request DTO
-No aplica para peticiones HTTP GET.
-
-##### Response DTO
-* **Estado HTTP:** `200 OK`
-* **Record Java:** `List<com.andeva.atelier.platform.iot.interfaces.rest.resources.responses.DeviceInstallationResponse>`
-
-Ejemplo JSON de Respuesta:
-```json
-[
-  {
-    "id": "1b345678-9abc-def0-1234-56789abcdef0",
-    "deviceId": "8a123456-789a-bcde-f012-3456789abc01",
-    "vehicleId": "4c56789a-bcde-f012-3456-789abcdef012",
-    "tenantId": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
-    "installedAt": "2026-10-01T15:42:00Z",
-    "uninstalledAt": "2026-10-01T17:30:00Z",
-    "initialOdometerKm": 68450,
-    "finalOdometerKm": 68485,
-    "isActive": false
-  },
-  {
-    "id": "2c456789-0bcd-ef01-2345-6789abcdef01",
-    "deviceId": "8a123456-789a-bcde-f012-3456789abc02",
-    "vehicleId": "4c56789a-bcde-f012-3456-789abcdef012",
-    "tenantId": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
-    "installedAt": "2026-08-15T09:00:00Z",
-    "uninstalledAt": "2026-08-15T12:15:00Z",
-    "initialOdometerKm": 65120,
-    "finalOdometerKm": 65135,
-    "isActive": false
-  }
-]
-```
-
-##### Errores y RFC 7807
-| Código HTTP | Error Type | Excepción de Dominio | Causa Común |
-| :--- | :--- | :--- | :--- |
-| `401 Unauthorized` | `https://api.atelier.andeva.pe/errors/unauthorized` | `AuthenticationException` | Token de sesión ausente o revocado. |
-| `403 Forbidden` | `https://api.atelier.andeva.pe/errors/forbidden` | `AccessDeniedException` | Acceso denegado a vehículos de otra empresa o taller. |
-
----
-
-### 3.3. TelemetryIngestionController
-
-Controlador de alta concurrencia encargado de la ingesta masiva por ráfagas hacia hipertablas TimescaleDB, lectura instantánea del tacómetro en vivo y agregación temporal de parámetros.
-
-#### POST /api/v1/iot/telemetry/batch
-
-##### Identidad Técnica
-* **Controlador:** `TelemetryIngestionController` (`com.andeva.atelier.platform.iot.interfaces.rest.controllers`)
-* **Método Java:** `public ResponseEntity<TelemetryIngestionAckResponse> ingestTelemetryBatch(@Valid @RequestBody TelemetryBatchRequest request, @AuthenticationPrincipal Jwt jwt)`
-
-##### Descripción Funcional
-Ingesta un paquete por lotes de lecturas telemétricas generadas por escáneres OBD-II y retransmitidas por la app móvil en foso (`Gateway BLE`) o módems celulares SIM. Ejecuta persistencia JDBC en bloque sobre la hipertabla `telemetry_logs` de TimescaleDB y dispara de forma asíncrona la evaluación termodinámica del motor analítico de anomalías.
-
-##### Seguridad y Autorización
-* **Rol Mínimo:** `ROLE_MECHANIC` o dispositivo de telemetría autenticado vía credenciales M2M.
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('iot:telemetry:ingest')")`
-* **Contexto Multi-Inquilino:** El `tenant_id` se resuelve a partir del contexto del operador autenticado o de la instalación activa del vehículo en el taller.
-
-##### Parámetros de Petición
-* **Headers:**
-  * `Authorization: Bearer <JWT>` (Obligatorio)
-  * `Content-Type: application/json` (Obligatorio)
-* **Path Variables:** Ninguna.
-* **Query Parameters:** Ninguno.
-
-##### Request DTO
-* **Record Java:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.requests.TelemetryBatchRequest`
-
-Tabla de Campos de `TelemetryBatchRequest`:
-| Campo | Tipo Java | Validaciones Jakarta | Descripción |
-| :--- | :--- | :--- | :--- |
-| `vehicleId` | UUID | `@NotNull` | Identificador del vehículo automotriz emisor de la telemetría. |
-| `readings` | List<TelemetryReadingItemDto> | `@NotEmpty`, `@Valid` | Colección cronológica de lecturas de sensores PIDs capturadas. |
-
-Tabla de Campos de `TelemetryReadingItemDto`:
-| Campo | Tipo Java | Validaciones Jakarta | Descripción |
-| :--- | :--- | :--- | :--- |
-| `timestamp` | Instant | `@NotNull` | Marca temporal exacta de la medición en el computador de abordo. |
-| `latitude` | Double | Opcional | Coordenada geográfica de latitud WGS84 del vehículo. |
-| `longitude` | Double | Opcional | Coordenada geográfica de longitud WGS84 del vehículo. |
-| `speedKmh` | int | `@Min(0)` | Velocidad instantánea en kilómetros por hora. |
-| `engineTempCelsius`| Double | `@NotNull` | Temperatura del líquido refrigerante del motor en grados Celsius. |
-| `engineRpm` | int | `@Min(0)` | Régimen de giro del cigüeñal en revoluciones por minuto. |
-| `fuelPercentage` | Double | Opcional | Nivel de combustible restante (0.0 a 100.0 por ciento). |
-| `batteryVoltage` | Double | Opcional | Tensión eléctrica en bornes de batería automotriz (Voltios). |
-
-Ejemplo JSON de Solicitud:
+**Ejemplo de Carga Útil de Error (RFC 7807 ProblemDetail):**
 ```json
 {
-  "vehicleId": "4c56789a-bcde-f012-3456-789abcdef012",
+  "type": "https://api.atelier.andeva.com/errors/installation-not-found",
+  "title": "No Active Installation Found",
+  "status": 404,
+  "detail": "El vehículo no cuenta con un dispositivo OBD-II activo instalado en este momento",
+  "instance": "/api/v1/iot/installations/vehicle/018f6c40-7e12-7000-8000-000000000601/active",
+  "code": "ERR_INSTALLATION_NOT_FOUND",
+  "timestamp": "2026-10-04T02:30:00Z"
+}
+```
+
+---
+
+## 5. Endpoints de TelemetryIngestionController
+
+El controlador `TelemetryIngestionController` constituye la compuerta de ingesta telemática de alto rendimiento de Atelier Platform, procesando ráfagas masivas de lecturas hacia TimescaleDB y exponiendo tacómetros en vivo y series temporales agregadas.
+
+### 5.1. [POST] /api/v1/iot/telemetry/batch
+
+#### Identidad Técnica
+* **Controlador:** `com.andeva.atelier.platform.iot.interfaces.rest.controllers.TelemetryIngestionController`
+* **Método Java:** `public ResponseEntity<TelemetryIngestionAckResponse> ingestTelemetryBatch(@Valid @RequestBody TelemetryBatchRequest request, @AuthenticationPrincipal Jwt jwt)`
+* **Ruta Base:** `/api/v1/iot/telemetry`
+* **Ruta Completa:** `/api/v1/iot/telemetry/batch`
+* **Propósito:** Ingesta un lote de lecturas telemétricas cinemáticas y térmicas de un vehículo directamente hacia las hipertablas de TimescaleDB.
+
+#### Descripción Funcional
+Recibe ráfagas de telemetría emitidas periódicamente por la aplicación móvil (puente BLE) o módems celulares OBD-II. Comprueba que el vehículo mantenga una sesión de instalación activa en el taller. Valida los rangos físicos de las magnitudes (temperatura entre -40 y 150 grados Celsius, RPM mayores o iguales a cero, velocidad plausible). Ejecuta una persistencia masiva en bloque mediante inserción JDBC optimizada sobre la hipertabla `telemetry_logs` de TimescaleDB, garantizando tiempos de procesamiento inferiores a 25 milisegundos para lotes de hasta 100 lecturas. Dispara de forma asíncrona el motor de detección de anomalías térmicas y cinemáticas.
+
+#### Seguridad y Autorización
+* **Nivel de Acceso:** Protegido / Ingesta Telemática
+* **Rol Mínimo Requerido:** Mecánico (`ROLE_MECHANIC`), Dispositivo Telemático o Aplicación Móvil de Taller
+* **Permiso Atómico:** `@PreAuthorize("hasAuthority('iot:telemetry:ingest')")`
+* **Aislamiento Multi-Inquilino:** La tenencia se resuelve a partir del vehículo asociado y la instalación activa del taller.
+
+#### Parámetros de Invocación
+* **Cabeceras HTTP (Headers):**
+  * `Authorization: Bearer <JWT>`
+  * `Content-Type: application/json`
+* **Parámetros de Ruta (Path Parameters):** No aplica.
+* **Parámetros de Consulta (Query Parameters):** No aplica.
+
+#### Recurso de Petición (Request Body)
+* **Registro Java DTO:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.requests.TelemetryBatchRequest`
+* **Definición de Campos:**
+
+| Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripción |
+| :--- | :--- | :---: | :--- | :--- |
+| `vehicleId` | `UUID` | Sí | `@NotNull` | Identificador del vehículo emisor de los datos |
+| `readings` | `List<TelemetryReadingItemDto>` | Sí | `@NotEmpty, @Valid` | Lista ordenada cronológicamente de lecturas tomadas |
+| `readings[].timestamp` | `Instant` | Sí | `@NotNull` | Marca temporal de la lectura en formato ISO 8601 UTC |
+| `readings[].latitude` | `Double` | No | Sin restricción adicional | Coordenada GPS latitud |
+| `readings[].longitude` | `Double` | No | Sin restricción adicional | Coordenada GPS longitud |
+| `readings[].speedKmh` | `int` | Sí | `@Min(0)` | Velocidad instantánea en kilómetros por hora |
+| `readings[].engineTempCelsius`| `Double` | Sí | `@NotNull` | Temperatura del refrigerante de motor en grados Celsius |
+| `readings[].engineRpm` | `int` | Sí | `@Min(0)` | Revoluciones por minuto del motor |
+| `readings[].fuelPercentage` | `Double` | No | Sin restricción adicional | Nivel de combustible relativo entre 0 y 100 por ciento |
+| `readings[].batteryVoltage` | `Double` | No | Sin restricción adicional | Tensión en bornes de batería en voltios |
+
+**Ejemplo de Carga Útil JSON (Request):**
+```json
+{
+  "vehicleId": "018f6c40-7e12-7000-8000-000000000601",
   "readings": [
     {
-      "timestamp": "2026-10-01T15:45:00Z",
+      "timestamp": "2026-10-04T02:30:00Z",
       "latitude": -12.0864,
       "longitude": -77.0345,
       "speedKmh": 45,
       "engineTempCelsius": 92.5,
-      "engineRpm": 2150,
+      "engineRpm": 2100,
       "fuelPercentage": 65.0,
-      "batteryVoltage": 13.8
+      "batteryVoltage": 14.1
     },
     {
-      "timestamp": "2026-10-01T15:45:05Z",
+      "timestamp": "2026-10-04T02:30:05Z",
       "latitude": -12.0869,
-      "longitude": -77.0349,
+      "longitude": -77.0350,
       "speedKmh": 52,
-      "engineTempCelsius": 93.0,
-      "engineRpm": 2400,
+      "engineTempCelsius": 94.0,
+      "engineRpm": 2450,
       "fuelPercentage": 64.9,
-      "batteryVoltage": 13.9
+      "batteryVoltage": 14.2
     }
   ]
 }
 ```
 
-##### Response DTO
-* **Estado HTTP:** `202 Accepted`
-* **Record Java:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.responses.TelemetryIngestionAckResponse`
+#### Recurso de Respuesta (Response Body)
+* **Estado HTTP Exitoso:** `202 Accepted`
+* **Registro Java DTO:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.responses.TelemetryIngestionAckResponse`
+* **Definición de Campos Proyectados:**
 
-Tabla de Campos:
-| Campo | Tipo Java | Descripción |
+| Campo | Tipo de Dato | Descripción |
 | :--- | :--- | :--- |
-| `vehicleId` | UUID | Identificador del vehículo cuyas lecturas fueron recibidas. |
-| `ingestedCount` | int | Cantidad total de registros validados e insertados en TimescaleDB. |
-| `anomalyDetected` | boolean | Indicador booleano si la evaluación preliminar detectó anomalías térmicas o eléctricas. |
-| `alertMessage` | String | Mensaje diagnóstico preliminar o nulo si los parámetros son nominales. |
+| `vehicleId` | `UUID` | Identificador del vehículo procesado |
+| `ingestedCount` | `int` | Cantidad exacta de lecturas almacenadas con éxito en TimescaleDB |
+| `anomalyDetected` | `boolean` | Bandera que indica si el motor analítico detectó anomalías térmicas |
+| `alertMessage` | `String` | Mensaje descriptivo de la alerta o null si no se encontraron anomalías |
 
-Ejemplo JSON de Respuesta:
+**Ejemplo de Carga Útil JSON (Response):**
 ```json
 {
-  "vehicleId": "4c56789a-bcde-f012-3456-789abcdef012",
+  "vehicleId": "018f6c40-7e12-7000-8000-000000000601",
   "ingestedCount": 2,
   "anomalyDetected": false,
   "alertMessage": null
 }
 ```
 
-##### Errores y RFC 7807
-| Código HTTP | Error Type | Excepción de Dominio | Causa Común |
-| :--- | :--- | :--- | :--- |
-| `400 Bad Request` | `https://api.atelier.andeva.pe/errors/validation-failed` | `MethodArgumentNotValidException` | Lista de lecturas vacía o datos con timestamps futuros irreales. |
-| `401 Unauthorized` | `https://api.atelier.andeva.pe/errors/unauthorized` | `AuthenticationException` | Token de sesión no provisto o inválido. |
-| `403 Forbidden` | `https://api.atelier.andeva.pe/errors/quota-exceeded` | `QuotaExceededException` | El plan SaaS no incluye el módulo de telemetría IoT activa (Plan Go). |
-| `404 Not Found` | `https://api.atelier.andeva.pe/errors/vehicle-not-found` | `VehicleNotFoundException` | El vehículo para el cual se envía telemetría no existe. |
-| `500 Internal Server Error` | `https://api.atelier.andeva.pe/errors/timescale-error` | `TimescaleIngestionException` | Falla en el buffer pool JDBC de inserción a TimescaleDB. |
+#### Errores y Excepciones de Dominio (RFC 7807)
+
+| Código HTTP | Excepción Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `400 Bad Request` | `MethodArgumentNotValidException` | Lista de lecturas vacía o valores numéricos fuera de rango físico |
+| `401 Unauthorized` | `AuthenticationException` | Token JWT ausente o inválido |
+| `403 Forbidden` | `AccessDeniedException` | Permisos insuficientes para ingesta telemática |
+| `404 Not Found` | `InstallationNotFoundException` | El vehículo no mantiene una sesión de escáner activa en el taller |
+| `500 Internal Server Error` | `TimescaleIngestionException` | Falla de conexión o inserción en la hipertabla de TimescaleDB |
+
+**Ejemplo de Carga Útil de Error (RFC 7807 ProblemDetail):**
+```json
+{
+  "type": "https://api.atelier.andeva.com/errors/installation-not-found",
+  "title": "No Active Installation For Ingestion",
+  "status": 404,
+  "detail": "No se puede ingerir telemetría porque el vehículo no tiene una sesión de escáner activa",
+  "instance": "/api/v1/iot/telemetry/batch",
+  "code": "ERR_INSTALLATION_NOT_FOUND",
+  "timestamp": "2026-10-04T02:30:00Z"
+}
+```
 
 ---
 
-#### GET /api/v1/iot/telemetry/vehicle/{vehicleId}/latest
+### 5.2. [GET] /api/v1/iot/telemetry/vehicle/{vehicleId}/latest
 
-##### Identidad Técnica
-* **Controlador:** `TelemetryIngestionController` (`com.andeva.atelier.platform.iot.interfaces.rest.controllers`)
-* **Método Java:** `public ResponseEntity<VehicleLatestTelemetryResponse> getLatestTelemetryByVehicle(@PathVariable UUID vehicleId, @AuthenticationPrincipal Jwt jwt)`
+#### Identidad Técnica
+* **Controlador:** `com.andeva.atelier.platform.iot.interfaces.rest.controllers.TelemetryIngestionController`
+* **Método Java:** `public ResponseEntity<VehicleLatestTelemetryResponse> getLatestTelemetry(@PathVariable UUID vehicleId, @AuthenticationPrincipal Jwt jwt)`
+* **Ruta Base:** `/api/v1/iot/telemetry`
+* **Ruta Completa:** `/api/v1/iot/telemetry/vehicle/{vehicleId}/latest`
+* **Propósito:** Retorna la lectura telemétrica más reciente registrada para alimentar tacómetros e indicadores en tiempo real.
 
-##### Descripción Funcional
-Consulta la última medición telemétrica válida registrada para el vehículo, permitiendo alimentar tacómetros digitales interactivos, monitores de temperatura del refrigerante y gráficos de estado de batería en tiempo real.
+#### Descripción Funcional
+Provee al panel web de taller o a la vista móvil del mecánico el estado cinemático instantáneo del vehículo. Consulta la última fila persistida en la hipertabla `telemetry_logs` ordenada descendentemente por marca temporal. Retorna velocidad actual, revoluciones por minuto, temperatura de refrigerante, tensión de batería y nivel de combustible.
 
-##### Seguridad y Autorización
-* **Rol Mínimo:** `ROLE_WORKSHOP_ADMIN`, `ROLE_SERVICE_ADVISOR`, `ROLE_CHIEF_MECHANIC`, `ROLE_MECHANIC` o `ROLE_VEHICLE_OWNER`.
+#### Seguridad y Autorización
+* **Nivel de Acceso:** Protegido / Taller Autenticado
+* **Rol Mínimo Requerido:** Mecánico (`ROLE_MECHANIC`), Asesor de Servicio (`ROLE_SERVICE_ADVISOR`) o Jefe de Taller (`ROLE_HEAD_MECHANIC`)
 * **Permiso Atómico:** `@PreAuthorize("hasAuthority('iot:telemetry:read')")`
-* **Contexto Multi-Inquilino:** Verifica que el vehículo pertenezca a la flota del taller o sea conducido por el usuario autenticado.
+* **Aislamiento Multi-Inquilino:** Filtrado por vehículo perteneciente al taller autenticado.
 
-##### Parámetros de Petición
-* **Headers:**
-  * `Authorization: Bearer <JWT>` (Obligatorio)
-* **Path Variables:**
-  | Variable | Tipo | Descripción |
-  | :--- | :--- | :--- |
-  | `vehicleId` | UUID | Identificador universal del vehículo automotriz. |
-* **Query Parameters:** Ninguno.
+#### Parámetros de Invocación
+* **Cabeceras HTTP (Headers):**
+  * `Authorization: Bearer <JWT>`
+  * `Accept: application/json`
+* **Parámetros de Ruta (Path Parameters):**
+  * `vehicleId` (`UUID`): Identificador universal del vehículo consultado.
+* **Parámetros de Consulta (Query Parameters):** No aplica.
 
-##### Request DTO
-No aplica para peticiones HTTP GET.
+#### Recurso de Petición (Request Body)
+No aplica (Solicitud de tipo HTTP GET sin cuerpo).
 
-##### Response DTO
-* **Estado HTTP:** `200 OK`
-* **Record Java:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.responses.VehicleLatestTelemetryResponse`
+#### Recurso de Respuesta (Response Body)
+* **Estado HTTP Exitoso:** `200 OK`
+* **Registro Java DTO:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.responses.VehicleLatestTelemetryResponse`
+* **Definición de Campos Proyectados:**
 
-Tabla de Campos:
-| Campo | Tipo Java | Descripción |
+| Campo | Tipo de Dato | Descripción |
 | :--- | :--- | :--- |
-| `vehicleId` | UUID | Identificador universal del vehículo. |
-| `timestamp` | Instant | Marca temporal de la última lectura asentada en la base de datos. |
-| `latitude` | Double | Última latitud registrada. |
-| `longitude` | Double | Última longitud registrada. |
-| `speedKmh` | int | Velocidad instantánea en km/h. |
-| `engineTempCelsius`| double | Temperatura de refrigerante en grados Celsius. |
-| `engineRpm` | int | Revoluciones por minuto del motor. |
-| `batteryVoltage` | Double | Voltaje en bornes de batería. |
-| `fuelPercentage` | Double | Porcentaje de combustible disponible. |
+| `vehicleId` | `UUID` | Identificador único del vehículo |
+| `timestamp` | `Instant` | Marca temporal de la última lectura en formato ISO 8601 UTC |
+| `latitude` | `Double` | Última coordenada latitud capturada |
+| `longitude` | `Double` | Última coordenada longitud capturada |
+| `speedKmh` | `int` | Velocidad instantánea en km/h |
+| `engineTempCelsius` | `double` | Temperatura del refrigerante del motor en grados Celsius |
+| `engineRpm` | `int` | Régimen de giro en revoluciones por minuto |
+| `batteryVoltage` | `Double` | Tensión actual del alternador o batería en voltios |
+| `fuelPercentage` | `Double` | Porcentaje remanente en depósito de combustible |
 
-Ejemplo JSON de Respuesta:
+**Ejemplo de Carga Útil JSON (Response):**
 ```json
 {
-  "vehicleId": "4c56789a-bcde-f012-3456-789abcdef012",
-  "timestamp": "2026-10-01T15:45:05Z",
+  "vehicleId": "018f6c40-7e12-7000-8000-000000000601",
+  "timestamp": "2026-10-04T02:30:05Z",
   "latitude": -12.0869,
-  "longitude": -77.0349,
+  "longitude": -77.0350,
   "speedKmh": 52,
-  "engineTempCelsius": 93.0,
-  "engineRpm": 2400,
-  "batteryVoltage": 13.9,
+  "engineTempCelsius": 94.0,
+  "engineRpm": 2450,
+  "batteryVoltage": 14.2,
   "fuelPercentage": 64.9
 }
 ```
 
-##### Errores y RFC 7807
-| Código HTTP | Error Type | Excepción de Dominio | Causa Común |
-| :--- | :--- | :--- | :--- |
-| `401 Unauthorized` | `https://api.atelier.andeva.pe/errors/unauthorized` | `AuthenticationException` | Token de sesión ausente o vencido. |
-| `404 Not Found` | `https://api.atelier.andeva.pe/errors/telemetry-not-found` | `TelemetryNotFoundException` | El vehículo aún no cuenta con ningún registro telemétrico en la hipertabla. |
+#### Errores y Excepciones de Dominio (RFC 7807)
+
+| Código HTTP | Excepción Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `400 Bad Request` | `MethodArgumentTypeMismatchException` | Identificador de vehículo con formato no válido |
+| `401 Unauthorized` | `AuthenticationException` | Token JWT ausente o expirado |
+| `403 Forbidden` | `AccessDeniedException` | Permisos insuficientes para consultar telemetría |
+| `404 Not Found` | `IoTDomainException` | El vehículo no registra lecturas telemétricas previas |
+
+**Ejemplo de Carga Útil de Error (RFC 7807 ProblemDetail):**
+```json
+{
+  "type": "https://api.atelier.andeva.com/errors/telemetry-not-found",
+  "title": "Telemetry Log Not Found",
+  "status": 404,
+  "detail": "El vehículo no registra ninguna lectura telemétrica en la base de datos",
+  "instance": "/api/v1/iot/telemetry/vehicle/018f6c40-7e12-7000-8000-000000000601/latest",
+  "code": "ERR_TELEMETRY_NOT_FOUND",
+  "timestamp": "2026-10-04T02:35:00Z"
+}
+```
 
 ---
 
-#### GET /api/v1/iot/telemetry/vehicle/{vehicleId}/range
+### 5.3. [GET] /api/v1/iot/telemetry/vehicle/{vehicleId}/history
 
-##### Identidad Técnica
-* **Controlador:** `TelemetryIngestionController` (`com.andeva.atelier.platform.iot.interfaces.rest.controllers`)
-* **Método Java:** `public ResponseEntity<List<TelemetryStatisticalSummaryDto>> getTelemetryRangeByVehicle(@PathVariable UUID vehicleId, @RequestParam Instant startTime, @RequestParam Instant endTime, @RequestParam(defaultValue = "15m") String bucketInterval, @AuthenticationPrincipal Jwt jwt)`
+#### Identidad Técnica
+* **Controlador:** `com.andeva.atelier.platform.iot.interfaces.rest.controllers.TelemetryIngestionController`
+* **Método Java:** `public ResponseEntity<List<TelemetryHistoryBucketResponse>> getTelemetryHistory(@PathVariable UUID vehicleId, @RequestParam(required = false) Instant from, @RequestParam(required = false) Instant to, @RequestParam(defaultValue = "1 hour") String bucket, @AuthenticationPrincipal Jwt jwt)`
+* **Ruta Base:** `/api/v1/iot/telemetry`
+* **Ruta Completa:** `/api/v1/iot/telemetry/vehicle/{vehicleId}/history`
+* **Propósito:** Retorna agregaciones históricas de magnitudes telemétricas calculadas mediante la función nativa time_bucket de TimescaleDB.
 
-##### Descripción Funcional
-Ejecuta una consulta analítica de serie temporal sobre la hipertabla de TimescaleDB mediante la función `time_bucket`, retornando estadísticas agregadas de promedios, máximos y mínimos de RPM, temperatura del motor, velocidad y voltaje dentro del rango cronológico solicitado.
+#### Descripción Funcional
+Permite a los asesores de servicio y jefes de taller auditar el comportamiento cinemático y térmico del vehículo en un periodo determinado (por defecto, los últimos 7 días). El repositorio ejecuta una sentencia SQL optimizada con `time_bucket(?, timestamp)` agrupando métricas por hora o por día, calculando promedios ponderados de velocidad, RPM, temperatura y conteo de muestras. Esta información alimenta los gráficos analíticos del panel web sin saturar el ancho de banda.
 
-##### Seguridad y Autorización
-* **Rol Mínimo:** `ROLE_WORKSHOP_ADMIN`, `ROLE_SERVICE_ADVISOR`, `ROLE_CHIEF_MECHANIC` o `ROLE_MECHANIC`.
+#### Seguridad y Autorización
+* **Nivel de Acceso:** Protegido / Taller Autenticado
+* **Rol Mínimo Requerido:** Asesor de Servicio (`ROLE_SERVICE_ADVISOR`), Jefe de Taller (`ROLE_HEAD_MECHANIC`) o Mecánico (`ROLE_MECHANIC`)
 * **Permiso Atómico:** `@PreAuthorize("hasAuthority('iot:telemetry:read')")`
-* **Contexto Multi-Inquilino:** Aislamiento forzado por `tenant_id` y `vehicle_id`.
+* **Aislamiento Multi-Inquilino:** Filtrado estricto por vehículo perteneciente al taller autenticado.
 
-##### Parámetros de Petición
-* **Headers:**
-  * `Authorization: Bearer <JWT>` (Obligatorio)
-* **Path Variables:**
-  | Variable | Tipo | Descripción |
-  | :--- | :--- | :--- |
-  | `vehicleId` | UUID | Identificador universal del vehículo. |
-* **Query Parameters:**
-  | Parámetro | Tipo | Requerido | Descripción |
-  | :--- | :--- | :--- | :--- |
-  | `startTime` | Instant | Sí | Fecha y hora de inicio del intervalo de análisis ISO 8601. |
-  | `endTime` | Instant | Sí | Fecha y hora de fin del intervalo de análisis ISO 8601. |
-  | `bucketInterval`| String | No | Ventana de agregación temporal TimescaleDB (ej. `5m`, `15m`, `1h`, default `15m`). |
+#### Parámetros de Invocación
+* **Cabeceras HTTP (Headers):**
+  * `Authorization: Bearer <JWT>`
+  * `Accept: application/json`
+* **Parámetros de Ruta (Path Parameters):**
+  * `vehicleId` (`UUID`): Identificador universal del vehículo consultado.
+* **Parámetros de Consulta (Query Parameters):**
+  * `from` (`Instant`, Opcional): Fecha y hora inicial del periodo analítico (formato ISO 8601 UTC).
+  * `to` (`Instant`, Opcional): Fecha y hora final del periodo analítico (formato ISO 8601 UTC).
+  * `bucket` (`String`, Opcional, por defecto "1 hour"): Intervalo de agregación para TimescaleDB (ej. "15 minutes", "1 hour", "1 day").
 
-##### Request DTO
-No aplica para peticiones HTTP GET.
+#### Recurso de Petición (Request Body)
+No aplica (Solicitud de tipo HTTP GET sin cuerpo).
 
-##### Response DTO
-* **Estado HTTP:** `200 OK`
-* **Record Java:** `List<com.andeva.atelier.platform.iot.domain.model.dto.TelemetryStatisticalSummary>`
+#### Recurso de Respuesta (Response Body)
+* **Estado HTTP Exitoso:** `200 OK`
+* **Registro Java DTO:** `List<com.andeva.atelier.platform.iot.interfaces.rest.resources.responses.TelemetryHistoryBucketResponse>`
+* **Definición de Campos Proyectados:**
 
-Tabla de Campos:
-| Campo | Tipo Java | Descripción |
+| Campo | Tipo de Dato | Descripción |
 | :--- | :--- | :--- |
-| `bucketStart` | Instant | Marca temporal de inicio de la ventana de agregación. |
-| `bucketEnd` | Instant | Marca temporal de término de la ventana de agregación. |
-| `avgRpm` | double | Promedio aritmético de revoluciones por minuto. |
-| `maxRpm` | int | Pico máximo de revoluciones alcanzado en el intervalo. |
-| `avgTempCelsius` | double | Temperatura promedio del refrigerante en grados Celsius. |
-| `maxTempCelsius` | double | Pico térmico máximo registrado en el motor. |
-| `avgSpeedKmh` | double | Velocidad media del vehículo en km/h. |
-| `maxSpeedKmh` | int | Velocidad máxima alcanzada. |
-| `minBatteryVoltage`| double | Tensión mínima de batería registrada en la ventana. |
-| `totalReadingsCount`| long | Cantidad de muestras individuales agregadas en el cubo. |
+| `bucketTime` | `Instant` | Inicio del intervalo temporal agrupado en formato ISO 8601 UTC |
+| `vehicleId` | `UUID` | Identificador del vehículo consultado |
+| `avgSpeedKmh` | `int` | Promedio de velocidad en el intervalo |
+| `avgEngineTempCelsius` | `double` | Promedio de temperatura de refrigerante |
+| `avgEngineRpm` | `int` | Promedio de revoluciones por minuto |
+| `avgFuelPercentage` | `Double` | Promedio del nivel de combustible |
+| `avgBatteryVoltage` | `Double` | Promedio de tensión eléctrica en bornes |
+| `sampleCount` | `int` | Conteo de lecturas físicas consolidadas en este intervalo |
 
-Ejemplo JSON de Respuesta:
+**Ejemplo de Carga Útil JSON (Response):**
 ```json
 [
   {
-    "bucketStart": "2026-10-01T15:00:00Z",
-    "bucketEnd": "2026-10-01T15:15:00Z",
-    "avgRpm": 2150.4,
-    "maxRpm": 3400,
-    "avgTempCelsius": 91.2,
-    "maxTempCelsius": 96.5,
-    "avgSpeedKmh": 38.6,
-    "maxSpeedKmh": 65,
-    "minBatteryVoltage": 13.6,
-    "totalReadingsCount": 180
+    "bucketTime": "2026-10-04T01:00:00Z",
+    "vehicleId": "018f6c40-7e12-7000-8000-000000000601",
+    "avgSpeedKmh": 38,
+    "avgEngineTempCelsius": 89.2,
+    "avgEngineRpm": 1850,
+    "avgFuelPercentage": 67.2,
+    "avgBatteryVoltage": 14.1,
+    "sampleCount": 720
   },
   {
-    "bucketStart": "2026-10-01T15:15:00Z",
-    "bucketEnd": "2026-10-01T15:30:00Z",
-    "avgRpm": 2420.1,
-    "maxRpm": 4100,
-    "avgTempCelsius": 94.8,
-    "maxTempCelsius": 102.3,
-    "avgSpeedKmh": 54.2,
-    "maxSpeedKmh": 88,
-    "minBatteryVoltage": 13.7,
-    "totalReadingsCount": 180
+    "bucketTime": "2026-10-04T02:00:00Z",
+    "vehicleId": "018f6c40-7e12-7000-8000-000000000601",
+    "avgSpeedKmh": 48,
+    "avgEngineTempCelsius": 93.1,
+    "avgEngineRpm": 2240,
+    "avgFuelPercentage": 65.5,
+    "avgBatteryVoltage": 14.2,
+    "sampleCount": 720
   }
 ]
 ```
 
-##### Errores y RFC 7807
-| Código HTTP | Error Type | Excepción de Dominio | Causa Común |
-| :--- | :--- | :--- | :--- |
-| `400 Bad Request` | `https://api.atelier.andeva.pe/errors/invalid-time-range` | `IllegalArgumentException` | El parámetro startTime es posterior a endTime o el intervalo de agregación es inválido. |
-| `401 Unauthorized` | `https://api.atelier.andeva.pe/errors/unauthorized` | `AuthenticationException` | Token de sesión no provisto o inválido. |
+#### Errores y Excepciones de Dominio (RFC 7807)
 
----
+| Código HTTP | Excepción Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `400 Bad Request` | `IoTDomainException` | Intervalo de agregación bucket no reconocido o rango de fechas invertido |
+| `401 Unauthorized` | `AuthenticationException` | Token JWT ausente o expirado |
+| `403 Forbidden` | `AccessDeniedException` | Permisos insuficientes para auditar telemetría histórica |
 
-### 3.4. VehicleFaultsController
-
-Controlador encargado de la captura, consulta y subsanación pericial de códigos de diagnóstico de falla (DTC).
-
-#### POST /api/v1/iot/faults
-
-##### Identidad Técnica
-* **Controlador:** `VehicleFaultsController` (`com.andeva.atelier.platform.iot.interfaces.rest.controllers`)
-* **Método Java:** `public ResponseEntity<VehicleFaultResponse> registerVehicleFault(@Valid @RequestBody RegisterVehicleFaultRequest request, @AuthenticationPrincipal Jwt jwt)`
-
-##### Descripción Funcional
-Registra un código de diagnóstico de falla vehicular (DTC) reportado por el escáner o ingresado por el mecánico en fosa, validando el formato estandarizado SAE J1979/ISO 15031 y asignando la severidad clínica del defecto en el historial del vehículo.
-
-##### Seguridad y Autorización
-* **Rol Mínimo:** `ROLE_MECHANIC` o `ROLE_CHIEF_MECHANIC`.
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('iot:faults:read') or hasAuthority('iot:devices:register')")`
-* **Contexto Multi-Inquilino:** Verifica que el vehículo pertenezca al taller del operador autenticado.
-
-##### Parámetros de Petición
-* **Headers:**
-  * `Authorization: Bearer <JWT>` (Obligatorio)
-  * `Content-Type: application/json` (Obligatorio)
-* **Path Variables:** Ninguna.
-* **Query Parameters:** Ninguno.
-
-##### Request DTO
-* **Record Java:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.requests.RegisterVehicleFaultRequest`
-
-Tabla de Campos:
-| Campo | Tipo Java | Validaciones Jakarta | Descripción |
-| :--- | :--- | :--- | :--- |
-| `vehicleId` | UUID | `@NotNull` | Identificador del vehículo diagnosticado. |
-| `dtcCode` | String | `@NotBlank`, patrón `^[PBUC][0-3][0-9A-F]{3}$` | Código estandarizado de falla (ej. P0300, P0420, B0001). |
-| `severity` | String | `@NotBlank`, patrón `LOW\|MEDIUM\|CRITICAL` | Nivel de criticidad clínica de la avería. |
-| `description` | String | Opcional | Descripción técnica del síntoma o subsistema afectado. |
-
-Ejemplo JSON de Solicitud:
+**Ejemplo de Carga Útil de Error (RFC 7807 ProblemDetail):**
 ```json
 {
-  "vehicleId": "4c56789a-bcde-f012-3456-789abcdef012",
-  "dtcCode": "P0300",
-  "severity": "CRITICAL",
-  "description": "Fallo aleatorio o multiple de encendido en los cilindros del motor detectado por sensor de detonacion."
+  "type": "https://api.atelier.andeva.com/errors/invalid-bucket-interval",
+  "title": "Invalid Aggregation Interval",
+  "status": 400,
+  "detail": "El intervalo temporal especificado en el parámetro bucket no es válido para TimescaleDB",
+  "instance": "/api/v1/iot/telemetry/vehicle/018f6c40-7e12-7000-8000-000000000601/history",
+  "code": "ERR_INVALID_BUCKET_INTERVAL",
+  "timestamp": "2026-10-04T02:40:00Z"
 }
 ```
 
-##### Response DTO
-* **Estado HTTP:** `201 Created`
-* **Headers:** `Location: /api/v1/iot/faults/{id}`
-* **Record Java:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.responses.VehicleFaultResponse`
+---
 
-Tabla de Campos:
-| Campo | Tipo Java | Descripción |
-| :--- | :--- | :--- |
-| `id` | UUID | Identificador unívoco del registro de falla en la base de datos. |
-| `vehicleId` | UUID | Identificador del vehículo afectado. |
-| `dtcCode` | String | Código estandarizado DTC SAE. |
-| `severity` | String | Criticidad de la falla (`LOW`, `MEDIUM`, `CRITICAL`). |
-| `description` | String | Descripción clínica o diagnóstica de la falla. |
-| `detectedAt` | Instant | Fecha y hora en la que se asentó la avería. |
-| `isResolved` | boolean | Indicador booleano de subsanación o reparación. |
-| `resolvedAt` | Instant | Fecha y hora de resolución (nulo si permanece activa). |
+## 6. Endpoints de VehicleFaultsController
 
-Ejemplo JSON de Respuesta:
+El controlador `VehicleFaultsController` administra el ciclo de vida de las averías electrónicas y códigos de diagnóstico de falla (DTC) decodificados desde el puerto OBD-II del vehículo.
+
+### 6.1. [POST] /api/v1/iot/faults
+
+#### Identidad Técnica
+* **Controlador:** `com.andeva.atelier.platform.iot.interfaces.rest.controllers.VehicleFaultsController`
+* **Método Java:** `public ResponseEntity<VehicleFaultResponse> registerVehicleFault(@Valid @RequestBody RegisterVehicleFaultRequest request, @AuthenticationPrincipal Jwt jwt)`
+* **Ruta Base:** `/api/v1/iot/faults`
+* **Ruta Completa:** `/api/v1/iot/faults`
+* **Propósito:** Asienta un código de falla DTC detectado por el escáner durante el escaneo computarizado del vehículo.
+
+#### Descripción Funcional
+Registra un código de diagnóstico de falla detectado en los módulos de control electrónico del vehículo (ECU, TCU, ABS). Valida que el formato del código cumpla la norma internacional SAE J2012 (letra P, B, C o U seguida de 4 dígitos hexadecimales). Asocia la severidad técnica preliminar, persiste la avería en estado no resuelto (`isResolved = false`) y dispara el análisis pericial del motor de diagnóstico predictivo para evaluar riesgos mecánicos colaterales.
+
+#### Seguridad y Autorización
+* **Nivel de Acceso:** Protegido / Taller Autenticado
+* **Rol Mínimo Requerido:** Mecánico (`ROLE_MECHANIC`), Jefe de Taller (`ROLE_HEAD_MECHANIC`) o Dueño de Taller (`ROLE_WORKSHOP_OWNER`)
+* **Permiso Atómico:** `@PreAuthorize("hasAuthority('iot:faults:write')")`
+* **Aislamiento Multi-Inquilino:** El vehículo debe pertenecer al taller autenticado.
+
+#### Parámetros de Invocación
+* **Cabeceras HTTP (Headers):**
+  * `Authorization: Bearer <JWT>`
+  * `Content-Type: application/json`
+* **Parámetros de Ruta (Path Parameters):** No aplica.
+* **Parámetros de Consulta (Query Parameters):** No aplica.
+
+#### Recurso de Petición (Request Body)
+* **Registro Java DTO:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.requests.RegisterVehicleFaultRequest`
+* **Definición de Campos:**
+
+| Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripción |
+| :--- | :--- | :---: | :--- | :--- |
+| `vehicleId` | `UUID` | Sí | `@NotNull` | Identificador único del vehículo con avería |
+| `dtcCode` | `String` | Sí | `@NotBlank, @Pattern(regexp = "^[PBUC][0-9A-Fa-f]{4}$")` | Código DTC estándar SAE J2012 (ej. P0300) |
+| `severity` | `String` | Sí | `@NotBlank, @Pattern(regexp = "^(MINOR\|MODERATE\|CRITICAL)$")` | Nivel de severidad técnica del fallo |
+| `description` | `String` | No | Sin restricción adicional | Glosa técnica o descripción del componente afectado |
+
+**Ejemplo de Carga Útil JSON (Request):**
 ```json
 {
-  "id": "3d456789-0123-4567-89ab-cdef01234567",
-  "vehicleId": "4c56789a-bcde-f012-3456-789abcdef012",
+  "vehicleId": "018f6c40-7e12-7000-8000-000000000601",
   "dtcCode": "P0300",
   "severity": "CRITICAL",
-  "description": "Fallo aleatorio o multiple de encendido en los cilindros del motor detectado por sensor de detonacion.",
-  "detectedAt": "2026-10-01T15:48:00Z",
+  "description": "Fallo de encendido detectado en múltiples cilindros del motor"
+}
+```
+
+#### Recurso de Respuesta (Response Body)
+* **Estado HTTP Exitoso:** `201 Created` con cabecera `Location: /api/v1/iot/faults/{id}`
+* **Registro Java DTO:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.responses.VehicleFaultResponse`
+* **Definición de Campos Proyectados:**
+
+| Campo | Tipo de Dato | Descripción |
+| :--- | :--- | :--- |
+| `id` | `UUID` | Identificador único del registro de avería |
+| `vehicleId` | `UUID` | Identificador del vehículo afectado |
+| `dtcCode` | `String` | Código DTC normalizado |
+| `severity` | `String` | Nivel de severidad técnica clasificado |
+| `description` | `String` | Explicación del fallo mecánico detectado |
+| `detectedAt` | `Instant` | Marca temporal de captura en formato ISO 8601 UTC |
+| `isResolved` | `boolean` | Indica si la falla fue solucionada |
+| `resolvedAt` | `Instant` | Marca temporal de solución (null mientras esté activa) |
+
+**Ejemplo de Carga Útil JSON (Response):**
+```json
+{
+  "id": "018f6c40-7e12-7000-8000-000000000801",
+  "vehicleId": "018f6c40-7e12-7000-8000-000000000601",
+  "dtcCode": "P0300",
+  "severity": "CRITICAL",
+  "description": "Fallo de encendido detectado en múltiples cilindros del motor",
+  "detectedAt": "2026-10-04T02:45:00Z",
   "isResolved": false,
   "resolvedAt": null
 }
 ```
 
-##### Errores y RFC 7807
-| Código HTTP | Error Type | Excepción de Dominio | Causa Común |
-| :--- | :--- | :--- | :--- |
-| `400 Bad Request` | `https://api.atelier.andeva.pe/errors/invalid-dtc` | `InvalidDtcCodeException` | El código DTC no cumple la convención SAE J1979 (ej. debe iniciar con P, B, U o C). |
-| `401 Unauthorized` | `https://api.atelier.andeva.pe/errors/unauthorized` | `AuthenticationException` | Token de sesión no provisto o inválido. |
-| `404 Not Found` | `https://api.atelier.andeva.pe/errors/vehicle-not-found` | `VehicleNotFoundException` | El vehículo especificado no existe en el sistema. |
+#### Errores y Excepciones de Dominio (RFC 7807)
+
+| Código HTTP | Excepción Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `400 Bad Request` | `InvalidDtcCodeException` | El código DTC no se ajusta al formato estándar SAE J2012 |
+| `401 Unauthorized` | `AuthenticationException` | Token JWT ausente o inválido |
+| `403 Forbidden` | `AccessDeniedException` | Permisos insuficientes para registrar fallas de diagnóstico |
+
+**Ejemplo de Carga Útil de Error (RFC 7807 ProblemDetail):**
+```json
+{
+  "type": "https://api.atelier.andeva.com/errors/invalid-dtc-code",
+  "title": "Invalid DTC Format",
+  "status": 400,
+  "detail": "El código DTC proporcionado no cumple con el estándar SAE J2012 de 5 caracteres alfanuméricos",
+  "instance": "/api/v1/iot/faults",
+  "code": "ERR_INVALID_DTC_CODE",
+  "timestamp": "2026-10-04T02:45:00Z"
+}
+```
 
 ---
 
-#### GET /api/v1/iot/faults/vehicle/{vehicleId}
+### 6.2. [GET] /api/v1/iot/faults/vehicle/{vehicleId}/active
 
-##### Identidad Técnica
-* **Controlador:** `VehicleFaultsController` (`com.andeva.atelier.platform.iot.interfaces.rest.controllers`)
-* **Método Java:** `public ResponseEntity<List<VehicleFaultResponse>> getVehicleFaults(@PathVariable UUID vehicleId, @RequestParam(required = false, defaultValue = "false") boolean activeOnly, @AuthenticationPrincipal Jwt jwt)`
+#### Identidad Técnica
+* **Controlador:** `com.andeva.atelier.platform.iot.interfaces.rest.controllers.VehicleFaultsController`
+* **Método Java:** `public ResponseEntity<List<VehicleFaultResponse>> getActiveFaultsByVehicle(@PathVariable UUID vehicleId, @AuthenticationPrincipal Jwt jwt)`
+* **Ruta Base:** `/api/v1/iot/faults`
+* **Ruta Completa:** `/api/v1/iot/faults/vehicle/{vehicleId}/active`
+* **Propósito:** Lista todas las averías electrónicas activas (no subsanadas) registradas para un vehículo específico.
 
-##### Descripción Funcional
-Lista las averías y códigos DTC registrados en el historial de un vehículo automotriz, permitiendo discriminar únicamente las fallas activas pendientes de reparación en bahía.
+#### Descripción Funcional
+Permite a los mecánicos y asesores de servicio revisar el expediente de anomalías activas antes de iniciar reparaciones o durante la inspección de recepción. Consulta la tabla `vehicle_faults` filtrando por `vehicleId` y la condición `isResolved = false`. Proyecta cada avería con su código, nivel de severidad y marca temporal de captura original.
 
-##### Seguridad y Autorización
-* **Rol Mínimo:** `ROLE_WORKSHOP_ADMIN`, `ROLE_SERVICE_ADVISOR`, `ROLE_CHIEF_MECHANIC` o `ROLE_MECHANIC`.
+#### Seguridad y Autorización
+* **Nivel de Acceso:** Protegido / Taller Autenticado
+* **Rol Mínimo Requerido:** Asesor de Servicio (`ROLE_SERVICE_ADVISOR`), Mecánico (`ROLE_MECHANIC`) o Jefe de Taller (`ROLE_HEAD_MECHANIC`)
 * **Permiso Atómico:** `@PreAuthorize("hasAuthority('iot:faults:read')")`
-* **Contexto Multi-Inquilino:** Verifica la pertenencia del vehículo al taller del usuario.
+* **Aislamiento Multi-Inquilino:** Comprobación estricta de pertenencia del vehículo al `tenant_id` autenticado.
 
-##### Parámetros de Petición
-* **Headers:**
-  * `Authorization: Bearer <JWT>` (Obligatorio)
-* **Path Variables:**
-  | Variable | Tipo | Descripción |
-  | :--- | :--- | :--- |
-  | `vehicleId` | UUID | Identificador universal del vehículo. |
-* **Query Parameters:**
-  | Parámetro | Tipo | Requerido | Descripción |
-  | :--- | :--- | :--- | :--- |
-  | `activeOnly` | boolean | No | Si es `true` retorna exclusivamente fallas no subsanadas (`isResolved = false`). |
+#### Parámetros de Invocación
+* **Cabeceras HTTP (Headers):**
+  * `Authorization: Bearer <JWT>`
+  * `Accept: application/json`
+* **Parámetros de Ruta (Path Parameters):**
+  * `vehicleId` (`UUID`): Identificador universal del vehículo a consultar.
+* **Parámetros de Consulta (Query Parameters):** No aplica.
 
-##### Request DTO
-No aplica para peticiones HTTP GET.
+#### Recurso de Petición (Request Body)
+No aplica (Solicitud de tipo HTTP GET sin cuerpo).
 
-##### Response DTO
-* **Estado HTTP:** `200 OK`
-* **Record Java:** `List<com.andeva.atelier.platform.iot.interfaces.rest.resources.responses.VehicleFaultResponse>`
+#### Recurso de Respuesta (Response Body)
+* **Estado HTTP Exitoso:** `200 OK`
+* **Registro Java DTO:** `List<com.andeva.atelier.platform.iot.interfaces.rest.resources.responses.VehicleFaultResponse>`
+* **Definición de Campos Proyectados:** Idéntica a la definición de `VehicleFaultResponse`.
 
-Ejemplo JSON de Respuesta:
+**Ejemplo de Carga Útil JSON (Response):**
 ```json
 [
   {
-    "id": "3d456789-0123-4567-89ab-cdef01234567",
-    "vehicleId": "4c56789a-bcde-f012-3456-789abcdef012",
+    "id": "018f6c40-7e12-7000-8000-000000000801",
+    "vehicleId": "018f6c40-7e12-7000-8000-000000000601",
     "dtcCode": "P0300",
     "severity": "CRITICAL",
-    "description": "Fallo aleatorio o multiple de encendido en los cilindros del motor.",
-    "detectedAt": "2026-10-01T15:48:00Z",
+    "description": "Fallo de encendido detectado en múltiples cilindros del motor",
+    "detectedAt": "2026-10-04T02:45:00Z",
     "isResolved": false,
     "resolvedAt": null
   },
   {
-    "id": "4e567890-1234-5678-9abc-def012345678",
-    "vehicleId": "4c56789a-bcde-f012-3456-789abcdef012",
-    "dtcCode": "P0128",
-    "severity": "MEDIUM",
-    "description": "Temperatura de refrigerante del motor por debajo de la temperatura regulada por el termostato.",
-    "detectedAt": "2026-09-20T11:15:00Z",
-    "isResolved": true,
-    "resolvedAt": "2026-09-21T16:00:00Z"
+    "id": "018f6c40-7e12-7000-8000-000000000802",
+    "vehicleId": "018f6c40-7e12-7000-8000-000000000601",
+    "dtcCode": "P0171",
+    "severity": "MODERATE",
+    "description": "Mezcla demasiado pobre en banco 1 de inyección",
+    "detectedAt": "2026-10-04T02:46:12Z",
+    "isResolved": false,
+    "resolvedAt": null
   }
 ]
 ```
 
-##### Errores y RFC 7807
-| Código HTTP | Error Type | Excepción de Dominio | Causa Común |
-| :--- | :--- | :--- | :--- |
-| `401 Unauthorized` | `https://api.atelier.andeva.pe/errors/unauthorized` | `AuthenticationException` | Token de sesión no provisto o inválido. |
-| `404 Not Found` | `https://api.atelier.andeva.pe/errors/vehicle-not-found` | `VehicleNotFoundException` | Vehículo no encontrado en el sistema. |
+#### Errores y Excepciones de Dominio (RFC 7807)
 
----
+| Código HTTP | Excepción Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `400 Bad Request` | `MethodArgumentTypeMismatchException` | Formato UUID del vehículo malformado |
+| `401 Unauthorized` | `AuthenticationException` | Token JWT ausente o expirado |
+| `403 Forbidden` | `AccessDeniedException` | Permisos insuficientes para auditar fallas del vehículo |
 
-#### PATCH /api/v1/iot/faults/{id}/resolve
-
-##### Identidad Técnica
-* **Controlador:** `VehicleFaultsController` (`com.andeva.atelier.platform.iot.interfaces.rest.controllers`)
-* **Método Java:** `public ResponseEntity<VehicleFaultResponse> resolveVehicleFault(@PathVariable UUID id, @Valid @RequestBody(required = false) ResolveVehicleFaultRequest request, @AuthenticationPrincipal Jwt jwt)`
-
-##### Descripción Funcional
-Marca una avería electrónica como subsanada tras la ejecución del servicio correctivo en bahía y el posterior borrado computarizado del código DTC en la computadora del motor (ECU).
-
-##### Seguridad y Autorización
-* **Rol Mínimo:** `ROLE_WORKSHOP_ADMIN`, `ROLE_CHIEF_MECHANIC` o `ROLE_MECHANIC`.
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('iot:faults:resolve')")`
-* **Contexto Multi-Inquilino:** Verifica que la falla pertenezca a un vehículo registrado en el taller autenticado.
-
-##### Parámetros de Petición
-* **Headers:**
-  * `Authorization: Bearer <JWT>` (Obligatorio)
-  * `Content-Type: application/json` (Opcional)
-* **Path Variables:**
-  | Variable | Tipo | Descripción |
-  | :--- | :--- | :--- |
-  | `id` | UUID | Identificador unívoco del registro de falla a resolver. |
-* **Query Parameters:** Ninguno.
-
-##### Request DTO
-* **Record Java:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.requests.ResolveVehicleFaultRequest`
-
-Tabla de Campos:
-| Campo | Tipo Java | Validaciones Jakarta | Descripción |
-| :--- | :--- | :--- | :--- |
-| `clearedByMechanic`| String | Opcional | Nombre o código de personal del mecánico que efectuó el borrado de avería. |
-| `clearingMethod` | String | Opcional | Método de resolución (ej. `ECU_DTC_CLEAR_COMMAND`, `PART_REPLACEMENT`). |
-| `notes` | String | Opcional | Observaciones técnicas periciales sobre la corrección física. |
-
-Ejemplo JSON de Solicitud:
+**Ejemplo de Carga Útil de Error (RFC 7807 ProblemDetail):**
 ```json
 {
-  "clearedByMechanic": "Carlos Mendoza",
-  "clearingMethod": "PART_REPLACEMENT",
-  "notes": "Se sustituyeron las 4 bujias de encendido y se comprobo borrado de codigo DTC en ralentí."
+  "type": "https://api.atelier.andeva.com/errors/access-denied",
+  "title": "Access Denied",
+  "status": 403,
+  "detail": "El usuario no cuenta con privilegios para consultar el expediente de fallas de este vehículo",
+  "instance": "/api/v1/iot/faults/vehicle/018f6c40-7e12-7000-8000-000000000601/active",
+  "code": "ERR_ACCESS_DENIED",
+  "timestamp": "2026-10-04T02:50:00Z"
 }
 ```
 
-##### Response DTO
-* **Estado HTTP:** `200 OK`
-* **Record Java:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.responses.VehicleFaultResponse`
+---
 
-Ejemplo JSON de Respuesta:
+### 6.3. [POST] /api/v1/iot/faults/{id}/resolve
+
+#### Identidad Técnica
+* **Controlador:** `com.andeva.atelier.platform.iot.interfaces.rest.controllers.VehicleFaultsController`
+* **Método Java:** `public ResponseEntity<VehicleFaultResponse> resolveVehicleFault(@PathVariable UUID id, @AuthenticationPrincipal Jwt jwt)`
+* **Ruta Base:** `/api/v1/iot/faults`
+* **Ruta Completa:** `/api/v1/iot/faults/{id}/resolve`
+* **Propósito:** Marca una avería electrónica como subsanada tras la ejecución efectiva de reparaciones mecánicas y borrado de código con escáner.
+
+#### Descripción Funcional
+Permite a los mecánicos cerrar formalmente un código de falla tras sustituir bujías, sensores o componentes defectuosos. Valida que la avería exista y no haya sido subsanada con anterioridad. Actualiza el estado a resuelto (`isResolved = true`), fija la marca temporal de resolución (`resolvedAt`) y emite el evento `VehicleFaultResolvedEvent` para recalcular la puntuación de salud de la unidad.
+
+#### Seguridad y Autorización
+* **Nivel de Acceso:** Protegido / Taller Autenticado
+* **Rol Mínimo Requerido:** Mecánico (`ROLE_MECHANIC`), Jefe de Taller (`ROLE_HEAD_MECHANIC`) o Dueño de Taller (`ROLE_WORKSHOP_OWNER`)
+* **Permiso Atómico:** `@PreAuthorize("hasAuthority('iot:faults:resolve')")`
+* **Aislamiento Multi-Inquilino:** La avería debe pertenecer al `tenant_id` del taller autenticado.
+
+#### Parámetros de Invocación
+* **Cabeceras HTTP (Headers):**
+  * `Authorization: Bearer <JWT>`
+  * `Accept: application/json`
+* **Parámetros de Ruta (Path Parameters):**
+  * `id` (`UUID`): Identificador universal de la avería a subsanar.
+* **Parámetros de Consulta (Query Parameters):** No aplica.
+
+#### Recurso de Petición (Request Body)
+No aplica (Solicitud de tipo HTTP POST sin cuerpo).
+
+#### Recurso de Respuesta (Response Body)
+* **Estado HTTP Exitoso:** `200 OK`
+* **Registro Java DTO:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.responses.VehicleFaultResponse`
+* **Definición de Campos Proyectados:** Idéntica a la definición de `VehicleFaultResponse` con `isResolved = true` y `resolvedAt` presente.
+
+**Ejemplo de Carga Útil JSON (Response):**
 ```json
 {
-  "id": "3d456789-0123-4567-89ab-cdef01234567",
-  "vehicleId": "4c56789a-bcde-f012-3456-789abcdef012",
+  "id": "018f6c40-7e12-7000-8000-000000000801",
+  "vehicleId": "018f6c40-7e12-7000-8000-000000000601",
   "dtcCode": "P0300",
   "severity": "CRITICAL",
-  "description": "Fallo aleatorio o multiple de encendido en los cilindros del motor.",
-  "detectedAt": "2026-10-01T15:48:00Z",
+  "description": "Fallo de encendido detectado en múltiples cilindros del motor",
+  "detectedAt": "2026-10-04T02:45:00Z",
   "isResolved": true,
-  "resolvedAt": "2026-10-01T17:15:00Z"
+  "resolvedAt": "2026-10-04T02:55:00Z"
 }
 ```
 
-##### Errores y RFC 7807
-| Código HTTP | Error Type | Excepción de Dominio | Causa Común |
-| :--- | :--- | :--- | :--- |
-| `401 Unauthorized` | `https://api.atelier.andeva.pe/errors/unauthorized` | `AuthenticationException` | Token de sesión no provisto o inválido. |
-| `404 Not Found` | `https://api.atelier.andeva.pe/errors/fault-not-found` | `VehicleFaultNotFoundException` | La avería especificada no existe en la base de datos. |
-| `409 Conflict` | `https://api.atelier.andeva.pe/errors/fault-already-resolved` | `IllegalStateException` | La avería ya figuraba previamente como subsanada. |
+#### Errores y Excepciones de Dominio (RFC 7807)
+
+| Código HTTP | Excepción Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `400 Bad Request` | `MethodArgumentTypeMismatchException` | Identificador de falla con formato UUID no válido |
+| `401 Unauthorized` | `AuthenticationException` | Token JWT ausente o inválido |
+| `403 Forbidden` | `AccessDeniedException` | Permisos insuficientes para subsanar averías |
+| `404 Not Found` | `VehicleFaultNotFoundException` | La avería especificada no fue localizada en el sistema |
+
+**Ejemplo de Carga Útil de Error (RFC 7807 ProblemDetail):**
+```json
+{
+  "type": "https://api.atelier.andeva.com/errors/fault-not-found",
+  "title": "Vehicle Fault Not Found",
+  "status": 404,
+  "detail": "La avería con identificador 018f6c40-7e12-7000-8000-000000000899 no existe en el registro",
+  "instance": "/api/v1/iot/faults/018f6c40-7e12-7000-8000-000000000899/resolve",
+  "code": "ERR_FAULT_NOT_FOUND",
+  "timestamp": "2026-10-04T02:55:00Z"
+}
+```
 
 ---
 
-### 3.5. PredictiveAlertsController
+## 7. Endpoints de PredictiveAlertsController
 
-Controlador encargado de la gestión de alertas predictivas generadas por el motor analítico ante patrones pre-catastróficos detectados en la telemetría.
+El controlador `PredictiveAlertsController` gestiona las alertas proactivas emitidas por los algoritmos de detección de anomalías y provee la conversión directa de alertas técnicas en citas preventivas del taller.
 
-#### GET /api/v1/iot/alerts/tenant
+### 7.1. [GET] /api/v1/iot/alerts/tenant
 
-##### Identidad Técnica
-* **Controlador:** `PredictiveAlertsController` (`com.andeva.atelier.platform.iot.interfaces.rest.controllers`)
-* **Método Java:** `public ResponseEntity<List<PredictiveAlertResponse>> getTenantAlerts(@RequestParam(required = false) String severity, @RequestParam(required = false) String status, @AuthenticationPrincipal Jwt jwt)`
+#### Identidad Técnica
+* **Controlador:** `com.andeva.atelier.platform.iot.interfaces.rest.controllers.PredictiveAlertsController`
+* **Método Java:** `public ResponseEntity<List<PredictiveAlertResponse>> getActiveAlertsForTenant(@AuthenticationPrincipal Jwt jwt)`
+* **Ruta Base:** `/api/v1/iot/alerts`
+* **Ruta Completa:** `/api/v1/iot/alerts/tenant`
+* **Propósito:** Retorna el tablero consolidado de alertas predictivas activas y no reconocidas de todos los vehículos atendidos por el taller.
 
-##### Descripción Funcional
-Tablero general de control de alertas predictivas del taller automotriz, permitiendo a los asesores de servicio identificar oportunidades de contacto proactivo con clientes cuyos vehículos presentan riesgos inminentes de rotura.
+#### Descripción Funcional
+Provee al jefe de taller y asesores comerciales un panorama de oportunidades de servicio preventivo y riesgos mecánicos inminentes. Consulta la tabla `predictive_alerts` filtrando por el `tenant_id` autenticado y estado pendiente (`status = PENDING`), ordenadas de manera descendente por nivel de confianza estadística (`confidenceScore`). Cada alerta incluye una recomendación de servicio correctivo o preventivo.
 
-##### Seguridad y Autorización
-* **Rol Mínimo:** `ROLE_WORKSHOP_ADMIN`, `ROLE_SERVICE_ADVISOR` o `ROLE_CHIEF_MECHANIC`.
+#### Seguridad y Autorización
+* **Nivel de Acceso:** Protegido / Taller Autenticado
+* **Rol Mínimo Requerido:** Asesor de Servicio (`ROLE_SERVICE_ADVISOR`), Jefe de Taller (`ROLE_HEAD_MECHANIC`) o Dueño de Taller (`ROLE_WORKSHOP_OWNER`)
 * **Permiso Atómico:** `@PreAuthorize("hasAuthority('iot:alerts:read')")`
-* **Contexto Multi-Inquilino:** Filtrado forzado por el `tenant_id` autenticado.
+* **Aislamiento Multi-Inquilino:** Filtrado estricto por el `tenant_id` del taller solicitante.
 
-##### Parámetros de Petición
-* **Headers:**
-  * `Authorization: Bearer <JWT>` (Obligatorio)
-* **Path Variables:** Ninguna.
-* **Query Parameters:**
-  | Parámetro | Tipo | Requerido | Descripción |
-  | :--- | :--- | :--- | :--- |
-  | `severity` | String | No | Filtro por severidad de alerta (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`). |
-  | `status` | String | No | Filtro por estado de atención (`NEW`, `ACKNOWLEDGED`, `DISMISSED`, `CONVERTED`). |
+#### Parámetros de Invocación
+* **Cabeceras HTTP (Headers):**
+  * `Authorization: Bearer <JWT>`
+  * `Accept: application/json`
+* **Parámetros de Ruta (Path Parameters):** No aplica.
+* **Parámetros de Consulta (Query Parameters):** No aplica.
 
-##### Request DTO
-No aplica para peticiones HTTP GET.
+#### Recurso de Petición (Request Body)
+No aplica (Solicitud de tipo HTTP GET sin cuerpo).
 
-##### Response DTO
-* **Estado HTTP:** `200 OK`
-* **Record Java:** `List<com.andeva.atelier.platform.iot.interfaces.rest.resources.responses.PredictiveAlertResponse>`
+#### Recurso de Respuesta (Response Body)
+* **Estado HTTP Exitoso:** `200 OK`
+* **Registro Java DTO:** `List<com.andeva.atelier.platform.iot.interfaces.rest.resources.responses.PredictiveAlertResponse>`
+* **Definición de Campos Proyectados:**
 
-Tabla de Campos:
-| Campo | Tipo Java | Descripción |
+| Campo | Tipo de Dato | Descripción |
 | :--- | :--- | :--- |
-| `id` | UUID | Identificador unívoco de la alerta predictiva. |
-| `vehicleId` | UUID | Identificador del vehículo automotriz en riesgo. |
-| `recommendedServiceId`| UUID | Servicio de mantenimiento preventivo sugerido del catálogo MRO. |
-| `alertType` | String | Tipología de anomalía detectada (ej. `COOLANT_OVERHEATING`, `BATTERY_DEGRADATION`). |
-| `confidenceScore` | BigDecimal | Índice de certidumbre analítica calculada por el modelo (0.00 a 1.00). |
-| `message` | String | Resumen explicativo de la condición de riesgo detectada. |
-| `status` | String | Estado actual de gestión de la alerta (`NEW`, `ACKNOWLEDGED`, `DISMISSED`). |
-| `createdAt` | Instant | Fecha y hora en la que el motor analítico emitió la alerta. |
+| `id` | `UUID` | Identificador único de la alerta predictiva |
+| `vehicleId` | `UUID` | Identificador del vehículo que experimenta la anomalía |
+| `recommendedServiceId` | `UUID` | Identificador del servicio del catálogo sugerido (ej. afinamiento) |
+| `alertType` | `String` | Categoría técnica de la alerta (THERMAL_ANOMALY, VOLTAGE_DROP, MISFIRE_RISK) |
+| `confidenceScore` | `BigDecimal` | Puntuación de certeza estadística entre 0.00 y 1.00 |
+| `message` | `String` | Texto explicativo con diagnóstico preventivo sugerido |
+| `status` | `String` | Estado operativo (PENDING, ACKNOWLEDGED, RESOLVED, DISMISSED) |
+| `createdAt` | `Instant` | Marca temporal de generación en formato ISO 8601 UTC |
 
-Ejemplo JSON de Respuesta:
+**Ejemplo de Carga Útil JSON (Response):**
 ```json
 [
   {
-    "id": "5f678901-2345-6789-abcd-ef0123456789",
-    "vehicleId": "4c56789a-bcde-f012-3456-789abcdef012",
-    "recommendedServiceId": "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
-    "alertType": "COOLANT_OVERHEATING",
+    "id": "018f6c40-7e12-7000-8000-000000000901",
+    "vehicleId": "018f6c40-7e12-7000-8000-000000000601",
+    "recommendedServiceId": "018f6c40-7e12-7000-8000-000000000950",
+    "alertType": "THERMAL_ANOMALY",
     "confidenceScore": 0.94,
-    "message": "Temperatura de motor sostenida por encima de 105C en regimen de ralenti. Riesgo de sopladura de junta de culata.",
-    "status": "NEW",
-    "createdAt": "2026-10-01T15:50:00Z"
+    "message": "Temperatura de refrigerante supera 105C bajo régimen moderado. Riesgo inminente de sobrecalentamiento de culata",
+    "status": "PENDING",
+    "createdAt": "2026-10-04T02:32:00Z"
   }
 ]
 ```
 
-##### Errores y RFC 7807
-| Código HTTP | Error Type | Excepción de Dominio | Causa Común |
-| :--- | :--- | :--- | :--- |
-| `401 Unauthorized` | `https://api.atelier.andeva.pe/errors/unauthorized` | `AuthenticationException` | Token de sesión no provisto o inválido. |
-| `403 Forbidden` | `https://api.atelier.andeva.pe/errors/forbidden` | `AccessDeniedException` | Usuario carece de permisos de lectura de alertas. |
+#### Errores y Excepciones de Dominio (RFC 7807)
+
+| Código HTTP | Excepción Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `401 Unauthorized` | `AuthenticationException` | Token JWT ausente o inválido |
+| `403 Forbidden` | `AccessDeniedException` | Permisos insuficientes para acceder al tablero de alertas |
+
+**Ejemplo de Carga Útil de Error (RFC 7807 ProblemDetail):**
+```json
+{
+  "type": "https://api.atelier.andeva.com/errors/access-denied",
+  "title": "Access Denied",
+  "status": 403,
+  "detail": "El usuario no dispone de privilegios para auditar el tablero de alertas predictivas del taller",
+  "instance": "/api/v1/iot/alerts/tenant",
+  "code": "ERR_ACCESS_DENIED",
+  "timestamp": "2026-10-04T02:40:00Z"
+}
+```
 
 ---
 
-#### GET /api/v1/iot/alerts/vehicle/{vehicleId}
+### 7.2. [GET] /api/v1/iot/alerts/vehicle/{vehicleId}
 
-##### Identidad Técnica
-* **Controlador:** `PredictiveAlertsController` (`com.andeva.atelier.platform.iot.interfaces.rest.controllers`)
-* **Método Java:** `public ResponseEntity<List<PredictiveAlertResponse>> getVehicleAlerts(@PathVariable UUID vehicleId, @RequestParam(required = false) String status, @AuthenticationPrincipal Jwt jwt)`
+#### Identidad Técnica
+* **Controlador:** `com.andeva.atelier.platform.iot.interfaces.rest.controllers.PredictiveAlertsController`
+* **Método Java:** `public ResponseEntity<List<PredictiveAlertResponse>> getAlertsByVehicle(@PathVariable UUID vehicleId, @AuthenticationPrincipal Jwt jwt)`
+* **Ruta Base:** `/api/v1/iot/alerts`
+* **Ruta Completa:** `/api/v1/iot/alerts/vehicle/{vehicleId}`
+* **Propósito:** Consulta el historial completo de alertas predictivas emitidas para un vehículo específico.
 
-##### Descripción Funcional
-Consulta la lista de alertas predictivas generadas exclusivamente para un vehículo particular, permitiendo evaluar el historial de advertencias preventivas antes de recepcionar una orden de trabajo.
+#### Descripción Funcional
+Permite a los asesores técnicos examinar la evolución histórica de riesgos de un automóvil. Recupera todas las alertas generadas históricamente para el vehículo especificado, sin importar si su estado es pendiente, reconocida o subsanada, ordenadas cronológicamente de forma descendente.
 
-##### Seguridad y Autorización
-* **Rol Mínimo:** `ROLE_WORKSHOP_ADMIN`, `ROLE_SERVICE_ADVISOR`, `ROLE_CHIEF_MECHANIC` o `ROLE_MECHANIC`.
+#### Seguridad y Autorización
+* **Nivel de Acceso:** Protegido / Taller Autenticado
+* **Rol Mínimo Requerido:** Asesor de Servicio (`ROLE_SERVICE_ADVISOR`), Jefe de Taller (`ROLE_HEAD_MECHANIC`) o Dueño de Taller (`ROLE_WORKSHOP_OWNER`)
 * **Permiso Atómico:** `@PreAuthorize("hasAuthority('iot:alerts:read')")`
-* **Contexto Multi-Inquilino:** Verifica la tenencia del vehículo por parte del taller autenticado.
+* **Aislamiento Multi-Inquilino:** Comprobación estricta de pertenencia del vehículo al `tenant_id` autenticado.
 
-##### Parámetros de Petición
-* **Headers:**
-  * `Authorization: Bearer <JWT>` (Obligatorio)
-* **Path Variables:**
-  | Variable | Tipo | Descripción |
-  | :--- | :--- | :--- |
-  | `vehicleId` | UUID | Identificador universal del vehículo. |
-* **Query Parameters:**
-  | Parámetro | Tipo | Requerido | Descripción |
-  | :--- | :--- | :--- | :--- |
-  | `status` | String | No | Filtro opcional por estado de la alerta (`NEW`, `ACKNOWLEDGED`, `DISMISSED`). |
+#### Parámetros de Invocación
+* **Cabeceras HTTP (Headers):**
+  * `Authorization: Bearer <JWT>`
+  * `Accept: application/json`
+* **Parámetros de Ruta (Path Parameters):**
+  * `vehicleId` (`UUID`): Identificador universal del vehículo consultado.
+* **Parámetros de Consulta (Query Parameters):** No aplica.
 
-##### Request DTO
-No aplica para peticiones HTTP GET.
+#### Recurso de Petición (Request Body)
+No aplica (Solicitud de tipo HTTP GET sin cuerpo).
 
-##### Response DTO
-* **Estado HTTP:** `200 OK`
-* **Record Java:** `List<com.andeva.atelier.platform.iot.interfaces.rest.resources.responses.PredictiveAlertResponse>`
+#### Recurso de Respuesta (Response Body)
+* **Estado HTTP Exitoso:** `200 OK`
+* **Registro Java DTO:** `List<com.andeva.atelier.platform.iot.interfaces.rest.resources.responses.PredictiveAlertResponse>`
+* **Definición de Campos Proyectados:** Idéntica a la definición de `PredictiveAlertResponse`.
 
-Ejemplo JSON de Respuesta:
+**Ejemplo de Carga Útil JSON (Response):**
 ```json
 [
   {
-    "id": "5f678901-2345-6789-abcd-ef0123456789",
-    "vehicleId": "4c56789a-bcde-f012-3456-789abcdef012",
-    "recommendedServiceId": "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
-    "alertType": "COOLANT_OVERHEATING",
+    "id": "018f6c40-7e12-7000-8000-000000000901",
+    "vehicleId": "018f6c40-7e12-7000-8000-000000000601",
+    "recommendedServiceId": "018f6c40-7e12-7000-8000-000000000950",
+    "alertType": "THERMAL_ANOMALY",
     "confidenceScore": 0.94,
-    "message": "Temperatura de motor sostenida por encima de 105C en regimen de ralenti.",
-    "status": "NEW",
-    "createdAt": "2026-10-01T15:50:00Z"
+    "message": "Temperatura de refrigerante supera 105C bajo régimen moderado. Riesgo inminente de sobrecalentamiento de culata",
+    "status": "PENDING",
+    "createdAt": "2026-10-04T02:32:00Z"
   }
 ]
 ```
 
-##### Errores y RFC 7807
-| Código HTTP | Error Type | Excepción de Dominio | Causa Común |
-| :--- | :--- | :--- | :--- |
-| `401 Unauthorized` | `https://api.atelier.andeva.pe/errors/unauthorized` | `AuthenticationException` | Token de sesión ausente o revocado. |
-| `404 Not Found` | `https://api.atelier.andeva.pe/errors/vehicle-not-found` | `VehicleNotFoundException` | El vehículo solicitado no existe en los registros. |
+#### Errores y Excepciones de Dominio (RFC 7807)
 
----
+| Código HTTP | Excepción Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `400 Bad Request` | `MethodArgumentTypeMismatchException` | Formato UUID del vehículo no válido |
+| `401 Unauthorized` | `AuthenticationException` | Token JWT ausente o inválido |
+| `403 Forbidden` | `AccessDeniedException` | Permisos insuficientes para auditar alertas del vehículo |
 
-#### PATCH /api/v1/iot/alerts/{id}/dismiss
-
-##### Identidad Técnica
-* **Controlador:** `PredictiveAlertsController` (`com.andeva.atelier.platform.iot.interfaces.rest.controllers`)
-* **Método Java:** `public ResponseEntity<PredictiveAlertResponse> dismissAlert(@PathVariable UUID id, @AuthenticationPrincipal Jwt jwt)`
-
-##### Descripción Funcional
-Descarta formalmente una alerta predictiva cuando el asesor de servicio o el jefe de taller comprueban que se debió a una condición operativa espuria o prueba controlada en dinamómetro, cerrando la advertencia.
-
-##### Seguridad y Autorización
-* **Rol Mínimo:** `ROLE_WORKSHOP_ADMIN` o `ROLE_SERVICE_ADVISOR`.
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('iot:alerts:acknowledge')")`
-* **Contexto Multi-Inquilino:** Verifica que la alerta pertenezca al taller autenticado.
-
-##### Parámetros de Petición
-* **Headers:**
-  * `Authorization: Bearer <JWT>` (Obligatorio)
-* **Path Variables:**
-  | Variable | Tipo | Descripción |
-  | :--- | :--- | :--- |
-  | `id` | UUID | Identificador universal de la alerta predictiva a descartar. |
-* **Query Parameters:** Ninguno.
-
-##### Request DTO
-No aplica para este endpoint.
-
-##### Response DTO
-* **Estado HTTP:** `200 OK`
-* **Record Java:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.responses.PredictiveAlertResponse`
-
-Ejemplo JSON de Respuesta:
+**Ejemplo de Carga Útil de Error (RFC 7807 ProblemDetail):**
 ```json
 {
-  "id": "5f678901-2345-6789-abcd-ef0123456789",
-  "vehicleId": "4c56789a-bcde-f012-3456-789abcdef012",
-  "recommendedServiceId": "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
-  "alertType": "COOLANT_OVERHEATING",
-  "confidenceScore": 0.94,
-  "message": "Temperatura de motor sostenida por encima de 105C en regimen de ralenti.",
-  "status": "DISMISSED",
-  "createdAt": "2026-10-01T15:50:00Z"
+  "type": "https://api.atelier.andeva.com/errors/access-denied",
+  "title": "Access Denied",
+  "status": 403,
+  "detail": "El usuario no cuenta con autorización para examinar el historial del vehículo especificado",
+  "instance": "/api/v1/iot/alerts/vehicle/018f6c40-7e12-7000-8000-000000000601",
+  "code": "ERR_ACCESS_DENIED",
+  "timestamp": "2026-10-04T02:45:00Z"
 }
 ```
 
-##### Errores y RFC 7807
-| Código HTTP | Error Type | Excepción de Dominio | Causa Común |
-| :--- | :--- | :--- | :--- |
-| `401 Unauthorized` | `https://api.atelier.andeva.pe/errors/unauthorized` | `AuthenticationException` | Token de sesión no provisto o inválido. |
-| `404 Not Found` | `https://api.atelier.andeva.pe/errors/alert-not-found` | `PredictiveAlertNotFoundException` | La alerta especificada no existe en la base de datos. |
-
 ---
 
-#### POST /api/v1/iot/alerts/{id}/acknowledge
+### 7.3. [PATCH] /api/v1/iot/alerts/{id}/acknowledge
 
-##### Identidad Técnica
-* **Controlador:** `PredictiveAlertsController` (`com.andeva.atelier.platform.iot.interfaces.rest.controllers`)
-* **Método Java:** `public ResponseEntity<PredictiveAlertResponse> acknowledgeAlert(@PathVariable UUID id, @Valid @RequestBody(required = false) AcknowledgeAlertRequest request, @AuthenticationPrincipal Jwt jwt)`
+#### Identidad Técnica
+* **Controlador:** `com.andeva.atelier.platform.iot.interfaces.rest.controllers.PredictiveAlertsController`
+* **Método Java:** `public ResponseEntity<PredictiveAlertResponse> acknowledgeAlert(@PathVariable UUID id, @Valid @RequestBody AcknowledgeAlertRequest request, @AuthenticationPrincipal Jwt jwt)`
+* **Ruta Base:** `/api/v1/iot/alerts`
+* **Ruta Completa:** `/api/v1/iot/alerts/{id}/acknowledge`
+* **Propósito:** Marca una alerta predictiva como leída y evaluada por el personal técnico del taller.
 
-##### Descripción Funcional
-Confirma la lectura y reconocimiento técnico de una alerta predictiva por parte del personal del taller, cambiando su estado a `ACKNOWLEDGED` para indicar que el personal está gestionando el contacto con el conductor o preparando una orden de inspección.
+#### Descripción Funcional
+Permite a los asesores de servicio o jefes de taller registrar formalmente la toma de conocimiento de una alerta técnica. Cambia el estado a reconocido (`status = ACKNOWLEDGED`), registra el nombre del colaborador responsable y retira la alerta de los tableros de urgencias inmediatas.
 
-##### Seguridad y Autorización
-* **Rol Mínimo:** `ROLE_WORKSHOP_ADMIN`, `ROLE_SERVICE_ADVISOR`, `ROLE_CHIEF_MECHANIC` o `ROLE_MECHANIC`.
+#### Seguridad y Autorización
+* **Nivel de Acceso:** Protegido / Taller Autenticado
+* **Rol Mínimo Requerido:** Asesor de Servicio (`ROLE_SERVICE_ADVISOR`), Jefe de Taller (`ROLE_HEAD_MECHANIC`) o Dueño de Taller (`ROLE_WORKSHOP_OWNER`)
 * **Permiso Atómico:** `@PreAuthorize("hasAuthority('iot:alerts:acknowledge')")`
-* **Contexto Multi-Inquilino:** Verifica la tenencia de la alerta por parte del taller autenticado.
+* **Aislamiento Multi-Inquilino:** La alerta debe pertenecer al taller autenticado.
 
-##### Parámetros de Petición
-* **Headers:**
-  * `Authorization: Bearer <JWT>` (Obligatorio)
-  * `Content-Type: application/json` (Opcional)
-* **Path Variables:**
-  | Variable | Tipo | Descripción |
-  | :--- | :--- | :--- |
-  | `id` | UUID | Identificador universal de la alerta predictiva a reconocer. |
-* **Query Parameters:** Ninguno.
+#### Parámetros de Invocación
+* **Cabeceras HTTP (Headers):**
+  * `Authorization: Bearer <JWT>`
+  * `Content-Type: application/json`
+* **Parámetros de Ruta (Path Parameters):**
+  * `id` (`UUID`): Identificador universal de la alerta a reconocer.
+* **Parámetros de Consulta (Query Parameters):** No aplica.
 
-##### Request DTO
-* **Record Java:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.requests.AcknowledgeAlertRequest`
+#### Recurso de Petición (Request Body)
+* **Registro Java DTO:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.requests.AcknowledgeAlertRequest`
+* **Definición de Campos:**
 
-Tabla de Campos:
-| Campo | Tipo Java | Validaciones Jakarta | Descripción |
-| :--- | :--- | :--- | :--- |
-| `acknowledgedBy`| String | Opcional | Nombre o identificador del asesor o mecánico responsable del seguimiento. |
+| Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripción |
+| :--- | :--- | :---: | :--- | :--- |
+| `acknowledgedBy` | `String` | No | Sin restricción adicional | Nombre o identificador del colaborador que revisa la alerta |
 
-Ejemplo JSON de Solicitud:
+**Ejemplo de Carga Útil JSON (Request):**
 ```json
 {
-  "acknowledgedBy": "Marco Polo - Asesor de Servicio"
+  "acknowledgedBy": "Carlos Mendoza (Jefe de Taller)"
 }
 ```
 
-##### Response DTO
-* **Estado HTTP:** `200 OK`
-* **Record Java:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.responses.PredictiveAlertResponse`
+#### Recurso de Respuesta (Response Body)
+* **Estado HTTP Exitoso:** `200 OK`
+* **Registro Java DTO:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.responses.PredictiveAlertResponse`
+* **Definición de Campos Proyectados:** Idéntica a la definición de `PredictiveAlertResponse` con `status = ACKNOWLEDGED`.
 
-Ejemplo JSON de Respuesta:
+**Ejemplo de Carga Útil JSON (Response):**
 ```json
 {
-  "id": "5f678901-2345-6789-abcd-ef0123456789",
-  "vehicleId": "4c56789a-bcde-f012-3456-789abcdef012",
-  "recommendedServiceId": "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
-  "alertType": "COOLANT_OVERHEATING",
+  "id": "018f6c40-7e12-7000-8000-000000000901",
+  "vehicleId": "018f6c40-7e12-7000-8000-000000000601",
+  "recommendedServiceId": "018f6c40-7e12-7000-8000-000000000950",
+  "alertType": "THERMAL_ANOMALY",
   "confidenceScore": 0.94,
-  "message": "Temperatura de motor sostenida por encima de 105C en regimen de ralenti.",
+  "message": "Temperatura de refrigerante supera 105C bajo régimen moderado. Riesgo inminente de sobrecalentamiento de culata",
   "status": "ACKNOWLEDGED",
-  "createdAt": "2026-10-01T15:50:00Z"
+  "createdAt": "2026-10-04T02:32:00Z"
 }
 ```
 
-##### Errores y RFC 7807
-| Código HTTP | Error Type | Excepción de Dominio | Causa Común |
-| :--- | :--- | :--- | :--- |
-| `401 Unauthorized` | `https://api.atelier.andeva.pe/errors/unauthorized` | `AuthenticationException` | Token de sesión no provisto o inválido. |
-| `404 Not Found` | `https://api.atelier.andeva.pe/errors/alert-not-found` | `PredictiveAlertNotFoundException` | La alerta especificada no existe en la base de datos. |
+#### Errores y Excepciones de Dominio (RFC 7807)
+
+| Código HTTP | Excepción Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `400 Bad Request` | `MethodArgumentTypeMismatchException` | Identificador de alerta con formato no válido |
+| `401 Unauthorized` | `AuthenticationException` | Token JWT ausente o expirado |
+| `403 Forbidden` | `AccessDeniedException` | Permisos insuficientes para reconocer alertas |
+| `404 Not Found` | `PredictiveAlertNotFoundException` | La alerta especificada no existe en el taller |
+
+**Ejemplo de Carga Útil de Error (RFC 7807 ProblemDetail):**
+```json
+{
+  "type": "https://api.atelier.andeva.com/errors/alert-not-found",
+  "title": "Predictive Alert Not Found",
+  "status": 404,
+  "detail": "La alerta con identificador 018f6c40-7e12-7000-8000-000000000999 no existe en el registro",
+  "instance": "/api/v1/iot/alerts/018f6c40-7e12-7000-8000-000000000999/acknowledge",
+  "code": "ERR_ALERT_NOT_FOUND",
+  "timestamp": "2026-10-04T02:50:00Z"
+}
+```
 
 ---
 
-### 3.6. VehicleHealthReportsController
+### 7.4. [POST] /api/v1/iot/alerts/{id}/convert-to-appointment
 
-Controlador encargado de la orquestación del motor pericial de diagnóstico vehicular con Inteligencia Artificial (Spring AI con Groq Cloud LPU), generación de dictámenes mecánicos y exportación documental en PDF.
+#### Identidad Técnica
+* **Controlador:** `com.andeva.atelier.platform.iot.interfaces.rest.controllers.PredictiveAlertsController`
+* **Método Java:** `public ResponseEntity<AppointmentResponse> convertAlertToAppointment(@PathVariable UUID id, @AuthenticationPrincipal Jwt jwt)`
+* **Ruta Base:** `/api/v1/iot/alerts`
+* **Ruta Completa:** `/api/v1/iot/alerts/{id}/convert-to-appointment`
+* **Propósito:** Transforma una alerta predictiva en una cita de servicio preventivo en los módulos de CRM y operaciones del taller.
 
-#### POST /api/v1/iot/vehicles/{vehicleId}/health-reports
+#### Descripción Funcional
+Conecta la inteligencia predictiva telemática con la facturación y retención de clientes. Recupera la alerta predictiva, resuelve el vehículo y su cliente propietario registrado en CRM, y delega a través del puerto de salida desacoplado `CrmFleetAclPort` la creación de una cita preventiva (`Appointment`) pre-llenada con el servicio recomendado y notas periciales. Marca la alerta técnica como resuelta (`status = RESOLVED`) y retorna el identificador de la cita agendada.
 
-##### Identidad Técnica
-* **Controlador:** `VehicleHealthReportsController` (`com.andeva.atelier.platform.iot.interfaces.rest.controllers`)
-* **Método Java:** `public ResponseEntity<HealthReportCreatedResponse> generateVehicleHealthReport(@PathVariable UUID vehicleId, @Valid @RequestBody(required = false) GenerateHealthReportRequest request, @AuthenticationPrincipal Jwt jwt)`
+#### Seguridad y Autorización
+* **Nivel de Acceso:** Protegido / Taller Autenticado
+* **Rol Mínimo Requerido:** Asesor de Servicio (`ROLE_SERVICE_ADVISOR`) o Dueño de Taller (`ROLE_WORKSHOP_OWNER`)
+* **Permiso Atómico:** `@PreAuthorize("hasAuthority('iot:alerts:convert')")`
+* **Aislamiento Multi-Inquilino:** La alerta y la cita se confinan estrictamente al `tenant_id` autenticado.
 
-##### Descripción Funcional
-Dispara el flujo completo de evaluación de salud automotriz sobre las series temporales de TimescaleDB y fallas DTC activas. Valida el cupo mensual de reportes IA bajo el plan SaaS contratado (`maxMonthlyAiReports`), ejecuta la inferencia diagnóstica con Spring AI, almacena el reporte estructurado y retorna `201 Created` con enlaces HATEOAS para consulta JSON y descarga binaria en PDF.
+#### Parámetros de Invocación
+* **Cabeceras HTTP (Headers):**
+  * `Authorization: Bearer <JWT>`
+  * `Accept: application/json`
+* **Parámetros de Ruta (Path Parameters):**
+  * `id` (`UUID`): Identificador universal de la alerta que se desea convertir.
+* **Parámetros de Consulta (Query Parameters):** No aplica.
 
-##### Seguridad y Autorización
-* **Rol Mínimo:** `ROLE_WORKSHOP_ADMIN`, `ROLE_SERVICE_ADVISOR` o `ROLE_CHIEF_MECHANIC`.
+#### Recurso de Petición (Request Body)
+No aplica (Solicitud de tipo HTTP POST sin cuerpo).
+
+#### Recurso de Respuesta (Response Body)
+* **Estado HTTP Exitoso:** `200 OK`
+* **Registro Java DTO:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.responses.AppointmentResponse`
+* **Definición de Campos Proyectados:**
+
+| Campo | Tipo de Dato | Descripción |
+| :--- | :--- | :--- |
+| `appointmentId` | `UUID` | Identificador único de la cita agendada en CRM |
+| `vehicleId` | `UUID` | Identificador del vehículo agendado |
+| `customerId` | `UUID` | Identificador del cliente propietario en CRM |
+| `scheduledAt` | `Instant` | Fecha y hora tentativa propuesta para la cita |
+| `status` | `String` | Estado de la cita (SCHEDULED) |
+| `notes` | `String` | Resumen técnico derivado de la alerta predictiva |
+
+**Ejemplo de Carga Útil JSON (Response):**
+```json
+{
+  "appointmentId": "018f6c40-7e12-7000-8000-000000000980",
+  "vehicleId": "018f6c40-7e12-7000-8000-000000000601",
+  "customerId": "018f6c40-7e12-7000-8000-000000000990",
+  "scheduledAt": "2026-10-06T14:00:00Z",
+  "status": "SCHEDULED",
+  "notes": "Cita generada automáticamente desde alerta de anomalía térmica P0300"
+}
+```
+
+#### Errores y Excepciones de Dominio (RFC 7807)
+
+| Código HTTP | Excepción Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `400 Bad Request` | `MethodArgumentTypeMismatchException` | Formato UUID no válido |
+| `401 Unauthorized` | `AuthenticationException` | Token JWT ausente o expirado |
+| `403 Forbidden` | `AccessDeniedException` | Permisos insuficientes para agendar citas |
+| `404 Not Found` | `PredictiveAlertNotFoundException` | La alerta especificada no existe en el sistema |
+
+**Ejemplo de Carga Útil de Error (RFC 7807 ProblemDetail):**
+```json
+{
+  "type": "https://api.atelier.andeva.com/errors/alert-not-found",
+  "title": "Predictive Alert Not Found",
+  "status": 404,
+  "detail": "No se puede convertir la alerta porque no fue encontrada en la base de datos",
+  "instance": "/api/v1/iot/alerts/018f6c40-7e12-7000-8000-000000000999/convert-to-appointment",
+  "code": "ERR_ALERT_NOT_FOUND",
+  "timestamp": "2026-10-04T02:55:00Z"
+}
+```
+
+---
+
+## 8. Endpoints de VehicleHealthReportsController
+
+El controlador `VehicleHealthReportsController` orquesta el motor pericial de diagnóstico vehicular asistido por Inteligencia Artificial (Spring AI con Groq Cloud LPU), la consolidación analítica de reportes de salud mecánica y la exportación de comprobantes periciales en formato binario PDF.
+
+### 8.1. [POST] /api/v1/iot/health-reports/generate
+
+#### Identidad Técnica
+* **Controlador:** `com.andeva.atelier.platform.iot.interfaces.rest.controllers.VehicleHealthReportsController`
+* **Método Java:** `public ResponseEntity<HealthReportCreatedResponse> generateHealthReport(@RequestParam UUID vehicleId, @Valid @RequestBody GenerateHealthReportRequest request, @AuthenticationPrincipal Jwt jwt)`
+* **Ruta Base:** `/api/v1/iot/health-reports`
+* **Ruta Completa:** `/api/v1/iot/health-reports/generate`
+* **Propósito:** Ejecuta la evaluación analítica forense completa del vehículo con inferencia Spring AI Groq de manera síncrona.
+
+#### Descripción Funcional
+Comprueba la cuota operativa mensual del taller respecto al límite de reportes asistidos por IA (`maxMonthlyAiReports` del plan SaaS). Recupera el historial agregado de 30 días en TimescaleDB (`time_bucket`) y los códigos DTC activos de la unidad. Construye un prompt enriquecido con lenguaje ubicuo automotriz y consulta el modelo Groq LPU mediante structured output tipado. Recibe el dictamen pericial, computa el índice general de salud (0 a 100), persiste el informe en la tabla `vehicle_health_reports` y emite el evento `VehicleHealthReportGeneratedEvent`.
+
+#### Seguridad y Autorización
+* **Nivel de Acceso:** Protegido / Taller Autenticado
+* **Rol Mínimo Requerido:** Asesor de Servicio (`ROLE_SERVICE_ADVISOR`), Jefe de Taller (`ROLE_HEAD_MECHANIC`) o Dueño de Taller (`ROLE_WORKSHOP_OWNER`)
 * **Permiso Atómico:** `@PreAuthorize("hasAuthority('iot:health_reports:generate')")`
-* **Contexto Multi-Inquilino:** Deducción estricta de `tenant_id` desde el token JWT e inspección de cuota de suscripción en Caffeine Cache.
+* **Aislamiento Multi-Inquilino:** El vehículo analizado debe pertenecer al taller autenticado.
 
-##### Parámetros de Petición
-* **Headers:**
-  * `Authorization: Bearer <JWT>` (Obligatorio)
-  * `Content-Type: application/json` (Opcional)
-* **Path Variables:**
-  | Variable | Tipo | Descripción |
-  | :--- | :--- | :--- |
-  | `vehicleId` | UUID | Identificador universal del vehículo automotriz a diagnosticar. |
-* **Query Parameters:** Ninguno.
+#### Parámetros de Invocación
+* **Cabeceras HTTP (Headers):**
+  * `Authorization: Bearer <JWT>`
+  * `Content-Type: application/json`
+* **Parámetros de Ruta (Path Parameters):** No aplica.
+* **Parámetros de Consulta (Query Parameters):**
+  * `vehicleId` (`UUID`, Obligatorio): Identificador universal del vehículo que será evaluado.
 
-##### Request DTO
-* **Record Java:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.requests.GenerateHealthReportRequest`
+#### Recurso de Petición (Request Body)
+* **Registro Java DTO:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.requests.GenerateHealthReportRequest`
+* **Definición de Campos:**
 
-Tabla de Campos:
-| Campo | Tipo Java | Validaciones Jakarta | Descripción |
-| :--- | :--- | :--- | :--- |
-| `daysToAnalyze` | Integer | `@Min(7)`, `@Max(90)`, Default `30` | Ventana temporal histórica de telemetría evaluada en TimescaleDB. |
-| `includeResolvedDtcHistory` | Boolean | Default `false` | Indicador si se deben incluir averías ya resueltas en la inferencia. |
-| `triggerReason` | String | Default `MANUAL_REQUEST` | Motivo del peritaje (ej. `PRE_TRIP_INSPECTION`, `WORK_ORDER_AUDIT`). |
+| Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripción |
+| :--- | :--- | :---: | :--- | :--- |
+| `daysToAnalyze` | `Integer` | No | `@Min(7), @Max(90)` | Ventana temporal de series telemétricas (por defecto 30 días) |
+| `includeResolvedDtcHistory` | `Boolean` | No | Sin restricción adicional | Si se auditan códigos ya resueltos previamente (por defecto false) |
+| `triggerReason` | `String` | No | Sin restricción adicional | Causa del reporte (ej. PRE_PURCHASE_INSPECTION o FLEET_AUDIT) |
 
-Ejemplo JSON de Solicitud:
+**Ejemplo de Carga Útil JSON (Request):**
 ```json
 {
   "daysToAnalyze": 30,
   "includeResolvedDtcHistory": false,
-  "triggerReason": "PRE_TRIP_INSPECTION"
+  "triggerReason": "PRE_PURCHASE_INSPECTION"
 }
 ```
 
-##### Response DTO
-* **Estado HTTP:** `201 Created`
-* **Headers:** `Location: /api/v1/iot/vehicles/{vehicleId}/health-reports/{reportId}`
-* **Record Java:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.responses.HealthReportCreatedResponse`
+#### Recurso de Respuesta (Response Body)
+* **Estado HTTP Exitoso:** `201 Created` con cabecera `Location: /api/v1/iot/health-reports/{reportId}`
+* **Registro Java DTO:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.responses.HealthReportCreatedResponse`
+* **Definición de Campos Proyectados:**
 
-Tabla de Campos:
-| Campo | Tipo Java | Descripción |
+| Campo | Tipo de Dato | Descripción |
 | :--- | :--- | :--- |
-| `reportId` | UUID | Identificador universal único del informe de salud generado. |
-| `vehicleId` | UUID | Identificador del vehículo evaluado. |
-| `overallHealthScore` | int | Calificación general pericial de salud vehicular de 0 a 100 puntos. |
-| `executiveSummary` | String | Dictamen pericial ejecutivo generado por el modelo de inteligencia artificial. |
-| `totalRisksDetected` | int | Conteo total de riesgos y anomalías detectadas en los subsistemas. |
-| `generatedAt` | Instant | Marca temporal de culminación de la inferencia analítica. |
-| `jsonResourceUrl` | String | Ruta canónica para consultar la versión estructurada en JSON. |
-| `pdfDownloadUrl` | String | Ruta canónica para descargar el documento pericial en formato binario PDF. |
+| `reportId` | `UUID` | Identificador único del reporte pericial generado |
+| `vehicleId` | `UUID` | Identificador del vehículo evaluado |
+| `overallHealthScore` | `int` | Puntuación integral de salud mecánica en escala de 0 a 100 puntos |
+| `executiveSummary` | `String` | Resumen ejecutivo generado por el modelo Groq LPU |
+| `totalRisksDetected` | `int` | Cantidad de anomalías o riesgos mecánicos identificados |
+| `generatedAt` | `Instant` | Marca temporal de emisión pericial en formato ISO 8601 UTC |
+| `jsonResourceUrl` | `String` | Enlace para inspección de datos estructurados completos |
+| `pdfDownloadUrl` | `String` | Enlace perimetral para la descarga del informe institucional en PDF |
 
-Ejemplo JSON de Respuesta:
+**Ejemplo de Carga Útil JSON (Response):**
 ```json
 {
-  "reportId": "7a890123-4567-89ab-cdef-0123456789ab",
-  "vehicleId": "4c56789a-bcde-f012-3456-789abcdef012",
+  "reportId": "018f6c40-7e12-7000-8000-000000001001",
+  "vehicleId": "018f6c40-7e12-7000-8000-000000000601",
   "overallHealthScore": 78,
-  "executiveSummary": "El vehiculo presenta una condicion mecanica estable pero con signos tempranos de fatiga termica en circuito refrigerante y degradacion en bateria.",
+  "executiveSummary": "Unidad con desgaste moderado en sistema de encendido. Código P0300 detectado con variaciones térmicas elevadas en tráfico lento.",
   "totalRisksDetected": 2,
-  "generatedAt": "2026-10-01T15:55:00Z",
-  "jsonResourceUrl": "/api/v1/iot/vehicles/4c56789a-bcde-f012-3456-789abcdef012/health-reports/7a890123-4567-89ab-cdef-0123456789ab",
-  "pdfDownloadUrl": "/api/v1/iot/vehicles/4c56789a-bcde-f012-3456-789abcdef012/health-reports/7a890123-4567-89ab-cdef-0123456789ab/pdf"
+  "generatedAt": "2026-10-04T02:50:00Z",
+  "jsonResourceUrl": "/api/v1/iot/health-reports/018f6c40-7e12-7000-8000-000000001001",
+  "pdfDownloadUrl": "/api/v1/iot/health-reports/018f6c40-7e12-7000-8000-000000001001/pdf"
 }
 ```
 
-##### Errores y RFC 7807
-| Código HTTP | Error Type | Excepción de Dominio | Causa Común |
-| :--- | :--- | :--- | :--- |
-| `400 Bad Request` | `https://api.atelier.andeva.pe/errors/validation-failed` | `MethodArgumentNotValidException` | Días de análisis menores a 7 o mayores a 90. |
-| `401 Unauthorized` | `https://api.atelier.andeva.pe/errors/unauthorized` | `AuthenticationException` | Token de sesión no provisto o inválido. |
-| `403 Forbidden` | `https://api.atelier.andeva.pe/errors/quota-exceeded` | `QuotaExceededException` | El taller copó su cupo mensual de reportes IA o su plan no incluye el módulo (Go/Pro). |
-| `404 Not Found` | `https://api.atelier.andeva.pe/errors/vehicle-not-found` | `VehicleNotFoundException` | El vehículo a evaluar no existe en el sistema. |
-| `502 Bad Gateway` | `https://api.atelier.andeva.pe/errors/ai-inference-failed` | `AiInferenceException` | Fallo de conexión o tiempo de espera agotado con la nube LPU de Groq. |
+#### Errores y Excepciones de Dominio (RFC 7807)
 
-Ejemplo JSON ProblemDetail:
+| Código HTTP | Excepción Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `400 Bad Request` | `MethodArgumentNotValidException` | Parámetros de días fuera de rango permitido (7 a 90) |
+| `401 Unauthorized` | `AuthenticationException` | Token JWT ausente o inválido |
+| `403 Forbidden` | `QuotaExceededException` | El taller excedió el cupo mensual de reportes con IA de su plan SaaS |
+| `404 Not Found` | `VehicleNotFoundException` | El vehículo especificado no existe en la base de datos |
+| `502 Bad Gateway` | `AiInferenceServiceUnavailableException` | Fallo de conexión o respuesta no estructurada desde Groq Cloud LPU |
+
+**Ejemplo de Carga Útil de Error (RFC 7807 ProblemDetail):**
 ```json
 {
-  "type": "https://api.atelier.andeva.pe/errors/quota-exceeded",
-  "title": "Cupo de Diagnosticos IA Copado",
+  "type": "https://api.atelier.andeva.com/errors/quota-exceeded",
+  "title": "AI Diagnostics Quota Exceeded",
   "status": 403,
-  "detail": "El Plan Max otorga hasta 60 reportes IA mensuales. Ha alcanzado el 100 por ciento de su cuota contratada.",
-  "instance": "/api/v1/iot/vehicles/4c56789a-bcde-f012-3456-789abcdef012/health-reports",
-  "code": "AI_REPORT_QUOTA_EXCEEDED",
-  "timestamp": "2026-10-01T15:55:30Z"
+  "detail": "El taller ha alcanzado el límite mensual de 60 reportes de salud mecánica con IA permitidos por su plan Atelier Max",
+  "instance": "/api/v1/iot/health-reports/generate",
+  "code": "ERR_QUOTA_EXCEEDED",
+  "timestamp": "2026-10-04T02:50:00Z"
 }
 ```
 
 ---
 
-#### POST /api/v1/iot/vehicles/{vehicleId}/ai-insights
+### 8.2. [POST] /api/v1/iot/health-reports/generate-async
 
-##### Identidad Técnica
-* **Controlador:** `VehicleHealthReportsController` (`com.andeva.atelier.platform.iot.interfaces.rest.controllers`)
-* **Método Java:** `public ResponseEntity<Void> requestAiInference(@PathVariable UUID vehicleId, @AuthenticationPrincipal Jwt jwt)`
+#### Identidad Técnica
+* **Controlador:** `com.andeva.atelier.platform.iot.interfaces.rest.controllers.VehicleHealthReportsController`
+* **Método Java:** `public ResponseEntity<AsyncJobResponse> generateHealthReportAsync(@RequestParam UUID vehicleId, @Valid @RequestBody GenerateHealthReportRequest request, @AuthenticationPrincipal Jwt jwt)`
+* **Ruta Base:** `/api/v1/iot/health-reports`
+* **Ruta Completa:** `/api/v1/iot/health-reports/generate-async`
+* **Propósito:** Encola la generación pericial del informe de salud mecánica para procesamiento asíncrono en segundo plano.
 
-##### Descripción Funcional
-Solicita de forma asíncrona la inferencia pericial para auditorías masivas de flotas vehiculares o procesamiento batch nocturno. Encola la orden en el ejecutor de tareas asíncronas de Spring Boot y responde de inmediato con código HTTP 202 Accepted.
+#### Descripción Funcional
+Diseñado para la evaluación de flotas corporativas masivas o escenarios donde el cliente no requiere esperar la inferencia síncrona en pantalla. Valida cuotas del taller, encola un trabajo de procesamiento en segundo plano con identificador único `jobId` y responde inmediatamente `202 Accepted` con el tiempo estimado de culminación. Al concluir el procesamiento asíncrono, se despacha una notificación push WebSocket o correo al solicitante.
 
-##### Seguridad y Autorización
-* **Rol Mínimo:** `ROLE_WORKSHOP_ADMIN` o `ROLE_SERVICE_ADVISOR`.
+#### Seguridad y Autorización
+* **Nivel de Acceso:** Protegido / Taller Autenticado
+* **Rol Mínimo Requerido:** Jefe de Taller (`ROLE_HEAD_MECHANIC`) o Dueño de Taller (`ROLE_WORKSHOP_OWNER`)
 * **Permiso Atómico:** `@PreAuthorize("hasAuthority('iot:health_reports:generate')")`
-* **Contexto Multi-Inquilino:** Verifica la pertenencia del vehículo al taller del token JWT.
+* **Aislamiento Multi-Inquilino:** Verificación estricta de tenencia sobre el vehículo.
 
-##### Parámetros de Petición
-* **Headers:**
-  * `Authorization: Bearer <JWT>` (Obligatorio)
-* **Path Variables:**
-  | Variable | Tipo | Descripción |
-  | :--- | :--- | :--- |
-  | `vehicleId` | UUID | Identificador universal del vehículo a encolar. |
-* **Query Parameters:** Ninguno.
+#### Parámetros de Invocación
+* **Cabeceras HTTP (Headers):**
+  * `Authorization: Bearer <JWT>`
+  * `Content-Type: application/json`
+* **Parámetros de Ruta (Path Parameters):** No aplica.
+* **Parámetros de Consulta (Query Parameters):**
+  * `vehicleId` (`UUID`, Obligatorio): Identificador universal del vehículo a evaluar.
 
-##### Request DTO
-No aplica para este endpoint.
+#### Recurso de Petición (Request Body)
+* **Registro Java DTO:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.requests.GenerateHealthReportRequest`
+* **Definición de Campos:** Idéntica a la especificación de `GenerateHealthReportRequest`.
 
-##### Response DTO
-* **Estado HTTP:** `202 Accepted`
-* **Record Java:** No retorna cuerpo (`Void`).
-
-##### Errores y RFC 7807
-| Código HTTP | Error Type | Excepción de Dominio | Causa Común |
-| :--- | :--- | :--- | :--- |
-| `401 Unauthorized` | `https://api.atelier.andeva.pe/errors/unauthorized` | `AuthenticationException` | Token de sesión no provisto o inválido. |
-| `403 Forbidden` | `https://api.atelier.andeva.pe/errors/quota-exceeded` | `QuotaExceededException` | Cuota de inferencias predictivas agotada para el periodo actual. |
-| `404 Not Found` | `https://api.atelier.andeva.pe/errors/vehicle-not-found` | `VehicleNotFoundException` | Vehículo no encontrado en el sistema. |
-
----
-
-#### GET /api/v1/iot/vehicles/{vehicleId}/health-reports
-
-##### Identidad Técnica
-* **Controlador:** `VehicleHealthReportsController` (`com.andeva.atelier.platform.iot.interfaces.rest.controllers`)
-* **Método Java:** `public ResponseEntity<List<HealthReportCreatedResponse>> getVehicleHealthReports(@PathVariable UUID vehicleId, @AuthenticationPrincipal Jwt jwt)`
-
-##### Descripción Funcional
-Lista la bitácora cronológica de todos los informes de salud mecánica e inferencias periciales calculadas históricamente para el automóvil especificado.
-
-##### Seguridad y Autorización
-* **Rol Mínimo:** `ROLE_WORKSHOP_ADMIN`, `ROLE_SERVICE_ADVISOR`, `ROLE_CHIEF_MECHANIC`, `ROLE_MECHANIC` o `ROLE_VEHICLE_OWNER`.
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('iot:health_reports:read')")`
-* **Contexto Multi-Inquilino:** Verifica que el vehículo pertenezca a la flota del taller o sea conducido por el usuario autenticado.
-
-##### Parámetros de Petición
-* **Headers:**
-  * `Authorization: Bearer <JWT>` (Obligatorio)
-* **Path Variables:**
-  | Variable | Tipo | Descripción |
-  | :--- | :--- | :--- |
-  | `vehicleId` | UUID | Identificador universal del vehículo. |
-* **Query Parameters:** Ninguno.
-
-##### Request DTO
-No aplica para peticiones HTTP GET.
-
-##### Response DTO
-* **Estado HTTP:** `200 OK`
-* **Record Java:** `List<com.andeva.atelier.platform.iot.interfaces.rest.resources.responses.HealthReportCreatedResponse>`
-
-Ejemplo JSON de Respuesta:
-```json
-[
-  {
-    "reportId": "7a890123-4567-89ab-cdef-0123456789ab",
-    "vehicleId": "4c56789a-bcde-f012-3456-789abcdef012",
-    "overallHealthScore": 78,
-    "executiveSummary": "El vehiculo presenta una condicion mecanica estable pero con signos tempranos de fatiga termica.",
-    "totalRisksDetected": 2,
-    "generatedAt": "2026-10-01T15:55:00Z",
-    "jsonResourceUrl": "/api/v1/iot/vehicles/4c56789a-bcde-f012-3456-789abcdef012/health-reports/7a890123-4567-89ab-cdef-0123456789ab",
-    "pdfDownloadUrl": "/api/v1/iot/vehicles/4c56789a-bcde-f012-3456-789abcdef012/health-reports/7a890123-4567-89ab-cdef-0123456789ab/pdf"
-  }
-]
-```
-
-##### Errores y RFC 7807
-| Código HTTP | Error Type | Excepción de Dominio | Causa Común |
-| :--- | :--- | :--- | :--- |
-| `401 Unauthorized` | `https://api.atelier.andeva.pe/errors/unauthorized` | `AuthenticationException` | Token de sesión no provisto o inválido. |
-| `404 Not Found` | `https://api.atelier.andeva.pe/errors/vehicle-not-found` | `VehicleNotFoundException` | Vehículo no encontrado en el sistema. |
-
----
-
-#### GET /api/v1/iot/vehicles/{vehicleId}/health-reports/{reportId}/pdf
-
-##### Identidad Técnica
-* **Controlador:** `VehicleHealthReportsController` (`com.andeva.atelier.platform.iot.interfaces.rest.controllers`)
-* **Método Java:** `public ResponseEntity<byte[]> downloadVehicleHealthReportPdf(@PathVariable UUID vehicleId, @PathVariable UUID reportId, @AuthenticationPrincipal Jwt jwt)`
-
-##### Descripción Funcional
-Genera y transmite de forma binaria el documento pericial maquetado en formato PDF con la identidad corporativa de Atelier Platform y del taller automotriz, incluyendo gráficos de telemetría, desglose de códigos DTC y recomendaciones preventivas calculadas por la IA.
-
-##### Seguridad y Autorización
-* **Rol Mínimo:** `ROLE_WORKSHOP_ADMIN`, `ROLE_SERVICE_ADVISOR` o `ROLE_VEHICLE_OWNER`.
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('iot:health_reports:read')")`
-* **Contexto Multi-Inquilino:** Verifica que el reporte y el vehículo correspondan al taller autenticado.
-
-##### Parámetros de Petición
-* **Headers:**
-  * `Authorization: Bearer <JWT>` (Obligatorio)
-* **Path Variables:**
-  | Variable | Tipo | Descripción |
-  | :--- | :--- | :--- |
-  | `vehicleId` | UUID | Identificador universal del vehículo. |
-  | `reportId` | UUID | Identificador universal del reporte de salud a descargar. |
-* **Query Parameters:** Ninguno.
-
-##### Request DTO
-No aplica para peticiones HTTP GET.
-
-##### Response DTO
-* **Estado HTTP:** `200 OK`
-* **Headers:**
-  * `Content-Type: application/pdf`
-  * `Content-Disposition: attachment, filename="informe-salud-vehicular-7a890123.pdf"`
-* **Tipo de Contenido:** Flujo binario de bytes (`byte[]`).
-
-##### Errores y RFC 7807
-| Código HTTP | Error Type | Excepción de Dominio | Causa Común |
-| :--- | :--- | :--- | :--- |
-| `401 Unauthorized` | `https://api.atelier.andeva.pe/errors/unauthorized` | `AuthenticationException` | Token de sesión no provisto o inválido. |
-| `403 Forbidden` | `https://api.atelier.andeva.pe/errors/forbidden` | `AccessDeniedException` | Permisos insuficientes para descargar el peritaje documental. |
-| `404 Not Found` | `https://api.atelier.andeva.pe/errors/report-not-found` | `VehicleHealthReportNotFoundException` | El informe de salud solicitado no existe en los registros. |
-| `500 Internal Server Error` | `https://api.atelier.andeva.pe/errors/pdf-generation-error` | `PdfRenderingException` | Falla en el motor OpenPDF durante la maquetación del documento. |
-
-Ejemplo JSON ProblemDetail:
+**Ejemplo de Carga Útil JSON (Request):**
 ```json
 {
-  "type": "https://api.atelier.andeva.pe/errors/report-not-found",
-  "title": "Informe Pericial No Encontrado",
+  "daysToAnalyze": 60,
+  "includeResolvedDtcHistory": true,
+  "triggerReason": "FLEET_PERIODIC_AUDIT"
+}
+```
+
+#### Recurso de Respuesta (Response Body)
+* **Estado HTTP Exitoso:** `202 Accepted`
+* **Registro Java DTO:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.responses.AsyncJobResponse`
+* **Definición de Campos Proyectados:**
+
+| Campo | Tipo de Dato | Descripción |
+| :--- | :--- | :--- |
+| `jobId` | `UUID` | Identificador único de la tarea encolada en segundo plano |
+| `status` | `String` | Estado del trabajo (QUEUED, PROCESSING) |
+| `vehicleId` | `UUID` | Identificador del vehículo vinculado |
+| `submittedAt` | `Instant` | Marca temporal de recepción en formato ISO 8601 UTC |
+| `estimatedCompletionTime` | `Instant` | Estimación proyectada de culminación del reporte |
+
+**Ejemplo de Carga Útil JSON (Response):**
+```json
+{
+  "jobId": "018f6c40-7e12-7000-8000-000000001050",
+  "status": "QUEUED",
+  "vehicleId": "018f6c40-7e12-7000-8000-000000000601",
+  "submittedAt": "2026-10-04T02:55:00Z",
+  "estimatedCompletionTime": "2026-10-04T02:55:15Z"
+}
+```
+
+#### Errores y Excepciones de Dominio (RFC 7807)
+
+| Código HTTP | Excepción Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `400 Bad Request` | `MethodArgumentNotValidException` | Parámetros inválidos en el cuerpo de la solicitud |
+| `401 Unauthorized` | `AuthenticationException` | Token JWT ausente o inválido |
+| `403 Forbidden` | `QuotaExceededException` | Cupo mensual de diagnósticos IA agotado en el taller |
+
+**Ejemplo de Carga Útil de Error (RFC 7807 ProblemDetail):**
+```json
+{
+  "type": "https://api.atelier.andeva.com/errors/quota-exceeded",
+  "title": "AI Diagnostics Quota Exceeded",
+  "status": 403,
+  "detail": "Cupo de procesamiento con inteligencia artificial agotado para el mes en curso",
+  "instance": "/api/v1/iot/health-reports/generate-async",
+  "code": "ERR_QUOTA_EXCEEDED",
+  "timestamp": "2026-10-04T02:55:00Z"
+}
+```
+
+---
+
+### 8.3. [GET] /api/v1/iot/health-reports/latest
+
+#### Identidad Técnica
+* **Controlador:** `com.andeva.atelier.platform.iot.interfaces.rest.controllers.VehicleHealthReportsController`
+* **Método Java:** `public ResponseEntity<HealthReportCreatedResponse> getLatestHealthReport(@RequestParam UUID vehicleId, @AuthenticationPrincipal Jwt jwt)`
+* **Ruta Base:** `/api/v1/iot/health-reports`
+* **Ruta Completa:** `/api/v1/iot/health-reports/latest`
+* **Propósito:** Consulta el último informe pericial de salud mecánica calculado para un automóvil.
+
+#### Descripción Funcional
+Recupera el dictamen de salud más reciente emitido para el vehículo solicitado sin desencadenar una nueva inferencia en Groq Cloud, ahorrando cuotas y costos de procesamiento. Consulta el último informe ordenado descendentemente por fecha de generación, retornando la puntuación de salud, resumen ejecutivo y enlaces de descarga.
+
+#### Seguridad y Autorización
+* **Nivel de Acceso:** Protegido / Taller Autenticado
+* **Rol Mínimo Requerido:** Mecánico (`ROLE_MECHANIC`), Asesor de Servicio (`ROLE_SERVICE_ADVISOR`) o Jefe de Taller (`ROLE_HEAD_MECHANIC`)
+* **Permiso Atómico:** `@PreAuthorize("hasAuthority('iot:health_reports:read')")`
+* **Aislamiento Multi-Inquilino:** Filtrado por vehículo perteneciente al taller autenticado.
+
+#### Parámetros de Invocación
+* **Cabeceras HTTP (Headers):**
+  * `Authorization: Bearer <JWT>`
+  * `Accept: application/json`
+* **Parámetros de Ruta (Path Parameters):** No aplica.
+* **Parámetros de Consulta (Query Parameters):**
+  * `vehicleId` (`UUID`, Obligatorio): Identificador del vehículo consultado.
+
+#### Recurso de Petición (Request Body)
+No aplica (Solicitud de tipo HTTP GET sin cuerpo).
+
+#### Recurso de Respuesta (Response Body)
+* **Estado HTTP Exitoso:** `200 OK`
+* **Registro Java DTO:** `com.andeva.atelier.platform.iot.interfaces.rest.resources.responses.HealthReportCreatedResponse`
+* **Definición de Campos Proyectados:** Idéntica a la definición de `HealthReportCreatedResponse`.
+
+**Ejemplo de Carga Útil JSON (Response):**
+```json
+{
+  "reportId": "018f6c40-7e12-7000-8000-000000001001",
+  "vehicleId": "018f6c40-7e12-7000-8000-000000000601",
+  "overallHealthScore": 78,
+  "executiveSummary": "Unidad con desgaste moderado en sistema de encendido. Código P0300 detectado con variaciones térmicas elevadas en tráfico lento.",
+  "totalRisksDetected": 2,
+  "generatedAt": "2026-10-04T02:50:00Z",
+  "jsonResourceUrl": "/api/v1/iot/health-reports/018f6c40-7e12-7000-8000-000000001001",
+  "pdfDownloadUrl": "/api/v1/iot/health-reports/018f6c40-7e12-7000-8000-000000001001/pdf"
+}
+```
+
+#### Errores y Excepciones de Dominio (RFC 7807)
+
+| Código HTTP | Excepción Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `400 Bad Request` | `MethodArgumentTypeMismatchException` | Formato UUID no válido |
+| `401 Unauthorized` | `AuthenticationException` | Token JWT ausente o inválido |
+| `403 Forbidden` | `AccessDeniedException` | Permisos insuficientes para consultar reportes |
+| `404 Not Found` | `VehicleHealthReportNotFoundException` | No se encontraron reportes generados para el vehículo |
+
+**Ejemplo de Carga Útil de Error (RFC 7807 ProblemDetail):**
+```json
+{
+  "type": "https://api.atelier.andeva.com/errors/health-report-not-found",
+  "title": "Health Report Not Found",
   "status": 404,
-  "detail": "No se encontro el informe de salud con identificador 7a890123-4567-89ab-cdef-0123456789ab para este vehiculo.",
-  "instance": "/api/v1/iot/vehicles/4c56789a-bcde-f012-3456-789abcdef012/health-reports/7a890123-4567-89ab-cdef-0123456789ab/pdf",
-  "code": "HEALTH_REPORT_NOT_FOUND",
-  "timestamp": "2026-10-01T15:56:00Z"
+  "detail": "El vehículo no cuenta con reportes periciales de salud mecánica previos en el sistema",
+  "instance": "/api/v1/iot/health-reports/latest",
+  "code": "ERR_HEALTH_REPORT_NOT_FOUND",
+  "timestamp": "2026-10-04T02:55:00Z"
+}
+```
+
+---
+
+### 8.4. [GET] /api/v1/iot/health-reports/{reportId}/pdf
+
+#### Identidad Técnica
+* **Controlador:** `com.andeva.atelier.platform.iot.interfaces.rest.controllers.VehicleHealthReportsController`
+* **Método Java:** `public ResponseEntity<byte[]> downloadHealthReportPdf(@PathVariable UUID reportId, @AuthenticationPrincipal Jwt jwt)`
+* **Ruta Base:** `/api/v1/iot/health-reports`
+* **Ruta Completa:** `/api/v1/iot/health-reports/{reportId}/pdf`
+* **Propósito:** Genera y descarga el informe pericial institucional en formato binario PDF maquetado con OpenPDF.
+
+#### Descripción Funcional
+Recupera el informe de salud mecánica y compila los gráficos de telemetría, códigos DTC y recomendaciones periciales mediante el motor documental OpenPDF. Genera el documento estructurado incorporando la identidad gráfica institucional de Atelier y del taller mecánico, retornando el flujo binario con cabecera `Content-Type: application/pdf` y cabecera de disposición para descarga inmediata en el navegador del cliente o asesor.
+
+#### Seguridad y Autorización
+* **Nivel de Acceso:** Protegido / Taller Autenticado
+* **Rol Mínimo Requerido:** Asesor de Servicio (`ROLE_SERVICE_ADVISOR`), Mecánico (`ROLE_MECHANIC`) o Jefe de Taller (`ROLE_HEAD_MECHANIC`)
+* **Permiso Atómico:** `@PreAuthorize("hasAuthority('iot:health_reports:read')")`
+* **Aislamiento Multi-Inquilino:** El informe debe pertenecer a un vehículo administrado por el taller autenticado.
+
+#### Parámetros de Invocación
+* **Cabeceras HTTP (Headers):**
+  * `Authorization: Bearer <JWT>`
+  * `Accept: application/pdf`
+* **Parámetros de Ruta (Path Parameters):**
+  * `reportId` (`UUID`): Identificador universal del reporte pericial.
+* **Parámetros de Consulta (Query Parameters):** No aplica.
+
+#### Recurso de Petición (Request Body)
+No aplica (Solicitud de tipo HTTP GET sin cuerpo).
+
+#### Recurso de Respuesta (Response Body)
+* **Estado HTTP Exitoso:** `200 OK`
+* **Cabeceras de Respuesta Clave:**
+  * `Content-Type: application/pdf`
+  * Cabecera `Content-Disposition` con disposición attachment y nombre de archivo institucional
+* **Formato del Cuerpo:** Flujo binario con el documento PDF oficial generado
+
+#### Errores y Excepciones de Dominio (RFC 7807)
+
+| Código HTTP | Excepción Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `400 Bad Request` | `MethodArgumentTypeMismatchException` | Formato UUID del reporte no válido |
+| `401 Unauthorized` | `AuthenticationException` | Token JWT ausente o inválido |
+| `403 Forbidden` | `AccessDeniedException` | Permisos insuficientes para descargar reportes periciales |
+| `404 Not Found` | `VehicleHealthReportNotFoundException` | El reporte solicitado no existe en la base de datos |
+
+**Ejemplo de Carga Útil de Error (RFC 7807 ProblemDetail):**
+```json
+{
+  "type": "https://api.atelier.andeva.com/errors/health-report-not-found",
+  "title": "Health Report Not Found",
+  "status": 404,
+  "detail": "El informe pericial con identificador 018f6c40-7e12-7000-8000-000000001099 no existe en el sistema",
+  "instance": "/api/v1/iot/health-reports/018f6c40-7e12-7000-8000-000000001099/pdf",
+  "code": "ERR_HEALTH_REPORT_NOT_FOUND",
+  "timestamp": "2026-10-04T02:58:00Z"
 }
 ```

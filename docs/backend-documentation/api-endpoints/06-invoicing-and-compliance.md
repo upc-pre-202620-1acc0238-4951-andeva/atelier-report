@@ -17,32 +17,27 @@ Todos los endpoints documentados en esta especificación se adhieren a los sigui
 
 ## 2. Índice Canónico de Endpoints
 
-| Método | Ruta Relativa | Controlador Java | Permiso Atómico Requerido | Rol Mínimo Sugerido |
-| :--- | :--- | :--- | :--- | :--- |
-| `POST` | `/api/v1/invoicing/vouchers` | `ElectronicVouchersController` | `invoicing:invoices:issue_sunat` | Cajero |
-| `POST` | `/api/v1/invoicing/vouchers/credit-notes` | `ElectronicVouchersController` | `invoicing:invoices:issue_sunat` | Administrador de Taller |
-| `GET` | `/api/v1/invoicing/vouchers/{id}` | `ElectronicVouchersController` | `invoicing:invoices:read` | Asesor de Servicio |
-| `GET` | `/api/v1/invoicing/vouchers` | `ElectronicVouchersController` | `invoicing:invoices:read` | Asesor de Servicio |
-| `GET` | `/api/v1/invoicing/vouchers/work-orders/{workOrderId}` | `ElectronicVouchersController` | `invoicing:invoices:read` | Asesor de Servicio |
-| `POST` | `/api/v1/invoicing/vouchers/{id}/void` | `ElectronicVouchersController` | `invoicing:invoices:issue_sunat` | Administrador de Taller |
-| `GET` | `/api/v1/invoicing/vouchers/{id}/pdf` | `ElectronicVouchersController` | `invoicing:invoices:read` | Cajero |
-| `GET` | `/api/v1/invoicing/vouchers/{id}/xml` | `ElectronicVouchersController` | `invoicing:invoices:read` | Cajero |
-| `GET` | `/api/v1/invoicing/vouchers/{id}/cdr` | `ElectronicVouchersController` | `invoicing:invoices:read` | Cajero |
-| `POST` | `/api/v1/invoicing/payments` | `VoucherPaymentsController` | `invoicing:payments:create` | Cajero |
-| `GET` | `/api/v1/invoicing/payments/vouchers/{voucherId}` | `VoucherPaymentsController` | `invoicing:invoices:read` | Cajero |
-| `GET` | `/api/v1/invoicing/payments/branches/{branchId}` | `VoucherPaymentsController` | `invoicing:invoices:read` | Cajero |
-| `POST` | `/api/v1/invoicing/series-configurations` | `SeriesConfigurationsController` | `invoicing:fiscal_config:manage` | Dueño de Taller |
-| `GET` | `/api/v1/invoicing/series-configurations/branches/{branchId}` | `SeriesConfigurationsController` | `invoicing:fiscal_config:manage` / `invoicing:invoices:read` | Cajero |
-| `PATCH` | `/api/v1/invoicing/series-configurations/{id}/activate` | `SeriesConfigurationsController` | `invoicing:fiscal_config:manage` | Dueño de Taller |
-| `PATCH` | `/api/v1/invoicing/series-configurations/{id}/deactivate` | `SeriesConfigurationsController` | `invoicing:fiscal_config:manage` | Dueño de Taller |
-| `GET` | `/api/v1/invoicing/financial-reports/cash-flow` | `FinancialReportsController` | `invoicing:cashflow:export_pdf` | Dueño de Taller |
-| `GET` | `/api/v1/invoicing/financial-reports/cash-flow/pdf` | `FinancialReportsController` | `invoicing:cashflow:export_pdf` | Dueño de Taller |
+| No. | Método | Ruta Relativa | Controlador Java | Permiso Atómico Requerido | Rol Mínimo Sugerido |
+| :---: | :--- | :--- | :--- | :--- | :--- |
+| 1 | `POST` | `/api/v1/invoicing/vouchers` | `ElectronicVouchersController` | `invoicing:invoices:issue_sunat` | Cajero |
+| 2 | `POST` | `/api/v1/invoicing/vouchers/credit-notes` | `ElectronicVouchersController` | `invoicing:invoices:issue_sunat` | Administrador de Taller |
+| 3 | `GET` | `/api/v1/invoicing/vouchers/{id}` | `ElectronicVouchersController` | `invoicing:invoices:read` | Asesor de Servicio |
+| 4 | `GET` | `/api/v1/invoicing/vouchers` | `ElectronicVouchersController` | `invoicing:invoices:read` | Asesor de Servicio |
+| 5 | `GET` | `/api/v1/invoicing/vouchers/work-order/{workOrderId}` | `ElectronicVouchersController` | `invoicing:invoices:read` | Asesor de Servicio |
+| 6 | `POST` | `/api/v1/invoicing/vouchers/{id}/void` | `ElectronicVouchersController` | `invoicing:invoices:issue_sunat` | Administrador de Taller |
+| 7 | `POST` | `/api/v1/invoicing/payments` | `VoucherPaymentsController` | `invoicing:payments:create` | Cajero |
+| 8 | `GET` | `/api/v1/invoicing/payments/voucher/{voucherId}` | `VoucherPaymentsController` | `invoicing:invoices:read` | Cajero |
+| 9 | `GET` | `/api/v1/invoicing/payments/branch/{branchId}/daily` | `VoucherPaymentsController` | `invoicing:invoices:read` | Cajero |
+| 10 | `POST` | `/api/v1/invoicing/series-configurations` | `SeriesConfigurationController` | `invoicing:fiscal_config:manage` | Dueño de Taller |
+| 11 | `GET` | `/api/v1/invoicing/series-configurations/branch/{branchId}` | `SeriesConfigurationController` | `invoicing:fiscal_config:manage` o `invoicing:invoices:read` | Cajero |
+| 12 | `GET` | `/api/v1/invoicing/financial-reports/cash-flow` | `FinancialReportsController` | `invoicing:cashflow:export_pdf` | Dueño de Taller |
+| 13 | `GET` | `/api/v1/invoicing/financial-reports/cash-flow/pdf` | `FinancialReportsController` | `invoicing:cashflow:export_pdf` | Dueño de Taller |
 
 ---
 
 ## 3. Endpoints de ElectronicVouchersController
 
-El controlador `ElectronicVouchersController` administra el ciclo de vida completo de los comprobantes electrónicos con validez tributaria: emisión ante SUNAT, notas de crédito, consulta de expedientes fiscales, anulación y descarga de archivos probatorios (PDF, XML firmado UBL 2.1 y constancia CDR).
+El controlador `ElectronicVouchersController` administra el ciclo de vida completo de los comprobantes electrónicos con validez tributaria: emisión ante SUNAT, notas de crédito, consulta de expedientes fiscales, anulación y obtención de hipervínculos para la descarga de archivos probatorios (PDF oficial para impresión térmica o A4, XML firmado bajo UBL 2.1 y constancia de recepción CDR provistos directamente en el recurso `digitalReceipts`).
 
 ### POST /api/v1/invoicing/vouchers
 
@@ -593,7 +588,7 @@ Lista de forma segmentada y filtrada el catálogo de comprobantes fiscales emiti
 
 ---
 
-### GET /api/v1/invoicing/vouchers/work-orders/{workOrderId}
+### GET /api/v1/invoicing/vouchers/work-order/{workOrderId}
 
 #### Identidad Técnica
 * **Controlador:** `com.andeva.atelier.platform.invoicing.interfaces.rest.ElectronicVouchersController`
@@ -662,7 +657,7 @@ Recupera el listado de todos los comprobantes fiscales vinculados formalmente a 
   "title": "Orden de Trabajo No Encontrada",
   "status": 404,
   "detail": "No se encontro la orden de trabajo especificada con identificador d4e5f6a7-b8c9-4012-3456-7890abcdef99.",
-  "instance": "/api/v1/invoicing/vouchers/work-orders/d4e5f6a7-b8c9-4012-3456-7890abcdef99",
+  "instance": "/api/v1/invoicing/vouchers/work-order/d4e5f6a7-b8c9-4012-3456-7890abcdef99",
   "timestamp": "2026-10-01T16:19:00Z",
   "correlationId": "req-vouch-wo-404-01"
 }
@@ -761,175 +756,7 @@ Comunica la baja formal y anulación del comprobante ante SUNAT dentro del plazo
 }
 ```
 
----
 
-### GET /api/v1/invoicing/vouchers/{id}/pdf
-
-#### Identidad Técnica
-* **Controlador:** `com.andeva.atelier.platform.invoicing.interfaces.rest.ElectronicVouchersController`
-* **Método Java:** `public ResponseEntity<byte[]> downloadVoucherPdf(@RequestHeader("X-Tenant-Id") UUID tenantId, @PathVariable("id") UUID id)`
-
-#### Descripción Funcional
-Descarga el archivo PDF oficial que contiene la representación impresa del comprobante fiscal, formateado con el imagotipo del taller, código QR tributario y glosas de ley exigidas por SUNAT.
-
-#### Seguridad y Autorización
-* **Rol Mínimo:** Cajero (ROLE_CASHIER) o Asesor de Servicio (ROLE_SERVICE_ADVISOR).
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('invoicing:invoices:read')")`
-* **Contexto Multi-Inquilino:** Valida pertenencia del comprobante al tenant_id autenticado.
-
-#### Parámetros de Petición
-* **Headers Obligatorios:**
-  * `Authorization: Bearer <JWT>`
-  * `X-Tenant-Id: <UUID>`
-* **Path Variables:**
-  * `id` (UUID): Identificador único del comprobante electrónico
-* **Query Parameters:** Ninguno.
-
-#### Cuerpo de Respuesta (Response DTO)
-* **Estado HTTP:** `200 OK`
-| Campo | Tipo Java | Descripción |
-| :--- | :--- | :--- |
-| `Content-Type` | `Header` | Cabecera MIME application/pdf |
-| `Content-Disposition` | `Header` | Adjunto de descarga con nombre de archivo F001-00001042.pdf |
-
-
-```text
-%PDF-1.4 ... [Contenido binario compilado de representacion impresa de comprobante fiscal]
-```
-#### Errores y Excepciones Semánticas (RFC 7807)
-
-| Código HTTP | Error Type URI | Excepción de Dominio Java | Causa Operativa |
-| :--- | :--- | :--- | :--- |
-| 401 Unauthorized | `https://api.atelier.pe/errors/unauthorized` | `AuthenticationException` | Token JWT ausente o inválido |
-| 403 Forbidden | `https://api.atelier.pe/errors/forbidden` | `AccessDeniedException` | Permiso invoicing:invoices:read denegado |
-| 404 Not Found | `https://api.atelier.pe/errors/voucher-not-found` | `VoucherNotFoundException` | Comprobante no encontrado |
-
-
-```json
-{
-  "type": "https://api.atelier.pe/errors/voucher-not-found",
-  "title": "Comprobante No Encontrado",
-  "status": 404,
-  "detail": "No se encontro el comprobante para generar la representacion impresa PDF.",
-  "instance": "/api/v1/invoicing/vouchers/a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c99/pdf",
-  "timestamp": "2026-10-01T16:21:00Z",
-  "correlationId": "req-pdf-404-01"
-}
-```
-
----
-
-### GET /api/v1/invoicing/vouchers/{id}/xml
-
-#### Identidad Técnica
-* **Controlador:** `com.andeva.atelier.platform.invoicing.interfaces.rest.ElectronicVouchersController`
-* **Método Java:** `public ResponseEntity<byte[]> downloadVoucherXml(@RequestHeader("X-Tenant-Id") UUID tenantId, @PathVariable("id") UUID id)`
-
-#### Descripción Funcional
-Descarga el archivo XML firmado criptográficamente bajo el estándar UBL 2.1 con el certificado digital de la empresa, el cual constituye el valor probatorio legal del comprobante.
-
-#### Seguridad y Autorización
-* **Rol Mínimo:** Cajero (ROLE_CASHIER) o Asesor de Servicio (ROLE_SERVICE_ADVISOR).
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('invoicing:invoices:read')")`
-* **Contexto Multi-Inquilino:** Valida pertenencia del comprobante al tenant_id autenticado.
-
-#### Parámetros de Petición
-* **Headers Obligatorios:**
-  * `Authorization: Bearer <JWT>`
-  * `X-Tenant-Id: <UUID>`
-* **Path Variables:**
-  * `id` (UUID): Identificador único del comprobante electrónico
-* **Query Parameters:** Ninguno.
-
-#### Cuerpo de Respuesta (Response DTO)
-* **Estado HTTP:** `200 OK`
-| Campo | Tipo Java | Descripción |
-| :--- | :--- | :--- |
-| `Content-Type` | `Header` | Cabecera MIME application/xml con codificación UTF-8 |
-| `Content-Disposition` | `Header` | Adjunto de descarga con nombre de archivo 20608945231-01-F001-00001042.xml |
-
-
-```text
-<?xml version="1.0" encoding="UTF-8"?>
-<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"> ... </Invoice>
-```
-#### Errores y Excepciones Semánticas (RFC 7807)
-
-| Código HTTP | Error Type URI | Excepción de Dominio Java | Causa Operativa |
-| :--- | :--- | :--- | :--- |
-| 401 Unauthorized | `https://api.atelier.pe/errors/unauthorized` | `AuthenticationException` | Token JWT ausente o inválido |
-| 403 Forbidden | `https://api.atelier.pe/errors/forbidden` | `AccessDeniedException` | Permiso denegado |
-| 404 Not Found | `https://api.atelier.pe/errors/voucher-not-found` | `VoucherNotFoundException` | Comprobante no encontrado |
-
-
-```json
-{
-  "type": "https://api.atelier.pe/errors/voucher-not-found",
-  "title": "Comprobante No Encontrado",
-  "status": 404,
-  "detail": "No se encontro el comprobante para descargar el archivo XML firmado.",
-  "instance": "/api/v1/invoicing/vouchers/a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c99/xml",
-  "timestamp": "2026-10-01T16:22:00Z",
-  "correlationId": "req-xml-404-01"
-}
-```
-
----
-
-### GET /api/v1/invoicing/vouchers/{id}/cdr
-
-#### Identidad Técnica
-* **Controlador:** `com.andeva.atelier.platform.invoicing.interfaces.rest.ElectronicVouchersController`
-* **Método Java:** `public ResponseEntity<byte[]> downloadVoucherCdr(@RequestHeader("X-Tenant-Id") UUID tenantId, @PathVariable("id") UUID id)`
-
-#### Descripción Funcional
-Descarga la Constancia de Recepción (CDR) oficial devuelta por SUNAT tras la aceptación satisfactoria del comprobante electrónico, la cual certifica la validez fiscal ante cualquier auditoría tributaria.
-
-#### Seguridad y Autorización
-* **Rol Mínimo:** Cajero (ROLE_CASHIER) o Asesor de Servicio (ROLE_SERVICE_ADVISOR).
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('invoicing:invoices:read')")`
-* **Contexto Multi-Inquilino:** Valida que el comprobante pertenezca al tenant_id autenticado.
-
-#### Parámetros de Petición
-* **Headers Obligatorios:**
-  * `Authorization: Bearer <JWT>`
-  * `X-Tenant-Id: <UUID>`
-* **Path Variables:**
-  * `id` (UUID): Identificador único del comprobante electrónico
-* **Query Parameters:** Ninguno.
-
-#### Cuerpo de Respuesta (Response DTO)
-* **Estado HTTP:** `200 OK`
-| Campo | Tipo Java | Descripción |
-| :--- | :--- | :--- |
-| `Content-Type` | `Header` | Cabecera MIME application/xml con codificación UTF-8 |
-| `Content-Disposition` | `Header` | Adjunto de descarga con nombre de archivo R-20608945231-01-F001-00001042.xml |
-
-
-```text
-<?xml version="1.0" encoding="UTF-8"?>
-<ApplicationResponse xmlns="urn:oasis:names:specification:ubl:schema:xsd:ApplicationResponse-2"> ... </ApplicationResponse>
-```
-#### Errores y Excepciones Semánticas (RFC 7807)
-
-| Código HTTP | Error Type URI | Excepción de Dominio Java | Causa Operativa |
-| :--- | :--- | :--- | :--- |
-| 401 Unauthorized | `https://api.atelier.pe/errors/unauthorized` | `AuthenticationException` | Token JWT ausente o inválido |
-| 403 Forbidden | `https://api.atelier.pe/errors/forbidden` | `AccessDeniedException` | Permiso denegado |
-| 404 Not Found | `https://api.atelier.pe/errors/voucher-not-found` | `VoucherNotFoundException` | Comprobante no encontrado o CDR no disponible aún |
-
-
-```json
-{
-  "type": "https://api.atelier.pe/errors/voucher-not-found",
-  "title": "CDR No Disponible",
-  "status": 404,
-  "detail": "La constancia de recepcion CDR de SUNAT aun no ha sido devuelta para este comprobante.",
-  "instance": "/api/v1/invoicing/vouchers/a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c99/cdr",
-  "timestamp": "2026-10-01T16:23:00Z",
-  "correlationId": "req-cdr-404-01"
-}
-```
 
 ---
 
@@ -1033,7 +860,7 @@ Asienta y registra un cobro dinerario efectivo o electrónico (efectivo, tarjeta
 
 ---
 
-### GET /api/v1/invoicing/payments/vouchers/{voucherId}
+### GET /api/v1/invoicing/payments/voucher/{voucherId}
 
 #### Identidad Técnica
 * **Controlador:** `com.andeva.atelier.platform.invoicing.interfaces.rest.VoucherPaymentsController`
@@ -1100,7 +927,7 @@ Consulta y lista el historial completo de amortizaciones y cobros aplicados a un
   "title": "Comprobante Inexistente",
   "status": 404,
   "detail": "No se encontro el comprobante especificado para consultar abonos.",
-  "instance": "/api/v1/invoicing/payments/vouchers/a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c99",
+  "instance": "/api/v1/invoicing/payments/voucher/a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c99",
   "timestamp": "2026-10-01T16:27:00Z",
   "correlationId": "req-pay-vouch-404-01"
 }
@@ -1108,14 +935,14 @@ Consulta y lista el historial completo de amortizaciones y cobros aplicados a un
 
 ---
 
-### GET /api/v1/invoicing/payments/branches/{branchId}
+### GET /api/v1/invoicing/payments/branch/{branchId}/daily
 
 #### Identidad Técnica
 * **Controlador:** `com.andeva.atelier.platform.invoicing.interfaces.rest.VoucherPaymentsController`
-* **Método Java:** `public ResponseEntity<List<VoucherPaymentResource>> getPaymentsByBranchAndDate(@RequestHeader("X-Tenant-Id") UUID tenantId, @PathVariable("branchId") UUID branchId, @RequestParam(value = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date)`
+* **Método Java:** `public ResponseEntity<List<VoucherPaymentResource>> getDailyPaymentsByBranch(@RequestHeader("X-Tenant-Id") UUID tenantId, @PathVariable("branchId") UUID branchId, @RequestParam(value = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date)`
 
 #### Descripción Funcional
-Recupera el arqueo consolidado de cobros recaudados en una sede física específica durante una jornada operativa. Permite al cajero y administrador cuadrar la caja física confrontando efectivo y abonos digitales.
+Recupera el reporte consolidado de cobros diarios percibidos en una sucursal física determinada para una fecha de corte específica. Si no se suministra el parámetro de consulta date, el backend asume la fecha actual del servidor. Permite al personal de caja y a la administración realizar el arqueo de caja confrontando los pagos en efectivo y electrónicos percibidos en mostrador o patio de servicio.
 
 #### Seguridad y Autorización
 * **Rol Mínimo:** Cajero (ROLE_CASHIER) o Administrador de Taller (ROLE_WORKSHOP_ADMINISTRATOR).
@@ -1146,7 +973,6 @@ Recupera el arqueo consolidado de cobros recaudados en una sede física específ
 | `status` | `String` | Estado formal |
 | `paidAt` | `Instant` | Marca temporal del cobro |
 
-
 ```json
 [
   {
@@ -1161,6 +987,7 @@ Recupera el arqueo consolidado de cobros recaudados en una sede física específ
   }
 ]
 ```
+
 #### Errores y Excepciones Semánticas (RFC 7807)
 
 | Código HTTP | Error Type URI | Excepción de Dominio Java | Causa Operativa |
@@ -1169,29 +996,27 @@ Recupera el arqueo consolidado de cobros recaudados en una sede física específ
 | 403 Forbidden | `https://api.atelier.pe/errors/forbidden` | `AccessDeniedException` | Permiso denegado para consultar arqueo |
 | 404 Not Found | `https://api.atelier.pe/errors/branch-not-found` | `BranchNotFoundException` | La sucursal indicada no existe |
 
-
 ```json
 {
   "type": "https://api.atelier.pe/errors/branch-not-found",
   "title": "Sede No Encontrada",
   "status": 404,
   "detail": "No se encontro la sede física especificada para consultar el arqueo de pagos.",
-  "instance": "/api/v1/invoicing/payments/branches/b8c3d9a1-4567-4e89-9123-abcdef012999",
+  "instance": "/api/v1/invoicing/payments/branch/b8c3d9a1-4567-4e89-9123-abcdef012999/daily",
   "timestamp": "2026-10-01T16:28:00Z",
   "correlationId": "req-pay-br-404-01"
 }
 ```
-
 ---
 
-## 5. Endpoints de SeriesConfigurationsController
+## 5. Endpoints de SeriesConfigurationController
 
-El controlador `SeriesConfigurationsController` gestiona la configuración soberana de las series alfanuméricas autorizadas por SUNAT para cada sucursal física del taller, garantizando el avance correlativo estricto y la trazabilidad fiscal inmutable.
+El controlador `SeriesConfigurationController` gestiona la configuración soberana de las series alfanuméricas autorizadas por SUNAT para cada sucursal física del taller, garantizando el avance correlativo estricto y la trazabilidad fiscal inmutable.
 
 ### POST /api/v1/invoicing/series-configurations
 
 #### Identidad Técnica
-* **Controlador:** `com.andeva.atelier.platform.invoicing.interfaces.rest.SeriesConfigurationsController`
+* **Controlador:** `com.andeva.atelier.platform.invoicing.interfaces.rest.SeriesConfigurationController`
 * **Método Java:** `public ResponseEntity<SeriesConfigurationResource> configureSeries(@RequestHeader("X-Tenant-Id") UUID tenantId, @Valid @RequestBody ConfigureSeriesRequest request)`
 
 #### Descripción Funcional
@@ -1280,10 +1105,10 @@ Parametriza y da de alta una nueva serie alfanumérica de facturación electrón
 
 ---
 
-### GET /api/v1/invoicing/series-configurations/branches/{branchId}
+### GET /api/v1/invoicing/series-configurations/branch/{branchId}
 
 #### Identidad Técnica
-* **Controlador:** `com.andeva.atelier.platform.invoicing.interfaces.rest.SeriesConfigurationsController`
+* **Controlador:** `com.andeva.atelier.platform.invoicing.interfaces.rest.SeriesConfigurationController`
 * **Método Java:** `public ResponseEntity<List<SeriesConfigurationResource>> getSeriesByBranch(@RequestHeader("X-Tenant-Id") UUID tenantId, @PathVariable("branchId") UUID branchId)`
 
 #### Descripción Funcional
@@ -1354,105 +1179,13 @@ Recupera el catálogo de todas las series de facturación electrónica configura
   "title": "Sede No Encontrada",
   "status": 404,
   "detail": "No se encontro la sede física especificada para listar series fiscales.",
-  "instance": "/api/v1/invoicing/series-configurations/branches/b8c3d9a1-4567-4e89-9123-abcdef012999",
+  "instance": "/api/v1/invoicing/series-configurations/branch/b8c3d9a1-4567-4e89-9123-abcdef012999",
   "timestamp": "2026-10-01T16:31:00Z",
   "correlationId": "req-ser-list-404-01"
 }
 ```
 
----
 
-### PATCH /api/v1/invoicing/series-configurations/{id}/activate
-
-#### Identidad Técnica
-* **Controlador:** `com.andeva.atelier.platform.invoicing.interfaces.rest.SeriesConfigurationsController`
-* **Método Java:** `public ResponseEntity<Void> activateSeries(@RequestHeader("X-Tenant-Id") UUID tenantId, @PathVariable("id") UUID id)`
-
-#### Descripción Funcional
-Habilita operativamente una serie fiscal que se encontraba desactivada, permitiendo la emisión continua de comprobantes con sus correlativos correlacionados.
-
-#### Seguridad y Autorización
-* **Rol Mínimo:** Dueño de Taller (ROLE_WORKSHOP_OWNER).
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('invoicing:fiscal_config:manage')")`
-* **Contexto Multi-Inquilino:** Valida pertenencia de la serie al tenant_id autenticado.
-
-#### Parámetros de Petición
-* **Headers Obligatorios:**
-  * `Authorization: Bearer <JWT>`
-  * `X-Tenant-Id: <UUID>`
-* **Path Variables:**
-  * `id` (UUID): Identificador único de la configuración de serie a habilitar
-* **Query Parameters:** Ninguno.
-
-#### Cuerpo de Respuesta (Response DTO)
-* **Estado HTTP:** `204 NO CONTENT`
-#### Errores y Excepciones Semánticas (RFC 7807)
-
-| Código HTTP | Error Type URI | Excepción de Dominio Java | Causa Operativa |
-| :--- | :--- | :--- | :--- |
-| 401 Unauthorized | `https://api.atelier.pe/errors/unauthorized` | `AuthenticationException` | Token JWT ausente o inválido |
-| 403 Forbidden | `https://api.atelier.pe/errors/forbidden` | `AccessDeniedException` | Permiso denegado para activar series |
-| 404 Not Found | `https://api.atelier.pe/errors/series-not-found` | `SeriesNotFoundException` | La serie solicitada no existe en el taller |
-
-
-```json
-{
-  "type": "https://api.atelier.pe/errors/series-not-found",
-  "title": "Serie No Encontrada",
-  "status": 404,
-  "detail": "No se encontro la serie fiscal con identificador c4d5e6f7-a8b9-4012-3456-7890abcdef99.",
-  "instance": "/api/v1/invoicing/series-configurations/c4d5e6f7-a8b9-4012-3456-7890abcdef99/activate",
-  "timestamp": "2026-10-01T16:32:00Z",
-  "correlationId": "req-ser-act-404-01"
-}
-```
-
----
-
-### PATCH /api/v1/invoicing/series-configurations/{id}/deactivate
-
-#### Identidad Técnica
-* **Controlador:** `com.andeva.atelier.platform.invoicing.interfaces.rest.SeriesConfigurationsController`
-* **Método Java:** `public ResponseEntity<Void> deactivateSeries(@RequestHeader("X-Tenant-Id") UUID tenantId, @PathVariable("id") UUID id)`
-
-#### Descripción Funcional
-Deshabilita temporal o permanentemente una serie de comprobantes para impedir la emisión de nuevas facturas o boletas bajo su numeración, manteniendo intacto su historial previo.
-
-#### Seguridad y Autorización
-* **Rol Mínimo:** Dueño de Taller (ROLE_WORKSHOP_OWNER).
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('invoicing:fiscal_config:manage')")`
-* **Contexto Multi-Inquilino:** Valida pertenencia de la serie al tenant_id autenticado.
-
-#### Parámetros de Petición
-* **Headers Obligatorios:**
-  * `Authorization: Bearer <JWT>`
-  * `X-Tenant-Id: <UUID>`
-* **Path Variables:**
-  * `id` (UUID): Identificador único de la serie fiscal a inhabilitar
-* **Query Parameters:** Ninguno.
-
-#### Cuerpo de Respuesta (Response DTO)
-* **Estado HTTP:** `204 NO CONTENT`
-#### Errores y Excepciones Semánticas (RFC 7807)
-
-| Código HTTP | Error Type URI | Excepción de Dominio Java | Causa Operativa |
-| :--- | :--- | :--- | :--- |
-| 401 Unauthorized | `https://api.atelier.pe/errors/unauthorized` | `AuthenticationException` | Token JWT ausente o inválido |
-| 403 Forbidden | `https://api.atelier.pe/errors/forbidden` | `AccessDeniedException` | Permiso denegado para desactivar series |
-| 404 Not Found | `https://api.atelier.pe/errors/series-not-found` | `SeriesNotFoundException` | Serie no encontrada |
-
-
-```json
-{
-  "type": "https://api.atelier.pe/errors/series-not-found",
-  "title": "Serie Inexistente",
-  "status": 404,
-  "detail": "No se encontro la serie fiscal para su inhabilitacion operativa.",
-  "instance": "/api/v1/invoicing/series-configurations/c4d5e6f7-a8b9-4012-3456-7890abcdef99/deactivate",
-  "timestamp": "2026-10-01T16:33:00Z",
-  "correlationId": "req-ser-deact-404-01"
-}
-```
 
 ---
 

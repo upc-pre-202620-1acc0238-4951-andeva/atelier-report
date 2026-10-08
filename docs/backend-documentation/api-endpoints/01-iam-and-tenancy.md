@@ -1,6 +1,6 @@
 # Especificacion Canonica de Endpoints: IAM & Tenancy Context
 
-Este documento constituye la referencia tecnica y exhaustiva de los 28 endpoints expuestos por el Bounded Context **Identity and Access Management (IAM) & Tenancy** (`com.andeva.atelier.platform.iam`) dentro de la plataforma SaaS **Atelier Platform Backend**.
+Este documento constituye la referencia tecnica y exhaustiva de los 26 endpoints expuestos por el Bounded Context **Identity and Access Management (IAM) & Tenancy** (`com.andeva.atelier.platform.iam`) dentro de la plataforma SaaS **Atelier Platform Backend**.
 
 ## 1. Arquitectura de Seguridad y Aislamiento Multi-Inquilino
 
@@ -24,26 +24,24 @@ El modulo IAM & Tenancy gobierna el aprovisionamiento corporativo de los tallere
 | 6 | 2.6 | `POST` | `/api/v1/auth/reset-password` | `AuthenticationController` | `resetPassword()` | `PermitAll` |
 | 7 | 3.1 | `GET` | `/api/v1/tenants/current` | `TenantsController` | `getCurrentTenant()` | `@PreAuthorize("hasAuthority('iam:tenants:read')")` |
 | 8 | 3.2 | `PUT` | `/api/v1/tenants/current` | `TenantsController` | `updateCurrentTenant()` | `@PreAuthorize("hasAuthority('iam:tenants:update')")` |
-| 9 | 4.1 | `GET` | `/api/v1/branches` | `BranchesController` | `getBranches()` | `@PreAuthorize("hasAuthority('iam:branches:read')")` |
-| 10 | 4.2 | `POST` | `/api/v1/branches` | `BranchesController` | `createBranch()` | `@PreAuthorize("hasAuthority('iam:branches:manage')")` |
-| 11 | 4.3 | `GET` | `/api/v1/branches/{id}` | `BranchesController` | `getBranchById()` | `@PreAuthorize("hasAuthority('iam:branches:read')")` |
-| 12 | 4.4 | `PUT` | `/api/v1/branches/{id}/location` | `BranchesController` | `updateBranchLocation()` | `@PreAuthorize("hasAuthority('iam:branches:manage')")` |
-| 13 | 5.1 | `POST` | `/api/v1/invitations/tenant/{tenantId}` | `InvitationsController` | `inviteStaff()` | `@PreAuthorize("hasAuthority('iam:members:invite')")` |
-| 14 | 5.2 | `GET` | `/api/v1/invitations/validate?token={token}` | `InvitationsController` | `validateInvitationToken()` | `PermitAll` |
-| 15 | 5.3 | `POST` | `/api/v1/invitations/accept` | `InvitationsController` | `acceptInvitation()` | `PermitAll` |
-| 16 | 6.1 | `GET` | `/api/v1/tenants/{tenantId}/memberships` | `MembershipsController` | `getMemberships()` | `@PreAuthorize("hasAuthority('iam:members:read')")` |
-| 17 | 6.2 | `GET` | `/api/v1/tenants/{tenantId}/memberships/{id}` | `MembershipsController` | `getMembershipById()` | `@PreAuthorize("hasAuthority('iam:members:read')")` |
-| 18 | 6.3 | `PUT` | `/api/v1/tenants/{tenantId}/memberships/{id}/roles` | `MembershipsController` | `assignRoles()` | `@PreAuthorize("hasAuthority('iam:members:manage_roles')")` |
-| 19 | 6.4 | `PUT` | `/api/v1/tenants/{tenantId}/memberships/{id}/compensation` | `MembershipsController` | `updateCompensation()` | `@PreAuthorize("hasAuthority('iam:members:compensate')")` |
-| 20 | 6.5 | `DELETE` | `/api/v1/tenants/{tenantId}/memberships/{id}` | `MembershipsController` | `deactivateMembership()` | `@PreAuthorize("hasAuthority('iam:members:manage_roles')")` |
+| 9 | 4.1 | `POST` | `/api/v1/branches` | `BranchesController` | `createBranch()` | `@PreAuthorize("hasAuthority('iam:branches:manage')")` |
+| 10 | 4.2 | `GET` | `/api/v1/branches` | `BranchesController` | `getBranches()` | `@PreAuthorize("hasAuthority('iam:branches:read')")` |
+| 11 | 4.3 | `GET` | `/api/v1/branches/{branchId}` | `BranchesController` | `getBranchById()` | `@PreAuthorize("hasAuthority('iam:branches:read')")` |
+| 12 | 4.4 | `PUT` | `/api/v1/branches/{branchId}` | `BranchesController` | `updateBranchLocation()` | `@PreAuthorize("hasAuthority('iam:branches:manage')")` |
+| 13 | 5.1 | `GET` | `/api/v1/memberships` | `MembershipsController` | `getMemberships()` | `@PreAuthorize("hasAuthority('iam:members:read')")` |
+| 14 | 5.2 | `GET` | `/api/v1/memberships/{membershipId}` | `MembershipsController` | `getMembershipById()` | `@PreAuthorize("hasAuthority('iam:members:read')")` |
+| 15 | 5.3 | `PUT` | `/api/v1/memberships/{membershipId}/roles` | `MembershipsController` | `assignRoles()` | `@PreAuthorize("hasAuthority('iam:members:manage_roles')")` |
+| 16 | 5.4 | `PUT` | `/api/v1/memberships/{membershipId}/compensation` | `MembershipsController` | `updateCompensation()` | `@PreAuthorize("hasAuthority('iam:members:compensate')")` |
+| 17 | 5.5 | `DELETE` | `/api/v1/memberships/{membershipId}` | `MembershipsController` | `deactivateMembership()` | `@PreAuthorize("hasAuthority('iam:members:manage_roles')")` |
+| 18 | 6.1 | `POST` | `/api/v1/invitations/tenant/{tenantId}` | `InvitationsController` | `inviteStaff()` | `@PreAuthorize("hasAuthority('iam:members:invite')")` |
+| 19 | 6.2 | `GET` | `/api/v1/invitations/validate?token={token}` | `InvitationsController` | `validateInvitationToken()` | `PermitAll` |
+| 20 | 6.3 | `POST` | `/api/v1/invitations/accept` | `InvitationsController` | `acceptInvitation()` | `PermitAll` |
 | 21 | 7.1 | `GET` | `/api/v1/tenants/{tenantId}/roles` | `RolesController` | `getRoles()` | `@PreAuthorize("hasAuthority('iam:roles:read')")` |
 | 22 | 7.2 | `POST` | `/api/v1/tenants/{tenantId}/roles` | `RolesController` | `createRole()` | `@PreAuthorize("hasAuthority('iam:roles:create')")` |
 | 23 | 7.3 | `PUT` | `/api/v1/tenants/{tenantId}/roles/{roleId}/permissions` | `RolesController` | `updateRolePermissions()` | `@PreAuthorize("hasAuthority('iam:roles:create')")` |
 | 24 | 7.4 | `POST` | `/api/v1/tenants/{tenantId}/roles/{roleId}/reset-defaults` | `RolesController` | `resetRoleToDefaults()` | `@PreAuthorize("hasAuthority('iam:roles:create')")` |
 | 25 | 7.5 | `DELETE` | `/api/v1/tenants/{tenantId}/roles/{roleId}` | `RolesController` | `deleteRole()` | `@PreAuthorize("hasAuthority('iam:roles:create')")` |
 | 26 | 7.6 | `GET` | `/api/v1/permissions` | `RolesController` | `getAllPermissions()` | `@PreAuthorize("hasAuthority('iam:permissions:read')")` |
-| 27 | 8.1 | `GET` | `/api/v1/users/me` | `UsersController` | `getCurrentUser()` | `@PreAuthorize("isAuthenticated()")` |
-| 28 | 8.2 | `PUT` | `/api/v1/users/me/profile` | `UsersController` | `updateProfile()` | `@PreAuthorize("isAuthenticated()")` |
 
 ---
 
@@ -766,100 +764,7 @@ No aplica (Sin parametros de consulta en la URL).
 
 ## 4. Endpoints de Sedes y Geocercas (BranchesController)
 
-### 4.1. [GET] /api/v1/branches
-
-**Listado de Sedes Operativas del Taller**
-
-#### Identidad Tecnica
-- **Controlador:** `com.andeva.atelier.platform.iam.interfaces.rest.controllers.BranchesController`
-- **Metodo Java:** `public ResponseEntity<List<BranchResource>> getBranches()`
-- **Ruta Base:** `/api/v1/branches`
-- **Ruta Completa:** `/api/v1/branches`
-- **Proposito:** Retorna la coleccion completa de sedes fisicas y locales operativos pertenecientes al taller en sesion. Incluye sus codigos de anexo SUNAT, coordenadas geograficas WGS84, radio perimetrico de geocerca en metros y estado de actividad.
-
-#### Seguridad y Autorizacion
-- **Nivel de Acceso:** Autenticado
-- **Rol Minimo Requerido:** Cualquier colaborador activo del taller
-- **Permiso Atomico:** `@PreAuthorize("hasAuthority('iam:branches:read')")`
-- **Aislamiento Multi-Inquilino:** Filtra estrictamente por el tenantId obtenido de las credenciales de sesion.
-
-#### Parametros de Invocacion
-**Cabeceras HTTP (Headers):**
-- `Authorization: Bearer <jwt_token>`
-- `Accept: application/json`
-
-**Parametros de Ruta (Path Parameters):**
-No aplica (Sin parametros en la ruta).
-
-**Parametros de Consulta (Query Parameters):**
-No aplica (Sin parametros de consulta en la URL).
-
-#### Recurso de Peticion (Request Body)
-No aplica (Peticion HTTP sin cuerpo de entrada).
-
-#### Recurso de Respuesta (Response Body)
-- **Estado HTTP Exitoso:** `200 OK`
-- **Registro Java DTO:** `List<com.andeva.atelier.platform.iam.interfaces.rest.resources.responses.BranchResource>`
-- **Definicion de Campos Proyectados:**
-| Campo | Tipo de Dato | Descripcion |
-| :--- | :--- | :--- |
-| `id` | `UUID` | Identificador universal de la sede fisica |
-| `tenantId` | `UUID` | Identificador del taller titular |
-| `name` | `String` | Nombre descriptivo de la sucursal |
-| `sunatCode` | `String` | Codigo de anexo tributario de cuatro digitos asignado por SUNAT |
-| `latitude` | `Double` | Latitud geografica en grados decimales (WGS84) |
-| `longitude` | `Double` | Longitud geografica en grados decimales (WGS84) |
-| `geofenceRadiusMeters` | `int` | Radio perimetrico en metros para validacion de asistencia |
-| `isActive` | `boolean` | Bandera de operatividad comercial de la sede |
-
-**Ejemplo de Carga Util JSON (Response):**
-```json
-[
-  {
-    "id": "018f6c40-7e12-7000-8000-000000000005",
-    "tenantId": "018f6c40-7e12-7000-8000-000000000001",
-    "name": "Sede Principal Surquillo",
-    "sunatCode": "0001",
-    "latitude": -12.11234567,
-    "longitude": -77.01987654,
-    "geofenceRadiusMeters": 60,
-    "isActive": true
-  },
-  {
-    "id": "018f6c40-7e12-7000-8000-000000000006",
-    "tenantId": "018f6c40-7e12-7000-8000-000000000001",
-    "name": "Sucursal Express La Molina",
-    "sunatCode": "0002",
-    "latitude": -12.08123456,
-    "longitude": -76.9456789,
-    "geofenceRadiusMeters": 45,
-    "isActive": true
-  }
-]
-```
-
-#### Errores y Excepciones de Dominio (RFC 7807)
-| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
-| :---: | :--- | :--- |
-| `401 Unauthorized` | `AuthenticationException` | Token Bearer ausente o invalido |
-| `403 Forbidden` | `AccessDeniedException` | Falta de autoridad de seguridad iam:branches:read |
-
-**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
-```json
-{
-  "type": "https://api.atelier.pe/errors/unauthorized",
-  "title": "Autenticacion Requerida",
-  "status": 401,
-  "detail": "La peticion carece de cabecera de autorizacion valida para acceder al catalogo de sedes",
-  "instance": "/api/v1/branches",
-  "code": "UNAUTHORIZED",
-  "timestamp": "2026-10-01T16:30:00Z"
-}
-```
-
----
-
-### 4.2. [POST] /api/v1/branches
+### 4.1. [POST] /api/v1/branches
 
 **Creacion de Nueva Sede Operativa con Geocerca GPS**
 
@@ -961,15 +866,108 @@ No aplica (Sin parametros de consulta en la URL).
 
 ---
 
-### 4.3. [GET] /api/v1/branches/{id}
+### 4.2. [GET] /api/v1/branches
+
+**Listado de Sedes Operativas del Taller**
+
+#### Identidad Tecnica
+- **Controlador:** `com.andeva.atelier.platform.iam.interfaces.rest.controllers.BranchesController`
+- **Metodo Java:** `public ResponseEntity<List<BranchResource>> getBranches()`
+- **Ruta Base:** `/api/v1/branches`
+- **Ruta Completa:** `/api/v1/branches`
+- **Proposito:** Retorna la coleccion completa de sedes fisicas y locales operativos pertenecientes al taller en sesion. Incluye sus codigos de anexo SUNAT, coordenadas geograficas WGS84, radio perimetrico de geocerca en metros y estado de actividad.
+
+#### Seguridad y Autorizacion
+- **Nivel de Acceso:** Autenticado
+- **Rol Minimo Requerido:** Cualquier colaborador activo del taller
+- **Permiso Atomico:** `@PreAuthorize("hasAuthority('iam:branches:read')")`
+- **Aislamiento Multi-Inquilino:** Filtra estrictamente por el tenantId obtenido de las credenciales de sesion.
+
+#### Parametros de Invocacion
+**Cabeceras HTTP (Headers):**
+- `Authorization: Bearer <jwt_token>`
+- `Accept: application/json`
+
+**Parametros de Ruta (Path Parameters):**
+No aplica (Sin parametros en la ruta).
+
+**Parametros de Consulta (Query Parameters):**
+No aplica (Sin parametros de consulta en la URL).
+
+#### Recurso de Peticion (Request Body)
+No aplica (Peticion HTTP sin cuerpo de entrada).
+
+#### Recurso de Respuesta (Response Body)
+- **Estado HTTP Exitoso:** `200 OK`
+- **Registro Java DTO:** `List<com.andeva.atelier.platform.iam.interfaces.rest.resources.responses.BranchResource>`
+- **Definicion de Campos Proyectados:**
+| Campo | Tipo de Dato | Descripcion |
+| :--- | :--- | :--- |
+| `id` | `UUID` | Identificador universal de la sede fisica |
+| `tenantId` | `UUID` | Identificador del taller titular |
+| `name` | `String` | Nombre descriptivo de la sucursal |
+| `sunatCode` | `String` | Codigo de anexo tributario de cuatro digitos asignado por SUNAT |
+| `latitude` | `Double` | Latitud geografica en grados decimales (WGS84) |
+| `longitude` | `Double` | Longitud geografica en grados decimales (WGS84) |
+| `geofenceRadiusMeters` | `int` | Radio perimetrico en metros para validacion de asistencia |
+| `isActive` | `boolean` | Bandera de operatividad comercial de la sede |
+
+**Ejemplo de Carga Util JSON (Response):**
+```json
+[
+  {
+    "id": "018f6c40-7e12-7000-8000-000000000005",
+    "tenantId": "018f6c40-7e12-7000-8000-000000000001",
+    "name": "Sede Principal Surquillo",
+    "sunatCode": "0001",
+    "latitude": -12.11234567,
+    "longitude": -77.01987654,
+    "geofenceRadiusMeters": 60,
+    "isActive": true
+  },
+  {
+    "id": "018f6c40-7e12-7000-8000-000000000006",
+    "tenantId": "018f6c40-7e12-7000-8000-000000000001",
+    "name": "Sucursal Express La Molina",
+    "sunatCode": "0002",
+    "latitude": -12.08123456,
+    "longitude": -76.9456789,
+    "geofenceRadiusMeters": 45,
+    "isActive": true
+  }
+]
+```
+
+#### Errores y Excepciones de Dominio (RFC 7807)
+| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `401 Unauthorized` | `AuthenticationException` | Token Bearer ausente o invalido |
+| `403 Forbidden` | `AccessDeniedException` | Falta de autoridad de seguridad iam:branches:read |
+
+**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
+```json
+{
+  "type": "https://api.atelier.pe/errors/unauthorized",
+  "title": "Autenticacion Requerida",
+  "status": 401,
+  "detail": "La peticion carece de cabecera de autorizacion valida para acceder al catalogo de sedes",
+  "instance": "/api/v1/branches",
+  "code": "UNAUTHORIZED",
+  "timestamp": "2026-10-01T16:30:00Z"
+}
+```
+
+---
+
+### 4.3. [GET] /api/v1/branches/{branchId}
 
 **Detalle Individual de Sede Operativa**
 
 #### Identidad Tecnica
 - **Controlador:** `com.andeva.atelier.platform.iam.interfaces.rest.controllers.BranchesController`
-- **Metodo Java:** `public ResponseEntity<BranchResource> getBranchById(@PathVariable UUID id)`
+- **Metodo Java:** `public ResponseEntity<BranchResource> getBranchById(@PathVariable UUID branchId)`
 - **Ruta Base:** `/api/v1/branches`
-- **Ruta Completa:** `/api/v1/branches/{id}`
+- **Ruta Completa:** `/api/v1/branches/{branchId}`
 - **Proposito:** Consulta los parametros especificos, identificador fiscal, coordenadas GPS y radio perimetrico de una sede fisica determinada perteneciente al taller en sesion.
 
 #### Seguridad y Autorizacion
@@ -1045,15 +1043,15 @@ No aplica (Peticion HTTP sin cuerpo de entrada).
 
 ---
 
-### 4.4. [PUT] /api/v1/branches/{id}/location
+### 4.4. [PUT] /api/v1/branches/{branchId}
 
 **Actualizacion de Coordenadas Satelitales y Geocerca**
 
 #### Identidad Tecnica
 - **Controlador:** `com.andeva.atelier.platform.iam.interfaces.rest.controllers.BranchesController`
-- **Metodo Java:** `public ResponseEntity<BranchResource> updateBranchLocation(@PathVariable UUID id, @Valid @RequestBody UpdateBranchLocationResource resource)`
+- **Metodo Java:** `public ResponseEntity<BranchResource> updateBranchLocation(@PathVariable UUID branchId, @Valid @RequestBody UpdateBranchLocationResource resource)`
 - **Ruta Base:** `/api/v1/branches`
-- **Ruta Completa:** `/api/v1/branches/{id}/location`
+- **Ruta Completa:** `/api/v1/branches/{branchId}`
 - **Proposito:** Actualiza las coordenadas geograficas satelitales (latitud y longitud WGS84) y el radio perimetrico en metros de una sede operativa existente. Reajusta el margen de tolerancia para la marcacion de asistencia movil del personal de bahia.
 
 #### Seguridad y Autorizacion
@@ -1070,7 +1068,7 @@ No aplica (Peticion HTTP sin cuerpo de entrada).
 **Parametros de Ruta (Path Parameters):**
 | Parametro | Tipo | Requerido | Descripcion |
 | :--- | :--- | :---: | :--- |
-| `id` | `UUID` | Si | Identificador de la sede fisica a actualizar |
+| `branchId` | `UUID` | Si | Identificador universal de la sede fisica a actualizar |
 
 **Parametros de Consulta (Query Parameters):**
 No aplica (Sin parametros de consulta en la URL).
@@ -1145,9 +1143,509 @@ No aplica (Sin parametros de consulta en la URL).
 
 ---
 
-## 5. Endpoints de Invitaciones de Personal (InvitationsController)
+## 5. Endpoints de Membresias Laborales (MembershipsController)
 
-### 5.1. [POST] /api/v1/invitations/tenant/{tenantId}
+### 5.1. [GET] /api/v1/memberships
+
+**Listado del Personal Adscrito al Taller**
+
+#### Identidad Tecnica
+- **Controlador:** `com.andeva.atelier.platform.iam.interfaces.rest.controllers.MembershipsController`
+- **Metodo Java:** `public ResponseEntity<List<MembershipResource>> getMemberships()`
+- **Ruta Base:** `/api/v1/memberships`
+- **Ruta Completa:** `/api/v1/memberships`
+- **Proposito:** Retorna el padron integro de colaboradores vinculados al taller especificado. Incluye datos biográficos del empleado, su correo electronico, estado laboral, esquema remunerativo (fijo u horario) y la coleccion de roles asignados.
+
+#### Seguridad y Autorizacion
+- **Nivel de Acceso:** Autenticado
+- **Rol Minimo Requerido:** Mecanico Jefe (ROLE_CHIEF_MECHANIC), Administrador o Dueno
+- **Permiso Atomico:** `@PreAuthorize("hasAuthority('iam:members:read')")`
+- **Aislamiento Multi-Inquilino:** Valida que el tenantId de la ruta coincida con el inquilino en sesion.
+
+#### Parametros de Invocacion
+**Cabeceras HTTP (Headers):**
+- `Authorization: Bearer <jwt_token>`
+- `Accept: application/json`
+
+**Parametros de Ruta (Path Parameters):**
+No aplica (Sin parametros en la ruta. El tenantId del taller se resuelve directamente a partir del token JWT autenticado en el contexto de seguridad).
+
+**Parametros de Consulta (Query Parameters):**
+No aplica (Sin parametros de consulta en la URL).
+
+#### Recurso de Peticion (Request Body)
+No aplica (Peticion HTTP sin cuerpo de entrada).
+
+#### Recurso de Respuesta (Response Body)
+- **Estado HTTP Exitoso:** `200 OK`
+- **Registro Java DTO:** `List<com.andeva.atelier.platform.iam.interfaces.rest.resources.responses.MembershipResource>`
+- **Definicion de Campos Proyectados:**
+| Campo | Tipo de Dato | Descripcion |
+| :--- | :--- | :--- |
+| `id` | `UUID` | Identificador de la membresia laboral |
+| `tenantId` | `UUID` | Identificador del taller empleador |
+| `userId` | `UUID` | Identificador de la cuenta de usuario |
+| `employeeName` | `String` | Nombre completo del colaborador |
+| `email` | `String` | Correo electronico laboral o de acceso |
+| `status` | `String` | Estado laboral (ACTIVE o INACTIVE) |
+| `salaryType` | `String` | Modalidad de pago (FIXED u HOURLY) |
+| `baseSalary` | `BigDecimal` | Monto salarial nominal |
+| `currency` | `String` | Moneda de pago (PEN o USD) |
+| `roles` | `List<RoleResource>` | Lista de roles asignados a la membresia |
+
+**Ejemplo de Carga Util JSON (Response):**
+```json
+[
+  {
+    "id": "018f6c40-7e12-7000-8000-000000000040",
+    "tenantId": "018f6c40-7e12-7000-8000-000000000001",
+    "userId": "018f6c40-7e12-7000-8000-000000000030",
+    "employeeName": "Pedro Juan Ramirez Quispe",
+    "email": "pedro.mecanico@gmail.com",
+    "status": "ACTIVE",
+    "salaryType": "HOURLY",
+    "baseSalary": 25.5,
+    "currency": "PEN",
+    "roles": [
+      {
+        "id": "018f6c40-7e12-7000-8000-000000000010",
+        "name": "Tecnico Mecanico",
+        "description": "Ejecucion directa de labores mecanicas y diagnostico en bahia",
+        "isSystemRole": true,
+        "permissions": [
+          "operations:tasks:track_time",
+          "operations:tasks:complete",
+          "hr:attendance:clock_in"
+        ]
+      }
+    ]
+  }
+]
+```
+
+#### Errores y Excepciones de Dominio (RFC 7807)
+| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `401 Unauthorized` | `AuthenticationException` | Token ausente o invalido |
+| `403 Forbidden` | `AccessDeniedException` | El usuario carece del permiso iam:members:read |
+| `404 Not Found` | `TenantNotFoundException` | Taller no encontrado en el sistema |
+
+**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
+```json
+{
+  "type": "https://api.atelier.pe/errors/access-denied",
+  "title": "Acceso Denegado",
+  "status": 403,
+  "detail": "No cuenta con privilegios para consultar la planilla y membresias laborales del taller",
+  "instance": "/api/v1/memberships",
+  "code": "ACCESS_DENIED",
+  "timestamp": "2026-10-01T16:30:00Z"
+}
+```
+
+---
+
+### 5.2. [GET] /api/v1/memberships/{membershipId}
+
+**Consulta de Ficha Laboral Individual de Colaborador**
+
+#### Identidad Tecnica
+- **Controlador:** `com.andeva.atelier.platform.iam.interfaces.rest.controllers.MembershipsController`
+- **Metodo Java:** `public ResponseEntity<MembershipResource> getMembershipById(@PathVariable UUID membershipId)`
+- **Ruta Base:** `/api/v1/memberships`
+- **Ruta Completa:** `/api/v1/memberships/{membershipId}`
+- **Proposito:** Recupera la ficha contractual detallada de un miembro especifico adscrito al taller. Expone sus roles, condiciones de sueldo pactadas y estado operativo.
+
+#### Seguridad y Autorizacion
+- **Nivel de Acceso:** Autenticado
+- **Rol Minimo Requerido:** Mecanico Jefe, Administrador o Dueno
+- **Permiso Atomico:** `@PreAuthorize("hasAuthority('iam:members:read')")`
+- **Aislamiento Multi-Inquilino:** Comprueba que la membresia pertenezca al taller en sesion.
+
+#### Parametros de Invocacion
+**Cabeceras HTTP (Headers):**
+- `Authorization: Bearer <jwt_token>`
+- `Accept: application/json`
+
+**Parametros de Ruta (Path Parameters):**
+| Parametro | Tipo | Requerido | Descripcion |
+| :--- | :--- | :---: | :--- |
+| `membershipId` | `UUID` | Si | Identificador universal de la membresia laboral del colaborador |
+
+**Parametros de Consulta (Query Parameters):**
+No aplica (Sin parametros de consulta en la URL).
+
+#### Recurso de Peticion (Request Body)
+No aplica (Peticion HTTP sin cuerpo de entrada).
+
+#### Recurso de Respuesta (Response Body)
+- **Estado HTTP Exitoso:** `200 OK`
+- **Registro Java DTO:** `com.andeva.atelier.platform.iam.interfaces.rest.resources.responses.MembershipResource`
+- **Definicion de Campos Proyectados:**
+| Campo | Tipo de Dato | Descripcion |
+| :--- | :--- | :--- |
+| `id` | `UUID` | Identificador de la membresia |
+| `tenantId` | `UUID` | Identificador del taller |
+| `userId` | `UUID` | Identificador de la cuenta de usuario |
+| `employeeName` | `String` | Nombre completo del colaborador |
+| `email` | `String` | Correo electronico de acceso |
+| `status` | `String` | Estado laboral |
+| `salaryType` | `String` | Modalidad de sueldo |
+| `baseSalary` | `BigDecimal` | Monto salarial nominal |
+| `currency` | `String` | Moneda de remuneracion |
+| `roles` | `List<RoleResource>` | Roles asignados |
+
+**Ejemplo de Carga Util JSON (Response):**
+```json
+{
+  "id": "018f6c40-7e12-7000-8000-000000000040",
+  "tenantId": "018f6c40-7e12-7000-8000-000000000001",
+  "userId": "018f6c40-7e12-7000-8000-000000000030",
+  "employeeName": "Pedro Juan Ramirez Quispe",
+  "email": "pedro.mecanico@gmail.com",
+  "status": "ACTIVE",
+  "salaryType": "HOURLY",
+  "baseSalary": 25.5,
+  "currency": "PEN",
+  "roles": [
+    {
+      "id": "018f6c40-7e12-7000-8000-000000000010",
+      "name": "Tecnico Mecanico",
+      "description": "Ejecucion directa de labores mecanicas y diagnostico en bahia",
+      "isSystemRole": true,
+      "permissions": [
+        "operations:tasks:track_time",
+        "operations:tasks:complete",
+        "hr:attendance:clock_in"
+      ]
+    }
+  ]
+}
+```
+
+#### Errores y Excepciones de Dominio (RFC 7807)
+| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `401 Unauthorized` | `AuthenticationException` | Token ausente o invalido |
+| `403 Forbidden` | `AccessDeniedException` | Permiso iam:members:read insuficiente |
+| `404 Not Found` | `MembershipNotFoundException` | Membresia laboral no localizada en este taller |
+
+**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
+```json
+{
+  "type": "https://api.atelier.pe/errors/membership-not-found",
+  "title": "Membresia No Encontrada",
+  "status": 404,
+  "detail": "La membresia con identificador 018f6c40-7e12-7000-8000-000000000040 no existe en el taller especificado",
+  "instance": "/api/v1/tenants/018f6c40-7e12-7000-8000-000000000001/memberships/018f6c40-7e12-7000-8000-000000000040",
+  "code": "MEMBERSHIP_NOT_FOUND",
+  "timestamp": "2026-10-01T16:30:00Z"
+}
+```
+
+---
+
+### 5.3. [PUT] /api/v1/memberships/{membershipId}/roles
+
+**Asignacion y Revocacion Dinamica de Roles de Seguridad**
+
+#### Identidad Tecnica
+- **Controlador:** `com.andeva.atelier.platform.iam.interfaces.rest.controllers.MembershipsController`
+- **Metodo Java:** `public ResponseEntity<MembershipResource> assignRoles(@PathVariable UUID membershipId, @Valid @RequestBody AssignRolesResource resource)`
+- **Ruta Base:** `/api/v1/memberships`
+- **Ruta Completa:** `/api/v1/memberships/{membershipId}/roles`
+- **Proposito:** Modifica de forma atomica el conjunto de roles (relacion M:N) asignados a un colaborador del taller. Actualiza la tabla asociativa membership_roles, recalculando las facultades que seran inyectadas en sus proximos tokens de autenticacion.
+
+#### Seguridad y Autorizacion
+- **Nivel de Acceso:** Autenticado
+- **Rol Minimo Requerido:** Administrador de Taller (ROLE_WORKSHOP_ADMINISTRATOR) o Dueno (ROLE_WORKSHOP_OWNER)
+- **Permiso Atomico:** `@PreAuthorize("hasAuthority('iam:members:manage_roles')")`
+- **Aislamiento Multi-Inquilino:** Verifica pertenencia del colaborador y de cada rol al tenantId en sesion.
+
+#### Parametros de Invocacion
+**Cabeceras HTTP (Headers):**
+- `Authorization: Bearer <jwt_token>`
+- `Content-Type: application/json`
+
+**Parametros de Ruta (Path Parameters):**
+| Parametro | Tipo | Requerido | Descripcion |
+| :--- | :--- | :---: | :--- |
+| `membershipId` | `UUID` | Si | Identificador universal de la membresia a reconfigurar |
+
+**Parametros de Consulta (Query Parameters):**
+No aplica (Sin parametros de consulta en la URL).
+
+#### Recurso de Peticion (Request Body)
+- **Registro Java DTO:** `com.andeva.atelier.platform.iam.interfaces.rest.resources.requests.AssignRolesResource`
+- **Definicion de Campos:**
+| Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripcion |
+| :--- | :--- | :---: | :--- | :--- |
+| `roleIds` | `List<UUID>` | Si | `@NotEmpty` | Lista de identificadores de roles a vincular a la membresia |
+
+**Ejemplo de Carga Util JSON (Request):**
+```json
+{
+  "roleIds": [
+    "018f6c40-7e12-7000-8000-000000000010",
+    "018f6c40-7e12-7000-8000-000000000011"
+  ]
+}
+```
+
+#### Recurso de Respuesta (Response Body)
+- **Estado HTTP Exitoso:** `200 OK`
+- **Registro Java DTO:** `com.andeva.atelier.platform.iam.interfaces.rest.resources.responses.MembershipResource`
+- **Definicion de Campos Proyectados:**
+| Campo | Tipo de Dato | Descripcion |
+| :--- | :--- | :--- |
+| `id` | `UUID` | Identificador de la membresia |
+| `tenantId` | `UUID` | Identificador del taller |
+| `userId` | `UUID` | Identificador del usuario |
+| `employeeName` | `String` | Nombre completo |
+| `email` | `String` | Correo electronico |
+| `status` | `String` | Estado laboral |
+| `salaryType` | `String` | Tipo de salario |
+| `baseSalary` | `BigDecimal` | Salario base |
+| `currency` | `String` | Moneda |
+| `roles` | `List<RoleResource>` | Lista actualizada de roles asignados |
+
+**Ejemplo de Carga Util JSON (Response):**
+```json
+{
+  "id": "018f6c40-7e12-7000-8000-000000000040",
+  "tenantId": "018f6c40-7e12-7000-8000-000000000001",
+  "userId": "018f6c40-7e12-7000-8000-000000000030",
+  "employeeName": "Pedro Juan Ramirez Quispe",
+  "email": "pedro.mecanico@gmail.com",
+  "status": "ACTIVE",
+  "salaryType": "HOURLY",
+  "baseSalary": 25.5,
+  "currency": "PEN",
+  "roles": [
+    {
+      "id": "018f6c40-7e12-7000-8000-000000000010",
+      "name": "Tecnico Mecanico",
+      "description": "Ejecucion directa de labores mecanicas",
+      "isSystemRole": true,
+      "permissions": [
+        "operations:tasks:track_time",
+        "operations:tasks:complete"
+      ]
+    },
+    {
+      "id": "018f6c40-7e12-7000-8000-000000000011",
+      "name": "Encargado de Inventario",
+      "description": "Custodia fisica y valoracion FIFO de autopartes",
+      "isSystemRole": true,
+      "permissions": [
+        "inventory:batches:receive",
+        "inventory:batches:dispatch_fifo"
+      ]
+    }
+  ]
+}
+```
+
+#### Errores y Excepciones de Dominio (RFC 7807)
+| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `400 Bad Request` | `MethodArgumentNotValidException` | Lista de roleIds vacia o nula |
+| `401 Unauthorized` | `AuthenticationException` | Token ausente o invalido |
+| `403 Forbidden` | `AccessDeniedException` | Falta de autoridad iam:members:manage_roles |
+| `404 Not Found` | `RoleNotFoundException` | Uno o mas roleIds no existen en el catalogo del taller |
+
+**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
+```json
+{
+  "type": "https://api.atelier.pe/errors/role-not-found",
+  "title": "Rol Inexistente",
+  "status": 404,
+  "detail": "Uno de los roles seleccionados no existe en el catalogo del taller o fue eliminado",
+  "instance": "/api/v1/tenants/018f6c40-7e12-7000-8000-000000000001/memberships/018f6c40-7e12-7000-8000-000000000040/roles",
+  "code": "ROLE_NOT_FOUND",
+  "timestamp": "2026-10-01T16:30:00Z"
+}
+```
+
+---
+
+### 5.4. [PUT] /api/v1/memberships/{membershipId}/compensation
+
+**Actualizacion del Esquema de Remuneracion Salarial**
+
+#### Identidad Tecnica
+- **Controlador:** `com.andeva.atelier.platform.iam.interfaces.rest.controllers.MembershipsController`
+- **Metodo Java:** `public ResponseEntity<MembershipResource> updateCompensation(@PathVariable UUID membershipId, @Valid @RequestBody UpdateCompensationResource resource)`
+- **Ruta Base:** `/api/v1/memberships`
+- **Ruta Completa:** `/api/v1/memberships/{membershipId}/compensation`
+- **Proposito:** Actualiza las condiciones economicas contractuales del colaborador (modalidad de salario fijo mensual o tarifa por hora hombre y moneda de curso legal). Este endpoint esta reservado con exclusividad al Dueno del taller por razones de confidencialidad de planilla.
+
+#### Seguridad y Autorizacion
+- **Nivel de Acceso:** Autenticado
+- **Rol Minimo Requerido:** Exclusivo Dueno de Taller (ROLE_WORKSHOP_OWNER)
+- **Permiso Atomico:** `@PreAuthorize("hasAuthority('iam:members:compensate')")`
+- **Aislamiento Multi-Inquilino:** Aislamiento estricto dentro del taller en sesion.
+
+#### Parametros de Invocacion
+**Cabeceras HTTP (Headers):**
+- `Authorization: Bearer <jwt_token>`
+- `Content-Type: application/json`
+
+**Parametros de Ruta (Path Parameters):**
+| Parametro | Tipo | Requerido | Descripcion |
+| :--- | :--- | :---: | :--- |
+| `membershipId` | `UUID` | Si | Identificador universal de la membresia laboral del colaborador |
+
+**Parametros de Consulta (Query Parameters):**
+No aplica (Sin parametros de consulta en la URL).
+
+#### Recurso de Peticion (Request Body)
+- **Registro Java DTO:** `com.andeva.atelier.platform.iam.interfaces.rest.resources.requests.UpdateCompensationResource`
+- **Definicion de Campos:**
+| Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripcion |
+| :--- | :--- | :---: | :--- | :--- |
+| `salaryType` | `String` | Si | `@NotBlank, @Pattern(regexp = "^(FIXED|HOURLY)$")` | Modalidad de compensacion salarial |
+| `baseSalary` | `BigDecimal` | Si | `@NotNull, @DecimalMin("0.00")` | Monto salarial nominal o tarifa por hora |
+| `currency` | `String` | Si | `@NotBlank, @Pattern(regexp = "^(PEN|USD)$")` | Codigo de moneda ISO-4217 |
+
+**Ejemplo de Carga Util JSON (Request):**
+```json
+{
+  "salaryType": "FIXED",
+  "baseSalary": 2800,
+  "currency": "PEN"
+}
+```
+
+#### Recurso de Respuesta (Response Body)
+- **Estado HTTP Exitoso:** `200 OK`
+- **Registro Java DTO:** `com.andeva.atelier.platform.iam.interfaces.rest.resources.responses.MembershipResource`
+- **Definicion de Campos Proyectados:**
+| Campo | Tipo de Dato | Descripcion |
+| :--- | :--- | :--- |
+| `id` | `UUID` | Identificador de la membresia |
+| `tenantId` | `UUID` | Identificador del taller |
+| `userId` | `UUID` | Identificador del usuario |
+| `employeeName` | `String` | Nombre completo |
+| `email` | `String` | Correo electronico |
+| `status` | `String` | Estado laboral |
+| `salaryType` | `String` | Modalidad de salario actualizada |
+| `baseSalary` | `BigDecimal` | Monto salarial actualizado |
+| `currency` | `String` | Moneda de liquidacion |
+| `roles` | `List<RoleResource>` | Roles asignados |
+
+**Ejemplo de Carga Util JSON (Response):**
+```json
+{
+  "id": "018f6c40-7e12-7000-8000-000000000040",
+  "tenantId": "018f6c40-7e12-7000-8000-000000000001",
+  "userId": "018f6c40-7e12-7000-8000-000000000030",
+  "employeeName": "Pedro Juan Ramirez Quispe",
+  "email": "pedro.mecanico@gmail.com",
+  "status": "ACTIVE",
+  "salaryType": "FIXED",
+  "baseSalary": 2800,
+  "currency": "PEN",
+  "roles": [
+    {
+      "id": "018f6c40-7e12-7000-8000-000000000010",
+      "name": "Tecnico Mecanico",
+      "description": "Ejecucion directa de labores mecanicas",
+      "isSystemRole": true,
+      "permissions": [
+        "operations:tasks:track_time",
+        "operations:tasks:complete"
+      ]
+    }
+  ]
+}
+```
+
+#### Errores y Excepciones de Dominio (RFC 7807)
+| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `400 Bad Request` | `MethodArgumentNotValidException` | Monto salarial negativo o tipo de compensacion invalido |
+| `401 Unauthorized` | `AuthenticationException` | Token ausente o invalido |
+| `403 Forbidden` | `AccessDeniedException` | El usuario no es Dueno de Taller o carece del permiso iam:members:compensate |
+| `404 Not Found` | `MembershipNotFoundException` | Membresia laboral no localizada |
+
+**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
+```json
+{
+  "type": "https://api.atelier.pe/errors/forbidden-access",
+  "title": "Acceso Privilegiado Requerido",
+  "status": 403,
+  "detail": "La gestion de compensaciones salariales es de caracter exclusivo para el Dueno del Taller",
+  "instance": "/api/v1/tenants/018f6c40-7e12-7000-8000-000000000001/memberships/018f6c40-7e12-7000-8000-000000000040/compensation",
+  "code": "ACCESS_DENIED",
+  "timestamp": "2026-10-01T16:30:00Z"
+}
+```
+
+---
+
+### 5.5. [DELETE] /api/v1/memberships/{membershipId}
+
+**Desactivacion Laboral de Membresia en el Taller**
+
+#### Identidad Tecnica
+- **Controlador:** `com.andeva.atelier.platform.iam.interfaces.rest.controllers.MembershipsController`
+- **Metodo Java:** `public ResponseEntity<Void> deactivateMembership(@PathVariable UUID membershipId)`
+- **Ruta Base:** `/api/v1/memberships`
+- **Ruta Completa:** `/api/v1/memberships/{membershipId}`
+- **Proposito:** Desvincula laboralmente al colaborador del taller mediante borrado logico (Soft Delete) y cambio de estado a INACTIVE. Invalida de forma inmediata la emision de nuevos tokens de acceso para ese taller.
+
+#### Seguridad y Autorizacion
+- **Nivel de Acceso:** Autenticado
+- **Rol Minimo Requerido:** Administrador de Taller (ROLE_WORKSHOP_ADMINISTRATOR) o Dueno (ROLE_WORKSHOP_OWNER)
+- **Permiso Atomico:** `@PreAuthorize("hasAuthority('iam:members:manage_roles')")`
+- **Aislamiento Multi-Inquilino:** Asegura que no se desactive a miembros de otros talleres.
+
+#### Parametros de Invocacion
+**Cabeceras HTTP (Headers):**
+- `Authorization: Bearer <jwt_token>`
+
+**Parametros de Ruta (Path Parameters):**
+| Parametro | Tipo | Requerido | Descripcion |
+| :--- | :--- | :---: | :--- |
+| `membershipId` | `UUID` | Si | Identificador universal de la membresia laboral a desactivar |
+
+**Parametros de Consulta (Query Parameters):**
+No aplica (Sin parametros de consulta en la URL).
+
+#### Recurso de Peticion (Request Body)
+No aplica (Peticion HTTP sin cuerpo de entrada).
+
+#### Recurso de Respuesta (Response Body)
+- **Estado HTTP Exitoso:** `204 No Content`
+Sin cuerpo de respuesta en la carga util.
+
+#### Errores y Excepciones de Dominio (RFC 7807)
+| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `401 Unauthorized` | `AuthenticationException` | Token ausente o invalido |
+| `403 Forbidden` | `AccessDeniedException` | Falta del permiso iam:members:manage_roles |
+| `404 Not Found` | `MembershipNotFoundException` | Membresia laboral no encontrada |
+| `409 Conflict` | `CannotDeactivateLastOwnerException` | No es posible desactivar la membresia del unico Dueno registrado en el taller |
+
+**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
+```json
+{
+  "type": "https://api.atelier.pe/errors/cannot-deactivate-last-owner",
+  "title": "Conflicto de Gobernanza",
+  "status": 409,
+  "detail": "No se puede dar de baja al unico titular legal (Dueno) registrado en el taller",
+  "instance": "/api/v1/tenants/018f6c40-7e12-7000-8000-000000000001/memberships/018f6c40-7e12-7000-8000-000000000040",
+  "code": "CANNOT_DEACTIVATE_LAST_OWNER",
+  "timestamp": "2026-10-01T16:30:00Z"
+}
+```
+
+---
+
+## 6. Endpoints de Invitaciones de Personal (InvitationsController)
+
+### 6.1. [POST] /api/v1/invitations/tenant/{tenantId}
 
 **Emision de Invitacion Formal de Personal por Correo Electronico**
 
@@ -1240,7 +1738,7 @@ No aplica (Sin parametros de consulta en la URL).
 
 ---
 
-### 5.2. [GET] /api/v1/invitations/validate?token={token}
+### 6.2. [GET] /api/v1/invitations/validate?token={token}
 
 **Validacion de Token Criptografico de Invitacion**
 
@@ -1315,7 +1813,7 @@ No aplica (Peticion HTTP sin cuerpo de entrada).
 
 ---
 
-### 5.3. [POST] /api/v1/invitations/accept
+### 6.3. [POST] /api/v1/invitations/accept
 
 **Aceptacion de Invitacion y Registro de Credenciales**
 
@@ -1420,512 +1918,6 @@ No aplica (Sin parametros de consulta en la URL).
   "detail": "La invitacion proporcionada ya fue redimida y la cuenta se encuentra activa",
   "instance": "/api/v1/invitations/accept",
   "code": "INVITATION_ALREADY_ACCEPTED",
-  "timestamp": "2026-10-01T16:30:00Z"
-}
-```
-
----
-
-## 6. Endpoints de Membresias Laborales (MembershipsController)
-
-### 6.1. [GET] /api/v1/tenants/{tenantId}/memberships
-
-**Listado del Personal Adscrito al Taller**
-
-#### Identidad Tecnica
-- **Controlador:** `com.andeva.atelier.platform.iam.interfaces.rest.controllers.MembershipsController`
-- **Metodo Java:** `public ResponseEntity<List<MembershipResource>> getMemberships(@PathVariable UUID tenantId)`
-- **Ruta Base:** `/api/v1/tenants`
-- **Ruta Completa:** `/api/v1/tenants/{tenantId}/memberships`
-- **Proposito:** Retorna el padron integro de colaboradores vinculados al taller especificado. Incluye datos biográficos del empleado, su correo electronico, estado laboral, esquema remunerativo (fijo u horario) y la coleccion de roles asignados.
-
-#### Seguridad y Autorizacion
-- **Nivel de Acceso:** Autenticado
-- **Rol Minimo Requerido:** Mecanico Jefe (ROLE_CHIEF_MECHANIC), Administrador o Dueno
-- **Permiso Atomico:** `@PreAuthorize("hasAuthority('iam:members:read')")`
-- **Aislamiento Multi-Inquilino:** Valida que el tenantId de la ruta coincida con el inquilino en sesion.
-
-#### Parametros de Invocacion
-**Cabeceras HTTP (Headers):**
-- `Authorization: Bearer <jwt_token>`
-- `Accept: application/json`
-
-**Parametros de Ruta (Path Parameters):**
-| Parametro | Tipo | Requerido | Descripcion |
-| :--- | :--- | :---: | :--- |
-| `tenantId` | `UUID` | Si | Identificador universal del taller |
-
-**Parametros de Consulta (Query Parameters):**
-No aplica (Sin parametros de consulta en la URL).
-
-#### Recurso de Peticion (Request Body)
-No aplica (Peticion HTTP sin cuerpo de entrada).
-
-#### Recurso de Respuesta (Response Body)
-- **Estado HTTP Exitoso:** `200 OK`
-- **Registro Java DTO:** `List<com.andeva.atelier.platform.iam.interfaces.rest.resources.responses.MembershipResource>`
-- **Definicion de Campos Proyectados:**
-| Campo | Tipo de Dato | Descripcion |
-| :--- | :--- | :--- |
-| `id` | `UUID` | Identificador de la membresia laboral |
-| `tenantId` | `UUID` | Identificador del taller empleador |
-| `userId` | `UUID` | Identificador de la cuenta de usuario |
-| `employeeName` | `String` | Nombre completo del colaborador |
-| `email` | `String` | Correo electronico laboral o de acceso |
-| `status` | `String` | Estado laboral (ACTIVE o INACTIVE) |
-| `salaryType` | `String` | Modalidad de pago (FIXED u HOURLY) |
-| `baseSalary` | `BigDecimal` | Monto salarial nominal |
-| `currency` | `String` | Moneda de pago (PEN o USD) |
-| `roles` | `List<RoleResource>` | Lista de roles asignados a la membresia |
-
-**Ejemplo de Carga Util JSON (Response):**
-```json
-[
-  {
-    "id": "018f6c40-7e12-7000-8000-000000000040",
-    "tenantId": "018f6c40-7e12-7000-8000-000000000001",
-    "userId": "018f6c40-7e12-7000-8000-000000000030",
-    "employeeName": "Pedro Juan Ramirez Quispe",
-    "email": "pedro.mecanico@gmail.com",
-    "status": "ACTIVE",
-    "salaryType": "HOURLY",
-    "baseSalary": 25.5,
-    "currency": "PEN",
-    "roles": [
-      {
-        "id": "018f6c40-7e12-7000-8000-000000000010",
-        "name": "Tecnico Mecanico",
-        "description": "Ejecucion directa de labores mecanicas y diagnostico en bahia",
-        "isSystemRole": true,
-        "permissions": [
-          "operations:tasks:track_time",
-          "operations:tasks:complete",
-          "hr:attendance:clock_in"
-        ]
-      }
-    ]
-  }
-]
-```
-
-#### Errores y Excepciones de Dominio (RFC 7807)
-| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
-| :---: | :--- | :--- |
-| `401 Unauthorized` | `AuthenticationException` | Token ausente o invalido |
-| `403 Forbidden` | `AccessDeniedException` | El usuario carece del permiso iam:members:read |
-| `404 Not Found` | `TenantNotFoundException` | Taller no encontrado en el sistema |
-
-**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
-```json
-{
-  "type": "https://api.atelier.pe/errors/access-denied",
-  "title": "Acceso Denegado",
-  "status": 403,
-  "detail": "No cuenta con privilegios para consultar la planilla y membresias laborales del taller",
-  "instance": "/api/v1/tenants/018f6c40-7e12-7000-8000-000000000001/memberships",
-  "code": "ACCESS_DENIED",
-  "timestamp": "2026-10-01T16:30:00Z"
-}
-```
-
----
-
-### 6.2. [GET] /api/v1/tenants/{tenantId}/memberships/{id}
-
-**Consulta de Ficha Laboral Individual de Colaborador**
-
-#### Identidad Tecnica
-- **Controlador:** `com.andeva.atelier.platform.iam.interfaces.rest.controllers.MembershipsController`
-- **Metodo Java:** `public ResponseEntity<MembershipResource> getMembershipById(@PathVariable UUID tenantId, @PathVariable UUID id)`
-- **Ruta Base:** `/api/v1/tenants`
-- **Ruta Completa:** `/api/v1/tenants/{tenantId}/memberships/{id}`
-- **Proposito:** Recupera la ficha contractual detallada de un miembro especifico adscrito al taller. Expone sus roles, condiciones de sueldo pactadas y estado operativo.
-
-#### Seguridad y Autorizacion
-- **Nivel de Acceso:** Autenticado
-- **Rol Minimo Requerido:** Mecanico Jefe, Administrador o Dueno
-- **Permiso Atomico:** `@PreAuthorize("hasAuthority('iam:members:read')")`
-- **Aislamiento Multi-Inquilino:** Comprueba que la membresia pertenezca al taller en sesion.
-
-#### Parametros de Invocacion
-**Cabeceras HTTP (Headers):**
-- `Authorization: Bearer <jwt_token>`
-- `Accept: application/json`
-
-**Parametros de Ruta (Path Parameters):**
-| Parametro | Tipo | Requerido | Descripcion |
-| :--- | :--- | :---: | :--- |
-| `tenantId` | `UUID` | Si | Identificador del taller |
-| `id` | `UUID` | Si | Identificador universal de la membresia laboral |
-
-**Parametros de Consulta (Query Parameters):**
-No aplica (Sin parametros de consulta en la URL).
-
-#### Recurso de Peticion (Request Body)
-No aplica (Peticion HTTP sin cuerpo de entrada).
-
-#### Recurso de Respuesta (Response Body)
-- **Estado HTTP Exitoso:** `200 OK`
-- **Registro Java DTO:** `com.andeva.atelier.platform.iam.interfaces.rest.resources.responses.MembershipResource`
-- **Definicion de Campos Proyectados:**
-| Campo | Tipo de Dato | Descripcion |
-| :--- | :--- | :--- |
-| `id` | `UUID` | Identificador de la membresia |
-| `tenantId` | `UUID` | Identificador del taller |
-| `userId` | `UUID` | Identificador de la cuenta de usuario |
-| `employeeName` | `String` | Nombre completo del colaborador |
-| `email` | `String` | Correo electronico de acceso |
-| `status` | `String` | Estado laboral |
-| `salaryType` | `String` | Modalidad de sueldo |
-| `baseSalary` | `BigDecimal` | Monto salarial nominal |
-| `currency` | `String` | Moneda de remuneracion |
-| `roles` | `List<RoleResource>` | Roles asignados |
-
-**Ejemplo de Carga Util JSON (Response):**
-```json
-{
-  "id": "018f6c40-7e12-7000-8000-000000000040",
-  "tenantId": "018f6c40-7e12-7000-8000-000000000001",
-  "userId": "018f6c40-7e12-7000-8000-000000000030",
-  "employeeName": "Pedro Juan Ramirez Quispe",
-  "email": "pedro.mecanico@gmail.com",
-  "status": "ACTIVE",
-  "salaryType": "HOURLY",
-  "baseSalary": 25.5,
-  "currency": "PEN",
-  "roles": [
-    {
-      "id": "018f6c40-7e12-7000-8000-000000000010",
-      "name": "Tecnico Mecanico",
-      "description": "Ejecucion directa de labores mecanicas y diagnostico en bahia",
-      "isSystemRole": true,
-      "permissions": [
-        "operations:tasks:track_time",
-        "operations:tasks:complete",
-        "hr:attendance:clock_in"
-      ]
-    }
-  ]
-}
-```
-
-#### Errores y Excepciones de Dominio (RFC 7807)
-| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
-| :---: | :--- | :--- |
-| `401 Unauthorized` | `AuthenticationException` | Token ausente o invalido |
-| `403 Forbidden` | `AccessDeniedException` | Permiso iam:members:read insuficiente |
-| `404 Not Found` | `MembershipNotFoundException` | Membresia laboral no localizada en este taller |
-
-**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
-```json
-{
-  "type": "https://api.atelier.pe/errors/membership-not-found",
-  "title": "Membresia No Encontrada",
-  "status": 404,
-  "detail": "La membresia con identificador 018f6c40-7e12-7000-8000-000000000040 no existe en el taller especificado",
-  "instance": "/api/v1/tenants/018f6c40-7e12-7000-8000-000000000001/memberships/018f6c40-7e12-7000-8000-000000000040",
-  "code": "MEMBERSHIP_NOT_FOUND",
-  "timestamp": "2026-10-01T16:30:00Z"
-}
-```
-
----
-
-### 6.3. [PUT] /api/v1/tenants/{tenantId}/memberships/{id}/roles
-
-**Asignacion y Revocacion Dinamica de Roles de Seguridad**
-
-#### Identidad Tecnica
-- **Controlador:** `com.andeva.atelier.platform.iam.interfaces.rest.controllers.MembershipsController`
-- **Metodo Java:** `public ResponseEntity<MembershipResource> assignRoles(@PathVariable UUID tenantId, @PathVariable UUID id, @Valid @RequestBody AssignRolesResource resource)`
-- **Ruta Base:** `/api/v1/tenants`
-- **Ruta Completa:** `/api/v1/tenants/{tenantId}/memberships/{id}/roles`
-- **Proposito:** Modifica de forma atomica el conjunto de roles (relacion M:N) asignados a un colaborador del taller. Actualiza la tabla asociativa membership_roles, recalculando las facultades que seran inyectadas en sus proximos tokens de autenticacion.
-
-#### Seguridad y Autorizacion
-- **Nivel de Acceso:** Autenticado
-- **Rol Minimo Requerido:** Administrador de Taller (ROLE_WORKSHOP_ADMINISTRATOR) o Dueno (ROLE_WORKSHOP_OWNER)
-- **Permiso Atomico:** `@PreAuthorize("hasAuthority('iam:members:manage_roles')")`
-- **Aislamiento Multi-Inquilino:** Verifica pertenencia del colaborador y de cada rol al tenantId en sesion.
-
-#### Parametros de Invocacion
-**Cabeceras HTTP (Headers):**
-- `Authorization: Bearer <jwt_token>`
-- `Content-Type: application/json`
-
-**Parametros de Ruta (Path Parameters):**
-| Parametro | Tipo | Requerido | Descripcion |
-| :--- | :--- | :---: | :--- |
-| `tenantId` | `UUID` | Si | Identificador del taller |
-| `id` | `UUID` | Si | Identificador de la membresia a reconfigurar |
-
-**Parametros de Consulta (Query Parameters):**
-No aplica (Sin parametros de consulta en la URL).
-
-#### Recurso de Peticion (Request Body)
-- **Registro Java DTO:** `com.andeva.atelier.platform.iam.interfaces.rest.resources.requests.AssignRolesResource`
-- **Definicion de Campos:**
-| Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripcion |
-| :--- | :--- | :---: | :--- | :--- |
-| `roleIds` | `List<UUID>` | Si | `@NotEmpty` | Lista de identificadores de roles a vincular a la membresia |
-
-**Ejemplo de Carga Util JSON (Request):**
-```json
-{
-  "roleIds": [
-    "018f6c40-7e12-7000-8000-000000000010",
-    "018f6c40-7e12-7000-8000-000000000011"
-  ]
-}
-```
-
-#### Recurso de Respuesta (Response Body)
-- **Estado HTTP Exitoso:** `200 OK`
-- **Registro Java DTO:** `com.andeva.atelier.platform.iam.interfaces.rest.resources.responses.MembershipResource`
-- **Definicion de Campos Proyectados:**
-| Campo | Tipo de Dato | Descripcion |
-| :--- | :--- | :--- |
-| `id` | `UUID` | Identificador de la membresia |
-| `tenantId` | `UUID` | Identificador del taller |
-| `userId` | `UUID` | Identificador del usuario |
-| `employeeName` | `String` | Nombre completo |
-| `email` | `String` | Correo electronico |
-| `status` | `String` | Estado laboral |
-| `salaryType` | `String` | Tipo de salario |
-| `baseSalary` | `BigDecimal` | Salario base |
-| `currency` | `String` | Moneda |
-| `roles` | `List<RoleResource>` | Lista actualizada de roles asignados |
-
-**Ejemplo de Carga Util JSON (Response):**
-```json
-{
-  "id": "018f6c40-7e12-7000-8000-000000000040",
-  "tenantId": "018f6c40-7e12-7000-8000-000000000001",
-  "userId": "018f6c40-7e12-7000-8000-000000000030",
-  "employeeName": "Pedro Juan Ramirez Quispe",
-  "email": "pedro.mecanico@gmail.com",
-  "status": "ACTIVE",
-  "salaryType": "HOURLY",
-  "baseSalary": 25.5,
-  "currency": "PEN",
-  "roles": [
-    {
-      "id": "018f6c40-7e12-7000-8000-000000000010",
-      "name": "Tecnico Mecanico",
-      "description": "Ejecucion directa de labores mecanicas",
-      "isSystemRole": true,
-      "permissions": [
-        "operations:tasks:track_time",
-        "operations:tasks:complete"
-      ]
-    },
-    {
-      "id": "018f6c40-7e12-7000-8000-000000000011",
-      "name": "Encargado de Inventario",
-      "description": "Custodia fisica y valoracion FIFO de autopartes",
-      "isSystemRole": true,
-      "permissions": [
-        "inventory:batches:receive",
-        "inventory:batches:dispatch_fifo"
-      ]
-    }
-  ]
-}
-```
-
-#### Errores y Excepciones de Dominio (RFC 7807)
-| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
-| :---: | :--- | :--- |
-| `400 Bad Request` | `MethodArgumentNotValidException` | Lista de roleIds vacia o nula |
-| `401 Unauthorized` | `AuthenticationException` | Token ausente o invalido |
-| `403 Forbidden` | `AccessDeniedException` | Falta de autoridad iam:members:manage_roles |
-| `404 Not Found` | `RoleNotFoundException` | Uno o mas roleIds no existen en el catalogo del taller |
-
-**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
-```json
-{
-  "type": "https://api.atelier.pe/errors/role-not-found",
-  "title": "Rol Inexistente",
-  "status": 404,
-  "detail": "Uno de los roles seleccionados no existe en el catalogo del taller o fue eliminado",
-  "instance": "/api/v1/tenants/018f6c40-7e12-7000-8000-000000000001/memberships/018f6c40-7e12-7000-8000-000000000040/roles",
-  "code": "ROLE_NOT_FOUND",
-  "timestamp": "2026-10-01T16:30:00Z"
-}
-```
-
----
-
-### 6.4. [PUT] /api/v1/tenants/{tenantId}/memberships/{id}/compensation
-
-**Actualizacion del Esquema de Remuneracion Salarial**
-
-#### Identidad Tecnica
-- **Controlador:** `com.andeva.atelier.platform.iam.interfaces.rest.controllers.MembershipsController`
-- **Metodo Java:** `public ResponseEntity<MembershipResource> updateCompensation(@PathVariable UUID tenantId, @PathVariable UUID id, @Valid @RequestBody UpdateCompensationResource resource)`
-- **Ruta Base:** `/api/v1/tenants`
-- **Ruta Completa:** `/api/v1/tenants/{tenantId}/memberships/{id}/compensation`
-- **Proposito:** Actualiza las condiciones economicas contractuales del colaborador (modalidad de salario fijo mensual o tarifa por hora hombre y moneda de curso legal). Este endpoint esta reservado con exclusividad al Dueno del taller por razones de confidencialidad de planilla.
-
-#### Seguridad y Autorizacion
-- **Nivel de Acceso:** Autenticado
-- **Rol Minimo Requerido:** Exclusivo Dueno de Taller (ROLE_WORKSHOP_OWNER)
-- **Permiso Atomico:** `@PreAuthorize("hasAuthority('iam:members:compensate')")`
-- **Aislamiento Multi-Inquilino:** Aislamiento estricto dentro del taller en sesion.
-
-#### Parametros de Invocacion
-**Cabeceras HTTP (Headers):**
-- `Authorization: Bearer <jwt_token>`
-- `Content-Type: application/json`
-
-**Parametros de Ruta (Path Parameters):**
-| Parametro | Tipo | Requerido | Descripcion |
-| :--- | :--- | :---: | :--- |
-| `tenantId` | `UUID` | Si | Identificador del taller |
-| `id` | `UUID` | Si | Identificador de la membresia del colaborador |
-
-**Parametros de Consulta (Query Parameters):**
-No aplica (Sin parametros de consulta en la URL).
-
-#### Recurso de Peticion (Request Body)
-- **Registro Java DTO:** `com.andeva.atelier.platform.iam.interfaces.rest.resources.requests.UpdateCompensationResource`
-- **Definicion de Campos:**
-| Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripcion |
-| :--- | :--- | :---: | :--- | :--- |
-| `salaryType` | `String` | Si | `@NotBlank, @Pattern(regexp = "^(FIXED|HOURLY)$")` | Modalidad de compensacion salarial |
-| `baseSalary` | `BigDecimal` | Si | `@NotNull, @DecimalMin("0.00")` | Monto salarial nominal o tarifa por hora |
-| `currency` | `String` | Si | `@NotBlank, @Pattern(regexp = "^(PEN|USD)$")` | Codigo de moneda ISO-4217 |
-
-**Ejemplo de Carga Util JSON (Request):**
-```json
-{
-  "salaryType": "FIXED",
-  "baseSalary": 2800,
-  "currency": "PEN"
-}
-```
-
-#### Recurso de Respuesta (Response Body)
-- **Estado HTTP Exitoso:** `200 OK`
-- **Registro Java DTO:** `com.andeva.atelier.platform.iam.interfaces.rest.resources.responses.MembershipResource`
-- **Definicion de Campos Proyectados:**
-| Campo | Tipo de Dato | Descripcion |
-| :--- | :--- | :--- |
-| `id` | `UUID` | Identificador de la membresia |
-| `tenantId` | `UUID` | Identificador del taller |
-| `userId` | `UUID` | Identificador del usuario |
-| `employeeName` | `String` | Nombre completo |
-| `email` | `String` | Correo electronico |
-| `status` | `String` | Estado laboral |
-| `salaryType` | `String` | Modalidad de salario actualizada |
-| `baseSalary` | `BigDecimal` | Monto salarial actualizado |
-| `currency` | `String` | Moneda de liquidacion |
-| `roles` | `List<RoleResource>` | Roles asignados |
-
-**Ejemplo de Carga Util JSON (Response):**
-```json
-{
-  "id": "018f6c40-7e12-7000-8000-000000000040",
-  "tenantId": "018f6c40-7e12-7000-8000-000000000001",
-  "userId": "018f6c40-7e12-7000-8000-000000000030",
-  "employeeName": "Pedro Juan Ramirez Quispe",
-  "email": "pedro.mecanico@gmail.com",
-  "status": "ACTIVE",
-  "salaryType": "FIXED",
-  "baseSalary": 2800,
-  "currency": "PEN",
-  "roles": [
-    {
-      "id": "018f6c40-7e12-7000-8000-000000000010",
-      "name": "Tecnico Mecanico",
-      "description": "Ejecucion directa de labores mecanicas",
-      "isSystemRole": true,
-      "permissions": [
-        "operations:tasks:track_time",
-        "operations:tasks:complete"
-      ]
-    }
-  ]
-}
-```
-
-#### Errores y Excepciones de Dominio (RFC 7807)
-| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
-| :---: | :--- | :--- |
-| `400 Bad Request` | `MethodArgumentNotValidException` | Monto salarial negativo o tipo de compensacion invalido |
-| `401 Unauthorized` | `AuthenticationException` | Token ausente o invalido |
-| `403 Forbidden` | `AccessDeniedException` | El usuario no es Dueno de Taller o carece del permiso iam:members:compensate |
-| `404 Not Found` | `MembershipNotFoundException` | Membresia laboral no localizada |
-
-**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
-```json
-{
-  "type": "https://api.atelier.pe/errors/forbidden-access",
-  "title": "Acceso Privilegiado Requerido",
-  "status": 403,
-  "detail": "La gestion de compensaciones salariales es de caracter exclusivo para el Dueno del Taller",
-  "instance": "/api/v1/tenants/018f6c40-7e12-7000-8000-000000000001/memberships/018f6c40-7e12-7000-8000-000000000040/compensation",
-  "code": "ACCESS_DENIED",
-  "timestamp": "2026-10-01T16:30:00Z"
-}
-```
-
----
-
-### 6.5. [DELETE] /api/v1/tenants/{tenantId}/memberships/{id}
-
-**Desactivacion Laboral de Membresia en el Taller**
-
-#### Identidad Tecnica
-- **Controlador:** `com.andeva.atelier.platform.iam.interfaces.rest.controllers.MembershipsController`
-- **Metodo Java:** `public ResponseEntity<Void> deactivateMembership(@PathVariable UUID tenantId, @PathVariable UUID id)`
-- **Ruta Base:** `/api/v1/tenants`
-- **Ruta Completa:** `/api/v1/tenants/{tenantId}/memberships/{id}`
-- **Proposito:** Desvincula laboralmente al colaborador del taller mediante borrado logico (Soft Delete) y cambio de estado a INACTIVE. Invalida de forma inmediata la emision de nuevos tokens de acceso para ese taller.
-
-#### Seguridad y Autorizacion
-- **Nivel de Acceso:** Autenticado
-- **Rol Minimo Requerido:** Administrador de Taller (ROLE_WORKSHOP_ADMINISTRATOR) o Dueno (ROLE_WORKSHOP_OWNER)
-- **Permiso Atomico:** `@PreAuthorize("hasAuthority('iam:members:manage_roles')")`
-- **Aislamiento Multi-Inquilino:** Asegura que no se desactive a miembros de otros talleres.
-
-#### Parametros de Invocacion
-**Cabeceras HTTP (Headers):**
-- `Authorization: Bearer <jwt_token>`
-
-**Parametros de Ruta (Path Parameters):**
-| Parametro | Tipo | Requerido | Descripcion |
-| :--- | :--- | :---: | :--- |
-| `tenantId` | `UUID` | Si | Identificador del taller |
-| `id` | `UUID` | Si | Identificador de la membresia laboral a desactivar |
-
-**Parametros de Consulta (Query Parameters):**
-No aplica (Sin parametros de consulta en la URL).
-
-#### Recurso de Peticion (Request Body)
-No aplica (Peticion HTTP sin cuerpo de entrada).
-
-#### Recurso de Respuesta (Response Body)
-- **Estado HTTP Exitoso:** `204 No Content`
-Sin cuerpo de respuesta en la carga util.
-
-#### Errores y Excepciones de Dominio (RFC 7807)
-| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
-| :---: | :--- | :--- |
-| `401 Unauthorized` | `AuthenticationException` | Token ausente o invalido |
-| `403 Forbidden` | `AccessDeniedException` | Falta del permiso iam:members:manage_roles |
-| `404 Not Found` | `MembershipNotFoundException` | Membresia laboral no encontrada |
-| `409 Conflict` | `CannotDeactivateLastOwnerException` | No es posible desactivar la membresia del unico Dueno registrado en el taller |
-
-**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
-```json
-{
-  "type": "https://api.atelier.pe/errors/cannot-deactivate-last-owner",
-  "title": "Conflicto de Gobernanza",
-  "status": 409,
-  "detail": "No se puede dar de baja al unico titular legal (Dueno) registrado en el taller",
-  "instance": "/api/v1/tenants/018f6c40-7e12-7000-8000-000000000001/memberships/018f6c40-7e12-7000-8000-000000000040",
-  "code": "CANNOT_DEACTIVATE_LAST_OWNER",
   "timestamp": "2026-10-01T16:30:00Z"
 }
 ```
@@ -2477,192 +2469,6 @@ No aplica (Peticion HTTP sin cuerpo de entrada).
   "detail": "Se requiere la autoridad iam:permissions:read para inspeccionar el catalogo de permisos",
   "instance": "/api/v1/permissions",
   "code": "ACCESS_DENIED",
-  "timestamp": "2026-10-01T16:30:00Z"
-}
-```
-
----
-
-## 8. Endpoints de Cuenta de Usuario (UsersController)
-
-### 8.1. [GET] /api/v1/users/me
-
-**Consulta de Perfil de la Cuenta de Usuario Autenticado**
-
-#### Identidad Tecnica
-- **Controlador:** `com.andeva.atelier.platform.iam.interfaces.rest.controllers.UsersController`
-- **Metodo Java:** `public ResponseEntity<AuthenticatedUserResource> getCurrentUser()`
-- **Ruta Base:** `/api/v1/users`
-- **Ruta Completa:** `/api/v1/users/me`
-- **Proposito:** Retorna los datos de sesion, identificador universal, nombres, correo electronico y autoridades concedidas al usuario que efectua la llamada, resolviendo su identidad desde el SecurityContext sin requerir parametros de ruta.
-
-#### Seguridad y Autorizacion
-- **Nivel de Acceso:** Autenticado
-- **Rol Minimo Requerido:** Cualquier usuario autenticado
-- **Permiso Atomico:** `@PreAuthorize("isAuthenticated()")`
-- **Aislamiento Multi-Inquilino:** Resuelve el perfil global y asocia el taller activo desde el token JWT.
-
-#### Parametros de Invocacion
-**Cabeceras HTTP (Headers):**
-- `Authorization: Bearer <jwt_token>`
-- `Accept: application/json`
-
-**Parametros de Ruta (Path Parameters):**
-No aplica (Sin parametros en la ruta).
-
-**Parametros de Consulta (Query Parameters):**
-No aplica (Sin parametros de consulta en la URL).
-
-#### Recurso de Peticion (Request Body)
-No aplica (Peticion HTTP sin cuerpo de entrada).
-
-#### Recurso de Respuesta (Response Body)
-- **Estado HTTP Exitoso:** `200 OK`
-- **Registro Java DTO:** `com.andeva.atelier.platform.iam.interfaces.rest.resources.responses.AuthenticatedUserResource`
-- **Definicion de Campos Proyectados:**
-| Campo | Tipo de Dato | Descripcion |
-| :--- | :--- | :--- |
-| `userId` | `UUID` | Identificador de la cuenta de usuario |
-| `email` | `String` | Correo electronico verificado de acceso |
-| `fullName` | `String` | Nombre completo del usuario |
-| `token` | `String` | Token Bearer JWT activo |
-| `tokenType` | `String` | Esquema Bearer |
-| `activeTenant` | `TenantSummaryResource` | Taller activo en la sesion actual |
-| `permissions` | `List<String>` | Lista de codigos de permisos asignados |
-
-**Ejemplo de Carga Util JSON (Response):**
-```json
-{
-  "userId": "018f6c40-7e12-7000-8000-000000000002",
-  "email": "gerencia@precisionmotors.pe",
-  "fullName": "Carlos Alberto Mendoza Flores",
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.active_jwt_token.signature",
-  "tokenType": "Bearer",
-  "activeTenant": {
-    "id": "018f6c40-7e12-7000-8000-000000000001",
-    "name": "Taller Mecanico Precision Motors",
-    "taxId": "20608912345"
-  },
-  "permissions": [
-    "iam:tenants:read",
-    "iam:tenants:update",
-    "iam:branches:read",
-    "iam:branches:manage",
-    "iam:members:read",
-    "iam:members:invite",
-    "iam:members:manage_roles"
-  ]
-}
-```
-
-#### Errores y Excepciones de Dominio (RFC 7807)
-| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
-| :---: | :--- | :--- |
-| `401 Unauthorized` | `AuthenticationException` | Token ausente o expirado |
-| `404 Not Found` | `UserNotFoundException` | La cuenta de usuario asociada al token ya no existe en el sistema |
-
-**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
-```json
-{
-  "type": "https://api.atelier.pe/errors/user-not-found",
-  "title": "Usuario No Localizado",
-  "status": 404,
-  "detail": "La cuenta de usuario vinculada a la sesion no fue encontrada en la base de datos",
-  "instance": "/api/v1/users/me",
-  "code": "USER_NOT_FOUND",
-  "timestamp": "2026-10-01T16:30:00Z"
-}
-```
-
----
-
-### 8.2. [PUT] /api/v1/users/me/profile
-
-**Actualizacion de Datos Demograficos y Contacto del Perfil**
-
-#### Identidad Tecnica
-- **Controlador:** `com.andeva.atelier.platform.iam.interfaces.rest.controllers.UsersController`
-- **Metodo Java:** `public ResponseEntity<UserProfileResource> updateProfile(@Valid @RequestBody UpdateProfileResource resource)`
-- **Ruta Base:** `/api/v1/users`
-- **Ruta Completa:** `/api/v1/users/me/profile`
-- **Proposito:** Permite al usuario autenticado modificar sus datos demograficos de perfil personal (nombres, apellidos y telefono de contacto). La direccion de correo electronico permanece inalterada para no comprometer el mecanismo principal de autenticacion.
-
-#### Seguridad y Autorizacion
-- **Nivel de Acceso:** Autenticado
-- **Rol Minimo Requerido:** Cualquier usuario autenticado
-- **Permiso Atomico:** `@PreAuthorize("isAuthenticated()")`
-- **Aislamiento Multi-Inquilino:** Afecta exclusivamente a la entidad Profile del usuario en sesion.
-
-#### Parametros de Invocacion
-**Cabeceras HTTP (Headers):**
-- `Authorization: Bearer <jwt_token>`
-- `Content-Type: application/json`
-
-**Parametros de Ruta (Path Parameters):**
-No aplica (Sin parametros en la ruta).
-
-**Parametros de Consulta (Query Parameters):**
-No aplica (Sin parametros de consulta en la URL).
-
-#### Recurso de Peticion (Request Body)
-- **Registro Java DTO:** `com.andeva.atelier.platform.iam.interfaces.rest.resources.requests.UpdateProfileResource`
-- **Definicion de Campos:**
-| Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripcion |
-| :--- | :--- | :---: | :--- | :--- |
-| `firstName` | `String` | Si | `@NotBlank, @Size(max = 100)` | Nombres del usuario |
-| `lastName` | `String` | Si | `@NotBlank, @Size(max = 100)` | Apellidos del usuario |
-| `phone` | `String` | No | `@Pattern(regexp = "^\+?[0-9]{9,15}$")` | Telefono movil de contacto |
-
-**Ejemplo de Carga Util JSON (Request):**
-```json
-{
-  "firstName": "Carlos Alberto",
-  "lastName": "Mendoza Flores",
-  "phone": "+51987654321"
-}
-```
-
-#### Recurso de Respuesta (Response Body)
-- **Estado HTTP Exitoso:** `200 OK`
-- **Registro Java DTO:** `com.andeva.atelier.platform.iam.interfaces.rest.resources.responses.UserProfileResource`
-- **Definicion de Campos Proyectados:**
-| Campo | Tipo de Dato | Descripcion |
-| :--- | :--- | :--- |
-| `id` | `UUID` | Identificador universal del perfil de usuario |
-| `email` | `String` | Correo electronico de la cuenta |
-| `firstName` | `String` | Nombres actualizados |
-| `lastName` | `String` | Apellidos actualizados |
-| `phone` | `String` | Telefono actualizado |
-| `avatarUrl` | `String` | URL publica de la foto de perfil en el bucket S3 |
-
-**Ejemplo de Carga Util JSON (Response):**
-```json
-{
-  "id": "018f6c40-7e12-7000-8000-000000000002",
-  "email": "gerencia@precisionmotors.pe",
-  "firstName": "Carlos Alberto",
-  "lastName": "Mendoza Flores",
-  "phone": "+51987654321",
-  "avatarUrl": "https://s3.us-east-1.amazonaws.com/atelier-avatars/profiles/018f6c40-0002.png"
-}
-```
-
-#### Errores y Excepciones de Dominio (RFC 7807)
-| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
-| :---: | :--- | :--- |
-| `400 Bad Request` | `MethodArgumentNotValidException` | Nombres o apellidos en blanco o formato de telefono invalido |
-| `401 Unauthorized` | `AuthenticationException` | Token ausente o invalido |
-| `404 Not Found` | `UserNotFoundException` | Cuenta de usuario no localizada |
-
-**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
-```json
-{
-  "type": "https://api.atelier.pe/errors/invalid-request-payload",
-  "title": "Datos de Perfil Invalidos",
-  "status": 400,
-  "detail": "El formato del numero telefonico movil no coincide con un patron internacional valido",
-  "instance": "/api/v1/users/me/profile",
-  "code": "INVALID_REQUEST_PAYLOAD",
   "timestamp": "2026-10-01T16:30:00Z"
 }
 ```

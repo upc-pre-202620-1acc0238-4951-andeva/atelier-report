@@ -10,56 +10,343 @@ El modulo CRM & Fleet administra la relacion con clientes particulares y corpora
 1. **Aislamiento Multi-Inquilino en Clientes:** La cartera de clientes se segmenta estrictamente por taller mediante la clave foranea `tenantId`. Cada taller es soberano de sus registros de clientes, contactos y condiciones comerciales acordadas.
 2. **Activo Vehicular Universal y Cadena de Custodia:** A diferencia de los clientes, la entidad `Vehicle` representa un activo fisico en el mundo real que carece de `tenantId` propio. Su unicidad se garantiza a nivel nacional por placa de rodaje y numero de chasis VIN (ISO 3779). La relacion con los clientes y talleres se materializa a traves de la entidad de trazabilidad `VehicleOwnership`, preservando el historico cronologico inmutable de tenencia y traspasos.
 3. **Flotas Comerciales Corporativas (B2B):** Permite agrupar unidades vehiculares bajo convenios empresariales con clientes de tipo persona juridica (`COMPANY`), habilitando tarifas corporativas y gestion centralizada de mantenimiento.
-4. **Invariante de Odometria:** Toda actualizacion de kilometraje valida de forma determinista la no regresion del odometro para salvaguardar la transparencia pericial y advertir inconsistencias mecanicas.
+4. **Invariante de Odometria e Integridad Pericial:** Toda actualizacion de kilometraje valida de forma determinista la no regresion del odometro para salvaguardar la transparencia pericial y advertir inconsistencias mecanicas.
 5. **Estandar de Errores RFC 7807:** Toda anomalia de validacion sintactica o conflicto de negocio produce respuestas estandarizadas bajo el formato `ProblemDetail`.
 
 ### 1.2. Catalogo Maestro de Endpoints de CRM & Fleet
 
 | No. | Seccion | Metodo | Ruta | Controlador | Metodo Java | Permiso Requerido |
 | :---: | :---: | :---: | :--- | :--- | :--- | :--- |
-| 1 | 2.1 | `GET` | `/api/v1/crm/customers` | `CustomersController` | `getCustomers()` | `@PreAuthorize("hasAuthority('crm:customers:read')")` |
-| 2 | 2.2 | `POST` | `/api/v1/crm/customers` | `CustomersController` | `createCustomer()` | `@PreAuthorize("hasAuthority('crm:customers:create')")` |
-| 3 | 2.3 | `GET` | `/api/v1/crm/customers/{id}` | `CustomersController` | `getCustomerById()` | `@PreAuthorize("hasAuthority('crm:customers:read')")` |
-| 4 | 2.4 | `PUT` | `/api/v1/crm/customers/{id}` | `CustomersController` | `updateCustomer()` | `@PreAuthorize("hasAuthority('crm:customers:update')")` |
-| 5 | 2.5 | `GET` | `/api/v1/crm/customers/by-document?type={type}&number={number}` | `CustomersController` | `getCustomerByDocument()` | `@PreAuthorize("hasAuthority('crm:customers:read')")` |
-| 6 | 2.6 | `POST` | `/api/v1/crm/customers/{id}/archive` | `CustomersController` | `archiveCustomer()` | `@PreAuthorize("hasAuthority('crm:customers:update')")` |
-| 7 | 3.1 | `GET` | `/api/v1/crm/vehicles` | `VehiclesController` | `getVehicles()` | `@PreAuthorize("hasAuthority('crm:vehicles:read')")` |
-| 8 | 3.2 | `POST` | `/api/v1/crm/vehicles` | `VehiclesController` | `registerVehicle()` | `@PreAuthorize("hasAuthority('crm:vehicles:create')")` |
-| 9 | 3.3 | `GET` | `/api/v1/crm/vehicles/{id}` | `VehiclesController` | `getVehicleById()` | `@PreAuthorize("hasAuthority('crm:vehicles:read')")` |
-| 10 | 3.4 | `PUT` | `/api/v1/crm/vehicles/{id}` | `VehiclesController` | `updateVehicle()` | `@PreAuthorize("hasAuthority('crm:vehicles:update')")` |
-| 11 | 3.5 | `GET` | `/api/v1/crm/vehicles/by-plate/{plate}` | `VehiclesController` | `getVehicleByPlate()` | `@PreAuthorize("hasAuthority('crm:vehicles:read')")` |
-| 12 | 3.6 | `GET` | `/api/v1/crm/vehicles/by-vin/{vin}` | `VehiclesController` | `getVehicleByVin()` | `@PreAuthorize("hasAuthority('crm:vehicles:read')")` |
-| 13 | 3.7 | `PUT` | `/api/v1/crm/vehicles/{id}/mileage` | `VehiclesController` | `updateMileage()` | `@PreAuthorize("hasAuthority('crm:vehicles:update')")` |
-| 14 | 3.8 | `POST` | `/api/v1/crm/vehicles/{id}/transfer-ownership` | `VehiclesController` | `transferOwnership()` | `@PreAuthorize("hasAuthority('crm:vehicles:update')")` |
-| 15 | 4.1 | `GET` | `/api/v1/crm/fleets` | `FleetsController` | `getFleets()` | `@PreAuthorize("hasAuthority('crm:fleets:manage')")` |
-| 16 | 4.2 | `POST` | `/api/v1/crm/fleets` | `FleetsController` | `createFleet()` | `@PreAuthorize("hasAuthority('crm:fleets:manage')")` |
-| 17 | 4.3 | `GET` | `/api/v1/crm/fleets/{id}` | `FleetsController` | `getFleetById()` | `@PreAuthorize("hasAuthority('crm:fleets:manage')")` |
-| 18 | 4.4 | `PUT` | `/api/v1/crm/fleets/{id}` | `FleetsController` | `updateFleet()` | `@PreAuthorize("hasAuthority('crm:fleets:manage')")` |
-| 19 | 4.5 | `POST` | `/api/v1/crm/fleets/{id}/vehicles` | `FleetsController` | `addVehicleToFleet()` | `@PreAuthorize("hasAuthority('crm:fleets:manage')")` |
-| 20 | 4.6 | `DELETE` | `/api/v1/crm/fleets/{id}/vehicles/{vehicleId}` | `FleetsController` | `removeVehicleFromFleet()` | `@PreAuthorize("hasAuthority('crm:fleets:manage')")` |
-| 21 | 5.1 | `GET` | `/api/v1/crm/customers/{customerId}/notes` | `CustomerNotesController` | `getCustomerNotes()` | `@PreAuthorize("hasAuthority('crm:customers:read')")` |
-| 22 | 5.2 | `POST` | `/api/v1/crm/customers/{customerId}/notes` | `CustomerNotesController` | `createCustomerNote()` | `@PreAuthorize("hasAuthority('crm:customers:update')")` |
+| 1 | 2.1 | `POST` | `/api/v1/customers/individuals` | `CustomersController` | `registerIndividualCustomer()` | `@PreAuthorize("hasAuthority('crm:customers:create')")` |
+| 2 | 2.2 | `POST` | `/api/v1/customers/companies` | `CustomersController` | `registerCompanyCustomer()` | `@PreAuthorize("hasAuthority('crm:customers:create')")` |
+| 3 | 2.3 | `GET` | `/api/v1/customers` | `CustomersController` | `getCustomers()` | `@PreAuthorize("hasAuthority('crm:customers:read')")` |
+| 4 | 2.4 | `GET` | `/api/v1/customers/{customerId}` | `CustomersController` | `getCustomerById()` | `@PreAuthorize("hasAuthority('crm:customers:read')")` |
+| 5 | 2.5 | `PUT` | `/api/v1/customers/{customerId}/contact` | `CustomersController` | `updateCustomerContact()` | `@PreAuthorize("hasAuthority('crm:customers:update')")` |
+| 6 | 2.6 | `GET` | `/api/v1/customers/{customerId}/vehicles` | `CustomersController` | `getCustomerVehicles()` | `@PreAuthorize("hasAuthority('crm:customers:read')")` |
+| 7 | 3.1 | `POST` | `/api/v1/vehicles` | `VehiclesController` | `registerVehicle()` | `@PreAuthorize("hasAuthority('crm:vehicles:create')")` |
+| 8 | 3.2 | `GET` | `/api/v1/vehicles/{vehicleId}` | `VehiclesController` | `getVehicleById()` | `@PreAuthorize("hasAuthority('crm:vehicles:read')")` |
+| 9 | 3.3 | `GET` | `/api/v1/vehicles/by-plate/{plate}` | `VehiclesController` | `getVehicleByPlate()` | `@PreAuthorize("hasAuthority('crm:vehicles:read')")` |
+| 10 | 3.4 | `POST` | `/api/v1/vehicles/{vehicleId}/ownerships` | `VehiclesController` | `transferOwnership()` | `@PreAuthorize("hasAuthority('crm:vehicles:update')")` |
+| 11 | 3.5 | `GET` | `/api/v1/vehicles/{vehicleId}/ownerships` | `VehiclesController` | `getVehicleOwnershipHistory()` | `@PreAuthorize("hasAuthority('crm:vehicles:read')")` |
+| 12 | 3.6 | `GET` | `/api/v1/vehicles/my-vehicles` | `VehiclesController` | `getMyVehicles()` | `@PreAuthorize("isAuthenticated()")` |
+| 13 | 4.1 | `POST` | `/api/v1/appointments` | `AppointmentsController` | `scheduleAppointment()` | `@PreAuthorize("hasAuthority('crm:appointments:create')")` |
+| 14 | 4.2 | `GET` | `/api/v1/appointments` | `AppointmentsController` | `getAppointments()` | `@PreAuthorize("hasAuthority('crm:appointments:read')")` |
+| 15 | 4.3 | `GET` | `/api/v1/appointments/{appointmentId}` | `AppointmentsController` | `getAppointmentById()` | `@PreAuthorize("hasAuthority('crm:appointments:read')")` |
+| 16 | 4.4 | `POST` | `/api/v1/appointments/{appointmentId}/confirm` | `AppointmentsController` | `confirmAppointment()` | `@PreAuthorize("hasAuthority('crm:appointments:manage')")` |
+| 17 | 4.5 | `POST` | `/api/v1/appointments/{appointmentId}/arrive` | `AppointmentsController` | `recordArrival()` | `@PreAuthorize("hasAuthority('crm:appointments:manage')")` |
+| 18 | 4.6 | `POST` | `/api/v1/appointments/{appointmentId}/reschedule` | `AppointmentsController` | `rescheduleAppointment()` | `@PreAuthorize("hasAuthority('crm:appointments:manage')")` |
+| 19 | 4.7 | `POST` | `/api/v1/appointments/{appointmentId}/cancel` | `AppointmentsController` | `cancelAppointment()` | `@PreAuthorize("hasAuthority('crm:appointments:manage')")` |
+| 20 | 5.1 | `POST` | `/api/v1/customers/{customerId}/memberships` | `CustomerMembershipsController` | `addCompanyMember()` | `@PreAuthorize("hasAuthority('crm:customers:manage')")` |
+| 21 | 5.2 | `GET` | `/api/v1/customers/{customerId}/memberships` | `CustomerMembershipsController` | `getCompanyMembers()` | `@PreAuthorize("hasAuthority('crm:customers:read')")` |
+| 22 | 5.3 | `DELETE` | `/api/v1/customers/{customerId}/memberships/{userId}` | `CustomerMembershipsController` | `revokeCompanyMember()` | `@PreAuthorize("hasAuthority('crm:customers:manage')")` |
 
 ---
 
-## 2. Endpoints de Clientes (CustomersController)
+## 2. Endpoints de Gestion de Clientes (CustomersController)
 
-### 2.1. [GET] /api/v1/crm/customers
+### 2.1. [POST] /api/v1/customers/individuals
 
-**Listado Paginado y Filtrado de Cartera de Clientes**
+**Alta de Cliente Particular (Persona Natural)**
 
 #### Identidad Tecnica
 - **Controlador:** `com.andeva.atelier.platform.crm.interfaces.rest.controllers.CustomersController`
-- **Metodo Java:** `public ResponseEntity<Page<CustomerResource>> getCustomers(@RequestParam(required = false) String type, @RequestParam(required = false) String search, @RequestParam(required = false) String status, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size)`
-- **Ruta Base:** `/api/v1/crm/customers`
-- **Ruta Completa:** `/api/v1/crm/customers`
-- **Proposito:** Retorna una vista paginada de la cartera de clientes (personas naturales y juridicas) correspondiente al taller en sesion. Permite aplicar filtros por tipologia legal (INDIVIDUAL o COMPANY), termino de busqueda textual sobre nombres, razon social o documento de identidad fiscal, y estado comercial.
+- **Metodo Java:** `public ResponseEntity<CustomerResource> registerIndividualCustomer(@Valid @RequestBody CreateIndividualCustomerResource resource)`
+- **Ruta Base:** `/api/v1/customers`
+- **Ruta Completa:** `/api/v1/customers/individuals`
+- **Proposito:** Registra a una persona natural como cliente del taller automotriz. Valida la unicidad nacional del documento nacional de identidad DNI ante la autoridad registral, valida el formato del correo electronico y el numero telefonico. Asocia de forma inmutable el identificador de inquilino del taller autenticado e inicializa el estado activo del titular.
 
 #### Seguridad y Autorizacion
 - **Nivel de Acceso:** Autenticado
-- **Rol Minimo Requerido:** Recepcionista (ROLE_RECEPTIONIST) o Asesor de Servicio (ROLE_SERVICE_ADVISOR)
+- **Rol Minimo Requerido:** Recepcionista (ROLE_RECEPTIONIST), Asesor de Servicio (ROLE_SERVICE_ADVISOR) o Administrador (ROLE_WORKSHOP_ADMINISTRATOR)
+- **Permiso Atomico:** `@PreAuthorize("hasAuthority('crm:customers:create')")`
+- **Aislamiento Multi-Inquilino:** Asigna el `tenantId` de forma automatica y determinista a partir de los claims del token JWT Bearer autenticado en el contexto de seguridad.
+
+#### Parametros de Invocacion
+**Cabeceras HTTP (Headers):**
+- `Authorization: Bearer <jwt_token>`
+- `Content-Type: application/json`
+- `Accept: application/json`
+
+**Parametros de Ruta (Path Parameters):**
+No aplica (Sin parametros en la ruta).
+
+**Parametros de Consulta (Query Parameters):**
+No aplica (Sin parametros de consulta en la URL).
+
+#### Recurso de Peticion (Request Body)
+- **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.requests.CreateIndividualCustomerResource`
+
+```java
+package com.andeva.atelier.platform.crm.interfaces.rest.resources.requests;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+
+public record CreateIndividualCustomerResource(
+    @NotBlank(message = "El nombre de pila es obligatorio")
+    @Size(min = 2, max = 100, message = "El nombre debe contener entre 2 y 100 caracteres")
+    String firstName,
+
+    @NotBlank(message = "El apellido es obligatorio")
+    @Size(min = 2, max = 100, message = "El apellido debe contener entre 2 y 100 caracteres")
+    String lastName,
+
+    @NotBlank(message = "El documento de identidad es obligatorio")
+    @Pattern(regexp = "^[0-9]{8}$", message = "El DNI debe estar compuesto exactamente por 8 digitos numericos")
+    String taxId,
+
+    @NotBlank(message = "El correo electronico es obligatorio")
+    @Email(message = "El formato de correo electronico es invalido")
+    String email,
+
+    @NotBlank(message = "El numero telefonico es obligatorio")
+    @Pattern(regexp = "^\+?[0-9]{9,15}$", message = "El telefono debe cumplir con formato internacional E.164")
+    String phone
+) {}
+```
+
+- **Definicion de Campos:**
+| Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripcion |
+| :--- | :--- | :---: | :--- | :--- |
+| `firstName` | `String` | Si | `@NotBlank, @Size(min = 2, max = 100)` | Nombres de pila de la persona natural |
+| `lastName` | `String` | Si | `@NotBlank, @Size(min = 2, max = 100)` | Apellidos completos del cliente titular |
+| `taxId` | `String` | Si | `@NotBlank, @Pattern(regexp = "^[0-9]{8}$")` | Documento Nacional de Identidad DNI de 8 digitos |
+| `email` | `String` | Si | `@NotBlank, @Email` | Correo electronico personal para notificaciones |
+| `phone` | `String` | Si | `@NotBlank, @Pattern(regexp = "^\+?[0-9]{9,15}$")` | Telefono celular en formato estandar E.164 |
+
+**Ejemplo de Carga Util JSON (Request):**
+```json
+{
+  "firstName": "Juan Alberto",
+  "lastName": "Perez Rodriguez",
+  "taxId": "45871234",
+  "email": "juan.perez@gmail.com",
+  "phone": "+51987654321"
+}
+```
+
+#### Recurso de Respuesta (Response Body)
+- **Estado HTTP Exitoso:** `201 Created`
+- **Cabecera de Ubicacion:** `Location: /api/v1/customers/018f6c40-7e12-7000-8000-000000000050`
+- **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.responses.CustomerResource`
+
+```java
+package com.andeva.atelier.platform.crm.interfaces.rest.resources.responses;
+
+import java.time.Instant;
+import java.util.UUID;
+
+public record CustomerResource(
+    UUID id,
+    UUID tenantId,
+    String type,
+    String displayName,
+    String taxId,
+    String email,
+    String phone,
+    String status,
+    Instant createdAt
+) {}
+```
+
+- **Definicion de Campos Proyectados:**
+| Campo | Tipo de Dato | Descripcion |
+| :--- | :--- | :--- |
+| `id` | `UUID` | Identificador universal asignado al cliente |
+| `tenantId` | `UUID` | Identificador del taller automotriz titular |
+| `type` | `String` | Tipo de personeria juridica (`INDIVIDUAL` o `COMPANY`) |
+| `displayName` | `String` | Nombre consolidado para presentacion visual en interfaz |
+| `taxId` | `String` | Documento de identidad fiscal registrado |
+| `email` | `String` | Correo electronico registrado |
+| `phone` | `String` | Telefono celular de contacto directo |
+| `status` | `String` | Estado operativo del cliente (`ACTIVE`, `INACTIVE`) |
+| `createdAt` | `Instant` | Marca temporal ISO-8601 de creacion en el sistema |
+
+**Ejemplo de Carga Util JSON (Response):**
+```json
+{
+  "id": "018f6c40-7e12-7000-8000-000000000050",
+  "tenantId": "018f6c40-7e12-7000-8000-000000000001",
+  "type": "INDIVIDUAL",
+  "displayName": "Juan Alberto Perez Rodriguez",
+  "taxId": "45871234",
+  "email": "juan.perez@gmail.com",
+  "phone": "+51987654321",
+  "status": "ACTIVE",
+  "createdAt": "2026-10-03T10:15:30Z"
+}
+```
+
+#### Errores y Excepciones de Dominio (RFC 7807)
+| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `400 Bad Request` | `MethodArgumentNotValidException` | El DNI no contiene 8 digitos o el formato de correo es sintacticamente invalido |
+| `409 Conflict` | `CustomerTaxIdAlreadyExistsException` | Ya existe un cliente registrado en este taller con el mismo numero de DNI |
+| `409 Conflict` | `CustomerEmailAlreadyExistsException` | La direccion de correo electronico ya se encuentra asignada a otro cliente del taller |
+
+**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
+```json
+{
+  "type": "https://api.atelier.pe/errors/customer-tax-id-already-exists",
+  "title": "Conflicto de Identidad Fiscal",
+  "status": 409,
+  "detail": "El documento DNI 45871234 ya se encuentra registrado para un cliente en este taller",
+  "instance": "/api/v1/customers/individuals",
+  "code": "CUSTOMER_TAX_ID_ALREADY_EXISTS",
+  "timestamp": "2026-10-03T10:15:30Z"
+}
+```
+
+---
+
+### 2.2. [POST] /api/v1/customers/companies
+
+**Alta de Cliente Corporativo o Empresa con Flota**
+
+#### Identidad Tecnica
+- **Controlador:** `com.andeva.atelier.platform.crm.interfaces.rest.controllers.CustomersController`
+- **Metodo Java:** `public ResponseEntity<CustomerResource> registerCompanyCustomer(@Valid @RequestBody CreateCompanyCustomerResource resource)`
+- **Ruta Base:** `/api/v1/customers`
+- **Ruta Completa:** `/api/v1/customers/companies`
+- **Proposito:** Registra a una persona juridica o empresa comercial con flota vehicular en la cartera del taller. Valida el numero de Registro Unico de Contribuyentes RUC de 11 digitos que inicie con 10 o 20, la razon social formal, el correo de administracion de flota y el telefono institucional. Habilita a la entidad para suscribir contratos de flota y delegar miembros autorizados.
+
+#### Seguridad y Autorizacion
+- **Nivel de Acceso:** Autenticado
+- **Rol Minimo Requerido:** Asesor de Servicio (ROLE_SERVICE_ADVISOR) o Administrador (ROLE_WORKSHOP_ADMINISTRATOR)
+- **Permiso Atomico:** `@PreAuthorize("hasAuthority('crm:customers:create')")`
+- **Aislamiento Multi-Inquilino:** Asigna el `tenantId` de forma automatica y determinista a partir de los claims del token JWT Bearer autenticado.
+
+#### Parametros de Invocacion
+**Cabeceras HTTP (Headers):**
+- `Authorization: Bearer <jwt_token>`
+- `Content-Type: application/json`
+- `Accept: application/json`
+
+**Parametros de Ruta (Path Parameters):**
+No aplica (Sin parametros en la ruta).
+
+**Parametros de Consulta (Query Parameters):**
+No aplica (Sin parametros de consulta en la URL).
+
+#### Recurso de Peticion (Request Body)
+- **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.requests.CreateCompanyCustomerResource`
+
+```java
+package com.andeva.atelier.platform.crm.interfaces.rest.resources.requests;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+
+public record CreateCompanyCustomerResource(
+    @NotBlank(message = "La razon social de la empresa es obligatoria")
+    @Size(min = 3, max = 150, message = "La razon social debe contener entre 3 y 150 caracteres")
+    String companyName,
+
+    @NotBlank(message = "El numero de RUC es obligatorio")
+    @Pattern(regexp = "^(10|20)[0-9]{9}$", message = "El RUC corporativo debe contener exactamente 11 digitos e iniciar con 10 o 20")
+    String taxId,
+
+    @NotBlank(message = "El correo corporativo es obligatorio")
+    @Email(message = "El formato de correo electronico es invalido")
+    String email,
+
+    @NotBlank(message = "El telefono corporativo es obligatorio")
+    @Pattern(regexp = "^\+?[0-9]{9,15}$", message = "El telefono debe cumplir con formato internacional E.164")
+    String phone
+) {}
+```
+
+- **Definicion de Campos:**
+| Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripcion |
+| :--- | :--- | :---: | :--- | :--- |
+| `companyName` | `String` | Si | `@NotBlank, @Size(min = 3, max = 150)` | Razon social o denominacion formal de la empresa |
+| `taxId` | `String` | Si | `@NotBlank, @Pattern(regexp = "^(10|20)[0-9]{9}$")` | RUC de 11 digitos numericos formalmente inscrito ante SUNAT |
+| `email` | `String` | Si | `@NotBlank, @Email` | Correo electronico institucional de administracion de flota |
+| `phone` | `String` | Si | `@NotBlank, @Pattern(regexp = "^\+?[0-9]{9,15}$")` | Telefono o central telefonica corporativa en formato E.164 |
+
+**Ejemplo de Carga Util JSON (Request):**
+```json
+{
+  "companyName": "TRANSPORTES LOGISTICOS DEL PACIFICO S.A.C.",
+  "taxId": "20556789012",
+  "email": "operaciones@transpacifico.pe",
+  "phone": "+5114567890"
+}
+```
+
+#### Recurso de Respuesta (Response Body)
+- **Estado HTTP Exitoso:** `201 Created`
+- **Cabecera de Ubicacion:** `Location: /api/v1/customers/018f6c40-7e12-7000-8000-000000000051`
+- **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.responses.CustomerResource`
+- **Definicion de Campos Proyectados:**
+| Campo | Tipo de Dato | Descripcion |
+| :--- | :--- | :--- |
+| `id` | `UUID` | Identificador universal asignado a la empresa cliente |
+| `tenantId` | `UUID` | Identificador del taller automotriz titular |
+| `type` | `String` | Tipo de personeria juridica (`COMPANY`) |
+| `displayName` | `String` | Razon social proyectada para listados comerciales |
+| `taxId` | `String` | Numero de RUC corporativo registrado |
+| `email` | `String` | Correo institucional registrado |
+| `phone` | `String` | Central telefonica registrada |
+| `status` | `String` | Estado operativo del cliente (`ACTIVE`) |
+| `createdAt` | `Instant` | Marca temporal ISO-8601 de creacion |
+
+**Ejemplo de Carga Util JSON (Response):**
+```json
+{
+  "id": "018f6c40-7e12-7000-8000-000000000051",
+  "tenantId": "018f6c40-7e12-7000-8000-000000000001",
+  "type": "COMPANY",
+  "displayName": "TRANSPORTES LOGISTICOS DEL PACIFICO S.A.C.",
+  "taxId": "20556789012",
+  "email": "operaciones@transpacifico.pe",
+  "phone": "+5114567890",
+  "status": "ACTIVE",
+  "createdAt": "2026-10-03T11:00:00Z"
+}
+```
+
+#### Errores y Excepciones de Dominio (RFC 7807)
+| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `400 Bad Request` | `MethodArgumentNotValidException` | El RUC no inicia con 10 o 20, o no contiene exactamente 11 digitos numericos |
+| `409 Conflict` | `CustomerTaxIdAlreadyExistsException` | Ya existe un cliente empresarial registrado en este taller con el mismo numero de RUC |
+
+**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
+```json
+{
+  "type": "https://api.atelier.pe/errors/customer-tax-id-already-exists",
+  "title": "Conflicto de RUC Corporativo",
+  "status": 409,
+  "detail": "El RUC 20556789012 ya se encuentra registrado para otra empresa en este taller",
+  "instance": "/api/v1/customers/companies",
+  "code": "CUSTOMER_TAX_ID_ALREADY_EXISTS",
+  "timestamp": "2026-10-03T11:00:00Z"
+}
+```
+
+---
+
+### 2.3. [GET] /api/v1/customers
+
+**Listado de Clientes Adscritos al Taller**
+
+#### Identidad Tecnica
+- **Controlador:** `com.andeva.atelier.platform.crm.interfaces.rest.controllers.CustomersController`
+- **Metodo Java:** `public ResponseEntity<List<CustomerResource>> getCustomers(@RequestParam(required = false) String type, @RequestParam(required = false) String search, @RequestParam(required = false) String status, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size)`
+- **Ruta Base:** `/api/v1/customers`
+- **Ruta Completa:** `/api/v1/customers`
+- **Proposito:** Consulta el padron de clientes adscritos al taller en sesion. Permite filtrar de forma parametrizable por tipo de cliente (natural o empresa), estado operativo y termino de busqueda textual sobre nombres, razon social o documento de identidad. Retorna colecciones acotadas por limites de desplazamiento.
+
+#### Seguridad y Autorizacion
+- **Nivel de Acceso:** Autenticado
+- **Rol Minimo Requerido:** Recepcionista (ROLE_RECEPTIONIST), Asesor de Servicio (ROLE_SERVICE_ADVISOR), Mecanico Jefe (ROLE_CHIEF_MECHANIC) o Administrador (ROLE_WORKSHOP_ADMINISTRATOR)
 - **Permiso Atomico:** `@PreAuthorize("hasAuthority('crm:customers:read')")`
-- **Aislamiento Multi-Inquilino:** Aislamiento estricto por inquilino. Resuelve el tenantId desde los claims del token JWT e inyecta el filtro en el repositorio JPA.
+- **Aislamiento Multi-Inquilino:** Filtra de forma estricta por el `tenantId` obtenido de los claims del token JWT Bearer.
 
 #### Parametros de Invocacion
 **Cabeceras HTTP (Headers):**
@@ -70,216 +357,73 @@ El modulo CRM & Fleet administra la relacion con clientes particulares y corpora
 No aplica (Sin parametros en la ruta).
 
 **Parametros de Consulta (Query Parameters):**
-| Parametro | Tipo | Requerido | Valor por Defecto | Descripcion |
-| :--- | :--- | :---: | :--- | :--- |
-| `type` | `String` | No | Todos | Tipologia legal del cliente (INDIVIDUAL o COMPANY) |
-| `search` | `String` | No | Ninguno | Termino de coincidencia sobre nombre, razon social o taxId |
-| `status` | `String` | No | ACTIVE | Estado comercial del cliente (ACTIVE o INACTIVE) |
-| `page` | `int` | No | 0 | Indice de pagina de resultados basado en cero |
-| `size` | `int` | No | 20 | Cantidad maxima de registros por pagina solicitada |
+| Parametro | Tipo | Requerido | Descripcion |
+| :--- | :--- | :---: | :--- |
+| `type` | `String` | No | Filtro por tipo de personeria (`INDIVIDUAL` o `COMPANY`) |
+| `search` | `String` | No | Termino de busqueda parcial sobre nombres, razon social o documento fiscal |
+| `status` | `String` | No | Filtro por estado operativo (`ACTIVE` o `INACTIVE`) |
+| `page` | `int` | No | Indice ordinal base cero del bloque de registros. Valor predeterminado 0 |
+| `size` | `int` | No | Tamano del bloque de registros solicitados. Valor predeterminado 20 |
 
 #### Recurso de Peticion (Request Body)
-No aplica (Peticion HTTP sin cuerpo de entrada).
+No aplica (Peticion HTTP de consulta `GET` sin cuerpo de entrada).
 
 #### Recurso de Respuesta (Response Body)
 - **Estado HTTP Exitoso:** `200 OK`
-- **Registro Java DTO:** `org.springframework.data.domain.Page<com.andeva.atelier.platform.crm.interfaces.rest.resources.responses.CustomerResource>`
-- **Definicion de Campos Proyectados:**
-| Campo | Tipo de Dato | Descripcion |
-| :--- | :--- | :--- |
-| `content` | `List<CustomerResource>` | Coleccion de recursos de clientes de la pagina solicitada |
-| `page` | `int` | Numero de pagina actual retornada |
-| `size` | `int` | Tamano maximo de pagina configurado |
-| `totalElements` | `long` | Cantidad total de clientes coincidentes en la base de datos |
-| `totalPages` | `int` | Cantidad total de paginas calculadas segun el tamano |
+- **Registro Java DTO:** `List<com.andeva.atelier.platform.crm.interfaces.rest.resources.responses.CustomerResource>`
+- **Definicion de Campos Proyectados:** Lista estructurada de registros `CustomerResource`.
 
 **Ejemplo de Carga Util JSON (Response):**
 ```json
-{
-  "content": [
-    {
-      "id": "018f6c50-7e12-7000-8000-000000000001",
-      "tenantId": "018f6c40-7e12-7000-8000-000000000001",
-      "type": "INDIVIDUAL",
-      "firstName": "Juan Jose",
-      "lastName": "Perez Rodriguez",
-      "companyName": null,
-      "taxId": "47891234",
-      "email": "juan.perez@gmail.com",
-      "phone": "+51998877665",
-      "status": "ACTIVE",
-      "createdAt": "2026-10-01T16:30:00Z"
-    },
-    {
-      "id": "018f6c50-7e12-7000-8000-000000000002",
-      "tenantId": "018f6c40-7e12-7000-8000-000000000001",
-      "type": "COMPANY",
-      "firstName": null,
-      "lastName": null,
-      "companyName": "TRANSPORTES Y LOGISTICA LIMA NORTE S.A.C.",
-      "taxId": "20554433221",
-      "email": "flota@transporteslimanorte.pe",
-      "phone": "+51911223344",
-      "status": "ACTIVE",
-      "createdAt": "2026-10-01T16:30:00Z"
-    }
-  ],
-  "page": 0,
-  "size": 20,
-  "totalElements": 2,
-  "totalPages": 1
-}
+[
+  {
+    "id": "018f6c40-7e12-7000-8000-000000000050",
+    "tenantId": "018f6c40-7e12-7000-8000-000000000001",
+    "type": "INDIVIDUAL",
+    "displayName": "Juan Alberto Perez Rodriguez",
+    "taxId": "45871234",
+    "email": "juan.perez@gmail.com",
+    "phone": "+51987654321",
+    "status": "ACTIVE",
+    "createdAt": "2026-10-03T10:15:30Z"
+  },
+  {
+    "id": "018f6c40-7e12-7000-8000-000000000051",
+    "tenantId": "018f6c40-7e12-7000-8000-000000000001",
+    "type": "COMPANY",
+    "displayName": "TRANSPORTES LOGISTICOS DEL PACIFICO S.A.C.",
+    "taxId": "20556789012",
+    "email": "operaciones@transpacifico.pe",
+    "phone": "+5114567890",
+    "status": "ACTIVE",
+    "createdAt": "2026-10-03T11:00:00Z"
+  }
+]
 ```
 
 #### Errores y Excepciones de Dominio (RFC 7807)
 | Codigo HTTP | Excepcion Mapeada | Causa Funcional |
 | :---: | :--- | :--- |
-| `401 Unauthorized` | `AuthenticationException` | Token ausente, invalido o expirado |
-| `403 Forbidden` | `AccessDeniedException` | El usuario carece de la autoridad de seguridad crm:customers:read |
-
-**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
-```json
-{
-  "type": "https://api.atelier.pe/errors/unauthorized",
-  "title": "Peticion No Autenticada",
-  "status": 401,
-  "detail": "Se requiere un token Bearer valido para consultar la cartera de clientes",
-  "instance": "/api/v1/crm/customers",
-  "code": "UNAUTHORIZED",
-  "timestamp": "2026-10-01T16:30:00Z"
-}
-```
+| `400 Bad Request` | `IllegalArgumentException` | Parametro de filtro o rango de bloque con valor negativo no valido |
 
 ---
 
-### 2.2. [POST] /api/v1/crm/customers
+### 2.4. [GET] /api/v1/customers/{customerId}
 
-**Alta y Registro de Nuevo Cliente en el Taller**
-
-#### Identidad Tecnica
-- **Controlador:** `com.andeva.atelier.platform.crm.interfaces.rest.controllers.CustomersController`
-- **Metodo Java:** `public ResponseEntity<CustomerResource> createCustomer(@Valid @RequestBody CreateCustomerResource resource)`
-- **Ruta Base:** `/api/v1/crm/customers`
-- **Ruta Completa:** `/api/v1/crm/customers`
-- **Proposito:** Da de alta a un nuevo cliente en el taller automotriz. Valida las reglas de integridad para personas naturales (exigiendo DNI de 8 digitos, nombres y apellidos) o personas juridicas (exigiendo RUC corporativo de 11 digitos y razon social), comprobando la no existencia previa de dicho documento fiscal en la cartera del taller.
-
-#### Seguridad y Autorizacion
-- **Nivel de Acceso:** Autenticado
-- **Rol Minimo Requerido:** Recepcionista (ROLE_RECEPTIONIST) o Asesor de Servicio (ROLE_SERVICE_ADVISOR)
-- **Permiso Atomico:** `@PreAuthorize("hasAuthority('crm:customers:create')")`
-- **Aislamiento Multi-Inquilino:** Asigna de manera forzosa el tenantId resuelto del token JWT al nuevo registro de cliente.
-
-#### Parametros de Invocacion
-**Cabeceras HTTP (Headers):**
-- `Authorization: Bearer <jwt_token>`
-- `Content-Type: application/json`
-
-**Parametros de Ruta (Path Parameters):**
-No aplica (Sin parametros en la ruta).
-
-**Parametros de Consulta (Query Parameters):**
-No aplica (Sin parametros de consulta en la URL).
-
-#### Recurso de Peticion (Request Body)
-- **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.requests.CreateCustomerResource`
-- **Definicion de Campos:**
-| Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripcion |
-| :--- | :--- | :---: | :--- | :--- |
-| `type` | `String` | Si | `@NotBlank, @Pattern(regexp = "^(INDIVIDUAL|COMPANY)$")` | Tipologia legal del cliente a registrar |
-| `firstName` | `String` | Condicional | `@Size(max = 100)` | Nombres de pila (obligatorio si el tipo es INDIVIDUAL) |
-| `lastName` | `String` | Condicional | `@Size(max = 100)` | Apellidos completos (obligatorio si el tipo es INDIVIDUAL) |
-| `companyName` | `String` | Condicional | `@Size(max = 150)` | Razon social legal (obligatoria si el tipo es COMPANY) |
-| `taxId` | `String` | Si | `@NotBlank, @Pattern(regexp = "^(\d{8}|(10|20)\d{9})$")` | Documento de identidad fiscal (DNI de 8 digitos o RUC de 11 digitos) |
-| `email` | `String` | Si | `@NotBlank, @Email, @Size(max = 150)` | Correo electronico de notificaciones del cliente |
-| `phone` | `String` | Si | `@NotBlank, @Pattern(regexp = "^\+?[0-9]{9,15}$")` | Telefono movil o fijo de contacto |
-
-**Ejemplo de Carga Util JSON (Request):**
-```json
-{
-  "type": "INDIVIDUAL",
-  "firstName": "Juan Jose",
-  "lastName": "Perez Rodriguez",
-  "companyName": null,
-  "taxId": "47891234",
-  "email": "juan.perez@gmail.com",
-  "phone": "+51998877665"
-}
-```
-
-#### Recurso de Respuesta (Response Body)
-- **Estado HTTP Exitoso:** `201 Created`
-- **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.responses.CustomerResource`
-- **Definicion de Campos Proyectados:**
-| Campo | Tipo de Dato | Descripcion |
-| :--- | :--- | :--- |
-| `id` | `UUID` | Identificador universal asignado al cliente |
-| `tenantId` | `UUID` | Identificador del taller automotriz |
-| `type` | `String` | Tipologia legal del cliente |
-| `firstName` | `String` | Nombres de pila registrados |
-| `lastName` | `String` | Apellidos registrados |
-| `companyName` | `String` | Razon social registrada |
-| `taxId` | `String` | Documento de identidad tributario |
-| `email` | `String` | Correo electronico registrado |
-| `phone` | `String` | Numero telefonico |
-| `status` | `String` | Estado comercial inicial (ACTIVE) |
-| `createdAt` | `Instant` | Marca temporal de alta en UTC |
-
-**Ejemplo de Carga Util JSON (Response):**
-```json
-{
-  "id": "018f6c50-7e12-7000-8000-000000000001",
-  "tenantId": "018f6c40-7e12-7000-8000-000000000001",
-  "type": "INDIVIDUAL",
-  "firstName": "Juan Jose",
-  "lastName": "Perez Rodriguez",
-  "companyName": null,
-  "taxId": "47891234",
-  "email": "juan.perez@gmail.com",
-  "phone": "+51998877665",
-  "status": "ACTIVE",
-  "createdAt": "2026-10-01T16:30:00Z"
-}
-```
-
-#### Errores y Excepciones de Dominio (RFC 7807)
-| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
-| :---: | :--- | :--- |
-| `400 Bad Request` | `MethodArgumentNotValidException` | El documento de identidad no cumple el patron numerico o faltan nombres/razon social requeridos |
-| `401 Unauthorized` | `AuthenticationException` | Token ausente o invalido |
-| `403 Forbidden` | `AccessDeniedException` | Falta de autoridad crm:customers:create |
-| `409 Conflict` | `CustomerTaxIdAlreadyExistsException` | Ya existe un cliente registrado con ese documento de identidad en este taller |
-
-**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
-```json
-{
-  "type": "https://api.atelier.pe/errors/customer-tax-id-exists",
-  "title": "Documento de Identidad Duplicado",
-  "status": 409,
-  "detail": "El documento 47891234 ya se encuentra registrado en la cartera de clientes de este taller",
-  "instance": "/api/v1/crm/customers",
-  "code": "CUSTOMER_TAX_ID_ALREADY_EXISTS",
-  "timestamp": "2026-10-01T16:30:00Z"
-}
-```
-
----
-
-### 2.3. [GET] /api/v1/crm/customers/{id}
-
-**Detalle Completo de Ficha de Cliente por Identificador**
+**Detalle Individual de Cliente por Identificador**
 
 #### Identidad Tecnica
 - **Controlador:** `com.andeva.atelier.platform.crm.interfaces.rest.controllers.CustomersController`
-- **Metodo Java:** `public ResponseEntity<CustomerResource> getCustomerById(@PathVariable UUID id)`
-- **Ruta Base:** `/api/v1/crm/customers`
-- **Ruta Completa:** `/api/v1/crm/customers/{id}`
-- **Proposito:** Consulta los datos integrales de la ficha comercial y de contacto de un cliente mediante su identificador universal. Comprueba que el registro pertenezca estrictamente al taller autenticado para garantizar aislamiento de datos.
+- **Metodo Java:** `public ResponseEntity<CustomerResource> getCustomerById(@PathVariable UUID customerId)`
+- **Ruta Base:** `/api/v1/customers`
+- **Ruta Completa:** `/api/v1/customers/{customerId}`
+- **Proposito:** Obtiene la ficha tecnica y comercial completa de un cliente por su identificador universal. Valida la pertenencia del cliente al espacio aislado del taller autenticado.
 
 #### Seguridad y Autorizacion
 - **Nivel de Acceso:** Autenticado
-- **Rol Minimo Requerido:** Recepcionista (ROLE_RECEPTIONIST) o Asesor de Servicio
+- **Rol Minimo Requerido:** Recepcionista (ROLE_RECEPTIONIST), Asesor de Servicio (ROLE_SERVICE_ADVISOR) o Administrador (ROLE_WORKSHOP_ADMINISTRATOR)
 - **Permiso Atomico:** `@PreAuthorize("hasAuthority('crm:customers:read')")`
-- **Aislamiento Multi-Inquilino:** Aislamiento multi-inquilino estricto. Valida que customer.tenantId coincida con session.tenantId.
+- **Aislamiento Multi-Inquilino:** Verifica que el cliente pertenezca al `tenantId` en sesion.
 
 #### Parametros de Invocacion
 **Cabeceras HTTP (Headers):**
@@ -289,55 +433,38 @@ No aplica (Sin parametros de consulta en la URL).
 **Parametros de Ruta (Path Parameters):**
 | Parametro | Tipo | Requerido | Descripcion |
 | :--- | :--- | :---: | :--- |
-| `id` | `UUID` | Si | Identificador universal del cliente |
+| `customerId` | `UUID` | Si | Identificador universal del cliente a consultar |
 
 **Parametros de Consulta (Query Parameters):**
 No aplica (Sin parametros de consulta en la URL).
 
 #### Recurso de Peticion (Request Body)
-No aplica (Peticion HTTP sin cuerpo de entrada).
+No aplica (Peticion HTTP de consulta `GET` sin cuerpo de entrada).
 
 #### Recurso de Respuesta (Response Body)
 - **Estado HTTP Exitoso:** `200 OK`
 - **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.responses.CustomerResource`
-- **Definicion de Campos Proyectados:**
-| Campo | Tipo de Dato | Descripcion |
-| :--- | :--- | :--- |
-| `id` | `UUID` | Identificador universal del cliente |
-| `tenantId` | `UUID` | Identificador del taller titular |
-| `type` | `String` | Tipologia legal del cliente |
-| `firstName` | `String` | Nombres registrados |
-| `lastName` | `String` | Apellidos registrados |
-| `companyName` | `String` | Razon social registrada |
-| `taxId` | `String` | Documento fiscal de identidad |
-| `email` | `String` | Correo electronico |
-| `phone` | `String` | Numero telefonico |
-| `status` | `String` | Estado comercial |
-| `createdAt` | `Instant` | Marca temporal de registro |
+- **Definicion de Campos Proyectados:** Coincide con la especificacion del recurso `CustomerResource`.
 
 **Ejemplo de Carga Util JSON (Response):**
 ```json
 {
-  "id": "018f6c50-7e12-7000-8000-000000000001",
+  "id": "018f6c40-7e12-7000-8000-000000000050",
   "tenantId": "018f6c40-7e12-7000-8000-000000000001",
   "type": "INDIVIDUAL",
-  "firstName": "Juan Jose",
-  "lastName": "Perez Rodriguez",
-  "companyName": null,
-  "taxId": "47891234",
+  "displayName": "Juan Alberto Perez Rodriguez",
+  "taxId": "45871234",
   "email": "juan.perez@gmail.com",
-  "phone": "+51998877665",
+  "phone": "+51987654321",
   "status": "ACTIVE",
-  "createdAt": "2026-10-01T16:30:00Z"
+  "createdAt": "2026-10-03T10:15:30Z"
 }
 ```
 
 #### Errores y Excepciones de Dominio (RFC 7807)
 | Codigo HTTP | Excepcion Mapeada | Causa Funcional |
 | :---: | :--- | :--- |
-| `401 Unauthorized` | `AuthenticationException` | Token ausente o expirado |
-| `403 Forbidden` | `AccessDeniedException` | Falta del permiso crm:customers:read |
-| `404 Not Found` | `CustomerNotFoundException` | El cliente no existe o pertenece a otro taller automotriz |
+| `404 Not Found` | `CustomerNotFoundException` | No existe ningun cliente en este taller con el identificador UUID provisto |
 
 **Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
 ```json
@@ -345,325 +472,138 @@ No aplica (Peticion HTTP sin cuerpo de entrada).
   "type": "https://api.atelier.pe/errors/customer-not-found",
   "title": "Cliente No Encontrado",
   "status": 404,
-  "detail": "No se encontro ningun cliente con el identificador 018f6c50-7e12-7000-8000-000000000001 en este taller",
-  "instance": "/api/v1/crm/customers/018f6c50-7e12-7000-8000-000000000001",
+  "detail": "No se encontro ningun cliente con identificador 018f6c40-7e12-7000-8000-000000000099 en este taller",
+  "instance": "/api/v1/customers/018f6c40-7e12-7000-8000-000000000099",
   "code": "CUSTOMER_NOT_FOUND",
-  "timestamp": "2026-10-01T16:30:00Z"
+  "timestamp": "2026-10-03T11:30:00Z"
 }
 ```
 
 ---
 
-### 2.4. [PUT] /api/v1/crm/customers/{id}
+### 2.5. [PUT] /api/v1/customers/{customerId}/contact
 
-**Actualizacion de Datos Personales y Canales de Contacto**
+**Actualizacion de Canales de Contacto Directo**
 
 #### Identidad Tecnica
 - **Controlador:** `com.andeva.atelier.platform.crm.interfaces.rest.controllers.CustomersController`
-- **Metodo Java:** `public ResponseEntity<CustomerResource> updateCustomer(@PathVariable UUID id, @Valid @RequestBody UpdateCustomerResource resource)`
-- **Ruta Base:** `/api/v1/crm/customers`
-- **Ruta Completa:** `/api/v1/crm/customers/{id}`
-- **Proposito:** Actualiza los canales de contacto directo (telefono y correo electronico) y datos demograficos del cliente. El documento de identidad fiscal (taxId) y la tipologia legal permanecen inmutables para garantizar consistencia con los historiales de facturacion electronica SUNAT.
+- **Metodo Java:** `public ResponseEntity<CustomerResource> updateCustomerContact(@PathVariable UUID customerId, @Valid @RequestBody UpdateCustomerContactResource resource)`
+- **Ruta Base:** `/api/v1/customers`
+- **Ruta Completa:** `/api/v1/customers/{customerId}/contact`
+- **Proposito:** Actualiza los canales de comunicacion directa (correo electronico y numero telefonico) del cliente. Valida la sintaxis del nuevo correo y la conformidad del numero telefonico bajo formato internacional. Emite un evento de dominio interno para actualizar fichas de atencion abiertas.
 
 #### Seguridad y Autorizacion
 - **Nivel de Acceso:** Autenticado
-- **Rol Minimo Requerido:** Recepcionista (ROLE_RECEPTIONIST) o Asesor de Servicio (ROLE_SERVICE_ADVISOR)
+- **Rol Minimo Requerido:** Recepcionista (ROLE_RECEPTIONIST), Asesor de Servicio (ROLE_SERVICE_ADVISOR) o Administrador (ROLE_WORKSHOP_ADMINISTRATOR)
 - **Permiso Atomico:** `@PreAuthorize("hasAuthority('crm:customers:update')")`
-- **Aislamiento Multi-Inquilino:** Verifica pertenencia del cliente al tenantId en sesion antes de aplicar cambios.
+- **Aislamiento Multi-Inquilino:** Verifica que el cliente pertenezca al taller autenticado antes de aplicar la modificacion.
 
 #### Parametros de Invocacion
 **Cabeceras HTTP (Headers):**
 - `Authorization: Bearer <jwt_token>`
 - `Content-Type: application/json`
+- `Accept: application/json`
 
 **Parametros de Ruta (Path Parameters):**
 | Parametro | Tipo | Requerido | Descripcion |
 | :--- | :--- | :---: | :--- |
-| `id` | `UUID` | Si | Identificador universal del cliente a modificar |
+| `customerId` | `UUID` | Si | Identificador universal del cliente a actualizar |
 
 **Parametros de Consulta (Query Parameters):**
 No aplica (Sin parametros de consulta en la URL).
 
 #### Recurso de Peticion (Request Body)
-- **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.requests.UpdateCustomerResource`
+- **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.requests.UpdateCustomerContactResource`
+
+```java
+package com.andeva.atelier.platform.crm.interfaces.rest.resources.requests;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+
+public record UpdateCustomerContactResource(
+    @NotBlank(message = "El correo electronico es obligatorio")
+    @Email(message = "El formato de correo electronico es invalido")
+    String email,
+
+    @NotBlank(message = "El numero telefonico es obligatorio")
+    @Pattern(regexp = "^\+?[0-9]{9,15}$", message = "El telefono debe cumplir con formato internacional E.164")
+    String phone
+) {}
+```
+
 - **Definicion de Campos:**
 | Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripcion |
 | :--- | :--- | :---: | :--- | :--- |
-| `firstName` | `String` | No | `@Size(max = 100)` | Nombres actualizados (si aplica a individual) |
-| `lastName` | `String` | No | `@Size(max = 100)` | Apellidos actualizados (si aplica a individual) |
-| `companyName` | `String` | No | `@Size(max = 150)` | Razon social actualizada (si aplica a empresa) |
-| `email` | `String` | Si | `@NotBlank, @Email, @Size(max = 150)` | Correo electronico actualizado |
-| `phone` | `String` | Si | `@NotBlank, @Pattern(regexp = "^\+?[0-9]{9,15}$")` | Telefono movil o fijo actualizado |
+| `email` | `String` | Si | `@NotBlank, @Email` | Nueva direccion de correo electronico verificada |
+| `phone` | `String` | Si | `@NotBlank, @Pattern(regexp = "^\+?[0-9]{9,15}$")` | Nuevo numero telefonico en formato E.164 |
 
 **Ejemplo de Carga Util JSON (Request):**
 ```json
 {
-  "firstName": "Juan Jose",
-  "lastName": "Perez Rodriguez",
-  "companyName": null,
-  "email": "juan.perez.nuevo@gmail.com",
-  "phone": "+51998877660"
+  "email": "juan.perez.actualizado@gmail.com",
+  "phone": "+51999888777"
 }
 ```
 
 #### Recurso de Respuesta (Response Body)
 - **Estado HTTP Exitoso:** `200 OK`
 - **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.responses.CustomerResource`
-- **Definicion de Campos Proyectados:**
-| Campo | Tipo de Dato | Descripcion |
-| :--- | :--- | :--- |
-| `id` | `UUID` | Identificador universal del cliente |
-| `tenantId` | `UUID` | Identificador del taller |
-| `type` | `String` | Tipologia legal del cliente |
-| `firstName` | `String` | Nombres actualizados |
-| `lastName` | `String` | Apellidos actualizados |
-| `companyName` | `String` | Razon social |
-| `taxId` | `String` | Documento fiscal inmutable |
-| `email` | `String` | Correo electronico modificado |
-| `phone` | `String` | Telefono modificado |
-| `status` | `String` | Estado comercial |
-| `createdAt` | `Instant` | Fecha de creacion original |
+- **Definicion de Campos Proyectados:** Coincide con la especificacion del recurso `CustomerResource`.
 
 **Ejemplo de Carga Util JSON (Response):**
 ```json
 {
-  "id": "018f6c50-7e12-7000-8000-000000000001",
+  "id": "018f6c40-7e12-7000-8000-000000000050",
   "tenantId": "018f6c40-7e12-7000-8000-000000000001",
   "type": "INDIVIDUAL",
-  "firstName": "Juan Jose",
-  "lastName": "Perez Rodriguez",
-  "companyName": null,
-  "taxId": "47891234",
-  "email": "juan.perez.nuevo@gmail.com",
-  "phone": "+51998877660",
+  "displayName": "Juan Alberto Perez Rodriguez",
+  "taxId": "45871234",
+  "email": "juan.perez.actualizado@gmail.com",
+  "phone": "+51999888777",
   "status": "ACTIVE",
-  "createdAt": "2026-10-01T16:30:00Z"
+  "createdAt": "2026-10-03T10:15:30Z"
 }
 ```
 
 #### Errores y Excepciones de Dominio (RFC 7807)
 | Codigo HTTP | Excepcion Mapeada | Causa Funcional |
 | :---: | :--- | :--- |
-| `400 Bad Request` | `MethodArgumentNotValidException` | Sintaxis de correo invalida o telefono disconforme con el patron internacional |
-| `401 Unauthorized` | `AuthenticationException` | Token ausente o invalido |
-| `403 Forbidden` | `AccessDeniedException` | Falta del permiso crm:customers:update |
-| `404 Not Found` | `CustomerNotFoundException` | Ficha de cliente no encontrada en el taller |
-
-**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
-```json
-{
-  "type": "https://api.atelier.pe/errors/invalid-request-payload",
-  "title": "Datos de Contacto Invalidos",
-  "status": 400,
-  "detail": "La direccion de correo electronico especificada no cumple con el formato RFC 5322",
-  "instance": "/api/v1/crm/customers/018f6c50-7e12-7000-8000-000000000001",
-  "code": "INVALID_REQUEST_PAYLOAD",
-  "timestamp": "2026-10-01T16:30:00Z"
-}
-```
-
----
-
-### 2.5. [GET] /api/v1/crm/customers/by-document?type={type}&number={number}
-
-**Busqueda Univoca de Cliente por Tipo y Numero de Documento**
-
-#### Identidad Tecnica
-- **Controlador:** `com.andeva.atelier.platform.crm.interfaces.rest.controllers.CustomersController`
-- **Metodo Java:** `public ResponseEntity<CustomerResource> getCustomerByDocument(@RequestParam String type, @RequestParam String number)`
-- **Ruta Base:** `/api/v1/crm/customers`
-- **Ruta Completa:** `/api/v1/crm/customers/by-document?type={type}&number={number}`
-- **Proposito:** Localiza de forma veloz y unívoca a un cliente en la cartera del taller mediante su documento fiscal de identidad (DNI o RUC). Diseñado para la atencion rapida en counter y el autocompletado en patio.
-
-#### Seguridad y Autorizacion
-- **Nivel de Acceso:** Autenticado
-- **Rol Minimo Requerido:** Recepcionista (ROLE_RECEPTIONIST) o Asesor de Servicio
-- **Permiso Atomico:** `@PreAuthorize("hasAuthority('crm:customers:read')")`
-- **Aislamiento Multi-Inquilino:** Filtra la busqueda combinando el tenantId activo con el taxId ingresado.
-
-#### Parametros de Invocacion
-**Cabeceras HTTP (Headers):**
-- `Authorization: Bearer <jwt_token>`
-- `Accept: application/json`
-
-**Parametros de Ruta (Path Parameters):**
-No aplica (Sin parametros en la ruta).
-
-**Parametros de Consulta (Query Parameters):**
-| Parametro | Tipo | Requerido | Valor por Defecto | Descripcion |
-| :--- | :--- | :---: | :--- | :--- |
-| `type` | `String` | Si | Ninguno | Tipo de documento oficial (DNI o RUC) |
-| `number` | `String` | Si | Ninguno | Numero del documento (8 digitos para DNI u 11 para RUC) |
-
-#### Recurso de Peticion (Request Body)
-No aplica (Peticion HTTP sin cuerpo de entrada).
-
-#### Recurso de Respuesta (Response Body)
-- **Estado HTTP Exitoso:** `200 OK`
-- **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.responses.CustomerResource`
-- **Definicion de Campos Proyectados:**
-| Campo | Tipo de Dato | Descripcion |
-| :--- | :--- | :--- |
-| `id` | `UUID` | Identificador universal del cliente |
-| `tenantId` | `UUID` | Identificador del taller |
-| `type` | `String` | Tipologia legal |
-| `firstName` | `String` | Nombres registrados |
-| `lastName` | `String` | Apellidos registrados |
-| `companyName` | `String` | Razon social registrada |
-| `taxId` | `String` | Documento fiscal localizado |
-| `email` | `String` | Correo electronico de contacto |
-| `phone` | `String` | Telefono de contacto |
-| `status` | `String` | Estado comercial |
-| `createdAt` | `Instant` | Fecha de registro |
-
-**Ejemplo de Carga Util JSON (Response):**
-```json
-{
-  "id": "018f6c50-7e12-7000-8000-000000000001",
-  "tenantId": "018f6c40-7e12-7000-8000-000000000001",
-  "type": "INDIVIDUAL",
-  "firstName": "Juan Jose",
-  "lastName": "Perez Rodriguez",
-  "companyName": null,
-  "taxId": "47891234",
-  "email": "juan.perez@gmail.com",
-  "phone": "+51998877665",
-  "status": "ACTIVE",
-  "createdAt": "2026-10-01T16:30:00Z"
-}
-```
-
-#### Errores y Excepciones de Dominio (RFC 7807)
-| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
-| :---: | :--- | :--- |
-| `400 Bad Request` | `IllegalArgumentException` | Parametros type o number ausentes o con formato disconforme |
-| `401 Unauthorized` | `AuthenticationException` | Token ausente o invalido |
-| `403 Forbidden` | `AccessDeniedException` | Permiso crm:customers:read insuficiente |
-| `404 Not Found` | `CustomerNotFoundException` | No existe ningun cliente con ese documento registrado en este taller |
+| `400 Bad Request` | `MethodArgumentNotValidException` | El nuevo correo o numero telefonico presenta un formato sintacticamente invalido |
+| `404 Not Found` | `CustomerNotFoundException` | El cliente especificado no existe en el registro del taller |
 
 **Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
 ```json
 {
   "type": "https://api.atelier.pe/errors/customer-not-found",
-  "title": "Cliente No Localizado",
+  "title": "Cliente No Encontrado",
   "status": 404,
-  "detail": "No se encontro ningun cliente registrado con el documento 47891234 en el taller activo",
-  "instance": "/api/v1/crm/customers/by-document?type=DNI&number=47891234",
+  "detail": "No se puede actualizar el contacto debido a que el cliente no existe en este taller",
+  "instance": "/api/v1/customers/018f6c40-7e12-7000-8000-000000000099/contact",
   "code": "CUSTOMER_NOT_FOUND",
-  "timestamp": "2026-10-01T16:30:00Z"
+  "timestamp": "2026-10-03T11:45:00Z"
 }
 ```
 
 ---
 
-### 2.6. [POST] /api/v1/crm/customers/{id}/archive
+### 2.6. [GET] /api/v1/customers/{customerId}/vehicles
 
-**Archivo o Pase a Inactividad Comercial de Ficha de Cliente**
+**Listado de Vehiculos Bajo Titularidad del Cliente**
 
 #### Identidad Tecnica
 - **Controlador:** `com.andeva.atelier.platform.crm.interfaces.rest.controllers.CustomersController`
-- **Metodo Java:** `public ResponseEntity<CustomerResource> archiveCustomer(@PathVariable UUID id)`
-- **Ruta Base:** `/api/v1/crm/customers`
-- **Ruta Completa:** `/api/v1/crm/customers/{id}/archive`
-- **Proposito:** Transiciona el estado comercial del cliente a INACTIVE. Impide la generacion de nuevas cotizaciones, ordenes de trabajo o agendamiento de citas futuras, preservando de manera inalterada todo el historico transaccional. La operacion es rechazada si el cliente posee ordenes de trabajo abiertas en patio.
+- **Metodo Java:** `public ResponseEntity<List<VehicleResource>> getCustomerVehicles(@PathVariable UUID customerId)`
+- **Ruta Base:** `/api/v1/customers`
+- **Ruta Completa:** `/api/v1/customers/{customerId}/vehicles`
+- **Proposito:** Consulta todas las unidades vehiculares del parque automotor universal que se encuentran bajo la custodia y titularidad activa del cliente indicado en la actualidad. Mapea la relacion materializada en la entidad de custodia `VehicleOwnership`.
 
 #### Seguridad y Autorizacion
 - **Nivel de Acceso:** Autenticado
-- **Rol Minimo Requerido:** Administrador de Taller (ROLE_WORKSHOP_ADMINISTRATOR) o Dueno (ROLE_WORKSHOP_OWNER)
-- **Permiso Atomico:** `@PreAuthorize("hasAuthority('crm:customers:update')")`
-- **Aislamiento Multi-Inquilino:** Verifica pertenencia del cliente al tenantId en sesion.
-
-#### Parametros de Invocacion
-**Cabeceras HTTP (Headers):**
-- `Authorization: Bearer <jwt_token>`
-
-**Parametros de Ruta (Path Parameters):**
-| Parametro | Tipo | Requerido | Descripcion |
-| :--- | :--- | :---: | :--- |
-| `id` | `UUID` | Si | Identificador universal del cliente a archivar |
-
-**Parametros de Consulta (Query Parameters):**
-No aplica (Sin parametros de consulta en la URL).
-
-#### Recurso de Peticion (Request Body)
-No aplica (Peticion HTTP sin cuerpo de entrada).
-
-#### Recurso de Respuesta (Response Body)
-- **Estado HTTP Exitoso:** `200 OK`
-- **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.responses.CustomerResource`
-- **Definicion de Campos Proyectados:**
-| Campo | Tipo de Dato | Descripcion |
-| :--- | :--- | :--- |
-| `id` | `UUID` | Identificador del cliente |
-| `tenantId` | `UUID` | Identificador del taller |
-| `type` | `String` | Tipologia legal |
-| `firstName` | `String` | Nombres registrados |
-| `lastName` | `String` | Apellidos registrados |
-| `companyName` | `String` | Razon social registrada |
-| `taxId` | `String` | Documento fiscal |
-| `email` | `String` | Correo electronico |
-| `phone` | `String` | Telefono |
-| `status` | `String` | Estado actualizado (INACTIVE) |
-| `createdAt` | `Instant` | Fecha de creacion |
-
-**Ejemplo de Carga Util JSON (Response):**
-```json
-{
-  "id": "018f6c50-7e12-7000-8000-000000000001",
-  "tenantId": "018f6c40-7e12-7000-8000-000000000001",
-  "type": "INDIVIDUAL",
-  "firstName": "Juan Jose",
-  "lastName": "Perez Rodriguez",
-  "companyName": null,
-  "taxId": "47891234",
-  "email": "juan.perez@gmail.com",
-  "phone": "+51998877665",
-  "status": "INACTIVE",
-  "createdAt": "2026-10-01T16:30:00Z"
-}
-```
-
-#### Errores y Excepciones de Dominio (RFC 7807)
-| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
-| :---: | :--- | :--- |
-| `401 Unauthorized` | `AuthenticationException` | Token ausente o invalido |
-| `403 Forbidden` | `AccessDeniedException` | Permiso insuficiente para archivar clientes |
-| `404 Not Found` | `CustomerNotFoundException` | Cliente no encontrado en el taller |
-| `409 Conflict` | `CustomerHasActiveWorkOrdersException` | No se puede archivar un cliente que mantiene ordenes de trabajo en ejecucion en el taller |
-
-**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
-```json
-{
-  "type": "https://api.atelier.pe/errors/customer-has-active-work-orders",
-  "title": "Conflicto Operativo",
-  "status": 409,
-  "detail": "El cliente mantiene una orden de trabajo activa en foso. Cierre o cancele la orden antes de archivarlo",
-  "instance": "/api/v1/crm/customers/018f6c50-7e12-7000-8000-000000000001/archive",
-  "code": "CUSTOMER_HAS_ACTIVE_WORK_ORDERS",
-  "timestamp": "2026-10-01T16:30:00Z"
-}
-```
-
----
-
-## 3. Endpoints del Parque Automotor (VehiclesController)
-
-### 3.1. [GET] /api/v1/crm/vehicles
-
-**Catalogo Paginado de Vehiculos Registrados**
-
-#### Identidad Tecnica
-- **Controlador:** `com.andeva.atelier.platform.crm.interfaces.rest.controllers.VehiclesController`
-- **Metodo Java:** `public ResponseEntity<Page<VehicleResource>> getVehicles(@RequestParam(required = false) String search, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size)`
-- **Ruta Base:** `/api/v1/crm/vehicles`
-- **Ruta Completa:** `/api/v1/crm/vehicles`
-- **Proposito:** Retorna el listado paginado del parque automotor atendido en el taller o vinculado a su cartera de clientes. Permite aplicar busquedas parciales por placa de rodaje, marca, modelo o titular.
-
-#### Seguridad y Autorizacion
-- **Nivel de Acceso:** Autenticado
-- **Rol Minimo Requerido:** Tecnico Mecanico (ROLE_MECHANIC) o Recepcionista (ROLE_RECEPTIONIST)
-- **Permiso Atomico:** `@PreAuthorize("hasAuthority('crm:vehicles:read')")`
-- **Aislamiento Multi-Inquilino:** El vehiculo es un activo global independiente de inquilino. Este endpoint filtra aquellos vehiculos que mantienen historial de custodia o atencion en el taller del usuario.
+- **Rol Minimo Requerido:** Recepcionista (ROLE_RECEPTIONIST), Asesor de Servicio (ROLE_SERVICE_ADVISOR), Mecanico Jefe (ROLE_CHIEF_MECHANIC) o Tecnico Mecanico (ROLE_MECHANIC)
+- **Permiso Atomico:** `@PreAuthorize("hasAuthority('crm:customers:read')")`
+- **Aislamiento Multi-Inquilino:** Verifica que el cliente pertenezca al taller en sesion.
 
 #### Parametros de Invocacion
 **Cabeceras HTTP (Headers):**
@@ -671,97 +611,99 @@ No aplica (Peticion HTTP sin cuerpo de entrada).
 - `Accept: application/json`
 
 **Parametros de Ruta (Path Parameters):**
-No aplica (Sin parametros en la ruta).
+| Parametro | Tipo | Requerido | Descripcion |
+| :--- | :--- | :---: | :--- |
+| `customerId` | `UUID` | Si | Identificador universal del cliente titular |
 
 **Parametros de Consulta (Query Parameters):**
-| Parametro | Tipo | Requerido | Valor por Defecto | Descripcion |
-| :--- | :--- | :---: | :--- | :--- |
-| `search` | `String` | No | Ninguno | Termino de coincidencia sobre placa, VIN, marca o modelo |
-| `page` | `int` | No | 0 | Indice de pagina de resultados basado en cero |
-| `size` | `int` | No | 20 | Cantidad maxima de registros por pagina |
+No aplica (Sin parametros de consulta en la URL).
 
 #### Recurso de Peticion (Request Body)
-No aplica (Peticion HTTP sin cuerpo de entrada).
+No aplica (Peticion HTTP de consulta `GET` sin cuerpo de entrada).
 
 #### Recurso de Respuesta (Response Body)
 - **Estado HTTP Exitoso:** `200 OK`
-- **Registro Java DTO:** `org.springframework.data.domain.Page<com.andeva.atelier.platform.crm.interfaces.rest.resources.responses.VehicleResource>`
+- **Registro Java DTO:** `List<com.andeva.atelier.platform.crm.interfaces.rest.resources.responses.VehicleResource>`
+
+```java
+package com.andeva.atelier.platform.crm.interfaces.rest.resources.responses;
+
+import java.util.UUID;
+
+public record VehicleResource(
+    UUID id,
+    String plate,
+    String vin,
+    String brand,
+    String model,
+    int year,
+    String engineType,
+    UUID currentOwnerId,
+    String currentOwnerName
+) {}
+```
+
 - **Definicion de Campos Proyectados:**
 | Campo | Tipo de Dato | Descripcion |
 | :--- | :--- | :--- |
-| `content` | `List<VehicleResource>` | Lista de vehiculos correspondientes a la pagina solicitada |
-| `page` | `int` | Indice de la pagina actual |
-| `size` | `int` | Registros por pagina |
-| `totalElements` | `long` | Total de vehiculos encontrados |
-| `totalPages` | `int` | Total de paginas disponibles |
+| `id` | `UUID` | Identificador universal asignado al vehiculo automotor |
+| `plate` | `String` | Placa de rodaje normalizada sin guiones |
+| `vin` | `String` | Numero de chasis estandarizado segun norma ISO 3779 |
+| `brand` | `String` | Marca del fabricante del vehiculo |
+| `model` | `String` | Modelo comercial del automovil |
+| `year` | `int` | Ano de fabricacion vehicular |
+| `engineType` | `String` | Motorizacion (`GASOLINE`, `DIESEL`, `ELECTRIC`, `HYBRID`) |
+| `currentOwnerId` | `UUID` | Identificador universal del cliente titular vigente |
+| `currentOwnerName` | `String` | Nombre o razon social del titular vigente |
 
 **Ejemplo de Carga Util JSON (Response):**
 ```json
-{
-  "content": [
-    {
-      "id": "018f6c50-7e12-7000-8000-000000000010",
-      "plate": "ABC123",
-      "vin": "9BD11122233344455",
-      "brand": "Toyota",
-      "model": "Corolla Sedan",
-      "year": 2021,
-      "engineType": "GASOLINE",
-      "currentMileage": 45200,
-      "currentOwnerId": "018f6c50-7e12-7000-8000-000000000001",
-      "currentOwnerName": "Juan Jose Perez Rodriguez",
-      "createdAt": "2026-10-01T16:30:00Z"
-    }
-  ],
-  "page": 0,
-  "size": 20,
-  "totalElements": 1,
-  "totalPages": 1
-}
+[
+  {
+    "id": "018f6c40-7e12-7000-8000-000000000070",
+    "plate": "ABC123",
+    "vin": "1HGCR2F83HA000123",
+    "brand": "Toyota",
+    "model": "Corolla",
+    "year": 2021,
+    "engineType": "GASOLINE",
+    "currentOwnerId": "018f6c40-7e12-7000-8000-000000000050",
+    "currentOwnerName": "Juan Alberto Perez Rodriguez"
+  }
+]
 ```
 
 #### Errores y Excepciones de Dominio (RFC 7807)
 | Codigo HTTP | Excepcion Mapeada | Causa Funcional |
 | :---: | :--- | :--- |
-| `401 Unauthorized` | `AuthenticationException` | Token ausente o invalido |
-| `403 Forbidden` | `AccessDeniedException` | Falta del permiso crm:vehicles:read |
-
-**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
-```json
-{
-  "type": "https://api.atelier.pe/errors/unauthorized",
-  "title": "No Autorizado",
-  "status": 401,
-  "detail": "Se requiere autenticacion valida para consultar el parque automotor",
-  "instance": "/api/v1/crm/vehicles",
-  "code": "UNAUTHORIZED",
-  "timestamp": "2026-10-01T16:30:00Z"
-}
-```
+| `404 Not Found` | `CustomerNotFoundException` | El cliente especificado no existe en el registro del taller |
 
 ---
 
-### 3.2. [POST] /api/v1/crm/vehicles
+## 3. Endpoints del Parque Automotor y Titularidad (VehiclesController)
 
-**Registro Universal de Activo Vehicular y Asignacion de Titular Inicial**
+### 3.1. [POST] /api/v1/vehicles
+
+**Alta Global de Vehiculo y Asignacion de Titular Inicial**
 
 #### Identidad Tecnica
 - **Controlador:** `com.andeva.atelier.platform.crm.interfaces.rest.controllers.VehiclesController`
-- **Metodo Java:** `public ResponseEntity<VehicleResource> registerVehicle(@Valid @RequestBody RegisterVehicleResource resource)`
-- **Ruta Base:** `/api/v1/crm/vehicles`
-- **Ruta Completa:** `/api/v1/crm/vehicles`
-- **Proposito:** Registra formalmente un automovil en el catalogo universal de la plataforma y crea el primer registro cronologico de tenencia vinculado a un cliente del taller. Garantiza unicidad nacional por placa de rodaje y numero de chasis VIN segun norma ISO 3779.
+- **Metodo Java:** `public ResponseEntity<VehicleResource> registerVehicle(@Valid @RequestBody CreateVehicleResource resource)`
+- **Ruta Base:** `/api/v1/vehicles`
+- **Ruta Completa:** `/api/v1/vehicles`
+- **Proposito:** Da de alta una unidad automotriz en el catalogo universal de vehiculos de la plataforma. Registra la placa de rodaje alfanumerica normalizada, numero de chasis VIN segun la norma ISO 3779, marca, modelo, ano de fabricacion y motorizacion. Asigna inmediatamente al cliente titular inicial en el taller mediante la creacion de un registro de custodia en `VehicleOwnership`.
 
 #### Seguridad y Autorizacion
 - **Nivel de Acceso:** Autenticado
-- **Rol Minimo Requerido:** Recepcionista (ROLE_RECEPTIONIST) o Asesor de Servicio (ROLE_SERVICE_ADVISOR)
+- **Rol Minimo Requerido:** Recepcionista (ROLE_RECEPTIONIST), Asesor de Servicio (ROLE_SERVICE_ADVISOR) o Mecanico Jefe (ROLE_CHIEF_MECHANIC)
 - **Permiso Atomico:** `@PreAuthorize("hasAuthority('crm:vehicles:create')")`
-- **Aislamiento Multi-Inquilino:** El activo automotor se crea a nivel global y su custodia inicial se asocia al customerId adscrito al taller.
+- **Aislamiento Multi-Inquilino:** Verifica que el cliente titular inicial indicado pertenezca al `tenantId` en sesion. El vehiculo se persiste en el catalogo universal y queda vinculado operativamente al taller a traves de la relacion de custodia del cliente.
 
 #### Parametros de Invocacion
 **Cabeceras HTTP (Headers):**
 - `Authorization: Bearer <jwt_token>`
 - `Content-Type: application/json`
+- `Accept: application/json`
 
 **Parametros de Ruta (Path Parameters):**
 No aplica (Sin parametros en la ruta).
@@ -770,108 +712,161 @@ No aplica (Sin parametros en la ruta).
 No aplica (Sin parametros de consulta en la URL).
 
 #### Recurso de Peticion (Request Body)
-- **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.requests.RegisterVehicleResource`
+- **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.requests.CreateVehicleResource`
+
+```java
+package com.andeva.atelier.platform.crm.interfaces.rest.resources.requests;
+
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import java.util.UUID;
+
+public record CreateVehicleResource(
+    @NotBlank(message = "La placa de rodaje es obligatoria")
+    @Pattern(regexp = "^[A-Z0-9]{3}-?[A-Z0-9]{3}$", message = "La placa vehicular debe tener un formato estandar alfanumerico de 6 caracteres")
+    String plate,
+
+    @Pattern(regexp = "^[A-HJ-NPR-Z0-9]{17}$", message = "El VIN debe cumplir con la norma ISO 3779 (17 caracteres alfanumericos excluyendo I, O, Q)")
+    String vin,
+
+    @NotBlank(message = "La marca del vehiculo es obligatoria")
+    @Size(min = 2, max = 50, message = "La marca debe contener entre 2 y 50 caracteres")
+    String brand,
+
+    @NotBlank(message = "El modelo del vehiculo es obligatorio")
+    @Size(min = 1, max = 50, message = "El modelo debe contener entre 1 y 50 caracteres")
+    String model,
+
+    @NotNull(message = "El ano del modelo de fabricacion es obligatorio")
+    @Min(value = 1950, message = "El ano de fabricacion no puede ser anterior a 1950")
+    Integer year,
+
+    @NotBlank(message = "El tipo de motorizacion es obligatorio")
+    @Pattern(regexp = "^(GASOLINE|DIESEL|ELECTRIC|HYBRID)$", message = "El tipo de motorizacion debe ser GASOLINE, DIESEL, ELECTRIC o HYBRID")
+    String engineType,
+
+    @NotNull(message = "El identificador del cliente titular inicial es obligatorio")
+    UUID initialOwnerId
+) {}
+```
+
 - **Definicion de Campos:**
 | Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripcion |
 | :--- | :--- | :---: | :--- | :--- |
-| `plate` | `String` | Si | `@NotBlank, @Pattern(regexp = "^[A-Z0-9]{6}$")` | Placa oficial de rodaje de seis caracteres alfanumericos sin guiones |
-| `vin` | `String` | No | `@Pattern(regexp = "^[A-HJ-NPR-Z0-9]{17}$")` | Numero de identificacion vehicular de 17 caracteres segun ISO 3779 |
-| `brand` | `String` | Si | `@NotBlank, @Size(max = 50)` | Marca automotriz (ej. Toyota, Nissan, Hyundai) |
-| `model` | `String` | Si | `@NotBlank, @Size(max = 50)` | Modelo comercial de la unidad |
-| `year` | `int` | Si | `@NotNull, @Min(1950), @Max(2030)` | Ano de fabricacion del vehiculo |
-| `engineType` | `String` | Si | `@NotBlank, @Pattern(regexp = "^(GASOLINE|DIESEL|ELECTRIC|HYBRID)$")` | Tipo de motorizacion y combustible |
-| `initialMileage` | `Integer` | No | `@Min(0)` | Kilometraje reportado al momento del registro |
-| `initialOwnerId` | `UUID` | Si | `@NotNull` | Identificador del cliente titular inicial de la unidad |
+| `plate` | `String` | Si | `@NotBlank, @Pattern(regexp = "^[A-Z0-9]{3}-?[A-Z0-9]{3}$")` | Placa de rodaje de 6 caracteres alfanumericos |
+| `vin` | `String` | No | `@Pattern(regexp = "^[A-HJ-NPR-Z0-9]{17}$")` | Numero de identificacion vehicular VIN segun ISO 3779 |
+| `brand` | `String` | Si | `@NotBlank, @Size(min = 2, max = 50)` | Marca automotriz del vehiculo |
+| `model` | `String` | Si | `@NotBlank, @Size(min = 1, max = 50)` | Modelo de fabricacion comercial |
+| `year` | `Integer` | Si | `@NotNull, @Min(1950)` | Ano de modelo de fabricacion |
+| `engineType` | `String` | Si | `@NotBlank, @Pattern(regexp = "^(GASOLINE|DIESEL|ELECTRIC|HYBRID)$")` | Tipo de motorizacion vehicular |
+| `initialOwnerId` | `UUID` | Si | `@NotNull` | Identificador universal del cliente titular inicial |
 
 **Ejemplo de Carga Util JSON (Request):**
 ```json
 {
   "plate": "ABC123",
-  "vin": "9BD11122233344455",
+  "vin": "1HGCR2F83HA000123",
   "brand": "Toyota",
-  "model": "Corolla Sedan",
+  "model": "Corolla",
   "year": 2021,
   "engineType": "GASOLINE",
-  "initialMileage": 45200,
-  "initialOwnerId": "018f6c50-7e12-7000-8000-000000000001"
+  "initialOwnerId": "018f6c40-7e12-7000-8000-000000000050"
 }
 ```
 
 #### Recurso de Respuesta (Response Body)
 - **Estado HTTP Exitoso:** `201 Created`
+- **Cabecera de Ubicacion:** `Location: /api/v1/vehicles/018f6c40-7e12-7000-8000-000000000070`
 - **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.responses.VehicleResource`
+
+```java
+package com.andeva.atelier.platform.crm.interfaces.rest.resources.responses;
+
+import java.util.UUID;
+
+public record VehicleResource(
+    UUID id,
+    String plate,
+    String vin,
+    String brand,
+    String model,
+    int year,
+    String engineType,
+    UUID currentOwnerId,
+    String currentOwnerName
+) {}
+```
+
 - **Definicion de Campos Proyectados:**
 | Campo | Tipo de Dato | Descripcion |
 | :--- | :--- | :--- |
-| `id` | `UUID` | Identificador universal asignado al automotor |
+| `id` | `UUID` | Identificador universal del vehiculo en la plataforma |
 | `plate` | `String` | Placa de rodaje normalizada |
-| `vin` | `String` | Numero de chasis VIN registrado |
-| `brand` | `String` | Marca automotriz |
-| `model` | `String` | Modelo del vehiculo |
+| `vin` | `String` | Numero VIN registrado |
+| `brand` | `String` | Marca del fabricante |
+| `model` | `String` | Modelo comercial |
 | `year` | `int` | Ano de fabricacion |
-| `engineType` | `String` | Tipo de motorizacion |
-| `currentMileage` | `Integer` | Kilometraje actual registrado |
-| `currentOwnerId` | `UUID` | Identificador del cliente titular |
-| `currentOwnerName` | `String` | Nombre completo o razon social del titular |
-| `createdAt` | `Instant` | Marca temporal de alta en UTC |
+| `engineType` | `String` | Motorizacion vehicular |
+| `currentOwnerId` | `UUID` | Identificador del cliente propietario actual |
+| `currentOwnerName` | `String` | Nombre o razon social del propietario actual |
 
 **Ejemplo de Carga Util JSON (Response):**
 ```json
 {
-  "id": "018f6c50-7e12-7000-8000-000000000010",
+  "id": "018f6c40-7e12-7000-8000-000000000070",
   "plate": "ABC123",
-  "vin": "9BD11122233344455",
+  "vin": "1HGCR2F83HA000123",
   "brand": "Toyota",
-  "model": "Corolla Sedan",
+  "model": "Corolla",
   "year": 2021,
   "engineType": "GASOLINE",
-  "currentMileage": 45200,
-  "currentOwnerId": "018f6c50-7e12-7000-8000-000000000001",
-  "currentOwnerName": "Juan Jose Perez Rodriguez",
-  "createdAt": "2026-10-01T16:30:00Z"
+  "currentOwnerId": "018f6c40-7e12-7000-8000-000000000050",
+  "currentOwnerName": "Juan Alberto Perez Rodriguez"
 }
 ```
 
 #### Errores y Excepciones de Dominio (RFC 7807)
 | Codigo HTTP | Excepcion Mapeada | Causa Funcional |
 | :---: | :--- | :--- |
-| `400 Bad Request` | `MethodArgumentNotValidException` | Formato de placa no conforme con el patron peruano o VIN disconforme con ISO 3779 |
-| `401 Unauthorized` | `AuthenticationException` | Token ausente o invalido |
-| `403 Forbidden` | `AccessDeniedException` | Falta de autoridad crm:vehicles:create |
+| `400 Bad Request` | `MethodArgumentNotValidException` | La placa no cumple el patron alfanumerico o el VIN no cumple con la norma ISO 3779 |
 | `404 Not Found` | `CustomerNotFoundException` | El cliente especificado en initialOwnerId no existe en este taller |
-| `409 Conflict` | `VehiclePlateAlreadyExistsException` | Ya existe un vehiculo registrado a nivel nacional con la placa indicada |
+| `409 Conflict` | `VehiclePlateAlreadyExistsException` | La placa de rodaje ya se encuentra registrada en el parque automotor universal |
+| `409 Conflict` | `VehicleVinAlreadyExistsException` | El numero de chasis VIN ya se encuentra asignado a otra unidad vehicular registrada |
 
 **Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
 ```json
 {
-  "type": "https://api.atelier.pe/errors/vehicle-plate-exists",
-  "title": "Placa de Rodaje Ya Registrada",
+  "type": "https://api.atelier.pe/errors/vehicle-plate-already-exists",
+  "title": "Conflicto de Placa Vehicular",
   "status": 409,
-  "detail": "La placa ABC123 ya se encuentra registrada en el catalogo universal de vehiculos",
-  "instance": "/api/v1/crm/vehicles",
+  "detail": "La placa de rodaje ABC123 ya se encuentra registrada en el sistema",
+  "instance": "/api/v1/vehicles",
   "code": "VEHICLE_PLATE_ALREADY_EXISTS",
-  "timestamp": "2026-10-01T16:30:00Z"
+  "timestamp": "2026-10-03T12:00:00Z"
 }
 ```
 
 ---
 
-### 3.3. [GET] /api/v1/crm/vehicles/{id}
+### 3.2. [GET] /api/v1/vehicles/{vehicleId}
 
-**Ficha Tecnica Integral de Vehiculo por Identificador**
+**Consulta Tecnica Integral de Vehiculo por Identificador**
 
 #### Identidad Tecnica
 - **Controlador:** `com.andeva.atelier.platform.crm.interfaces.rest.controllers.VehiclesController`
-- **Metodo Java:** `public ResponseEntity<VehicleResource> getVehicleById(@PathVariable UUID id)`
-- **Ruta Base:** `/api/v1/crm/vehicles`
-- **Ruta Completa:** `/api/v1/crm/vehicles/{id}`
-- **Proposito:** Consulta los datos tecnicos completos de la unidad vehicular por su identificador universal. Proyecta placa, numero de chasis, motorizacion, odometro consolidado y los datos del custodio legal vigente.
+- **Metodo Java:** `public ResponseEntity<VehicleResource> getVehicleById(@PathVariable UUID vehicleId)`
+- **Ruta Base:** `/api/v1/vehicles`
+- **Ruta Completa:** `/api/v1/vehicles/{vehicleId}`
+- **Proposito:** Consulta la ficha tecnica completa y los datos del propietario vigente de un vehiculo automotor a partir de su identificador universal.
 
 #### Seguridad y Autorizacion
 - **Nivel de Acceso:** Autenticado
-- **Rol Minimo Requerido:** Tecnico Mecanico (ROLE_MECHANIC), Asesor de Servicio o Recepcionista
+- **Rol Minimo Requerido:** Recepcionista (ROLE_RECEPTIONIST), Asesor de Servicio (ROLE_SERVICE_ADVISOR), Mecanico Jefe (ROLE_CHIEF_MECHANIC) o Tecnico Mecanico (ROLE_MECHANIC)
 - **Permiso Atomico:** `@PreAuthorize("hasAuthority('crm:vehicles:read')")`
-- **Aislamiento Multi-Inquilino:** Activo global consultable para operaciones de recepcion e ingreso a bahia.
+- **Aislamiento Multi-Inquilino:** Entidad universal del parque automotor. Permite el acceso de lectura a colaboradores autenticados.
 
 #### Parametros de Invocacion
 **Cabeceras HTTP (Headers):**
@@ -881,197 +876,57 @@ No aplica (Sin parametros de consulta en la URL).
 **Parametros de Ruta (Path Parameters):**
 | Parametro | Tipo | Requerido | Descripcion |
 | :--- | :--- | :---: | :--- |
-| `id` | `UUID` | Si | Identificador universal del vehiculo |
+| `vehicleId` | `UUID` | Si | Identificador universal del vehiculo a consultar |
 
 **Parametros de Consulta (Query Parameters):**
 No aplica (Sin parametros de consulta en la URL).
 
 #### Recurso de Peticion (Request Body)
-No aplica (Peticion HTTP sin cuerpo de entrada).
+No aplica (Peticion HTTP de consulta `GET` sin cuerpo de entrada).
 
 #### Recurso de Respuesta (Response Body)
 - **Estado HTTP Exitoso:** `200 OK`
 - **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.responses.VehicleResource`
-- **Definicion de Campos Proyectados:**
-| Campo | Tipo de Dato | Descripcion |
-| :--- | :--- | :--- |
-| `id` | `UUID` | Identificador universal del automovil |
-| `plate` | `String` | Placa oficial de rodaje |
-| `vin` | `String` | Numero de chasis VIN |
-| `brand` | `String` | Marca automotriz |
-| `model` | `String` | Modelo del vehiculo |
-| `year` | `int` | Ano de fabricacion |
-| `engineType` | `String` | Motorizacion |
-| `currentMileage` | `Integer` | Ultimo kilometraje registrado |
-| `currentOwnerId` | `UUID` | Identificador del propietario vigente |
-| `currentOwnerName` | `String` | Nombre del propietario vigente |
-| `createdAt` | `Instant` | Fecha de registro original |
+- **Definicion de Campos Proyectados:** Coincide con la especificacion del recurso `VehicleResource`.
 
 **Ejemplo de Carga Util JSON (Response):**
 ```json
 {
-  "id": "018f6c50-7e12-7000-8000-000000000010",
+  "id": "018f6c40-7e12-7000-8000-000000000070",
   "plate": "ABC123",
-  "vin": "9BD11122233344455",
+  "vin": "1HGCR2F83HA000123",
   "brand": "Toyota",
-  "model": "Corolla Sedan",
+  "model": "Corolla",
   "year": 2021,
   "engineType": "GASOLINE",
-  "currentMileage": 45200,
-  "currentOwnerId": "018f6c50-7e12-7000-8000-000000000001",
-  "currentOwnerName": "Juan Jose Perez Rodriguez",
-  "createdAt": "2026-10-01T16:30:00Z"
+  "currentOwnerId": "018f6c40-7e12-7000-8000-000000000050",
+  "currentOwnerName": "Juan Alberto Perez Rodriguez"
 }
 ```
 
 #### Errores y Excepciones de Dominio (RFC 7807)
 | Codigo HTTP | Excepcion Mapeada | Causa Funcional |
 | :---: | :--- | :--- |
-| `401 Unauthorized` | `AuthenticationException` | Token ausente o invalido |
-| `403 Forbidden` | `AccessDeniedException` | Permiso crm:vehicles:read insuficiente |
-| `404 Not Found` | `VehicleNotFoundException` | Vehiculo no localizado con el identificador proporcionado |
-
-**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
-```json
-{
-  "type": "https://api.atelier.pe/errors/vehicle-not-found",
-  "title": "Vehiculo No Encontrado",
-  "status": 404,
-  "detail": "No se encontro ningun vehiculo registrado con el identificador 018f6c50-7e12-7000-8000-000000000010",
-  "instance": "/api/v1/crm/vehicles/018f6c50-7e12-7000-8000-000000000010",
-  "code": "VEHICLE_NOT_FOUND",
-  "timestamp": "2026-10-01T16:30:00Z"
-}
-```
+| `404 Not Found` | `VehicleNotFoundException` | No existe ningun vehiculo registrado con el identificador UUID provisto |
 
 ---
 
-### 3.4. [PUT] /api/v1/crm/vehicles/{id}
+### 3.3. [GET] /api/v1/vehicles/by-plate/{plate}
 
-**Actualizacion de Especificaciones Tecnicas y Motorizacion**
-
-#### Identidad Tecnica
-- **Controlador:** `com.andeva.atelier.platform.crm.interfaces.rest.controllers.VehiclesController`
-- **Metodo Java:** `public ResponseEntity<VehicleResource> updateVehicle(@PathVariable UUID id, @Valid @RequestBody UpdateVehicleResource resource)`
-- **Ruta Base:** `/api/v1/crm/vehicles`
-- **Ruta Completa:** `/api/v1/crm/vehicles/{id}`
-- **Proposito:** Actualiza los atributos tecnicos del automovil (marca, modelo, ano de fabricacion, motorizacion y VIN). La placa de rodaje se mantiene estrictamente inmutable para salvaguardar la cadena ininterrumpida de custodia legal.
-
-#### Seguridad y Autorizacion
-- **Nivel de Acceso:** Autenticado
-- **Rol Minimo Requerido:** Recepcionista (ROLE_RECEPTIONIST) o Asesor de Servicio (ROLE_SERVICE_ADVISOR)
-- **Permiso Atomico:** `@PreAuthorize("hasAuthority('crm:vehicles:update')")`
-- **Aislamiento Multi-Inquilino:** Opera sobre el activo vehicular universal validando que el taller posea custodia vigente o historica.
-
-#### Parametros de Invocacion
-**Cabeceras HTTP (Headers):**
-- `Authorization: Bearer <jwt_token>`
-- `Content-Type: application/json`
-
-**Parametros de Ruta (Path Parameters):**
-| Parametro | Tipo | Requerido | Descripcion |
-| :--- | :--- | :---: | :--- |
-| `id` | `UUID` | Si | Identificador universal del automovil a modificar |
-
-**Parametros de Consulta (Query Parameters):**
-No aplica (Sin parametros de consulta en la URL).
-
-#### Recurso de Peticion (Request Body)
-- **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.requests.UpdateVehicleResource`
-- **Definicion de Campos:**
-| Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripcion |
-| :--- | :--- | :---: | :--- | :--- |
-| `brand` | `String` | Si | `@NotBlank, @Size(max = 50)` | Marca automotriz |
-| `model` | `String` | Si | `@NotBlank, @Size(max = 50)` | Modelo de la unidad |
-| `year` | `int` | Si | `@NotNull, @Min(1950), @Max(2030)` | Ano de fabricacion |
-| `engineType` | `String` | Si | `@NotBlank, @Pattern(regexp = "^(GASOLINE|DIESEL|ELECTRIC|HYBRID)$")` | Tipo de combustible |
-| `vin` | `String` | No | `@Pattern(regexp = "^[A-HJ-NPR-Z0-9]{17}$")` | Numero de serie de chasis (VIN ISO 3779) |
-
-**Ejemplo de Carga Util JSON (Request):**
-```json
-{
-  "brand": "Toyota",
-  "model": "Corolla Altis",
-  "year": 2021,
-  "engineType": "HYBRID",
-  "vin": "9BD11122233344455"
-}
-```
-
-#### Recurso de Respuesta (Response Body)
-- **Estado HTTP Exitoso:** `200 OK`
-- **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.responses.VehicleResource`
-- **Definicion de Campos Proyectados:**
-| Campo | Tipo de Dato | Descripcion |
-| :--- | :--- | :--- |
-| `id` | `UUID` | Identificador del vehiculo |
-| `plate` | `String` | Placa inmutable |
-| `vin` | `String` | VIN actualizado |
-| `brand` | `String` | Marca actualizada |
-| `model` | `String` | Modelo actualizado |
-| `year` | `int` | Ano actualizado |
-| `engineType` | `String` | Motorizacion actualizada |
-| `currentMileage` | `Integer` | Kilometraje actual |
-| `currentOwnerId` | `UUID` | Titular vigente |
-| `currentOwnerName` | `String` | Nombre del titular |
-| `createdAt` | `Instant` | Fecha de alta original |
-
-**Ejemplo de Carga Util JSON (Response):**
-```json
-{
-  "id": "018f6c50-7e12-7000-8000-000000000010",
-  "plate": "ABC123",
-  "vin": "9BD11122233344455",
-  "brand": "Toyota",
-  "model": "Corolla Altis",
-  "year": 2021,
-  "engineType": "HYBRID",
-  "currentMileage": 45200,
-  "currentOwnerId": "018f6c50-7e12-7000-8000-000000000001",
-  "currentOwnerName": "Juan Jose Perez Rodriguez",
-  "createdAt": "2026-10-01T16:30:00Z"
-}
-```
-
-#### Errores y Excepciones de Dominio (RFC 7807)
-| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
-| :---: | :--- | :--- |
-| `400 Bad Request` | `MethodArgumentNotValidException` | Ano fuera de rango o tipo de motorizacion no reconocido |
-| `401 Unauthorized` | `AuthenticationException` | Token ausente o invalido |
-| `403 Forbidden` | `AccessDeniedException` | Falta del permiso crm:vehicles:update |
-| `404 Not Found` | `VehicleNotFoundException` | Vehiculo no encontrado |
-
-**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
-```json
-{
-  "type": "https://api.atelier.pe/errors/invalid-request-payload",
-  "title": "Especificaciones Invalidas",
-  "status": 400,
-  "detail": "El tipo de motorizacion ingresado no corresponde a ninguna de las opciones permitidas",
-  "instance": "/api/v1/crm/vehicles/018f6c50-7e12-7000-8000-000000000010",
-  "code": "INVALID_REQUEST_PAYLOAD",
-  "timestamp": "2026-10-01T16:30:00Z"
-}
-```
-
----
-
-### 3.5. [GET] /api/v1/crm/vehicles/by-plate/{plate}
-
-**Busqueda Rapida de Automotor por Placa de Rodaje Nacional**
+**Busqueda Rapida de Vehiculo por Placa de Rodaje**
 
 #### Identidad Tecnica
 - **Controlador:** `com.andeva.atelier.platform.crm.interfaces.rest.controllers.VehiclesController`
 - **Metodo Java:** `public ResponseEntity<VehicleResource> getVehicleByPlate(@PathVariable String plate)`
-- **Ruta Base:** `/api/v1/crm/vehicles`
-- **Ruta Completa:** `/api/v1/crm/vehicles/by-plate/{plate}`
-- **Proposito:** Permite al recepcionista o mecanico buscar un automovil ingresando su placa de rodaje. Normaliza la cadena removiendo espacios y guiones y convirtiendola a mayusculas para ejecutar una busqueda O(1) sobre el indice B-Tree unico.
+- **Ruta Base:** `/api/v1/vehicles`
+- **Ruta Completa:** `/api/v1/vehicles/by-plate/{plate}`
+- **Proposito:** Permite la busqueda expedita de una unidad vehicular mediante su placa de rodaje para la recepcion agil en patio o fosa. Normaliza la entrada eliminando guiones y convirtiendo a mayusculas de forma previa a la consulta.
 
 #### Seguridad y Autorizacion
 - **Nivel de Acceso:** Autenticado
-- **Rol Minimo Requerido:** Tecnico Mecanico (ROLE_MECHANIC) o Recepcionista (ROLE_RECEPTIONIST)
+- **Rol Minimo Requerido:** Recepcionista (ROLE_RECEPTIONIST), Asesor de Servicio (ROLE_SERVICE_ADVISOR), Mecanico Jefe (ROLE_CHIEF_MECHANIC) o Tecnico Mecanico (ROLE_MECHANIC)
 - **Permiso Atomico:** `@PreAuthorize("hasAuthority('crm:vehicles:read')")`
-- **Aislamiento Multi-Inquilino:** Consulta sobre el padron universal automotriz.
+- **Aislamiento Multi-Inquilino:** Entidad universal del parque automotor. Acceso autorizado para usuarios con credenciales activas del taller.
 
 #### Parametros de Invocacion
 **Cabeceras HTTP (Headers):**
@@ -1081,393 +936,261 @@ No aplica (Sin parametros de consulta en la URL).
 **Parametros de Ruta (Path Parameters):**
 | Parametro | Tipo | Requerido | Descripcion |
 | :--- | :--- | :---: | :--- |
-| `plate` | `String` | Si | Placa de rodaje normalizada de 6 caracteres alfanumericos (ej. ABC123) |
+| `plate` | `String` | Si | Placa de rodaje alfanumerica normalizada de 6 caracteres (ej. `ABC123`) |
 
 **Parametros de Consulta (Query Parameters):**
 No aplica (Sin parametros de consulta en la URL).
 
 #### Recurso de Peticion (Request Body)
-No aplica (Peticion HTTP sin cuerpo de entrada).
+No aplica (Peticion HTTP de consulta `GET` sin cuerpo de entrada).
 
 #### Recurso de Respuesta (Response Body)
 - **Estado HTTP Exitoso:** `200 OK`
 - **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.responses.VehicleResource`
-- **Definicion de Campos Proyectados:**
-| Campo | Tipo de Dato | Descripcion |
-| :--- | :--- | :--- |
-| `id` | `UUID` | Identificador del vehiculo |
-| `plate` | `String` | Placa de rodaje coincidente |
-| `vin` | `String` | Numero de chasis VIN |
-| `brand` | `String` | Marca automotriz |
-| `model` | `String` | Modelo del vehiculo |
-| `year` | `int` | Ano de fabricacion |
-| `engineType` | `String` | Motorizacion |
-| `currentMileage` | `Integer` | Kilometraje reportado |
-| `currentOwnerId` | `UUID` | Identificador del propietario vigente |
-| `currentOwnerName` | `String` | Nombre del propietario |
-| `createdAt` | `Instant` | Fecha de registro |
+- **Definicion de Campos Proyectados:** Coincide con la especificacion del recurso `VehicleResource`.
 
 **Ejemplo de Carga Util JSON (Response):**
 ```json
 {
-  "id": "018f6c50-7e12-7000-8000-000000000010",
+  "id": "018f6c40-7e12-7000-8000-000000000070",
   "plate": "ABC123",
-  "vin": "9BD11122233344455",
+  "vin": "1HGCR2F83HA000123",
   "brand": "Toyota",
-  "model": "Corolla Sedan",
+  "model": "Corolla",
   "year": 2021,
   "engineType": "GASOLINE",
-  "currentMileage": 45200,
-  "currentOwnerId": "018f6c50-7e12-7000-8000-000000000001",
-  "currentOwnerName": "Juan Jose Perez Rodriguez",
-  "createdAt": "2026-10-01T16:30:00Z"
+  "currentOwnerId": "018f6c40-7e12-7000-8000-000000000050",
+  "currentOwnerName": "Juan Alberto Perez Rodriguez"
 }
 ```
 
 #### Errores y Excepciones de Dominio (RFC 7807)
 | Codigo HTTP | Excepcion Mapeada | Causa Funcional |
 | :---: | :--- | :--- |
-| `400 Bad Request` | `IllegalArgumentException` | Formato de placa invalido (longitud distinta a 6 caracteres) |
-| `401 Unauthorized` | `AuthenticationException` | Token ausente o invalido |
-| `403 Forbidden` | `AccessDeniedException` | Permiso crm:vehicles:read insuficiente |
-| `404 Not Found` | `VehicleNotFoundException` | No existe ningun vehiculo registrado con la placa especificada |
-
-**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
-```json
-{
-  "type": "https://api.atelier.pe/errors/vehicle-not-found",
-  "title": "Vehiculo No Localizado",
-  "status": 404,
-  "detail": "No se encontro ningun automotor registrado con la placa de rodaje ABC123",
-  "instance": "/api/v1/crm/vehicles/by-plate/ABC123",
-  "code": "VEHICLE_NOT_FOUND",
-  "timestamp": "2026-10-01T16:30:00Z"
-}
-```
+| `404 Not Found` | `VehicleNotFoundException` | La placa de rodaje no se encuentra registrada en la base de datos nacional de vehiculos |
 
 ---
 
-### 3.6. [GET] /api/v1/crm/vehicles/by-vin/{vin}
+### 3.4. [POST] /api/v1/vehicles/{vehicleId}/ownerships
 
-**Busqueda de Automotor por Numero de Identificacion Vehicular**
+**Traspaso Formal de Titularidad Vehicular**
 
 #### Identidad Tecnica
 - **Controlador:** `com.andeva.atelier.platform.crm.interfaces.rest.controllers.VehiclesController`
-- **Metodo Java:** `public ResponseEntity<VehicleResource> getVehicleByVin(@PathVariable String vin)`
-- **Ruta Base:** `/api/v1/crm/vehicles`
-- **Ruta Completa:** `/api/v1/crm/vehicles/by-vin/{vin}`
-- **Proposito:** Consulta y recupera los datos de un automotor utilizando su numero de chasis VIN estandarizado segun ISO 3779. Esencial para peritajes tecnicos y cotejo contra las lecturas computarizadas del escanner OBD-II.
+- **Metodo Java:** `public ResponseEntity<VehicleOwnershipResource> transferOwnership(@PathVariable UUID vehicleId, @Valid @RequestBody TransferVehicleOwnershipResource resource)`
+- **Ruta Base:** `/api/v1/vehicles`
+- **Ruta Completa:** `/api/v1/vehicles/{vehicleId}/ownerships`
+- **Proposito:** Formaliza el cambio de titularidad de un vehiculo entre clientes. Finaliza el periodo de custodia vigente asignando la fecha de cese y crea un nuevo periodo de custodia activo vinculado al nuevo propietario, preservando de forma ininterrumpida la cadena de custodia legal y pericial.
 
 #### Seguridad y Autorizacion
 - **Nivel de Acceso:** Autenticado
-- **Rol Minimo Requerido:** Tecnico Mecanico (ROLE_MECHANIC) o Asesor de Servicio
-- **Permiso Atomico:** `@PreAuthorize("hasAuthority('crm:vehicles:read')")`
-- **Aislamiento Multi-Inquilino:** Busqueda sobre el registro universal de vehiculos.
+- **Rol Minimo Requerido:** Asesor de Servicio (ROLE_SERVICE_ADVISOR) o Administrador (ROLE_WORKSHOP_ADMINISTRATOR)
+- **Permiso Atomico:** `@PreAuthorize("hasAuthority('crm:vehicles:update')")`
+- **Aislamiento Multi-Inquilino:** Verifica que el nuevo cliente titular pertenezca al taller en sesion antes de formalizar la cesion.
 
 #### Parametros de Invocacion
 **Cabeceras HTTP (Headers):**
 - `Authorization: Bearer <jwt_token>`
+- `Content-Type: application/json`
 - `Accept: application/json`
 
 **Parametros de Ruta (Path Parameters):**
 | Parametro | Tipo | Requerido | Descripcion |
 | :--- | :--- | :---: | :--- |
-| `vin` | `String` | Si | Numero de chasis VIN de 17 caracteres alfanumericos (ISO 3779) |
+| `vehicleId` | `UUID` | Si | Identificador universal del vehiculo objeto del traspaso |
 
 **Parametros de Consulta (Query Parameters):**
 No aplica (Sin parametros de consulta en la URL).
 
 #### Recurso de Peticion (Request Body)
-No aplica (Peticion HTTP sin cuerpo de entrada).
+- **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.requests.TransferVehicleOwnershipResource`
 
-#### Recurso de Respuesta (Response Body)
-- **Estado HTTP Exitoso:** `200 OK`
-- **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.responses.VehicleResource`
-- **Definicion de Campos Proyectados:**
-| Campo | Tipo de Dato | Descripcion |
-| :--- | :--- | :--- |
-| `id` | `UUID` | Identificador del vehiculo |
-| `plate` | `String` | Placa oficial de rodaje |
-| `vin` | `String` | VIN localizado |
-| `brand` | `String` | Marca automotriz |
-| `model` | `String` | Modelo del vehiculo |
-| `year` | `int` | Ano de fabricacion |
-| `engineType` | `String` | Tipo de combustible |
-| `currentMileage` | `Integer` | Kilometraje reportado |
-| `currentOwnerId` | `UUID` | Titular vigente |
-| `currentOwnerName` | `String` | Nombre del titular |
-| `createdAt` | `Instant` | Fecha de registro |
+```java
+package com.andeva.atelier.platform.crm.interfaces.rest.resources.requests;
 
-**Ejemplo de Carga Util JSON (Response):**
-```json
-{
-  "id": "018f6c50-7e12-7000-8000-000000000010",
-  "plate": "ABC123",
-  "vin": "9BD11122233344455",
-  "brand": "Toyota",
-  "model": "Corolla Sedan",
-  "year": 2021,
-  "engineType": "GASOLINE",
-  "currentMileage": 45200,
-  "currentOwnerId": "018f6c50-7e12-7000-8000-000000000001",
-  "currentOwnerName": "Juan Jose Perez Rodriguez",
-  "createdAt": "2026-10-01T16:30:00Z"
-}
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
+import java.time.LocalDate;
+import java.util.UUID;
+
+public record TransferVehicleOwnershipResource(
+    @NotNull(message = "El identificador del nuevo cliente titular es obligatorio")
+    UUID newOwnerId,
+
+    @NotNull(message = "La fecha formal de traspaso de custodia es obligatoria")
+    @PastOrPresent(message = "La fecha de traspaso no puede ser una fecha futura")
+    LocalDate transferDate
+) {}
 ```
 
-#### Errores y Excepciones de Dominio (RFC 7807)
-| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
-| :---: | :--- | :--- |
-| `400 Bad Request` | `IllegalArgumentException` | El VIN no posee exactamente 17 caracteres o contiene letras prohibidas (I, O, Q) |
-| `401 Unauthorized` | `AuthenticationException` | Token ausente o invalido |
-| `403 Forbidden` | `AccessDeniedException` | Falta del permiso crm:vehicles:read |
-| `404 Not Found` | `VehicleNotFoundException` | No se encontro ningun automovil con el VIN indicado |
-
-**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
-```json
-{
-  "type": "https://api.atelier.pe/errors/vehicle-not-found",
-  "title": "VIN No Registrado",
-  "status": 404,
-  "detail": "No se encontro ningun vehiculo registrado con el VIN 9BD11122233344455",
-  "instance": "/api/v1/crm/vehicles/by-vin/9BD11122233344455",
-  "code": "VEHICLE_NOT_FOUND",
-  "timestamp": "2026-10-01T16:30:00Z"
-}
-```
-
----
-
-### 3.7. [PUT] /api/v1/crm/vehicles/{id}/mileage
-
-**Actualizacion de Lectura de Odometro y Kilometraje**
-
-#### Identidad Tecnica
-- **Controlador:** `com.andeva.atelier.platform.crm.interfaces.rest.controllers.VehiclesController`
-- **Metodo Java:** `public ResponseEntity<VehicleResource> updateMileage(@PathVariable UUID id, @Valid @RequestBody UpdateMileageResource resource)`
-- **Ruta Base:** `/api/v1/crm/vehicles`
-- **Ruta Completa:** `/api/v1/crm/vehicles/{id}/mileage`
-- **Proposito:** Registra una nueva lectura de kilometraje para el automotor capturada durante la recepcion pericial o extraida mediante telemetria OBD-II. Valida la invariante de no regresion para impedir alteraciones fraudulentas de odometro.
-
-#### Seguridad y Autorizacion
-- **Nivel de Acceso:** Autenticado
-- **Rol Minimo Requerido:** Tecnico Mecanico (ROLE_MECHANIC) o Asesor de Servicio (ROLE_SERVICE_ADVISOR)
-- **Permiso Atomico:** `@PreAuthorize("hasAuthority('crm:vehicles:update')")`
-- **Aislamiento Multi-Inquilino:** Actualiza el odometro dentro del contexto de atencion del taller.
-
-#### Parametros de Invocacion
-**Cabeceras HTTP (Headers):**
-- `Authorization: Bearer <jwt_token>`
-- `Content-Type: application/json`
-
-**Parametros de Ruta (Path Parameters):**
-| Parametro | Tipo | Requerido | Descripcion |
-| :--- | :--- | :---: | :--- |
-| `id` | `UUID` | Si | Identificador del vehiculo |
-
-**Parametros de Consulta (Query Parameters):**
-No aplica (Sin parametros de consulta en la URL).
-
-#### Recurso de Peticion (Request Body)
-- **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.requests.UpdateMileageResource`
 - **Definicion de Campos:**
 | Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripcion |
 | :--- | :--- | :---: | :--- | :--- |
-| `mileage` | `Integer` | Si | `@NotNull, @Min(0)` | Nueva lectura de kilometraje en unidades enteras |
-| `recordedAt` | `String` | Si | `@NotBlank` | Marca temporal en formato ISO 8601 UTC en que se tomo la lectura |
+| `newOwnerId` | `UUID` | Si | `@NotNull` | Identificador universal del cliente adquirente |
+| `transferDate` | `LocalDate` | Si | `@NotNull, @PastOrPresent` | Fecha del traspaso legal de la unidad vehicular |
 
 **Ejemplo de Carga Util JSON (Request):**
 ```json
 {
-  "mileage": 48500,
-  "recordedAt": "2026-10-01T16:30:00Z"
+  "newOwnerId": "018f6c40-7e12-7000-8000-000000000051",
+  "transferDate": "2026-10-03"
 }
 ```
 
 #### Recurso de Respuesta (Response Body)
-- **Estado HTTP Exitoso:** `200 OK`
-- **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.responses.VehicleResource`
+- **Estado HTTP Exitoso:** `201 Created`
+- **Cabecera de Ubicacion:** `Location: /api/v1/vehicles/018f6c40-7e12-7000-8000-000000000070/ownerships/018f6c40-7e12-7000-8000-000000000085`
+- **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.responses.VehicleOwnershipResource`
+
+```java
+package com.andeva.atelier.platform.crm.interfaces.rest.resources.responses;
+
+import java.time.LocalDate;
+import java.util.UUID;
+
+public record VehicleOwnershipResource(
+    UUID id,
+    UUID vehicleId,
+    UUID customerId,
+    String ownerName,
+    LocalDate startDate,
+    LocalDate endDate,
+    boolean isCurrent
+) {}
+```
+
 - **Definicion de Campos Proyectados:**
 | Campo | Tipo de Dato | Descripcion |
 | :--- | :--- | :--- |
-| `id` | `UUID` | Identificador del vehiculo |
-| `plate` | `String` | Placa oficial de rodaje |
-| `vin` | `String` | Numero de chasis VIN |
-| `brand` | `String` | Marca automotriz |
-| `model` | `String` | Modelo del vehiculo |
-| `year` | `int` | Ano de fabricacion |
-| `engineType` | `String` | Motorizacion |
-| `currentMileage` | `Integer` | Kilometraje actualizado (48500 km) |
-| `currentOwnerId` | `UUID` | Titular vigente |
-| `currentOwnerName` | `String` | Nombre del titular |
-| `createdAt` | `Instant` | Fecha de creacion |
+| `id` | `UUID` | Identificador universal del registro de titularidad |
+| `vehicleId` | `UUID` | Identificador universal del vehiculo automotor |
+| `customerId` | `UUID` | Identificador universal del cliente titular |
+| `ownerName` | `String` | Nombre o razon social del titular |
+| `startDate` | `LocalDate` | Fecha de inicio del periodo de custodia legal |
+| `endDate` | `LocalDate` | Fecha de cese de custodia (nulo para el custodio vigente) |
+| `isCurrent` | `boolean` | Indicador booleano de vigencia de titularidad |
 
 **Ejemplo de Carga Util JSON (Response):**
 ```json
 {
-  "id": "018f6c50-7e12-7000-8000-000000000010",
-  "plate": "ABC123",
-  "vin": "9BD11122233344455",
-  "brand": "Toyota",
-  "model": "Corolla Sedan",
-  "year": 2021,
-  "engineType": "GASOLINE",
-  "currentMileage": 48500,
-  "currentOwnerId": "018f6c50-7e12-7000-8000-000000000001",
-  "currentOwnerName": "Juan Jose Perez Rodriguez",
-  "createdAt": "2026-10-01T16:30:00Z"
+  "id": "018f6c40-7e12-7000-8000-000000000085",
+  "vehicleId": "018f6c40-7e12-7000-8000-000000000070",
+  "customerId": "018f6c40-7e12-7000-8000-000000000051",
+  "ownerName": "TRANSPORTES LOGISTICOS DEL PACIFICO S.A.C.",
+  "startDate": "2026-10-03",
+  "endDate": null,
+  "isCurrent": true
 }
 ```
 
 #### Errores y Excepciones de Dominio (RFC 7807)
 | Codigo HTTP | Excepcion Mapeada | Causa Funcional |
 | :---: | :--- | :--- |
-| `400 Bad Request` | `MethodArgumentNotValidException` | Kilometraje negativo o marca temporal en formato invalido |
-| `401 Unauthorized` | `AuthenticationException` | Token ausente o invalido |
-| `403 Forbidden` | `AccessDeniedException` | Falta del permiso crm:vehicles:update |
-| `404 Not Found` | `VehicleNotFoundException` | Vehiculo no localizado |
-| `422 Unprocessable Entity` | `InvalidMileageException` | El kilometraje ingresado es menor al kilometraje historico previamente registrado (invariante de no regresion) |
-
-**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
-```json
-{
-  "type": "https://api.atelier.pe/errors/invalid-mileage-regression",
-  "title": "Regresion de Odometro Detectada",
-  "status": 422,
-  "detail": "La lectura ingresada (40000 km) es inferior al ultimo kilometraje verificado (45200 km)",
-  "instance": "/api/v1/crm/vehicles/018f6c50-7e12-7000-8000-000000000010/mileage",
-  "code": "MILEAGE_LOWER_THAN_PREVIOUS",
-  "timestamp": "2026-10-01T16:30:00Z"
-}
-```
-
----
-
-### 3.8. [POST] /api/v1/crm/vehicles/{id}/transfer-ownership
-
-**Traspaso Formal de Custodia o Titularidad Vehicular**
-
-#### Identidad Tecnica
-- **Controlador:** `com.andeva.atelier.platform.crm.interfaces.rest.controllers.VehiclesController`
-- **Metodo Java:** `public ResponseEntity<VehicleResource> transferOwnership(@PathVariable UUID id, @Valid @RequestBody TransferOwnershipResource resource)`
-- **Ruta Base:** `/api/v1/crm/vehicles`
-- **Ruta Completa:** `/api/v1/crm/vehicles/{id}/transfer-ownership`
-- **Proposito:** Formaliza la transferencia de custodia o titularidad automotriz hacia un nuevo cliente comercial. Cierra la tenencia previa en la tabla vehicle_ownerships estampando la fecha de fin e inaugura un nuevo periodo activo sin fecha de culminacion.
-
-#### Seguridad y Autorizacion
-- **Nivel de Acceso:** Autenticado
-- **Rol Minimo Requerido:** Asesor de Servicio (ROLE_SERVICE_ADVISOR) o Administrador de Taller
-- **Permiso Atomico:** `@PreAuthorize("hasAuthority('crm:vehicles:update')")`
-- **Aislamiento Multi-Inquilino:** Verifica que el nuevo titular (newOwnerId) este registrado como cliente en el taller activo.
-
-#### Parametros de Invocacion
-**Cabeceras HTTP (Headers):**
-- `Authorization: Bearer <jwt_token>`
-- `Content-Type: application/json`
-
-**Parametros de Ruta (Path Parameters):**
-| Parametro | Tipo | Requerido | Descripcion |
-| :--- | :--- | :---: | :--- |
-| `id` | `UUID` | Si | Identificador del vehiculo cuya titularidad se transfiere |
-
-**Parametros de Consulta (Query Parameters):**
-No aplica (Sin parametros de consulta en la URL).
-
-#### Recurso de Peticion (Request Body)
-- **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.requests.TransferOwnershipResource`
-- **Definicion de Campos:**
-| Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripcion |
-| :--- | :--- | :---: | :--- | :--- |
-| `newOwnerId` | `UUID` | Si | `@NotNull` | Identificador del nuevo cliente titular que adquiere la custodia |
-| `transferDate` | `LocalDate` | Si | `@NotNull` | Fecha formal del traspaso (formato ISO YYYY-MM-DD) |
-| `reason` | `String` | No | `@Size(max = 255)` | Motivo descriptivo del traspaso (ej. compraventa, cesion corporativa) |
-
-**Ejemplo de Carga Util JSON (Request):**
-```json
-{
-  "newOwnerId": "018f6c50-7e12-7000-8000-000000000002",
-  "transferDate": "2026-10-01",
-  "reason": "Venta y cesion formal de flota particular a corporativa"
-}
-```
-
-#### Recurso de Respuesta (Response Body)
-- **Estado HTTP Exitoso:** `200 OK`
-- **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.responses.VehicleResource`
-- **Definicion de Campos Proyectados:**
-| Campo | Tipo de Dato | Descripcion |
-| :--- | :--- | :--- |
-| `id` | `UUID` | Identificador del vehiculo |
-| `plate` | `String` | Placa oficial de rodaje |
-| `vin` | `String` | Numero de chasis VIN |
-| `brand` | `String` | Marca automotriz |
-| `model` | `String` | Modelo del vehiculo |
-| `year` | `int` | Ano de fabricacion |
-| `engineType` | `String` | Motorizacion |
-| `currentMileage` | `Integer` | Kilometraje registrado |
-| `currentOwnerId` | `UUID` | Nuevo titular asignado tras la transferencia |
-| `currentOwnerName` | `String` | Razon social o nombre del nuevo titular |
-| `createdAt` | `Instant` | Fecha de creacion original |
-
-**Ejemplo de Carga Util JSON (Response):**
-```json
-{
-  "id": "018f6c50-7e12-7000-8000-000000000010",
-  "plate": "ABC123",
-  "vin": "9BD11122233344455",
-  "brand": "Toyota",
-  "model": "Corolla Sedan",
-  "year": 2021,
-  "engineType": "GASOLINE",
-  "currentMileage": 48500,
-  "currentOwnerId": "018f6c50-7e12-7000-8000-000000000002",
-  "currentOwnerName": "TRANSPORTES Y LOGISTICA LIMA NORTE S.A.C.",
-  "createdAt": "2026-10-01T16:30:00Z"
-}
-```
-
-#### Errores y Excepciones de Dominio (RFC 7807)
-| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
-| :---: | :--- | :--- |
-| `400 Bad Request` | `VehicleAlreadyOwnedException` | El cliente especificado ya es el custodio vigente del vehiculo |
-| `401 Unauthorized` | `AuthenticationException` | Token ausente o invalido |
-| `403 Forbidden` | `AccessDeniedException` | Permiso insuficiente para transferir titularidad |
-| `404 Not Found` | `VehicleNotFoundException` | Vehiculo no encontrado |
-| `404 Not Found` | `CustomerNotFoundException` | El nuevo cliente titular no existe en este taller |
+| `400 Bad Request` | `VehicleAlreadyOwnedByCustomerException` | El vehiculo ya se encuentra actualmente bajo la titularidad del cliente especificado |
+| `400 Bad Request` | `IllegalArgumentException` | La fecha de traspaso es futura o anterior a la fecha de inicio del propietario actual |
+| `404 Not Found` | `VehicleNotFoundException` | El vehiculo indicado no existe en el sistema |
+| `404 Not Found` | `CustomerNotFoundException` | El nuevo cliente propietario no existe en el taller en sesion |
 
 **Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
 ```json
 {
   "type": "https://api.atelier.pe/errors/vehicle-already-owned",
-  "title": "Traspaso Invalido",
+  "title": "Traspaso No Permitido",
   "status": 400,
-  "detail": "El vehiculo ya se encuentra registrado bajo la titularidad de este cliente",
-  "instance": "/api/v1/crm/vehicles/018f6c50-7e12-7000-8000-000000000010/transfer-ownership",
+  "detail": "El vehiculo ya se encuentra actualmente bajo la titularidad del cliente adquirente",
+  "instance": "/api/v1/vehicles/018f6c40-7e12-7000-8000-000000000070/ownerships",
   "code": "VEHICLE_ALREADY_OWNED_BY_CUSTOMER",
-  "timestamp": "2026-10-01T16:30:00Z"
+  "timestamp": "2026-10-03T12:15:00Z"
 }
 ```
 
 ---
 
-## 4. Endpoints de Flotas Comerciales B2B (FleetsController)
+### 3.5. [GET] /api/v1/vehicles/{vehicleId}/ownerships
 
-### 4.1. [GET] /api/v1/crm/fleets
-
-**Listado de Flotas Corporativas Comerciales del Taller**
+**Historial Cronologico de Propietarios y Cadena de Custodia**
 
 #### Identidad Tecnica
-- **Controlador:** `com.andeva.atelier.platform.crm.interfaces.rest.controllers.FleetsController`
-- **Metodo Java:** `public ResponseEntity<List<FleetResource>> getFleets()`
-- **Ruta Base:** `/api/v1/crm/fleets`
-- **Ruta Completa:** `/api/v1/crm/fleets`
-- **Proposito:** Retorna el catalogo integro de cuentas de flotas comerciales corporativas (B2B) atendidas por el taller automotriz. Expone la empresa titular, el conteo total de vehiculos afiliados, los datos del gestor logistico institucional y el estado operativo del convenio.
+- **Controlador:** `com.andeva.atelier.platform.crm.interfaces.rest.controllers.VehiclesController`
+- **Metodo Java:** `public ResponseEntity<List<VehicleOwnershipResource>> getVehicleOwnershipHistory(@PathVariable UUID vehicleId)`
+- **Ruta Base:** `/api/v1/vehicles`
+- **Ruta Completa:** `/api/v1/vehicles/{vehicleId}/ownerships`
+- **Proposito:** Consulta el historico ordenado cronologicamente de todos los titulares y custodios que ha tenido la unidad automotor a lo largo de su ciclo de vida util, garantizando trazabilidad pericial y transparencia.
 
 #### Seguridad y Autorizacion
 - **Nivel de Acceso:** Autenticado
-- **Rol Minimo Requerido:** Asesor de Servicio (ROLE_SERVICE_ADVISOR) o Administrador de Taller
-- **Permiso Atomico:** `@PreAuthorize("hasAuthority('crm:fleets:manage')")`
-- **Aislamiento Multi-Inquilino:** Filtra de manera estricta por el tenantId del taller en sesion.
+- **Rol Minimo Requerido:** Recepcionista (ROLE_RECEPTIONIST), Asesor de Servicio (ROLE_SERVICE_ADVISOR) o Mecanico Jefe (ROLE_CHIEF_MECHANIC)
+- **Permiso Atomico:** `@PreAuthorize("hasAuthority('crm:vehicles:read')")`
+- **Aislamiento Multi-Inquilino:** Entidad universal. Acceso concedido a usuarios autenticados del taller.
+
+#### Parametros de Invocacion
+**Cabeceras HTTP (Headers):**
+- `Authorization: Bearer <jwt_token>`
+- `Accept: application/json`
+
+**Parametros de Ruta (Path Parameters):**
+| Parametro | Tipo | Requerido | Descripcion |
+| :--- | :--- | :---: | :--- |
+| `vehicleId` | `UUID` | Si | Identificador universal del vehiculo automotor |
+
+**Parametros de Consulta (Query Parameters):**
+No aplica (Sin parametros de consulta en la URL).
+
+#### Recurso de Peticion (Request Body)
+No aplica (Peticion HTTP de consulta `GET` sin cuerpo de entrada).
+
+#### Recurso de Respuesta (Response Body)
+- **Estado HTTP Exitoso:** `200 OK`
+- **Registro Java DTO:** `List<com.andeva.atelier.platform.crm.interfaces.rest.resources.responses.VehicleOwnershipResource>`
+- **Definicion de Campos Proyectados:** Lista estructurada de registros `VehicleOwnershipResource`.
+
+**Ejemplo de Carga Util JSON (Response):**
+```json
+[
+  {
+    "id": "018f6c40-7e12-7000-8000-000000000084",
+    "vehicleId": "018f6c40-7e12-7000-8000-000000000070",
+    "customerId": "018f6c40-7e12-7000-8000-000000000050",
+    "ownerName": "Juan Alberto Perez Rodriguez",
+    "startDate": "2021-05-10",
+    "endDate": "2026-10-03",
+    "isCurrent": false
+  },
+  {
+    "id": "018f6c40-7e12-7000-8000-000000000085",
+    "vehicleId": "018f6c40-7e12-7000-8000-000000000070",
+    "customerId": "018f6c40-7e12-7000-8000-000000000051",
+    "ownerName": "TRANSPORTES LOGISTICOS DEL PACIFICO S.A.C.",
+    "startDate": "2026-10-03",
+    "endDate": null,
+    "isCurrent": true
+  }
+]
+```
+
+#### Errores y Excepciones de Dominio (RFC 7807)
+| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `404 Not Found` | `VehicleNotFoundException` | El vehiculo indicado no existe en el sistema |
+
+---
+
+### 3.6. [GET] /api/v1/vehicles/my-vehicles
+
+**Consulta de Vehiculos del Conductor Autenticado**
+
+#### Identidad Tecnica
+- **Controlador:** `com.andeva.atelier.platform.crm.interfaces.rest.controllers.VehiclesController`
+- **Metodo Java:** `public ResponseEntity<List<VehicleResource>> getMyVehicles()`
+- **Ruta Base:** `/api/v1/vehicles`
+- **Ruta Completa:** `/api/v1/vehicles/my-vehicles`
+- **Proposito:** Consulta las unidades vehiculares registradas o asignadas bajo custodia activa del usuario autenticado en la sesion movil o web. Resuelve de forma directa el identificador de usuario a partir del token JWT para su renderizacion en la aplicacion de clientes y choferes.
+
+#### Seguridad y Autorizacion
+- **Nivel de Acceso:** Autenticado
+- **Rol Minimo Requerido:** Usuario autenticado en la plataforma
+- **Permiso Atomico:** `@PreAuthorize("isAuthenticated()")`
+- **Aislamiento Multi-Inquilino:** Vincula de forma directa el `userId` autenticado con los clientes de tipo natural o miembros de flotas corporativas donde posee membresia autorizada.
 
 #### Parametros de Invocacion
 **Cabeceras HTTP (Headers):**
@@ -1481,41 +1204,26 @@ No aplica (Sin parametros en la ruta).
 No aplica (Sin parametros de consulta en la URL).
 
 #### Recurso de Peticion (Request Body)
-No aplica (Peticion HTTP sin cuerpo de entrada).
+No aplica (Peticion HTTP de consulta `GET` sin cuerpo de entrada).
 
 #### Recurso de Respuesta (Response Body)
 - **Estado HTTP Exitoso:** `200 OK`
-- **Registro Java DTO:** `List<com.andeva.atelier.platform.crm.interfaces.rest.resources.responses.FleetResource>`
-- **Definicion de Campos Proyectados:**
-| Campo | Tipo de Dato | Descripcion |
-| :--- | :--- | :--- |
-| `id` | `UUID` | Identificador universal de la cuenta de flota |
-| `tenantId` | `UUID` | Identificador del taller titular |
-| `customerId` | `UUID` | Identificador de la empresa cliente propietaria |
-| `name` | `String` | Denominacion de la flota o division corporativa |
-| `corporateTaxId` | `String` | RUC de la empresa titular |
-| `contactPerson` | `String` | Nombres del gestor de flota o supervisor de operaciones |
-| `contactEmail` | `String` | Correo electronico de contacto del gestor |
-| `contactPhone` | `String` | Telefono directo del gestor |
-| `vehicleCount` | `int` | Cantidad total de vehiculos vinculados a la flota |
-| `status` | `String` | Estado de la cuenta corporativa (ACTIVE o SUSPENDED) |
-| `createdAt` | `Instant` | Marca temporal de registro en UTC |
+- **Registro Java DTO:** `List<com.andeva.atelier.platform.crm.interfaces.rest.resources.responses.VehicleResource>`
+- **Definicion de Campos Proyectados:** Lista estructurada de registros `VehicleResource`.
 
 **Ejemplo de Carga Util JSON (Response):**
 ```json
 [
   {
-    "id": "018f6c50-7e12-7000-8000-000000000020",
-    "tenantId": "018f6c40-7e12-7000-8000-000000000001",
-    "customerId": "018f6c50-7e12-7000-8000-000000000002",
-    "name": "Flota Distribucion Metropolitana",
-    "corporateTaxId": "20554433221",
-    "contactPerson": "Ing. Miguel Angel Soto Valdivia",
-    "contactEmail": "msoto@transporteslimanorte.pe",
-    "contactPhone": "+51988112233",
-    "vehicleCount": 12,
-    "status": "ACTIVE",
-    "createdAt": "2026-10-01T16:30:00Z"
+    "id": "018f6c40-7e12-7000-8000-000000000070",
+    "plate": "ABC123",
+    "vin": "1HGCR2F83HA000123",
+    "brand": "Toyota",
+    "model": "Corolla",
+    "year": 2021,
+    "engineType": "GASOLINE",
+    "currentOwnerId": "018f6c40-7e12-7000-8000-000000000050",
+    "currentOwnerName": "Juan Alberto Perez Rodriguez"
   }
 ]
 ```
@@ -1523,45 +1231,34 @@ No aplica (Peticion HTTP sin cuerpo de entrada).
 #### Errores y Excepciones de Dominio (RFC 7807)
 | Codigo HTTP | Excepcion Mapeada | Causa Funcional |
 | :---: | :--- | :--- |
-| `401 Unauthorized` | `AuthenticationException` | Token ausente o invalido |
-| `403 Forbidden` | `AccessDeniedException` | Falta del permiso crm:fleets:manage |
-
-**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
-```json
-{
-  "type": "https://api.atelier.pe/errors/access-denied",
-  "title": "Permisos Insuficientes",
-  "status": 403,
-  "detail": "Se requiere la autoridad crm:fleets:manage para administrar cuentas de flotas comerciales",
-  "instance": "/api/v1/crm/fleets",
-  "code": "ACCESS_DENIED",
-  "timestamp": "2026-10-01T16:30:00Z"
-}
-```
+| `401 Unauthorized` | `AuthenticationCredentialsNotFoundException` | La peticion carece del encabezado de autorizacion Bearer o el token ha expirado |
 
 ---
 
-### 4.2. [POST] /api/v1/crm/fleets
+## 4. Endpoints de Citas Previas e Inspeccion (AppointmentsController)
 
-**Creacion de Cuenta de Flota Corporativa B2B**
+### 4.1. [POST] /api/v1/appointments
+
+**Agendamiento de Cita Previa de Inspeccion o Mantenimiento**
 
 #### Identidad Tecnica
-- **Controlador:** `com.andeva.atelier.platform.crm.interfaces.rest.controllers.FleetsController`
-- **Metodo Java:** `public ResponseEntity<FleetResource> createFleet(@Valid @RequestBody CreateFleetResource resource)`
-- **Ruta Base:** `/api/v1/crm/fleets`
-- **Ruta Completa:** `/api/v1/crm/fleets`
-- **Proposito:** Registra una nueva cuenta de flota comercial vinculada a una empresa cliente (tipo COMPANY). Permite formalizar acuerdos de facturacion mensual, atencion prioritaria en bahia y tarifas corporativas preacordadas.
+- **Controlador:** `com.andeva.atelier.platform.crm.interfaces.rest.controllers.AppointmentsController`
+- **Metodo Java:** `public ResponseEntity<AppointmentResource> scheduleAppointment(@Valid @RequestBody ScheduleAppointmentResource resource)`
+- **Ruta Base:** `/api/v1/appointments`
+- **Ruta Completa:** `/api/v1/appointments`
+- **Proposito:** Agenda formalmente una cita previa de recepcion para mantenimiento o evaluacion tecnica en una sede fisica del taller. Comprueba la validez de la franja horaria disponible, verifica la pertenencia del cliente y vehiculo, valida que la fecha solicitada sea estrictamente posterior al momento actual y crea la cita en estado inicial `PENDING`.
 
 #### Seguridad y Autorizacion
 - **Nivel de Acceso:** Autenticado
-- **Rol Minimo Requerido:** Asesor de Servicio (ROLE_SERVICE_ADVISOR) o Administrador de Taller
-- **Permiso Atomico:** `@PreAuthorize("hasAuthority('crm:fleets:manage')")`
-- **Aislamiento Multi-Inquilino:** Asigna el tenantId en sesion y valida que la empresa pertenezca a la cartera del taller.
+- **Rol Minimo Requerido:** Recepcionista (ROLE_RECEPTIONIST), Asesor de Servicio (ROLE_SERVICE_ADVISOR) o Conductor autenticado
+- **Permiso Atomico:** `@PreAuthorize("hasAuthority('crm:appointments:create')")`
+- **Aislamiento Multi-Inquilino:** Asocia el `tenantId` a partir del token JWT autenticado y corrobora que la sede fisica `branchId` corresponda a dicho inquilino.
 
 #### Parametros de Invocacion
 **Cabeceras HTTP (Headers):**
 - `Authorization: Bearer <jwt_token>`
 - `Content-Type: application/json`
+- `Accept: application/json`
 
 **Parametros de Ruta (Path Parameters):**
 No aplica (Sin parametros en la ruta).
@@ -1570,104 +1267,165 @@ No aplica (Sin parametros en la ruta).
 No aplica (Sin parametros de consulta en la URL).
 
 #### Recurso de Peticion (Request Body)
-- **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.requests.CreateFleetResource`
+- **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.requests.ScheduleAppointmentResource`
+
+```java
+package com.andeva.atelier.platform.crm.interfaces.rest.resources.requests;
+
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import java.time.Instant;
+import java.util.UUID;
+
+public record ScheduleAppointmentResource(
+    @NotNull(message = "El identificador de la sede fisica de atencion es obligatorio")
+    UUID branchId,
+
+    @NotNull(message = "El identificador del cliente titular es obligatorio")
+    UUID customerId,
+
+    @NotNull(message = "El identificador del vehiculo es obligatorio")
+    UUID vehicleId,
+
+    @NotNull(message = "La fecha y hora acordada para la cita es obligatoria")
+    @Future(message = "La cita tecnica debe agendarse para una fecha y hora futura")
+    Instant scheduledAt,
+
+    @Min(value = 15, message = "La duracion estimada de recepcion minima es de 15 minutos")
+    int estimatedDurationMinutes,
+
+    @NotBlank(message = "El motivo de la cita es obligatorio")
+    @Size(min = 5, max = 500, message = "El motivo debe contener entre 5 y 500 caracteres")
+    String reason
+) {}
+```
+
 - **Definicion de Campos:**
 | Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripcion |
 | :--- | :--- | :---: | :--- | :--- |
-| `customerId` | `UUID` | Si | `@NotNull` | Identificador de la empresa cliente (debe ser de tipo COMPANY) |
-| `name` | `String` | Si | `@NotBlank, @Size(max = 100)` | Nombre de la flota corporativa (ej. Flota Reparto Callao) |
-| `contactPerson` | `String` | Si | `@NotBlank, @Size(max = 100)` | Nombres del responsable de logistica de la empresa |
-| `contactEmail` | `String` | Si | `@NotBlank, @Email, @Size(max = 150)` | Correo electronico de contacto del supervisor |
-| `contactPhone` | `String` | Si | `@NotBlank, @Pattern(regexp = "^\+?[0-9]{9,15}$")` | Telefono directo del supervisor |
-| `notes` | `String` | No | `@Size(max = 500)` | Notas comerciales o condiciones especiales pactadas |
+| `branchId` | `UUID` | Si | `@NotNull` | Identificador universal de la sede fisica de atencion |
+| `customerId` | `UUID` | Si | `@NotNull` | Identificador universal del cliente titular |
+| `vehicleId` | `UUID` | Si | `@NotNull` | Identificador universal de la unidad vehicular |
+| `scheduledAt` | `Instant` | Si | `@NotNull, @Future` | Marca temporal UTC pactada para la atencion |
+| `estimatedDurationMinutes` | `int` | Si | `@Min(15)` | Estimacion pericial de duracion en minutos |
+| `reason` | `String` | Si | `@NotBlank, @Size(min = 5, max = 500)` | Descripcion textual del motivo o falla manifestada |
 
 **Ejemplo de Carga Util JSON (Request):**
 ```json
 {
-  "customerId": "018f6c50-7e12-7000-8000-000000000002",
-  "name": "Flota Distribucion Metropolitana",
-  "contactPerson": "Ing. Miguel Angel Soto Valdivia",
-  "contactEmail": "msoto@transporteslimanorte.pe",
-  "contactPhone": "+51988112233",
-  "notes": "Tarifa preferencial de mano de obra con 15 por ciento de descuento corporativo"
+  "branchId": "018f6c40-7e12-7000-8000-000000000010",
+  "customerId": "018f6c40-7e12-7000-8000-000000000050",
+  "vehicleId": "018f6c40-7e12-7000-8000-000000000070",
+  "scheduledAt": "2026-10-15T14:30:00Z",
+  "estimatedDurationMinutes": 60,
+  "reason": "Mantenimiento preventivo de los 10000 km y revision de frenos delanteros"
 }
 ```
 
 #### Recurso de Respuesta (Response Body)
 - **Estado HTTP Exitoso:** `201 Created`
-- **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.responses.FleetResource`
+- **Cabecera de Ubicacion:** `Location: /api/v1/appointments/018f6c40-7e12-7000-8000-000000000090`
+- **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.responses.AppointmentResource`
+
+```java
+package com.andeva.atelier.platform.crm.interfaces.rest.resources.responses;
+
+import java.time.Instant;
+import java.util.UUID;
+
+public record AppointmentResource(
+    UUID id,
+    UUID tenantId,
+    UUID branchId,
+    UUID customerId,
+    String customerName,
+    UUID vehicleId,
+    String vehiclePlate,
+    Instant scheduledAt,
+    int estimatedDurationMinutes,
+    String reason,
+    String status,
+    String cancellationReason
+) {}
+```
+
 - **Definicion de Campos Proyectados:**
 | Campo | Tipo de Dato | Descripcion |
 | :--- | :--- | :--- |
-| `id` | `UUID` | Identificador de la flota creada |
-| `tenantId` | `UUID` | Identificador del taller |
-| `customerId` | `UUID` | Identificador de la empresa titular |
-| `name` | `String` | Nombre de la flota |
-| `corporateTaxId` | `String` | RUC de la empresa cliente |
-| `contactPerson` | `String` | Responsable de flota |
-| `contactEmail` | `String` | Correo del responsable |
-| `contactPhone` | `String` | Telefono del responsable |
-| `vehicleCount` | `int` | Vehiculos iniciales (0) |
-| `status` | `String` | Estado inicial (ACTIVE) |
-| `createdAt` | `Instant` | Marca temporal de alta en UTC |
+| `id` | `UUID` | Identificador universal asignado a la cita previa |
+| `tenantId` | `UUID` | Identificador del taller automotriz titular |
+| `branchId` | `UUID` | Sede fisica de atencion programada |
+| `customerId` | `UUID` | Identificador del cliente solicitante |
+| `customerName` | `String` | Nombre o razon social del cliente |
+| `vehicleId` | `UUID` | Identificador de la unidad automotor |
+| `vehiclePlate` | `String` | Placa de rodaje vehicular |
+| `scheduledAt` | `Instant` | Fecha y hora UTC acordada para la recepcion |
+| `estimatedDurationMinutes` | `int` | Duracion proyectada de recepcion |
+| `reason` | `String` | Motivo declarado del servicio |
+| `status` | `String` | Estado operativo (`PENDING`, `CONFIRMED`, `ARRIVED`, `CANCELED`) |
+| `cancellationReason` | `String` | Motivo de cancelacion en caso aplique (nulo inicialmente) |
 
 **Ejemplo de Carga Util JSON (Response):**
 ```json
 {
-  "id": "018f6c50-7e12-7000-8000-000000000020",
+  "id": "018f6c40-7e12-7000-8000-000000000090",
   "tenantId": "018f6c40-7e12-7000-8000-000000000001",
-  "customerId": "018f6c50-7e12-7000-8000-000000000002",
-  "name": "Flota Distribucion Metropolitana",
-  "corporateTaxId": "20554433221",
-  "contactPerson": "Ing. Miguel Angel Soto Valdivia",
-  "contactEmail": "msoto@transporteslimanorte.pe",
-  "contactPhone": "+51988112233",
-  "vehicleCount": 0,
-  "status": "ACTIVE",
-  "createdAt": "2026-10-01T16:30:00Z"
+  "branchId": "018f6c40-7e12-7000-8000-000000000010",
+  "customerId": "018f6c40-7e12-7000-8000-000000000050",
+  "customerName": "Juan Alberto Perez Rodriguez",
+  "vehicleId": "018f6c40-7e12-7000-8000-000000000070",
+  "vehiclePlate": "ABC123",
+  "scheduledAt": "2026-10-15T14:30:00Z",
+  "estimatedDurationMinutes": 60,
+  "reason": "Mantenimiento preventivo de los 10000 km y revision de frenos delanteros",
+  "status": "PENDING",
+  "cancellationReason": null
 }
 ```
 
 #### Errores y Excepciones de Dominio (RFC 7807)
 | Codigo HTTP | Excepcion Mapeada | Causa Funcional |
 | :---: | :--- | :--- |
-| `400 Bad Request` | `MethodArgumentNotValidException` | Campos obligatorios ausentes o formato de correo invalido |
-| `401 Unauthorized` | `AuthenticationException` | Token ausente o invalido |
-| `403 Forbidden` | `AccessDeniedException` | Falta de autoridad crm:fleets:manage |
-| `404 Not Found` | `CustomerNotFoundException` | La empresa cliente especificada no existe en el taller |
-| `409 Conflict` | `FleetAlreadyExistsException` | Ya existe una flota registrada con esa misma denominacion para esta empresa |
+| `400 Bad Request` | `AppointmentPastDateException` | La fecha solicitada no es posterior a la marca temporal actual |
+| `404 Not Found` | `CustomerNotFoundException` | El cliente especificado no existe en este taller |
+| `404 Not Found` | `VehicleNotFoundException` | El vehiculo automotor indicado no se encuentra registrado |
+| `404 Not Found` | `BranchNotFoundException` | La sede fisica solicitada no pertenece a este taller |
+| `409 Conflict` | `AppointmentSlotUnavailableException` | La capacidad horaria de recepcion de la sede fisica se encuentra copada |
 
 **Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
 ```json
 {
-  "type": "https://api.atelier.pe/errors/fleet-already-exists",
-  "title": "Flota Ya Registrada",
+  "type": "https://api.atelier.pe/errors/appointment-slot-unavailable",
+  "title": "Franja Horaria No Disponible",
   "status": 409,
-  "detail": "La empresa ya registra una flota con el nombre Flota Distribucion Metropolitana",
-  "instance": "/api/v1/crm/fleets",
-  "code": "FLEET_ALREADY_EXISTS_FOR_CUSTOMER",
-  "timestamp": "2026-10-01T16:30:00Z"
+  "detail": "La sede fisica no dispone de cupos de recepcion disponibles para la fecha y hora seleccionada",
+  "instance": "/api/v1/appointments",
+  "code": "APPOINTMENT_SLOT_UNAVAILABLE",
+  "timestamp": "2026-10-03T12:30:00Z"
 }
 ```
 
 ---
 
-### 4.3. [GET] /api/v1/crm/fleets/{id}
+### 4.2. [GET] /api/v1/appointments
 
-**Detalle de Cuenta de Flota Corporativa por Identificador**
+**Busqueda Filtrada de Citas Previas**
 
 #### Identidad Tecnica
-- **Controlador:** `com.andeva.atelier.platform.crm.interfaces.rest.controllers.FleetsController`
-- **Metodo Java:** `public ResponseEntity<FleetResource> getFleetById(@PathVariable UUID id)`
-- **Ruta Base:** `/api/v1/crm/fleets`
-- **Ruta Completa:** `/api/v1/crm/fleets/{id}`
-- **Proposito:** Consulta los datos de gestion de una flota corporativa especifica, incluyendo canales de atencion del supervisor, cantidad de unidades adscritas y estado operativo.
+- **Controlador:** `com.andeva.atelier.platform.crm.interfaces.rest.controllers.AppointmentsController`
+- **Metodo Java:** `public ResponseEntity<List<AppointmentResource>> getAppointments(@RequestParam(required = false) UUID branchId, @RequestParam(required = false) LocalDate date, @RequestParam(required = false) String status)`
+- **Ruta Base:** `/api/v1/appointments`
+- **Ruta Completa:** `/api/v1/appointments`
+- **Proposito:** Consulta el calendario operativo de citas previas del taller. Permite acotar la busqueda por sede fisica, dia calendario (formato ISO-8601 `YYYY-MM-DD`) y estado operativo del flujo de atencion.
 
 #### Seguridad y Autorizacion
 - **Nivel de Acceso:** Autenticado
-- **Rol Minimo Requerido:** Asesor de Servicio (ROLE_SERVICE_ADVISOR) o Administrador
-- **Permiso Atomico:** `@PreAuthorize("hasAuthority('crm:fleets:manage')")`
-- **Aislamiento Multi-Inquilino:** Verifica que la flota pertenezca estrictamente al taller en sesion.
+- **Rol Minimo Requerido:** Recepcionista (ROLE_RECEPTIONIST), Asesor de Servicio (ROLE_SERVICE_ADVISOR) o Administrador (ROLE_WORKSHOP_ADMINISTRATOR)
+- **Permiso Atomico:** `@PreAuthorize("hasAuthority('crm:appointments:read')")`
+- **Aislamiento Multi-Inquilino:** Filtra estrictamente por el `tenantId` resuelto desde las credenciales del token JWT.
 
 #### Parametros de Invocacion
 **Cabeceras HTTP (Headers):**
@@ -1675,409 +1433,39 @@ No aplica (Sin parametros de consulta en la URL).
 - `Accept: application/json`
 
 **Parametros de Ruta (Path Parameters):**
-| Parametro | Tipo | Requerido | Descripcion |
-| :--- | :--- | :---: | :--- |
-| `id` | `UUID` | Si | Identificador universal de la cuenta de flota |
+No aplica (Sin parametros en la ruta).
 
 **Parametros de Consulta (Query Parameters):**
-No aplica (Sin parametros de consulta en la URL).
+| Parametro | Tipo | Requerido | Descripcion |
+| :--- | :--- | :---: | :--- |
+| `branchId` | `UUID` | No | Filtro opcional por identificador de sede fisica |
+| `date` | `LocalDate` | No | Fecha especifica en formato ISO-8601 (`YYYY-MM-DD`) |
+| `status` | `String` | No | Estado de cita (`PENDING`, `CONFIRMED`, `ARRIVED`, `CANCELED`) |
 
 #### Recurso de Peticion (Request Body)
-No aplica (Peticion HTTP sin cuerpo de entrada).
+No aplica (Peticion HTTP de consulta `GET` sin cuerpo de entrada).
 
 #### Recurso de Respuesta (Response Body)
 - **Estado HTTP Exitoso:** `200 OK`
-- **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.responses.FleetResource`
-- **Definicion de Campos Proyectados:**
-| Campo | Tipo de Dato | Descripcion |
-| :--- | :--- | :--- |
-| `id` | `UUID` | Identificador de la flota |
-| `tenantId` | `UUID` | Identificador del taller |
-| `customerId` | `UUID` | Identificador de la empresa cliente |
-| `name` | `String` | Nombre de la flota |
-| `corporateTaxId` | `String` | RUC de la empresa |
-| `contactPerson` | `String` | Responsable de la flota |
-| `contactEmail` | `String` | Correo del responsable |
-| `contactPhone` | `String` | Telefono de contacto |
-| `vehicleCount` | `int` | Cantidad de automotores asignados |
-| `status` | `String` | Estado de la cuenta corporativa |
-| `createdAt` | `Instant` | Marca temporal de registro |
-
-**Ejemplo de Carga Util JSON (Response):**
-```json
-{
-  "id": "018f6c50-7e12-7000-8000-000000000020",
-  "tenantId": "018f6c40-7e12-7000-8000-000000000001",
-  "customerId": "018f6c50-7e12-7000-8000-000000000002",
-  "name": "Flota Distribucion Metropolitana",
-  "corporateTaxId": "20554433221",
-  "contactPerson": "Ing. Miguel Angel Soto Valdivia",
-  "contactEmail": "msoto@transporteslimanorte.pe",
-  "contactPhone": "+51988112233",
-  "vehicleCount": 12,
-  "status": "ACTIVE",
-  "createdAt": "2026-10-01T16:30:00Z"
-}
-```
-
-#### Errores y Excepciones de Dominio (RFC 7807)
-| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
-| :---: | :--- | :--- |
-| `401 Unauthorized` | `AuthenticationException` | Token ausente o invalido |
-| `403 Forbidden` | `AccessDeniedException` | Falta del permiso crm:fleets:manage |
-| `404 Not Found` | `FleetNotFoundException` | Cuenta de flota no encontrada en este taller |
-
-**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
-```json
-{
-  "type": "https://api.atelier.pe/errors/fleet-not-found",
-  "title": "Flota No Encontrada",
-  "status": 404,
-  "detail": "No se encontro ninguna flota corporativa con el identificador 018f6c50-7e12-7000-8000-000000000020",
-  "instance": "/api/v1/crm/fleets/018f6c50-7e12-7000-8000-000000000020",
-  "code": "FLEET_NOT_FOUND",
-  "timestamp": "2026-10-01T16:30:00Z"
-}
-```
-
----
-
-### 4.4. [PUT] /api/v1/crm/fleets/{id}
-
-**Actualizacion de Datos Corporativos de Flota**
-
-#### Identidad Tecnica
-- **Controlador:** `com.andeva.atelier.platform.crm.interfaces.rest.controllers.FleetsController`
-- **Metodo Java:** `public ResponseEntity<FleetResource> updateFleet(@PathVariable UUID id, @Valid @RequestBody UpdateFleetResource resource)`
-- **Ruta Base:** `/api/v1/crm/fleets`
-- **Ruta Completa:** `/api/v1/crm/fleets/{id}`
-- **Proposito:** Actualiza los canales de contacto institucional, el supervisor operativo o las notas del acuerdo corporativo de la flota comercial.
-
-#### Seguridad y Autorizacion
-- **Nivel de Acceso:** Autenticado
-- **Rol Minimo Requerido:** Asesor de Servicio (ROLE_SERVICE_ADVISOR) o Administrador de Taller
-- **Permiso Atomico:** `@PreAuthorize("hasAuthority('crm:fleets:manage')")`
-- **Aislamiento Multi-Inquilino:** Verifica pertenencia de la flota al tenantId del token en sesion.
-
-#### Parametros de Invocacion
-**Cabeceras HTTP (Headers):**
-- `Authorization: Bearer <jwt_token>`
-- `Content-Type: application/json`
-
-**Parametros de Ruta (Path Parameters):**
-| Parametro | Tipo | Requerido | Descripcion |
-| :--- | :--- | :---: | :--- |
-| `id` | `UUID` | Si | Identificador de la flota a actualizar |
-
-**Parametros de Consulta (Query Parameters):**
-No aplica (Sin parametros de consulta en la URL).
-
-#### Recurso de Peticion (Request Body)
-- **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.requests.UpdateFleetResource`
-- **Definicion de Campos:**
-| Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripcion |
-| :--- | :--- | :---: | :--- | :--- |
-| `name` | `String` | Si | `@NotBlank, @Size(max = 100)` | Nombre actualizado de la flota |
-| `contactPerson` | `String` | Si | `@NotBlank, @Size(max = 100)` | Responsable actualizado |
-| `contactEmail` | `String` | Si | `@NotBlank, @Email, @Size(max = 150)` | Correo actualizado |
-| `contactPhone` | `String` | Si | `@NotBlank, @Pattern(regexp = "^\+?[0-9]{9,15}$")` | Telefono actualizado |
-| `notes` | `String` | No | `@Size(max = 500)` | Notas comerciales o de convenio |
-
-**Ejemplo de Carga Util JSON (Request):**
-```json
-{
-  "name": "Flota Distribucion Lima y Callao",
-  "contactPerson": "Ing. Miguel Angel Soto Valdivia",
-  "contactEmail": "msoto@transporteslimanorte.pe",
-  "contactPhone": "+51988112299",
-  "notes": "Tarifa preferencial actualizada con pago a 30 dias previa emision de factura electronica"
-}
-```
-
-#### Recurso de Respuesta (Response Body)
-- **Estado HTTP Exitoso:** `200 OK`
-- **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.responses.FleetResource`
-- **Definicion de Campos Proyectados:**
-| Campo | Tipo de Dato | Descripcion |
-| :--- | :--- | :--- |
-| `id` | `UUID` | Identificador de la flota |
-| `tenantId` | `UUID` | Identificador del taller |
-| `customerId` | `UUID` | Identificador de la empresa |
-| `name` | `String` | Nombre actualizado |
-| `corporateTaxId` | `String` | RUC de la empresa |
-| `contactPerson` | `String` | Responsable actualizado |
-| `contactEmail` | `String` | Correo actualizado |
-| `contactPhone` | `String` | Telefono actualizado |
-| `vehicleCount` | `int` | Cantidad de automotores |
-| `status` | `String` | Estado operativo |
-| `createdAt` | `Instant` | Fecha de creacion original |
-
-**Ejemplo de Carga Util JSON (Response):**
-```json
-{
-  "id": "018f6c50-7e12-7000-8000-000000000020",
-  "tenantId": "018f6c40-7e12-7000-8000-000000000001",
-  "customerId": "018f6c50-7e12-7000-8000-000000000002",
-  "name": "Flota Distribucion Lima y Callao",
-  "corporateTaxId": "20554433221",
-  "contactPerson": "Ing. Miguel Angel Soto Valdivia",
-  "contactEmail": "msoto@transporteslimanorte.pe",
-  "contactPhone": "+51988112299",
-  "vehicleCount": 12,
-  "status": "ACTIVE",
-  "createdAt": "2026-10-01T16:30:00Z"
-}
-```
-
-#### Errores y Excepciones de Dominio (RFC 7807)
-| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
-| :---: | :--- | :--- |
-| `400 Bad Request` | `MethodArgumentNotValidException` | Campos obligatorios vacios o sintaxis de correo invalida |
-| `401 Unauthorized` | `AuthenticationException` | Token ausente o invalido |
-| `403 Forbidden` | `AccessDeniedException` | Permiso crm:fleets:manage insuficiente |
-| `404 Not Found` | `FleetNotFoundException` | Flota no encontrada |
-
-**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
-```json
-{
-  "type": "https://api.atelier.pe/errors/invalid-request-payload",
-  "title": "Actualizacion Invalida",
-  "status": 400,
-  "detail": "El formato del correo electronico proporcionado no cumple con el estandar RFC 5322",
-  "instance": "/api/v1/crm/fleets/018f6c50-7e12-7000-8000-000000000020",
-  "code": "INVALID_REQUEST_PAYLOAD",
-  "timestamp": "2026-10-01T16:30:00Z"
-}
-```
-
----
-
-### 4.5. [POST] /api/v1/crm/fleets/{id}/vehicles
-
-**Vinculacion de Vehiculo a la Flota Comercial**
-
-#### Identidad Tecnica
-- **Controlador:** `com.andeva.atelier.platform.crm.interfaces.rest.controllers.FleetsController`
-- **Metodo Java:** `public ResponseEntity<FleetResource> addVehicleToFleet(@PathVariable UUID id, @Valid @RequestBody AddVehicleToFleetResource resource)`
-- **Ruta Base:** `/api/v1/crm/fleets`
-- **Ruta Completa:** `/api/v1/crm/fleets/{id}/vehicles`
-- **Proposito:** Incorpora una unidad automotriz al padron operativo de la flota comercial, asociandole opcionalmente un identificador o codigo interno empresarial de unidad (ej. MOVIL-04) para facilitar el control de ruta.
-
-#### Seguridad y Autorizacion
-- **Nivel de Acceso:** Autenticado
-- **Rol Minimo Requerido:** Asesor de Servicio (ROLE_SERVICE_ADVISOR) o Administrador de Taller
-- **Permiso Atomico:** `@PreAuthorize("hasAuthority('crm:fleets:manage')")`
-- **Aislamiento Multi-Inquilino:** Comprueba que la flota pertenezca al taller en sesion y que el vehiculo exista en el catalogo.
-
-#### Parametros de Invocacion
-**Cabeceras HTTP (Headers):**
-- `Authorization: Bearer <jwt_token>`
-- `Content-Type: application/json`
-
-**Parametros de Ruta (Path Parameters):**
-| Parametro | Tipo | Requerido | Descripcion |
-| :--- | :--- | :---: | :--- |
-| `id` | `UUID` | Si | Identificador de la flota a la que se anade el automovil |
-
-**Parametros de Consulta (Query Parameters):**
-No aplica (Sin parametros de consulta en la URL).
-
-#### Recurso de Peticion (Request Body)
-- **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.requests.AddVehicleToFleetResource`
-- **Definicion de Campos:**
-| Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripcion |
-| :--- | :--- | :---: | :--- | :--- |
-| `vehicleId` | `UUID` | Si | `@NotNull` | Identificador del vehiculo a incorporar a la flota |
-| `internalFleetCode` | `String` | No | `@Size(max = 30)` | Codigo o identificador interno de la empresa (ej. MOVIL-12) |
-
-**Ejemplo de Carga Util JSON (Request):**
-```json
-{
-  "vehicleId": "018f6c50-7e12-7000-8000-000000000010",
-  "internalFleetCode": "MOVIL-12"
-}
-```
-
-#### Recurso de Respuesta (Response Body)
-- **Estado HTTP Exitoso:** `200 OK`
-- **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.responses.FleetResource`
-- **Definicion de Campos Proyectados:**
-| Campo | Tipo de Dato | Descripcion |
-| :--- | :--- | :--- |
-| `id` | `UUID` | Identificador de la flota |
-| `tenantId` | `UUID` | Identificador del taller |
-| `customerId` | `UUID` | Identificador de la empresa titular |
-| `name` | `String` | Nombre de la flota |
-| `corporateTaxId` | `String` | RUC de la empresa |
-| `contactPerson` | `String` | Responsable de flota |
-| `contactEmail` | `String` | Correo del responsable |
-| `contactPhone` | `String` | Telefono del responsable |
-| `vehicleCount` | `int` | Total de vehiculos actualizado (incrementado en 1) |
-| `status` | `String` | Estado de la cuenta |
-| `createdAt` | `Instant` | Fecha de creacion |
-
-**Ejemplo de Carga Util JSON (Response):**
-```json
-{
-  "id": "018f6c50-7e12-7000-8000-000000000020",
-  "tenantId": "018f6c40-7e12-7000-8000-000000000001",
-  "customerId": "018f6c50-7e12-7000-8000-000000000002",
-  "name": "Flota Distribucion Metropolitana",
-  "corporateTaxId": "20554433221",
-  "contactPerson": "Ing. Miguel Angel Soto Valdivia",
-  "contactEmail": "msoto@transporteslimanorte.pe",
-  "contactPhone": "+51988112233",
-  "vehicleCount": 13,
-  "status": "ACTIVE",
-  "createdAt": "2026-10-01T16:30:00Z"
-}
-```
-
-#### Errores y Excepciones de Dominio (RFC 7807)
-| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
-| :---: | :--- | :--- |
-| `400 Bad Request` | `MethodArgumentNotValidException` | vehicleId ausente o en blanco |
-| `401 Unauthorized` | `AuthenticationException` | Token ausente o invalido |
-| `403 Forbidden` | `AccessDeniedException` | Falta del permiso crm:fleets:manage |
-| `404 Not Found` | `FleetNotFoundException` | Flota no encontrada |
-| `404 Not Found` | `VehicleNotFoundException` | El vehiculo especificado no existe en el sistema |
-| `409 Conflict` | `VehicleAlreadyInFleetException` | El vehiculo ya se encuentra adscrito a esta flota corporativa |
-
-**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
-```json
-{
-  "type": "https://api.atelier.pe/errors/vehicle-already-in-fleet",
-  "title": "Vehiculo Ya Afiliado",
-  "status": 409,
-  "detail": "El vehiculo con identificador 018f6c50-7e12-7000-8000-000000000010 ya forma parte de esta flota",
-  "instance": "/api/v1/crm/fleets/018f6c50-7e12-7000-8000-000000000020/vehicles",
-  "code": "VEHICLE_ALREADY_IN_FLEET",
-  "timestamp": "2026-10-01T16:30:00Z"
-}
-```
-
----
-
-### 4.6. [DELETE] /api/v1/crm/fleets/{id}/vehicles/{vehicleId}
-
-**Desvinculacion de Unidad Vehicular de la Flota Corporativa**
-
-#### Identidad Tecnica
-- **Controlador:** `com.andeva.atelier.platform.crm.interfaces.rest.controllers.FleetsController`
-- **Metodo Java:** `public ResponseEntity<Void> removeVehicleFromFleet(@PathVariable UUID id, @PathVariable UUID vehicleId)`
-- **Ruta Base:** `/api/v1/crm/fleets`
-- **Ruta Completa:** `/api/v1/crm/fleets/{id}/vehicles/{vehicleId}`
-- **Proposito:** Retira una unidad vehicular del padron de la flota corporativa cuando es dada de baja, vendida o reasignada por la empresa titular.
-
-#### Seguridad y Autorizacion
-- **Nivel de Acceso:** Autenticado
-- **Rol Minimo Requerido:** Asesor de Servicio (ROLE_SERVICE_ADVISOR) o Administrador de Taller
-- **Permiso Atomico:** `@PreAuthorize("hasAuthority('crm:fleets:manage')")`
-- **Aislamiento Multi-Inquilino:** Verifica pertenencia de la flota al taller en sesion.
-
-#### Parametros de Invocacion
-**Cabeceras HTTP (Headers):**
-- `Authorization: Bearer <jwt_token>`
-
-**Parametros de Ruta (Path Parameters):**
-| Parametro | Tipo | Requerido | Descripcion |
-| :--- | :--- | :---: | :--- |
-| `id` | `UUID` | Si | Identificador de la flota corporativa |
-| `vehicleId` | `UUID` | Si | Identificador del vehiculo a desvincular |
-
-**Parametros de Consulta (Query Parameters):**
-No aplica (Sin parametros de consulta en la URL).
-
-#### Recurso de Peticion (Request Body)
-No aplica (Peticion HTTP sin cuerpo de entrada).
-
-#### Recurso de Respuesta (Response Body)
-- **Estado HTTP Exitoso:** `204 No Content`
-Sin cuerpo de respuesta en la carga util.
-
-#### Errores y Excepciones de Dominio (RFC 7807)
-| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
-| :---: | :--- | :--- |
-| `401 Unauthorized` | `AuthenticationException` | Token ausente o invalido |
-| `403 Forbidden` | `AccessDeniedException` | Falta del permiso crm:fleets:manage |
-| `404 Not Found` | `FleetNotFoundException` | Flota no encontrada |
-| `404 Not Found` | `FleetVehicleNotFoundException` | El vehiculo no pertenece a la flota especificada |
-
-**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
-```json
-{
-  "type": "https://api.atelier.pe/errors/fleet-vehicle-not-found",
-  "title": "Unidad No Vinculada",
-  "status": 404,
-  "detail": "El vehiculo especificado no se encuentra registrado en el padron de esta flota",
-  "instance": "/api/v1/crm/fleets/018f6c50-7e12-7000-8000-000000000020/vehicles/018f6c50-7e12-7000-8000-000000000010",
-  "code": "FLEET_VEHICLE_NOT_FOUND",
-  "timestamp": "2026-10-01T16:30:00Z"
-}
-```
-
----
-
-## 5. Endpoints de Bitacora y Notas de Cliente (CustomerNotesController)
-
-### 5.1. [GET] /api/v1/crm/customers/{customerId}/notes
-
-**Listado Cronologico de Notas y Observaciones de Bitacora**
-
-#### Identidad Tecnica
-- **Controlador:** `com.andeva.atelier.platform.crm.interfaces.rest.controllers.CustomerNotesController`
-- **Metodo Java:** `public ResponseEntity<List<CustomerNoteResource>> getCustomerNotes(@PathVariable UUID customerId)`
-- **Ruta Base:** `/api/v1/crm/customers`
-- **Ruta Completa:** `/api/v1/crm/customers/{customerId}/notes`
-- **Proposito:** Recupera la coleccion cronologica inmutable de notas, apreciaciones cualitativas, acuerdos de trato preferencial y recordatorios comerciales formulados por el equipo sobre el cliente.
-
-#### Seguridad y Autorizacion
-- **Nivel de Acceso:** Autenticado
-- **Rol Minimo Requerido:** Recepcionista (ROLE_RECEPTIONIST) o Asesor de Servicio
-- **Permiso Atomico:** `@PreAuthorize("hasAuthority('crm:customers:read')")`
-- **Aislamiento Multi-Inquilino:** Comprueba que el cliente pertenezca al taller en sesion.
-
-#### Parametros de Invocacion
-**Cabeceras HTTP (Headers):**
-- `Authorization: Bearer <jwt_token>`
-- `Accept: application/json`
-
-**Parametros de Ruta (Path Parameters):**
-| Parametro | Tipo | Requerido | Descripcion |
-| :--- | :--- | :---: | :--- |
-| `customerId` | `UUID` | Si | Identificador universal del cliente |
-
-**Parametros de Consulta (Query Parameters):**
-No aplica (Sin parametros de consulta en la URL).
-
-#### Recurso de Peticion (Request Body)
-No aplica (Peticion HTTP sin cuerpo de entrada).
-
-#### Recurso de Respuesta (Response Body)
-- **Estado HTTP Exitoso:** `200 OK`
-- **Registro Java DTO:** `List<com.andeva.atelier.platform.crm.interfaces.rest.resources.responses.CustomerNoteResource>`
-- **Definicion de Campos Proyectados:**
-| Campo | Tipo de Dato | Descripcion |
-| :--- | :--- | :--- |
-| `id` | `UUID` | Identificador de la nota de bitacora |
-| `customerId` | `UUID` | Identificador del cliente observado |
-| `authorUserId` | `UUID` | Identificador del colaborador autor de la nota |
-| `authorName` | `String` | Nombre completo del colaborador autor |
-| `content` | `String` | Texto descriptivo de la observacion |
-| `category` | `String` | Categoria de la nota (SERVICE, BILLING, PREFERENCE o GENERAL) |
-| `createdAt` | `Instant` | Marca temporal de registro en UTC |
+- **Registro Java DTO:** `List<com.andeva.atelier.platform.crm.interfaces.rest.resources.responses.AppointmentResource>`
+- **Definicion de Campos Proyectados:** Coleccion estructurada de registros `AppointmentResource`.
 
 **Ejemplo de Carga Util JSON (Response):**
 ```json
 [
   {
-    "id": "018f6c50-7e12-7000-8000-000000000030",
-    "customerId": "018f6c50-7e12-7000-8000-000000000001",
-    "authorUserId": "018f6c40-7e12-7000-8000-000000000002",
-    "authorName": "Carlos Alberto Mendoza Flores",
-    "content": "Cliente solicita recepcion prioritaria a primera hora los dias sabados. Exige lubricante sintetico 5W-30 especificacion Dexos 1",
-    "category": "PREFERENCE",
-    "createdAt": "2026-10-01T16:30:00Z"
+    "id": "018f6c40-7e12-7000-8000-000000000090",
+    "tenantId": "018f6c40-7e12-7000-8000-000000000001",
+    "branchId": "018f6c40-7e12-7000-8000-000000000010",
+    "customerId": "018f6c40-7e12-7000-8000-000000000050",
+    "customerName": "Juan Alberto Perez Rodriguez",
+    "vehicleId": "018f6c40-7e12-7000-8000-000000000070",
+    "vehiclePlate": "ABC123",
+    "scheduledAt": "2026-10-15T14:30:00Z",
+    "estimatedDurationMinutes": 60,
+    "reason": "Mantenimiento preventivo de los 10000 km y revision de frenos delanteros",
+    "status": "PENDING",
+    "cancellationReason": null
   }
 ]
 ```
@@ -2085,118 +1473,630 @@ No aplica (Peticion HTTP sin cuerpo de entrada).
 #### Errores y Excepciones de Dominio (RFC 7807)
 | Codigo HTTP | Excepcion Mapeada | Causa Funcional |
 | :---: | :--- | :--- |
-| `401 Unauthorized` | `AuthenticationException` | Token ausente o invalido |
-| `403 Forbidden` | `AccessDeniedException` | Falta del permiso crm:customers:read |
-| `404 Not Found` | `CustomerNotFoundException` | Cliente no encontrado en este taller |
-
-**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
-```json
-{
-  "type": "https://api.atelier.pe/errors/customer-not-found",
-  "title": "Cliente No Encontrado",
-  "status": 404,
-  "detail": "No existe ningun cliente registrado con el identificador 018f6c50-7e12-7000-8000-000000000001",
-  "instance": "/api/v1/crm/customers/018f6c50-7e12-7000-8000-000000000001/notes",
-  "code": "CUSTOMER_NOT_FOUND",
-  "timestamp": "2026-10-01T16:30:00Z"
-}
-```
+| `400 Bad Request` | `IllegalArgumentException` | Formato de fecha invalido o estado no reconocido |
 
 ---
 
-### 5.2. [POST] /api/v1/crm/customers/{customerId}/notes
+### 4.3. [GET] /api/v1/appointments/{appointmentId}
 
-**Incorporacion de Nueva Nota u Observacion de Servicio en Bitacora**
+**Detalle Individual de Cita por Identificador**
 
 #### Identidad Tecnica
-- **Controlador:** `com.andeva.atelier.platform.crm.interfaces.rest.controllers.CustomerNotesController`
-- **Metodo Java:** `public ResponseEntity<CustomerNoteResource> createCustomerNote(@PathVariable UUID customerId, @Valid @RequestBody CreateCustomerNoteResource resource)`
-- **Ruta Base:** `/api/v1/crm/customers`
-- **Ruta Completa:** `/api/v1/crm/customers/{customerId}/notes`
-- **Proposito:** Agrega una nueva nota cualitativa a la ficha del cliente. Asocia de forma automatica e inmutable la identidad del autor (authorUserId y authorName) extraida directamente del token JWT autenticado.
+- **Controlador:** `com.andeva.atelier.platform.crm.interfaces.rest.controllers.AppointmentsController`
+- **Metodo Java:** `public ResponseEntity<AppointmentResource> getAppointmentById(@PathVariable UUID appointmentId)`
+- **Ruta Base:** `/api/v1/appointments`
+- **Ruta Completa:** `/api/v1/appointments/{appointmentId}`
+- **Proposito:** Consulta la informacion descriptiva y tecnica completa de una cita de atencion programada mediante su identificador universal.
+
+#### Seguridad y Autorizacion
+- **Nivel de Acceso:** Autenticado
+- **Rol Minimo Requerido:** Recepcionista (ROLE_RECEPTIONIST), Asesor de Servicio (ROLE_SERVICE_ADVISOR) o Mecanico Jefe (ROLE_CHIEF_MECHANIC)
+- **Permiso Atomico:** `@PreAuthorize("hasAuthority('crm:appointments:read')")`
+- **Aislamiento Multi-Inquilino:** Verifica que la cita pertenezca al `tenantId` del taller autenticado.
+
+#### Parametros de Invocacion
+**Cabeceras HTTP (Headers):**
+- `Authorization: Bearer <jwt_token>`
+- `Accept: application/json`
+
+**Parametros de Ruta (Path Parameters):**
+| Parametro | Tipo | Requerido | Descripcion |
+| :--- | :--- | :---: | :--- |
+| `appointmentId` | `UUID` | Si | Identificador universal de la cita programada |
+
+**Parametros de Consulta (Query Parameters):**
+No aplica (Sin parametros de consulta en la URL).
+
+#### Recurso de Peticion (Request Body)
+No aplica (Peticion HTTP de consulta `GET` sin cuerpo de entrada).
+
+#### Recurso de Respuesta (Response Body)
+- **Estado HTTP Exitoso:** `200 OK`
+- **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.responses.AppointmentResource`
+- **Definicion de Campos Proyectados:** Coincide con la especificacion del recurso `AppointmentResource`.
+
+**Ejemplo de Carga Util JSON (Response):**
+```json
+{
+  "id": "018f6c40-7e12-7000-8000-000000000090",
+  "tenantId": "018f6c40-7e12-7000-8000-000000000001",
+  "branchId": "018f6c40-7e12-7000-8000-000000000010",
+  "customerId": "018f6c40-7e12-7000-8000-000000000050",
+  "customerName": "Juan Alberto Perez Rodriguez",
+  "vehicleId": "018f6c40-7e12-7000-8000-000000000070",
+  "vehiclePlate": "ABC123",
+  "scheduledAt": "2026-10-15T14:30:00Z",
+  "estimatedDurationMinutes": 60,
+  "reason": "Mantenimiento preventivo de los 10000 km y revision de frenos delanteros",
+  "status": "PENDING",
+  "cancellationReason": null
+}
+```
+
+#### Errores y Excepciones de Dominio (RFC 7807)
+| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `404 Not Found` | `AppointmentNotFoundException` | La cita especificada no existe en este taller automotriz |
+
+---
+
+### 4.4. [POST] /api/v1/appointments/{appointmentId}/confirm
+
+**Confirmacion Formal de Cita por Recepcion**
+
+#### Identidad Tecnica
+- **Controlador:** `com.andeva.atelier.platform.crm.interfaces.rest.controllers.AppointmentsController`
+- **Metodo Java:** `public ResponseEntity<AppointmentResource> confirmAppointment(@PathVariable UUID appointmentId)`
+- **Ruta Base:** `/api/v1/appointments`
+- **Ruta Completa:** `/api/v1/appointments/{appointmentId}/confirm`
+- **Proposito:** Transiciona formalmente el estado de una cita de `PENDING` a `CONFIRMED`. Representa la validacion telefonica o digital efectuada por el personal de recepcion, bloqueando definitivamente el espacio de atencion en bahia.
 
 #### Seguridad y Autorizacion
 - **Nivel de Acceso:** Autenticado
 - **Rol Minimo Requerido:** Recepcionista (ROLE_RECEPTIONIST) o Asesor de Servicio (ROLE_SERVICE_ADVISOR)
-- **Permiso Atomico:** `@PreAuthorize("hasAuthority('crm:customers:update')")`
-- **Aislamiento Multi-Inquilino:** Verifica pertenencia del cliente al tenantId en sesion.
+- **Permiso Atomico:** `@PreAuthorize("hasAuthority('crm:appointments:manage')")`
+- **Aislamiento Multi-Inquilino:** Verifica que la cita pertenezca al `tenantId` en sesion.
 
 #### Parametros de Invocacion
 **Cabeceras HTTP (Headers):**
 - `Authorization: Bearer <jwt_token>`
-- `Content-Type: application/json`
+- `Accept: application/json`
 
 **Parametros de Ruta (Path Parameters):**
 | Parametro | Tipo | Requerido | Descripcion |
 | :--- | :--- | :---: | :--- |
-| `customerId` | `UUID` | Si | Identificador del cliente a quien se adjunta la nota |
+| `appointmentId` | `UUID` | Si | Identificador universal de la cita a confirmar |
 
 **Parametros de Consulta (Query Parameters):**
 No aplica (Sin parametros de consulta en la URL).
 
 #### Recurso de Peticion (Request Body)
-- **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.requests.CreateCustomerNoteResource`
-- **Definicion de Campos:**
-| Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripcion |
-| :--- | :--- | :---: | :--- | :--- |
-| `content` | `String` | Si | `@NotBlank, @Size(max = 1000)` | Cuerpo de la observacion o recordatorio |
-| `category` | `String` | Si | `@NotBlank, @Pattern(regexp = "^(SERVICE|BILLING|PREFERENCE|GENERAL)$")` | Clasificacion tematica de la nota |
-
-**Ejemplo de Carga Util JSON (Request):**
-```json
-{
-  "content": "Cliente solicita recepcion prioritaria a primera hora los dias sabados. Exige lubricante sintetico 5W-30 especificacion Dexos 1",
-  "category": "PREFERENCE"
-}
-```
+No aplica (Operacion idempotente de transicion de estado sin cuerpo de entrada).
 
 #### Recurso de Respuesta (Response Body)
-- **Estado HTTP Exitoso:** `201 Created`
-- **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.responses.CustomerNoteResource`
-- **Definicion de Campos Proyectados:**
-| Campo | Tipo de Dato | Descripcion |
-| :--- | :--- | :--- |
-| `id` | `UUID` | Identificador asignado a la nueva nota |
-| `customerId` | `UUID` | Identificador del cliente |
-| `authorUserId` | `UUID` | Identificador del usuario autor |
-| `authorName` | `String` | Nombre resuelto del usuario autor |
-| `content` | `String` | Contenido de la nota |
-| `category` | `String` | Categoria de la observacion |
-| `createdAt` | `Instant` | Marca temporal de registro en UTC |
+- **Estado HTTP Exitoso:** `200 OK`
+- **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.responses.AppointmentResource`
+- **Definicion de Campos Proyectados:** Coincide con la especificacion del recurso `AppointmentResource` con campo `status` actualizado a `CONFIRMED`.
 
 **Ejemplo de Carga Util JSON (Response):**
 ```json
 {
-  "id": "018f6c50-7e12-7000-8000-000000000030",
-  "customerId": "018f6c50-7e12-7000-8000-000000000001",
-  "authorUserId": "018f6c40-7e12-7000-8000-000000000002",
-  "authorName": "Carlos Alberto Mendoza Flores",
-  "content": "Cliente solicita recepcion prioritaria a primera hora los dias sabados. Exige lubricante sintetico 5W-30 especificacion Dexos 1",
-  "category": "PREFERENCE",
-  "createdAt": "2026-10-01T16:30:00Z"
+  "id": "018f6c40-7e12-7000-8000-000000000090",
+  "tenantId": "018f6c40-7e12-7000-8000-000000000001",
+  "branchId": "018f6c40-7e12-7000-8000-000000000010",
+  "customerId": "018f6c40-7e12-7000-8000-000000000050",
+  "customerName": "Juan Alberto Perez Rodriguez",
+  "vehicleId": "018f6c40-7e12-7000-8000-000000000070",
+  "vehiclePlate": "ABC123",
+  "scheduledAt": "2026-10-15T14:30:00Z",
+  "estimatedDurationMinutes": 60,
+  "reason": "Mantenimiento preventivo de los 10000 km y revision de frenos delanteros",
+  "status": "CONFIRMED",
+  "cancellationReason": null
 }
 ```
 
 #### Errores y Excepciones de Dominio (RFC 7807)
 | Codigo HTTP | Excepcion Mapeada | Causa Funcional |
 | :---: | :--- | :--- |
-| `400 Bad Request` | `MethodArgumentNotValidException` | Contenido en blanco o categoria no reconocida |
-| `401 Unauthorized` | `AuthenticationException` | Token ausente o invalido |
-| `403 Forbidden` | `AccessDeniedException` | Falta del permiso crm:customers:update |
-| `404 Not Found` | `CustomerNotFoundException` | Cliente no encontrado en este taller |
+| `400 Bad Request` | `AppointmentInvalidStateTransitionException` | La cita no se encuentra en estado PENDING para ser confirmada |
+| `404 Not Found` | `AppointmentNotFoundException` | La cita especificada no existe en el taller |
+
+---
+
+### 4.5. [POST] /api/v1/appointments/{appointmentId}/arrive
+
+**Registro de Arribo Fisico del Automovil a Recepcion**
+
+#### Identidad Tecnica
+- **Controlador:** `com.andeva.atelier.platform.crm.interfaces.rest.controllers.AppointmentsController`
+- **Metodo Java:** `public ResponseEntity<AppointmentResource> recordArrival(@PathVariable UUID appointmentId)`
+- **Ruta Base:** `/api/v1/appointments`
+- **Ruta Completa:** `/api/v1/appointments/{appointmentId}/arrive`
+- **Proposito:** Registra la presencia fisica del automovil y su conductor en la zona de recepcion del taller. Transiciona el estado a `ARRIVED` y publica un evento de integracion de dominio que habilita en el Bounded Context Workshop Operations la apertura de la Orden de Trabajo preliminar y el inicio del inventario de recepcion pericial.
+
+#### Seguridad y Autorizacion
+- **Nivel de Acceso:** Autenticado
+- **Rol Minimo Requerido:** Recepcionista (ROLE_RECEPTIONIST) o Asesor de Servicio (ROLE_SERVICE_ADVISOR)
+- **Permiso Atomico:** `@PreAuthorize("hasAuthority('crm:appointments:manage')")`
+- **Aislamiento Multi-Inquilino:** Verifica la pertenencia de la cita al `tenantId` autenticado.
+
+#### Parametros de Invocacion
+**Cabeceras HTTP (Headers):**
+- `Authorization: Bearer <jwt_token>`
+- `Accept: application/json`
+
+**Parametros de Ruta (Path Parameters):**
+| Parametro | Tipo | Requerido | Descripcion |
+| :--- | :--- | :---: | :--- |
+| `appointmentId` | `UUID` | Si | Identificador universal de la cita cuyo vehiculo ha arribado |
+
+**Parametros de Consulta (Query Parameters):**
+No aplica (Sin parametros de consulta en la URL).
+
+#### Recurso de Peticion (Request Body)
+No aplica (Accion de transicion de estado sin cuerpo de entrada).
+
+#### Recurso de Respuesta (Response Body)
+- **Estado HTTP Exitoso:** `200 OK`
+- **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.responses.AppointmentResource`
+- **Definicion de Campos Proyectados:** Coincide con la especificacion del recurso `AppointmentResource` con campo `status` actualizado a `ARRIVED`.
+
+**Ejemplo de Carga Util JSON (Response):**
+```json
+{
+  "id": "018f6c40-7e12-7000-8000-000000000090",
+  "tenantId": "018f6c40-7e12-7000-8000-000000000001",
+  "branchId": "018f6c40-7e12-7000-8000-000000000010",
+  "customerId": "018f6c40-7e12-7000-8000-000000000050",
+  "customerName": "Juan Alberto Perez Rodriguez",
+  "vehicleId": "018f6c40-7e12-7000-8000-000000000070",
+  "vehiclePlate": "ABC123",
+  "scheduledAt": "2026-10-15T14:30:00Z",
+  "estimatedDurationMinutes": 60,
+  "reason": "Mantenimiento preventivo de los 10000 km y revision de frenos delanteros",
+  "status": "ARRIVED",
+  "cancellationReason": null
+}
+```
+
+#### Errores y Excepciones de Dominio (RFC 7807)
+| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `400 Bad Request` | `AppointmentAlreadyArrivedException` | El vehiculo ya habia registrado previamente su arribo a recepcion |
+| `400 Bad Request` | `AppointmentInvalidStateTransitionException` | La cita se encuentra en estado cancelado y no admite arribos |
+| `404 Not Found` | `AppointmentNotFoundException` | La cita especificada no existe |
+
+---
+
+### 4.6. [POST] /api/v1/appointments/{appointmentId}/reschedule
+
+**Reprogramacion de Fecha y Hora de Cita**
+
+#### Identidad Tecnica
+- **Controlador:** `com.andeva.atelier.platform.crm.interfaces.rest.controllers.AppointmentsController`
+- **Metodo Java:** `public ResponseEntity<AppointmentResource> rescheduleAppointment(@PathVariable UUID appointmentId, @Valid @RequestBody RescheduleAppointmentResource resource)`
+- **Ruta Base:** `/api/v1/appointments`
+- **Ruta Completa:** `/api/v1/appointments/{appointmentId}/reschedule`
+- **Proposito:** Modifica la fecha y hora acordada para una cita tecnica no ejecutada. Comprueba que la unidad vehicular no haya ingresado fisicamente al taller, valida la disponibilidad de la nueva fecha solicitada y actualiza la programacion.
+
+#### Seguridad y Autorizacion
+- **Nivel de Acceso:** Autenticado
+- **Rol Minimo Requerido:** Recepcionista (ROLE_RECEPTIONIST), Asesor de Servicio (ROLE_SERVICE_ADVISOR) o Conductor autenticado
+- **Permiso Atomico:** `@PreAuthorize("hasAuthority('crm:appointments:manage')")`
+- **Aislamiento Multi-Inquilino:** Valida la pertenencia de la cita al `tenantId` autenticado.
+
+#### Parametros de Invocacion
+**Cabeceras HTTP (Headers):**
+- `Authorization: Bearer <jwt_token>`
+- `Content-Type: application/json`
+- `Accept: application/json`
+
+**Parametros de Ruta (Path Parameters):**
+| Parametro | Tipo | Requerido | Descripcion |
+| :--- | :--- | :---: | :--- |
+| `appointmentId` | `UUID` | Si | Identificador universal de la cita a reprogramar |
+
+**Parametros de Consulta (Query Parameters):**
+No aplica (Sin parametros de consulta en la URL).
+
+#### Recurso de Peticion (Request Body)
+- **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.requests.RescheduleAppointmentResource`
+
+```java
+package com.andeva.atelier.platform.crm.interfaces.rest.resources.requests;
+
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.NotNull;
+import java.time.Instant;
+
+public record RescheduleAppointmentResource(
+    @NotNull(message = "La nueva fecha y hora programada es obligatoria")
+    @Future(message = "La nueva fecha de la cita debe ser futura")
+    Instant newScheduledAt
+) {}
+```
+
+- **Definicion de Campos:**
+| Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripcion |
+| :--- | :--- | :---: | :--- | :--- |
+| `newScheduledAt` | `Instant` | Si | `@NotNull, @Future` | Nueva marca temporal UTC acordada para la cita |
+
+**Ejemplo de Carga Util JSON (Request):**
+```json
+{
+  "newScheduledAt": "2026-10-18T10:00:00Z"
+}
+```
+
+#### Recurso de Respuesta (Response Body)
+- **Estado HTTP Exitoso:** `200 OK`
+- **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.responses.AppointmentResource`
+- **Definicion de Campos Proyectados:** Coincide con la especificacion del recurso `AppointmentResource` con campo `scheduledAt` actualizado.
+
+**Ejemplo de Carga Util JSON (Response):**
+```json
+{
+  "id": "018f6c40-7e12-7000-8000-000000000090",
+  "tenantId": "018f6c40-7e12-7000-8000-000000000001",
+  "branchId": "018f6c40-7e12-7000-8000-000000000010",
+  "customerId": "018f6c40-7e12-7000-8000-000000000050",
+  "customerName": "Juan Alberto Perez Rodriguez",
+  "vehicleId": "018f6c40-7e12-7000-8000-000000000070",
+  "vehiclePlate": "ABC123",
+  "scheduledAt": "2026-10-18T10:00:00Z",
+  "estimatedDurationMinutes": 60,
+  "reason": "Mantenimiento preventivo de los 10000 km y revision de frenos delanteros",
+  "status": "CONFIRMED",
+  "cancellationReason": null
+}
+```
+
+#### Errores y Excepciones de Dominio (RFC 7807)
+| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `400 Bad Request` | `AppointmentPastDateException` | La nueva fecha solicitada es anterior al momento actual |
+| `400 Bad Request` | `AppointmentAlreadyArrivedException` | No se puede reprogramar una cita de un vehiculo que ya arribo al taller |
+| `404 Not Found` | `AppointmentNotFoundException` | La cita especificada no existe |
+| `409 Conflict` | `AppointmentSlotUnavailableException` | La nueva franja horaria solicitada no cuenta con capacidad disponible |
+
+---
+
+### 4.7. [POST] /api/v1/appointments/{appointmentId}/cancel
+
+**Cancelacion Justificada de Cita Previa**
+
+#### Identidad Tecnica
+- **Controlador:** `com.andeva.atelier.platform.crm.interfaces.rest.controllers.AppointmentsController`
+- **Metodo Java:** `public ResponseEntity<AppointmentResource> cancelAppointment(@PathVariable UUID appointmentId, @Valid @RequestBody CancelAppointmentResource resource)`
+- **Ruta Base:** `/api/v1/appointments`
+- **Ruta Completa:** `/api/v1/appointments/{appointmentId}/cancel`
+- **Proposito:** Cancela una cita previa antes de su atencion material. Exige un motivo justificado que queda registrado en la bitacora de atencion del cliente y libera de inmediato la capacidad de recepcion de la sede fisica.
+
+#### Seguridad y Autorizacion
+- **Nivel de Acceso:** Autenticado
+- **Rol Minimo Requerido:** Recepcionista (ROLE_RECEPTIONIST), Asesor de Servicio (ROLE_SERVICE_ADVISOR) o Conductor titular
+- **Permiso Atomico:** `@PreAuthorize("hasAuthority('crm:appointments:manage')")`
+- **Aislamiento Multi-Inquilino:** Verifica que la cita pertenezca al taller en sesion.
+
+#### Parametros de Invocacion
+**Cabeceras HTTP (Headers):**
+- `Authorization: Bearer <jwt_token>`
+- `Content-Type: application/json`
+- `Accept: application/json`
+
+**Parametros de Ruta (Path Parameters):**
+| Parametro | Tipo | Requerido | Descripcion |
+| :--- | :--- | :---: | :--- |
+| `appointmentId` | `UUID` | Si | Identificador universal de la cita a cancelar |
+
+**Parametros de Consulta (Query Parameters):**
+No aplica (Sin parametros de consulta en la URL).
+
+#### Recurso de Peticion (Request Body)
+- **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.requests.CancelAppointmentResource`
+
+```java
+package com.andeva.atelier.platform.crm.interfaces.rest.resources.requests;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+public record CancelAppointmentResource(
+    @NotBlank(message = "El motivo de cancelacion es obligatorio")
+    @Size(min = 5, max = 250, message = "La justificacion debe contener entre 5 y 250 caracteres")
+    String reason
+) {}
+```
+
+- **Definicion de Campos:**
+| Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripcion |
+| :--- | :--- | :---: | :--- | :--- |
+| `reason` | `String` | Si | `@NotBlank, @Size(min = 5, max = 250)` | Motivo justificado de la cancelacion de la cita |
+
+**Ejemplo de Carga Util JSON (Request):**
+```json
+{
+  "reason": "El cliente tuvo una emergencia de viaje laboral y solicito anular la reserva"
+}
+```
+
+#### Recurso de Respuesta (Response Body)
+- **Estado HTTP Exitoso:** `200 OK`
+- **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.responses.AppointmentResource`
+- **Definicion de Campos Proyectados:** Coincide con la especificacion del recurso `AppointmentResource` con campo `status` actualizado a `CANCELED` y `cancellationReason` registrado.
+
+**Ejemplo de Carga Util JSON (Response):**
+```json
+{
+  "id": "018f6c40-7e12-7000-8000-000000000090",
+  "tenantId": "018f6c40-7e12-7000-8000-000000000001",
+  "branchId": "018f6c40-7e12-7000-8000-000000000010",
+  "customerId": "018f6c40-7e12-7000-8000-000000000050",
+  "customerName": "Juan Alberto Perez Rodriguez",
+  "vehicleId": "018f6c40-7e12-7000-8000-000000000070",
+  "vehiclePlate": "ABC123",
+  "scheduledAt": "2026-10-15T14:30:00Z",
+  "estimatedDurationMinutes": 60,
+  "reason": "Mantenimiento preventivo de los 10000 km y revision de frenos delanteros",
+  "status": "CANCELED",
+  "cancellationReason": "El cliente tuvo una emergencia de viaje laboral y solicito anular la reserva"
+}
+```
+
+#### Errores y Excepciones de Dominio (RFC 7807)
+| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `400 Bad Request` | `AppointmentAlreadyArrivedException` | No se puede cancelar una cita de una unidad vehicular que ya ingreso a taller |
+| `404 Not Found` | `AppointmentNotFoundException` | La cita especificada no existe |
+
+---
+
+## 5. Endpoints de Membresias de Flotas Comerciales (CustomerMembershipsController)
+
+### 5.1. [POST] /api/v1/customers/{customerId}/memberships
+
+**Delegacion e Incorporacion de Miembro a Flota Corporativa**
+
+#### Identidad Tecnica
+- **Controlador:** `com.andeva.atelier.platform.crm.interfaces.rest.controllers.CustomerMembershipsController`
+- **Metodo Java:** `public ResponseEntity<CustomerMembershipResource> addCompanyMember(@PathVariable UUID customerId, @Valid @RequestBody InviteCustomerMemberResource resource)`
+- **Ruta Base:** `/api/v1/customers/{customerId}/memberships`
+- **Ruta Completa:** `/api/v1/customers/{customerId}/memberships`
+- **Proposito:** Registra formalmente a un usuario como miembro autorizado o delegado operativo en la flota comercial de un cliente empresarial de tipo `COMPANY`. Confiere atribuciones delegadas (`FLEET_ADMIN` para gestion y agendamiento general de todas las unidades, o `FLEET_OPERATOR` para conduccion y recepcion de unidades asignadas).
+
+#### Seguridad y Autorizacion
+- **Nivel de Acceso:** Autenticado
+- **Rol Minimo Requerido:** Administrador de Taller (ROLE_WORKSHOP_ADMINISTRATOR), Asesor de Servicio (ROLE_SERVICE_ADVISOR) o Administrador Corporativo de Flota
+- **Permiso Atomico:** `@PreAuthorize("hasAuthority('crm:customers:manage')")`
+- **Aislamiento Multi-Inquilino:** Verifica que el cliente corporativo pertenezca al `tenantId` en sesion y que corresponda a una persona juridica.
+
+#### Parametros de Invocacion
+**Cabeceras HTTP (Headers):**
+- `Authorization: Bearer <jwt_token>`
+- `Content-Type: application/json`
+- `Accept: application/json`
+
+**Parametros de Ruta (Path Parameters):**
+| Parametro | Tipo | Requerido | Descripcion |
+| :--- | :--- | :---: | :--- |
+| `customerId` | `UUID` | Si | Identificador universal del cliente corporativo titular de la flota |
+
+**Parametros de Consulta (Query Parameters):**
+No aplica (Sin parametros de consulta en la URL).
+
+#### Recurso de Peticion (Request Body)
+- **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.requests.InviteCustomerMemberResource`
+
+```java
+package com.andeva.atelier.platform.crm.interfaces.rest.resources.requests;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import java.util.UUID;
+
+public record InviteCustomerMemberResource(
+    @NotNull(message = "El identificador del usuario delegado es obligatorio")
+    UUID userId,
+
+    @NotBlank(message = "El rol de flota es obligatorio")
+    @Pattern(regexp = "^(FLEET_ADMIN|FLEET_OPERATOR)$", message = "El rol de flota debe ser FLEET_ADMIN o FLEET_OPERATOR")
+    String role
+) {}
+```
+
+- **Definicion de Campos:**
+| Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripcion |
+| :--- | :--- | :---: | :--- | :--- |
+| `userId` | `UUID` | Si | `@NotNull` | Identificador universal del usuario a delegar en la flota |
+| `role` | `String` | Si | `@NotBlank, @Pattern(regexp = "^(FLEET_ADMIN|FLEET_OPERATOR)$")` | Rol operativo concedido (`FLEET_ADMIN`, `FLEET_OPERATOR`) |
+
+**Ejemplo de Carga Util JSON (Request):**
+```json
+{
+  "userId": "018f6c40-7e12-7000-8000-000000000025",
+  "role": "FLEET_OPERATOR"
+}
+```
+
+#### Recurso de Respuesta (Response Body)
+- **Estado HTTP Exitoso:** `201 Created`
+- **Cabecera de Ubicacion:** `Location: /api/v1/customers/018f6c40-7e12-7000-8000-000000000051/memberships/018f6c40-7e12-7000-8000-000000000095`
+- **Registro Java DTO:** `com.andeva.atelier.platform.crm.interfaces.rest.resources.responses.CustomerMembershipResource`
+
+```java
+package com.andeva.atelier.platform.crm.interfaces.rest.resources.responses;
+
+import java.time.Instant;
+import java.util.UUID;
+
+public record CustomerMembershipResource(
+    UUID id,
+    UUID customerId,
+    UUID userId,
+    String role,
+    String status,
+    Instant createdAt
+) {}
+```
+
+- **Definicion de Campos Proyectados:**
+| Campo | Tipo de Dato | Descripcion |
+| :--- | :--- | :--- |
+| `id` | `UUID` | Identificador universal del registro de membresia de flota |
+| `customerId` | `UUID` | Identificador de la empresa cliente |
+| `userId` | `UUID` | Identificador universal del colaborador delegado |
+| `role` | `String` | Rol concedido en la flota (`FLEET_ADMIN`, `FLEET_OPERATOR`) |
+| `status` | `String` | Estado operativo de la membresia (`ACTIVE`, `REVOKED`) |
+| `createdAt` | `Instant` | Fecha y hora UTC de concesion de acceso |
+
+**Ejemplo de Carga Util JSON (Response):**
+```json
+{
+  "id": "018f6c40-7e12-7000-8000-000000000095",
+  "customerId": "018f6c40-7e12-7000-8000-000000000051",
+  "userId": "018f6c40-7e12-7000-8000-000000000025",
+  "role": "FLEET_OPERATOR",
+  "status": "ACTIVE",
+  "createdAt": "2026-10-03T13:00:00Z"
+}
+```
+
+#### Errores y Excepciones de Dominio (RFC 7807)
+| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `400 Bad Request` | `MethodArgumentNotValidException` | Rol de flota no reconocido o campos faltantes |
+| `404 Not Found` | `CustomerNotFoundException` | El cliente corporativo no existe en el taller |
+| `404 Not Found` | `UserNotFoundException` | El usuario especificado en userId no existe en la plataforma |
+| `409 Conflict` | `CustomerMembershipAlreadyExistsException` | El usuario ya se encuentra registrado activamente como miembro de esta flota |
 
 **Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
 ```json
 {
-  "type": "https://api.atelier.pe/errors/invalid-request-payload",
-  "title": "Nota Invalida",
-  "status": 400,
-  "detail": "La categoria especificada no corresponde a ninguno de los valores admitidos (SERVICE, BILLING, PREFERENCE, GENERAL)",
-  "instance": "/api/v1/crm/customers/018f6c50-7e12-7000-8000-000000000001/notes",
-  "code": "INVALID_REQUEST_PAYLOAD",
-  "timestamp": "2026-10-01T16:30:00Z"
+  "type": "https://api.atelier.pe/errors/customer-membership-already-exists",
+  "title": "Membresia de Flota Ya Existente",
+  "status": 409,
+  "detail": "El usuario ya figura como miembro activo con permisos delegados sobre la flota corporativa",
+  "instance": "/api/v1/customers/018f6c40-7e12-7000-8000-000000000051/memberships",
+  "code": "CUSTOMER_MEMBERSHIP_ALREADY_EXISTS",
+  "timestamp": "2026-10-03T13:00:00Z"
 }
 ```
 
 ---
 
+### 5.2. [GET] /api/v1/customers/{customerId}/memberships
+
+**Listado de Miembros Autorizados de la Flota Corporativa**
+
+#### Identidad Tecnica
+- **Controlador:** `com.andeva.atelier.platform.crm.interfaces.rest.controllers.CustomerMembershipsController`
+- **Metodo Java:** `public ResponseEntity<List<CustomerMembershipResource>> getCompanyMembers(@PathVariable UUID customerId)`
+- **Ruta Base:** `/api/v1/customers/{customerId}/memberships`
+- **Ruta Completa:** `/api/v1/customers/{customerId}/memberships`
+- **Proposito:** Consulta el listado completo de usuarios autorizados, choferes y administradores vinculados a la flota de un cliente corporativo.
+
+#### Seguridad y Autorizacion
+- **Nivel de Acceso:** Autenticado
+- **Rol Minimo Requerido:** Recepcionista (ROLE_RECEPTIONIST), Asesor de Servicio (ROLE_SERVICE_ADVISOR) o Administrador de Taller (ROLE_WORKSHOP_ADMINISTRATOR)
+- **Permiso Atomico:** `@PreAuthorize("hasAuthority('crm:customers:read')")`
+- **Aislamiento Multi-Inquilino:** Verifica que el cliente pertenezca al taller en sesion.
+
+#### Parametros de Invocacion
+**Cabeceras HTTP (Headers):**
+- `Authorization: Bearer <jwt_token>`
+- `Accept: application/json`
+
+**Parametros de Ruta (Path Parameters):**
+| Parametro | Tipo | Requerido | Descripcion |
+| :--- | :--- | :---: | :--- |
+| `customerId` | `UUID` | Si | Identificador universal del cliente corporativo |
+
+**Parametros de Consulta (Query Parameters):**
+No aplica (Sin parametros de consulta en la URL).
+
+#### Recurso de Peticion (Request Body)
+No aplica (Peticion HTTP de consulta `GET` sin cuerpo de entrada).
+
+#### Recurso de Respuesta (Response Body)
+- **Estado HTTP Exitoso:** `200 OK`
+- **Registro Java DTO:** `List<com.andeva.atelier.platform.crm.interfaces.rest.resources.responses.CustomerMembershipResource>`
+- **Definicion de Campos Proyectados:** Lista estructurada de registros `CustomerMembershipResource`.
+
+**Ejemplo de Carga Util JSON (Response):**
+```json
+[
+  {
+    "id": "018f6c40-7e12-7000-8000-000000000095",
+    "customerId": "018f6c40-7e12-7000-8000-000000000051",
+    "userId": "018f6c40-7e12-7000-8000-000000000025",
+    "role": "FLEET_OPERATOR",
+    "status": "ACTIVE",
+    "createdAt": "2026-10-03T13:00:00Z"
+  }
+]
+```
+
+#### Errores y Excepciones de Dominio (RFC 7807)
+| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `404 Not Found` | `CustomerNotFoundException` | El cliente especificado no existe en el taller |
+
+---
+
+### 5.3. [DELETE] /api/v1/customers/{customerId}/memberships/{userId}
+
+**Revocacion de Permisos de Miembro de la Flota**
+
+#### Identidad Tecnica
+- **Controlador:** `com.andeva.atelier.platform.crm.interfaces.rest.controllers.CustomerMembershipsController`
+- **Metodo Java:** `public ResponseEntity<Void> revokeCompanyMember(@PathVariable UUID customerId, @PathVariable UUID userId)`
+- **Ruta Base:** `/api/v1/customers/{customerId}/memberships`
+- **Ruta Completa:** `/api/v1/customers/{customerId}/memberships/{userId}`
+- **Proposito:** Revoca de forma definitiva las facultades delegadas de un usuario sobre la flota comercial corporativa. Transiciona el estado de la membresia a `REVOKED` impidiendo el agendamiento o retiro de vehiculos por parte de dicho chofer o administrador.
+
+#### Seguridad y Autorizacion
+- **Nivel de Acceso:** Autenticado
+- **Rol Minimo Requerido:** Administrador de Taller (ROLE_WORKSHOP_ADMINISTRATOR), Asesor de Servicio (ROLE_SERVICE_ADVISOR) o Administrador Corporativo de Flota
+- **Permiso Atomico:** `@PreAuthorize("hasAuthority('crm:customers:manage')")`
+- **Aislamiento Multi-Inquilino:** Verifica que el cliente corporativo pertenezca al taller autenticado.
+
+#### Parametros de Invocacion
+**Cabeceras HTTP (Headers):**
+- `Authorization: Bearer <jwt_token>`
+
+**Parametros de Ruta (Path Parameters):**
+| Parametro | Tipo | Requerido | Descripcion |
+| :--- | :--- | :---: | :--- |
+| `customerId` | `UUID` | Si | Identificador universal del cliente corporativo |
+| `userId` | `UUID` | Si | Identificador del usuario colaborador a revocar |
+
+**Parametros de Consulta (Query Parameters):**
+No aplica (Sin parametros de consulta en la URL).
+
+#### Recurso de Peticion (Request Body)
+No aplica (Accion HTTP de revocacion `DELETE` sin cuerpo de entrada).
+
+#### Recurso de Respuesta (Response Body)
+- **Estado HTTP Exitoso:** `204 No Content`
+- **Cuerpo de Respuesta:** Vacio (Sin contenido conforme a la semantica REST HTTP 204).
+
+#### Errores y Excepciones de Dominio (RFC 7807)
+| Codigo HTTP | Excepcion Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `404 Not Found` | `CustomerNotFoundException` | El cliente corporativo no existe en este taller |
+| `404 Not Found` | `CustomerMembershipNotFoundException` | No existe una membresia activa que vincule al usuario con esta flota |
+
+**Ejemplo de Carga Util de Error (RFC 7807 ProblemDetail):**
+```json
+{
+  "type": "https://api.atelier.pe/errors/customer-membership-not-found",
+  "title": "Membresia de Flota No Encontrada",
+  "status": 404,
+  "detail": "El usuario no cuenta con una membresia activa sobre la flota comercial especificada",
+  "instance": "/api/v1/customers/018f6c40-7e12-7000-8000-000000000051/memberships/018f6c40-7e12-7000-8000-000000000025",
+  "code": "CUSTOMER_MEMBERSHIP_NOT_FOUND",
+  "timestamp": "2026-10-03T13:30:00Z"
+}
+```

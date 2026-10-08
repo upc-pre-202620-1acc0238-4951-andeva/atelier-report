@@ -1,336 +1,226 @@
-# Especificación Canónica de Endpoints: SaaS Billing and Subscriptions
+# Especificación Canónica de Endpoints REST: SaaS Billing and Subscriptions
 
-## 1. Identidad y Propósito del Bounded Context
-
-El Bounded Context **SaaS Billing and Subscriptions** (`com.andeva.atelier.platform.billing`) gobierna el modelo de monetización recurrente B2B, el aprovisionamiento de planes comerciales, el control de cuotas operativas y la conciliación contable de cobros entre la empresa proveedora de la plataforma (Andeva) y los talleres mecánicos abonados.
-
-Para el detalle de diseño estratégico, agregados y entidades de dominio, consultar:
-* [08-saas-billing-and-subscriptions.md](file:///home/shouy/development/atelier-report/docs/extended-description-bounded-contexts-backend/08-saas-billing-and-subscriptions.md)
-* [atelier-roles.md](file:///home/shouy/development/atelier-report/docs/backend-documentation/atelier-roles.md)
-* [atelier-database-schema.md](file:///home/shouy/development/atelier-report/docs/atelier-database-schema.md)
-
-### Principios Fundamentales del Módulo
-1. **Desacoplamiento Fiscal:** Este contexto gestiona exclusivamente las tarifas y membresías cobradas por la plataforma al taller. Los comprobantes fiscales tributarios emitidos por el taller a sus clientes particulares son administrados por el módulo de facturación local.
-2. **Cumplimiento PCI-DSS:** El backend jamás almacena ni procesa números de tarjeta bancaria ni códigos de seguridad. Todo intercambio sensible se delega a Stripe Elements, almacenando únicamente identificadores tokenizados.
-3. **Idempotencia Estricta en Webhooks:** Deduplicación estricta de eventos asíncronos mediante identificador unívoco de evento en base de datos.
-4. **Caché en Memoria:** Evaluación de cuotas con baja latencia mediante Caffeine Cache e invalidación reactiva inmediata ante cambios contractuales.
+El Bounded Context **SaaS Billing and Subscriptions** (`com.andeva.atelier.platform.billing`) gobierna el modelo comercial de ingresos B2B, el aprovisionamiento automatizado de planes comerciales, el control de cuotas operativas de plataforma y la conciliación contable de cobros entre la empresa proveedora de la plataforma (Andeva) y los talleres mecánicos abonados.
 
 ---
 
-## 2. Inventario de Controladores y Endpoints
+## 1. Arquitectura de Seguridad y Convenciones Globales
 
-El módulo expone un total de 13 endpoints REST organizados en 4 controladores:
+Todos los endpoints documentados en esta especificación técnica se adhieren rigurosamente a los estándares de arquitectura de Atelier Platform:
 
-1. **SubscriptionPlansController** (`/api/v1/billing/plans`): 4 endpoints para catálogo comercial y administración de tarifas.
-2. **TenantSubscriptionsController** (`/api/v1/billing/subscriptions`): 5 endpoints para ciclo de vida de membresías, checkout y portal de cliente.
-3. **SaasInvoicesController** (`/api/v1/billing/invoices`): 3 endpoints para historial de facturación de plataforma y comprobantes PDF.
-4. **StripeWebhooksController** (`/api/v1/billing/webhooks/stripe`): 1 endpoint para ingesta de eventos asíncronos de la pasarela de pagos.
+* **Desacoplamiento Fiscal Estricto:** Este módulo administra exclusivamente las relaciones comerciales y cobros periódicos de la plataforma hacia los talleres automotrices. La facturación tributaria emitida por los talleres a sus propios clientes (Facturas y Boletas UBL 2.1 ante SUNAT) reside de manera desacoplada en el contexto de Invoicing and Compliance.
+* **Seguridad Bancaria PCI-DSS Nivel 1:** El backend jamás recibe, procesa ni almacena números de tarjeta bancaria (PAN), códigos de verificación CVC ni fechas de vencimiento. Todo el intercambio de credenciales bancarias se delega al navegador o dispositivo móvil mediante componentes certificados de Stripe Elements y Stripe Mobile SDK, intercambiando únicamente identificadores tokenizados seguros.
+* **Gobernanza Determinista de Cuotas (Tenant Quota Limits):** Cada taller opera dentro de límites estrictos definidos por su plan activo. El sistema evalúa techos de sucursales (`maxBranches`), personal activo (`maxActiveStaff`), escáneres telemáticos (`maxActiveObd2Devices`), cupo mensual de órdenes de trabajo (`maxMonthlyWorkOrders`) y reportes periciales de inteligencia artificial (`maxMonthlyAiReports`).
+* **Idempotencia Garantizada en Webhooks:** Ante eventos asíncronos despachados por Stripe, la tabla de idempotencia `stripe_events` almacena unívocamente cada identificador con restricción de unicidad para evitar procesamientos duplicados o cobros espurios.
+* **Aceleración de Caché en Memoria:** La validación de estado contractual y cuotas operativas se resuelve con latencias menores a 0.05 milisegundos mediante Caffeine Cache local con invalidación reactiva inmediata ante webhooks.
+* **Estandarización de Respuestas de Error (RFC 7807):** Toda falla de dominio o de infraestructura se serializa bajo el estándar `application/problem+json` mediante `ProblemDetail`.
 
 ---
 
-## 3. Especificación Detallada de Endpoints
+## 2. Índice Canónico de Endpoints
 
-### 3.1. SubscriptionPlansController
+El módulo expone exactamente 12 endpoints distribuidos en 4 controladores especializados:
 
-Controlador encargado de la publicación del catálogo de planes comerciales y de la parametrización de cuotas operativas.
+| No. | Método | Ruta Relativa | Controlador Java | Método Java | Permiso Atómico Requerido | Rol Mínimo Sugerido |
+| :---: | :---: | :--- | :--- | :--- | :--- | :--- |
+| 1 | `GET` | `/api/v1/billing/plans` | `SubscriptionPlansController` | `getActivePlans()` | `billing:plans:read` | Público / Conductor |
+| 2 | `GET` | `/api/v1/billing/plans/{id}` | `SubscriptionPlansController` | `getPlanById()` | `billing:plans:read` | Público / Conductor |
+| 3 | `POST` | `/api/v1/billing/plans` | `SubscriptionPlansController` | `createPlan()` | `billing:plans:manage` | Administrador de Plataforma |
+| 4 | `PUT` | `/api/v1/billing/plans/{id}` | `SubscriptionPlansController` | `updatePlan()` | `billing:plans:manage` | Administrador de Plataforma |
+| 5 | `GET` | `/api/v1/billing/subscriptions/me` | `TenantSubscriptionsController` | `getCurrentSubscription()` | `billing:subscriptions:read` | Administrador de Taller |
+| 6 | `POST` | `/api/v1/billing/subscriptions/checkout-session` | `TenantSubscriptionsController` | `createCheckoutSession()` | `billing:subscriptions:manage_stripe` | Administrador de Taller |
+| 7 | `POST` | `/api/v1/billing/subscriptions/customer-portal` | `TenantSubscriptionsController` | `createCustomerPortalSession()` | `billing:subscriptions:manage_stripe` | Administrador de Taller |
+| 8 | `POST` | `/api/v1/billing/subscriptions/cancel` | `TenantSubscriptionsController` | `cancelSubscription()` | `billing:subscriptions:manage_stripe` | Administrador de Taller |
+| 9 | `GET` | `/api/v1/billing/invoices` | `SaasInvoicesController` | `listInvoices()` | `billing:invoices:read` | Administrador de Taller |
+| 10 | `GET` | `/api/v1/billing/invoices/{id}` | `SaasInvoicesController` | `getInvoiceById()` | `billing:invoices:read` | Administrador de Taller |
+| 11 | `GET` | `/api/v1/billing/invoices/{id}/pdf` | `SaasInvoicesController` | `redirectToInvoicePdf()` | `billing:invoices:read` | Administrador de Taller |
+| 12 | `POST` | `/api/v1/billing/webhooks/stripe` | `StripeWebhooksController` | `handleWebhook()` | Verificación Firma HMAC-SHA256 | Pasarela Externa Stripe |
 
-#### GET /api/v1/billing/plans
+---
 
-##### Identidad Técnica
-* **Controlador:** `SubscriptionPlansController` (`com.andeva.atelier.platform.billing.interfaces.rest.controllers`)
-* **Método Java:** `public ResponseEntity<List<SubscriptionPlanResource>> getAllActivePlans(@RequestParam(required = false) String billingCycle)`
+## 3. Endpoints de SubscriptionPlansController
 
-##### Descripción Funcional
-Consulta la lista consolidada de planes comerciales activos disponibles para contratación. Retorna los niveles de membresía (Go, Pro, Max y Enterprise), precios bases, periodicidad y el conjunto completo de límites y habilitaciones de cuota operativa.
+El controlador `SubscriptionPlansController` gestiona el catálogo público de tarifas y planes de suscripción de Atelier Platform, así como la configuración administrativa de cuotas y vinculación con identificadores de precio en Stripe.
 
-##### Seguridad y Autorización
-* **Rol Mínimo:** Acceso público perimetral o cualquier usuario autenticado.
-* **Permiso Atómico:** `billing:plans:read` o acceso libre en pasarela perimetral.
-* **Contexto Multi-Inquilino:** No requiere aislamiento por taller al tratarse de un catálogo global de la plataforma.
+### 3.1. [GET] /api/v1/billing/plans
 
-##### Parámetros de Petición
-* **Headers:**
-  * `Authorization: Bearer <JWT>` (Opcional para visitantes, recomendado para clientes autenticados)
-* **Path Variables:** Ninguna.
-* **Query Parameters:**
-  | Parámetro | Tipo | Requerido | Descripción |
-  | :--- | :--- | :--- | :--- |
-  | `billingCycle` | String | No | Filtro por ciclo de facturación. Valores admitidos: `MONTHLY`, `YEARLY`. |
+#### Identidad Técnica
+* **Controlador:** `com.andeva.atelier.platform.billing.interfaces.rest.controllers.SubscriptionPlansController`
+* **Método Java:** `public ResponseEntity<List<SubscriptionPlanResource>> getActivePlans()`
+* **Ruta Base:** `/api/v1/billing/plans`
+* **Ruta Completa:** `/api/v1/billing/plans`
+* **Propósito:** Retorna la lista completa de planes comerciales activos disponibles para contratación, detallando precios, ciclo de facturación, cuotas operativas autorizadas y características modulares activas.
 
-##### Request DTO
-No aplica para peticiones de lectura HTTP GET.
+#### Descripción Funcional
+Permite a los administradores de taller o usuarios no registrados explorar las opciones comerciales disponibles de Atelier Platform. Consulta la base de datos de planes activos filtrando aquellos marcados con vigencia comercial (`isActive = true`), ordenados por nivel tarifario jerárquico (`GO`, `PRO`, `MAX`, `ENTERPRISE`). Cada plan proyecta sus cuotas técnicas asociadas para que el cliente conozca los límites de sucursales, personal activo, órdenes de trabajo mensuales, telemetría IoT y diagnósticos con inteligencia artificial.
 
-##### Response DTO
-* **Estado HTTP:** `200 OK`
-* **Record Java:** `List<com.andeva.atelier.platform.billing.interfaces.rest.resources.responses.SubscriptionPlanResource>`
+#### Seguridad y Autorización
+* **Nivel de Acceso:** Público / Catálogo Perimetral
+* **Rol Mínimo Requerido:** Público (Sin credenciales) o cualquier rol autenticado
+* **Permiso Atómico:** `PermitAll` / `@PreAuthorize("hasAuthority('billing:plans:read') or permitAll()")`
+* **Aislamiento Multi-Inquilino:** Catálogo global de plataforma. No aplica filtro por inquilino.
 
-Campos del recurso `SubscriptionPlanResource`:
-| Campo | Tipo Java | Descripción |
+#### Parámetros de Invocación
+* **Cabeceras HTTP (Headers):**
+  * `Accept: application/json`
+* **Parámetros de Ruta (Path Parameters):** No aplica.
+* **Parámetros de Consulta (Query Parameters):** No aplica.
+
+#### Recurso de Petición (Request Body)
+No aplica (Solicitud de tipo HTTP GET sin cuerpo).
+
+#### Recurso de Respuesta (Response Body)
+* **Estado HTTP Exitoso:** `200 OK`
+* **Registro Java DTO:** `List<com.andeva.atelier.platform.billing.interfaces.rest.resources.responses.SubscriptionPlanResource>`
+* **Definición de Campos Proyectados:**
+
+| Campo | Tipo de Dato | Descripción |
 | :--- | :--- | :--- |
-| `id` | UUID | Identificador universal único del plan comercial en la plataforma. |
-| `stripePriceId` | String | Identificador del objeto Price registrado en Stripe. |
-| `name` | String | Nombre comercial del plan (Go, Pro, Max o Enterprise). |
-| `tier` | String | Nivel del plan (`GO`, `PRO`, `MAX`, `ENTERPRISE`). |
-| `price` | BigDecimal | Importe monetario de la tarifa base. |
-| `currency` | String | Código de moneda bajo estándar ISO 4217 (USD o PEN). |
-| `billingCycle` | String | Periodicidad de cobro recurrente (`MONTHLY` o `YEARLY`). |
-| `quotaLimits` | TenantQuotaLimitsDto | Objeto anidado con los techos y habilitaciones de recursos del plan. |
-| `quotaLimits.maxBranches` | int | Límite máximo de sucursales físicas permitidas. |
-| `quotaLimits.maxActiveStaff` | int | Límite máximo de mecánicos y personal activo simultáneamente. |
-| `quotaLimits.maxActiveObd2Devices` | int | Límite de escáneres OBD-II telemáticos vinculados en simultáneo. |
-| `quotaLimits.maxPhotosPerWorkOrder` | int | Límite de evidencias fotográficas periciales por orden de trabajo. |
-| `quotaLimits.maxMonthlyAiReports` | int | Cupo mensual de informes de salud mecánica asistidos por inteligencia artificial. |
-| `quotaLimits.companyRegistrationAllowed` | boolean | Indicador de permiso para registrar clientes corporativos y flotas. |
-| `quotaLimits.multiWarehouseAllowed` | boolean | Indicador de permiso para transferencias de inventario multi-almacén FIFO. |
-| `quotaLimits.marketplaceListed` | boolean | Indicador de presencia comercial en el marketplace de flotas Atelier Business. |
-| `quotaLimits.maxMonthlyWorkOrders` | int | Cupo máximo mensual de órdenes de trabajo emitidas. |
-| `quotaLimits.iotTelemetryEnabled` | boolean | Indicador de habilitación de ingesta telemática en tiempo real. |
-| `quotaLimits.aiDiagnosticsEnabled` | boolean | Indicador de habilitación de diagnósticos predictivos de falla. |
-| `features` | List<PlanFeatureResource> | Lista de características comerciales paquetizadas dentro del plan. |
-| `isActive` | boolean | Estado de vigencia comercial del plan para nuevas compras. |
-| `createdAt` | Instant | Marca temporal de registro inicial en el sistema. |
-| `updatedAt` | Instant | Marca temporal de última modificación contractual. |
+| `id` | `UUID` | Identificador único del plan comercial en la base de datos |
+| `stripePriceId` | `String` | Identificador oficial del precio en la pasarela Stripe (ej. price_1Ou8abc) |
+| `name` | `String` | Nombre comercial formal del plan (ej. Atelier Pro) |
+| `tier` | `String` | Nivel funcional del plan (GO, PRO, MAX, ENTERPRISE) |
+| `price` | `BigDecimal` | Tarifa periódica en el valor monetario establecido |
+| `currency` | `String` | Código ISO de tres caracteres de la divisa (ej. USD o PEN) |
+| `billingCycle` | `String` | Frecuencia de renovación contractual (MONTHLY o YEARLY) |
+| `quotaLimits` | `TenantQuotaLimitsDto` | Objeto anidado con los techos operativos autorizados por el plan |
+| `quotaLimits.maxBranches` | `int` | Cantidad máxima de sedes físicas permitidas simultáneamente |
+| `quotaLimits.maxActiveStaff` | `int` | Límite máximo de personal técnico y administrativo activo |
+| `quotaLimits.maxActiveObd2Devices` | `int` | Techo de escáneres telemáticos OBD-II vinculables |
+| `quotaLimits.maxPhotosPerWorkOrder` | `int` | Cantidad máxima de evidencias fotográficas por orden de trabajo |
+| `quotaLimits.maxMonthlyAiReports` | `int` | Cupo mensual de informes de salud mecánica asistidos por Spring AI |
+| `quotaLimits.companyRegistrationAllowed` | `boolean` | Bandera que autoriza el registro de clientes tipo corporativo o flota |
+| `quotaLimits.multiWarehouseAllowed` | `boolean` | Habilita la gestión de inventario multi-almacén con costeo FIFO |
+| `quotaLimits.marketplaceListed` | `boolean` | Determina si el taller aparece listado en el marketplace B2B |
+| `quotaLimits.maxMonthlyWorkOrders` | `int` | Límite mensual de órdenes de trabajo procesables |
+| `quotaLimits.iotTelemetryEnabled` | `boolean` | Habilitación de ingesta telemática de alta frecuencia |
+| `quotaLimits.aiDiagnosticsEnabled` | `boolean` | Habilitación de inferencia predictiva asistida por Groq LPU |
+| `features` | `List<PlanFeatureResource>` | Colección de características modulares y servicios del plan |
+| `features[].id` | `UUID` | Identificador de la característica en el catálogo |
+| `features[].featureKey` | `String` | Clave técnica única de la funcionalidad |
+| `features[].name` | `String` | Denominación legible de la funcionalidad |
+| `features[].description` | `String` | Explicación del beneficio operativo para el taller |
+| `features[].isEnabled` | `boolean` | Estado de activación funcional de la característica |
+| `isActive` | `boolean` | Indicador de disponibilidad comercial del plan |
+| `createdAt` | `Instant` | Marca temporal de creación en formato ISO 8601 UTC |
+| `updatedAt` | `Instant` | Marca temporal de última modificación en formato ISO 8601 UTC |
 
-Ejemplo JSON de Respuesta:
+**Ejemplo de Carga Útil JSON (Response):**
 ```json
 [
   {
-    "id": "1e548f3b-8d76-47b2-b13c-fa5d206f4001",
-    "stripePriceId": "price_1OuAtelierGoMonth001",
-    "name": "Plan Go",
-    "tier": "GO",
-    "price": 49.00,
-    "currency": "USD",
-    "billingCycle": "MONTHLY",
-    "quotaLimits": {
-      "maxBranches": 1,
-      "maxActiveStaff": 5,
-      "maxActiveObd2Devices": 0,
-      "maxPhotosPerWorkOrder": 10,
-      "maxMonthlyAiReports": 0,
-      "companyRegistrationAllowed": false,
-      "multiWarehouseAllowed": false,
-      "marketplaceListed": false,
-      "maxMonthlyWorkOrders": 100,
-      "iotTelemetryEnabled": false,
-      "aiDiagnosticsEnabled": false
-    },
-    "features": [
-      {
-        "id": "fe018f3b-8d76-47b2-b13c-fa5d206f4001",
-        "featureKey": "FEATURE_SINGLE_BRANCH_MRO",
-        "name": "Operaciones en Sede Unica",
-        "description": "Gestion de ordenes de trabajo y citas para un taller individual.",
-        "isEnabled": true
-      },
-      {
-        "id": "fe028f3b-8d76-47b2-b13c-fa5d206f4002",
-        "featureKey": "FEATURE_BASIC_INVENTORY",
-        "name": "Inventario Valorizado FIFO",
-        "description": "Control de repuestos y costeo por lote para almacen unico.",
-        "isEnabled": true
-      }
-    ],
-    "isActive": true,
-    "createdAt": "2026-01-15T08:00:00Z",
-    "updatedAt": "2026-01-15T08:00:00Z"
-  },
-  {
-    "id": "2e548f3b-8d76-47b2-b13c-fa5d206f4002",
-    "stripePriceId": "price_1OuAtelierProMonth002",
-    "name": "Plan Pro",
+    "id": "018f6c40-7e12-7000-8000-000000000101",
+    "stripePriceId": "price_1Ou8abcPROMonthly",
+    "name": "Atelier Pro Mensual",
     "tier": "PRO",
-    "price": 129.00,
+    "price": 89.00,
     "currency": "USD",
     "billingCycle": "MONTHLY",
     "quotaLimits": {
       "maxBranches": 2,
       "maxActiveStaff": 10,
       "maxActiveObd2Devices": 5,
-      "maxPhotosPerWorkOrder": 100,
-      "maxMonthlyAiReports": 0,
+      "maxPhotosPerWorkOrder": 50,
+      "maxMonthlyAiReports": 10,
       "companyRegistrationAllowed": false,
       "multiWarehouseAllowed": false,
       "marketplaceListed": false,
       "maxMonthlyWorkOrders": 300,
       "iotTelemetryEnabled": true,
-      "aiDiagnosticsEnabled": false
+      "aiDiagnosticsEnabled": true
     },
     "features": [
       {
-        "id": "fe038f3b-8d76-47b2-b13c-fa5d206f4003",
-        "featureKey": "FEATURE_OBD2_TELEMETRY",
-        "name": "Telemetria OBD-II en Vivo",
-        "description": "Conectividad Bluetooth con escaneres para monitoreo de RPM y temperatura.",
+        "id": "018f6c40-7e12-7000-8000-000000000201",
+        "featureKey": "OBD2_TELEMETRY",
+        "name": "Telemetría OBD-II en Tiempo Real",
+        "description": "Conectividad Bluetooth con escáneres en bahía para diagnóstico en vivo",
+        "isEnabled": true
+      },
+      {
+        "id": "018f6c40-7e12-7000-8000-000000000202",
+        "featureKey": "FIFO_INVENTORY",
+        "name": "Inventario Valorizado FIFO",
+        "description": "Gestión de repuestos por lote con costeo de inventario estricto",
         "isEnabled": true
       }
     ],
     "isActive": true,
-    "createdAt": "2026-01-15T08:00:00Z",
-    "updatedAt": "2026-01-15T08:00:00Z"
+    "createdAt": "2026-09-01T12:00:00Z",
+    "updatedAt": "2026-10-01T14:30:00Z"
   }
 ]
 ```
 
-##### Errores y RFC 7807
-| Código HTTP | Error Type | Excepción de Dominio | Causa Común |
-| :--- | :--- | :--- | :--- |
-| `500 Internal Server Error` | `https://api.atelier.andeva.pe/errors/internal-error` | `BillingInfrastructureException` | Error no controlado en persistencia o conectividad de catálogo. |
+#### Errores y Excepciones de Dominio (RFC 7807)
 
-Ejemplo JSON ProblemDetail:
+| Código HTTP | Excepción Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `500 Internal Server Error` | `BillingDomainException` | Error no controlado en la consulta del catálogo de planes comerciales |
+
+**Ejemplo de Carga Útil de Error (RFC 7807 ProblemDetail):**
 ```json
 {
-  "type": "https://api.atelier.andeva.pe/errors/internal-error",
-  "title": "Error Interno de Infraestructura",
+  "type": "https://api.atelier.andeva.com/errors/billing-domain-violation",
+  "title": "Billing Domain Violation",
   "status": 500,
-  "detail": "No se pudo recuperar el catalogo comercial debido a una indisponibilidad temporal.",
+  "detail": "Error de infraestructura al consultar el catálogo comercial de planes",
   "instance": "/api/v1/billing/plans",
-  "code": "BILLING_CATALOG_UNAVAILABLE",
-  "timestamp": "2026-10-01T15:30:00Z"
+  "code": "ERR_BILLING_DOMAIN_VIOLATION",
+  "timestamp": "2026-10-04T02:00:00Z"
 }
 ```
 
 ---
 
-#### GET /api/v1/billing/plans/{id}
+### 3.2. [GET] /api/v1/billing/plans/{id}
 
-##### Identidad Técnica
-* **Controlador:** `SubscriptionPlansController` (`com.andeva.atelier.platform.billing.interfaces.rest.controllers`)
+#### Identidad Técnica
+* **Controlador:** `com.andeva.atelier.platform.billing.interfaces.rest.controllers.SubscriptionPlansController`
 * **Método Java:** `public ResponseEntity<SubscriptionPlanResource> getPlanById(@PathVariable UUID id)`
+* **Ruta Base:** `/api/v1/billing/plans`
+* **Ruta Completa:** `/api/v1/billing/plans/{id}`
+* **Propósito:** Obtiene la ficha técnica y comercial exhaustiva de un plan de suscripción específico a partir de su identificador universal.
 
-##### Descripción Funcional
-Consulta la ficha técnica y comercial completa de un plan de suscripción específico a partir de su identificador único universal.
+#### Descripción Funcional
+Recupera la entidad agregada `SubscriptionPlan` localizada por su `PlanId`. Valida la existencia del registro en el repositorio y transforma la estructura interna en un recurso de presentación `SubscriptionPlanResource`, incluyendo sus cuotas operativas y lista detallada de características.
 
-##### Seguridad y Autorización
-* **Rol Mínimo:** Acceso público perimetral o cualquier usuario autenticado.
-* **Permiso Atómico:** `billing:plans:read`.
-* **Contexto Multi-Inquilino:** No requiere aislamiento por taller.
+#### Seguridad y Autorización
+* **Nivel de Acceso:** Público / Catálogo Perimetral
+* **Rol Mínimo Requerido:** Público (Sin credenciales) o cualquier rol autenticado
+* **Permiso Atómico:** `PermitAll` / `@PreAuthorize("hasAuthority('billing:plans:read') or permitAll()")`
+* **Aislamiento Multi-Inquilino:** Catálogo global de plataforma.
 
-##### Parámetros de Petición
-* **Headers:**
-  * `Authorization: Bearer <JWT>` (Opcional en catálogo público)
-* **Path Variables:**
-  | Variable | Tipo | Descripción |
-  | :--- | :--- | :--- |
-  | `id` | UUID | Identificador universal único del plan comercial. |
-* **Query Parameters:** Ninguno.
+#### Parámetros de Invocación
+* **Cabeceras HTTP (Headers):**
+  * `Accept: application/json`
+* **Parámetros de Ruta (Path Parameters):**
+  * `id` (`UUID`): Identificador universal único del plan tarifario consultado.
+* **Parámetros de Consulta (Query Parameters):** No aplica.
 
-##### Request DTO
-No aplica para peticiones HTTP GET.
+#### Recurso de Petición (Request Body)
+No aplica (Solicitud de tipo HTTP GET sin cuerpo).
 
-##### Response DTO
-* **Estado HTTP:** `200 OK`
-* **Record Java:** `com.andeva.atelier.platform.billing.interfaces.rest.resources.responses.SubscriptionPlanResource`
+#### Recurso de Respuesta (Response Body)
+* **Estado HTTP Exitoso:** `200 OK`
+* **Registro Java DTO:** `com.andeva.atelier.platform.billing.interfaces.rest.resources.responses.SubscriptionPlanResource`
+* **Definición de Campos Proyectados:** Idéntica a la definición proyectada en el endpoint `GET /api/v1/billing/plans`.
 
-Ejemplo JSON de Respuesta:
+**Ejemplo de Carga Útil JSON (Response):**
 ```json
 {
-  "id": "2e548f3b-8d76-47b2-b13c-fa5d206f4002",
-  "stripePriceId": "price_1OuAtelierProMonth002",
-  "name": "Plan Pro",
-  "tier": "PRO",
-  "price": 129.00,
-  "currency": "USD",
-  "billingCycle": "MONTHLY",
-  "quotaLimits": {
-    "maxBranches": 2,
-    "maxActiveStaff": 10,
-    "maxActiveObd2Devices": 5,
-    "maxPhotosPerWorkOrder": 100,
-    "maxMonthlyAiReports": 0,
-    "companyRegistrationAllowed": false,
-    "multiWarehouseAllowed": false,
-    "marketplaceListed": false,
-    "maxMonthlyWorkOrders": 300,
-    "iotTelemetryEnabled": true,
-    "aiDiagnosticsEnabled": false
-  },
-  "features": [
-    {
-      "id": "fe038f3b-8d76-47b2-b13c-fa5d206f4003",
-      "featureKey": "FEATURE_OBD2_TELEMETRY",
-      "name": "Telemetria OBD-II en Vivo",
-      "description": "Conectividad Bluetooth con escaneres para monitoreo de RPM y temperatura.",
-      "isEnabled": true
-    }
-  ],
-  "isActive": true,
-  "createdAt": "2026-01-15T08:00:00Z",
-  "updatedAt": "2026-01-15T08:00:00Z"
-}
-```
-
-##### Errores y RFC 7807
-| Código HTTP | Error Type | Excepción de Dominio | Causa Común |
-| :--- | :--- | :--- | :--- |
-| `400 Bad Request` | `https://api.atelier.andeva.pe/errors/invalid-identifier` | `IllegalArgumentException` | El identificador proporcionado en la ruta no cumple el formato UUID estándar. |
-| `404 Not Found` | `https://api.atelier.andeva.pe/errors/plan-not-found` | `PlanNotFoundException` | No existe ningun plan registrado con el identificador UUID proporcionado. |
-
-Ejemplo JSON ProblemDetail:
-```json
-{
-  "type": "https://api.atelier.andeva.pe/errors/plan-not-found",
-  "title": "Plan Comercial No Encontrado",
-  "status": 404,
-  "detail": "El plan de suscripcion con identificador 2e548f3b-8d76-47b2-b13c-fa5d206f4999 no existe en el sistema.",
-  "instance": "/api/v1/billing/plans/2e548f3b-8d76-47b2-b13c-fa5d206f4999",
-  "code": "PLAN_NOT_FOUND",
-  "timestamp": "2026-10-01T15:31:00Z"
-}
-```
-
----
-
-#### POST /api/v1/billing/plans
-
-##### Identidad Técnica
-* **Controlador:** `SubscriptionPlansController` (`com.andeva.atelier.platform.billing.interfaces.rest.controllers`)
-* **Método Java:** `public ResponseEntity<SubscriptionPlanResource> createSubscriptionPlan(@Valid @RequestBody CreateSubscriptionPlanRequest request)`
-
-##### Descripción Funcional
-Registra administrativamente un nuevo paquete comercial en Atelier Platform, asociándolo con un identificador de precio recurrente previamente creado en Stripe y estableciendo las cuotas técnicas inmutables que gobernarán a los talleres suscriptores.
-
-##### Seguridad y Autorización
-* **Rol Mínimo:** `ROLE_SUPER_ADMIN` (Administrador global de la plataforma Andeva).
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('billing:plans:write') and hasRole('ROLE_SUPER_ADMIN')")`
-* **Contexto Multi-Inquilino:** Operación administrativa global a nivel de plataforma.
-
-##### Parámetros de Petición
-* **Headers:**
-  * `Authorization: Bearer <JWT>` (Obligatorio con credenciales de superadministrador)
-  * `Content-Type: application/json` (Obligatorio)
-* **Path Variables:** Ninguna.
-* **Query Parameters:** Ninguno.
-
-##### Request DTO
-* **Record Java:** `com.andeva.atelier.platform.billing.interfaces.rest.resources.requests.CreateSubscriptionPlanRequest`
-
-Tabla de Campos:
-| Campo | Tipo Java | Validaciones Jakarta | Descripción |
-| :--- | :--- | :--- | :--- |
-| `stripePriceId` | String | `@NotBlank`, `@Pattern(regexp = "^price_[a-zA-Z0-9]+$")` | Identificador del precio recurrente generado en la consola de Stripe. |
-| `name` | String | `@NotBlank`, `@Size(min = 3, max = 100)` | Nombre comercial del plan. |
-| `tier` | String | `@NotBlank`, `@Pattern(regexp = "^(GO\|PRO\|MAX\|ENTERPRISE)$")` | Nivel arquitectónico del plan. |
-| `price` | BigDecimal | `@NotNull`, `@DecimalMin("0.0")`, `@Digits(integer = 10, fraction = 2)` | Importe monetario base del plan. |
-| `currency` | String | `@NotBlank`, `@Size(min = 3, max = 3)` | Código de moneda bajo estándar ISO 4217 (USD o PEN). |
-| `billingCycle` | String | `@NotBlank`, `@Pattern(regexp = "^(MONTHLY\|YEARLY)$")` | Ciclo de cobro recurrente. |
-| `quotaLimits` | TenantQuotaLimitsDto | `@NotNull`, `@Valid` | Estructura con las cuotas y límites del plan. |
-| `features` | List<PlanFeatureRequest> | `@Valid` | Lista opcional de funcionalidades paquetizadas. |
-
-Ejemplo JSON de Solicitud:
-```json
-{
-  "stripePriceId": "price_1OuAtelierMaxMonth003",
-  "name": "Plan Max",
+  "id": "018f6c40-7e12-7000-8000-000000000102",
+  "stripePriceId": "price_1Ou8abcMAXMonthly",
+  "name": "Atelier Max Mensual",
   "tier": "MAX",
-  "price": 249.00,
+  "price": 179.00,
   "currency": "USD",
   "billingCycle": "MONTHLY",
   "quotaLimits": {
     "maxBranches": 5,
     "maxActiveStaff": 25,
     "maxActiveObd2Devices": 15,
-    "maxPhotosPerWorkOrder": 150,
+    "maxPhotosPerWorkOrder": 100,
     "maxMonthlyAiReports": 60,
     "companyRegistrationAllowed": true,
     "multiWarehouseAllowed": true,
@@ -341,136 +231,252 @@ Ejemplo JSON de Solicitud:
   },
   "features": [
     {
-      "featureKey": "FEATURE_AI_PREDICTIONS",
-      "name": "Diagnostico Predictivo Spring AI",
-      "description": "Inferencia pericial en la nube LPU de Groq con analisis termodinamico.",
+      "id": "018f6c40-7e12-7000-8000-000000000201",
+      "featureKey": "OBD2_TELEMETRY",
+      "name": "Telemetría OBD-II en Tiempo Real",
+      "description": "Conectividad Bluetooth con escáneres en bahía para diagnóstico en vivo",
       "isEnabled": true
     },
     {
-      "featureKey": "FEATURE_MULTI_WAREHOUSE",
-      "name": "Gestion Multi-Almacen FIFO",
-      "description": "Transferencias de inventario entre sedes y costeo estricto por lote.",
+      "id": "018f6c40-7e12-7000-8000-000000000203",
+      "featureKey": "SPRING_AI_GROQ_DIAGNOSTICS",
+      "name": "Diagnósticos Predictivos con Inteligencia Artificial",
+      "description": "Análisis computarizado de fallas y emisión de reportes forenses en PDF",
+      "isEnabled": true
+    }
+  ],
+  "isActive": true,
+  "createdAt": "2026-09-01T12:00:00Z",
+  "updatedAt": "2026-10-01T14:30:00Z"
+}
+```
+
+#### Errores y Excepciones de Dominio (RFC 7807)
+
+| Código HTTP | Excepción Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `400 Bad Request` | `MethodArgumentTypeMismatchException` | El parámetro de ruta id no presenta un formato UUID válido |
+| `404 Not Found` | `PlanNotFoundException` | El identificador proporcionado no corresponde a ningún plan registrado |
+
+**Ejemplo de Carga Útil de Error (RFC 7807 ProblemDetail):**
+```json
+{
+  "type": "https://api.atelier.andeva.com/errors/plan-not-found",
+  "title": "Plan Not Found",
+  "status": 404,
+  "detail": "El plan comercial con identificador 018f6c40-7e12-7000-8000-000000000999 no existe en el catálogo",
+  "instance": "/api/v1/billing/plans/018f6c40-7e12-7000-8000-000000000999",
+  "code": "ERR_PLAN_NOT_FOUND",
+  "timestamp": "2026-10-04T02:00:00Z"
+}
+```
+
+---
+
+### 3.3. [POST] /api/v1/billing/plans
+
+#### Identidad Técnica
+* **Controlador:** `com.andeva.atelier.platform.billing.interfaces.rest.controllers.SubscriptionPlansController`
+* **Método Java:** `public ResponseEntity<SubscriptionPlanResource> createPlan(@Valid @RequestBody CreateSubscriptionPlanRequest request)`
+* **Ruta Base:** `/api/v1/billing/plans`
+* **Ruta Completa:** `/api/v1/billing/plans`
+* **Propósito:** Registra administrativamente un nuevo plan comercial en la plataforma vinculándolo a un precio preconfigurado en Stripe.
+
+#### Descripción Funcional
+Permite a los administradores globales de la plataforma registrar una nueva oferta tarifaria en el sistema. Valida que el identificador de precio en Stripe comience con el prefijo formal `price_`, que la moneda corresponda a un estándar ISO válido y que las cuotas operativas cumplan las invariantes mínimas del dominio. Persiste el agregado `SubscriptionPlan` con sus características modulares y publica el evento de integración `SubscriptionPlanCreatedEvent`.
+
+#### Seguridad y Autorización
+* **Nivel de Acceso:** Protegido / Exclusivo Administrador de Plataforma
+* **Rol Mínimo Requerido:** Administrador de Plataforma (`ROLE_SUPER_ADMIN`)
+* **Permiso Atómico:** `@PreAuthorize("hasAuthority('billing:plans:manage')")`
+* **Aislamiento Multi-Inquilino:** Configuración global de plataforma.
+
+#### Parámetros de Invocación
+* **Cabeceras HTTP (Headers):**
+  * `Authorization: Bearer <JWT>`
+  * `Content-Type: application/json`
+* **Parámetros de Ruta (Path Parameters):** No aplica.
+* **Parámetros de Consulta (Query Parameters):** No aplica.
+
+#### Recurso de Petición (Request Body)
+* **Registro Java DTO:** `com.andeva.atelier.platform.billing.interfaces.rest.resources.requests.CreateSubscriptionPlanRequest`
+* **Definición de Campos:**
+
+| Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripción |
+| :--- | :--- | :---: | :--- | :--- |
+| `stripePriceId` | `String` | Sí | `@NotBlank, @Pattern(regexp = "^price_[a-zA-Z0-9]+$")` | Identificador de precio creado en la pasarela Stripe |
+| `name` | `String` | Sí | `@NotBlank, @Size(min = 3, max = 100)` | Denominación comercial formal del plan |
+| `tier` | `String` | Sí | `@NotBlank, @Pattern(regexp = "^(GO\|PRO\|MAX\|ENTERPRISE)$")` | Nivel del plan tarifario |
+| `price` | `BigDecimal` | Sí | `@NotNull, @DecimalMin("0.0"), @Digits(integer = 10, fraction = 2)` | Importe recurrente en la divisa especificada |
+| `currency` | `String` | Sí | `@NotBlank, @Size(min = 3, max = 3)` | Código de moneda ISO 4217 (ej. USD, PEN) |
+| `billingCycle` | `String` | Sí | `@NotBlank, @Pattern(regexp = "^(MONTHLY\|YEARLY)$")` | Periodicidad de liquidación |
+| `quotaLimits` | `TenantQuotaLimitsDto` | Sí | `@NotNull, @Valid` | Cuotas y capacidades técnicas habilitadas |
+| `features` | `List<PlanFeatureRequest>` | No | `@Valid` | Lista opcional de características modulares |
+
+**Ejemplo de Carga Útil JSON (Request):**
+```json
+{
+  "stripePriceId": "price_1Ou8abcENTERPRISEAnnual",
+  "name": "Atelier Enterprise Corporativo Anual",
+  "tier": "ENTERPRISE",
+  "price": 2388.00,
+  "currency": "USD",
+  "billingCycle": "YEARLY",
+  "quotaLimits": {
+    "maxBranches": 20,
+    "maxActiveStaff": 100,
+    "maxActiveObd2Devices": 50,
+    "maxPhotosPerWorkOrder": 200,
+    "maxMonthlyAiReports": 500,
+    "companyRegistrationAllowed": true,
+    "multiWarehouseAllowed": true,
+    "marketplaceListed": true,
+    "maxMonthlyWorkOrders": 5000,
+    "iotTelemetryEnabled": true,
+    "aiDiagnosticsEnabled": true
+  },
+  "features": [
+    {
+      "featureKey": "MULTI_WAREHOUSE",
+      "name": "Gestión Multi-Almacén Inter-Sede",
+      "description": "Transferencias entre depósitos y valoración consolidada FIFO",
+      "isEnabled": true
+    },
+    {
+      "featureKey": "PRIORITY_SLA_SUPPORT",
+      "name": "Soporte Técnico con SLA Prioritario",
+      "description": "Atención telefónica directa 24 horas y resolución en menos de dos horas",
       "isEnabled": true
     }
   ]
 }
 ```
 
-##### Response DTO
-* **Estado HTTP:** `201 Created`
-* **Headers:** `Location: /api/v1/billing/plans/{id}`
-* **Record Java:** `com.andeva.atelier.platform.billing.interfaces.rest.resources.responses.SubscriptionPlanResource`
+#### Recurso de Respuesta (Response Body)
+* **Estado HTTP Exitoso:** `201 Created` con cabecera `Location: /api/v1/billing/plans/{id}`
+* **Registro Java DTO:** `com.andeva.atelier.platform.billing.interfaces.rest.resources.responses.SubscriptionPlanResource`
+* **Definición de Campos Proyectados:** Idéntica a la especificación de `SubscriptionPlanResource`.
 
-Ejemplo JSON de Respuesta:
+**Ejemplo de Carga Útil JSON (Response):**
 ```json
 {
-  "id": "3e548f3b-8d76-47b2-b13c-fa5d206f4003",
-  "stripePriceId": "price_1OuAtelierMaxMonth003",
-  "name": "Plan Max",
-  "tier": "MAX",
-  "price": 249.00,
+  "id": "018f6c40-7e12-7000-8000-000000000103",
+  "stripePriceId": "price_1Ou8abcENTERPRISEAnnual",
+  "name": "Atelier Enterprise Corporativo Anual",
+  "tier": "ENTERPRISE",
+  "price": 2388.00,
   "currency": "USD",
-  "billingCycle": "MONTHLY",
+  "billingCycle": "YEARLY",
   "quotaLimits": {
-    "maxBranches": 5,
-    "maxActiveStaff": 25,
-    "maxActiveObd2Devices": 15,
-    "maxPhotosPerWorkOrder": 150,
-    "maxMonthlyAiReports": 60,
+    "maxBranches": 20,
+    "maxActiveStaff": 100,
+    "maxActiveObd2Devices": 50,
+    "maxPhotosPerWorkOrder": 200,
+    "maxMonthlyAiReports": 500,
     "companyRegistrationAllowed": true,
     "multiWarehouseAllowed": true,
     "marketplaceListed": true,
-    "maxMonthlyWorkOrders": 1000,
+    "maxMonthlyWorkOrders": 5000,
     "iotTelemetryEnabled": true,
     "aiDiagnosticsEnabled": true
   },
   "features": [
     {
-      "id": "fe048f3b-8d76-47b2-b13c-fa5d206f4004",
-      "featureKey": "FEATURE_AI_PREDICTIONS",
-      "name": "Diagnostico Predictivo Spring AI",
-      "description": "Inferencia pericial en la nube LPU de Groq con analisis termodinamico.",
+      "id": "018f6c40-7e12-7000-8000-000000000204",
+      "featureKey": "MULTI_WAREHOUSE",
+      "name": "Gestión Multi-Almacén Inter-Sede",
+      "description": "Transferencias entre depósitos y valoración consolidada FIFO",
+      "isEnabled": true
+    },
+    {
+      "id": "018f6c40-7e12-7000-8000-000000000205",
+      "featureKey": "PRIORITY_SLA_SUPPORT",
+      "name": "Soporte Técnico con SLA Prioritario",
+      "description": "Atención telefónica directa 24 horas y resolución en menos de dos horas",
       "isEnabled": true
     }
   ],
   "isActive": true,
-  "createdAt": "2026-10-01T15:32:00Z",
-  "updatedAt": "2026-10-01T15:32:00Z"
+  "createdAt": "2026-10-04T02:05:00Z",
+  "updatedAt": "2026-10-04T02:05:00Z"
 }
 ```
 
-##### Errores y RFC 7807
-| Código HTTP | Error Type | Excepción de Dominio | Causa Común |
-| :--- | :--- | :--- | :--- |
-| `400 Bad Request` | `https://api.atelier.andeva.pe/errors/validation-failed` | `MethodArgumentNotValidException` | Campos requeridos ausentes o violación de expresiones regulares. |
-| `401 Unauthorized` | `https://api.atelier.andeva.pe/errors/unauthorized` | `AuthenticationException` | Token JWT ausente, vencido o con firma criptográfica inválida. |
-| `403 Forbidden` | `https://api.atelier.andeva.pe/errors/forbidden` | `AccessDeniedException` | El usuario no ostenta el rol de superadministrador de plataforma. |
-| `409 Conflict` | `https://api.atelier.andeva.pe/errors/duplicate-plan` | `DuplicatePlanException` | Ya existe un plan registrado con el mismo `stripePriceId` o nombre. |
-| `422 Unprocessable Entity` | `https://api.atelier.andeva.pe/errors/invalid-plan-pricing` | `InvalidPlanPricingException` | Tarifas monetarias negativas o configuración inconsistente de cuotas. |
+#### Errores y Excepciones de Dominio (RFC 7807)
 
-Ejemplo JSON ProblemDetail:
+| Código HTTP | Excepción Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `400 Bad Request` | `MethodArgumentNotValidException` | Faltan campos obligatorios o el formato de stripePriceId es inválido |
+| `400 Bad Request` | `InvalidPlanPricingException` | Parámetros de importe o moneda inconsistentes con las reglas de Stripe |
+| `401 Unauthorized` | `AuthenticationException` | Token JWT ausente o inválido |
+| `403 Forbidden` | `AccessDeniedException` | El usuario autenticado carece del rol SUPER_ADMIN |
+| `409 Conflict` | `DuplicatePlanException` | Ya existe un plan registrado con el mismo stripePriceId |
+
+**Ejemplo de Carga Útil de Error (RFC 7807 ProblemDetail):**
 ```json
 {
-  "type": "https://api.atelier.andeva.pe/errors/duplicate-plan",
-  "title": "Conflicto en Registro de Plan",
-  "status": 409,
-  "detail": "El identificador de precio price_1OuAtelierMaxMonth003 ya se encuentra asignado a otro plan activo.",
+  "type": "https://api.atelier.andeva.com/errors/invalid-plan-pricing",
+  "title": "Invalid Plan Pricing",
+  "status": 400,
+  "detail": "El precio especificado no puede ser negativo ni exceder dos decimales de precisión",
   "instance": "/api/v1/billing/plans",
-  "code": "DUPLICATE_STRIPE_PRICE_ID",
-  "timestamp": "2026-10-01T15:32:30Z"
+  "code": "ERR_INVALID_PLAN_PRICING",
+  "timestamp": "2026-10-04T02:05:00Z"
 }
 ```
 
 ---
 
-#### PUT /api/v1/billing/plans/{id}
+### 3.4. [PUT] /api/v1/billing/plans/{id}
 
-##### Identidad Técnica
-* **Controlador:** `SubscriptionPlansController` (`com.andeva.atelier.platform.billing.interfaces.rest.controllers`)
-* **Método Java:** `public ResponseEntity<SubscriptionPlanResource> updateSubscriptionPlan(@PathVariable UUID id, @Valid @RequestBody UpdateSubscriptionPlanRequest request)`
+#### Identidad Técnica
+* **Controlador:** `com.andeva.atelier.platform.billing.interfaces.rest.controllers.SubscriptionPlansController`
+* **Método Java:** `public ResponseEntity<SubscriptionPlanResource> updatePlan(@PathVariable UUID id, @Valid @RequestBody UpdateSubscriptionPlanRequest request)`
+* **Ruta Base:** `/api/v1/billing/plans`
+* **Ruta Completa:** `/api/v1/billing/plans/{id}`
+* **Propósito:** Actualiza cuotas operativas, denominación comercial, estado de vigencia o periodicidad de un plan existente.
 
-##### Descripción Funcional
-Actualiza los parámetros comerciales, las cuotas operativas autorizadas o el estado de vigencia comercial de un plan de software existente.
+#### Descripción Funcional
+Permite a los administradores de la plataforma ajustar las capacidades técnicas asignadas a un plan comercial o retirar su vigencia comercial mediante la bandera `isActive`. El agregador valida que la modificación de cuotas no infrinja restricciones sobre talleres actualmente suscritos que requieran soporte continuado. Tras la mutación, se invalidan selectivamente las entradas en Caffeine Cache para forzar la actualización de cuotas en las subsiguientes peticiones de los talleres.
 
-##### Seguridad y Autorización
-* **Rol Mínimo:** `ROLE_SUPER_ADMIN`.
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('billing:plans:write') and hasRole('ROLE_SUPER_ADMIN')")`
-* **Contexto Multi-Inquilino:** Operación administrativa global.
+#### Seguridad y Autorización
+* **Nivel de Acceso:** Protegido / Exclusivo Administrador de Plataforma
+* **Rol Mínimo Requerido:** Administrador de Plataforma (`ROLE_SUPER_ADMIN`)
+* **Permiso Atómico:** `@PreAuthorize("hasAuthority('billing:plans:manage')")`
+* **Aislamiento Multi-Inquilino:** Configuración global de plataforma.
 
-##### Parámetros de Petición
-* **Headers:**
-  * `Authorization: Bearer <JWT>` (Obligatorio)
-  * `Content-Type: application/json` (Obligatorio)
-* **Path Variables:**
-  | Variable | Tipo | Descripción |
-  | :--- | :--- | :--- |
-  | `id` | UUID | Identificador universal del plan comercial a modificar. |
-* **Query Parameters:** Ninguno.
+#### Parámetros de Invocación
+* **Cabeceras HTTP (Headers):**
+  * `Authorization: Bearer <JWT>`
+  * `Content-Type: application/json`
+* **Parámetros de Ruta (Path Parameters):**
+  * `id` (`UUID`): Identificador universal del plan que se desea actualizar.
+* **Parámetros de Consulta (Query Parameters):** No aplica.
 
-##### Request DTO
-* **Record Java:** `com.andeva.atelier.platform.billing.interfaces.rest.resources.requests.UpdateSubscriptionPlanRequest`
+#### Recurso de Petición (Request Body)
+* **Registro Java DTO:** `com.andeva.atelier.platform.billing.interfaces.rest.resources.requests.UpdateSubscriptionPlanRequest`
+* **Definición de Campos:**
 
-Tabla de Campos:
-| Campo | Tipo Java | Validaciones Jakarta | Descripción |
-| :--- | :--- | :--- | :--- |
-| `name` | String | `@NotBlank`, `@Size(min = 3, max = 100)` | Nombre comercial actualizado del plan. |
-| `price` | BigDecimal | `@NotNull`, `@DecimalMin("0.0")`, `@Digits(integer = 10, fraction = 2)` | Nueva tarifa monetaria. |
-| `billingCycle` | String | `@NotBlank`, `@Pattern(regexp = "^(MONTHLY\|YEARLY)$")` | Periodicidad de cobro. |
-| `quotaLimits` | TenantQuotaLimitsDto | `@NotNull`, `@Valid` | Nuevos techos de cuota operativa. |
-| `isActive` | Boolean | Opcional | Estado de vigencia comercial para nuevas ventas. |
+| Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripción |
+| :--- | :--- | :---: | :--- | :--- |
+| `name` | `String` | Sí | `@NotBlank, @Size(min = 3, max = 100)` | Nombre comercial actualizado del plan |
+| `price` | `BigDecimal` | Sí | `@NotNull, @DecimalMin("0.0"), @Digits(integer = 10, fraction = 2)` | Importe actualizado |
+| `billingCycle` | `String` | Sí | `@NotBlank, @Pattern(regexp = "^(MONTHLY\|YEARLY)$")` | Periodicidad de liquidación |
+| `quotaLimits` | `TenantQuotaLimitsDto` | Sí | `@NotNull, @Valid` | Cuotas y capacidades técnicas actualizadas |
+| `isActive` | `Boolean` | No | Sin restricción adicional | Estado de activación comercial del plan |
 
-Ejemplo JSON de Solicitud:
+**Ejemplo de Carga Útil JSON (Request):**
 ```json
 {
-  "name": "Plan Pro Plus",
-  "price": 139.00,
+  "name": "Atelier Pro Plus Mensual",
+  "price": 99.00,
   "billingCycle": "MONTHLY",
   "quotaLimits": {
-    "maxBranches": 2,
+    "maxBranches": 3,
     "maxActiveStaff": 12,
     "maxActiveObd2Devices": 8,
-    "maxPhotosPerWorkOrder": 120,
-    "maxMonthlyAiReports": 10,
+    "maxPhotosPerWorkOrder": 60,
+    "maxMonthlyAiReports": 15,
     "companyRegistrationAllowed": false,
     "multiWarehouseAllowed": false,
     "marketplaceListed": false,
@@ -482,26 +488,27 @@ Ejemplo JSON de Solicitud:
 }
 ```
 
-##### Response DTO
-* **Estado HTTP:** `200 OK`
-* **Record Java:** `com.andeva.atelier.platform.billing.interfaces.rest.resources.responses.SubscriptionPlanResource`
+#### Recurso de Respuesta (Response Body)
+* **Estado HTTP Exitoso:** `200 OK`
+* **Registro Java DTO:** `com.andeva.atelier.platform.billing.interfaces.rest.resources.responses.SubscriptionPlanResource`
+* **Definición de Campos Proyectados:** Idéntica a la especificación de `SubscriptionPlanResource`.
 
-Ejemplo JSON de Respuesta:
+**Ejemplo de Carga Útil JSON (Response):**
 ```json
 {
-  "id": "2e548f3b-8d76-47b2-b13c-fa5d206f4002",
-  "stripePriceId": "price_1OuAtelierProMonth002",
-  "name": "Plan Pro Plus",
+  "id": "018f6c40-7e12-7000-8000-000000000101",
+  "stripePriceId": "price_1Ou8abcPROMonthly",
+  "name": "Atelier Pro Plus Mensual",
   "tier": "PRO",
-  "price": 139.00,
+  "price": 99.00,
   "currency": "USD",
   "billingCycle": "MONTHLY",
   "quotaLimits": {
-    "maxBranches": 2,
+    "maxBranches": 3,
     "maxActiveStaff": 12,
     "maxActiveObd2Devices": 8,
-    "maxPhotosPerWorkOrder": 120,
-    "maxMonthlyAiReports": 10,
+    "maxPhotosPerWorkOrder": 60,
+    "maxMonthlyAiReports": 15,
     "companyRegistrationAllowed": false,
     "multiWarehouseAllowed": false,
     "marketplaceListed": false,
@@ -509,78 +516,104 @@ Ejemplo JSON de Respuesta:
     "iotTelemetryEnabled": true,
     "aiDiagnosticsEnabled": true
   },
-  "features": [],
+  "features": [
+    {
+      "id": "018f6c40-7e12-7000-8000-000000000201",
+      "featureKey": "OBD2_TELEMETRY",
+      "name": "Telemetría OBD-II en Tiempo Real",
+      "description": "Conectividad Bluetooth con escáneres en bahía para diagnóstico en vivo",
+      "isEnabled": true
+    }
+  ],
   "isActive": true,
-  "createdAt": "2026-01-15T08:00:00Z",
-  "updatedAt": "2026-10-01T15:33:00Z"
+  "createdAt": "2026-09-01T12:00:00Z",
+  "updatedAt": "2026-10-04T02:10:00Z"
 }
 ```
 
-##### Errores y RFC 7807
-| Código HTTP | Error Type | Excepción de Dominio | Causa Común |
-| :--- | :--- | :--- | :--- |
-| `400 Bad Request` | `https://api.atelier.andeva.pe/errors/validation-failed` | `MethodArgumentNotValidException` | Formato numérico incorrecto o violaciones de validación en campos. |
-| `401 Unauthorized` | `https://api.atelier.andeva.pe/errors/unauthorized` | `AuthenticationException` | Token de autenticación ausente o inválido. |
-| `403 Forbidden` | `https://api.atelier.andeva.pe/errors/forbidden` | `AccessDeniedException` | Permisos insuficientes sin rol de superadministrador. |
-| `404 Not Found` | `https://api.atelier.andeva.pe/errors/plan-not-found` | `PlanNotFoundException` | El plan a actualizar no existe en el catálogo. |
-| `422 Unprocessable Entity` | `https://api.atelier.andeva.pe/errors/invalid-plan-pricing` | `InvalidPlanPricingException` | Se intenta reducir cuotas operativas por debajo de mínimos permitidos. |
+#### Errores y Excepciones de Dominio (RFC 7807)
+
+| Código HTTP | Excepción Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `400 Bad Request` | `MethodArgumentNotValidException` | Campos obligatorios ausentes o formato de cuotas inválido |
+| `401 Unauthorized` | `AuthenticationException` | Token JWT ausente o expirado |
+| `403 Forbidden` | `AccessDeniedException` | Permisos insuficientes para editar planes comerciales |
+| `404 Not Found` | `PlanNotFoundException` | El identificador del plan no existe en el repositorio |
+
+**Ejemplo de Carga Útil de Error (RFC 7807 ProblemDetail):**
+```json
+{
+  "type": "https://api.atelier.andeva.com/errors/plan-not-found",
+  "title": "Plan Not Found",
+  "status": 404,
+  "detail": "No se puede actualizar el plan porque no existe en la base de datos",
+  "instance": "/api/v1/billing/plans/018f6c40-7e12-7000-8000-000000000101",
+  "code": "ERR_PLAN_NOT_FOUND",
+  "timestamp": "2026-10-04T02:10:00Z"
+}
+```
 
 ---
 
-### 3.2. TenantSubscriptionsController
+## 4. Endpoints de TenantSubscriptionsController
 
-Controlador encargado de la gestión del ciclo contractual del taller, sesiones de pago seguras en Stripe Checkout y autogestión de medios de pago.
+El controlador `TenantSubscriptionsController` gobierna el ciclo de vida de la suscripción del taller mecánico autenticado, gestionando la consulta del estado operativo, la inicialización de sesiones alojadas en Stripe Checkout, la generación de portales de autogestión de cliente y la cancelación de membresías.
 
-#### GET /api/v1/billing/subscriptions/me
+### 4.1. [GET] /api/v1/billing/subscriptions/me
 
-##### Identidad Técnica
-* **Controlador:** `TenantSubscriptionsController` (`com.andeva.atelier.platform.billing.interfaces.rest.controllers`)
-* **Método Java:** `public ResponseEntity<TenantSubscriptionResource> getCurrentTenantSubscription(@AuthenticationPrincipal Jwt jwt)`
+#### Identidad Técnica
+* **Controlador:** `com.andeva.atelier.platform.billing.interfaces.rest.controllers.TenantSubscriptionsController`
+* **Método Java:** `public ResponseEntity<TenantSubscriptionResource> getCurrentSubscription(@AuthenticationPrincipal Jwt jwt)`
+* **Ruta Base:** `/api/v1/billing/subscriptions`
+* **Ruta Completa:** `/api/v1/billing/subscriptions/me`
+* **Propósito:** Consulta el contrato de suscripción vigente del taller automotriz autenticado, su estado contable, periodo de facturación actual y límites de cuota técnica en tiempo real.
 
-##### Descripción Funcional
-Consulta la suscripción contractual activa del taller automotriz autenticado, su estado contable (`ACTIVE`, `TRIALING`, `PAST_DUE`), periodo de cobertura vigente, bandera de cancelación al fin de ciclo y techos de cuota operativa asignados.
+#### Descripción Funcional
+Extrae el `tenant_id` del token JWT de la sesión autenticada. Primero consulta en la capa de caché de alto rendimiento Caffeine Cache para verificar si existe un registro válido con tiempo de vida remanente. De no existir en memoria o ante una invalidación reactiva por webhook de Stripe, acude al repositorio PostgreSQL para reconstruir el agregado `TenantSubscription`, contrastando las fechas de inicio y término del ciclo, la presencia de periodo de prueba (`trialEndDate`) y el indicador de cancelación programada (`cancelAtPeriodEnd`). Resuelve determinísticamente la bandera `isAccessGranted`.
 
-##### Seguridad y Autorización
-* **Rol Mínimo:** `ROLE_TENANT_ADMIN` o `ROLE_WORKSHOP_OWNER`.
+#### Seguridad y Autorización
+* **Nivel de Acceso:** Protegido / Taller Autenticado
+* **Rol Mínimo Requerido:** Administrador de Taller (`ROLE_TENANT_ADMIN`) o Dueño de Taller (`ROLE_WORKSHOP_OWNER`)
 * **Permiso Atómico:** `@PreAuthorize("hasAuthority('billing:subscriptions:read')")`
-* **Contexto Multi-Inquilino:** El identificador del taller (`tenant_id`) se resuelve de manera determinista desde los claims del token JWT, impidiendo consultas cruzadas entre talleres.
+* **Aislamiento Multi-Inquilino:** La consulta se encuentra estrictamente anclada al `tenant_id` inyectado en el claim criptográfico del token JWT.
 
-##### Parámetros de Petición
-* **Headers:**
-  * `Authorization: Bearer <JWT>` (Obligatorio)
-* **Path Variables:** Ninguna.
-* **Query Parameters:** Ninguno.
+#### Parámetros de Invocación
+* **Cabeceras HTTP (Headers):**
+  * `Authorization: Bearer <JWT>`
+  * `Accept: application/json`
+* **Parámetros de Ruta (Path Parameters):** No aplica.
+* **Parámetros de Consulta (Query Parameters):** No aplica.
 
-##### Request DTO
-No aplica para peticiones HTTP GET.
+#### Recurso de Petición (Request Body)
+No aplica (Solicitud de tipo HTTP GET sin cuerpo).
 
-##### Response DTO
-* **Estado HTTP:** `200 OK`
-* **Record Java:** `com.andeva.atelier.platform.billing.interfaces.rest.resources.responses.TenantSubscriptionResource`
+#### Recurso de Respuesta (Response Body)
+* **Estado HTTP Exitoso:** `200 OK`
+* **Registro Java DTO:** `com.andeva.atelier.platform.billing.interfaces.rest.resources.responses.TenantSubscriptionResource`
+* **Definición de Campos Proyectados:**
 
-Tabla de Campos:
-| Campo | Tipo Java | Descripción |
+| Campo | Tipo de Dato | Descripción |
 | :--- | :--- | :--- |
-| `id` | UUID | Identificador unívoco de la suscripción SaaS. |
-| `tenantId` | UUID | Identificador del taller titular del contrato. |
-| `planId` | UUID | Identificador del plan comercial contratado. |
-| `planName` | String | Nombre comercial del plan contratado (ej. Plan Pro). |
-| `tier` | String | Nivel del plan (`GO`, `PRO`, `MAX`, `ENTERPRISE`). |
-| `status` | String | Estado contable del ciclo de vida (`ACTIVE`, `TRIALING`, `PAST_DUE`, `CANCELED`). |
-| `currentPeriodStart` | Instant | Fecha y hora de inicio de la cobertura del ciclo actual. |
-| `currentPeriodEnd` | Instant | Fecha y hora límite del ciclo actual antes de renovación. |
-| `cancelAtPeriodEnd` | boolean | Indica si la suscripción se dará de baja al concluir el periodo. |
-| `trialEndDate` | Instant | Fecha de vencimiento del periodo de prueba gratuita (nullable). |
-| `quotaLimits` | TenantQuotaLimitsDto | Cuotas y límites operacionales vigentes para el taller. |
-| `isAccessGranted` | boolean | Indicador consolidado de autorización para operar en la plataforma. |
+| `id` | `UUID` | Identificador único de la suscripción del taller |
+| `tenantId` | `UUID` | Identificador del taller automotriz titular del contrato |
+| `planId` | `UUID` | Identificador del plan comercial contratado |
+| `planName` | `String` | Nombre comercial formal del plan suscrito |
+| `tier` | `String` | Nivel del plan (GO, PRO, MAX, ENTERPRISE) |
+| `status` | `String` | Estado contractual (TRIALING, ACTIVE, PAST_DUE, CANCELED, UNPAID) |
+| `currentPeriodStart` | `Instant` | Inicio del ciclo de facturación vigente en formato ISO 8601 UTC |
+| `currentPeriodEnd` | `Instant` | Fin del ciclo de facturación vigente en formato ISO 8601 UTC |
+| `cancelAtPeriodEnd` | `boolean` | Indica si la suscripción se cancelará al terminar el periodo |
+| `trialEndDate` | `Instant` | Fecha límite del periodo de prueba gratuito si aplica |
+| `quotaLimits` | `TenantQuotaLimitsDto` | Techos operativos autorizados para el taller |
+| `isAccessGranted` | `boolean` | Indicador booleano que certifica acceso operativo irrestricto |
 
-Ejemplo JSON de Respuesta:
+**Ejemplo de Carga Útil JSON (Response):**
 ```json
 {
-  "id": "5a432109-8d76-47b2-b13c-fa5d206f4005",
-  "tenantId": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
-  "planId": "2e548f3b-8d76-47b2-b13c-fa5d206f4002",
-  "planName": "Plan Pro",
+  "id": "018f6c40-7e12-7000-8000-000000000301",
+  "tenantId": "018f6c40-7e12-7000-8000-000000000001",
+  "planId": "018f6c40-7e12-7000-8000-000000000101",
+  "planName": "Atelier Pro Mensual",
   "tier": "PRO",
   "status": "ACTIVE",
   "currentPeriodStart": "2026-10-01T00:00:00Z",
@@ -591,250 +624,12 @@ Ejemplo JSON de Respuesta:
     "maxBranches": 2,
     "maxActiveStaff": 10,
     "maxActiveObd2Devices": 5,
-    "maxPhotosPerWorkOrder": 100,
-    "maxMonthlyAiReports": 0,
+    "maxPhotosPerWorkOrder": 50,
+    "maxMonthlyAiReports": 10,
     "companyRegistrationAllowed": false,
     "multiWarehouseAllowed": false,
     "marketplaceListed": false,
     "maxMonthlyWorkOrders": 300,
-    "iotTelemetryEnabled": true,
-    "aiDiagnosticsEnabled": false
-  },
-  "isAccessGranted": true
-}
-```
-
-##### Errores y RFC 7807
-| Código HTTP | Error Type | Excepción de Dominio | Causa Común |
-| :--- | :--- | :--- | :--- |
-| `401 Unauthorized` | `https://api.atelier.andeva.pe/errors/unauthorized` | `AuthenticationException` | Token JWT expirado o cabecera de autorización ausente. |
-| `403 Forbidden` | `https://api.atelier.andeva.pe/errors/forbidden` | `AccessDeniedException` | Usuario sin privilegios de administración en el taller. |
-| `404 Not Found` | `https://api.atelier.andeva.pe/errors/subscription-not-found` | `SubscriptionNotFoundException` | El taller recién creado no posee ninguna suscripción inicial registrada. |
-
-Ejemplo JSON ProblemDetail:
-```json
-{
-  "type": "https://api.atelier.andeva.pe/errors/subscription-not-found",
-  "title": "Suscripcion No Encontrada",
-  "status": 404,
-  "detail": "El taller no cuenta con una suscripcion activa ni periodo de prueba vigente.",
-  "instance": "/api/v1/billing/subscriptions/me",
-  "code": "SUBSCRIPTION_NOT_FOUND",
-  "timestamp": "2026-10-01T15:34:00Z"
-}
-```
-
----
-
-#### POST /api/v1/billing/subscriptions/checkout-session
-
-##### Identidad Técnica
-* **Controlador:** `TenantSubscriptionsController` (`com.andeva.atelier.platform.billing.interfaces.rest.controllers`)
-* **Método Java:** `public ResponseEntity<CheckoutSessionResponse> createCheckoutSession(@Valid @RequestBody CreateCheckoutSessionRequest request, @AuthenticationPrincipal Jwt jwt)`
-
-##### Descripción Funcional
-Inicializa una sesión de pago alojada en **Stripe Checkout** para contratar una nueva membresía o formalizar un plan de pago tras el periodo de prueba. Retorna la URL segura de redirección de Stripe y el identificador de sesión.
-
-##### Seguridad y Autorización
-* **Rol Mínimo:** `ROLE_TENANT_ADMIN` o `ROLE_WORKSHOP_OWNER`.
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('billing:subscriptions:manage_stripe')")`
-* **Contexto Multi-Inquilino:** Inyecta de forma segura el `tenant_id` autenticado dentro de los metadatos de la sesión de Stripe (`client_reference_id` y `metadata.tenant_id`).
-
-##### Parámetros de Petición
-* **Headers:**
-  * `Authorization: Bearer <JWT>` (Obligatorio)
-  * `Content-Type: application/json` (Obligatorio)
-* **Path Variables:** Ninguna.
-* **Query Parameters:** Ninguno.
-
-##### Request DTO
-* **Record Java:** `com.andeva.atelier.platform.billing.interfaces.rest.resources.requests.CreateCheckoutSessionRequest`
-
-Tabla de Campos:
-| Campo | Tipo Java | Validaciones Jakarta | Descripción |
-| :--- | :--- | :--- | :--- |
-| `planId` | UUID | `@NotNull` | Identificador universal del plan comercial que se desea contratar. |
-| `successUrl` | String | `@NotBlank` | URL de retorno de la aplicación tras confirmarse el pago exitoso en Stripe. |
-| `cancelUrl` | String | `@NotBlank` | URL de retorno si el usuario desiste o cancela el flujo de pago en Stripe. |
-
-Ejemplo JSON de Solicitud:
-```json
-{
-  "planId": "2e548f3b-8d76-47b2-b13c-fa5d206f4002",
-  "successUrl": "https://dashboard.atelier.andeva.pe/billing/success?session_id={CHECKOUT_SESSION_ID}",
-  "cancelUrl": "https://dashboard.atelier.andeva.pe/billing/plans"
-}
-```
-
-##### Response DTO
-* **Estado HTTP:** `200 OK`
-* **Record Java:** `com.andeva.atelier.platform.billing.interfaces.rest.resources.responses.CheckoutSessionResponse`
-
-Tabla de Campos:
-| Campo | Tipo Java | Descripción |
-| :--- | :--- | :--- |
-| `checkoutUrl` | String | URL segura de redirección hacia la pasarela de Stripe Checkout. |
-| `sessionId` | String | Identificador unívoco de la sesión en Stripe (prefijo `cs_test_` o `cs_live_`). |
-
-Ejemplo JSON de Respuesta:
-```json
-{
-  "checkoutUrl": "https://checkout.stripe.com/c/pay/cs_live_a1b2c3d4e5f6g7h8i9j0k1l2m3n4",
-  "sessionId": "cs_live_a1b2c3d4e5f6g7h8i9j0k1l2m3n4"
-}
-```
-
-##### Errores y RFC 7807
-| Código HTTP | Error Type | Excepción de Dominio | Causa Común |
-| :--- | :--- | :--- | :--- |
-| `400 Bad Request` | `https://api.atelier.andeva.pe/errors/validation-failed` | `MethodArgumentNotValidException` | Las URLs de retorno no son válidas o falta el planId. |
-| `401 Unauthorized` | `https://api.atelier.andeva.pe/errors/unauthorized` | `AuthenticationException` | Token de sesión ausente o revocado. |
-| `404 Not Found` | `https://api.atelier.andeva.pe/errors/plan-not-found` | `PlanNotFoundException` | El plan especificado en la solicitud no existe o está inactivo. |
-| `409 Conflict` | `https://api.atelier.andeva.pe/errors/duplicate-subscription` | `DuplicateActiveSubscriptionException` | El taller ya cuenta con una suscripción activa idéntica en curso. |
-| `500 Internal Server Error` | `https://api.atelier.andeva.pe/errors/stripe-integration-error` | `StripeIntegrationException` | Falla de comunicación con los servidores de la API de Stripe. |
-
-Ejemplo JSON ProblemDetail:
-```json
-{
-  "type": "https://api.atelier.andeva.pe/errors/duplicate-subscription",
-  "title": "Suscripcion Activa Existente",
-  "status": 409,
-  "detail": "El taller ya cuenta con una suscripcion activa para este plan. Utilice el endpoint de cambio de plan para modificarla.",
-  "instance": "/api/v1/billing/subscriptions/checkout-session",
-  "code": "DUPLICATE_ACTIVE_SUBSCRIPTION",
-  "timestamp": "2026-10-01T15:35:00Z"
-}
-```
-
----
-
-#### POST /api/v1/billing/subscriptions/customer-portal
-
-##### Identidad Técnica
-* **Controlador:** `TenantSubscriptionsController` (`com.andeva.atelier.platform.billing.interfaces.rest.controllers`)
-* **Método Java:** `public ResponseEntity<CustomerPortalResponse> createCustomerPortalSession(@Valid @RequestBody CustomerPortalRequest request, @AuthenticationPrincipal Jwt jwt)`
-
-##### Descripción Funcional
-Genera una sesión segura en el **Stripe Customer Billing Portal**, permitiendo al propietario del taller actualizar tarjetas de crédito bancarias, revisar comprobantes fiscales y gestionar sus datos de cobro sin intermediación humana.
-
-##### Seguridad y Autorización
-* **Rol Mínimo:** `ROLE_TENANT_ADMIN` o `ROLE_WORKSHOP_OWNER`.
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('billing:subscriptions:manage_stripe')")`
-* **Contexto Multi-Inquilino:** Resuelve el `stripe_customer_id` vinculado al `tenant_id` autenticado.
-
-##### Parámetros de Petición
-* **Headers:**
-  * `Authorization: Bearer <JWT>` (Obligatorio)
-  * `Content-Type: application/json` (Obligatorio)
-* **Path Variables:** Ninguna.
-* **Query Parameters:** Ninguno.
-
-##### Request DTO
-* **Record Java:** `com.andeva.atelier.platform.billing.interfaces.rest.resources.requests.CustomerPortalRequest`
-
-Tabla de Campos:
-| Campo | Tipo Java | Validaciones Jakarta | Descripción |
-| :--- | :--- | :--- | :--- |
-| `returnUrl` | String | `@NotBlank` | URL a la cual Stripe redirigirá al cliente tras culminar sus gestiones en el portal. |
-
-Ejemplo JSON de Solicitud:
-```json
-{
-  "returnUrl": "https://dashboard.atelier.andeva.pe/settings/billing"
-}
-```
-
-##### Response DTO
-* **Estado HTTP:** `200 OK`
-* **Record Java:** `com.andeva.atelier.platform.billing.interfaces.rest.resources.responses.CustomerPortalResponse`
-
-Tabla de Campos:
-| Campo | Tipo Java | Descripción |
-| :--- | :--- | :--- |
-| `portalUrl` | String | URL de redirección segura con token temporal hacia el Stripe Billing Portal. |
-
-Ejemplo JSON de Respuesta:
-```json
-{
-  "portalUrl": "https://billing.stripe.com/p/session/live_YWNjdF8xT3VBdGVsaWVyMSxwb3J0YWxfU2Vzc2lvbl9BMTIyMzM0NA"
-}
-```
-
-##### Errores y RFC 7807
-| Código HTTP | Error Type | Excepción de Dominio | Causa Común |
-| :--- | :--- | :--- | :--- |
-| `400 Bad Request` | `https://api.atelier.andeva.pe/errors/invalid-return-url` | `IllegalArgumentException` | La URL de retorno no pertenece a un dominio institucional autorizado. |
-| `401 Unauthorized` | `https://api.atelier.andeva.pe/errors/unauthorized` | `AuthenticationException` | Token de sesión ausente o vencido. |
-| `404 Not Found` | `https://api.atelier.andeva.pe/errors/customer-not-found` | `SubscriptionNotFoundException` | El taller no cuenta con un identificador de cliente registrado en Stripe. |
-| `500 Internal Server Error` | `https://api.atelier.andeva.pe/errors/stripe-integration-error` | `StripeIntegrationException` | Error devuelto por la pasarela Stripe al generar la sesión. |
-
----
-
-#### POST /api/v1/billing/subscriptions/change-plan
-
-##### Identidad Técnica
-* **Controlador:** `TenantSubscriptionsController` (`com.andeva.atelier.platform.billing.interfaces.rest.controllers`)
-* **Método Java:** `public ResponseEntity<TenantSubscriptionResource> changeSubscriptionPlan(@Valid @RequestBody ChangeSubscriptionPlanRequest request, @AuthenticationPrincipal Jwt jwt)`
-
-##### Descripción Funcional
-Modifica el plan contratado por el taller (`upgrade` hacia un plan superior o `downgrade` hacia un plan inferior). Aplica reglas de prorrateo inmediato en Stripe, recalcula las cuotas del taller e invalida de forma inmediata la memoria de Caffeine Cache para reflejar las nuevas cuotas en tiempo real.
-
-##### Seguridad y Autorización
-* **Rol Mínimo:** `ROLE_WORKSHOP_OWNER` o `ROLE_TENANT_ADMIN`.
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('billing:subscriptions:manage_stripe')")`
-* **Contexto Multi-Inquilino:** Aislamiento estricto por `tenant_id` obtenido del token JWT.
-
-##### Parámetros de Petición
-* **Headers:**
-  * `Authorization: Bearer <JWT>` (Obligatorio)
-  * `Content-Type: application/json` (Obligatorio)
-* **Path Variables:** Ninguna.
-* **Query Parameters:** Ninguno.
-
-##### Request DTO
-* **Record Java:** `com.andeva.atelier.platform.billing.interfaces.rest.resources.requests.ChangeSubscriptionPlanRequest`
-
-Tabla de Campos:
-| Campo | Tipo Java | Validaciones Jakarta | Descripción |
-| :--- | :--- | :--- | :--- |
-| `newPlanId` | UUID | `@NotNull` | Identificador universal del nuevo plan comercial destino. |
-| `prorate` | Boolean | Opcional (Default `true`) | Indica si se debe prorratear financieramente el saldo a favor o pendiente en Stripe. |
-
-Ejemplo JSON de Solicitud:
-```json
-{
-  "newPlanId": "3e548f3b-8d76-47b2-b13c-fa5d206f4003",
-  "prorate": true
-}
-```
-
-##### Response DTO
-* **Estado HTTP:** `200 OK`
-* **Record Java:** `com.andeva.atelier.platform.billing.interfaces.rest.resources.responses.TenantSubscriptionResource`
-
-Ejemplo JSON de Respuesta:
-```json
-{
-  "id": "5a432109-8d76-47b2-b13c-fa5d206f4005",
-  "tenantId": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
-  "planId": "3e548f3b-8d76-47b2-b13c-fa5d206f4003",
-  "planName": "Plan Max",
-  "tier": "MAX",
-  "status": "ACTIVE",
-  "currentPeriodStart": "2026-10-01T15:36:00Z",
-  "currentPeriodEnd": "2026-11-01T00:00:00Z",
-  "cancelAtPeriodEnd": false,
-  "trialEndDate": null,
-  "quotaLimits": {
-    "maxBranches": 5,
-    "maxActiveStaff": 25,
-    "maxActiveObd2Devices": 15,
-    "maxPhotosPerWorkOrder": 150,
-    "maxMonthlyAiReports": 60,
-    "companyRegistrationAllowed": true,
-    "multiWarehouseAllowed": true,
-    "marketplaceListed": true,
-    "maxMonthlyWorkOrders": 1000,
     "iotTelemetryEnabled": true,
     "aiDiagnosticsEnabled": true
   },
@@ -842,79 +637,252 @@ Ejemplo JSON de Respuesta:
 }
 ```
 
-##### Errores y RFC 7807
-| Código HTTP | Error Type | Excepción de Dominio | Causa Común |
-| :--- | :--- | :--- | :--- |
-| `400 Bad Request` | `https://api.atelier.andeva.pe/errors/validation-failed` | `MethodArgumentNotValidException` | Identificador del nuevo plan nulo o malformado. |
-| `401 Unauthorized` | `https://api.atelier.andeva.pe/errors/unauthorized` | `AuthenticationException` | Token de sesión ausente o vencido. |
-| `404 Not Found` | `https://api.atelier.andeva.pe/errors/plan-not-found` | `PlanNotFoundException` | El nuevo plan comercial solicitado no existe en la plataforma. |
-| `409 Conflict` | `https://api.atelier.andeva.pe/errors/same-plan` | `IllegalStateException` | El taller ya tiene asignado el plan solicitado en la petición. |
-| `422 Unprocessable Entity` | `https://api.atelier.andeva.pe/errors/downgrade-blocked` | `QuotaExceededException` | No se puede degradar a un plan inferior porque el taller supera las cuotas de dicho nivel (ej. tiene 7 mecánicos y el plan Go solo permite 5). |
+#### Errores y Excepciones de Dominio (RFC 7807)
 
-Ejemplo JSON ProblemDetail:
+| Código HTTP | Excepción Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `401 Unauthorized` | `AuthenticationException` | Token JWT ausente, expirado o con firma digital inválida |
+| `403 Forbidden` | `AccessDeniedException` | El usuario autenticado carece de privilegios administrativos de taller |
+| `404 Not Found` | `SubscriptionNotFoundException` | El taller autenticado no cuenta con contrato de suscripción registrado |
+
+**Ejemplo de Carga Útil de Error (RFC 7807 ProblemDetail):**
 ```json
 {
-  "type": "https://api.atelier.andeva.pe/errors/downgrade-blocked",
-  "title": "Degradacion de Plan Bloqueada",
-  "status": 422,
-  "detail": "No es posible cambiar al Plan Go. El taller tiene 7 mecanicos activos y el limite maximo permitido en Go es de 5.",
-  "instance": "/api/v1/billing/subscriptions/change-plan",
-  "code": "DOWNGRADE_USAGE_EXCEEDS_TARGET_LIMITS",
-  "timestamp": "2026-10-01T15:36:30Z"
+  "type": "https://api.atelier.andeva.com/errors/subscription-not-found",
+  "title": "Subscription Not Found",
+  "status": 404,
+  "detail": "El taller automotriz no posee un contrato de suscripción SaaS activo ni periodo de prueba asignado",
+  "instance": "/api/v1/billing/subscriptions/me",
+  "code": "ERR_SUBSCRIPTION_NOT_FOUND",
+  "timestamp": "2026-10-04T02:15:00Z"
 }
 ```
 
 ---
 
-#### POST /api/v1/billing/subscriptions/cancel
+### 4.2. [POST] /api/v1/billing/subscriptions/checkout-session
 
-##### Identidad Técnica
-* **Controlador:** `TenantSubscriptionsController` (`com.andeva.atelier.platform.billing.interfaces.rest.controllers`)
-* **Método Java:** `public ResponseEntity<TenantSubscriptionResource> cancelSubscription(@Valid @RequestBody CancelSubscriptionRequest request, @AuthenticationPrincipal Jwt jwt)`
+#### Identidad Técnica
+* **Controlador:** `com.andeva.atelier.platform.billing.interfaces.rest.controllers.TenantSubscriptionsController`
+* **Método Java:** `public ResponseEntity<CheckoutSessionResponse> createCheckoutSession(@Valid @RequestBody CreateCheckoutSessionRequest request, @AuthenticationPrincipal Jwt jwt)`
+* **Ruta Base:** `/api/v1/billing/subscriptions`
+* **Ruta Completa:** `/api/v1/billing/subscriptions/checkout-session`
+* **Propósito:** Genera una sesión de pago alojada en Stripe Checkout para contratar un plan o formalizar una actualización de membresía.
 
-##### Descripción Funcional
-Registra la solicitud formal de baja de la suscripción SaaS del taller. Permite programar la cancelación al término del periodo facturado actual (`cancelAtPeriodEnd = true`) preservando el acceso hasta la fecha de corte, o rescindir la membresía de manera inmediata.
+#### Descripción Funcional
+Permite a los administradores de taller iniciar el proceso seguro de pago para suscribirse a un nuevo plan comercial. El servicio valida la existencia del `planId` solicitado, comprueba si el taller ya cuenta con un cliente registrado en Stripe (`stripe_customer_id`) o crea uno nuevo en la pasarela sincronizando la información fiscal del taller, y genera una sesión de Stripe Checkout en modo `subscription`. Retorna la URL oficial de Stripe hacia la cual el frontend redirige al usuario para ingresar los datos de su tarjeta bancaria bajo cumplimiento PCI-DSS Nivel 1.
 
-##### Seguridad y Autorización
-* **Rol Mínimo:** `ROLE_WORKSHOP_OWNER` (Exclusivo para el titular propietario del taller).
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('billing:subscriptions:manage_stripe') and hasRole('ROLE_WORKSHOP_OWNER')")`
-* **Contexto Multi-Inquilino:** Aislamiento estricto por `tenant_id` desde el token JWT.
+#### Seguridad y Autorización
+* **Nivel de Acceso:** Protegido / Taller Autenticado
+* **Rol Mínimo Requerido:** Administrador de Taller (`ROLE_TENANT_ADMIN`) o Dueño de Taller (`ROLE_WORKSHOP_OWNER`)
+* **Permiso Atómico:** `@PreAuthorize("hasAuthority('billing:subscriptions:manage_stripe')")`
+* **Aislamiento Multi-Inquilino:** La sesión de Stripe se parametriza con el `tenant_id` autenticado inyectado en los metadatos (`client_reference_id` y `metadata.tenantId`).
 
-##### Parámetros de Petición
-* **Headers:**
-  * `Authorization: Bearer <JWT>` (Obligatorio)
-  * `Content-Type: application/json` (Obligatorio)
-* **Path Variables:** Ninguna.
-* **Query Parameters:** Ninguno.
+#### Parámetros de Invocación
+* **Cabeceras HTTP (Headers):**
+  * `Authorization: Bearer <JWT>`
+  * `Content-Type: application/json`
+* **Parámetros de Ruta (Path Parameters):** No aplica.
+* **Parámetros de Consulta (Query Parameters):** No aplica.
 
-##### Request DTO
-* **Record Java:** `com.andeva.atelier.platform.billing.interfaces.rest.resources.requests.CancelSubscriptionRequest`
+#### Recurso de Petición (Request Body)
+* **Registro Java DTO:** `com.andeva.atelier.platform.billing.interfaces.rest.resources.requests.CreateCheckoutSessionRequest`
+* **Definición de Campos:**
 
-Tabla de Campos:
-| Campo | Tipo Java | Validaciones Jakarta | Descripción |
-| :--- | :--- | :--- | :--- |
-| `cancelImmediately` | boolean | Obligatorio | Si es `true` cancela de inmediato, si es `false` programa la baja para el fin del periodo actual. |
-| `cancellationReason` | String | Opcional | Motivo o justificación comercial de la baja informada por el usuario. |
+| Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripción |
+| :--- | :--- | :---: | :--- | :--- |
+| `planId` | `UUID` | Sí | `@NotNull` | Identificador único del plan comercial seleccionado |
+| `successUrl` | `String` | Sí | `@NotBlank` | URL de retorno seguro hacia el frontend tras el pago exitoso |
+| `cancelUrl` | `String` | Sí | `@NotBlank` | URL de retorno hacia el frontend si el usuario cancela la sesión |
 
-Ejemplo JSON de Solicitud:
+**Ejemplo de Carga Útil JSON (Request):**
 ```json
 {
-  "cancelImmediately": false,
-  "cancellationReason": "Cierre temporal de operaciones del taller automotriz."
+  "planId": "018f6c40-7e12-7000-8000-000000000102",
+  "successUrl": "https://app.atelier.pe/settings/billing?session_id={CHECKOUT_SESSION_ID}&status=success",
+  "cancelUrl": "https://app.atelier.pe/settings/billing?status=cancelled"
 }
 ```
 
-##### Response DTO
-* **Estado HTTP:** `200 OK`
-* **Record Java:** `com.andeva.atelier.platform.billing.interfaces.rest.resources.responses.TenantSubscriptionResource`
+#### Recurso de Respuesta (Response Body)
+* **Estado HTTP Exitoso:** `200 OK`
+* **Registro Java DTO:** `com.andeva.atelier.platform.billing.interfaces.rest.resources.responses.CheckoutSessionResponse`
+* **Definición de Campos Proyectados:**
 
-Ejemplo JSON de Respuesta:
+| Campo | Tipo de Dato | Descripción |
+| :--- | :--- | :--- |
+| `checkoutUrl` | `String` | URL alojada en los servidores seguros de Stripe Checkout |
+| `sessionId` | `String` | Identificador único de sesión emitido por Stripe (cs_test_...) |
+
+**Ejemplo de Carga Útil JSON (Response):**
 ```json
 {
-  "id": "5a432109-8d76-47b2-b13c-fa5d206f4005",
-  "tenantId": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
-  "planId": "2e548f3b-8d76-47b2-b13c-fa5d206f4002",
-  "planName": "Plan Pro",
+  "checkoutUrl": "https://checkout.stripe.com/c/pay/cs_test_a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6",
+  "sessionId": "cs_test_a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6"
+}
+```
+
+#### Errores y Excepciones de Dominio (RFC 7807)
+
+| Código HTTP | Excepción Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `400 Bad Request` | `MethodArgumentNotValidException` | URLs de retorno malformadas o planId nulo |
+| `401 Unauthorized` | `AuthenticationException` | Token JWT ausente o inválido |
+| `403 Forbidden` | `AccessDeniedException` | Permisos insuficientes para gestionar sesiones de pago |
+| `404 Not Found` | `PlanNotFoundException` | El plan seleccionado no existe en el catálogo |
+| `409 Conflict` | `DuplicateActiveSubscriptionException` | El taller ya cuenta con una suscripción activa idéntica |
+| `502 Bad Gateway` | `StripeIntegrationException` | Falla de conexión telemática con los servidores de Stripe |
+
+**Ejemplo de Carga Útil de Error (RFC 7807 ProblemDetail):**
+```json
+{
+  "type": "https://api.atelier.andeva.com/errors/stripe-integration-error",
+  "title": "Stripe Integration Error",
+  "status": 502,
+  "detail": "Error de comunicación con la API de Stripe al crear la sesión de Checkout",
+  "instance": "/api/v1/billing/subscriptions/checkout-session",
+  "code": "ERR_STRIPE_INTEGRATION",
+  "timestamp": "2026-10-04T02:20:00Z"
+}
+```
+
+---
+
+### 4.3. [POST] /api/v1/billing/subscriptions/customer-portal
+
+#### Identidad Técnica
+* **Controlador:** `com.andeva.atelier.platform.billing.interfaces.rest.controllers.TenantSubscriptionsController`
+* **Método Java:** `public ResponseEntity<CustomerPortalResponse> createCustomerPortalSession(@Valid @RequestBody CustomerPortalRequest request, @AuthenticationPrincipal Jwt jwt)`
+* **Ruta Base:** `/api/v1/billing/subscriptions`
+* **Ruta Completa:** `/api/v1/billing/subscriptions/customer-portal`
+* **Propósito:** Genera una sesión de autogestión interactiva en el Stripe Customer Portal para actualizar tarjetas bancarias, consultar métodos de pago y descargar facturas.
+
+#### Descripción Funcional
+Proporciona al dueño del taller un enlace seguro y efímero hacia el portal alojado de Stripe Billing. Resuelve el `stripe_customer_id` vinculado al taller en la base de datos de Atelier, invoca la API de Stripe para instanciar la sesión del portal configurada con la URL de retorno proporcionada, y entrega la URL firmada. A través de este portal oficial, el cliente puede cambiar su tarjeta de crédito o débito, modificar su domicilio comercial de facturación y descargar comprobantes históricos sin que Atelier almacene datos sensibles.
+
+#### Seguridad y Autorización
+* **Nivel de Acceso:** Protegido / Taller Autenticado
+* **Rol Mínimo Requerido:** Administrador de Taller (`ROLE_TENANT_ADMIN`) o Dueño de Taller (`ROLE_WORKSHOP_OWNER`)
+* **Permiso Atómico:** `@PreAuthorize("hasAuthority('billing:subscriptions:manage_stripe')")`
+* **Aislamiento Multi-Inquilino:** La sesión del portal se genera estrictamente contra el `stripe_customer_id` del taller autenticado.
+
+#### Parámetros de Invocación
+* **Cabeceras HTTP (Headers):**
+  * `Authorization: Bearer <JWT>`
+  * `Content-Type: application/json`
+* **Parámetros de Ruta (Path Parameters):** No aplica.
+* **Parámetros de Consulta (Query Parameters):** No aplica.
+
+#### Recurso de Petición (Request Body)
+* **Registro Java DTO:** `com.andeva.atelier.platform.billing.interfaces.rest.resources.requests.CustomerPortalRequest`
+* **Definición de Campos:**
+
+| Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripción |
+| :--- | :--- | :---: | :--- | :--- |
+| `returnUrl` | `String` | Sí | `@NotBlank` | URL del panel web del taller a la cual regresará el usuario al salir del portal |
+
+**Ejemplo de Carga Útil JSON (Request):**
+```json
+{
+  "returnUrl": "https://app.atelier.pe/settings/billing"
+}
+```
+
+#### Recurso de Respuesta (Response Body)
+* **Estado HTTP Exitoso:** `200 OK`
+* **Registro Java DTO:** `com.andeva.atelier.platform.billing.interfaces.rest.resources.responses.CustomerPortalResponse`
+* **Definición de Campos Proyectados:**
+
+| Campo | Tipo de Dato | Descripción |
+| :--- | :--- | :--- |
+| `portalUrl` | `String` | URL segura de redirección hacia el Stripe Customer Billing Portal |
+
+**Ejemplo de Carga Útil JSON (Response):**
+```json
+{
+  "portalUrl": "https://billing.stripe.com/p/session/portal_test_a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6"
+}
+```
+
+#### Errores y Excepciones de Dominio (RFC 7807)
+
+| Código HTTP | Excepción Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `400 Bad Request` | `MethodArgumentNotValidException` | Parámetro returnUrl ausente o con formato URI inválido |
+| `401 Unauthorized` | `AuthenticationException` | Token JWT ausente o expirado |
+| `403 Forbidden` | `AccessDeniedException` | Permisos insuficientes para acceder al portal de facturación |
+| `404 Not Found` | `SubscriptionNotFoundException` | El taller no cuenta con un identificador de cliente en Stripe asociado |
+| `502 Bad Gateway` | `StripeIntegrationException` | Error al contactar la API de portales de Stripe |
+
+**Ejemplo de Carga Útil de Error (RFC 7807 ProblemDetail):**
+```json
+{
+  "type": "https://api.atelier.andeva.com/errors/subscription-not-found",
+  "title": "Subscription Not Found",
+  "status": 404,
+  "detail": "El taller automotriz no posee un cliente de facturación registrado en la pasarela de pagos",
+  "instance": "/api/v1/billing/subscriptions/customer-portal",
+  "code": "ERR_SUBSCRIPTION_NOT_FOUND",
+  "timestamp": "2026-10-04T02:25:00Z"
+}
+```
+
+---
+
+### 4.4. [POST] /api/v1/billing/subscriptions/cancel
+
+#### Identidad Técnica
+* **Controlador:** `com.andeva.atelier.platform.billing.interfaces.rest.controllers.TenantSubscriptionsController`
+* **Método Java:** `public ResponseEntity<TenantSubscriptionResource> cancelSubscription(@Valid @RequestBody CancelSubscriptionRequest request, @AuthenticationPrincipal Jwt jwt)`
+* **Ruta Base:** `/api/v1/billing/subscriptions`
+* **Ruta Completa:** `/api/v1/billing/subscriptions/cancel`
+* **Propósito:** Procesa la solicitud voluntaria de cancelación de la suscripción SaaS del taller, permitiendo finalizar al término del periodo o de manera inmediata.
+
+#### Descripción Funcional
+Permite a los administradores del taller cancelar formalmente su suscripción a Atelier Platform. El comando recibe un motivo descriptivo opcional y el indicador booleano `cancelImmediately`. Si `cancelImmediately` es falso, la suscripción se marca en Stripe con `cancel_at_period_end = true`, garantizando que el taller mantenga acceso operativo irrestricto hasta el final del periodo ya pagado. Si es verdadero, el contrato se rescinde de forma fulminante y se suspende el acceso al sistema. Tras la ejecución, se emite el evento de dominio `TenantSubscriptionCanceledEvent` y se actualiza la entrada en Caffeine Cache.
+
+#### Seguridad y Autorización
+* **Nivel de Acceso:** Protegido / Taller Autenticado
+* **Rol Mínimo Requerido:** Administrador de Taller (`ROLE_TENANT_ADMIN`) o Dueño de Taller (`ROLE_WORKSHOP_OWNER`)
+* **Permiso Atómico:** `@PreAuthorize("hasAuthority('billing:subscriptions:manage_stripe')")`
+* **Aislamiento Multi-Inquilino:** La cancelación afecta únicamente la membresía del `tenant_id` autenticado.
+
+#### Parámetros de Invocación
+* **Cabeceras HTTP (Headers):**
+  * `Authorization: Bearer <JWT>`
+  * `Content-Type: application/json`
+* **Parámetros de Ruta (Path Parameters):** No aplica.
+* **Parámetros de Consulta (Query Parameters):** No aplica.
+
+#### Recurso de Petición (Request Body)
+* **Registro Java DTO:** `com.andeva.atelier.platform.billing.interfaces.rest.resources.requests.CancelSubscriptionRequest`
+* **Definición de Campos:**
+
+| Campo | Tipo de Dato | Requerido | Validaciones Jakarta | Descripción |
+| :--- | :--- | :---: | :--- | :--- |
+| `cancelImmediately` | `boolean` | Sí | Sin restricción adicional | Define si la cancelación opera de inmediato o al final del periodo |
+| `cancellationReason` | `String` | No | Sin restricción adicional | Motivo cualitativo de la cancelación para analítica de retención |
+
+**Ejemplo de Carga Útil JSON (Request):**
+```json
+{
+  "cancelImmediately": false,
+  "cancellationReason": "Cierre temporal de operaciones por remodelación del taller mecánico"
+}
+```
+
+#### Recurso de Respuesta (Response Body)
+* **Estado HTTP Exitoso:** `200 OK`
+* **Registro Java DTO:** `com.andeva.atelier.platform.billing.interfaces.rest.resources.responses.TenantSubscriptionResource`
+* **Definición de Campos Proyectados:** Idéntica a la especificación de `TenantSubscriptionResource` con `cancelAtPeriodEnd = true` o `status = CANCELED`.
+
+**Ejemplo de Carga Útil JSON (Response):**
+```json
+{
+  "id": "018f6c40-7e12-7000-8000-000000000301",
+  "tenantId": "018f6c40-7e12-7000-8000-000000000001",
+  "planId": "018f6c40-7e12-7000-8000-000000000101",
+  "planName": "Atelier Pro Mensual",
   "tier": "PRO",
   "status": "ACTIVE",
   "currentPeriodStart": "2026-10-01T00:00:00Z",
@@ -925,315 +893,402 @@ Ejemplo JSON de Respuesta:
     "maxBranches": 2,
     "maxActiveStaff": 10,
     "maxActiveObd2Devices": 5,
-    "maxPhotosPerWorkOrder": 100,
-    "maxMonthlyAiReports": 0,
+    "maxPhotosPerWorkOrder": 50,
+    "maxMonthlyAiReports": 10,
     "companyRegistrationAllowed": false,
     "multiWarehouseAllowed": false,
     "marketplaceListed": false,
     "maxMonthlyWorkOrders": 300,
     "iotTelemetryEnabled": true,
-    "aiDiagnosticsEnabled": false
+    "aiDiagnosticsEnabled": true
   },
   "isAccessGranted": true
 }
 ```
 
-##### Errores y RFC 7807
-| Código HTTP | Error Type | Excepción de Dominio | Causa Común |
-| :--- | :--- | :--- | :--- |
-| `401 Unauthorized` | `https://api.atelier.andeva.pe/errors/unauthorized` | `AuthenticationException` | Token de sesión ausente o revocado. |
-| `403 Forbidden` | `https://api.atelier.andeva.pe/errors/forbidden` | `AccessDeniedException` | Solicitud efectuada por un usuario que no ostenta el rol de propietario del taller. |
-| `404 Not Found` | `https://api.atelier.andeva.pe/errors/subscription-not-found` | `SubscriptionNotFoundException` | No existe una suscripción activa susceptible de cancelación. |
-| `409 Conflict` | `https://api.atelier.andeva.pe/errors/already-canceled` | `IllegalStateException` | La suscripción ya se encuentra previamente cancelada o en baja definitiva. |
+#### Errores y Excepciones de Dominio (RFC 7807)
+
+| Código HTTP | Excepción Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `401 Unauthorized` | `AuthenticationException` | Token JWT ausente o inválido |
+| `403 Forbidden` | `AccessDeniedException` | Permisos insuficientes para cancelar la suscripción del taller |
+| `404 Not Found` | `SubscriptionNotFoundException` | El taller no cuenta con una suscripción activa para cancelar |
+| `409 Conflict` | `BillingDomainException` | La suscripción ya se encuentra en estado cancelado definitivo |
+| `502 Bad Gateway` | `StripeIntegrationException` | Error al notificar la cancelación a la pasarela de pagos Stripe |
+
+**Ejemplo de Carga Útil de Error (RFC 7807 ProblemDetail):**
+```json
+{
+  "type": "https://api.atelier.andeva.com/errors/billing-domain-violation",
+  "title": "Billing Domain Violation",
+  "status": 409,
+  "detail": "El contrato de suscripción ya se encuentra cancelado definitivamente",
+  "instance": "/api/v1/billing/subscriptions/cancel",
+  "code": "ERR_BILLING_DOMAIN_VIOLATION",
+  "timestamp": "2026-10-04T02:30:00Z"
+}
+```
 
 ---
 
-### 3.3. SaasInvoicesController
+## 5. Endpoints de SaasInvoicesController
 
-Controlador encargado de la consulta de facturas de servicio emitidas por Atelier Platform al taller y redirección a sus archivos PDF oficiales en Stripe.
+El controlador `SaasInvoicesController` administra el historial contable de facturas y comprobantes emitidos por la empresa proveedora de la plataforma (Andeva) hacia el taller automotriz, permitiendo la consulta de resúmenes, el detalle de recaudación y la redirección oficial hacia comprobantes en PDF.
 
-#### GET /api/v1/billing/invoices
+### 5.1. [GET] /api/v1/billing/invoices
 
-##### Identidad Técnica
-* **Controlador:** `SaasInvoicesController` (`com.andeva.atelier.platform.billing.interfaces.rest.controllers`)
-* **Método Java:** `public ResponseEntity<List<SaasInvoiceSummaryResource>> getTenantInvoices(@RequestParam(required = false) String status, @AuthenticationPrincipal Jwt jwt)`
+#### Identidad Técnica
+* **Controlador:** `com.andeva.atelier.platform.billing.interfaces.rest.controllers.SaasInvoicesController`
+* **Método Java:** `public ResponseEntity<List<SaasInvoiceSummaryResource>> listInvoices(@AuthenticationPrincipal Jwt jwt)`
+* **Ruta Base:** `/api/v1/billing/invoices`
+* **Ruta Completa:** `/api/v1/billing/invoices`
+* **Propósito:** Obtiene la lista cronológica de comprobantes y facturas de suscripción emitidas al taller automotriz autenticado.
 
-##### Descripción Funcional
-Lista cronológica de todos los comprobantes y facturas emitidas por concepto de suscripción de software hacia el taller autenticado.
+#### Descripción Funcional
+Recupera el historial de comprobantes de pago generados periódicamente por la plataforma hacia el taller. Realiza una consulta optimizada sobre la tabla `saas_invoices` filtrando por el `tenant_id` autenticado, ordenada descendentemente por fecha de pago (`paidAt`). Retorna un listado de resúmenes contables ligeros optimizados para renderizado en tablas web, evitando sobrecargas de red al no transferir URLs pesadas en listados masivos.
 
-##### Seguridad y Autorización
-* **Rol Mínimo:** `ROLE_TENANT_ADMIN`, `ROLE_WORKSHOP_OWNER` o `ROLE_ACCOUNTANT`.
+#### Seguridad y Autorización
+* **Nivel de Acceso:** Protegido / Taller Autenticado
+* **Rol Mínimo Requerido:** Administrador de Taller (`ROLE_TENANT_ADMIN`), Dueño de Taller (`ROLE_WORKSHOP_OWNER`) o Contador (`ROLE_ACCOUNTANT`)
 * **Permiso Atómico:** `@PreAuthorize("hasAuthority('billing:invoices:read')")`
-* **Contexto Multi-Inquilino:** Filtrado forzado en base de datos relacional mediante la cláusula `tenant_id = :authenticatedTenantId`.
+* **Aislamiento Multi-Inquilino:** Filtrado estricto por el `tenant_id` extraído del token JWT.
 
-##### Parámetros de Petición
-* **Headers:**
-  * `Authorization: Bearer <JWT>` (Obligatorio)
-* **Path Variables:** Ninguna.
-* **Query Parameters:**
-  | Parámetro | Tipo | Requerido | Descripción |
-  | :--- | :--- | :--- | :--- |
-  | `status` | String | No | Filtro por estado de pago de factura (`PAID`, `OPEN`, `VOID`, `UNCOLLECTIBLE`). |
+#### Parámetros de Invocación
+* **Cabeceras HTTP (Headers):**
+  * `Authorization: Bearer <JWT>`
+  * `Accept: application/json`
+* **Parámetros de Ruta (Path Parameters):** No aplica.
+* **Parámetros de Consulta (Query Parameters):** No aplica.
 
-##### Request DTO
-No aplica para peticiones HTTP GET.
+#### Recurso de Petición (Request Body)
+No aplica (Solicitud de tipo HTTP GET sin cuerpo).
 
-##### Response DTO
-* **Estado HTTP:** `200 OK`
-* **Record Java:** `List<com.andeva.atelier.platform.billing.interfaces.rest.resources.responses.SaasInvoiceSummaryResource>`
+#### Recurso de Respuesta (Response Body)
+* **Estado HTTP Exitoso:** `200 OK`
+* **Registro Java DTO:** `List<com.andeva.atelier.platform.billing.interfaces.rest.resources.responses.SaasInvoiceSummaryResource>`
+* **Definición de Campos Proyectados:**
 
-Tabla de Campos:
-| Campo | Tipo Java | Descripción |
+| Campo | Tipo de Dato | Descripción |
 | :--- | :--- | :--- |
-| `id` | UUID | Identificador interno de la factura SaaS en la base de datos de Atelier. |
-| `stripeInvoiceId` | String | Identificador oficial de factura en Stripe (prefijo `in_`). |
-| `amountPaid` | BigDecimal | Monto monetario debitado con éxito. |
-| `currency` | String | Código ISO 4217 de la moneda de facturación. |
-| `status` | String | Estado contable del comprobante (`PAID`, `OPEN`, `VOID`, `UNCOLLECTIBLE`). |
-| `paidAt` | Instant | Fecha y hora en la que se confirmó el pago en la pasarela. |
+| `id` | `UUID` | Identificador único del comprobante en la base de datos de Atelier |
+| `stripeInvoiceId` | `String` | Identificador oficial de factura en Stripe (ej. in_1Ou8abc) |
+| `amountPaid` | `BigDecimal` | Monto total liquidado y recaudado |
+| `currency` | `String` | Código ISO de tres caracteres de la divisa (ej. USD) |
+| `status` | `String` | Estado del comprobante (PAID, OPEN, VOID, UNCOLLECTIBLE) |
+| `paidAt` | `Instant` | Fecha y hora exacta de confirmación del pago en formato ISO 8601 UTC |
 
-Ejemplo JSON de Respuesta:
+**Ejemplo de Carga Útil JSON (Response):**
 ```json
 [
   {
-    "id": "7f123456-8d76-47b2-b13c-fa5d206f4007",
-    "stripeInvoiceId": "in_1OuAtelierInvoice001",
-    "amountPaid": 129.00,
+    "id": "018f6c40-7e12-7000-8000-000000000401",
+    "stripeInvoiceId": "in_1Ou8abc20261001",
+    "amountPaid": 89.00,
     "currency": "USD",
     "status": "PAID",
-    "paidAt": "2026-10-01T00:05:00Z"
+    "paidAt": "2026-10-01T00:05:22Z"
   },
   {
-    "id": "8f123456-8d76-47b2-b13c-fa5d206f4008",
-    "stripeInvoiceId": "in_1OuAtelierInvoice002",
-    "amountPaid": 129.00,
+    "id": "018f6c40-7e12-7000-8000-000000000402",
+    "stripeInvoiceId": "in_1Ou8abc20260901",
+    "amountPaid": 89.00,
     "currency": "USD",
     "status": "PAID",
-    "paidAt": "2026-09-01T00:05:00Z"
+    "paidAt": "2026-09-01T00:04:15Z"
   }
 ]
 ```
 
-##### Errores y RFC 7807
-| Código HTTP | Error Type | Excepción de Dominio | Causa Común |
-| :--- | :--- | :--- | :--- |
-| `401 Unauthorized` | `https://api.atelier.andeva.pe/errors/unauthorized` | `AuthenticationException` | Token de sesión no provisto o inválido. |
-| `403 Forbidden` | `https://api.atelier.andeva.pe/errors/forbidden` | `AccessDeniedException` | Usuario carece de permisos de lectura de facturación del taller. |
+#### Errores y Excepciones de Dominio (RFC 7807)
+
+| Código HTTP | Excepción Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `401 Unauthorized` | `AuthenticationException` | Token JWT ausente o inválido |
+| `403 Forbidden` | `AccessDeniedException` | Permisos insuficientes para consultar facturas de la plataforma |
+
+**Ejemplo de Carga Útil de Error (RFC 7807 ProblemDetail):**
+```json
+{
+  "type": "https://api.atelier.andeva.com/errors/access-denied",
+  "title": "Access Denied",
+  "status": 403,
+  "detail": "El rol asignado no cuenta con privilegios contables para auditar facturas SaaS",
+  "instance": "/api/v1/billing/invoices",
+  "code": "ERR_ACCESS_DENIED",
+  "timestamp": "2026-10-04T02:35:00Z"
+}
+```
 
 ---
 
-#### GET /api/v1/billing/invoices/{id}
+### 5.2. [GET] /api/v1/billing/invoices/{id}
 
-##### Identidad Técnica
-* **Controlador:** `SaasInvoicesController` (`com.andeva.atelier.platform.billing.interfaces.rest.controllers`)
+#### Identidad Técnica
+* **Controlador:** `com.andeva.atelier.platform.billing.interfaces.rest.controllers.SaasInvoicesController`
 * **Método Java:** `public ResponseEntity<SaasInvoiceResource> getInvoiceById(@PathVariable UUID id, @AuthenticationPrincipal Jwt jwt)`
+* **Ruta Base:** `/api/v1/billing/invoices`
+* **Ruta Completa:** `/api/v1/billing/invoices/{id}`
+* **Propósito:** Consulta el detalle financiero y administrativo exhaustivo de un comprobante de facturación SaaS específico.
 
-##### Descripción Funcional
-Obtiene el detalle financiero exhaustivo de un comprobante de facturación de software emitido hacia el taller, incluyendo enlaces seguros a la factura alojada en Stripe y a su archivo PDF.
+#### Descripción Funcional
+Recupera el registro completo de la entidad `SaasInvoice` identificada por su `UUID`. Comprueba de forma rigurosa que el comprobante pertenezca al `tenant_id` autenticado, bloqueando accesos inter-inquilino. Retorna el identificador de suscripción asociada, el identificador oficial de Stripe, el monto cobrado, la fecha de emisión y las URLs seguras para inspección web alojada y descarga en PDF.
 
-##### Seguridad y Autorización
-* **Rol Mínimo:** `ROLE_TENANT_ADMIN`, `ROLE_WORKSHOP_OWNER` o `ROLE_ACCOUNTANT`.
+#### Seguridad y Autorización
+* **Nivel de Acceso:** Protegido / Taller Autenticado
+* **Rol Mínimo Requerido:** Administrador de Taller (`ROLE_TENANT_ADMIN`), Dueño de Taller (`ROLE_WORKSHOP_OWNER`) o Contador (`ROLE_ACCOUNTANT`)
 * **Permiso Atómico:** `@PreAuthorize("hasAuthority('billing:invoices:read')")`
-* **Contexto Multi-Inquilino:** Verifica que el registro de factura pertenezca estrictamente al `tenant_id` autenticado, arrojando denegación en intentos de acceso cruzado.
+* **Aislamiento Multi-Inquilino:** Verificación estricta de pertenencia al `tenant_id` del solicitante. Si el comprobante pertenece a otro inquilino, se emite una excepción de acceso no autorizado o no encontrado.
 
-##### Parámetros de Petición
-* **Headers:**
-  * `Authorization: Bearer <JWT>` (Obligatorio)
-* **Path Variables:**
-  | Variable | Tipo | Descripción |
-  | :--- | :--- | :--- |
-  | `id` | UUID | Identificador interno de la factura SaaS en la base de datos de Atelier. |
-* **Query Parameters:** Ninguno.
+#### Parámetros de Invocación
+* **Cabeceras HTTP (Headers):**
+  * `Authorization: Bearer <JWT>`
+  * `Accept: application/json`
+* **Parámetros de Ruta (Path Parameters):**
+  * `id` (`UUID`): Identificador universal de la factura SaaS en la base de datos.
+* **Parámetros de Consulta (Query Parameters):** No aplica.
 
-##### Request DTO
-No aplica para peticiones HTTP GET.
+#### Recurso de Petición (Request Body)
+No aplica (Solicitud de tipo HTTP GET sin cuerpo).
 
-##### Response DTO
-* **Estado HTTP:** `200 OK`
-* **Record Java:** `com.andeva.atelier.platform.billing.interfaces.rest.resources.responses.SaasInvoiceResource`
+#### Recurso de Respuesta (Response Body)
+* **Estado HTTP Exitoso:** `200 OK`
+* **Registro Java DTO:** `com.andeva.atelier.platform.billing.interfaces.rest.resources.responses.SaasInvoiceResource`
+* **Definición de Campos Proyectados:**
 
-Tabla de Campos:
-| Campo | Tipo Java | Descripción |
+| Campo | Tipo de Dato | Descripción |
 | :--- | :--- | :--- |
-| `id` | UUID | Identificador interno único del registro de factura SaaS. |
-| `subscriptionId` | UUID | Identificador de la suscripción asociada al cobro. |
-| `tenantId` | UUID | Identificador del taller automotriz titular. |
-| `stripeInvoiceId` | String | Identificador oficial del recibo en Stripe. |
-| `amountPaid` | BigDecimal | Importe total debitado a la tarjeta o cuenta bancaria. |
-| `currency` | String | Código de moneda bajo estándar ISO 4217. |
-| `status` | String | Estado contable del comprobante (`PAID`, `OPEN`, `VOID`, `UNCOLLECTIBLE`). |
-| `invoicePdfUrl` | String | Enlace oficial firmado provisto por Stripe para descargar el comprobante en PDF. |
-| `hostedInvoiceUrl` | String | Enlace interactivo web de Stripe para consultar el recibo detallado. |
-| `paidAt` | Instant | Momento en el que se confirmó la liquidación bancaria del pago. |
-| `createdAt` | Instant | Marca temporal de registro de la factura en el sistema. |
+| `id` | `UUID` | Identificador único de la factura en Atelier |
+| `subscriptionId` | `UUID` | Identificador de la suscripción SaaS vinculada |
+| `tenantId` | `UUID` | Identificador del taller automotriz titular |
+| `stripeInvoiceId` | `String` | Identificador oficial del comprobante en Stripe |
+| `amountPaid` | `BigDecimal` | Importe total liquidado |
+| `currency` | `String` | Divisa de la transacción (USD o PEN) |
+| `status` | `String` | Estado operativo del comprobante (PAID, OPEN, VOID, UNCOLLECTIBLE) |
+| `invoicePdfUrl` | `String` | Enlace oficial firmado para la descarga del comprobante PDF en Stripe |
+| `hostedInvoiceUrl` | `String` | Enlace a la interfaz web interactiva del comprobante en Stripe |
+| `paidAt` | `Instant` | Fecha y hora de confirmación del pago en formato ISO 8601 UTC |
+| `createdAt` | `Instant` | Fecha de emisión contable en formato ISO 8601 UTC |
 
-Ejemplo JSON de Respuesta:
+**Ejemplo de Carga Útil JSON (Response):**
 ```json
 {
-  "id": "7f123456-8d76-47b2-b13c-fa5d206f4007",
-  "subscriptionId": "5a432109-8d76-47b2-b13c-fa5d206f4005",
-  "tenantId": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
-  "stripeInvoiceId": "in_1OuAtelierInvoice001",
-  "amountPaid": 129.00,
+  "id": "018f6c40-7e12-7000-8000-000000000401",
+  "subscriptionId": "018f6c40-7e12-7000-8000-000000000301",
+  "tenantId": "018f6c40-7e12-7000-8000-000000000001",
+  "stripeInvoiceId": "in_1Ou8abc20261001",
+  "amountPaid": 89.00,
   "currency": "USD",
   "status": "PAID",
-  "invoicePdfUrl": "https://pay.stripe.com/invoice/acct_1OuAtelier/invst_1OuAtelierInvoice001/pdf",
-  "hostedInvoiceUrl": "https://invoice.stripe.com/i/acct_1OuAtelier/invst_1OuAtelierInvoice001",
-  "paidAt": "2026-10-01T00:05:00Z",
-  "createdAt": "2026-10-01T00:05:01Z"
+  "invoicePdfUrl": "https://pay.stripe.com/invoice/acct_123/invst_456/pdf?s=ap",
+  "hostedInvoiceUrl": "https://invoice.stripe.com/i/acct_123/invst_456",
+  "paidAt": "2026-10-01T00:05:22Z",
+  "createdAt": "2026-10-01T00:00:10Z"
 }
 ```
 
-##### Errores y RFC 7807
-| Código HTTP | Error Type | Excepción de Dominio | Causa Común |
-| :--- | :--- | :--- | :--- |
-| `400 Bad Request` | `https://api.atelier.andeva.pe/errors/invalid-identifier` | `IllegalArgumentException` | Formato UUID del parámetro de ruta inválido. |
-| `401 Unauthorized` | `https://api.atelier.andeva.pe/errors/unauthorized` | `AuthenticationException` | Token de sesión ausente o vencido. |
-| `403 Forbidden` | `https://api.atelier.andeva.pe/errors/forbidden` | `AccessDeniedException` | Intento deliberado de acceder a facturas de un taller tercero. |
-| `404 Not Found` | `https://api.atelier.andeva.pe/errors/invoice-not-found` | `SaasInvoiceNotFoundException` | La factura solicitada no existe en los registros contables. |
+#### Errores y Excepciones de Dominio (RFC 7807)
 
----
+| Código HTTP | Excepción Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `400 Bad Request` | `MethodArgumentTypeMismatchException` | El formato del identificador de factura en la ruta no es un UUID válido |
+| `401 Unauthorized` | `AuthenticationException` | Token JWT ausente o expirado |
+| `403 Forbidden` | `AccessDeniedException` | Intento de acceder a un comprobante que pertenece a otro taller |
+| `404 Not Found` | `SaasInvoiceNotFoundException` | La factura solicitada no existe en el registro del taller |
 
-#### GET /api/v1/billing/invoices/{id}/pdf
-
-##### Identidad Técnica
-* **Controlador:** `SaasInvoicesController` (`com.andeva.atelier.platform.billing.interfaces.rest.controllers`)
-* **Método Java:** `public ResponseEntity<Void> redirectToInvoicePdf(@PathVariable UUID id, @AuthenticationPrincipal Jwt jwt)`
-
-##### Descripción Funcional
-Redirige de manera directa al navegador o cliente móvil mediante código HTTP 302 hacia el enlace oficial y seguro firmado por Stripe para la descarga del comprobante en PDF.
-
-##### Seguridad y Autorización
-* **Rol Mínimo:** `ROLE_TENANT_ADMIN`, `ROLE_WORKSHOP_OWNER` o `ROLE_ACCOUNTANT`.
-* **Permiso Atómico:** `@PreAuthorize("hasAuthority('billing:invoices:read')")`
-* **Contexto Multi-Inquilino:** Verifica la tenencia de la factura antes de efectuar la redirección.
-
-##### Parámetros de Petición
-* **Headers:**
-  * `Authorization: Bearer <JWT>` (Obligatorio)
-* **Path Variables:**
-  | Variable | Tipo | Descripción |
-  | :--- | :--- | :--- |
-  | `id` | UUID | Identificador de la factura SaaS. |
-* **Query Parameters:** Ninguno.
-
-##### Request DTO
-No aplica para peticiones HTTP GET.
-
-##### Response DTO
-* **Estado HTTP:** `302 Found`
-* **Headers:**
-  * `Location: https://pay.stripe.com/invoice/acct_1OuAtelier/invst_1OuAtelierInvoice001/pdf`
-* **Record Java:** No retorna cuerpo en la respuesta (`Void`).
-
-##### Errores y RFC 7807
-| Código HTTP | Error Type | Excepción de Dominio | Causa Común |
-| :--- | :--- | :--- | :--- |
-| `401 Unauthorized` | `https://api.atelier.andeva.pe/errors/unauthorized` | `AuthenticationException` | Token de sesión no provisto o inválido. |
-| `403 Forbidden` | `https://api.atelier.andeva.pe/errors/forbidden` | `AccessDeniedException` | Permisos insuficientes para consultar el comprobante. |
-| `404 Not Found` | `https://api.atelier.andeva.pe/errors/invoice-not-found` | `SaasInvoiceNotFoundException` | La factura solicitada no existe o no tiene un PDF generado en Stripe. |
-
----
-
-### 3.4. StripeWebhooksController
-
-Controlador perimetral de ingesta asíncrona de eventos de facturación despachados por la pasarela de pagos Stripe.
-
-#### POST /api/v1/billing/webhooks/stripe
-
-##### Identidad Técnica
-* **Controlador:** `StripeWebhooksController` (`com.andeva.atelier.platform.billing.interfaces.rest.controllers`)
-* **Método Java:** `public ResponseEntity<StripeWebhookAcknowledgmentResponse> handleStripeWebhook(@RequestHeader("Stripe-Signature") String sigHeader, @RequestBody String rawPayload)`
-
-##### Descripción Funcional
-Endpoint público asíncrono para recepción de eventos de Stripe. Valida la firma criptográfica HMAC-SHA256 con el secreto simétrico del webhook, persiste el registro en la tabla `stripe_events` con restricción UNIQUE para garantizar procesamiento exactamente una vez, y dispara la actualización del estado de suscripción y la invalidación reactiva de Caffeine Cache.
-
-Eventos de Stripe procesados:
-* `checkout.session.completed`: Vincula el cliente y activa la suscripción inicial del taller.
-* `invoice.payment_succeeded`: Asienta la factura pagada y prolonga el periodo de cobertura.
-* `invoice.payment_failed`: Conmuta la suscripción a mora (`PAST_DUE`) y envía notificación de contingencia.
-* `customer.subscription.updated`: Actualiza los ítems y cuotas del plan ante cambios tarifarios.
-* `customer.subscription.deleted`: Conmuta el estado de la membresía a cancelada (`CANCELED`).
-
-##### Seguridad y Autorización
-* **Rol Mínimo:** Sin autenticación JWT (Endpoint perimetral público para infraestructura distribuida de Stripe).
-* **Firma Criptográfica:** Validación obligatoria de la cabecera `Stripe-Signature` calculada mediante HMAC-SHA256 contra la variable de entorno `STRIPE_WEBHOOK_SECRET`.
-* **Contexto Multi-Inquilino:** El `tenant_id` es extraído de los metadatos (`metadata.tenant_id`) embebidos en el payload original del evento.
-
-##### Parámetros de Petición
-* **Headers:**
-  * `Stripe-Signature: t=1614552225,v1=5257a869e7eee... (Obligatorio)`
-  * `Content-Type: application/json` (Obligatorio)
-* **Path Variables:** Ninguna.
-* **Query Parameters:** Ninguno.
-
-##### Request DTO
-* **Tipo:** Payload JSON sin procesar (`String rawPayload`). No debe deserializarse previamente en objetos intermedios para evitar mutaciones que invaliden la comprobación de la firma criptográfica.
-
-Ejemplo JSON de Notificación de Stripe:
+**Ejemplo de Carga Útil de Error (RFC 7807 ProblemDetail):**
 ```json
 {
-  "id": "evt_1OuAtelierPaymentSucc001",
-  "object": "event",
-  "api_version": "2024-06-20",
-  "created": 1727800000,
-  "data": {
-    "object": {
-      "id": "in_1OuAtelierInvoice001",
-      "object": "invoice",
-      "customer": "cus_OuAtelierCust001",
-      "subscription": "sub_OuAtelierSub001",
-      "amount_paid": 12900,
-      "currency": "usd",
-      "status": "paid",
-      "invoice_pdf": "https://pay.stripe.com/invoice/acct_1OuAtelier/invst_1OuAtelierInvoice001/pdf",
-      "hosted_invoice_url": "https://invoice.stripe.com/i/acct_1OuAtelier/invst_1OuAtelierInvoice001",
-      "metadata": {
-        "tenant_id": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d"
-      }
-    }
-  },
-  "type": "invoice.payment_succeeded"
+  "type": "https://api.atelier.andeva.com/errors/saas-invoice-not-found",
+  "title": "SaaS Invoice Not Found",
+  "status": 404,
+  "detail": "El comprobante contable con identificador 018f6c40-7e12-7000-8000-000000000499 no fue localizado",
+  "instance": "/api/v1/billing/invoices/018f6c40-7e12-7000-8000-000000000499",
+  "code": "ERR_SAAS_INVOICE_NOT_FOUND",
+  "timestamp": "2026-10-04T02:40:00Z"
 }
 ```
 
-##### Response DTO
-* **Estado HTTP:** `200 OK`
-* **Record Java:** `com.andeva.atelier.platform.billing.interfaces.rest.resources.responses.StripeWebhookAcknowledgmentResponse`
+---
 
-Tabla de Campos:
-| Campo | Tipo Java | Descripción |
+### 5.3. [GET] /api/v1/billing/invoices/{id}/pdf
+
+#### Identidad Técnica
+* **Controlador:** `com.andeva.atelier.platform.billing.interfaces.rest.controllers.SaasInvoicesController`
+* **Método Java:** `public ResponseEntity<Void> redirectToInvoicePdf(@PathVariable UUID id, @AuthenticationPrincipal Jwt jwt)`
+* **Ruta Base:** `/api/v1/billing/invoices`
+* **Ruta Completa:** `/api/v1/billing/invoices/{id}/pdf`
+* **Propósito:** Redirige de forma transparente al usuario hacia el enlace oficial y seguro de descarga del PDF generado por Stripe.
+
+#### Descripción Funcional
+Comprueba la existencia del comprobante y su pertenencia al taller autenticado. En lugar de transmitir pesados flujos binarios de PDF a través del servidor de aplicaciones de Atelier sobrecargando la red interna, el controlador emite una respuesta de redirección HTTP `302 Found` con la cabecera estándar `Location` apuntando hacia la URL de descarga oficial generada por Stripe en su red de distribución CDN. El navegador del cliente inicia la descarga inmediata del documento fiscal emitido por Andeva.
+
+#### Seguridad y Autorización
+* **Nivel de Acceso:** Protegido / Taller Autenticado
+* **Rol Mínimo Requerido:** Administrador de Taller (`ROLE_TENANT_ADMIN`), Dueño de Taller (`ROLE_WORKSHOP_OWNER`) o Contador (`ROLE_ACCOUNTANT`)
+* **Permiso Atómico:** `@PreAuthorize("hasAuthority('billing:invoices:read')")`
+* **Aislamiento Multi-Inquilino:** Comprobación estricta de titularidad multi-inquilino sobre el recurso solicitado.
+
+#### Parámetros de Invocación
+* **Cabeceras HTTP (Headers):**
+  * `Authorization: Bearer <JWT>`
+* **Parámetros de Ruta (Path Parameters):**
+  * `id` (`UUID`): Identificador único de la factura en el sistema.
+* **Parámetros de Consulta (Query Parameters):** No aplica.
+
+#### Recurso de Petición (Request Body)
+No aplica (Solicitud de tipo HTTP GET sin cuerpo).
+
+#### Recurso de Respuesta (Response Body)
+* **Estado HTTP Exitoso:** `302 Found`
+* **Cabeceras de Respuesta Clave:**
+  * `Location: https://pay.stripe.com/invoice/acct_123/invst_456/pdf?s=ap`
+* **Registro Java DTO:** No aplica (Cuerpo vacío con cabecera Location de redirección).
+
+#### Errores y Excepciones de Dominio (RFC 7807)
+
+| Código HTTP | Excepción Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `401 Unauthorized` | `AuthenticationException` | Token JWT ausente o inválido |
+| `403 Forbidden` | `AccessDeniedException` | Acceso denegado a comprobantes de otro inquilino |
+| `404 Not Found` | `SaasInvoiceNotFoundException` | La factura solicitada no existe o carece de URL de descarga PDF |
+
+**Ejemplo de Carga Útil de Error (RFC 7807 ProblemDetail):**
+```json
+{
+  "type": "https://api.atelier.andeva.com/errors/saas-invoice-not-found",
+  "title": "SaaS Invoice Not Found",
+  "status": 404,
+  "detail": "El comprobante contable no dispone de archivo PDF disponible para descarga en este momento",
+  "instance": "/api/v1/billing/invoices/018f6c40-7e12-7000-8000-000000000401/pdf",
+  "code": "ERR_SAAS_INVOICE_NOT_FOUND",
+  "timestamp": "2026-10-04T02:45:00Z"
+}
+```
+
+---
+
+## 6. Endpoints de StripeWebhooksController
+
+El controlador `StripeWebhooksController` provee el canal de comunicación perimetral asíncrono y desacoplado para la ingesta segura de eventos emitidos por la pasarela de pagos Stripe Inc.
+
+### 6.1. [POST] /api/v1/billing/webhooks/stripe
+
+#### Identidad Técnica
+* **Controlador:** `com.andeva.atelier.platform.billing.interfaces.rest.controllers.StripeWebhooksController`
+* **Método Java:** `public ResponseEntity<StripeWebhookAcknowledgmentResponse> handleWebhook(@RequestBody String rawPayload, @RequestHeader("Stripe-Signature") String signatureHeader)`
+* **Ruta Base:** `/api/v1/billing/webhooks/stripe`
+* **Ruta Completa:** `/api/v1/billing/webhooks/stripe`
+* **Propósito:** Procesa eventos asíncronos enviados por Stripe, verificando matemáticamente la firma criptográfica HMAC-SHA256, garantizando idempotencia estricta y sincronizando el estado contable de las suscripciones.
+
+#### Descripción Funcional
+Constituye la puerta de entrada asíncrona de Stripe. Debido a que la verificación de firma criptográfica exige comparar el cuerpo crudo de la petición contra el encabezado sin mutaciones causadas por deserializadores JSON, el método recibe la cadena `rawPayload` intacta. El servicio `StripeWebhookSignatureVerificationService` calcula el hash HMAC-SHA256 utilizando el secreto `STRIPE_WEBHOOK_SECRET` y tolera un desfase temporal máximo de 300 segundos para impedir ataques de repetición.
+
+Tras la validación matemática:
+1. Registra el identificador de evento (`eventId`) en la tabla de idempotencia `stripe_events`. Si el evento ya fue registrado previamente, descarta la ejecución retornando inmediatamente confirmación `200 OK` para evitar cobros o renovaciones duplicadas.
+2. Despacha el comando transaccional correspondiente según el tipo de evento:
+   * `customer.subscription.created` y `customer.subscription.updated`: Actualiza vigencia, periodo y cuotas en `TenantSubscription`.
+   * `invoice.payment_succeeded`: Registra el comprobante en `saas_invoices` y emite `SaasInvoicePaymentSucceededEvent`.
+   * `invoice.payment_failed`: Pasa la membresía a estado `PAST_DUE` y despacha alerta urgente por correo mediante Resend.
+   * `customer.subscription.deleted`: Marca el contrato como rescindido (`CANCELED`).
+3. Invalida de forma reactiva la entrada del taller en Caffeine Cache.
+
+#### Seguridad y Autorización
+* **Nivel de Acceso:** Público Perimetral / Pasarela Externa Stripe
+* **Rol Mínimo Requerido:** No aplica (Punto de enlace perimetral externo)
+* **Permiso Atómico:** Verificación Criptográfica de Cabecera `Stripe-Signature` contra el secreto de webhook `STRIPE_WEBHOOK_SECRET`
+* **Aislamiento Multi-Inquilino:** La tenencia se resuelve a partir de los metadatos (`metadata.tenantId`) o del cliente de Stripe (`customer`) contenido en el objeto del evento.
+
+#### Parámetros de Invocación
+* **Cabeceras HTTP (Headers):**
+  * `Content-Type: application/json`
+  * `Stripe-Signature: t=1614552225,v1=5257a869e7eee22... (Obligatoria)`
+* **Parámetros de Ruta (Path Parameters):** No aplica.
+* **Parámetros de Consulta (Query Parameters):** No aplica.
+
+#### Recurso de Petición (Request Body)
+* **Registro Java DTO:** Cadena JSON cruda (`String rawPayload`) correspondiente a la estructura del evento Stripe.
+
+**Ejemplo de Carga Útil JSON (Request - Evento invoice.payment_succeeded):**
+```json
+{
+  "id": "evt_1Ou8abcPaymentSuccess001",
+  "object": "event",
+  "api_version": "2024-06-20",
+  "created": 1727740800,
+  "type": "invoice.payment_succeeded",
+  "data": {
+    "object": {
+      "id": "in_1Ou8abc20261001",
+      "object": "invoice",
+      "amount_paid": 8900,
+      "currency": "usd",
+      "customer": "cus_1Ou8abcCustomerTaller01",
+      "subscription": "sub_1Ou8abcSubActive01",
+      "status": "paid",
+      "invoice_pdf": "https://pay.stripe.com/invoice/acct_123/invst_456/pdf?s=ap",
+      "hosted_invoice_url": "https://invoice.stripe.com/i/acct_123/invst_456",
+      "lines": {
+        "data": [
+          {
+            "id": "il_1Ou8abcLineItem01",
+            "amount": 8900,
+            "currency": "usd",
+            "period": {
+              "start": 1727740800,
+              "end": 1730419200
+            },
+            "price": {
+              "id": "price_1Ou8abcPROMonthly"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "tenantId": "018f6c40-7e12-7000-8000-000000000001"
+      }
+    }
+  }
+}
+```
+
+#### Recurso de Respuesta (Response Body)
+* **Estado HTTP Exitoso:** `200 OK`
+* **Registro Java DTO:** `com.andeva.atelier.platform.billing.interfaces.rest.resources.responses.StripeWebhookAcknowledgmentResponse`
+* **Definición de Campos Proyectados:**
+
+| Campo | Tipo de Dato | Descripción |
 | :--- | :--- | :--- |
-| `received` | boolean | Confirmación booleana de recepción conforme del evento. |
-| `eventId` | String | Identificador unívoco del evento procesado (prefijo `evt_`). |
-| `status` | String | Estado del procesamiento idempotente (`PROCESSED`, `IGNORED`, `PENDING`). |
+| `received` | `boolean` | Confirmación booleana de recepción exitosa para Stripe |
+| `eventId` | `String` | Identificador del evento registrado para fines de auditoría |
+| `status` | `String` | Estado de procesamiento del evento (PROCESSED o DUPLICATE_IGNORED) |
 
-Ejemplo JSON de Respuesta:
+**Ejemplo de Carga Útil JSON (Response):**
 ```json
 {
   "received": true,
-  "eventId": "evt_1OuAtelierPaymentSucc001",
+  "eventId": "evt_1Ou8abcPaymentSuccess001",
   "status": "PROCESSED"
 }
 ```
 
-##### Errores y RFC 7807
-| Código HTTP | Error Type | Excepción de Dominio | Causa Común |
-| :--- | :--- | :--- | :--- |
-| `400 Bad Request` | `https://api.atelier.andeva.pe/errors/empty-payload` | `IllegalArgumentException` | Cuerpo de solicitud nulo o vacío. |
-| `401 Unauthorized` | `https://api.atelier.andeva.pe/errors/invalid-signature` | `InvalidWebhookSignatureException` | La cabecera `Stripe-Signature` es inválida, expiró la tolerancia temporal de 300 segundos o no coincide con la firma HMAC. |
-| `422 Unprocessable Entity` | `https://api.atelier.andeva.pe/errors/webhook-processing-failed` | `StripeWebhookProcessingException` | Fallo al parsear metadatos del evento o tipo de evento no soportado. |
-| `500 Internal Server Error` | `https://api.atelier.andeva.pe/errors/internal-error` | `BillingInfrastructureException` | Error al registrar en tabla de idempotencia o falla de broker. |
+#### Errores y Excepciones de Dominio (RFC 7807)
 
-Ejemplo JSON ProblemDetail:
+| Código HTTP | Excepción Mapeada | Causa Funcional |
+| :---: | :--- | :--- |
+| `400 Bad Request` | `BillingDomainException` | Carga JSON vacía o malformada |
+| `401 Unauthorized` | `InvalidWebhookSignatureException` | Firma Stripe-Signature ausente, expirada o con hash HMAC incorrecto |
+| `422 Unprocessable Entity` | `StripeWebhookProcessingException` | Esquema del evento irreconocible o metadatos de tenantId corruptos |
+| `500 Internal Server Error` | `BillingDomainException` | Falla de concurrencia al registrar la persistencia en base de datos |
+
+**Ejemplo de Carga Útil de Error (RFC 7807 ProblemDetail):**
 ```json
 {
-  "type": "https://api.atelier.andeva.pe/errors/invalid-signature",
-  "title": "Firma de Webhook Invalida",
+  "type": "https://api.atelier.andeva.com/errors/invalid-webhook-signature",
+  "title": "Invalid Webhook Signature",
   "status": 401,
-  "detail": "La firma provista en la cabecera Stripe-Signature no coincide con el secreto configurado.",
+  "detail": "La firma criptográfica HMAC-SHA256 en la cabecera Stripe-Signature no coincide con el secreto configurado",
   "instance": "/api/v1/billing/webhooks/stripe",
-  "code": "INVALID_WEBHOOK_SIGNATURE",
-  "timestamp": "2026-10-01T15:37:00Z"
+  "code": "ERR_INVALID_WEBHOOK_SIGNATURE",
+  "timestamp": "2026-10-04T02:50:00Z"
 }
 ```

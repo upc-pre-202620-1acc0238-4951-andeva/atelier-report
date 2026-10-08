@@ -1,0 +1,31 @@
+Repository,Branch,Commit Id,Commit Message,Commit Message Body,Commited on (Date)
+upc-pre-202620-1acc0238-4951-andeva/atelier-website,main,344e062,Merge pull request #2 from upc-pre-202620-1acc0238-4951-andeva/develop,Develop,08/10/2026
+upc-pre-202620-1acc0238-4951-andeva/atelier-website,main,20ae0a6,"refactor: bump service worker cache version, add asset loading checks for intro, and use ThreadingTCPServer.",,07/10/2026
+upc-pre-202620-1acc0238-4951-andeva/atelier-website,main,6715f4f,Merge pull request #4 from upc-pre-202620-1acc0238-4951-andeva/feature/navbar,chore: add IDE configuration for GitFlow helper,07/10/2026
+upc-pre-202620-1acc0238-4951-andeva/atelier-website,main,bf6a73e,chore: add IDE configuration for GitFlow helper,,07/10/2026
+upc-pre-202620-1acc0238-4951-andeva/atelier-website,main,f11f80d,chore: add JetBrains IDE configuration files,,07/10/2026
+upc-pre-202620-1acc0238-4951-andeva/atelier-website,main,08f6f63,"feat(i18n): add pricing, faq, and demo translations",,06/10/2026
+upc-pre-202620-1acc0238-4951-andeva/atelier-website,main,6f776cb,"feat(js): add logic for pricing, faq accordion, and demo modal",,06/10/2026
+upc-pre-202620-1acc0238-4951-andeva/atelier-website,main,cbc30f2,"feat(html): add pricing, faq, install, and demo modal sections",,06/10/2026
+upc-pre-202620-1acc0238-4951-andeva/atelier-website,main,7ff7427,feat(js): add PWA manifest and offline cache,,05/10/2026
+upc-pre-202620-1acc0238-4951-andeva/atelier-website,main,8994ae1,feat(js): addpwa install and whatsapp links,,05/10/2026
+upc-pre-202620-1acc0238-4951-andeva/atelier-website,main,c36bf92,feat(i18n): add product and team for both idioms,,05/10/2026
+upc-pre-202620-1acc0238-4951-andeva/atelier-website,main,15e8e40,feat(style): add Tailwind utilities and theme styling,,05/10/2026
+upc-pre-202620-1acc0238-4951-andeva/atelier-website,main,0bbe73d,"feat(html) :add product, roles, and team landing sections",,05/10/2026
+upc-pre-202620-1acc0238-4951-andeva/atelier-website,main,df04c82,Merge pull request #1 from upc-pre-202620-1acc0238-4951-andeva/feature/part1-base-hero,Feature/part1 base hero,04/10/2026
+upc-pre-202620-1acc0238-4951-andeva/atelier-website,main,2732a6e,"feat(js): add scroll effects, live telemetry demo and intro animation",,04/10/2026
+upc-pre-202620-1acc0238-4951-andeva/atelier-website,main,1019106,"feat(js): add theme toggle, language switch and mobile drawer",,04/10/2026
+upc-pre-202620-1acc0238-4951-andeva/atelier-website,main,991c012,"feat(i18n): add ES and EN dictionary for navigation, hero, stats, comparison and steps",,04/10/2026
+upc-pre-202620-1acc0238-4951-andeva/atelier-website,main,5bbdb5c,feat(html): add how-it-works section,,04/10/2026
+upc-pre-202620-1acc0238-4951-andeva/atelier-website,main,db88719,feat(html): add context stats and before/after comparison,,04/10/2026
+upc-pre-202620-1acc0238-4951-andeva/atelier-website,main,d48ac37,feat(html): add hero section with phone mockup,,04/10/2026
+upc-pre-202620-1acc0238-4951-andeva/atelier-website,main,4514c8f,"feat(html): add document head, intro overlay, navigation and drawer",,04/10/2026
+upc-pre-202620-1acc0238-4951-andeva/atelier-website,main,893050e,"feat(style): add dark-mode adaptations, responsive rules and mobile drawer",,04/10/2026
+upc-pre-202620-1acc0238-4951-andeva/atelier-website,main,1b13b49,"feat(style): add hero, stats and how-it-works layout",,04/10/2026
+upc-pre-202620-1acc0238-4951-andeva/atelier-website,main,aed1b98,"feat(style): add navigation, buttons and typography",,04/10/2026
+upc-pre-202620-1acc0238-4951-andeva/atelier-website,main,2a673a1,feat(style): add Tailwind v4 theme tokens and base styles,,04/10/2026
+upc-pre-202620-1acc0238-4951-andeva/atelier-website,main,1c9b434,feat(assets): vendor Phosphor icons for offline use,,04/10/2026
+upc-pre-202620-1acc0238-4951-andeva/atelier-website,main,59a7f3d,"feat(assets): add brand logos, isotipo, favicon and intro masks",,04/10/2026
+upc-pre-202620-1acc0238-4951-andeva/atelier-website,main,506fb0d,feat(assets): add Satoshi and Albert Sans fonts served locally,,04/10/2026
+upc-pre-202620-1acc0238-4951-andeva/atelier-website,main,229d10f,"chore: add pnpm manifest, lockfile and local dev server",,04/10/2026
+upc-pre-202620-1acc0238-4951-andeva/atelier-website,main,d2e065d,chore: initialize repository,,04/10/2026
