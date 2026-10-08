@@ -68,7 +68,105 @@ Esta imagen exhibe la estructura de cierre del servicio. La primera pantalla div
 
 #### 3.1.4.2. Mobile Applications Wireflow Diagrams
 
+Un wireflow o flujo de pantalla es un diagrama donde se reúnen distintos wireframes realizados cuya finalidad es contar las metas del usuario con la aplicación y cómo las consiguen. Luego, los pasos para la creación de cada diagrama empiezan por la definición de un objetivo del usuario que desea cumplir. Luego, se define el flujo de tareas que deben ser realizadas por el usuario en la aplicación para conseguir dicho objetivo. Y, finalmente, se traducen dichas tareas por pantallas en baja fidelidad (blanco y negro) y, también, se trazan decisiones en botones del wireframe.
 
+- **User Goal 1:** Usuario (Técnico o Administrador) desea iniciar sesión en su cuenta
+
+Primero, se definen las tareas típicas que realizaría un usuario para completar este objetivo:
+
+![Taskflow de inicio de sesión.](report/assets/taskflows/taskflow_1.png){#fig:taskflow-1}
+
+Luego, se muestra el resultado de la traducción de acción a pantallas. A continuación, en este flujo se muestra el proceso para iniciar sesión en la aplicación. El usuario ingresa sus credenciales en la pantalla de login, selecciona su sede de trabajo y finalmente accede a la pantalla principal de su perfil.
+
+![Wireflow de inicio de sesión.](report/assets/wireflows/wireflow_1.png){#fig:wireflow-1}
+
+- **User Goal 2:** Usuario desea recuperar su contraseña olvidada
+
+Primero, se definen las tareas típicas que realizaría un usuario para completar este objetivo:
+
+![Taskflow de recuperación de contraseña.](report/assets/taskflows/taskflow_2.png){#fig:taskflow-2}
+
+Luego, se muestra el resultado de la traducción de acción a pantallas. A continuación, en este flujo se muestra el proceso para recuperar la contraseña de una cuenta. Para ello, el usuario accede a la opción de recuperación, coloca su correo institucional, y mediante un enlace de verificación procede a registrar y confirmar su nueva clave de acceso.
+
+![Wireflow de recuperación de contraseña.](report/assets/wireflows/wireflow_2.png){#fig:wireflow-2}
+
+- **User Goal 3:** Técnico automotriz desea registrar su asistencia mediante geolocalización
+
+Primero, se definen las tareas típicas que realizaría un usuario para completar este objetivo:
+
+![Taskflow de marcación de asistencia.](report/assets/taskflows/taskflow_3.png){#fig:taskflow-3}
+
+Luego, se muestra el resultado de la traducción de acción a pantallas. A continuación, en este flujo se muestra el proceso para registrar la entrada al taller. El técnico accede al módulo de asistencia, el sistema valida su ubicación física dentro de la geocerca permitida y, al confirmar, se registra su hora de ingreso en el sistema.
+
+![Wireflow de marcación de asistencia.](report/assets/wireflows/wireflow_3.png){#fig:wireflow-3}
+
+- **User Goal 4:** Administrador o Asesor desea recibir un vehículo y aperturar una Orden de Trabajo (OT)
+
+Primero, se definen las tareas típicas que realizaría un usuario para completar este objetivo:
+
+![Taskflow de apertura de orden de trabajo.](report/assets/taskflows/taskflow_4.png){#fig:taskflow-4}
+
+Luego, se muestra el resultado de la traducción de acción a pantallas. A continuación, en este flujo se muestra el proceso para la recepción vehicular. El asesor busca el vehículo por su placa, completa el formulario con el kilometraje actual y los síntomas indicados por el cliente, asigna las tareas iniciales y genera el identificador único de la orden.
+
+![Wireflow de apertura de orden de trabajo.](report/assets/wireflows/wireflow_4.png){#fig:wireflow-4}
+
+- **User Goal 5:** Técnico automotriz desea conectar el escáner OBD-II y leer los códigos de falla
+
+Primero, se definen las tareas típicas que realizaría un usuario para completar este objetivo:
+
+![Taskflow de diagnóstico electrónico OBD-II.](report/assets/taskflows/taskflow_5.png){#fig:taskflow-5}
+
+Luego, se muestra el resultado de la traducción de acción a pantallas. A continuación, en este flujo se muestra el proceso para realizar un diagnóstico electrónico. El técnico busca escáneres cercanos por Bluetooth, vincula el dispositivo correcto conectado al auto y ejecuta la lectura para extraer y visualizar los códigos de falla del motor.
+
+![Wireflow de diagnóstico electrónico OBD-II.](report/assets/wireflows/wireflow_5.png){#fig:wireflow-5}
+
+- **User Goal 6:** Técnico automotriz desea imputar (consumir) un repuesto del inventario hacia una tarea activa
+
+Primero, se definen las tareas típicas que realizaría un usuario para completar este objetivo:
+
+![Taskflow de imputación de repuestos.](report/assets/taskflows/taskflow_6.png){#fig:taskflow-6}
+
+Luego, se muestra el resultado de la traducción de acción a pantallas. A continuación, en este flujo se muestra el proceso para asignar repuestos. El técnico, desde la vista de su tarea en progreso, accede al catálogo de inventario, busca el insumo necesario, define la cantidad a consumir y lo agrega directamente a la orden de trabajo.
+
+![Wireflow de imputación de repuestos.](report/assets/wireflows/wireflow_6.png){#fig:wireflow-6}
+
+- **User Goal 7:** Técnico automotriz desea cerrar una tarea completada
+
+Primero, se definen las tareas típicas que realizaría un usuario para completar este objetivo:
+
+![Taskflow de cierre de tarea técnica.](report/assets/taskflows/taskflow_7.png){#fig:taskflow-7}
+
+Luego, se muestra el resultado de la traducción de acción a pantallas. A continuación, en este flujo se muestra el proceso para finalizar una labor. El técnico accede a la pantalla de cierre, verifica que se cumplan las validaciones obligatorias (como el registro de repuestos y captura de fotos de evidencia) y confirma la culminación de la tarea.
+
+![Wireflow de cierre de tarea técnica.](report/assets/wireflows/wireflow_7.png){#fig:wireflow-7}
+
+- **User Goal 8:** Administrador gestiona la resolución de un presupuesto con el cliente
+
+Primero, se definen las tareas típicas que realizaría un usuario para completar este objetivo:
+
+![Taskflow de resolución de presupuesto.](report/assets/taskflows/taskflow_8.png){#fig:taskflow-8}
+
+Luego, se muestra el resultado de la traducción de acción a pantallas. A continuación, en este flujo se muestra el proceso de aprobación comercial. El administrador registra la decisión del cliente sobre la proforma, lo cual permite iniciar los trabajos si es aceptada, o requiere ingresar un motivo de rechazo para cancelar la orden y devolver los repuestos.
+
+![Wireflow de resolución de presupuesto.](report/assets/wireflows/wireflow_8.png){#fig:wireflow-8}
+
+- **User Goal 9:** Administrador desea emitir el comprobante electrónico a SUNAT
+
+Primero, se definen las tareas típicas que realizaría un usuario para completar este objetivo:
+
+![Taskflow de emisión de comprobante fiscal.](report/assets/taskflows/taskflow_9.png){#fig:taskflow-9}
+
+Luego, se muestra el resultado de la traducción de acción a pantallas. A continuación, en este flujo se muestra el proceso de facturación. El administrador procesa la orden completada y el sistema se comunica con el servidor fiscal para generar la boleta o factura, devolviendo la confirmación de éxito con el respectivo código Hash.
+
+![Wireflow de emisión de comprobante fiscal.](report/assets/wireflows/wireflow_9.png){#fig:wireflow-9}
+
+- **User Goal 10:** Administrador desea cobrar el servicio y entregar el vehículo al cliente
+
+Primero, se definen las tareas típicas que realizaría un usuario para completar este objetivo:
+
+![Taskflow de cobro y entrega de vehículo.](report/assets/taskflows/taskflow_10.png){#fig:taskflow-10}
+
+Luego, se muestra el resultado de la traducción de acción a pantallas. A continuación, en este flujo se muestra el proceso final de liberación. El administrador registra los abonos del cliente en la pasarela hasta saldar la cuenta, recolecta la firma digital en pantalla y el sistema genera automáticamente el código QR de pase de salida.
 
 #### 3.1.4.3. Mobile Applications Mock-ups
 
