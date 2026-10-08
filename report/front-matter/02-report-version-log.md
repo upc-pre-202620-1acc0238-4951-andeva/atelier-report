@@ -49,4 +49,5 @@
 |1.1.5|07/10/2026|Huamani Estefanero, Joel|Inserción de la sección 4.1 Software Configuration Management (Entornos de desarrollo, GitFlow, Guía de estilos y Configuración de despliegue con C4).|
 |1.2.0|08/10/2026|Huamani Estefanero, Joel|Consolidación del ***Sprint 1***.|
 |1.2.1|08/10/2026|Sanchez Santin, Adiel Abdiaz|Actualización de los diagramas de EventStorming en los ocho pasos del diseño estratégico DDD.|
+|1.2.2|08/10/2026|Huamani Estefanero, Joel|Inserción de analíticos de colaboración TB1, conclusiones y Student Outcomes.|
 \newpage
