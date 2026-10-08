@@ -1,53 +1,55 @@
 # Registro de Versiones del Informe {- .unlisted}
 
-| Versión | Fecha | Autor | Descripción de modificación |
-|:-----------:|:---------:|:----------|:--------------------------------|
-|0.8.0|28/08/2026|Huamani Estefanero, Joel|Añadido de la sección de ***Descripción de la Startup*** y documentación con las definiciones de Atelier.|
-|0.10.0|28/08/2026|Huamani Estefanero, Joel|Realización de la técnica 5W's y 2H's para la sección de ***Antecedentes y Problemática***.|
-|0.10.0|28/08/2026|Huamani Estefanero, Joel|Añadido completo de la sección de ***Antecedentes y Problemática*** en base a las fuentes encontradas.|
-|0.11.0|28/08/2026|Huamani Estefanero, Joel|Añadido de la sección de **Segmentos Objetivo** con datos demográficos.|
-|0.12.0|02/09/2026|Granda Ibarra Luis Daniel|Añadido de **Lean UX Problem Statement** y definición de *Outcomes*.|
-|0.13.0|02/09/2026|Granda Ibarra Luis Daniel|Añadido de **Lean UX Assumptions** y **Hypothesis Statements**.|
-|0.14.0|02/09/2026|Granda Ibarra Luis Daniel|Inserción de la matriz gráfica de **Lean UX Canvas**.|
-|0.14.0|03/09/2026|Teran Zavala, Mauricio Alejandro|Añadido de **Diseño de Entrevistas**.|
-|0.15.0|03/09/2026|Huamani Estefanero, Joel|Añadido de la sección de ***Software Architecture*** y reformulación de la documentación de Atelier.|
-|0.15.0|06/09/2026|Teran Zavala, Mauricio Alejandro|Inserción de la primera entrevista para el primer segmento y todo el marco de las entrevistas.|
-|0.17.0|07/09/2026|Huamani Estefanero, Joel|Añadido de ***Bounded Context: Shared*** y documentación del backend.|
-|0.17.0|07/09/2026|Rocha Cotrina, Alvaro|Añadido de Objetivos SMART para Alvaro Rocha.|
-|0.20.0|07/09/2026|Rocha Cotrina, Alvaro|Añadido del perfil de Alvaro para el capítulo 1.|
-|0.20.0|08/09/2026|Huamani Estefanero, Joel|Añadido de ***Bounded Context: Identity and Access Management (IAM) & Tenancy*** y documentación del backend.|
-|0.21.0|08/09/2026|Huamani Estefanero, Joel|Añadido de ***Bounded Context: Customer and Fleet Management (CRM)*** y documentación del backend.|
-|0.23.0|08/09/2026|Teran Zavala, Mauricio Alejandro|Añadido de **User Persona** para ambos segmentos.|
-|0.24.0|06/09/2026|Sanchez Santin, Adiel Abdiaz|Elaboración del ***Big Picture EventStorming*** y definición del ***Lenguaje Ubicuo*** del dominio automotriz.|
-|0.24.0|07/09/2026|Sanchez Santin, Adiel Abdiaz|Diseño de ***Candidate Context Discovery*** (pasos 1 al 8) y modelado de ***Domain Message Flows***.|
-|0.24.0|08/09/2026|Sanchez Santin, Adiel Abdiaz|Inserción de ***Bounded Context Canvases*** (8 contextos), elaboración de ***Context Mapping*** y actualización de perfil de integrante.|
-|0.24.0|08/09/2026|Teran Zavala, Mauricio Alejandro|Inserción de la segunda entrevista para el segundo segmento.|
-|0.25.0|08/09/2026|Huamani Estefanero, Joel|Añadido de ***Bounded Context: Workshop Operations (MRO)*** y documentación del backend.|
-|0.25.0|08/09/2026|Teran Zavala, Mauricio Alejandro|Inserción **Empathy Mapping** para ambos user persona.|
-|0.26.0|08/09/2026|Teran Zavala, Mauricio Alejandro|Inserción **Interview Analysis** para ambos segmentos.|
-|0.26.0|08/09/2026|Rocha Cotrina, Alvaro|Añadido y normalización de la **User Task Matrix** para ambos segmentos y corrección de rutas relativas de imágenes.|
-|0.28.0|10/09/2026|Huamani Estefanero, Joel|Añadido de ***Bounded Context: Inventory & Supply Chain*** y documentación del backend.|
-|0.29.0|10/09/2026|Huamani Estefanero, Joel|Añadido de ***Bounded Context: Human Resources Management (HR)*** y documentación del backend.|
-|0.30.0|11/09/2026|Huamani Estefanero, Joel|Añadido de ***Bounded Context: Invoicing & Compliance*** y documentación del backend.|
-|0.31.0|11/09/2026|Huamani Estefanero, Joel|Añadido de ***Bounded Context: SaaS Billing & Subscriptions*** y documentación del backend.|
-|0.32.0|11/09/2026|Huamani Estefanero, Joel|Añadido de ***Bounded Context: IoT Telemetry & Predictive Maintenance*** y documentación del backend.|
-|0.33.0|12/09/2026|Granda Ibarra, Luis Daniel|Añadido de competidores.|
-|0.34.0|12/09/2026|Granda Ibarra, Luis Daniel|Añadido de análisis competitivo.|
-|0.35.0|12/09/2026|Granda Ibarra, Luis Daniel|Añadido de estrategias y tácticas frente a competidores.|
-|0.36.0|12/09/2026|Sanchez Santin, Adiel Abdiaz|Añadido de especificación de requisitos: 10 Épicas y 32 Historias de Usuario bajo formato APA 7 y BDD.|
-|0.37.0|12/09/2026|Sanchez Santin, Adiel Abdiaz|Añadido de Objetivos SMART para Sanchez Santin, Adiel Abdiaz.|
-|0.38.0|12/09/2026|Sanchez Santin, Adiel Abdiaz|Normalización de rutas relativas de diagramas e imágenes a report/assets para compilación Pandoc.|
-|0.39.0|13/09/2026|Granda Ibarra, Luis Daniel|Inserción de Customer Journey Mapping para ambos segmentos en Needfinding.|
-|0.40.0|14/09/2026|Granda Ibarra, Luis Daniel|Inserción de diagramas de Impact Mapping en la especificación de requisitos.|
-|0.41.0|15/09/2026|Huamani Estefanero, Joel|Reestructuración y reformulación integral de las 10 Epics, 43 ***User Stories*** como 24 Technical Stories bajo formato BDD Gherkin y el ***Product Backlog***.|
-|0.42.0|16/09/2026|Sanchez Santin, Adiel Abdiaz|Actualización de enlace a tablero Miro de Big Picture EventStorming y redacción de Student Outcome.|
-|1.1.0|01/10/2026|Huamani Estefanero, Joel|Inserción de User Stories del Website y correciones de la documentación backend de Atelier Workshop.|
-|1.1.2|3/10/2026|Granda Ibarra, Luis Daniel| Inserción del **General Style Guidelines** para el capitulo 3.|
-|1.1.3|3/10/2026|Granda Ibarra, Luis Daniel| Inserción de todo el **Information Architecture** de Atelier.|
-|1.1.3|5/10/2026|Teran Zavala, Mauricio Alejandro|Inserción del **Web Style Guidelines** y **Mobile Style Guidelines** de la plataforma.|
-|1.1.4|6/10/2026|Teran Zavala, Mauricio Alejandro|Inserción de todo el **Landing Page UI Design** de Atelier.|
-|1.1.5|07/10/2026|Huamani Estefanero, Joel|Inserción de la sección 4.1 Software Configuration Management (Entornos de desarrollo, GitFlow, Guía de estilos y Configuración de despliegue con C4).|
-|1.2.0|08/10/2026|Huamani Estefanero, Joel|Consolidación del ***Sprint 1***.|
-|1.2.1|08/10/2026|Sanchez Santin, Adiel Abdiaz|Actualización de los diagramas de EventStorming en los ocho pasos del diseño estratégico DDD.|
-|1.2.2|08/10/2026|Huamani Estefanero, Joel|Inserción de analíticos de colaboración TB1, conclusiones y Student Outcomes.|
+| Versión |   Fecha    | Autor                            | Descripción de modificación                                                                                                                                     |
+| :-----: | :--------: | :------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|  0.8.0  | 28/08/2026 | Huamani Estefanero, Joel         | Añadido de la sección de **_Descripción de la Startup_** y documentación con las definiciones de Atelier.                                                       |
+| 0.10.0  | 28/08/2026 | Huamani Estefanero, Joel         | Realización de la técnica 5W's y 2H's para la sección de **_Antecedentes y Problemática_**.                                                                     |
+| 0.10.0  | 28/08/2026 | Huamani Estefanero, Joel         | Añadido completo de la sección de **_Antecedentes y Problemática_** en base a las fuentes encontradas.                                                          |
+| 0.11.0  | 28/08/2026 | Huamani Estefanero, Joel         | Añadido de la sección de **Segmentos Objetivo** con datos demográficos.                                                                                         |
+| 0.12.0  | 02/09/2026 | Granda Ibarra Luis Daniel        | Añadido de **Lean UX Problem Statement** y definición de _Outcomes_.                                                                                            |
+| 0.13.0  | 02/09/2026 | Granda Ibarra Luis Daniel        | Añadido de **Lean UX Assumptions** y **Hypothesis Statements**.                                                                                                 |
+| 0.14.0  | 02/09/2026 | Granda Ibarra Luis Daniel        | Inserción de la matriz gráfica de **Lean UX Canvas**.                                                                                                           |
+| 0.14.0  | 03/09/2026 | Teran Zavala, Mauricio Alejandro | Añadido de **Diseño de Entrevistas**.                                                                                                                           |
+| 0.15.0  | 03/09/2026 | Huamani Estefanero, Joel         | Añadido de la sección de **_Software Architecture_** y reformulación de la documentación de Atelier.                                                            |
+| 0.15.0  | 06/09/2026 | Teran Zavala, Mauricio Alejandro | Inserción de la primera entrevista para el primer segmento y todo el marco de las entrevistas.                                                                  |
+| 0.17.0  | 07/09/2026 | Huamani Estefanero, Joel         | Añadido de **_Bounded Context: Shared_** y documentación del backend.                                                                                           |
+| 0.17.0  | 07/09/2026 | Rocha Cotrina, Alvaro            | Añadido de Objetivos SMART para Alvaro Rocha.                                                                                                                   |
+| 0.20.0  | 07/09/2026 | Rocha Cotrina, Alvaro            | Añadido del perfil de Alvaro para el capítulo 1.                                                                                                                |
+| 0.20.0  | 08/09/2026 | Huamani Estefanero, Joel         | Añadido de **_Bounded Context: Identity and Access Management (IAM) & Tenancy_** y documentación del backend.                                                   |
+| 0.21.0  | 08/09/2026 | Huamani Estefanero, Joel         | Añadido de **_Bounded Context: Customer and Fleet Management (CRM)_** y documentación del backend.                                                              |
+| 0.23.0  | 08/09/2026 | Teran Zavala, Mauricio Alejandro | Añadido de **User Persona** para ambos segmentos.                                                                                                               |
+| 0.24.0  | 06/09/2026 | Sanchez Santin, Adiel Abdiaz     | Elaboración del **_Big Picture EventStorming_** y definición del **_Lenguaje Ubicuo_** del dominio automotriz.                                                  |
+| 0.24.0  | 07/09/2026 | Sanchez Santin, Adiel Abdiaz     | Diseño de **_Candidate Context Discovery_** (pasos 1 al 8) y modelado de **_Domain Message Flows_**.                                                            |
+| 0.24.0  | 08/09/2026 | Sanchez Santin, Adiel Abdiaz     | Inserción de **_Bounded Context Canvases_** (8 contextos), elaboración de **_Context Mapping_** y actualización de perfil de integrante.                        |
+| 0.24.0  | 08/09/2026 | Teran Zavala, Mauricio Alejandro | Inserción de la segunda entrevista para el segundo segmento.                                                                                                    |
+| 0.25.0  | 08/09/2026 | Huamani Estefanero, Joel         | Añadido de **_Bounded Context: Workshop Operations (MRO)_** y documentación del backend.                                                                        |
+| 0.25.0  | 08/09/2026 | Teran Zavala, Mauricio Alejandro | Inserción **Empathy Mapping** para ambos user persona.                                                                                                          |
+| 0.26.0  | 08/09/2026 | Teran Zavala, Mauricio Alejandro | Inserción **Interview Analysis** para ambos segmentos.                                                                                                          |
+| 0.26.0  | 08/09/2026 | Rocha Cotrina, Alvaro            | Añadido y normalización de la **User Task Matrix** para ambos segmentos y corrección de rutas relativas de imágenes.                                            |
+| 0.28.0  | 10/09/2026 | Huamani Estefanero, Joel         | Añadido de **_Bounded Context: Inventory & Supply Chain_** y documentación del backend.                                                                         |
+| 0.29.0  | 10/09/2026 | Huamani Estefanero, Joel         | Añadido de **_Bounded Context: Human Resources Management (HR)_** y documentación del backend.                                                                  |
+| 0.30.0  | 11/09/2026 | Huamani Estefanero, Joel         | Añadido de **_Bounded Context: Invoicing & Compliance_** y documentación del backend.                                                                           |
+| 0.31.0  | 11/09/2026 | Huamani Estefanero, Joel         | Añadido de **_Bounded Context: SaaS Billing & Subscriptions_** y documentación del backend.                                                                     |
+| 0.32.0  | 11/09/2026 | Huamani Estefanero, Joel         | Añadido de **_Bounded Context: IoT Telemetry & Predictive Maintenance_** y documentación del backend.                                                           |
+| 0.33.0  | 12/09/2026 | Granda Ibarra, Luis Daniel       | Añadido de competidores.                                                                                                                                        |
+| 0.34.0  | 12/09/2026 | Granda Ibarra, Luis Daniel       | Añadido de análisis competitivo.                                                                                                                                |
+| 0.35.0  | 12/09/2026 | Granda Ibarra, Luis Daniel       | Añadido de estrategias y tácticas frente a competidores.                                                                                                        |
+| 0.36.0  | 12/09/2026 | Sanchez Santin, Adiel Abdiaz     | Añadido de especificación de requisitos: 10 Épicas y 32 Historias de Usuario bajo formato APA 7 y BDD.                                                          |
+| 0.37.0  | 12/09/2026 | Sanchez Santin, Adiel Abdiaz     | Añadido de Objetivos SMART para Sanchez Santin, Adiel Abdiaz.                                                                                                   |
+| 0.38.0  | 12/09/2026 | Sanchez Santin, Adiel Abdiaz     | Normalización de rutas relativas de diagramas e imágenes a report/assets para compilación Pandoc.                                                               |
+| 0.39.0  | 13/09/2026 | Granda Ibarra, Luis Daniel       | Inserción de Customer Journey Mapping para ambos segmentos en Needfinding.                                                                                      |
+| 0.40.0  | 14/09/2026 | Granda Ibarra, Luis Daniel       | Inserción de diagramas de Impact Mapping en la especificación de requisitos.                                                                                    |
+| 0.41.0  | 15/09/2026 | Huamani Estefanero, Joel         | Reestructuración y reformulación integral de las 10 Epics, 43 **_User Stories_** como 24 Technical Stories bajo formato BDD Gherkin y el **_Product Backlog_**. |
+| 0.42.0  | 16/09/2026 | Sanchez Santin, Adiel Abdiaz     | Actualización de enlace a tablero Miro de Big Picture EventStorming y redacción de Student Outcome.                                                             |
+|  1.1.0  | 01/10/2026 | Huamani Estefanero, Joel         | Inserción de User Stories del Website y correciones de la documentación backend de Atelier Workshop.                                                            |
+|  1.1.2  | 3/10/2026  | Granda Ibarra, Luis Daniel       | Inserción del **General Style Guidelines** para el capitulo 3.                                                                                                  |
+|  1.1.3  | 3/10/2026  | Granda Ibarra, Luis Daniel       | Inserción de todo el **Information Architecture** de Atelier.                                                                                                   |
+|  1.1.3  | 5/10/2026  | Teran Zavala, Mauricio Alejandro | Inserción del **Web Style Guidelines** y **Mobile Style Guidelines** de la plataforma.                                                                          |
+|  1.1.4  | 6/10/2026  | Teran Zavala, Mauricio Alejandro | Inserción de todo el **Landing Page UI Design** de Atelier.                                                                                                     |
+|  1.1.5  | 07/10/2026 | Huamani Estefanero, Joel         | Inserción de la sección 4.1 Software Configuration Management (Entornos de desarrollo, GitFlow, Guía de estilos y Configuración de despliegue con C4).          |
+|  1.2.0  | 08/10/2026 | Huamani Estefanero, Joel         | Consolidación del **_Sprint 1_**.                                                                                                                               |
+|  1.2.1  | 08/10/2026 | Sanchez Santin, Adiel Abdiaz     | Actualización de los diagramas de EventStorming en los ocho pasos del diseño estratégico DDD.                                                                   |
+|  1.2.2  | 08/10/2026 | Huamani Estefanero, Joel         | Inserción de analíticos de colaboración TB1, conclusiones y Student Outcomes.                                                                                   |
+|  2.0.0  | 08/10/2026 | Huamani Estefanero, Joel         | Inserción de tasks en el Sprint Backlog para el **_Sprint 1_**.                                                                                                 |
+
 \newpage
