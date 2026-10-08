@@ -4,7 +4,67 @@
 
 #### 3.1.4.1. Mobile Applications Wireframes
 
+En esta sección se presentarán los wireframes de la aplicación, los cuales son bosquejos de baja fidelidad sobre las funcionalidades principales de nuestra solución. El objetivo es mostrar la estructura, distribución de elementos y jerarquía de la información sin la intervención de colores o detalles gráficos. Para el proyecto Atelier Workshop, se han dividido estos wireframes en diez secciones estructurales.
 
+**Sección Autenticación y Bienvenida**
+
+![Wireframes del flujo de inicio de sesión y selección de sede.](report/assets/MobileApplications-Wireframes/autenticacion.png){#fig:wireframe-autenticacion}
+
+Esta imagen presenta el flujo de acceso estructurado en tres pantallas. La primera pantalla muestra un contenedor superior para el isotipo, seguido de un formulario clásico con campos de texto para correo institucional y contraseña, finalizando con un botón primario ancho. La segunda pantalla presenta una lista de opciones utilizando tarjetas (cards) con selectores radiales (radio buttons) para elegir la sede operativa. La tercera pantalla establece el diseño del dashboard del usuario, con un saludo superior, tarjetas de información del turno y un botón de acción principal ("Registrar entrada").
+
+**Sección Marcación de Asistencia**
+
+![Wireframes del módulo de control de asistencia por GPS.](report/assets/MobileApplications-Wireframes/asistencia.png){#fig:wireframe-asistencia}
+
+Esta imagen exhibe la estructura del registro de geolocalización en dos estados. El diseño de las pantallas se divide en una mitad superior que contiene un bloque cuadrado grande reservado para la integración del mapa interactivo y un indicador de radio (geocerca). La mitad inferior organiza la información en tarjetas de texto (distancia, turno asignado y tolerancias) y culmina con un botón fijo en la parte inferior de la pantalla que cambia su estado (habilitado/bloqueado) según la ubicación.
+
+**Sección Recepción y Órdenes de Trabajo**
+
+![Wireframes de recepción vehicular y formulario de orden.](report/assets/MobileApplications-Wireframes/recepcion.png){#fig:wireframe-recepcion}
+
+Esta imagen muestra las tres pantallas del flujo de ingreso. La primera pantalla destaca una barra de búsqueda superior dividida por pestañas (Placa / DNI) y un área amplia para desplegar resultados en forma de lista. La segunda pantalla presenta el formulario estructurado para crear la orden, el cual contiene campos de entrada numérica (kilometraje), un área de texto expansible con ícono de dictado por voz para los síntomas, y una sección de lista interactiva para agregar las tareas iniciales, finalizando con la vista de confirmación del ticket generado.
+
+**Sección Diagnóstico OBD-II**
+
+![Wireframes del escaneo de códigos de falla.](report/assets/MobileApplications-Wireframes/diagnostico.png){#fig:wireframe-obd}
+
+Esta imagen detalla la interfaz técnica de diagnóstico en tres vistas. Inicia con una pantalla que tiene un ícono central grande de estado Bluetooth. La segunda pantalla muestra la estructura de una lista de dispositivos encontrados, organizados en filas con íconos de intensidad de señal a la derecha. La tercera pantalla presenta el resultado del escaneo, organizando los códigos de falla (DTC) en una lista vertical estructurada, donde cada ítem tiene un título en negrita (el código), una descripción y etiquetas de estado alineadas a la derecha.
+
+**Sección Gestión de Tareas**
+
+![Wireframes del listado de tareas y cronómetro operativo.](report/assets/MobileApplications-Wireframes/tareas.png){#fig:wireframe-tareas}
+
+Esta imagen ilustra la distribución operativa del técnico. La primera pantalla implementa un menú de navegación por pestañas (Tabs) en la parte superior para filtrar vehículos, organizando el contenido en tarjetas con información clave. La segunda pantalla (vista de detalle) reserva el espacio central para un temporizador numérico de gran tamaño y una barra de progreso horizontal, seguidos de secciones desplegables o modales para registrar evidencias fotográficas mediante cajas de marcado (checkboxes) e imputar repuestos.
+
+**Sección Inventario y Repuestos**
+
+![Wireframes del catálogo de almacén y consumo.](report/assets/MobileApplications-Wireframes/inventario.png){#fig:wireframe-inventario}
+
+Esta imagen muestra la disposición del catálogo de almacén. La estructura principal recae en una barra de búsqueda superior y una lista vertical de tarjetas. Cada tarjeta de repuesto muestra el nombre alineado a la izquierda y un indicador de stock a la derecha. La pantalla de imputación destaca por su componente de interfaz centrado: un selector de cantidad numérico flanqueado por botones de incremento y decremento redondos (`-` y `+`), optimizado para el uso rápido con guantes en el taller.
+
+**Sección Tablero de Bahías**
+
+![Wireframes de la grilla de control de espacios físicos.](report/assets/MobileApplications-Wireframes/bahias.png){#fig:wireframe-bahias}
+
+Esta imagen presenta la estructura del panel de control de espacios físicos. La pantalla principal utiliza un diseño de cuadrícula (grid) de dos columnas, donde cada bloque representa una bahía o elevador. Visualmente, el wireframe diferencia las bahías ocupadas de las libres mediante la presencia o ausencia de campos de texto en su interior. La segunda pantalla muestra un modal tipo "bottom sheet" (hoja inferior) que emerge para mostrar detalles operativos y un menú desplegable para reasignar el vehículo de espacio.
+
+**Sección Proforma y Resolución**
+
+![Wireframes de cotización y respuesta del cliente.](report/assets/MobileApplications-Wireframes/proforma.png){#fig:wireframe-proforma}
+
+Esta imagen detalla la interfaz comercial de cotizaciones. La primera vista simula un documento estructurado, alineando los conceptos (tareas y repuestos) a la izquierda y los montos a la derecha, sumando subtotales e impuestos en la base. Las pantallas siguientes presentan botones condicionales amplios para aceptar o rechazar el servicio, y muestran un cuadro de diálogo (modal central) con un campo de texto obligatorio para justificar las cancelaciones.
+
+**Sección Emisión SUNAT**
+
+![Wireframes del proceso de facturación electrónica.](report/assets/MobileApplications-Wireframes/sunat.png){#fig:wireframe-sunat}
+
+Esta imagen ilustra la estructura de integración fiscal. Muestra un flujo simple que comienza con un indicador de carga central (spinner). La pantalla de éxito presenta un ícono de verificación grande (check), seguido de una tabla de datos simplificada (clave-valor) que lista el número de comprobante, el total y el código Hash, culminando con botones secundarios esquemáticos para descargar representaciones impresas (PDF/XML).
+
+**Sección Facturación y Entrega**
+
+![Wireframes de la pasarela de cobro y validación de salida.](report/assets/MobileApplications-Wireframes/facturacion.png){#fig:wireframe-facturacion}
+
+Esta imagen exhibe la estructura de cierre del servicio. La primera pantalla divide el cobro: una sección superior con la barra de saldo restante, botones segmentados horizontales para el método de pago, y un campo de entrada numérica. La pantalla final de entrega presenta un checklist estructural en la parte superior, un área rectangular amplia (canvas) vacía designada para la firma táctil, y termina con un bloque cuadrado central cruzado por una "X" (o entramado) que representa el código QR del pase de salida generado.
 
 #### 3.1.4.2. Mobile Applications Wireflow Diagrams
 
