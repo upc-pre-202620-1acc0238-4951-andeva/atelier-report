@@ -7,103 +7,88 @@ El landing page juega un papel esencial en atraer la atención de los visitantes
 Los wireframes representan la estructura básica y la disposición de los elementos de la interfaz antes de desarrollar la versión visual final. En este conjunto de prototipos, se definen la jerarquía de contenido, la navegación y las áreas principales de interacción de la página.
 
 **Introducción de la propuesta**
+Esta imagen introduce la propuesta de Atelier y comunica el propósito principal de la plataforma.
 
-La primera vista presenta la presentación inicial de Atelier y destaca el propósito de la plataforma.
-
-![LandingPage Wireframe](/report/assets/LandingPage-Wireframes/Imagen1.png){#fig:mockup-1}
+![LandingPage Wireframe](report/assets/LandingPage-Wireframes/Imagen1.png){#fig:Imagen1.png}
 
 **Funcionamiento de la plataforma**
+Esta imagen organiza en tres pasos la explicación del funcionamiento de la plataforma.
 
-Esta vista explica cómo funciona la plataforma en tres pasos.
-
-![LandingPage Wireframe](/report/assets/LandingPage-Wireframes/Imagen2.png){#fig:mockup-2}
+![LandingPage Wireframe](report/assets/LandingPage-Wireframes/Imagen2.png){#fig:Imagen2.png}
 
 **Producto**
+Esta imagen contrasta la experiencia tradicional de los talleres con la propuesta de Atelier y destaca sus diferencias.
 
-La tercera vista compara la experiencia tradicional con la propuesta de Atelier para resaltar su valor diferencial.
-
-![LandingPage Wireframe](/report/assets/LandingPage-Wireframes/Imagen3.png){#fig:mockup-3}
+![LandingPage Wireframe](report/assets/LandingPage-Wireframes/Imagen3.png){#fig:Imagen3.png}
 
 **Muestra de interfaces**
+Esta imagen reúne las interfaces principales de Atelier y muestra los servicios disponibles en la plataforma.
 
-Esta vista presenta las interfaces principales mediante las cuales los usuarios pueden utilizar los servicios ofrecidos por Atelier.
-
-![LandingPage Wireframe](/report/assets/LandingPage-Wireframes/Imagen4.png){#fig:mockup-4}
+![LandingPage Wireframe](report/assets/LandingPage-Wireframes/Imagen4.png){#fig:Imagen4.png}
 
 **Planes y precios**
+Esta imagen presenta los planes de Atelier junto con los beneficios asociados a cada opción.
 
-La quinta vista organiza la información sobre los planes de Atelier y sus beneficios correspondientes.
-
-![LandingPage Wireframe](/report/assets/LandingPage-Wireframes/Imagen5.png){#fig:mockup-5}
+![LandingPage Wireframe](report/assets/LandingPage-Wireframes/Imagen5.png){#fig:Imagen5.png}
 
 **Preguntas frecuentes**
+Esta imagen reúne preguntas frecuentes y facilita la consulta de información sobre la plataforma.
 
-Esta vista reúne las preguntas frecuentes que podría tener el usuario.
-
-![LandingPage Wireframe](/report/assets/LandingPage-Wireframes/Imagen6.png){#fig:mockup-6}
+![LandingPage Wireframe](report/assets/LandingPage-Wireframes/Imagen6.png){#fig:Imagen6.png}
 
 **Roles**
+Esta imagen presenta a las personas responsables de construir la plataforma.
 
-La séptima vista presenta a las personas que construyen la plataforma.
-
-![LandingPage Wireframe](/report/assets/LandingPage-Wireframes/Imagen7.png){#fig:mockup-7}
+![LandingPage Wireframe](report/assets/LandingPage-Wireframes/Imagen7.png){#fig:Imagen7.png}
 
 **Cierre e instalación de Atelier**
+Esta imagen cierra la página e invita a acceder a la aplicación web o descargar la aplicación móvil de Atelier.
 
-La vista final muestra la opción de descargar la aplicación web o móvil de la plataforma.
+![LandingPage Wireframe](report/assets/LandingPage-Wireframes/Imagen8.png){#fig:Imagen8.png}
 
-![LandingPage Wireframe](/report/assets/LandingPage-Wireframes/Imagen8.png){#fig:mockup-8}
 
 #### 3.1.3.2. Landing Page Mock-up
 
 Los mockups muestran la interfaz visual final del landing page, incorporando colores, tipografía, iconografía, espacios y componentes interactivos. Cada vista representa la presentación definitiva de la propuesta y refuerza la identidad visual de Atelier.
 
 **Introducción de la propuesta**
+Esta imagen presenta la propuesta visual de Atelier y comunica el propósito principal de la plataforma.
 
-La primera vista presenta la presentación visual inicial de Atelier y destaca el propósito de la plataforma.
-
-![LandingPage Mockup](/report/assets/LandingPage-Mockups/Imagen1.png){#fig:Imagen1.png}
+![LandingPage Mockup](report/assets/LandingPage-Mockups/Imagen1.png){#fig:Imagen1.png}
 
 **Funcionamiento de la plataforma**
+Esta imagen ilustra en tres pasos el funcionamiento de la plataforma.
 
-Esta vista muestra de forma visual el funcionamiento de la plataforma en tres pasos.
-
-![LandingPage Mockup](/report/assets/LandingPage-Mockups/Imagen2.png){#fig:Imagen2.png}
+![LandingPage Mockup](report/assets/LandingPage-Mockups/Imagen2.png){#fig:Imagen2.png}
 
 **Producto**
+Esta imagen muestra la propuesta de Atelier y destaca sus diferencias frente a la experiencia tradicional de los talleres.
 
-La tercera vista presenta el producto de Atelier y resalta su valor diferencial respecto de la experiencia tradicional.
-
-![LandingPage Mockup](/report/assets/LandingPage-Mockups/Imagen3.png){#fig:Imagen3.png}
+![LandingPage Mockup](report/assets/LandingPage-Mockups/Imagen3.png){#fig:Imagen3.png}
 
 **Muestra de interfaces**
+Esta imagen presenta las interfaces principales y muestra cómo se organizan dentro del ecosistema de Atelier.
 
-Esta vista presenta las interfaces principales de la plataforma y su organización dentro del ecosistema.
-
-![LandingPage Mockup](/report/assets/LandingPage-Mockups/Imagen4.png){#fig:Imagen4.png}
+![LandingPage Mockup](report/assets/LandingPage-Mockups/Imagen4.png){#fig:Imagen4.png}
 
 **Planes y precios**
+Esta imagen presenta los planes disponibles y resume los beneficios de cada opción.
 
-La quinta vista presenta los planes disponibles y los beneficios que ofrece cada opción.
-
-![LandingPage Mockup](/report/assets/LandingPage-Mockups/Imagen5.png){#fig:Imagen5.png}
+![LandingPage Mockup](report/assets/LandingPage-Mockups/Imagen5.png){#fig:Imagen5.png}
 
 **Preguntas frecuentes**
+Esta imagen reúne las preguntas frecuentes de los usuarios y presenta sus respuestas.
 
-Esta vista reúne las preguntas más comunes que puede tener el usuario y sus respuestas correspondientes.
-
-![LandingPage Mockup](/report/assets/LandingPage-Mockups/Imagen6.png){#fig:Imagen6.png}
+![LandingPage Mockup](report/assets/LandingPage-Mockups/Imagen6.png){#fig:Imagen6.png}
 
 **Roles**
+Esta imagen presenta los roles disponibles en la plataforma y las responsabilidades correspondientes.
 
-La séptima vista presenta los roles disponibles en la plataforma y las responsabilidades asociadas a cada uno.
-
-![LandingPage Mockup](/report/assets/LandingPage-Mockups/Imagen7.png){#fig:Imagen7.png}
+![LandingPage Mockup](report/assets/LandingPage-Mockups/Imagen7.png){#fig:Imagen7.png}
 
 **Cierre e instalación de Atelier**
+Esta imagen cierra la página e invita a comenzar a utilizar Atelier mediante sus aplicaciones.
 
-La vista final muestra el cierre del landing page y la invitación para comenzar con la instalación de Atelier.
-
-![LandingPage Mockup](/report/assets/LandingPage-Mockups/Imagen8.png){#fig:Imagen8.png}
+![LandingPage Mockup](report/assets/LandingPage-Mockups/Imagen8.png){#fig:Imagen8.png}
 
 \newpage
