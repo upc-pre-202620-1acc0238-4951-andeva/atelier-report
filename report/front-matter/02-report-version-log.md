@@ -51,5 +51,6 @@
 |  1.2.1  | 08/10/2026 | Sanchez Santin, Adiel Abdiaz     | Actualización de los diagramas de EventStorming en los ocho pasos del diseño estratégico DDD.                                                                   |
 |  1.2.2  | 08/10/2026 | Huamani Estefanero, Joel         | Inserción de analíticos de colaboración TB1, conclusiones y Student Outcomes.                                                                                   |
 |  2.0.0  | 08/10/2026 | Huamani Estefanero, Joel         | Inserción de tasks en el Sprint Backlog para el **_Sprint 1_**.                                                                                                 |
+|  2.0.0  | 5/10/2026  | Teran Zavala, Mauricio Alejandro | Inserción del **Mobile Applications Prototyping** de la plataforma.                                                                        |
 
 \newpage
