@@ -4,7 +4,7 @@
 
 El diseño de producto de Atelier Workshop se plantea como una experiencia digital integral, moderna y confiable, orientada a profesionalizar la gestión de los talleres automotrices y conectar el mantenimiento predictivo mediante telemetría IoT con escáneres OBD-II. La propuesta visual y funcional responde a dos entornos operativos complementarios: la administración de órdenes de trabajo, control de inventario FIFO y facturación en la plataforma web, y la ejecución de diagnósticos técnicos con evidencias fotográficas en la aplicación móvil de bahía. Por ello, el diseño prioriza interfaces de alta legibilidad, elementos táctiles ergonómicos y una navegación intuitiva que reduce la carga cognitiva del personal técnico, transmitiendo precisión ingenieril, orden operativo y respaldo profesional.
 
-### 3.1.1. *Style Guidelines*
+### 3.1.1. _Style Guidelines_
 
 Las directrices de estilo de Atelier Workshop definen los criterios visuales que guían la identidad de la plataforma en la aplicación web de gestión y la aplicación móvil de bahía. La propuesta visual se basa en una estética sobria, industrial y funcional, diseñada para operar con claridad bajo condiciones de iluminación variables en el taller. Para ello, se emplea una paleta cromática basada en azul eléctrico como tono principal, tonos neutros de alto contraste para modos diurno y nocturno, un acento ámbar para alertas prioritarias y la tipografía Satoshi para optimizar la legibilidad en pantallas de diversa resolución.
 
@@ -22,25 +22,25 @@ La marca Atelier Workshop refleja la transición del taller tradicional hacia un
 
 ![Isotipo oficial de Atelier Workshop en sus variantes cromáticas](report/assets/logo-tipo-colores/isotipo-variantes.png){#fig:isotipo-atelier}
 
-*Nota.* Variantes del isotipo oficial en modos claro, oscuro y configuraciones de alto contraste.
+_Nota._ Variantes del isotipo oficial en modos claro, oscuro y configuraciones de alto contraste.
 
 - **Anatomía del Imagotipo:** El imagotipo principal integra el isotipo corporativo enmarcado dentro de un contenedor redondeado con esquinas suavizadas, acompañado del bloque tipográfico institucional a dos líneas horizontales alineadas a la izquierda: Atelier en la línea superior y Workshop en la línea inferior.
 
 ![Imagotipo principal de Atelier Workshop con isotipo en contenedor redondeado](report/assets/logo-tipo-colores/imagotipo-squircle.png){#fig:imagotipo-squircle-atelier}
 
-*Nota.* Imagotipo principal para encabezados del sistema web y aplicaciones institucionales.
+_Nota._ Imagotipo principal para encabezados del sistema web y aplicaciones institucionales.
 
 Se dispone asimismo de una variante secundaria con isotipo calado directo orientada a fondos neutros y entornos monocromáticos.
 
 ![Imagotipo secundario de Atelier Workshop con isotipo calado](report/assets/logo-tipo-colores/imagotipo-calado.png){#fig:imagotipo-calado-atelier}
 
-*Nota.* Imagotipo secundario en configuraciones monocromáticas y azul corporativo.
+_Nota._ Imagotipo secundario en configuraciones monocromáticas y azul corporativo.
 
 - **Patrón Gráfico de Identidad:** La identidad visual incorpora una trama geométrica basada en la repetición lineal del isotipo corporativo, empleada como textura de soporte en fondos de pantallas de autenticación, portadas de módulos y recursos gráficos institucionales.
 
 ![Patrón gráfico de identidad visual de Atelier Workshop](report/assets/logo-tipo-colores/patron-identidad.png){#fig:patron-identidad-atelier}
 
-*Nota.* Trama gráfica de soporte visual desarrollada a partir de la silueta del isotipo de marca.
+_Nota._ Trama gráfica de soporte visual desarrollada a partir de la silueta del isotipo de marca.
 
 **Sistema Tipográfico**
 
@@ -52,22 +52,23 @@ El sistema tipográfico de Atelier Workshop responde a criterios de rendimiento 
 
 ![Escala tipográfica de la interfaz de usuario con la fuente Satoshi](report/assets/logo-tipo-colores/tipografia-satoshi.png){#fig:tipografia-satoshi-atelier}
 
-*Nota.* Escala de pesos visuales de la tipografía Satoshi para títulos, subtítulos y cuerpo de texto.
+_Nota._ Escala de pesos visuales de la tipografía Satoshi para títulos, subtítulos y cuerpo de texto.
 
 A continuación se describe la jerarquía tipográfica oficial adoptada en el ecosistema, especificando los pesos, tamaños y funciones correspondientes a cada nivel de texto:
 
-| Nivel Tipográfico | Familia y Peso | Tamaño y Escala | Uso Principal en la Interfaz |
-| :--- | :---: | :---: | :--- |
-| Imagotipo de Marca | Albert Sans ExtraBold | 28 px a 36 px | Bloque de texto corporativo Atelier Workshop en cabeceras. |
-| Títulos Principales (H1) | Satoshi Bold | 24 px a 30 px | Encabezados principales de módulos, vistas y pantallas operativas. |
-| Títulos de Sección (H2) | Satoshi Bold | 20 px a 22 px | Títulos de tarjetas de órdenes de trabajo y bloques de inventario. |
-| Subtítulos de Tarjeta (H3) | Satoshi Medium | 16 px a 18 px | Nombres de clientes, modelos vehiculares y fases de servicio. |
-| Cuerpo de Texto General | Satoshi Regular | 14 px a 15 px | Párrafos descriptivos, diagnósticos y notas periciales. |
-| Metadatos y Datos Técnicos | Satoshi Medium | 12 px a 13 px | Números VIN, kilometrajes, códigos DTC y marcas temporales. |
-| Microtextos y Etiquetas | Satoshi Bold | 10 px a 11 px | Insignias de estado en bahía, badges de lotes FIFO y alertas. |
+| Nivel Tipográfico          |    Familia y Peso     | Tamaño y Escala | Uso Principal en la Interfaz                                       |
+| :------------------------- | :-------------------: | :-------------: | :----------------------------------------------------------------- |
+| Imagotipo de Marca         | Albert Sans ExtraBold |  28 px a 36 px  | Bloque de texto corporativo Atelier Workshop en cabeceras.         |
+| Títulos Principales (H1)   |     Satoshi Bold      |  24 px a 30 px  | Encabezados principales de módulos, vistas y pantallas operativas. |
+| Títulos de Sección (H2)    |     Satoshi Bold      |  20 px a 22 px  | Títulos de tarjetas de órdenes de trabajo y bloques de inventario. |
+| Subtítulos de Tarjeta (H3) |    Satoshi Medium     |  16 px a 18 px  | Nombres de clientes, modelos vehiculares y fases de servicio.      |
+| Cuerpo de Texto General    |    Satoshi Regular    |  14 px a 15 px  | Párrafos descriptivos, diagnósticos y notas periciales.            |
+| Metadatos y Datos Técnicos |    Satoshi Medium     |  12 px a 13 px  | Números VIN, kilometrajes, códigos DTC y marcas temporales.        |
+| Microtextos y Etiquetas    |     Satoshi Bold      |  10 px a 11 px  | Insignias de estado en bahía, badges de lotes FIFO y alertas.      |
+
 : Jerarquía tipográfica del ecosistema Atelier Workshop {#tbl:jerarquia-tipografica}
 
-*Nota.* Elaboración propia.
+_Nota._ Elaboración propia.
 
 **Paleta Cromática Oficial y Tokens Semánticos**
 
@@ -75,33 +76,34 @@ La paleta cromática de Atelier Workshop está diseñada para garantizar un cont
 
 ![Paleta cromática oficial y tokens del sistema de diseño](report/assets/logo-tipo-colores/paleta-colores.png){#fig:paleta-colores-atelier}
 
-*Nota.* Matriz cromática que ilustra colores primarios, colores de acento, superficies y estados semánticos.
+_Nota._ Matriz cromática que ilustra colores primarios, colores de acento, superficies y estados semánticos.
 
 A continuación se presenta el catálogo oficial de tokens cromáticos, su valor hexadecimal y su rol dentro del producto:
 
-| Nombre del Token | Valor Hex | Muestra | Rol y Aplicación en la Interfaz |
-| :--- | :---: | :---: | :--- |
-| Azul Eléctrico (Primary) | `#0071EB` | ■ Azul | Botones primarios, isotipo corporativo, pestañas activas y cabeceras. |
-| Azul Marino (Primary Dark) | `#031A6B` | ■ Marino | Estados de interacción hover en botones primarios y barras laterales oscuras. |
-| Azul Celeste (Primary Soft) | `#69B1FF` | ■ Celeste | Fondos sutiles de insignias de estado para unidades en proceso de diagnóstico. |
-| Naranja Ámbar (Accent) | `#F68B01` | ■ Ámbar | Botones de acción crítica, alertas de telemetría y hallazgos periciales urgentes. |
-| Ámbar Oscuro (Accent Dark) | `#D87900` | ■ Dorado | Estados de interacción hover en botones de acento y avisos prioritarios. |
-| Ámbar Suave (Accent Soft) | `#FFCD69` | ■ Suave | Fondo de etiquetas de mantenimiento preventivo y alertas predictivas. |
-| Fondo Oscuro (Surface Black) | `#262626` | ■ Negro | Fondo principal de la interfaz en modo oscuro para evitar fatiga visual. |
-| Fondo Claro (Surface White) | `#F8F8FA` | ■ Gris C | Fondo principal en modo claro, calibrado para reducir el deslumbramiento. |
-| Tarjeta Oscura (Card Black) | `#272727` | ■ Oscuro | Contenedores modulares, tablas y paneles flotantes en modo oscuro. |
-| Tarjeta Clara (Card White) | `#FFFFFF` | ■ Blanco | Contenedores de órdenes de trabajo, formularios y tarjetas en modo claro. |
-| Texto Oscuro (Text Black) | `#262626` | ■ Negro | Tipografía principal de lectura y títulos sobre fondos claros. |
-| Texto Claro (Text White) | `#FFFFFF` | ■ Blanco | Tipografía principal en modo oscuro y sobre botones de fondo sólido. |
-| Subtítulos (Text Subtitles) | `#C6C6C6` | ■ Gris | Metadatos técnicos, números de serie, fechas y códigos de repuestos. |
-| Borde Claro (Border Light) | `#C6C6C6` | ■ Borde C | Líneas divisorias y delimitadores de tarjetas sobre fondos claros. |
-| Borde Oscuro (Border Dark) | `#EBEBEB` | ■ Borde O | Bordes divisorios sutiles para tarjetas y paneles sobre fondo negro. |
-| Éxito (Success) | `#3AC530` | ■ Verde | Órdenes de trabajo liquidadas, stock disponible y telemetría óptima. |
-| Error Crítico (Error) | `#FB2C36` | ■ Rojo | Códigos DTC confirmados, anomalías de motor y desconexión OBD-II. |
-| Advertencia (Warning) | `#F0B100` | ■ Amarillo | Alerta de stock mínimo en lote FIFO y mantenimientos próximos a vencer. |
+| Nombre del Token             | Valor Hex |  Muestra   | Rol y Aplicación en la Interfaz                                                   |
+| :--------------------------- | :-------: | :--------: | :-------------------------------------------------------------------------------- |
+| Azul Eléctrico (Primary)     | `#0071EB` |   ■ Azul   | Botones primarios, isotipo corporativo, pestañas activas y cabeceras.             |
+| Azul Marino (Primary Dark)   | `#031A6B` |  ■ Marino  | Estados de interacción hover en botones primarios y barras laterales oscuras.     |
+| Azul Celeste (Primary Soft)  | `#69B1FF` | ■ Celeste  | Fondos sutiles de insignias de estado para unidades en proceso de diagnóstico.    |
+| Naranja Ámbar (Accent)       | `#F68B01` |  ■ Ámbar   | Botones de acción crítica, alertas de telemetría y hallazgos periciales urgentes. |
+| Ámbar Oscuro (Accent Dark)   | `#D87900` |  ■ Dorado  | Estados de interacción hover en botones de acento y avisos prioritarios.          |
+| Ámbar Suave (Accent Soft)    | `#FFCD69` |  ■ Suave   | Fondo de etiquetas de mantenimiento preventivo y alertas predictivas.             |
+| Fondo Oscuro (Surface Black) | `#262626` |  ■ Negro   | Fondo principal de la interfaz en modo oscuro para evitar fatiga visual.          |
+| Fondo Claro (Surface White)  | `#F8F8FA` |  ■ Gris C  | Fondo principal en modo claro, calibrado para reducir el deslumbramiento.         |
+| Tarjeta Oscura (Card Black)  | `#272727` |  ■ Oscuro  | Contenedores modulares, tablas y paneles flotantes en modo oscuro.                |
+| Tarjeta Clara (Card White)   | `#FFFFFF` |  ■ Blanco  | Contenedores de órdenes de trabajo, formularios y tarjetas en modo claro.         |
+| Texto Oscuro (Text Black)    | `#262626` |  ■ Negro   | Tipografía principal de lectura y títulos sobre fondos claros.                    |
+| Texto Claro (Text White)     | `#FFFFFF` |  ■ Blanco  | Tipografía principal en modo oscuro y sobre botones de fondo sólido.              |
+| Subtítulos (Text Subtitles)  | `#C6C6C6` |   ■ Gris   | Metadatos técnicos, números de serie, fechas y códigos de repuestos.              |
+| Borde Claro (Border Light)   | `#C6C6C6` | ■ Borde C  | Líneas divisorias y delimitadores de tarjetas sobre fondos claros.                |
+| Borde Oscuro (Border Dark)   | `#EBEBEB` | ■ Borde O  | Bordes divisorios sutiles para tarjetas y paneles sobre fondo negro.              |
+| Éxito (Success)              | `#3AC530` |  ■ Verde   | Órdenes de trabajo liquidadas, stock disponible y telemetría óptima.              |
+| Error Crítico (Error)        | `#FB2C36` |   ■ Rojo   | Códigos DTC confirmados, anomalías de motor y desconexión OBD-II.                 |
+| Advertencia (Warning)        | `#F0B100` | ■ Amarillo | Alerta de stock mínimo en lote FIFO y mantenimientos próximos a vencer.           |
+
 : Paleta cromática oficial y tokens del sistema de diseño {#tbl:paleta-colores}
 
-*Nota.* Elaboración propia.
+_Nota._ Elaboración propia.
 
 **Espaciado y Sistema de Retícula**
 
@@ -139,13 +141,13 @@ Los elementos interactivos del sistema están diseñados para facilitar la manip
 
 #### 3.1.1.2. Web Style Guidelines
 
-## 1. Layout
+**Layout**
 
-### 1.1 Estructura general
+**Estructura general**
 
 La página utiliza una estructura de una sola columna, organizada mediante secciones temáticas y separaciones visuales claras. El contenido presenta primero la propuesta del producto, continúa con el problema que resuelve, la explicación de su funcionamiento, las funcionalidades, los roles, los planes, las preguntas frecuentes, el equipo y finaliza con un llamado a la acción. Esta organización permite que el usuario recorra la propuesta de forma progresiva sin perder el contexto general del producto.
 
-### 1.2 Sistema de bloques
+**Sistema de bloques**
 
 La disposición se apoya en componentes reutilizables:
 
@@ -156,7 +158,7 @@ La disposición se apoya en componentes reutilizables:
 - Botones primarios y secundarios para acciones concretas.
 - Espaciado vertical consistente entre secciones.
 
-### 1.3 Jerarquía visual
+**Jerarquía visual**
 
 La jerarquía se define principalmente por:
 
@@ -168,40 +170,40 @@ La jerarquía se define principalmente por:
 
 La importante información debe aparecer en la primera vista de cada sección, mientras que detalles secundarios y extensos se utilizan como apoyo visual o texto complementario.
 
-### 1.4 Paleta de colores
+**Paleta de colores**
 
-| Color | Uso principal | Observación |
-|---|---|---|
-| Azul principal `#0071eb` | Acciones principales, enlaces y elementos destacados | Debe mantenerse como elemento visual dominante |
-| Azul oscuro `#031a6b` | Títulos, fondos oscuros y contraste de profundidad | Se utiliza para reforzar la identidad institucional |
-| Azul claro `#69b1ff` | Elementos secundarios, fondos suaves y detalles | Ideal para estados de apoyo o fondos de resaltado |
-| Naranja `#f68b01` | Accentos y elementos secundarios | Debe usarse con moderación |
-| Blanco `#ffffff` | Fondos claros y textos sobre fondos oscuros | Proporciona alto contraste |
-| Negro / gris oscuro `#262626` / `#141416` | Textos y fondos oscuros | Mantiene una apariencia moderna y sobria |
-| Verde `#00d756` | Confirmación, estados correctos y mensajes positivos | Se utiliza para representar éxito |
-| Rojo `#d81222` | Errores, mensajes negativos o eliminación | Se usa con claridad y sin exceso |
+| Color                                     | Uso principal                                        | Observación                                         |
+| ----------------------------------------- | ---------------------------------------------------- | --------------------------------------------------- |
+| Azul principal `#0071eb`                  | Acciones principales, enlaces y elementos destacados | Debe mantenerse como elemento visual dominante      |
+| Azul oscuro `#031a6b`                     | Títulos, fondos oscuros y contraste de profundidad   | Se utiliza para reforzar la identidad institucional |
+| Azul claro `#69b1ff`                      | Elementos secundarios, fondos suaves y detalles      | Ideal para estados de apoyo o fondos de resaltado   |
+| Naranja `#f68b01`                         | Accentos y elementos secundarios                     | Debe usarse con moderación                          |
+| Blanco `#ffffff`                          | Fondos claros y textos sobre fondos oscuros          | Proporciona alto contraste                          |
+| Negro / gris oscuro `#262626` / `#141416` | Textos y fondos oscuros                              | Mantiene una apariencia moderna y sobria            |
+| Verde `#00d756`                           | Confirmación, estados correctos y mensajes positivos | Se utiliza para representar éxito                   |
+| Rojo `#d81222`                            | Errores, mensajes negativos o eliminación            | Se usa con claridad y sin exceso                    |
 
-## 2. Responsive Design
+**Responsive Design**
 
-### 2.1 Principio general
+**Principio general**
 
 El sitio debe adaptarse correctamente a distintos tamaños de pantalla, comenzando por dispositivos móviles y ampliándose hacia tabletas, portátiles y equipos de escritorio. La experiencia debe mantener su legibilidad, navegación y jerarquía visual en cada tamaño.
 
-### 2.2 Breakpoints
+**Breakpoints**
 
 El proyecto actualmente emplea reglas de diseño responsivo para adaptar la disposición de los elementos. La navegación, las tarjetas, el contenido de las secciones y los componentes de formulario deben validar su comportamiento en los rangos principales:
 
-| Dispositivo | Rango aproximado | Comportamiento esperado |
-|---|---|---|
-| Smartphone pequeño | 320–479 px | Diseño vertical, navegación compacta y elementos de tamaño táctil |
-| Smartphone grande | 480–767 px | Ajuste de espacios y reducción de contenido redundante |
-| Tablet | 768–1023 px | Aparición de columnas y mejor aprovechamiento del ancho |
-| Laptop | 1024–1439 px | Distribución de dos o más columnas según el contenido |
-| Escritorio amplio | 1440 px o más | Máximo aprovechamiento del ancho sin extender excesivamente las líneas de texto |
+| Dispositivo        | Rango aproximado | Comportamiento esperado                                                         |
+| ------------------ | ---------------- | ------------------------------------------------------------------------------- |
+| Smartphone pequeño | 320–479 px       | Diseño vertical, navegación compacta y elementos de tamaño táctil               |
+| Smartphone grande  | 480–767 px       | Ajuste de espacios y reducción de contenido redundante                          |
+| Tablet             | 768–1023 px      | Aparición de columnas y mejor aprovechamiento del ancho                         |
+| Laptop             | 1024–1439 px     | Distribución de dos o más columnas según el contenido                           |
+| Escritorio amplio  | 1440 px o más    | Máximo aprovechamiento del ancho sin extender excesivamente las líneas de texto |
 
 Se recomienda verificar además los tamaños de pantalla de 390 px, 768 px y 1440 px, ya que corresponden a escenarios frecuentes de navegación móvil, tablet y escritorio.
 
-### 2.3 Navegación móvil
+**Navegación móvil**
 
 La navegación en dispositivos pequeños utiliza un menú desplegable. Debe cumplir con las siguientes pautas:
 
@@ -212,7 +214,7 @@ La navegación en dispositivos pequeños utiliza un menú desplegable. Debe cump
 - El contenido detrás del menú debe mantenerse bloqueado mientras esté abierto.
 - La transición debe ser fluida y no impedir la interacción.
 
-### 2.4 Texto y contenido
+**Texto y contenido**
 
 - Se debe evitar texturar los bloques con excesivo contenido informativo.
 - Los textos largos deben organizarse en párrafos breves.
@@ -220,7 +222,7 @@ La navegación en dispositivos pequeños utiliza un menú desplegable. Debe cump
 - Los botones y enlaces deben tener áreas táctiles apropiadas.
 - Los textos importantes deben conservar contraste suficiente respecto al fondo.
 
-### 2.5 Compatibilidad y pruebas
+**Compatibilidad y pruebas**
 
 Antes de cerrar una entrega, es recomendable comprobar el sitio en:
 
@@ -231,9 +233,9 @@ Antes de cerrar una entrega, es recomendable comprobar el sitio en:
 - Pantallas con diferentes factores de pixel density.
 - Sistemas con modo claro y oscuro.
 
-## 3. Interaction Design
+**Interaction Design**
 
-### 3.1 Interacciones principales
+**Interacciones principales**
 
 El sitio utiliza animaciones para crear una presentación inicial, revelar contenido y dar continuidad visual. Las interacciones principales incluyen:
 
@@ -247,7 +249,7 @@ El sitio utiliza animaciones para crear una presentación inicial, revelar conte
 - Apertura del modal para solicitar una demostración.
 - Botones de instalación que enlazan con la aplicación móvil o la versión web.
 
-### 3.2 Comportamiento de los botones
+**Comportamiento de los botones**
 
 Los botones deben:
 
@@ -259,7 +261,7 @@ Los botones deben:
 
 En particular, los botones de demostración y de instalación deben resultar intuitivos y deben conservar el contexto del plan seleccionado al abrir el formulario.
 
-### 3.3 Animaciones
+**Animaciones**
 
 Las animaciones se utilizan para apoyar la narrativa, no para reemplazarla. Se recomienda:
 
@@ -269,7 +271,7 @@ Las animaciones se utilizan para apoyar la narrativa, no para reemplazarla. Se r
 - Reducir o eliminar animaciones cuando el usuario habilita `prefers-reduced-motion`.
 - Utilizar animaciones con duración estable para mantener consistencia.
 
-### 3.4 Accesibilidad de interacción
+**Accesibilidad de interacción**
 
 El sitio debe asegurar que todas las acciones sean operables mediante teclado y lectura de pantalla. Para ello:
 
@@ -281,9 +283,9 @@ El sitio debe asegurar que todas las acciones sean operables mediante teclado y 
 - El contenido no debe depender únicamente de colores para transmitir información.
 - Los elementos interactivos deben mantener una distancia visual y táctil suficiente.
 
-## 4. Images and Icons
+**Images and Icons**
 
-### 4.1 Uso de imágenes
+**Uso de imágenes**
 
 El sitio utiliza imágenes de marca, fotografías de equipo y mockups de teléfono. Las imágenes deben:
 
@@ -296,7 +298,7 @@ El sitio utiliza imágenes de marca, fotografías de equipo y mockups de teléfo
 
 El mockup del teléfono se utiliza como representación visual de la aplicación y no debe confundirse con una captura real de la plataforma.
 
-### 4.2 Fotografía de equipo
+**Fotografía de equipo**
 
 Las fotografías deben presentar una apariencia uniforme:
 
@@ -306,7 +308,7 @@ Las fotografías deben presentar una apariencia uniforme:
 - Enfoque limpio y buena exposición.
 - Recorte ajustado a la figura de cada integrante.
 
-### 4.3 Iconografía
+**Iconografía**
 
 La iconografía utiliza Phosphor Icons, un conjunto moderno y uniforme. Se recomienda:
 
@@ -316,7 +318,7 @@ La iconografía utiliza Phosphor Icons, un conjunto moderno y uniforme. Se recom
 - Utilizar iconos para reforzar conceptos, no como reemplazo de textos.
 - Mantener el nivel de detalle apropiado para tamaños pequeños.
 
-### 4.4 Imágenes en modo oscuro
+**Imágenes en modo oscuro**
 
 Al utilizar imágenes con fondo claro, debe evaluarse su contraste en modo oscuro. Si una imagen no se adapta correctamente, conviene:
 
@@ -325,41 +327,31 @@ Al utilizar imágenes con fondo claro, debe evaluarse su contraste en modo oscur
 - Usar una versión específica para modo oscuro.
 - Sustituir la imagen por una ilustración más simple.
 
-## 5. Repositorio Central
-
-### 5.1 Organización del proyecto
-
-El proyecto se organiza en archivos para la estructura, los estilos, la lógica, los recursos visuales y la documentación. Esta distribución facilita la actualización del contenido y la mantenibilidad de la página.
-
-### 5.2 Versionado
-
-Usamos Git como sistema de control de versiones para gestionar los cambios en los archivos de estilo y contenido.
-
 #### 3.1.1.3. Mobile Style Guidelines
 
-## 1. Layout and Grid
+**Layout and Grid**
 
-| Elemento | Guía |
-|---|---|
-| Unidad base | Usar una retícula de 8 dp. Espaciados habituales: 8, 16, 24 y 32 dp. |
-| Márgenes laterales | Mantener 16 dp como margen de contenido en pantallas estándar. |
-| Barra superior | La app bar ocupa 64 dp, debajo de la barra de estado del sistema. Reservar espacio para volver, título, acciones y estado de sincronización sin solaparlos. |
-| Área de contenido | Desplazamiento vertical dentro del contenido. Usar 8 dp de separación inicial y 16–20 dp entre grupos, según densidad. |
-| Navegación inferior | Reservar 80 dp cuando la navegación principal esté presente. El contenido debe terminar antes de esta zona. |
-| Acciones persistentes | Para flujos como recepción o aprobación, ubicar la acción principal en un pie fijo, con fondo y separación suficientes respecto al contenido desplazable. |
-| Columnas | Priorizar una sola columna. Usar dos columnas solo para elementos visuales compactos que se entienden de forma independiente, como las casillas de fotos. |
-| Superficies | Usar tarjetas para agrupar información relacionada, no para cada línea de texto. Radio de tarjeta de 16 dp; campos de 16 dp y chips de 8 dp. |
+| Elemento              | Guía                                                                                                                                                        |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unidad base           | Usar una retícula de 8 dp. Espaciados habituales: 8, 16, 24 y 32 dp.                                                                                        |
+| Márgenes laterales    | Mantener 16 dp como margen de contenido en pantallas estándar.                                                                                              |
+| Barra superior        | La app bar ocupa 64 dp, debajo de la barra de estado del sistema. Reservar espacio para volver, título, acciones y estado de sincronización sin solaparlos. |
+| Área de contenido     | Desplazamiento vertical dentro del contenido. Usar 8 dp de separación inicial y 16–20 dp entre grupos, según densidad.                                      |
+| Navegación inferior   | Reservar 80 dp cuando la navegación principal esté presente. El contenido debe terminar antes de esta zona.                                                 |
+| Acciones persistentes | Para flujos como recepción o aprobación, ubicar la acción principal en un pie fijo, con fondo y separación suficientes respecto al contenido desplazable.   |
+| Columnas              | Priorizar una sola columna. Usar dos columnas solo para elementos visuales compactos que se entienden de forma independiente, como las casillas de fotos.   |
+| Superficies           | Usar tarjetas para agrupar información relacionada, no para cada línea de texto. Radio de tarjeta de 16 dp; campos de 16 dp y chips de 8 dp.                |
 
 Organizar la pantalla por prioridad: estado de la tarea y sincronización, información necesaria para decidir, y acción principal. Mantener visibles las acciones críticas cuando sea posible, pero permitir que el contenido largo se desplace. Adaptar la composición a pantallas más estrechas o grandes sin reducir áreas táctiles ni truncar información necesaria.
 
-## 2. Navegación
+**Navegación**
 
 La navegación principal depende del rol. Mantener etiquetas e iconos consistentes entre pantallas y señalar claramente el destino actual. Las secciones secundarias y los flujos de varios pasos deben mostrar el título y una acción de retorno reconocible.
 
-| Rol | Destinos principales | Uso |
-|---|---|---|
-| Técnico | Inicio, Tareas, OBD-II, Perfil | Barra de navegación inferior con cuatro destinos principales. |
-| Administrador | Inicio, Órdenes, Recepción, Inventario, Configuración | Barra de navegación inferior con cinco destinos principales. |
+| Rol           | Destinos principales                                  | Uso                                                           |
+| ------------- | ----------------------------------------------------- | ------------------------------------------------------------- |
+| Técnico       | Inicio, Tareas, OBD-II, Perfil                        | Barra de navegación inferior con cuatro destinos principales. |
+| Administrador | Inicio, Órdenes, Recepción, Inventario, Configuración | Barra de navegación inferior con cinco destinos principales.  |
 
 - Usar navegación inferior solo para destinos principales de uso frecuente; abrir detalles y pasos de una tarea dentro de su flujo.
 - En pantallas secundarias, ubicar «Volver» en la parte superior izquierda y presentar un título descriptivo.
@@ -368,20 +360,20 @@ La navegación principal depende del rol. Mantener etiquetas e iconos consistent
 - No usar el color o la posición como única señal del destino actual; combinar el indicador visual con etiquetas legibles y estado accesible.
 - No mezclar destinos de administrador y técnico: cada rol debe ver las secciones que necesita para su trabajo.
 
-## 3. Tipografía Mobile
+**Tipografía Mobile**
 
 La familia principal es **Plus Jakarta Sans**. Usar **JetBrains Mono** para datos técnicos, identificadores, mediciones, temporizadores y cifras que se comparan dígito por dígito. En Android, mapear los tamaños a roles tipográficos y expresarlos en `sp`.
 
-| Rol | Tamaño / interlineado de referencia | Uso |
-|---|---:|---|
-| Display | 32 / 40 sp, ExtraBold | Valor o encabezado protagonista de una pantalla puntual. |
-| Headline | 24 / 32 sp, ExtraBold | Título principal o cifra destacada. |
-| Title Large | 20 / 28 sp, Bold | Encabezado de pantalla o sección importante. |
-| Title Medium | 16 / 24 sp, Bold | Títulos de tarjetas, filas y controles. |
-| Body Large | 16 / 24 sp, Regular | Instrucciones y texto que requiere lectura cómoda. |
-| Body Medium | 14 / 20 sp, Regular | Texto general y descripciones breves. |
-| Label Large | 14 / 20 sp, Bold | Etiquetas de acciones y controles. |
-| Label Medium | 12 / 16 sp, SemiBold | Metadatos, etiquetas auxiliares y chips. |
+| Rol          | Tamaño / interlineado de referencia | Uso                                                      |
+| ------------ | ----------------------------------: | -------------------------------------------------------- |
+| Display      |               32 / 40 sp, ExtraBold | Valor o encabezado protagonista de una pantalla puntual. |
+| Headline     |               24 / 32 sp, ExtraBold | Título principal o cifra destacada.                      |
+| Title Large  |                    20 / 28 sp, Bold | Encabezado de pantalla o sección importante.             |
+| Title Medium |                    16 / 24 sp, Bold | Títulos de tarjetas, filas y controles.                  |
+| Body Large   |                 16 / 24 sp, Regular | Instrucciones y texto que requiere lectura cómoda.       |
+| Body Medium  |                 14 / 20 sp, Regular | Texto general y descripciones breves.                    |
+| Label Large  |                    14 / 20 sp, Bold | Etiquetas de acciones y controles.                       |
+| Label Medium |                12 / 16 sp, SemiBold | Metadatos, etiquetas auxiliares y chips.                 |
 
 - Mantener una jerarquía clara y frases breves; evitar reducir el texto para hacer caber contenido que debería reorganizarse.
 - Usar cifras monoespaciadas para placa, OT, códigos DTC, lecturas OBD-II, montos y tiempos cuando la alineación facilite la comparación.
@@ -389,22 +381,22 @@ La familia principal es **Plus Jakarta Sans**. Usar **JetBrains Mono** para dato
 - Permitir que textos de títulos y descripciones aumenten según el ajuste de accesibilidad del dispositivo; verificar saltos de línea y desplazamiento con tamaños grandes.
 - Usar español claro y directo, explicando términos técnicos cuando sean necesarios. Mantener la misma intención y jerarquía al localizar la interfaz al inglés.
 
-## 4. Colores en contexto móvil
+**Colores en contexto móvil**
 
 La aplicación ofrece tema oscuro por defecto y tema claro con el mismo nivel de cuidado. En ambos, el contraste debe seguir WCAG AA como mínimo y verificarse en las combinaciones reales de texto, fondo, iconos y controles.
 
-| Token / uso | Color de marca | Aplicación |
-|---|---|---|
-| Primario | `#0071EB` | Acciones principales, selección y énfasis interactivo. |
-| Primario oscuro | `#031A6B` | Acento de marca y contenedores o texto asociados según el tema. |
-| Primario suave | `#69B1FF` | Énfasis azul claro, especialmente en el tema oscuro. |
-| Acento | `#F68B01` | Advertencias y estados que requieren atención. |
-| Acento suave | `#F7B32B` | Variación cálida para espera o advertencia. |
-| Rojo | `#D81222` | Identidad de error o estado crítico; ajustar a variantes accesibles por tema. |
-| Verde | `#00D756` | Identidad de éxito; ajustar a variantes accesibles por tema. |
-| Fondo claro | `#F8F8FA` | Fondo base del tema claro. |
-| Superficie oscura | `#141416` | Fondo base del tema oscuro. |
-| Texto oscuro | `#262626` | Texto principal sobre superficies claras. |
+| Token / uso       | Color de marca | Aplicación                                                                    |
+| ----------------- | -------------- | ----------------------------------------------------------------------------- |
+| Primario          | `#0071EB`      | Acciones principales, selección y énfasis interactivo.                        |
+| Primario oscuro   | `#031A6B`      | Acento de marca y contenedores o texto asociados según el tema.               |
+| Primario suave    | `#69B1FF`      | Énfasis azul claro, especialmente en el tema oscuro.                          |
+| Acento            | `#F68B01`      | Advertencias y estados que requieren atención.                                |
+| Acento suave      | `#F7B32B`      | Variación cálida para espera o advertencia.                                   |
+| Rojo              | `#D81222`      | Identidad de error o estado crítico; ajustar a variantes accesibles por tema. |
+| Verde             | `#00D756`      | Identidad de éxito; ajustar a variantes accesibles por tema.                  |
+| Fondo claro       | `#F8F8FA`      | Fondo base del tema claro.                                                    |
+| Superficie oscura | `#141416`      | Fondo base del tema oscuro.                                                   |
+| Texto oscuro      | `#262626`      | Texto principal sobre superficies claras.                                     |
 
 En uso real, preferir los tokens semánticos del tema (primario, superficie, texto, éxito, espera, error e información) en vez de asignar hexadecimales directamente a cada componente. El tema claro y el oscuro pueden usar variantes distintas de una misma identidad cromática para conservar contraste.
 
@@ -414,7 +406,7 @@ En uso real, preferir los tokens semánticos del tema (primario, superficie, tex
 - Probar contraste de texto normal y texto grande en cada tema, incluyendo chips, botones deshabilitados, campos, foco y mensajes superpuestos.
 - Usar superficies y divisores para separar contenido; no depender exclusivamente de sombras, especialmente en el modo oscuro.
 
-## 5. Interaction Design
+**Interaction Design**
 
 La interacción debe funcionar con una mano, atención dividida y guantes. Los controles deben ser previsibles, proporcionar respuesta inmediata y explicar qué ocurrió después de una acción.
 
@@ -429,7 +421,7 @@ La interacción debe funcionar con una mano, atención dividida y guantes. Los c
 - Usar animación solo para comunicar transición o cambio de estado. Respetar «reducir movimiento» del sistema y asegurar que la interfaz siga siendo comprensible sin animaciones.
 - No exigir gestos como deslizar o mantener pulsado cuando la acción no tenga una alternativa visible.
 
-## 6. Accesibilidad
+**Accesibilidad**
 
 - Cumplir WCAG AA como piso para contraste y legibilidad en ambos temas. Revisar también estados deshabilitados, error, espera, foco y texto sobre imágenes.
 - Usar tamaños en `sp` en Android y respetar el escalado de fuente del usuario. El contenido debe reorganizarse, no desaparecer, cuando el texto crece.
@@ -443,4 +435,3 @@ La interacción debe funcionar con una mano, atención dividida y guantes. Los c
 - Validar pantallas con TalkBack, escala de fuente ampliada, contraste alto, tema claro y oscuro, y uso real bajo iluminación variable.
 
 \newpage
-

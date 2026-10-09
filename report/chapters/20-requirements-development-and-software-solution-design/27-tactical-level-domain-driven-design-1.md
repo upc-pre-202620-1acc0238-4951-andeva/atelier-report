@@ -9831,7 +9831,7 @@ A continuación, se profundiza en la especificación a manera de diccionario de 
 
 **Controladores REST y Endpoints de Comunicación**
 
-La exposición perimetral de los servicios web se organiza en tres controladores anotados con @RestController, delimitando con precisión las fronteras operativas del dominio:
+La exposición perimetral de los servicios web se organiza en tres controladores anotados con `@RestController`, delimitando con precisión las fronteras operativas del dominio:
 
 - **CustomersController**: Centraliza la administración de la cartera comercial del taller automotriz bajo la ruta base /api/v1/customers. Provee rutas semánticamente diferenciadas para el alta de personas naturales (/individuals) y empresas de flotas (/companies), evitando estructuras polimórficas ambiguas. Asimismo, implementa endpoints para la consulta paginada de clientes filtrada por taller, la inspección detallada por identificador, la actualización idempotente de canales de contacto directo y el listado del parque vehicular bajo titularidad activa del cliente.
 
