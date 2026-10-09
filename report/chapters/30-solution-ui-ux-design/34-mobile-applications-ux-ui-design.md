@@ -366,6 +366,10 @@ En este último flujo esperado, el administrador se encuentra en la pasarela de 
 
 #### 3.1.4.5. Mobile Applications Prototyping
 
+En esta sección se presenta el prototipo de la aplicación móvil de Atelier mediante un video que recorre sus pantallas y muestra las principales interacciones. La navegación ilustrada se basa en los flujos de usuario descritos previamente y permite observar cómo se conectan las funcionalidades de la plataforma.
 
+![Prototype](report/assets/Prototype/Atelier_Prototype.png){#fig:prototipo-Atelier}
+
+Prototipo de Atelier: https://upcedupe-my.sharepoint.com/:v:/g/personal/u202417423_upc_edu_pe/IQDQ0LT1SbGJRJ2KmdLUWZOLAZ-mZ6ws9qtsKgoQlFB5MZg?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=EMucdj
 
 \newpage
