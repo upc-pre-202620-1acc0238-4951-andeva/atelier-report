@@ -38,23 +38,23 @@ La redacción y diagramación del informe contó con la participación activa de
 
 Las siguientes figuras certifican la trazabilidad, la frecuencia de commits y la colaboración del equipo en el repositorio de documentación durante el ciclo de desarrollo del informe.
 
-***Métricas de Contribuidores y Frecuencia de Commits en GitHub***
+**_Métricas de Contribuidores y Frecuencia de Commits en GitHub_**
 
 ![](report/assets/collaboration-insights/av1-github-contributors.png){width=100%}
 
-*Nota.* Gráfico de contribuciones individuales del repositorio atelier-report en GitHub.
+_Nota._ Gráfico de contribuciones individuales del repositorio atelier-report en GitHub.
 
-***Red de Ramas e Integraciones en GitHub***
+**_Red de Ramas e Integraciones en GitHub_**
 
 ![](report/assets/collaboration-insights/av1-github-network-frequency.png){width=100%}
 
-*Nota.* Grafo de commits y ramas integradas sobre el historial del repositorio en GitHub.
+_Nota._ Grafo de commits y ramas integradas sobre el historial del repositorio en GitHub.
 
-***Registro Cronológico de Commits en GitHub***
+**_Registro Cronológico de Commits en GitHub_**
 
 ![](report/assets/collaboration-insights/av1-github-commits-log.png){width=100%}
 
-*Nota.* Registro cronológico de commits que certifica la autoría y coherencia con el registro de versiones del informe.
+_Nota._ Registro cronológico de commits que certifica la autoría y coherencia con el registro de versiones del informe.
 
 \newpage
 
@@ -82,22 +82,22 @@ La elaboración, estructuración y maquetación de los capítulos incorporados e
 
 Las siguientes figuras certifican la trazabilidad, la frecuencia de commits y la colaboración del equipo en el repositorio de documentación durante el ciclo de desarrollo correspondiente al hito TB1.
 
-***Métricas de Contribuidores y Frecuencia de Commits en GitHub para el TB1***
+**_Métricas de Contribuidores y Frecuencia de Commits en GitHub para el TB1_**
 
 ![](report/assets/collaboration-insights/tb1-github-contributors.png){width=78%}
 
-*Nota.* Gráfico de contribuciones individuales del repositorio atelier-report en GitHub durante el hito TB1.
+_Nota._ Gráfico de contribuciones individuales del repositorio atelier-report en GitHub durante el hito TB1.
 
-***Red de Ramas e Integraciones en GitHub para el TB1***
+**_Red de Ramas e Integraciones en GitHub para el TB1_**
 
 ![](report/assets/collaboration-insights/tb1-github-network-frequency.png){width=100%}
 
-*Nota.* Grafo de commits y ramas integradas sobre el historial del repositorio en GitHub durante el hito TB1.
+_Nota._ Grafo de commits y ramas integradas sobre el historial del repositorio en GitHub durante el hito TB1.
 
-***Registro Cronológico de Commits en GitHub para el TB1***
+**_Registro Cronológico de Commits en GitHub para el TB1_**
 
 ![](report/assets/collaboration-insights/tb1-github-commits-log.png){width=100%}
 
-*Nota.* Registro cronológico de commits que certifica la autoría y coherencia con el registro de versiones del informe para el hito TB1.
+_Nota._ Registro cronológico de commits que certifica la autoría y coherencia con el registro de versiones del informe para el hito TB1.
 
 \newpage
