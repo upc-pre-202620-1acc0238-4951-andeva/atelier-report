@@ -327,7 +327,7 @@ US05 & Colaborador del taller & Media & EP01 \\
 
 **Epic 2: Control de Asistencia Satelital y Turnos**
 
-A continuación, se presentan las historias de usuario pertenecientes a la épica número 2, que agrupa las funcionalidades de marcación de jornada laboral asistida por geocerca GPS satelital, auditoría perimétrica geodésica, liquidación de jornada efectiva y gestión de turnos y descargos en Atelier Workshop Mobile.
+A continuación, se presentan las historias de usuario pertenecientes a la épica número 2, que agrupa las funcionalidades de marcación de jornada laboral asistida por geocerca GPS satelital, liquidación de jornada efectiva y gestión de turnos y descargos en Atelier Workshop Mobile.
 
 \renewcommand{\arraystretch}{1.3}
 \begin{longtable}{| >{\centering\arraybackslash}p{2.5cm} | >{\centering\arraybackslash}p{5.0cm} | >{\centering\arraybackslash}p{\dimexpr\textwidth-7.5cm-6\tabcolsep-4\arrayrulewidth\relax} |}
@@ -402,53 +402,6 @@ US06 & Técnico mecánico & Alta & EP02 \\
 \end{longtable}
 
 *Nota.* Criterios de aceptación estructurados en formato BDD Gherkin para la historia US06.
-
-\renewcommand{\arraystretch}{1.3}
-\begin{longtable}{| >{\centering\arraybackslash}p{2.2cm} | >{\centering\arraybackslash}p{4.2cm} | >{\centering\arraybackslash}p{2.2cm} | >{\centering\arraybackslash}p{\dimexpr\textwidth-8.6cm-8\tabcolsep-5\arrayrulewidth\relax} |}
-\caption{Historia de Usuario US07 - Auditoría perimétrica y contingencias de conectividad satelital} \label{tbl:us07} \\
-\hline
-\thfirst{Story ID} & \thcell{User} & \thcell{Priority} & \thcell{Epic} \\
-\hline
-\endfirsthead
-\hline
-\thfirst{Story ID} & \thcell{User} & \thcell{Priority} & \thcell{Epic} \\
-\hline
-\endhead
-\hline
-\endfoot
-\hline
-\endlastfoot
-US07 & Técnico mecánico & Alta & EP02 \\
-\hline
-\thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Auditoría perimétrica y contingencias de conectividad satelital} \\
-\hline
-\thspanfirst{4}{Description} \\
-\hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} técnico mecánico que acude a laborar en la sede del taller,\newline \textbf{quiero} que el sistema audite mi posición geográfica en tiempo de marcación y gestione contingencias de cobertura celular en patio,\newline \textbf{para} garantizar la fiabilidad del cómputo laboral y asegurar el registro de mi asistencia ante pérdidas transitorias de conectividad.} \\
-\hline
-\thspanfirst{4}{Acceptance Criteria} \\
-\hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{%
-\textbf{Escenario 1: Rechazo estricto por ubicación fuera de la geocerca autorizada}\newline
-\textbf{Dado que} las coordenadas satelitales del dispositivo superan el radio perimétrico de cien metros asignado a la sucursal,\newline
-\textbf{cuando} el colaborador intenta registrar su asistencia laboral,\newline
-\textbf{entonces} el sistema deniega el registro de ingreso por discrepancia geográfica, calcula la distancia excedente en metros,\newline
-\textbf{y} notifica la imposibilidad de marcar fuera de los linderos del taller.\vspace{4pt}\newline
-\textbf{Escenario 2: Imposibilidad de obtener fijación satelital en el dispositivo}\newline
-\textbf{Dado que} el dispositivo móvil no cuenta con señal de posicionamiento satelital o mantiene los servicios de geolocalización desactivados,\newline
-\textbf{cuando} se solicita el registro de asistencia,\newline
-\textbf{entonces} el sistema bloquea la operación impidiendo el registro sin coordenadas auditables,\newline
-\textbf{y} orienta al colaborador a restablecer los permisos de ubicación para continuar.\vspace{4pt}\newline
-\textbf{Escenario 3: Sincronización resiliente ante pérdida de cobertura en fosa subterránea}\newline
-\textbf{Dado que} el técnico efectúa su marcación en un área de taller con apantallamiento electromagnético sin cobertura de datos móviles,\newline
-\textbf{cuando} se registra la asistencia contando con coordenadas satelitales válidas,\newline
-\textbf{entonces} el sistema almacena el registro en una cola local protegida con firma criptográfica,\newline
-\textbf{y} sincroniza automáticamente el evento con el servidor central al restablecer la conexión de red.%
-} \\
-\hline
-\end{longtable}
-
-*Nota.* Criterios de aceptación estructurados en formato BDD Gherkin para la historia US07.
 
 \renewcommand{\arraystretch}{1.3}
 \begin{longtable}{| >{\centering\arraybackslash}p{2.2cm} | >{\centering\arraybackslash}p{4.2cm} | >{\centering\arraybackslash}p{2.2cm} | >{\centering\arraybackslash}p{\dimexpr\textwidth-8.6cm-8\tabcolsep-5\arrayrulewidth\relax} |}
@@ -2203,7 +2156,7 @@ US41 & Dueño de taller & Alta & EP09 \\
 
 \renewcommand{\arraystretch}{1.3}
 \begin{longtable}{| >{\centering\arraybackslash}p{2.2cm} | >{\centering\arraybackslash}p{4.2cm} | >{\centering\arraybackslash}p{2.2cm} | >{\centering\arraybackslash}p{\dimexpr\textwidth-8.6cm-8\tabcolsep-5\arrayrulewidth\relax} |}
-\caption{Historia de Usuario US42 - Configuración de información fiscal, series SUNAT y enlace con PSE} \label{tbl:us42} \\
+\caption{Historia de Usuario US42 - Configuración de información fiscal y series SUNAT con PSE administrado por la plataforma} \label{tbl:us42} \\
 \hline
 \thfirst{Story ID} & \thcell{User} & \thcell{Priority} & \thcell{Epic} \\
 \hline
@@ -2218,25 +2171,25 @@ US41 & Dueño de taller & Alta & EP09 \\
 \endlastfoot
 US42 & Dueño de taller & Alta & EP09 \\
 \hline
-\thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Configuración de información fiscal, series SUNAT y enlace con PSE} \\
+\thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Configuración de información fiscal y series SUNAT con PSE administrado por la plataforma} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} dueño de taller automotriz responsable del cumplimiento tributario institucional,\newline \textbf{quiero} registrar la razón social, RUC, series correlativas autorizadas y el token de conexión con el PSE Nubefact,\newline \textbf{para} asegurar la validez legal y tributaria de los comprobantes electrónicos emitidos ante la SUNAT.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} dueño de taller automotriz responsable del cumplimiento tributario institucional,\newline \textbf{quiero} registrar la razón social, el RUC y las series correlativas autorizadas de cada sede, sin gestionar credenciales propias ante el PSE porque la conexión con Nubefact la administra la plataforma Atelier,\newline \textbf{para} empezar a facturar apenas completo el registro del taller y asegurar la validez de los comprobantes electrónicos ante la SUNAT.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
 \multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{%
-\textbf{Escenario 1: Vinculación exitosa de credenciales tributarias y activación de series}\newline
-\textbf{Dado que} el dueño de taller ingresa el RUC, razón social y el token de autenticación provisto por el PSE Nubefact,\newline
-\textbf{cuando} el sistema valida la conectividad con el servidor fiscal y constata la condición activa del contribuyente,\newline
+\textbf{Escenario 1: Activación de series tras el registro del taller}\newline
+\textbf{Dado que} el taller quedó registrado con su RUC y razón social y el dueño configura una serie autorizada para su sede,\newline
+\textbf{cuando} el sistema registra la serie usando la conexión con el PSE administrada por la plataforma,\newline
 \textbf{entonces} activa las series alfanuméricas autorizadas vinculándolas a la sucursal de trabajo,\newline
 \textbf{y} habilita la expedición regular de comprobantes electrónicos en las órdenes de servicio.\vspace{4pt}\newline
-\textbf{Escenario 2: Detección preventiva de credenciales fiscales erróneas}\newline
-\textbf{Dado que} se ingresa un token de autenticación PSE revocado o un RUC que no corresponde a la empresa,\newline
-\textbf{cuando} el servicio ejecuta la prueba de comunicación tributaria,\newline
-\textbf{entonces} bloquea la activación de la serie informando el fallo de autenticación con el proveedor fiscal,\newline
-\textbf{y} previene la emisión de comprobantes no homologados ante SUNAT.%
+\textbf{Escenario 2: Rechazo de series duplicadas}\newline
+\textbf{Dado que} el dueño intenta registrar una serie que ya existe para la misma sede,\newline
+\textbf{cuando} el sistema valida la configuración tributaria,\newline
+\textbf{entonces} rechaza el registro informando que la serie ya está configurada,\newline
+\textbf{y} previene correlativos duplicados ante la SUNAT.%
 } \\
 \hline
 \end{longtable}
@@ -2459,11 +2412,11 @@ TS03 & Developer & Alta & EP10 \\
 \endlastfoot
 TS04 & Developer & Media & EP10 \\
 \hline
-\thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Emisión y despacho de invitaciones corporativas de personal (\texttt{POST /api/v1/tenants/\{tenantId\}/invitations})} \\
+\thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Emisión y despacho de invitaciones corporativas de personal (\texttt{POST /api/v1/invitations/tenant/{tenantId}})} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} Developer,\newline \textbf{quiero} exponer el endpoint RESTful \texttt{POST /api/v1/tenants/\{tenantId\}/invitations} protegido por perfil de administrador,\newline \textbf{para} generar tokens de invitación firmados y enviar correos transaccionales a nuevos colaboradores del taller.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} Developer,\newline \textbf{quiero} exponer el endpoint RESTful \texttt{POST /api/v1/invitations/tenant/{tenantId}} protegido por perfil de administrador,\newline \textbf{para} generar tokens de invitación firmados y enviar correos transaccionales a nuevos colaboradores del taller.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -2501,11 +2454,11 @@ TS04 & Developer & Media & EP10 \\
 \endlastfoot
 TS05 & Developer & Media & EP10 \\
 \hline
-\thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Alta de sucursales operativas y delimitación de geocercas (\texttt{POST /api/v1/tenants/\{tenantId\}/branches})} \\
+\thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Alta de sucursales operativas y delimitación de geocercas (\texttt{POST /api/v1/branches})} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} Developer,\newline \textbf{quiero} exponer el endpoint RESTful \texttt{POST /api/v1/tenants/\{tenantId\}/branches},\newline \textbf{para} registrar sedes físicas con código tributario SUNAT, coordenadas geográficas WGS84 y radio perimétrico en metros.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} Developer,\newline \textbf{quiero} exponer el endpoint RESTful \texttt{POST /api/v1/branches},\newline \textbf{para} registrar sedes físicas con código tributario SUNAT, coordenadas geográficas WGS84 y radio perimétrico en metros.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -2518,7 +2471,7 @@ TS05 & Developer & Media & EP10 \\
 \textbf{Escenario 2: Rechazo por coordenadas geográficas fuera de rango}\newline
 \textbf{Dado que} la solicitud contiene valores de latitud o longitud fuera de los rangos válidos o un radio perimétrico negativo,\newline
 \textbf{cuando} el componente de validación inspecciona el cuerpo de la petición,\newline
-\textbf{entonces} responde con código HTTP 422 Unprocessable Entity detallando los errores de esquema,\newline
+\textbf{entonces} responde con código HTTP 400 Bad Request detallando los errores de validación,\newline
 \textbf{y} descarta la persistencia de la sucursal.%
 } \\
 \hline
@@ -2669,11 +2622,11 @@ TS08 & Developer & Media & EP10 \\
 \endlastfoot
 TS09 & Developer & Alta & EP10 \\
 \hline
-\thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Registro de arribo a patio y apertura automática de orden (\texttt{POST /api/v1/appointments/\{id\}/check-in})} \\
+\thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Registro de arribo a patio y apertura automática de orden (\texttt{POST /api/v1/appointments/{id}/arrive})} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} Developer,\newline \textbf{quiero} exponer el endpoint RESTful \texttt{POST /api/v1/appointments/\{id\}/check-in},\newline \textbf{para} registrar el ingreso físico del automóvil al patio y disparar la creación automática de la orden de trabajo.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} Developer,\newline \textbf{quiero} exponer el endpoint RESTful \texttt{POST /api/v1/appointments/{id}/arrive},\newline \textbf{para} registrar el ingreso físico del automóvil al patio y disparar la creación automática de la orden de trabajo.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -3215,11 +3168,11 @@ TS21 & Developer & Media & EP10 \\
 \endlastfoot
 TS22 & Developer & Alta & EP10 \\
 \hline
-\thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Generación de informe pericial asistido por IA predictiva (\texttt{POST /api/v1/iot/vehicles/\{id\}/health-reports/generate})} \\
+\thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Generación de informe pericial asistido por IA predictiva (\texttt{POST /api/v1/iot/health-reports/generate?vehicleId={id}})} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} Developer,\newline \textbf{quiero} exponer el endpoint RESTful \texttt{POST /api/v1/iot/vehicles/\{id\}/health-reports/generate},\newline \textbf{para} extraer telemetría sensorial y fallas DTC, invocar al modelo de inteligencia artificial vía Spring AI y persistir el dictamen pericial con resumen y recomendaciones preventivas.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} Developer,\newline \textbf{quiero} exponer el endpoint RESTful \texttt{POST /api/v1/iot/health-reports/generate?vehicleId={id}},\newline \textbf{para} extraer telemetría sensorial y fallas DTC, invocar al modelo de inteligencia artificial vía Spring AI y persistir el dictamen pericial con resumen y recomendaciones preventivas.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -3299,11 +3252,11 @@ TS23 & Developer & Media & EP10 \\
 \endlastfoot
 TS24 & Developer & Media & EP10 \\
 \hline
-\thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Descarga documental de informe pericial de salud vehicular en PDF (\texttt{GET /api/v1/iot/vehicles/\{vehicleId\}/health-reports/\{reportId\}/pdf})} \\
+\thfirst{Title} & \multicolumn{3}{p{\dimexpr\textwidth-2.2cm-4\tabcolsep-3\arrayrulewidth\relax}|}{Descarga documental de informe pericial de salud vehicular en PDF (\texttt{GET /api/v1/iot/health-reports/{reportId}/pdf})} \\
 \hline
 \thspanfirst{4}{Description} \\
 \hline
-\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} Developer,\newline \textbf{quiero} exponer el endpoint RESTful \texttt{GET /api/v1/iot/vehicles/\{vehicleId\}/health-reports/\{reportId\}/pdf},\newline \textbf{para} transmitir el archivo binario PDF maquetado con el dictamen pericial generado por IA y recomendaciones preventivas.} \\
+\multicolumn{4}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\textbf{Como} Developer,\newline \textbf{quiero} exponer el endpoint RESTful \texttt{GET /api/v1/iot/health-reports/{reportId}/pdf},\newline \textbf{para} transmitir el archivo binario PDF maquetado con el dictamen pericial generado por IA y recomendaciones preventivas.} \\
 \hline
 \thspanfirst{4}{Acceptance Criteria} \\
 \hline
@@ -3864,111 +3817,109 @@ A continuación, la @tbl:product-backlog presenta la matriz consolidada del **Pr
 \hline
 22 & US08 & Marcación de salida y liquidación de jornada laboral efectiva & 2 & Sprint 2 \\
 \hline
-23 & US07 & Auditoría perimétrica y contingencias de conectividad satelital & 2 & Sprint 2 \\
+23 & US01 & Registro y vinculación de colaborador mediante invitación corporativa & 2 & Sprint 2 \\
 \hline
-24 & US01 & Registro y vinculación de colaborador mediante invitación corporativa & 2 & Sprint 2 \\
+24 & US02 & Verificación de identidad y correo electrónico mediante código OTP & 2 & Sprint 2 \\
 \hline
-25 & US02 & Verificación de identidad y correo electrónico mediante código OTP & 2 & Sprint 2 \\
+25 & US03 & Inicio de sesión corporativo y contextualización de sede de trabajo & 3 & Sprint 2 \\
 \hline
-26 & US03 & Inicio de sesión corporativo y contextualización de sede de trabajo & 3 & Sprint 2 \\
+26 & TS01 & Autenticación de credenciales y expedición de tokens JWT (\texttt{POST /api/v1/auth/sign-in}) & 2 & Sprint 1 \\
 \hline
-27 & TS01 & Autenticación de credenciales y expedición de tokens JWT (\texttt{POST /api/v1/auth/sign-in}) & 2 & Sprint 1 \\
+27 & TS02 & Registro fundacional de organización y aprovisionamiento de inquilino (\texttt{POST /api/v1/auth/sign-up}) & 2 & Sprint 1 \\
 \hline
-28 & TS02 & Registro fundacional de organización y aprovisionamiento de inquilino (\texttt{POST /api/v1/auth/sign-up}) & 2 & Sprint 1 \\
+28 & TS03 & Verificación de correo y activación mediante código OTP (\texttt{POST /api/v1/auth/verify-email}) & 2 & Sprint 1 \\
 \hline
-29 & TS03 & Verificación de correo y activación mediante código OTP (\texttt{POST /api/v1/auth/verify-email}) & 2 & Sprint 1 \\
+29 & US24 & Generación y remisión digital de proforma comercial en PDF & 3 & Sprint 2 \\
 \hline
-30 & US24 & Generación y remisión digital de proforma comercial en PDF & 3 & Sprint 2 \\
+30 & US25 & Formalización de resolución de presupuesto tras comunicación externa & 2 & Sprint 2 \\
 \hline
-31 & US25 & Formalización de resolución de presupuesto tras comunicación externa & 2 & Sprint 2 \\
+31 & TS07 & Registro técnico de vehículos con homologación de placa y VIN (\texttt{POST /api/v1/vehicles}) & 3 & Sprint 1 \\
 \hline
-32 & TS07 & Registro técnico de vehículos con homologación de placa y VIN (\texttt{POST /api/v1/vehicles}) & 3 & Sprint 1 \\
+32 & TS08 & Agendamiento y reserva de citas de mantenimiento (\texttt{POST /api/v1/appointments}) & 2 & Sprint 1 \\
 \hline
-33 & TS08 & Agendamiento y reserva de citas de mantenimiento (\texttt{POST /api/v1/appointments}) & 2 & Sprint 1 \\
+33 & US30 & Cierre técnico de tarea con cómputo de horas hombre efectivas & 2 & Sprint 3 \\
 \hline
-34 & US30 & Cierre técnico de tarea con cómputo de horas hombre efectivas & 2 & Sprint 3 \\
+34 & TS12 & Incorporación de tareas técnicas a la orden de trabajo (\texttt{POST /api/v1/work-orders/\{id\}/tasks}) & 5 & Sprint 1 \\
 \hline
-35 & TS12 & Incorporación de tareas técnicas a la orden de trabajo (\texttt{POST /api/v1/work-orders/\{id\}/tasks}) & 5 & Sprint 1 \\
+35 & US32 & Descargo contable y físico automatizado mediante regla estricta FIFO por lote & 5 & Sprint 2 \\
 \hline
-36 & US32 & Descargo contable y físico automatizado mediante regla estricta FIFO por lote & 5 & Sprint 2 \\
+36 & TS14 & Requisición y descargo de repuestos bajo método FIFO (\texttt{POST /api/v1/tasks/\{id\}/products}) & 2 & Sprint 1 \\
 \hline
-37 & TS14 & Requisición y descargo de repuestos bajo método FIFO (\texttt{POST /api/v1/tasks/\{id\}/products}) & 2 & Sprint 1 \\
+37 & US35 & Imputación automática de precios de venta de catálogo y conciliación de margen FIFO & 3 & Sprint 3 \\
 \hline
-38 & US35 & Imputación automática de precios de venta de catálogo y conciliación de margen FIFO & 3 & Sprint 3 \\
+38 & US21 & Generación de informe pericial predictivo con inteligencia artificial y exportación en PDF & 5 & Sprint 3 \\
 \hline
-39 & US21 & Generación de informe pericial predictivo con inteligencia artificial y exportación en PDF & 5 & Sprint 3 \\
+39 & TS22 & Generación de informe pericial asistido por IA predictiva (\texttt{POST /api/v1/iot/health-reports/generate?vehicleId={id}}) & 5 & Sprint 1 \\
 \hline
-40 & TS22 & Generación de informe pericial asistido por IA predictiva (\texttt{POST /api/v1/iot/vehicles/\{id\}/health-reports/generate}) & 5 & Sprint 1 \\
+40 & US14 & Generación de propuesta de tarea adicional por hallazgo en foso & 3 & Sprint 2 \\
 \hline
-41 & US14 & Generación de propuesta de tarea adicional por hallazgo en foso & 3 & Sprint 2 \\
+41 & US15 & Notificación y aprobación de propuesta técnica con el cliente & 2 & Sprint 2 \\
 \hline
-42 & US15 & Notificación y aprobación de propuesta técnica con el cliente & 2 & Sprint 2 \\
+42 & US28 & Registro fotográfico pericial de desmontaje y montaje de piezas en foso & 2 & Sprint 3 \\
 \hline
-43 & US28 & Registro fotográfico pericial de desmontaje y montaje de piezas en foso & 2 & Sprint 3 \\
+43 & US29 & Solicitud y validación administrativa de suspensión por pieza defectuosa indispensable & 2 & Sprint 3 \\
 \hline
-44 & US29 & Solicitud y validación administrativa de suspensión por pieza defectuosa indispensable & 2 & Sprint 3 \\
+44 & US33 & Reincorporación lógica de materiales a inventario por remoción en tarea técnica & 3 & Sprint 2 \\
 \hline
-45 & US33 & Reincorporación lógica de materiales a inventario por remoción en tarea técnica & 3 & Sprint 2 \\
+45 & US34 & Disparo y desactivación de alertas automáticas de reposición por stock mínimo & 2 & Sprint 3 \\
 \hline
-46 & US34 & Disparo y desactivación de alertas automáticas de reposición por stock mínimo & 2 & Sprint 3 \\
+46 & US23 & Imputación de repuestos a tareas y supervisión administrativa & 2 & Sprint 2 \\
 \hline
-47 & US23 & Imputación de repuestos a tareas y supervisión administrativa & 2 & Sprint 2 \\
+47 & US09 & Consulta de programación semanal de turnos y márgenes de tolerancia & 2 & Sprint 2 \\
 \hline
-48 & US09 & Consulta de programación semanal de turnos y márgenes de tolerancia & 2 & Sprint 2 \\
+48 & US10 & Emisión y seguimiento de descargos justificatorios de tardanza & 1 & Sprint 2 \\
 \hline
-49 & US10 & Emisión y seguimiento de descargos justificatorios de tardanza & 1 & Sprint 2 \\
+49 & TS16 & Ingreso y valorización de lotes por adquisición (\texttt{POST /api/v1/inventory/items/\{id\}/batches}) & 3 & Sprint 1 \\
 \hline
-50 & TS16 & Ingreso y valorización de lotes por adquisición (\texttt{POST /api/v1/inventory/items/\{id\}/batches}) & 3 & Sprint 1 \\
+50 & US36 & Liquidación económica automática en cascada de la orden de trabajo & 3 & Sprint 3 \\
 \hline
-51 & US36 & Liquidación económica automática en cascada de la orden de trabajo & 3 & Sprint 3 \\
+51 & US37 & Emisión de comprobantes tributarios electrónicos UBL 2.1 ante SUNAT vía PSE & 5 & Sprint 3 \\
 \hline
-52 & US37 & Emisión de comprobantes tributarios electrónicos UBL 2.1 ante SUNAT vía PSE & 5 & Sprint 3 \\
+52 & TS18 & Emisión y timbrado de comprobantes electrónicos UBL 2.1 (\texttt{POST /api/v1/invoicing/vouchers}) & 3 & Sprint 1 \\
 \hline
-53 & TS18 & Emisión y timbrado de comprobantes electrónicos UBL 2.1 (\texttt{POST /api/v1/invoicing/vouchers}) & 3 & Sprint 1 \\
+53 & US38 & Recaudación y amortización de pagos multi-medio en mostrador y patio & 3 & Sprint 3 \\
 \hline
-54 & US38 & Recaudación y amortización de pagos multi-medio en mostrador y patio & 3 & Sprint 3 \\
+54 & TS19 & Registro transaccional de pagos y liquidación de comprobantes (\texttt{POST /api/v1/invoicing/payments}) & 3 & Sprint 1 \\
 \hline
-55 & TS19 & Registro transaccional de pagos y liquidación de comprobantes (\texttt{POST /api/v1/invoicing/payments}) & 3 & Sprint 1 \\
+55 & US39 & Transición a orden pagada, emisión de pase de salida vehicular y entrega en patio & 2 & Sprint 3 \\
 \hline
-56 & US39 & Transición a orden pagada, emisión de pase de salida vehicular y entrega en patio & 2 & Sprint 3 \\
+56 & TS09 & Registro de arribo a patio y apertura automática de orden (\texttt{POST /api/v1/appointments/{id}/arrive}) & 2 & Sprint 1 \\
 \hline
-57 & TS09 & Registro de arribo a patio y apertura automática de orden (\texttt{POST /api/v1/appointments/\{id\}/check-in}) & 2 & Sprint 1 \\
+57 & US40 & Supervisión y reasignación de bahías de servicio en tiempo real & 3 & Sprint 3 \\
 \hline
-58 & US40 & Supervisión y reasignación de bahías de servicio en tiempo real & 3 & Sprint 3 \\
+58 & TS11 & Asignación y conmutación de bahías de servicio en orden (\texttt{PUT /api/v1/work-orders/\{id\}/bay}) & 5 & Sprint 1 \\
 \hline
-59 & TS11 & Asignación y conmutación de bahías de servicio en orden (\texttt{PUT /api/v1/work-orders/\{id\}/bay}) & 5 & Sprint 1 \\
+59 & US41 & Exportación de reporte de flujo de caja en PDF para auditoría contable externa & 3 & Sprint 3 \\
 \hline
-60 & US41 & Exportación de reporte de flujo de caja en PDF para auditoría contable externa & 3 & Sprint 3 \\
+60 & TS23 & Descarga documental de estado de flujo de caja en formato PDF (\texttt{GET /api/v1/invoicing/financial-reports/cash-flow/pdf}) & 2 & Sprint 1 \\
 \hline
-61 & TS23 & Descarga documental de estado de flujo de caja en formato PDF (\texttt{GET /api/v1/invoicing/financial-reports/cash-flow/pdf}) & 2 & Sprint 1 \\
+61 & US42 & Configuración de información fiscal y series SUNAT con PSE administrado por la plataforma & 3 & Sprint 3 \\
 \hline
-62 & US42 & Configuración de información fiscal corporativa, series SUNAT y enlace con PSE Nubefact & 3 & Sprint 3 \\
+62 & TS04 & Emisión y despacho de invitaciones corporativas de personal (\texttt{POST /api/v1/invitations/tenant/{tenantId}}) & 2 & Sprint 1 \\
 \hline
-63 & TS04 & Emisión y despacho de invitaciones corporativas de personal (\texttt{POST /api/v1/tenants/\{tenantId\}/invitations}) & 2 & Sprint 1 \\
+63 & US43 & Descarga y remisión de informe pericial de salud vehicular en PDF para clientes y flotas & 3 & Sprint 3 \\
 \hline
-64 & US43 & Descarga y remisión de informe pericial de salud vehicular en PDF para clientes y flotas & 3 & Sprint 3 \\
+64 & TS24 & Descarga documental de informe pericial de salud vehicular en PDF (\texttt{GET /api/v1/iot/health-reports/{reportId}/pdf}) & 2 & Sprint 1 \\
 \hline
-65 & TS24 & Descarga documental de informe pericial de salud vehicular en PDF (\texttt{GET /api/v1/iot/vehicles/\{vehicleId\}/health-reports/\{reportId\}/pdf}) & 2 & Sprint 1 \\
+65 & TS05 & Alta de sucursales operativas y delimitación de geocercas (\texttt{POST /api/v1/branches}) & 3 & Sprint 1 \\
 \hline
-66 & TS05 & Alta de sucursales operativas y delimitación de geocercas (\texttt{POST /api/v1/tenants/\{tenantId\}/branches}) & 3 & Sprint 1 \\
+66 & US19 & Almacenamiento local resiliente y sincronización diferida en fosa & 3 & Sprint 3 \\
 \hline
-67 & US19 & Almacenamiento local resiliente y sincronización diferida en fosa & 3 & Sprint 3 \\
+67 & US20 & Borrado y verificación de restablecimiento de fallas en la computadora & 2 & Sprint 3 \\
 \hline
-68 & US20 & Borrado y verificación de restablecimiento de fallas en la computadora & 2 & Sprint 3 \\
+68 & US04 & Cierre de sesión seguro y revocación de credenciales en el dispositivo móvil & 1 & Sprint 3 \\
 \hline
-69 & US04 & Cierre de sesión seguro y revocación de credenciales en el dispositivo móvil & 1 & Sprint 3 \\
+69 & US05 & Restablecimiento de credenciales de acceso mediante token de verificación & 2 & Sprint 3 \\
 \hline
-70 & US05 & Restablecimiento de credenciales de acceso mediante token de verificación & 2 & Sprint 3 \\
+70 & US44 & Alta y afiliación de clientes en taller según tenencia previa de cuenta en la plataforma & 3 & Sprint 2 \\
 \hline
-71 & US44 & Alta y afiliación de clientes en taller según tenencia previa de cuenta en la plataforma & 3 & Sprint 2 \\
+71 & US45 & Presentación de la propuesta de valor central del ecosistema Atelier & 2 & Sprint 1 \\
 \hline
-72 & US45 & Presentación de la propuesta de valor central del ecosistema Atelier & 2 & Sprint 1 \\
+72 & US46 & Exploración y comparativa dinámica de planes comerciales según periodicidad de facturación & 3 & Sprint 1 \\
 \hline
-73 & US46 & Exploración y comparativa dinámica de planes comerciales según periodicidad de facturación & 3 & Sprint 1 \\
+73 & US47 & Resolución interactiva de dudas operativas y condiciones del servicio & 2 & Sprint 1 \\
 \hline
-74 & US47 & Resolución interactiva de dudas operativas y condiciones del servicio & 2 & Sprint 1 \\
-\hline
-75 & US48 & Redirección y transición hacia el flujo de registro de prueba gratuita en la aplicación principal & 3 & Sprint 1 \\
+74 & US48 & Redirección y transición hacia el flujo de registro de prueba gratuita en la aplicación principal & 3 & Sprint 1 \\
 \hline
 \end{longtable}
 
@@ -3981,9 +3932,9 @@ La @tbl:sprint-velocity-summary sintetiza la distribución global del esfuerzo e
 | Sprint | Alcance Operativo y Hito Académico | Puntos US | Puntos TS / SP | Total SP |
 |:---:|:----------|:---:|:---:|:---:|
 | Sprint 1 | Despliegue de Portal Web Comercial y Servicios Core del Backend | 10 | 80 | 90 |
-| Sprint 2 | Operaciones de Patio, Bahías de Servicio y Control de Repuestos FIFO | 57 | 0 | 57 |
+| Sprint 2 | Operaciones de Patio, Bahías de Servicio y Control de Repuestos FIFO | 55 | 0 | 55 |
 | Sprint 3 | Diagnóstico Telemático OBD-II, Facturación SUNAT y Cierre Operativo | 57 | 0 | 57 |
-| **Total** | Consolidado del Catálogo de Producto Atelier | 124 | 80 | 204 |
+| **Total** | Consolidado del Catálogo de Producto Atelier | 122 | 80 | 202 |
 : Resumen Consolidado de Capacidad y Velocidad por Sprint {#tbl:sprint-velocity-summary}
 
 *Nota.* Consolidación de esfuerzo estimado y balance de velocidad por iteración.
