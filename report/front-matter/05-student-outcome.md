@@ -50,6 +50,14 @@ En el siguiente cuadro se describe las acciones realizadas y enunciados de concl
 & 
 % --- Conclusiones del Criterio 1 (TB1) ---
 \textbf{TB1}: En el hito TB1, el equipo consolidó la arquitectura modular en Java 21, Spring Boot 3, TimescaleDB e interfaces multiplataforma, sopesando fortalezas de escalabilidad y debilidades de memoria en contenedores. Se articularon normativas fiscales UBL 2.1, finanzas de pasarelas de pago, ergonomía de taller e ingesta telemática vehicular, sustentado en pruebas automatizadas y especificaciones BDD en Gherkin. \newline
+\\ \cline{2-3}
+
+% --- Alumno 1 (AV2) ---
+& 
+\textbf{AV2}: Desarrollo integral de la aplicación móvil nativa en Kotlin con Jetpack Compose bajo Clean Architecture e inyección de dependencias con Dagger Hilt. Se implementó una arquitectura offline-first con Room sobre SQLite, colas de sincronización reactivas y despacho diferido de órdenes de trabajo MRO hacia la API central. En el aspecto funcional, se desarrollaron módulos de cronometraje de labor efectiva en fosa, inspección con cámara pericial mediante CameraX, conectividad Bluetooth de baja energía con escáneres OBD-II para captura de códigos DTC y telemetría, y el algoritmo contable de descargo y restitución de repuestos bajo el método estricto FIFO por lote. Se evaluaron como fortalezas la alta reactividad de la interfaz declarativa y la resiliencia en áreas sin cobertura de red, frente a debilidades operativas como el consumo de memoria en dispositivos de uso rudo y la complejidad en la resolución de conflictos de sincronización. Este trabajo articuló la ingeniería móvil reactiva con la mecánica vehicular y la gestión contable de almacenes, empleando métodos de benchmarking empírico para medir la latencia del protocolo ELM327 y la consistencia transaccional local. \newline
+& 
+% --- Conclusiones del Criterio 1 (AV2) ---
+\textbf{AV2}: En el hito AV2, el equipo demostró un dominio riguroso al asimilar tecnologías móviles en Kotlin con Jetpack Compose y arquitecturas móviles cliente, consolidando esquemas offline-first con SQLite que garantizan continuidad operativa en entornos sin red. Se validaron las fortalezas de desacoplamiento y resiliencia de datos locales frente a las debilidades asociadas a la gestión de memoria en dispositivos móviles y la sincronización concurrente con la API central. La integración multidisciplinaria enlazó el desarrollo de software con la mecatrónica de diagnóstico OBD-II, la ergonomía de bahías mecánicas y las reglas contables de inventario FIFO, aplicando técnicas de investigación empírica y pruebas funcionales para validar la estabilidad de las soluciones desplegadas. \newline
 \\ \cline{2-2}
 
 % --- Alumno 2 ---
@@ -57,6 +65,7 @@ En el siguiente cuadro se describe las acciones realizadas y enunciados de concl
 \textbf{Granda Ibarra, Luis Daniel} \newline
 \textbf{AV1}: Aplicación y estructuración de la metodología Lean UX (Problem Statement, Assumptions, Hypothesis) para definir el alcance del proyecto. Asimismo, se realizó un análisis exhaustivo de competidores y el diseño de la estructura para las entrevistas de los segmentos objetivo. \newline
 \textbf{TB1}: Investigación y formulación de directrices de estilo generales y de diseño de producto para el ecosistema Atelier, estableciendo las bases del sistema de diseño corporativo y la arquitectura de información (sistemas de organización, etiquetado, navegación y búsqueda). Asimismo, definición técnica de etiquetas de posicionamiento en motores de búsqueda (SEO) para el portal web y optimización en tiendas de aplicaciones móviles (ASO) para Atelier Mobile, asegurando accesibilidad y coherencia visual en todos los canales digitales. \newline
+\textbf{AV2}: Aquí detallas tu aporte... \newline
 & \\ \cline{2-2}
 
 % --- Alumno 3 ---
@@ -64,6 +73,7 @@ En el siguiente cuadro se describe las acciones realizadas y enunciados de concl
 \textbf{Rocha Cotrina, Alvaro} \newline
 \textbf{AV1}: Asimilación y aplicación práctica de herramientas de compilación automatizada y documentación técnica (entorno Pandoc, motores LaTeX y Markdown) para la correcta estandarización del reporte en el repositorio, gestionando la resolución de conflictos de dependencias y rutas relativas bajo control de versiones (Git). Asimismo, se integraron conocimientos metodológicos centrados en el usuario mediante la estructuración de la User Task Matrix y el apoyo en el análisis de las entrevistas del Segmento 2 (Personal Operativo del Taller). Este involucramiento directo permitió asimilar y actualizar conceptos del dominio mecánico (como el uso de escáneres OBD2 y la identificación de "tiempos muertos" como fricción operativa), traduciendo el modelo mental de los técnicos automotrices en requerimientos de software de alta fidelidad. \newline
 \textbf{TB1}: Consolidación de buenas prácticas en la gestión y organización del flujo de trabajo ágil dentro de la plataforma Jira. Esto incluyó la correcta estructuración y actualización del Sprint Backlog mediante la creación y gestión de subtareas técnicas e historias de usuario, asegurando la trazabilidad del avance operativo del equipo y la documentación formal de los entregables del sprint bajo los estándares metodológicos establecidos. \newline
+\textbf{AV2}: Aquí detallas tu aporte... \newline
 & \\ \cline{2-2}
 
 % --- Alumno 4 ---
@@ -71,6 +81,7 @@ En el siguiente cuadro se describe las acciones realizadas y enunciados de concl
 \textbf{Sanchez Santin, Adiel Abdiaz} \newline
 \textbf{AV1}: Investigación, asimilación y aplicación práctica del marco metodológico Domain-Driven Design (DDD) a nivel estratégico mediante la técnica de EventStorming (Big Picture y Design-Level) de Alberto Brandolini para el modelado colaborativo del ecosistema Atelier. Se evaluó críticamente la descomposición del dominio en contextos delimitados (Bounded Contexts) altamente cohesivos y flujos de mensajes asíncronos (Domain Message Flows), identificando como principales fortalezas el desacoplamiento estructural de subsistemas, la mitigación del antipatrón Big Ball of Mud y la sincronización entre las necesidades del negocio y los modelos de software, frente a la sobrecarga inicial de coordinación intercontextual y la complejidad técnica de garantizar consistencia eventual como debilidades operativas. Asimismo, se integraron conocimientos multidisciplinarios articulando la ingeniería de software con los procesos de mantenimiento, reparación y operaciones automotrices (MRO), el diagnóstico vehicular por telemetría OBD-II (códigos DTC y parámetros PID) y la valorización de inventarios bajo el método FIFO. Finalmente, se estructuró el Lenguaje Ubicuo del dominio y se formularon diez épicas con treinta y dos historias de usuario estimadas en Story Points y formalizadas con criterios de aceptación verificables bajo sintaxis BDD Gherkin. \newline
 \textbf{TB1}: Asimilación y formalización de guías de estilo y convenciones de codificación multiplataforma para el backend en Java 21 con Spring Boot (Google Java Style Guide y patrones de inmutabilidad con records en DDD), desarrollo móvil en Android con Kotlin y Jetpack Compose, y frontend web en TypeScript con React y Tailwind CSS v4. Asimismo, estandarización de convenciones para especificaciones ejecutables BDD en Gherkin y reglas de nomenclatura para esquemas relacionales en PostgreSQL y TimescaleDB. \newline
+\textbf{AV2}: Aquí detallas tu aporte... \newline
 & \\ \cline{2-2}
 
 % --- Alumno 5 ---
@@ -78,6 +89,7 @@ En el siguiente cuadro se describe las acciones realizadas y enunciados de concl
 \textbf{Teran Zavala, Mauricio Alejandro} \newline
 \textbf{AV1}: Con el fin de fundamentar la solución tecnológica sobre conocimientos actualizados del entorno automotriz y potenciar el desarrollo del proyecto de software, se llevó a cabo un proceso integral de investigación cualitativa y modelado de usuarios. Este proceso comprendió el diseño metodológico de los instrumentos de recolección, el registro riguroso de las entrevistas en profundidad a los actores clave del sector y un análisis estadístico paramétrico de las respuestas obtenidas. A partir de los hallazgos, se elaboraron los Empathy Maps para cada segmento objetivo, permitiendo identificar patrones de conducta, fricciones operativas y requerimientos técnicos reales —como la necesidad de un sistema con arquitectura offline-first para zonas sin conectividad y un modelo Bring Your Own Device (BYOD) sobre Android—. Esta actualización de conceptos garantizó que la arquitectura y funcionalidades de la plataforma Atelier respondan de manera precisa a los estándares actuales de gestión de talleres y diagnóstico por puerto OBD2. \newline
 \textbf{TB1}: Desarrollo e integración de wireframes, flujos de pantalla (Wireflows y User Flows) y prototipos de interfaz de usuario interactivos de alta fidelidad para el portal comercial Atelier Website y la aplicación móvil nativa Atelier Mobile Android. Traducción de los requisitos de usabilidad e interacción física en bahías mecánicas hacia componentes visuales responsivos basados en Tailwind CSS v4 y Material Design 3, considerando la ergonomía táctil en dispositivos de uso rudo y la operación sin conexión a internet en fosa. \newline
+\textbf{AV2}: Aquí detallas tu aporte... \newline
 & \\ \hline
 
 % =========================================================================
@@ -99,6 +111,14 @@ En el siguiente cuadro se describe las acciones realizadas y enunciados de concl
 & 
 % --- Conclusiones del Criterio 2 (TB1) ---
 \textbf{TB1}: En el hito TB1, resolver fricciones de despliegue en la nube y gobernar un sistema distribuido impulsó al equipo a definir con rigor sus planes de crecimiento post-graduación. Se formalizaron metas hacia certificaciones internacionales en arquitectura cloud, Kubernetes y desarrollo móvil nativo en los primeros dos años tras el egreso, complementadas con la proyección de liderazgo técnico y emprendimiento en productos digitales escalables a tres años. \newline
+\\ \cline{2-3}
+
+% --- Alumno 1 (AV2) ---
+& 
+\textbf{AV2}: La ingeniería de la aplicación móvil nativa con persistencia offline-first, enlace telemático Bluetooth y empaquetado de producción evidenció la necesidad imperiosa de mantener una actualización técnica continua ante la rápida evolución de los ecosistemas móviles e IoT. Para el desarrollo profesional post-graduación, se identificaron y documentaron como áreas estratégicas la arquitectura de aplicaciones móviles reactivas de misión crítica y la computación en el borde. El plan de crecimiento profesional formaliza una hoja de ruta rigurosa que contempla la obtención de las certificaciones internacionales Google Associate Android Developer y AWS Certified Solutions Architect Associate durante los primeros dos años tras egresar de la universidad, complementada con programas de actualización en protocolos de comunicación inalámbrica industrial y seguridad en dispositivos finales para respaldar un liderazgo técnico de alto impacto como Chief Technology Officer en emprendimientos tecnológicos. \newline
+& 
+% --- Conclusiones del Criterio 2 (AV2) ---
+\textbf{AV2}: Durante el hito AV2, la superación de desafíos en el desarrollo móvil nativo, la persistencia local desconectada y la sincronización telemática vehicular reforzó en el equipo el reconocimiento del aprendizaje permanente como pilar del desempeño profesional. Los integrantes actualizaron sus planes de carrera documentando áreas de especialización en ingeniería móvil reactiva, computación en la nube y diseño de interfaces accesibles. Se consolidaron compromisos formales para alcanzar certificaciones de nivel profesional y desarrollar iniciativas tecnológicas escalables en un horizonte de dos a tres años post-graduación, garantizando una adaptación continua a las demandas del sector tecnológico. \newline
 \\ \cline{2-2}
 
 % --- Alumno 2 ---
@@ -106,6 +126,7 @@ En el siguiente cuadro se describe las acciones realizadas y enunciados de concl
 \textbf{Granda Ibarra, Luis Daniel} \newline
 \textbf{AV1}: Reconocimiento de las necesidades del mercado a través del análisis de competidores directos e indirectos. Adicionalmente, ejecución y análisis de entrevistas a usuarios reales para validar hipótesis y adaptar las funcionalidades del software. \newline
 \textbf{TB1}: Identificación de la rápida transformación de las pautas de experiencia de usuario y arquitectura de información en plataformas web y móviles. Se reconoció la necesidad de capacitarse continuamente en estándares emergentes de accesibilidad web, diseño inclusivo y métricas analíticas de comportamiento de usuario para optimizar los embudos de conversión comercial de la solución digital. \newline
+\textbf{AV2}: Aquí detallas tu aporte... \newline
 & \\ \cline{2-2}
 
 % --- Alumno 3 ---
@@ -113,6 +134,7 @@ En el siguiente cuadro se describe las acciones realizadas y enunciados de concl
 \textbf{Rocha Cotrina, Alvaro} \newline
 \textbf{AV1}: Reconocimiento estratégico de la necesidad de mantener un aprendizaje continuo mediante la formulación de Objetivos profesionales SMART orientados a corto y mediano plazo. La experiencia de configurar flujos de integración en repositorios colaborativos y analizar los procesos operativos del sector automotriz, evidenció que la competitividad en la ingeniería de software exige una constante adaptación técnica. En respuesta a ello, se ha definido una hoja de ruta profesional enfocada en la auto-capacitación constante sobre nuevas herramientas de automatización, gestión avanzada de control de versiones y metodologías ágiles de diseño; garantizando de este modo la capacidad de aportar soluciones de calidad y adaptabilidad en entornos de desarrollo tecnológico altamente dinámicos. \newline
 \textbf{TB1}: Comprensión de que la gestión eficiente de proyectos y el aseguramiento de la calidad en los artefactos de ingeniería requieren un compromiso constante con la organización y el seguimiento de procesos. Se identificó la importancia de la mejora continua en la planificación de tareas ágiles y en el uso de herramientas colaborativas para garantizar la sincronización y el éxito técnico del equipo de desarrollo. \newline
+\textbf{AV2}: Aquí detallas tu aporte... \newline
 & \\ \cline{2-2}
 
 % --- Alumno 4 ---
@@ -120,6 +142,7 @@ En el siguiente cuadro se describe las acciones realizadas y enunciados de concl
 \textbf{Sanchez Santin, Adiel Abdiaz} \newline
 \textbf{AV1}: Reconocimiento de la naturaleza dinámica y cambiante de la ingeniería de software, evidenciado en la exigencia de adoptar paradigmas móviles offline-first, ingesta telemétrica de datos vehiculares en tiempo real y servicios en la nube para responder a los retos del ecosistema Atelier. Frente a estas demandas y para sostener la competitividad técnica, se diseñó un plan de desarrollo profesional continuo estructurado en dos fases estratégicas alineadas con metas SMART. La primera fase, proyectada a corto plazo en un horizonte de dos años tras el egreso universitario, comprende la obtención de dos certificaciones internacionales de estándar profesional: Google Associate Android Developer, con énfasis en arquitecturas móviles reactivas, almacenamiento local y conectividad por Bluetooth de bajo consumo, y AWS Certified Solutions Architect - Associate, orientada al diseño de microservicios distribuidos y arquitecturas elásticas. La segunda fase, proyectada a mediano plazo en un periodo de tres años post-graduación, establece el liderazgo del diseño arquitectónico y desarrollo técnico de una plataforma SaaS B2B para la automatización operativa y logística, validando el producto con organizaciones del sector en el rol de Líder de Ingeniería de Software o Arquitecto de Soluciones. \newline
 \textbf{TB1}: Comprensión del impacto directo que ejercen las directrices de código limpio, la seguridad tipada y la inmutabilidad sobre la mantenibilidad y escalabilidad del software a largo plazo. Se reconoció la exigencia de mantener un aprendizaje permanente frente a las nuevas características de lenguajes modernos y arquitecturas reactivas para diseñar sistemas robustos y libres de deuda técnica. \newline
+\textbf{AV2}: Aquí detallas tu aporte... \newline
 & \\ \cline{2-2}
 
 % --- Alumno 5 ---
@@ -127,6 +150,7 @@ En el siguiente cuadro se describe las acciones realizadas y enunciados de concl
 \textbf{Teran Zavala, Mauricio Alejandro} \newline
 \textbf{AV1}: El desarrollo y la evolución de la plataforma Atelier evidencia que la ingeniería de software moderna exige un aprendizaje continuo y una constante actualización tecnológica para responder a entornos cambiantes. La identificación de brechas en los flujos de diagnóstico tradicionales, la adopción de arquitecturas Software as a Service (SaaS) sustentadas en paradigmas Bring Your Own Device (BYOD) y la necesidad de procesar telemetría automotriz mediante el protocolo OBD2 demuestran que el diseño de soluciones eficientes no depende únicamente de conocimientos teóricos previos, sino de la capacidad para investigar, incorporar nuevas tecnologías y adaptar metodologías acordes a las exigencias operativas del mercado actual. Este proceso reafirma que la actualización constante y la capacidad de autoaprendizaje constituyen pilares fundamentales para garantizar la calidad, sostenibilidad y competitividad de los proyectos tecnológicos. \newline
 \textbf{TB1}: Reconocimiento de la necesidad de actualizarse continuamente en marcos de trabajo declarativos para interfaces móviles y técnicas avanzadas de prototipado interactivo. La interacción con entornos automotrices de alta exigencia física demostró que el diseño de software para la industria requiere incorporar constantemente nuevos métodos de validación ergonómica y tecnologías de renderizado eficiente en dispositivos cliente. \newline
+\textbf{AV2}: Aquí detallas tu aporte... \newline
 & \\ \hline
 
 \end{longtable}
