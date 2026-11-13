@@ -54,5 +54,6 @@
 |  2.0.4  | 5/10/2026  | Teran Zavala, Mauricio Alejandro | Inserción del **Mobile Applications Prototyping** de la plataforma.                                                                                             |
 |  3.0.0  | 10/11/2026 | Huamani Estefanero, Joel         | Consolidación del **_Sprint 2_**.                                                                                                                               |
 |  3.2.0  | 12/11/2026 | Huamani Estefanero, Joel         | Consolidación del **_Validation Interview_**.                                                                                                                   |
+|  3.2.1  | 12/11/2026 | Huamani Estefanero, Joel         | Inserción de analíticos de colaboración AV2, conclusiones y Student Outcomes.                                                                                   |
 
 \newpage
