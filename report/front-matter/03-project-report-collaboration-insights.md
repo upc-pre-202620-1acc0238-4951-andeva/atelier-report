@@ -101,3 +101,55 @@ _Nota._ Grafo de commits y ramas integradas sobre el historial del repositorio e
 _Nota._ Registro cronológico de commits que certifica la autoría y coherencia con el registro de versiones del informe para el hito TB1.
 
 \newpage
+
+**Reporte de colaboración del AV2**
+
+Para el hito AV2, el equipo mantuvo de forma ininterrumpida la metodología Docs as Code, integrando al informe técnico los capítulos de ejecución del Sprint 2 y las entrevistas de validación de solución. Toda la documentación se versionó de manera modular en archivos Markdown dentro del repositorio oficial atelier-report en GitHub, asegurando la correspondencia entre los artefactos documentales, las historias de usuario implementadas y el código fuente del ecosistema.
+
+El flujo de trabajo profundizó el modelo de ramificación GitFlow mediante la articulación coordinada de ramas de características sobre la rama develop y ramas de estabilización release para consolidar las versiones 3.0.0, 3.1.0 y 3.2.0. Asimismo, se conservó la reproducibilidad del entorno de compilación contenerizado con Docker, Pandoc 3.8.3 y LuaLaTeX, automatizando la generación de diagramas y la maquetación tipográfica de tablas de sprint backlog, matrices de trazabilidad y transcripciones periciales bajo normas académicas.
+
+**Distribución de Responsabilidades**
+
+La redacción, estructuración y verificación de los contenidos incorporados en el hito AV2 contó con la participación técnica activa de los cinco integrantes del equipo de trabajo, manteniendo estricta coherencia con el historial de control de versiones y el Registro de Versiones del Informe:
+
+- **Huamani Estefanero, Joel (shouydev):** Registró 7 commits en la ventana de consolidación de este hito. Lideró la dirección técnica del informe y la redacción integral de la sección de Sprint 2, abarcando la planificación de sprint, la descomposición detallada de tareas del sprint backlog, el registro de ejecución técnica con código móvil en Kotlin y Jetpack Compose, el soporte offline-first con Room, la integración telemétrica Bluetooth OBD-II y la retrospectiva del equipo. Asimismo, elaboró la sección de entrevistas de validación y la evaluación heurística de usabilidad, coordinando los lanzamientos de estabilización hacia la rama principal.
+
+- **Teran Zavala, Mauricio Alejandro (mau-tz):** Registró 2 commits. Diseñó y ejecutó las entrevistas de validación para el Segmento 2 con personal operativo de taller mecánico en foso, registrando el análisis cualitativo y las transcripciones periciales para contrastar la operatividad de Atelier Workshop Mobile frente a la dinámica real de bahía. Participó activamente en la construcción de los flujos de navegación tipada, autenticación y gestión de sesión en Kotlin con Compose, actualizando el registro de versiones del informe y su sustentación individual en Student Outcomes.
+
+\newpage
+
+- **Granda Ibarra, Luis Daniel (danieltyuyu):** Registró 1 commit en el reporte y lideró la integración de la rama de sustentación académica. Desarrolló integralmente en la aplicación móvil los módulos de acceso, órdenes de trabajo, recepción vehicular con cámara pericial mediante CameraX e imputación de inventario bajo la regla contable FIFO con más de 600 pruebas unitarias aprobadas. En el informe, estructuró y consolidó la sección de Student Outcomes para la competencia ABET EAC 7 en el hito AV2 y colaboró en el análisis de hallazgos derivados de las pruebas de validación con usuarios.
+
+- **Rocha Cotrina, Alvaro (alvarorc24):** Registró 1 commit. Desarrolló y perfeccionó las mejoras del módulo de asistencia laboral en la aplicación móvil nativa Atelier Mobile Android, implementando el cálculo geodésico con la fórmula de Haversine, detección de ubicaciones simuladas y validación perimétrica de geocercas satelitales en talleres mecánicos. En el reporte, actualizó su evaluación de competencias en Student Outcomes para AV2 y colaboró en la revisión y auditoría de los artefactos visuales y evidencias del Sprint 2.
+
+- **Sanchez Santin, Adiel Abdiaz (xs4el):** Investigó y formuló la homologación de contratos de red e interoperabilidad entre el backend en Spring Boot y el cliente móvil Android mediante Retrofit 2 y OkHttp bajo la especificación RFC 7807 Problem Details. Aseguró la integridad tipada y consistencia transaccional de los modelos de transferencia para el cálculo automático de presupuestos, descargo de repuestos y generación de proformas comerciales en PDF, garantizando la trazabilidad de requisitos en el informe y la sustentación en Student Outcomes.
+
+\newpage
+
+**Evidencias Gráficas de Colaboración en GitHub para el AV2**
+
+Las siguientes figuras certifican la trazabilidad, la frecuencia de commits y la colaboración del equipo en el repositorio de documentación durante el ciclo de desarrollo correspondiente al hito AV2.
+
+**_Métricas de Contribuidores y Frecuencia de Commits en GitHub para el AV2_**
+
+![](report/assets/collaboration-insights/av2-github-contributors.png){width=75%}
+
+_Nota._ Gráfico de contribuciones individuales del repositorio atelier-report en GitHub durante el hito AV2.
+
+\newpage
+
+**_Red de Ramas e Integraciones en GitHub para el AV2_**
+
+![](report/assets/collaboration-insights/av2-github-network-frequency.png){width=100%}
+
+_Nota._ Grafo de commits y ramas integradas sobre el historial del repositorio en GitHub durante el hito AV2.
+
+\newpage
+
+**_Registro Cronológico de Commits en GitHub para el AV2_**
+
+![](report/assets/collaboration-insights/av2-github-commits-log.png){width=100%}
+
+_Nota._ Registro cronológico de commits que certifica la autoría y coherencia con el registro de versiones del informe para el hito AV2.
+
+\newpage
