@@ -235,18 +235,18 @@ _Nota._ Registro de entrevista de validación correspondiente al Segmento 2.
 \textbullet\ \textbf{Apellidos:} Pacheco Díaz \newline
 \textbullet\ \textbf{Edad:} 25 años \newline
 \textbullet\ \textbf{Distrito:} Chorrillos \newline
-\textbullet\ \textbf{Duración:} 18:50 min a 23:30 min
+\textbullet\ \textbf{Duración:} 00:04 min a 05:37 min
 \vspace{2pt}
-& \fbox{\parbox[c][3.8cm][c]{0.90\linewidth}{\centering\footnotesize\textit{[Espacio para captura de pantalla del video de validación]}}} \\
+& \includegraphics[width=0.92\linewidth, height=3.8cm, keepaspectratio]{report/assets/validation-Interviews/Interview-of-Bruno-Pacheco.png} \\
 \hline
 \thspanfirst{2}{Resumen de la entrevista} \\
 \hline
 \multicolumn{2}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{%
-El participante ejecutó el flujo de registro de fallas imprevistas con evidencia fotográfica y la consulta de tareas en bahía. Destacó la utilidad de subir fotografías de averías ocultas directamente desde la fosa, ya que evita tener que buscar al asesor para explicarle visualmente el problema. Recomendó incorporar una vista previa en miniatura de la foto recién tomada antes de enviarla formalmente a la orden de trabajo.
+El entrevistado evaluó la aplicación móvil y comentó que todo le pareció bien. Como recomendación, sugirió que debería existir un tutorial que explique cómo usar la aplicación móvil.
 } \\
 \hline
 \multicolumn{2}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{%
-\textbf{Enlace:} \href{https://upcedupe-my.sharepoint.com/:v:/g/personal/u20241e275_upc_edu_pe/IQDQRFe6_07YQ5IyAfsO8-lZASKREUobZCqZ_7w8a7zf0jc}{Video de Validación - Entrevista 5 (OneDrive)}
+\textbf{Enlace:} \href{https://drive.google.com/file/d/1ZH1HuE0QIzWRkkK1NiSFh7Vrv-WmKWCJ/view?usp=sharing}{Video de Validación - Entrevista 5 (OneDrive)}
 } \\
 \hline
 \end{tabularx}
