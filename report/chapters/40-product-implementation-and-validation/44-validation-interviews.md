@@ -80,205 +80,39 @@ _Nota._ Matriz elaborada para la planificación de las entrevistas de validació
 
 ### 4.3.2. _Registro de Entrevistas_
 
-En esta sección se presentan los registros individuales y la compilación de evidencias de las entrevistas de validación realizadas con representantes de ambos segmentos objetivo. Las sesiones se llevaron a cabo evaluando los incrementos funcionales del portal web comercial Atelier Website y de la aplicación móvil nativa Atelier Workshop Mobile en dispositivos Android.
+En esta sección se presenta el registro y la evidencia audiovisual de la entrevista de validación realizada para contrastar las funcionalidades implementadas de la aplicación móvil nativa Atelier Workshop Mobile en entorno Android. La sesión combina la demostración guiada de los flujos operativos implementados con la observación directa y la recolección de retroalimentación sobre claridad visual, fluidez de navegación y adecuación al trabajo diario en taller.
 
-Conforme a las pautas de registro audiovisual del proyecto, las grabaciones completas de las entrevistas han sido editadas y unificadas en un archivo audiovisual consolidado denominado **upc-pre-202620-1acc0238-4951-andeva-validation-av2.mp4**, publicado en el repositorio institucional de OneDrive en el siguiente enlace: [Video Consolidado de Validación (OneDrive)](https://upcedupe-my.sharepoint.com/:v:/g/personal/u20241e275_upc_edu_pe/IQDQRFe6_07YQ5IyAfsO8-lZASKREUobZCqZ_7w8a7zf0jc). Cada registro detalla los datos demográficos del participante, el intervalo temporal dentro del metraje unificado, un contenedor para la captura de pantalla del fotograma y un resumen descriptivo de las observaciones manifestadas durante la interacción.
-
-**Segmento 1: Personal de Gestión y Propietarios del Taller**
-
-A continuación se presentan las entrevistas correspondientes a los representantes de la gestión administrativa y comercial del taller:
-
-\begin{table}[H]
-\centering
-\caption{Entrevista de Validación a Jorge Antonio Aguilar Perez}
-\label{tbl:entrevista-val-s1-1}
-\renewcommand{\arraystretch}{1.3}
-\begin{tabularx}{\textwidth}{| p{\dimexpr0.5\textwidth-2\tabcolsep-1.5\arrayrulewidth\relax} | >{\centering\arraybackslash}m{\dimexpr0.5\textwidth-2\tabcolsep-1.5\arrayrulewidth\relax} |}
-\hline
-\thfirst{Datos del entrevistado} & \thcell{Registro de evidencia audiovisual} \\
-\hline
-\textbullet\ \textbf{Nombre:} Jorge Antonio \newline
-\textbullet\ \textbf{Apellidos:} Aguilar Perez \newline
-\textbullet\ \textbf{Edad:} 53 años \newline
-\textbullet\ \textbf{Distrito:} Chorrillos \newline
-\textbullet\ \textbf{Duración:} 00:00 min a 04:45 min
-\vspace{2pt}
-& \fbox{\parbox[c][3.8cm][c]{0.90\linewidth}{\centering\footnotesize\textit{[Espacio para captura de pantalla del video de validación]}}} \\
-\hline
-\thspanfirst{2}{Resumen de la entrevista} \\
-\hline
-\multicolumn{2}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{%
-El entrevistado evaluó la propuesta comercial del portal web y el flujo de recepción vehicular en la aplicación móvil. Manifestó que la calculadora interactiva de suscripciones resulta clara al proyectar el ahorro mensual frente a sistemas tradicionales. Durante la prueba en el dispositivo móvil, valoró la rapidez con la que se registra un vehículo por su placa de rodaje y la incorporación inmediata de la fotografía pericial en patio. Sugirió hacer más visibles los términos de garantía en la proforma digital antes de enviarla al cliente final.
-} \\
-\hline
-\multicolumn{2}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{%
-\textbf{Enlace:} \href{https://upcedupe-my.sharepoint.com/:v:/g/personal/u20241e275_upc_edu_pe/IQDQRFe6_07YQ5IyAfsO8-lZASKREUobZCqZ_7w8a7zf0jc}{Video de Validación - Entrevista 1 (OneDrive)}
-} \\
-\hline
-\end{tabularx}
-\end{table}
-
-_Nota._ Registro de entrevista de validación correspondiente al Segmento 1.
-
-\begin{table}[H]
-\centering
-\caption{Entrevista de Validación a Marcelo Alejandro Silva Ramos}
-\label{tbl:entrevista-val-s1-2}
-\renewcommand{\arraystretch}{1.3}
-\begin{tabularx}{\textwidth}{| p{\dimexpr0.5\textwidth-2\tabcolsep-1.5\arrayrulewidth\relax} | >{\centering\arraybackslash}m{\dimexpr0.5\textwidth-2\tabcolsep-1.5\arrayrulewidth\relax} |}
-\hline
-\thfirst{Datos del entrevistado} & \thcell{Registro de evidencia audiovisual} \\
-\hline
-\textbullet\ \textbf{Nombre:} Marcelo Alejandro \newline
-\textbullet\ \textbf{Apellidos:} Silva Ramos \newline
-\textbullet\ \textbf{Edad:} 63 años \newline
-\textbullet\ \textbf{Distrito:} Chorrillos \newline
-\textbullet\ \textbf{Duración:} 04:45 min a 09:20 min
-\vspace{2pt}
-& \fbox{\parbox[c][3.8cm][c]{0.90\linewidth}{\centering\footnotesize\textit{[Espacio para captura de pantalla del video de validación]}}} \\
-\hline
-\thspanfirst{2}{Resumen de la entrevista} \\
-\hline
-\multicolumn{2}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{%
-El participante revisó la presentación de planes en el sitio web y la emisión de presupuestos en la aplicación móvil. Destacó como fortaleza la presentación limpia del desglose de mano de obra y repuestos en el documento generado. Señaló que en la rutina diaria de taller es vital que el cliente pueda autorizar trabajos adicionales sin acudir físicamente al local, por lo que consideró muy conveniente el registro formal de aprobación remota. Expresó dudas sobre la visualización de proformas en pantallas pequeñas de clientes mayores, recomendando tipografías más contrastadas.
-} \\
-\hline
-\multicolumn{2}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{%
-\textbf{Enlace:} \href{https://upcedupe-my.sharepoint.com/:v:/g/personal/u20241e275_upc_edu_pe/IQDQRFe6_07YQ5IyAfsO8-lZASKREUobZCqZ_7w8a7zf0jc}{Video de Validación - Entrevista 2 (OneDrive)}
-} \\
-\hline
-\end{tabularx}
-\end{table}
-
-_Nota._ Registro de entrevista de validación correspondiente al Segmento 1.
-
-\begin{table}[H]
-\centering
-\caption{Entrevista de Validación a Carlos Alberto Mendoza Rivas}
-\label{tbl:entrevista-val-s1-3}
-\renewcommand{\arraystretch}{1.3}
-\begin{tabularx}{\textwidth}{| p{\dimexpr0.5\textwidth-2\tabcolsep-1.5\arrayrulewidth\relax} | >{\centering\arraybackslash}m{\dimexpr0.5\textwidth-2\tabcolsep-1.5\arrayrulewidth\relax} |}
-\hline
-\thfirst{Datos del entrevistado} & \thcell{Registro de evidencia audiovisual} \\
-\hline
-\textbullet\ \textbf{Nombre:} Carlos Alberto \newline
-\textbullet\ \textbf{Apellidos:} Mendoza Rivas \newline
-\textbullet\ \textbf{Edad:} 48 años \newline
-\textbullet\ \textbf{Distrito:} San Juan de Miraflores \newline
-\textbullet\ \textbf{Duración:} 09:20 min a 14:10 min
-\vspace{2pt}
-& \fbox{\parbox[c][3.8cm][c]{0.90\linewidth}{\centering\footnotesize\textit{[Espacio para captura de pantalla del video de validación]}}} \\
-\hline
-\thspanfirst{2}{Resumen de la entrevista} \\
-\hline
-\multicolumn{2}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{%
-El entrevistado comprobó la navegación comercial y la creación de órdenes de trabajo. Indicó que la diferenciación de estados entre orden activa y proforma en espera evita confusiones operativas con los mecánicos. Como oportunidad de mejora, sugirió agregar una confirmación rápida al afiliar clientes presenciales para verificar que el número de contacto esté completo antes de generar la cotización.
-} \\
-\hline
-\multicolumn{2}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{%
-\textbf{Enlace:} \href{https://upcedupe-my.sharepoint.com/:v:/g/personal/u20241e275_upc_edu_pe/IQDQRFe6_07YQ5IyAfsO8-lZASKREUobZCqZ_7w8a7zf0jc}{Video de Validación - Entrevista 3 (OneDrive)}
-} \\
-\hline
-\end{tabularx}
-\end{table}
-
-_Nota._ Registro de entrevista de validación correspondiente al Segmento 1.
-
-\newpage
+La grabación completa de la sesión se encuentra publicada bajo el archivo **upc-pre-202620-1acc0238-4951-andeva-validation-av2.mp4** en el repositorio institucional de OneDrive mediante el enlace [Video de Validación (OneDrive)](https://upcedupe-my.sharepoint.com/:v:/g/personal/u20241e275_upc_edu_pe/IQCQRQCfuCkRQa3nnu0yYI84AU4-p88XucMGEwW7cCKEdks?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=az7Ef4). El registro detalla los datos demográficos del participante, la duración de la sesión, la captura de evidencia de la videollamada y la síntesis de las observaciones expresadas durante la interacción.
 
 **Segmento 2: Personal Operativo del Taller**
 
-A continuación se presentan las entrevistas efectuadas a técnicos mecánicos y especialistas de patio:
-
-\begin{table}[H]
-\centering
-\caption{Entrevista de Validación a César Nikolay Montero Vega}
-\label{tbl:entrevista-val-s2-1}
-\renewcommand{\arraystretch}{1.3}
-\begin{tabularx}{\textwidth}{| p{\dimexpr0.5\textwidth-2\tabcolsep-1.5\arrayrulewidth\relax} | >{\centering\arraybackslash}m{\dimexpr0.5\textwidth-2\tabcolsep-1.5\arrayrulewidth\relax} |}
-\hline
-\thfirst{Datos del entrevistado} & \thcell{Registro de evidencia audiovisual} \\
-\hline
-\textbullet\ \textbf{Nombre:} César Nikolay \newline
-\textbullet\ \textbf{Apellidos:} Montero Vega \newline
-\textbullet\ \textbf{Edad:} 23 años \newline
-\textbullet\ \textbf{Distrito:} Chorrillos \newline
-\textbullet\ \textbf{Duración:} 14:10 min a 18:50 min
-\vspace{2pt}
-& \fbox{\parbox[c][3.8cm][c]{0.90\linewidth}{\centering\footnotesize\textit{[Espacio para captura de pantalla del video de validación]}}} \\
-\hline
-\thspanfirst{2}{Resumen de la entrevista} \\
-\hline
-\multicolumn{2}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{%
-El técnico interactuó con la aplicación móvil en tareas de marcación laboral y asignación de trabajos mecánicos. Resaltó la confirmación visual de la geocerca satelital al registrar la asistencia, indicando que elimina discusiones sobre horas de llegada. Al operar el cronómetro de faenas, valoró que el botón de pausa sea de gran tamaño y fácilmente presionable. Observó que en fosos profundos con poca luz convendría reforzar las alertas sonoras al terminar una tarea técnica.
-} \\
-\hline
-\multicolumn{2}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{%
-\textbf{Enlace:} \href{https://upcedupe-my.sharepoint.com/:v:/g/personal/u20241e275_upc_edu_pe/IQDQRFe6_07YQ5IyAfsO8-lZASKREUobZCqZ_7w8a7zf0jc}{Video de Validación - Entrevista 4 (OneDrive)}
-} \\
-\hline
-\end{tabularx}
-\end{table}
-
-_Nota._ Registro de entrevista de validación correspondiente al Segmento 2.
+A continuación se presenta el registro correspondiente a la validación realizada con el representante del equipo técnico operativo del taller:
 
 \begin{table}[H]
 \centering
 \caption{Entrevista de Validación a Bruno Marcelo Pacheco Díaz}
-\label{tbl:entrevista-val-s2-2}
+\label{tbl:entrevista-val-s2-1}
 \renewcommand{\arraystretch}{1.3}
 \begin{tabularx}{\textwidth}{| p{\dimexpr0.5\textwidth-2\tabcolsep-1.5\arrayrulewidth\relax} | >{\centering\arraybackslash}m{\dimexpr0.5\textwidth-2\tabcolsep-1.5\arrayrulewidth\relax} |}
 \hline
-\thfirst{Datos del entrevistado} & \thcell{Registro de evidencia audiovisual} \\
-\hline
+\thfirst{Datos del entrevistado} & \multirow{6}{\dimexpr0.5\textwidth-2\tabcolsep-1.5\arrayrulewidth\relax}{\centering\includegraphics[width=0.92\linewidth, height=4.2cm, keepaspectratio]{report/assets/validation-interviews/validation-interview-1.png}} \\
+\cline{1-1}
 \textbullet\ \textbf{Nombre:} Bruno Marcelo \newline
 \textbullet\ \textbf{Apellidos:} Pacheco Díaz \newline
 \textbullet\ \textbf{Edad:} 25 años \newline
 \textbullet\ \textbf{Distrito:} Chorrillos \newline
-\textbullet\ \textbf{Duración:} 00:04 min a 05:37 min
+\textbullet\ \textbf{Duración:} 00:00 min a 05:30 min
 \vspace{2pt}
-& \includegraphics[width=0.92\linewidth, height=3.8cm, keepaspectratio]{report/assets/validation-Interviews/Interview-of-Bruno-Pacheco.png} \\
+& \\
 \hline
 \thspanfirst{2}{Resumen de la entrevista} \\
 \hline
 \multicolumn{2}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{%
-El entrevistado evaluó la aplicación móvil y comentó que todo le pareció bien. Como recomendación, sugirió que debería existir un tutorial que explique cómo usar la aplicación móvil.
+El participante evaluó el flujo operativo de la aplicación móvil nativa Atelier Workshop Mobile ejecutada en entorno Android. Durante el recorrido guiado revisó la marcación de asistencia mediante validación de perímetro geográfico con tolerancia de quince minutos, el reporte semanal de días laborados, la gestión de tareas técnicas en pausa o asignadas, el inventario de escáneres OBD-II por Bluetooth y las opciones de perfil con sincronización sin conexión. Asimismo, exploró el cambio de sucursal, la recepción de clientes y vehículos por placa o documento de identidad, la disponibilidad de bahías de trabajo, el catálogo con lotes de repuestos y las notificaciones de nuevas tareas. El técnico valoró positivamente la utilidad integral de la aplicación para la gestión diaria del taller, destacando de forma particular la conectividad Bluetooth para escáneres y el control de asistencia por perímetro. Como oportunidad de mejora, sugirió incorporar un tutorial inicial que explique la función de cada botón para facilitar la ruta de aprendizaje al comenzar a utilizar la aplicación.
 } \\
 \hline
 \multicolumn{2}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{%
-\textbf{Enlace:} \href{https://drive.google.com/file/d/1ZH1HuE0QIzWRkkK1NiSFh7Vrv-WmKWCJ/view?usp=sharing}{Video de Validación - Entrevista 5 (OneDrive)}
-} \\
-\hline
-\end{tabularx}
-\end{table}
-
-_Nota._ Registro de entrevista de validación correspondiente al Segmento 2.
-
-\begin{table}[H]
-\centering
-\caption{Entrevista de Validación a Angie Karol Choque Pura}
-\label{tbl:entrevista-val-s2-3}
-\renewcommand{\arraystretch}{1.3}
-\begin{tabularx}{\textwidth}{| p{\dimexpr0.5\textwidth-2\tabcolsep-1.5\arrayrulewidth\relax} | >{\centering\arraybackslash}m{\dimexpr0.5\textwidth-2\tabcolsep-1.5\arrayrulewidth\relax} |}
-\hline
-\thfirst{Datos del entrevistado} & \thcell{Registro de evidencia audiovisual} \\
-\hline
-\textbullet\ \textbf{Nombre:} Angie Karol \newline
-\textbullet\ \textbf{Apellidos:} Choque Pura \newline
-\textbullet\ \textbf{Edad:} 25 años \newline
-\textbullet\ \textbf{Distrito:} Santiago de Surco \newline
-\textbullet\ \textbf{Duración:} 23:30 min a 28:15 min
-\vspace{2pt}
-& \fbox{\parbox[c][3.8cm][c]{0.90\linewidth}{\centering\footnotesize\textit{[Espacio para captura de pantalla del video de validación]}}} \\
-\hline
-\thspanfirst{2}{Resumen de la entrevista} \\
-\hline
-\multicolumn{2}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{%
-La entrevistada evaluó la búsqueda de repuestos en catálogo y el procedimiento de descargo por lote cronológico FIFO. Señaló que la identificación automática del lote más antiguo reduce equivocaciones en el inventario físico del taller. Como aspecto de mejora, mencionó que al buscar piezas por código numérico se debería permitir ingresar fragmentos parciales del código para agilizar la respuesta en el almacén.
-} \\
-\hline
-\multicolumn{2}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{%
-\textbf{Enlace:} \href{https://upcedupe-my.sharepoint.com/:v:/g/personal/u20241e275_upc_edu_pe/IQDQRFe6_07YQ5IyAfsO8-lZASKREUobZCqZ_7w8a7zf0jc}{Video de Validación - Entrevista 6 (OneDrive)}
+\textbf{Enlace:} \href{https://upcedupe-my.sharepoint.com/:v:/g/personal/u20241e275_upc_edu_pe/IQCQRQCfuCkRQa3nnu0yYI84AU4-p88XucMGEwW7cCKEdks?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0\&e=az7Ef4}{Video de Validación - Entrevista a Bruno Marcelo Pacheco Díaz (OneDrive)}
 } \\
 \hline
 \end{tabularx}
@@ -290,7 +124,7 @@ _Nota._ Registro de entrevista de validación correspondiente al Segmento 2.
 
 ### 4.3.3. _Evaluaciones según heurísticas_
 
-En esta sección se documenta la evaluación formal de la experiencia de usuario de las soluciones digitales Atelier Website y Atelier Workshop Mobile. La evaluación adopta el formato estándar establecido en el Anexo E del proyecto, estructurando el análisis en tres dimensiones fundamentales: heurísticas de usabilidad de Jakob Nielsen, principios de arquitectura de información y directrices de diseño inclusivo.
+En esta sección se documenta la evaluación formal de la experiencia de usuario de la aplicación móvil nativa Atelier Workshop Mobile. La evaluación adopta el formato estándar establecido en el Anexo E del proyecto, estructurando el análisis en tres dimensiones fundamentales: heurísticas de usabilidad de Jakob Nielsen, principios de arquitectura de información y directrices de diseño inclusivo.
 
 **Ficha Técnica de Evaluación Heurística**
 
@@ -311,54 +145,53 @@ En esta sección se documenta la evaluación formal de la experiencia de usuario
 \endlastfoot
 \textbf{Carrera} & Ingeniería de Software \\
 \hline
-\textbf{Curso} & 1acc0238 Aplicaciones para dispositivos móviles \\
+\textbf{Curso} & 1ACC0238 Aplicaciones para Dispositivos Móviles \\
 \hline
 \textbf{NRC} & 4951 \\
 \hline
-\textbf{Profesores} & Todos \\
+\textbf{Profesores} & Jorge Luis Mayta Guillermo \\
 \hline
-\textbf{Auditor} & Equipo de Ingeniería Andeva (Atelier Software Team) \\
+\textbf{Auditor} & Equipo de Ingeniería Andeva \\
 \hline
-\textbf{Clientes y Participantes} & Jorge Antonio Aguilar Perez, Marcelo Alejandro Silva Ramos, Carlos Alberto Mendoza Rivas, César Nikolay Montero Vega, Bruno Marcelo Pacheco Díaz y Angie Karol Choque Pura \\
+\textbf{Clientes y Participantes} & Bruno Marcelo Pacheco Díaz \\
 \hline
-\textbf{Artefactos Evaluados} & Portal web comercial Atelier Website y aplicación móvil nativa Android Atelier Workshop Mobile \\
+\textbf{Artefactos Evaluados} & Aplicación móvil nativa Android Atelier Workshop Mobile \\
 \hline
 \end{longtable}
 
-_Nota._ Ficha técnica estructurada según el estándar del proyecto para evaluación de experiencia de usuario.
+_Nota._ Ficha técnica de la evaluación de experiencia de usuario aplicada sobre el producto móvil.
 
 **Tareas Evaluadas y Tareas Fuera de Alcance**
 
-El alcance de la presente evaluación comprende la verificación técnica y de interacción de las siguientes tareas clave:
+El alcance de la evaluación comprende la verificación funcional y de interacción de las siguientes tareas operativas en Atelier Workshop Mobile:
 
-1. Registro e inicio de sesión institucional con validación de código numérico OTP.
-2. Marcación de asistencia satelital con verificación de geocerca geodésica.
-3. Búsqueda y vinculación vehicular por placa de rodaje en patio.
-4. Creación de orden de trabajo y registro de evidencias periciales fotográficas en 360 grados.
-5. Emisión de proforma comercial digital en formato PDF con cálculo imponible automático.
-6. Notificación y registro formal de la resolución de presupuesto comunicada por el cliente.
-7. Consulta, priorización y control de cronómetro de tareas mecánicas en bahía con pausas operativas.
-8. Búsqueda de piezas en catálogo de almacén y descargo de inventario bajo el método estricto FIFO por lote.
+- Marcación de ingreso laboral con validación de perímetro geográfico, tolerancia de tardanza de quince minutos y consulta del reporte semanal de asistencia.
+- Consulta del listado de tareas técnicas asignadas, en pausa y completadas desde la pantalla de inicio.
+- Revisión del inventario de escáneres OBD-II por Bluetooth, filtrado por estado operativo, cambio de estado y desvinculación de unidades asociadas a vehículos.
+- Gestión de configuraciones de perfil, verificación de sucursal activa, habilitación de sincronización sin conexión y cierre de sesión.
+- Navegación directa para confirmación o cambio de sede y recepción de clientes y vehículos por número de placa o documento nacional de identidad.
+- Consulta de la cartera de clientes y vehículos registrados, estado de ocupación de bahías de trabajo, catálogo de repuestos por lotes y alertas de reposición.
+- Visualización de notificaciones ante la asignación de nuevas tareas técnicas.
 
-Quedan expresamente excluidas del alcance de esta versión las siguientes tareas operativas:
+Quedan expresamente excluidas del alcance de esta evaluación las siguientes tareas operativas:
 
-1. Captura de parámetros sensoriales en vivo mediante escáner OBD2 acoplado a Bluetooth.
-2. Emisión y despacho fiscal directo de comprobantes electrónicos UBL 2.1 hacia la autoridad tributaria.
-3. Procesamiento de cobros recurrentes de suscripción de talleres mediante pasarelas bancarias externas.
-4. Parametrización avanzada de múltiples sucursales simultáneas desde la aplicación móvil.
+- Captura de códigos de falla y telemetría vehicular en tiempo real acoplada a un vehículo físico en campo.
+- Emisión y despacho fiscal directo de comprobantes electrónicos UBL 2.1 hacia la autoridad tributaria.
+- Procesamiento de cobros recurrentes de suscripción de talleres mediante pasarelas bancarias externas.
+- Evaluación del portal web comercial Atelier Website en navegador de escritorio.
 
 **Escala de Severidad de Problemas**
 
-Para graduar el impacto de los hallazgos identificados durante la interacción de los usuarios, se aplica la escala estándar de severidad de cuatro niveles:
+Para graduar el impacto de los hallazgos identificados durante la interacción y revisión de la interfaz, se aplica la escala estándar de severidad de cuatro niveles:
 
-- **Nivel 1 (Problema superficial):** Dificultad estética o de menor impacto que puede ser superada fácilmente por el usuario y ocurre con muy baja frecuencia. No requiere corrección inmediata a menos que exista disponibilidad de tiempo.
-- **Nivel 2 (Problema menor):** Dificultad operativa que puede presentarse con mayor frecuencia o demanda un esfuerzo adicional de comprensión. Se le asigna prioridad baja para resolución en el siguiente ciclo de despliegue.
-- **Nivel 3 (Problema mayor):** Fricción que ocurre con frecuencia o bloquea la resolución autónoma por parte del usuario. Es prioritario corregirla antes del lanzamiento.
-- **Nivel 4 (Problema muy grave):** Defecto crítico que imposibilita al usuario completar una tarea esencial del negocio. Es imperativo subsanarlo de manera inmediata antes de autorizar el paso a producción.
+- **Nivel 1: Problema superficial.** Dificultad estética o de menor impacto que puede ser superada fácilmente por el usuario y ocurre con muy baja frecuencia. No requiere corrección inmediata a menos que exista disponibilidad de tiempo.
+- **Nivel 2: Problema menor.** Dificultad operativa que puede presentarse con mayor frecuencia o demanda un esfuerzo adicional de comprensión. Se le asigna prioridad baja para resolución en el siguiente ciclo de despliegue.
+- **Nivel 3: Problema mayor.** Fricción que ocurre con frecuencia o bloquea la resolución autónoma por parte del usuario. Es prioritario corregirla antes del lanzamiento.
+- **Nivel 4: Problema muy grave.** Defecto crítico que imposibilita al usuario completar una tarea esencial del negocio. Es imperativo subsanarlo de manera inmediata antes de autorizar el paso a producción.
 
 **Tabla Resumen de Problemas Identificados**
 
-A continuación, la @tbl:resumen-evaluacion-heuristicas consolida la relación de incidencias detectadas, vinculando cada hallazgo con el principio de diseño correspondiente y su nivel de severidad asignado:
+A continuación, la @tbl:resumen-evaluacion-heuristicas consolida la relación de incidencias detectadas durante la sesión de validación y la inspección de interfaz, vinculando cada hallazgo con el principio de diseño correspondiente y su nivel de severidad asignado:
 
 \renewcommand{\arraystretch}{1.25}
 \begin{longtable}{| >{\centering\arraybackslash}p{0.8cm} | >{\raggedright\arraybackslash}p{6.4cm} | >{\raggedright\arraybackslash}p{5.4cm} | >{\centering\arraybackslash}p{\dimexpr\textwidth-12.6cm-8\tabcolsep-5\arrayrulewidth\relax} |}
@@ -375,21 +208,11 @@ A continuación, la @tbl:resumen-evaluacion-heuristicas consolida la relación d
 \endfoot
 \hline
 \endlastfoot
-1 & Ausencia de indicador visual de sincronización pendiente al operar sin conexión & Usabilidad: Visibilidad del estado del sistema & 3 \\
+1 & Ausencia de tutorial inicial y guía contextual sobre la función de botones y módulos & Usabilidad: Ayuda y documentación & 2 \\
 \hline
-2 & Falta de diálogo de confirmación previo a descartar el cronómetro de una tarea & Usabilidad: Prevención de errores & 3 \\
+2 & Ambigüedad entre los accesos rápidos de la pantalla de inicio, perfil y navegación directa & Arquitectura de información: Claridad de etiquetado y navegación & 2 \\
 \hline
-3 & Inexistencia de opción para revertir un descargo de repuesto por lote equivocado & Usabilidad: Control y libertad del usuario & 3 \\
-\hline
-4 & Contraste tipográfico insuficiente en textos secundarios en entornos con alta luz solar & Diseño inclusivo: Considerar la situación & 2 \\
-\hline
-5 & Ausencia de soporte para búsqueda de repuestos mediante fragmentos parciales de código & Arquitectura de información: Organización y búsqueda & 2 \\
-\hline
-6 & Nomenclatura contable compleja en el desglose de proforma para clientes particulares & Usabilidad: Correspondencia entre el sistema y el mundo real & 2 \\
-\hline
-7 & Imágenes del portal comercial sin textos descriptivos para tecnologías de asistencia & Diseño inclusivo: Proporcionar experiencias comparables & 2 \\
-\hline
-8 & Selector de fotografías periciales sin aviso previo del tope máximo de archivos & Arquitectura de información: Claridad de etiquetado y navegación & 1 \\
+3 & Exposición de identificadores técnicos internos y jerarquía invertida de acciones en escáneres OBD-II & Usabilidad: Correspondencia entre el sistema y el mundo real & 2 \\
 \hline
 \end{longtable}
 
@@ -401,106 +224,41 @@ _Nota._ Consolidación de problemas de experiencia de usuario clasificados segú
 
 A continuación se presenta el desglose individual de cada incidencia identificada, precisando su contexto de manifestación, impacto en la tarea y la recomendación técnica para su subsanación:
 
-**Problema 1: Ausencia de indicador visual de sincronización pendiente al operar sin conexión**
-
-- **Severidad:** 3 (Problema mayor).
-- **Heurística o principio violado:** Usabilidad de Nielsen: Visibilidad del estado del sistema.
-- **Descripción del problema:** Al registrar una inspección pericial o iniciar una tarea mecánica en áreas del taller sin cobertura de red inalámbrica, como fosos de alineamiento o sótanos, la aplicación móvil guarda la información localmente en SQLite pero no presenta una insignia gráfica visible que advierta al usuario que los cambios se encuentran pendientes de sincronización con el servidor central. Esta omisión genera incertidumbre en el mecánico, quien intenta reenviar la orden repetidamente creyendo que la acción no fue procesada.
-- **Evidencia visual:**
-
-\begin{center}
-\fbox{\parbox[c][3.2cm][c]{0.92\linewidth}{\centering\footnotesize\textit{[Espacio para captura de pantalla: Cabecera de la aplicación móvil sin indicador de sincronización pendiente en fosa]}}}
-\end{center}
-
-- **Recomendación de solución:** Implementar una barra de estado contextual en la parte superior de la pantalla mediante Jetpack Compose. Dicho componente debe reflejar un icono de nube con flechas circulares en tono ámbar cuando existan mutaciones almacenadas en la base de datos Room pendientes de despacho, cambiando a un icono verde de confirmación una vez que el servicio en segundo plano sincronice exitosamente los datos con la API RESTful.
-
-**Problema 2: Falta de diálogo de confirmación previo a descartar el cronómetro de una tarea**
-
-- **Severidad:** 3 (Problema mayor).
-- **Heurística o principio violado:** Usabilidad de Nielsen: Prevención de errores.
-- **Descripción del problema:** Durante el cronometraje de faenas mecánicas en bahía, el botón para detener y descartar la medición de labor se encuentra adyacente al control de pausa operativa. Si el técnico presiona por equivocación el botón de reinicio mientras manipula el teléfono con guantes de nitrilo, el conteo acumulado de minutos se pierde de forma inmediata sin solicitar confirmación, distorsionando el registro de productividad laboral del turno.
-- **Evidencia visual:**
-
-\begin{center}
-\fbox{\parbox[c][3.2cm][c]{0.92\linewidth}{\centering\footnotesize\textit{[Espacio para captura de pantalla: Panel de cronómetro de bahía con botones contiguos de pausa y reinicio]}}}
-\end{center}
-
-- **Recomendación de solución:** Introducir un diálogo modal de confirmación con doble acción que requiera ratificar la cancelación del cronometraje activo. Adicionalmente, se recomienda reubicar el botón de detención definitiva separándolo físicamente del control de pausa y aplicar un retraso de pulsación prolongada de dos segundos para prevenir ejecuciones accidentales en el área de trabajo.
-
-**Problema 3: Inexistencia de opción para revertir un descargo de repuesto por lote equivocado**
-
-- **Severidad:** 3 (Problema mayor).
-- **Heurística o principio violado:** Usabilidad de Nielsen: Control y libertad del usuario.
-- **Descripción del problema:** Al efectuar el despacho de materiales desde el catálogo móvil, si el encargado selecciona por error un insumo similar o digita una cantidad mayor a la solicitada por el mecánico, el sistema aplica la imputación contable al lote FIFO más antiguo sin ofrecer una vía directa de anulación dentro de los primeros minutos tras la acción. Para corregir la equivocación, el usuario debe salir del módulo de despacho y registrar un movimiento manual de reincorporación, incrementando el tiempo de operación en almacén.
-- **Evidencia visual:**
-
-\begin{center}
-\fbox{\parbox[c][3.2cm][c]{0.92\linewidth}{\centering\footnotesize\textit{[Espacio para captura de pantalla: Pantalla de confirmación de descargo FIFO sin acción de deshacer]}}}
-\end{center}
-
-- **Recomendación de solución:** Añadir un mensaje emergente de tipo barra de aviso temporal con la acción explícita de deshacer, activo durante diez segundos posteriores a la transacción. Esta acción debe revertir atómicamente la mutación en la base de datos local y restituir las cantidades al lote cronológico original antes del cierre del lote de trabajo.
-
-**Problema 4: Contraste tipográfico insuficiente en textos secundarios en entornos con alta luz solar**
+**Problema 1: Ausencia de tutorial inicial y guía contextual sobre la función de botones y módulos**
 
 - **Severidad:** 2 (Problema menor).
-- **Heurística o principio violado:** Diseño inclusivo: Considerar la situación y contexto operativo.
-- **Descripción del problema:** En patios abiertos de recepción vehicular expuestos a radiación solar intensa, los textos descriptivos secundarios de las tarjetas de vehículos (como el código de motor y el año de fabricación) presentan una relación de contraste cromático de 3.2:1 con respecto al fondo, situándose por debajo del estándar accesible. Esto obliga al recepcionista a forzar la vista o buscar zonas techadas para verificar los datos de la unidad.
-- **Evidencia visual:**
+- **Heurística o principio violado:** Usabilidad de Nielsen: Ayuda y documentación.
+- **Descripción del problema:** La pantalla de inicio de la aplicación concentra tarjetas de jornada laboral y labor técnica, indicadores resumidos, accesos de operaciones de patio, botones superiores de menú y alertas, y una barra de navegación inferior compuesta por cuatro iconos sin etiquetas textuales. Durante la sesión de validación, el entrevistado manifestó que, al interactuar por primera vez con la interfaz, resulta necesario contar con un tutorial inicial que explique qué función cumple cada botón para facilitar la ruta de aprendizaje sin depender de explicaciones verbales previas.
+- **Evidencia visual:** Como se muestra en la @fig:heuristica-problema-1, la vista principal carece de un recorrido de inducción inicial o botón de ayuda contextual que oriente sobre el propósito de los controles y la barra inferior iconográfica.
 
-\begin{center}
-\fbox{\parbox[c][3.2cm][c]{0.92\linewidth}{\centering\footnotesize\textit{[Espacio para captura de pantalla: Tarjeta de recepción vehicular en patio con bajo contraste en textos auxiliares]}}}
-\end{center}
+![Pantalla de inicio de Atelier Workshop Mobile sin guía de inducción inicial ni etiquetas en la barra inferior](report/assets/validation-interviews/problem-1.png){#fig:heuristica-problema-1 width=36%}
 
-- **Recomendación de solución:** Ajustar los tokens de color del sistema de diseño en la directiva de estilos móviles, elevando el valor de luminancia de los textos secundarios para alcanzar una relación de contraste mínima de 4.5:1 conforme a las pautas de accesibilidad WCAG 2.1 nivel AA. Asimismo, habilitar la detección de sensores de luminosidad del dispositivo para elevar dinámicamente el brillo del componente en patios exteriores.
+_Nota._ Captura de la pantalla principal evaluada en Atelier Workshop Mobile.
 
-**Problema 5: Ausencia de soporte para búsqueda de repuestos mediante fragmentos parciales de código**
+- **Recomendación de solución:** Implementar un recorrido guiado de inducción en el primer inicio de sesión mediante Jetpack Compose que destaque secuencialmente los controles principales de asistencia, labor técnica, operaciones de patio y navegación inferior. Complementariamente, incorporar etiquetas textuales bajo los iconos de la barra de navegación y un acceso de ayuda rápida desde la cabecera o la sección de perfil.
+
+**Problema 2: Ambigüedad entre los accesos rápidos de la pantalla de inicio, perfil y navegación directa**
 
 - **Severidad:** 2 (Problema menor).
-- **Heurística o principio violado:** Arquitectura de información: Organización y búsqueda.
-- **Descripción del problema:** El campo de búsqueda en el catálogo de almacén requiere ingresar la secuencia alfanumérica exacta de la pieza o su denominación completa para mostrar resultados. Cuando el técnico conoce únicamente los dígitos centrales del código de parte del fabricante, la consulta retorna una lista vacía, impidiendo localizar el repuesto con agilidad.
-- **Evidencia visual:**
+- **Heurística o principio violado:** Arquitectura de información: Claridad de etiquetado y navegación.
+- **Descripción del problema:** La aplicación duplica puntos de acceso hacia las mismas funcionalidades operativas entre la pantalla de inicio, el menú lateral, la barra inferior y la vista de perfil. En particular, la opción **Bandeja de notificaciones** se encuentra anidada dentro del bloque de operaciones y sincronización en la pantalla de perfil a pesar de existir un icono de campana en la cabecera superior, y el módulo de escáneres OBD-II figura tanto en operaciones de patio como en la barra inferior, lo que exigió aclaraciones adicionales durante la entrevista sobre el propósito de cada ruta.
+- **Evidencia visual:** En la @fig:heuristica-problema-2 se observa la vista de perfil con la bandeja de notificaciones agrupada junto a la cola de sincronización y los permisos del rol, coexistiendo con los accesos equivalentes de la pantalla principal.
 
-\begin{center}
-\fbox{\parbox[c][3.2cm][c]{0.92\linewidth}{\centering\footnotesize\textit{[Espacio para captura de pantalla: Buscador de catálogo con mensaje de coincidencia no encontrada ante código parcial]}}}
-\end{center}
+![Vista de perfil con acceso a bandeja de notificaciones anidado en operaciones y sincronización](report/assets/validation-interviews/problem-2.png){#fig:heuristica-problema-2 width=36%}
 
-- **Recomendación de solución:** Optimizar la consulta en el DAO de Room incorporando el operador de concordancia parcial sobre los campos de código de parte y descripción comercial. Complementariamente, incorporar un mecanismo de sugerencias automáticas a partir del tercer carácter ingresado en la barra de texto.
+_Nota._ Captura de la sección de perfil y rutas de acceso en Atelier Workshop Mobile.
 
-**Problema 6: Nomenclatura contable compleja en el desglose de proforma para clientes particulares**
+- **Recomendación de solución:** Reorganizar la arquitectura de navegación para reservar la pantalla de inicio al estado operativo inmediato del técnico, restringiendo el perfil estrictamente a datos de cuenta, sede activa, sincronización sin conexión y cierre de sesión. Asimismo, consolidar la bandeja de notificaciones únicamente en el icono de cabecera para eliminar redundancias de rutas.
+
+**Problema 3: Exposición de identificadores técnicos internos y jerarquía invertida de acciones en escáneres OBD-II**
 
 - **Severidad:** 2 (Problema menor).
 - **Heurística o principio violado:** Usabilidad de Nielsen: Correspondencia entre el sistema y el mundo real.
-- **Descripción del problema:** La proforma digital emitida para consulta del cliente final utiliza etiquetas tributarias técnicas como base gravable imponible y valor de afectación en lugar de términos cotidianos comprensibles como subtotal de mano de obra y costo de piezas. Los propietarios particulares manifestaron confusión al interpretar el monto total a cancelar en la entrevista de validación.
-- **Evidencia visual:**
+- **Descripción del problema:** En el listado de inventario de escáneres OBD-II, cada tarjeta presenta el protocolo de conectividad mediante la constante técnica interna BLUETOOTH_BLE en lugar de una denominación comprensible para el mecánico automotriz. Adicionalmente, la acción de desvinculación del dispositivo respecto al vehículo asignado recibe mayor énfasis visual mediante un botón con contorno prominente frente al enlace en texto plano para cambiar de estado, invirtiendo la jerarquía esperada entre la operación habitual y la acción de mayor impacto operativo.
+- **Evidencia visual:** Como se aprecia en la @fig:heuristica-problema-3, las tarjetas exhiben la cadena técnica BLUETOOTH_BLE junto al botón destacado de desvinculación sin advertencia previa.
 
-\begin{center}
-\fbox{\parbox[c][3.2cm][c]{0.92\linewidth}{\centering\footnotesize\textit{[Espacio para captura de pantalla: Desglose de proforma comercial en PDF con terminología fiscal compleja]}}}
-\end{center}
+![Listado de escáneres OBD-II con identificador técnico BLUETOOTH_BLE y botón de desvinculación destacado](report/assets/validation-interviews/problem-3.png){#fig:heuristica-problema-3 width=36%}
 
-- **Recomendación de solución:** Simplificar el membrete de la plantilla de cotización generada con OpenPDF, presentando un resumen jerárquico articulado en conceptos claros: mano de obra técnica, repuestos e insumos, e impuesto general a las ventas. La información fiscal detallada debe conservarse únicamente en la sección de pie de página destinada a fines contables formales.
+_Nota._ Captura del módulo de inventario de escáneres OBD-II en Atelier Workshop Mobile.
 
-**Problema 7: Imágenes del portal comercial sin textos descriptivos para tecnologías de asistencia**
-
-- **Severidad:** 2 (Problema menor).
-- **Heurística o principio violado:** Diseño inclusivo: Proporcionar experiencias comparables.
-- **Descripción del problema:** En el portal web comercial Atelier Website, diversas imágenes ilustrativas de los módulos de diagnóstico telemático y telemetría predictiva carecen del atributo textual descriptivo en su marcado HTML. En consecuencia, los lectores de pantalla utilizados por usuarios con discapacidad visual omiten la explicación del contenido gráfico, limitando la comprensión integral de las funciones presentadas.
-- **Evidencia visual:**
-
-\begin{center}
-\fbox{\parbox[c][3.2cm][c]{0.92\linewidth}{\centering\footnotesize\textit{[Espacio para captura de pantalla: Código de marcado del portal web con etiquetas de imagen sin atributo de texto alternativo]}}}
-\end{center}
-
-- **Recomendación de solución:** Añadir textos alternativos específicos y concisos en todas las etiquetas de imagen del portal comercial, describiendo con exactitud la escena operativa o el diagrama de software que se ilustra. Para elementos puramente decorativos, aplicar el atributo vacío correspondiente a fin de que las herramientas de accesibilidad los ignoren sin emitir alertas de lectura.
-
-**Problema 8: Selector de fotografías periciales sin aviso previo del tope máximo de archivos**
-
-- **Severidad:** 1 (Problema superficial).
-- **Heurística o principio violado:** Arquitectura de información: Claridad de etiquetado y navegación.
-- **Descripción del problema:** Durante el registro pericial de recepción en patio, la cuadrícula de captura fotográfica permite al recepcionista tomar imágenes de forma sucesiva sin indicar anticipadamente cuál es el número máximo de fotografías admitidas por orden. Al alcanzar la octava fotografía, el botón de captura se desactiva sin un mensaje informativo que comunique que se ha completado el cupo permitido.
-- **Evidencia visual:**
-
-\begin{center}
-\fbox{\parbox[c][3.2cm][c]{0.92\linewidth}{\centering\footnotesize\textit{[Espacio para captura de pantalla: Cuadrícula pericial de recepción con botón de captura desactivado sin mensaje explicativo]}}}
-\end{center}
-
-- **Recomendación de solución:** Incorporar un contador visual permanente en la cabecera de la cuadrícula fotográfica, indicando la cantidad de capturas registradas frente al total permitido. Al completar el límite, el sistema debe presentar un aviso informativo breve que señale que la documentación pericial del vehículo ha alcanzado la capacidad establecida para la orden.
+- **Recomendación de solución:** Mapear el enumerado interno de conectividad hacia una etiqueta legible en lenguaje natural, como Bluetooth Low Energy, y ajustar la jerarquía visual de los botones otorgando el estilo principal o secundario al cambio de estado operativo. Para la acción de desvinculación, aplicar un estilo discreto acompañado de un diálogo breve de confirmación antes de desligar el escáner del vehículo.

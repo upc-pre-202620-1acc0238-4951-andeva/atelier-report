@@ -1,7 +1,7 @@
 # Registro de Versiones del Informe {- .unlisted}
 
-| Versión | Fecha | Autor | Descripción de modificación |
-| :-------------: | :-----------: | :----------------------- | :------------------------------------------------------- |
+| Versión |   Fecha    | Autor                            | Descripción de modificación                                                                                                                                     |
+| :-----: | :--------: | :------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 |  0.8.0  | 28/08/2026 | Huamani Estefanero, Joel         | Añadido de la sección de **_Descripción de la Startup_** y documentación con las definiciones de Atelier.                                                       |
 | 0.10.0  | 28/08/2026 | Huamani Estefanero, Joel         | Realización de la técnica 5W's y 2H's para la sección de **_Antecedentes y Problemática_**.                                                                     |
 | 0.10.0  | 28/08/2026 | Huamani Estefanero, Joel         | Añadido completo de la sección de **_Antecedentes y Problemática_** en base a las fuentes encontradas.                                                          |
@@ -53,5 +53,6 @@
 |  2.0.0  | 08/10/2026 | Huamani Estefanero, Joel         | Inserción de tasks en el Sprint Backlog para el **_Sprint 1_**.                                                                                                 |
 |  2.0.4  | 5/10/2026  | Teran Zavala, Mauricio Alejandro | Inserción del **Mobile Applications Prototyping** de la plataforma.                                                                                             |
 |  3.0.0  | 10/11/2026 | Huamani Estefanero, Joel         | Consolidación del **_Sprint 2_**.                                                                                                                               |
+|  3.2.0  | 12/11/2026 | Huamani Estefanero, Joel         | Consolidación del **_Validation Interview_**.                                                                                                                   |
 
 \newpage
