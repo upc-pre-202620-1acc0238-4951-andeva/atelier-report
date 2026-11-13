@@ -104,7 +104,7 @@ _Nota._ Matriz de liderazgo y colaboración del Sprint 2 adaptada de la guía de
 
 #### 4.2.2.3. Sprint Backlog 2
 
-El Sprint Backlog del segundo ciclo de desarrollo reúne el catálogo integral de las veintidós historias de usuario seleccionadas para implementar las capacidades operativas de la aplicación móvil nativa Atelier Workshop Mobile. Con una asignación total de cincuenta y cinco puntos de historia, el equipo descompuso el alcance en setenta y seis tareas de ingeniería registradas y administradas en Jira Software, totalizando ciento sesenta y cinco horas de trabajo estimadas a razón de tres horas por Story Point.
+El Sprint Backlog del segundo ciclo de desarrollo reúne el catálogo integral de las veintidós historias de usuario seleccionadas para implementar las capacidades operativas de la aplicación móvil nativa Atelier Workshop Mobile, con una asignación total de cincuenta y cinco puntos de historia equivalentes a ciento sesenta y cinco horas de trabajo estimadas a razón de tres horas por Story Point. En el estado actual del tablero en Jira Software, se encuentran registradas y culminadas quince tareas técnicas correspondientes a las historias US26, US27, US31, US32 y US33 por un total de cuarenta y cinco horas, mientras que las diecisiete historias restantes mantienen únicamente su asignación de responsable a la espera del registro de sus subtareas.
 
 Cada historia de usuario se articula en tareas complementarias de diseño de interfaz reactiva con Jetpack Compose, desarrollo de ViewModels y casos de uso bajo Arquitectura Limpia, persistencia local con entidades y DAOs en Room SQLite para soporte sin conexión, e integración de contratos con la API RESTful del backend.
 
@@ -142,157 +142,69 @@ La @tbl:sprint-backlog-2 consolida la distribución detallada de tareas, sus est
 \endfoot
 \hline
 \endlastfoot
-US01 & Registro y vinculación de colaborador mediante invitación corporativa & AT-266 & UI Compose & Diseñar el flujo de registro móvil para nuevos colaboradores a partir de enlace de invitación institucional & 2 & Teran Zavala, Mauricio Alejandro & Done \\
-\cline{3-8}
-& & AT-267 & ViewModel & Validar formato seguro de contraseñas y consistencia de datos de identidad en el cliente móvil & 2 & Teran Zavala, Mauricio Alejandro & Done \\
-\cline{3-8}
-& & AT-268 & Retrofit & Invocar el endpoint de vinculación de colaboradores asignando rol operativo y sucursal autorizada & 2 & Teran Zavala, Mauricio Alejandro & Done \\
+US01 & Registro y vinculación de colaborador mediante invitación corporativa &  &  &  &  & Teran Zavala, Mauricio Alejandro &  \\
 \hline
-US02 & Verificación de identidad y correo electrónico mediante código OTP & AT-269 & UI Compose & Crear el componente de ingreso de código numérico OTP de seis dígitos con temporizador de reenvío & 2 & Teran Zavala, Mauricio Alejandro & Done \\
-\cline{3-8}
-& & AT-270 & ViewModel & Controlar la expiración del código numérico y gestionar reintentos de despacho ante demoras & 2 & Teran Zavala, Mauricio Alejandro & Done \\
-\cline{3-8}
-& & AT-271 & Retrofit & Verificar el código OTP con el servicio de autenticación activando la cuenta del colaborador & 2 & Teran Zavala, Mauricio Alejandro & Done \\
+US02 & Verificación de identidad y correo electrónico mediante código OTP &  &  &  &  & Teran Zavala, Mauricio Alejandro &  \\
 \hline
-US03 & Inicio de sesión corporativo y contextualización de sede de trabajo & AT-272 & UI Compose & Diseñar la pantalla de inicio de sesión con campos de correo institucional y contraseña segura & 2 & Teran Zavala, Mauricio Alejandro & Done \\
-\cline{3-8}
-& & AT-273 & DataStore & Implementar el almacenamiento cifrado de tokens JWT de acceso y refresco en el dispositivo & 2 & Teran Zavala, Mauricio Alejandro & Done \\
-\cline{3-8}
-& & AT-274 & Dominio & Contextualizar la sesión del usuario estableciendo sede laboral activa y permisos de rol en memoria & 3 & Teran Zavala, Mauricio Alejandro & Done \\
-\cline{3-8}
-& & AT-275 & Retrofit & Conectar la autenticación con el endpoint de emisión de tokens y gestionar errores de credenciales & 2 & Teran Zavala, Mauricio Alejandro & Done \\
+US03 & Inicio de sesión corporativo y contextualización de sede de trabajo &  &  &  &  & Teran Zavala, Mauricio Alejandro &  \\
 \hline
-US06 & Marcación de ingreso laboral con validación de geocerca GPS satelital & AT-276 & UI Compose & Diseñar la pantalla de marcación de asistencia con indicador de precisión satelital y botón de ingreso & 2 & Rocha Cotrina, Alvaro & Done \\
-\cline{3-8}
-& & AT-277 & GPS Service & Integrar la API de geolocalización de Android para captura de coordenadas geodésicas en tiempo real & 3 & Rocha Cotrina, Alvaro & Done \\
-\cline{3-8}
-& & AT-278 & Algoritmo & Implementar la validación geodésica de distancia Haversine frente al perímetro delimitado de la sede & 2 & Rocha Cotrina, Alvaro & Done \\
-\cline{3-8}
-& & AT-279 & Retrofit & Transmitir la marcación exitosa al backend con firma de tiempo y coordenadas para validación final & 2 & Rocha Cotrina, Alvaro & Done \\
+US06 & Marcación de ingreso laboral con validación de geocerca GPS satelital &  &  &  &  & Rocha Cotrina, Alvaro &  \\
 \hline
-US08 & Marcación de salida y liquidación de jornada laboral efectiva & AT-280 & UI Compose & Desarrollar el panel de cierre de jornada diaria con visualización de horas efectivas laboradas & 2 & Rocha Cotrina, Alvaro & Done \\
-\cline{3-8}
-& & AT-281 & Dominio & Registrar el evento de cierre de asistencia liquidando formalmente la jornada y pausas del día & 2 & Rocha Cotrina, Alvaro & Done \\
-\cline{3-8}
-& & AT-282 & Retrofit & Enviar el registro de salida al servicio central de recursos humanos y actualizar estado de presencia & 2 & Rocha Cotrina, Alvaro & Done \\
+US08 & Marcación de salida y liquidación de jornada laboral efectiva &  &  &  &  & Rocha Cotrina, Alvaro &  \\
 \hline
-US09 & Consulta de programación semanal de turnos y márgenes de tolerancia & AT-283 & UI Compose & Diseñar la vista de calendario semanal de turnos indicando sucursal, horario de guardia y tolerancias & 2 & Rocha Cotrina, Alvaro & Done \\
-\cline{3-8}
-& & AT-284 & Room Local & Almacenar la programación laboral en la base de datos local para consulta sin conectividad & 2 & Rocha Cotrina, Alvaro & Done \\
-\cline{3-8}
-& & AT-285 & Retrofit & Sincronizar el calendario semanal desde el backend ante actualizaciones de guardias & 2 & Rocha Cotrina, Alvaro & Done \\
+US09 & Consulta de programación semanal de turnos y márgenes de tolerancia &  &  &  &  & Rocha Cotrina, Alvaro &  \\
 \hline
-US10 & Emisión y seguimiento de descargos justificatorios de tardanza & AT-286 & UI Compose & Desarrollar el formulario móvil para redacción de justificantes de demora con adjuntos opcionales & 1 & Rocha Cotrina, Alvaro & Done \\
-\cline{3-8}
-& & AT-287 & Retrofit & Remitir el descargo al módulo de recursos humanos y consultar su estado de aprobación & 2 & Rocha Cotrina, Alvaro & Done \\
+US10 & Emisión y seguimiento de descargos justificatorios de tardanza &  &  &  &  & Rocha Cotrina, Alvaro &  \\
 \hline
-US11 & Búsqueda y vinculación de cliente y vehículo por placa o documento & AT-288 & UI Compose & Diseñar la pantalla de consulta rápida en patio con barras de búsqueda por placa vehicular y documento fiscal & 2 & Granda Ibarra, Luis Daniel & Done \\
-\cline{3-8}
-& & AT-289 & ViewModel & Implementar el caso de uso y ViewModel con filtrado reactivo de clientes y vehículos locales en Room & 2 & Granda Ibarra, Luis Daniel & Done \\
-\cline{3-8}
-& & AT-290 & Retrofit & Integrar los servicios del backend para recuperación remota de fichas técnicas y sincronización con base de datos local & 2 & Granda Ibarra, Luis Daniel & Done \\
+US11 & Búsqueda y vinculación de cliente y vehículo por placa o documento &  &  &  &  & Granda Ibarra, Luis Daniel &  \\
 \hline
-US12 & Apertura de orden de trabajo y parametrización de tareas iniciales & AT-291 & UI Compose & Desarrollar el formulario interactivo de apertura de orden asentando odómetro, nivel de combustible y resumen inicial & 3 & Granda Ibarra, Luis Daniel & Done \\
-\cline{3-8}
-& & AT-292 & Dominio & Modelar la entidad WorkOrder en Room con validaciones de kilometraje y delegación de estado inicial & 2 & Granda Ibarra, Luis Daniel & Done \\
-\cline{3-8}
-& & AT-293 & Retrofit & Conectar la mutación remota de creación de orden con la pasarela de servicios web del backend & 2 & Granda Ibarra, Luis Daniel & Done \\
-\cline{3-8}
-& & AT-294 & QA & Ejecutar pruebas unitarias de validación de campos obligatorios e integridad referencial en apertura & 2 & Granda Ibarra, Luis Daniel & Done \\
+US12 & Apertura de orden de trabajo y parametrización de tareas iniciales &  &  &  &  & Granda Ibarra, Luis Daniel &  \\
 \hline
-US13 & Registro pericial de evidencias fotográficas de recepción vehicular & AT-295 & UI Compose & Implementar la galería fotográfica pericial en cuadrícula con captura directa desde cámara del dispositivo & 2 & Granda Ibarra, Luis Daniel & Done \\
-\cline{3-8}
-& & AT-296 & Almacenamiento & Configurar la compresión de imágenes y almacenamiento local en caché temporal previo a subida & 2 & Granda Ibarra, Luis Daniel & Done \\
-\cline{3-8}
-& & AT-297 & Retrofit & Integrar la carga multipart de fotografías 360° asociándolas a la orden de trabajo en el servidor & 2 & Granda Ibarra, Luis Daniel & Done \\
+US13 & Registro pericial de evidencias fotográficas de recepción vehicular &  &  &  &  & Granda Ibarra, Luis Daniel &  \\
 \hline
-US14 & Generación de propuesta de tarea adicional por hallazgo en foso & AT-298 & UI Compose & Desarrollar el formulario móvil para reporte de fallas imprevistas con nivel de severidad y foto & 2 & Granda Ibarra, Luis Daniel & Done \\
-\cline{3-8}
-& & AT-299 & Cámara & Capturar la evidencia gráfica del hallazgo en foso asociándola a la propuesta técnica & 3 & Granda Ibarra, Luis Daniel & Done \\
-\cline{3-8}
-& & AT-300 & Dominio & Crear la propuesta en estado preliminar vinculada a la orden sin alterar el presupuesto vigente & 2 & Granda Ibarra, Luis Daniel & Done \\
-\cline{3-8}
-& & AT-301 & Retrofit & Remitir la propuesta al backend para notificar al asesor de servicio y habilitar su evaluación & 2 & Granda Ibarra, Luis Daniel & Done \\
+US14 & Generación de propuesta de tarea adicional por hallazgo en foso &  &  &  &  & Granda Ibarra, Luis Daniel &  \\
 \hline
-US15 & Notificación y aprobación de propuesta técnica con el cliente & AT-302 & UI Compose & Diseñar el panel de revisión de propuestas técnicas imprevistas para gestión del asesor & 2 & Granda Ibarra, Luis Daniel & Done \\
-\cline{3-8}
-& & AT-303 & Dominio & Incorporar la tarea técnica autorizada como labor activa en la orden de trabajo del taller & 2 & Granda Ibarra, Luis Daniel & Done \\
-\cline{3-8}
-& & AT-304 & Retrofit & Transmitir la resolución del cliente al servidor recalculando los montos presupuestados & 2 & Granda Ibarra, Luis Daniel & Done \\
+US15 & Notificación y aprobación de propuesta técnica con el cliente &  &  &  &  & Granda Ibarra, Luis Daniel &  \\
 \hline
-US44 & Alta y afiliación de clientes en taller según tenencia previa de cuenta en la plataforma & AT-305 & UI Compose & Crear el flujo de bienvenida diferenciando entre clientes presenciales nuevos y cuentas existentes & 2 & Granda Ibarra, Luis Daniel & Done \\
-\cline{3-8}
-& & AT-306 & Verificación & Consultar por correo si el cliente ya posee perfil en la plataforma para evitar duplicación & 2 & Granda Ibarra, Luis Daniel & Done \\
-\cline{3-8}
-& & AT-307 & Dominio & Afiliar automáticamente el vehículo existente o registrar desde cero al cliente presencial & 3 & Granda Ibarra, Luis Daniel & Done \\
-\cline{3-8}
-& & AT-308 & Retrofit & Sincronizar la afiliación con el backend asociando al cliente a la base de datos del taller & 2 & Granda Ibarra, Luis Daniel & Done \\
+US44 & Alta y afiliación de clientes en taller según tenencia previa de cuenta en la plataforma &  &  &  &  & Granda Ibarra, Luis Daniel &  \\
 \hline
-US22 & Cómputo automático en cascada de costos de tareas e impuestos & AT-309 & UI Compose & Diseñar el desglose de proforma con subtotales acumulados, porcentaje de impuesto e importe total & 2 & Sanchez Santin, Adiel Abdiaz & Done \\
-\cline{3-8}
-& & AT-310 & Dominio & Implementar el motor de cálculo aritmético de mano de obra y repuestos respetando reglas tributarias & 3 & Sanchez Santin, Adiel Abdiaz & Done \\
-\cline{3-8}
-& & AT-311 & Room Local & Persistir la estructura presupuestaria en la base de datos embebida con tipos numéricos seguros & 2 & Sanchez Santin, Adiel Abdiaz & Done \\
-\cline{3-8}
-& & AT-312 & QA & Formular pruebas automatizadas para verificar precisión monetaria y redondeo legal de comprobantes & 2 & Sanchez Santin, Adiel Abdiaz & Done \\
+US22 & Cómputo automático en cascada de costos de tareas e impuestos &  &  &  &  & Sanchez Santin, Adiel Abdiaz &  \\
 \hline
-US23 & Imputación de repuestos a tareas y supervisión administrativa & AT-313 & UI Compose & Crear la interfaz para asignación de piezas a faenas con alertas de consumo para supervisión & 2 & Sanchez Santin, Adiel Abdiaz & Done \\
-\cline{3-8}
-& & AT-314 & Dominio & Vincular repuestos a la tarea técnica verificando disponibilidad previa y precio unitario base & 2 & Sanchez Santin, Adiel Abdiaz & Done \\
-\cline{3-8}
-& & AT-315 & Retrofit & Registrar la solicitud de materiales en el backend habilitando su auditoría por administración & 2 & Sanchez Santin, Adiel Abdiaz & Done \\
+US23 & Imputación de repuestos a tareas y supervisión administrativa &  &  &  &  & Sanchez Santin, Adiel Abdiaz &  \\
 \hline
-US24 & Generación y remisión digital de proforma comercial en PDF & AT-316 & UI Compose & Diseñar el diálogo de previsualización de proforma y selección de canal de remisión digital & 2 & Sanchez Santin, Adiel Abdiaz & Done \\
-\cline{3-8}
-& & AT-317 & Generador & Configurar el motor de generación documental en PDF estructurando membrete, tareas y costos & 3 & Sanchez Santin, Adiel Abdiaz & Done \\
-\cline{3-8}
-& & AT-318 & Compartir & Integrar el gestor de intents nativos de Android para remitir el documento por correo o mensajería & 2 & Sanchez Santin, Adiel Abdiaz & Done \\
-\cline{3-8}
-& & AT-319 & Retrofit & Notificar al servidor el envío formal de la cotización para actualizar la traza de seguimiento & 2 & Sanchez Santin, Adiel Abdiaz & Done \\
+US24 & Generación y remisión digital de proforma comercial en PDF &  &  &  &  & Sanchez Santin, Adiel Abdiaz &  \\
 \hline
-US25 & Formalización de resolución de presupuesto tras comunicación externa & AT-320 & UI Compose & Crear la interfaz de resolución comercial con opciones de aprobación integral, parcial o rechazo & 2 & Sanchez Santin, Adiel Abdiaz & Done \\
-\cline{3-8}
-& & AT-321 & Dominio & Registrar el estado del presupuesto habilitando el inicio de faenas o liberando reservas de stock & 2 & Sanchez Santin, Adiel Abdiaz & Done \\
-\cline{3-8}
-& & AT-322 & Retrofit & Enviar la resolución al backend para actualizar el ciclo de vida de la orden y tareas asociadas & 2 & Sanchez Santin, Adiel Abdiaz & Done \\
+US25 & Formalización de resolución de presupuesto tras comunicación externa &  &  &  &  & Sanchez Santin, Adiel Abdiaz &  \\
 \hline
-US26 & Consulta y priorización de tareas mecánicas asignadas en bahía & AT-323 & UI Compose & Diseñar la vista principal del mecánico con tarjetas de tareas organizadas por prioridad operativa y orden & 2 & Huamani Estefanero, Joel & Done \\
+US26 & Consulta y priorización de tareas mecánicas asignadas en bahía & AT-280 & UI Compose & Maquetar la interfaz de la bandeja de faenas mecánicas en bahía con indicadores de prioridad y estado & 2 & Huamani Estefanero, Joel & Done \\
 \cline{3-8}
-& & AT-324 & ViewModel & Implementar la lógica de consulta y filtrado por identificador de mecánico autenticado en sesión & 2 & Huamani Estefanero, Joel & Done \\
+& & AT-281 & Room Local & Implementar la persistencia local en Room SQLite y repositorio offline-first para faenas en bahía & 2 & Huamani Estefanero, Joel & Done \\
 \cline{3-8}
-& & AT-325 & Room Local & Configurar la persistencia local de tareas para permitir la lectura offline en fosas sin cobertura de red & 2 & Huamani Estefanero, Joel & Done \\
+& & AT-282 & ViewModel & Integrar el consumo reactivo y ordenamiento de faenas mecánicas asignadas con soporte sin conexión & 2 & Huamani Estefanero, Joel & Done \\
 \hline
-US27 & Cronometraje de labor efectiva, pausas operativas y sincronización con turnos laborales & AT-326 & UI Compose & Implementar el componente visual de cronómetro reactivo con botones de inicio, pausa y culminación técnica & 2 & Huamani Estefanero, Joel & Done \\
+US27 & Cronometraje de labor efectiva, pausas operativas y sincronización con turnos laborales & AT-283 & UI Compose & Maquetar el cronómetro de labor en foso con controles interactivos de inicio, pausa y culminación & 3 & Huamani Estefanero, Joel & Done \\
 \cline{3-8}
-& & AT-327 & Lógica & Desarrollar el servicio en segundo plano para el cómputo de segundos efectivos y registro de pausas & 3 & Huamani Estefanero, Joel & Done \\
+& & AT-284 & Dominio & Implementar el cómputo de horas hombre efectivas y suspensión automática al cumplirse el fin de turno & 3 & Huamani Estefanero, Joel & Done \\
 \cline{3-8}
-& & AT-328 & Dominio & Integrar validaciones de suspensión automática al concluir el turno laboral formal del colaborador & 2 & Huamani Estefanero, Joel & Done \\
-\cline{3-8}
-& & AT-329 & Retrofit & Implementar el despacho diferido de eventos de cronometraje hacia el backend al reconectar red & 2 & Huamani Estefanero, Joel & Done \\
+& & AT-285 & Persistencia & Integrar la persistencia de intervalos de tiempo y sincronización con turnos laborales & 3 & Huamani Estefanero, Joel & Done \\
 \hline
-US31 & Búsqueda y consulta de disponibilidad de repuestos en catálogo & AT-330 & UI Compose & Diseñar el buscador de inventario con filtros por categoría comercial, código de pieza y nivel de existencias & 2 & Huamani Estefanero, Joel & Done \\
+US31 & Búsqueda y consulta de disponibilidad de repuestos en catálogo & AT-286 & UI Compose & Maquetar el catálogo móvil de repuestos con navegación por categorías y buscador reactivo & 2 & Huamani Estefanero, Joel & Done \\
 \cline{3-8}
-& & AT-331 & ViewModel & Gestionar el estado de búsqueda y presentación de precios unitarios con caché local en SQLite & 2 & Huamani Estefanero, Joel & Done \\
+& & AT-287 & ViewModel & Implementar filtros por SKU, categoría y marca con consulta de existencias y precios en Android & 2 & Huamani Estefanero, Joel & Done \\
 \cline{3-8}
-& & AT-332 & Retrofit & Conectar la consulta con el catálogo central del backend para validar stock físico antes de reservar & 2 & Huamani Estefanero, Joel & Done \\
+& & AT-288 & Navegación & Integrar la navegación fluida y manejo de back handler en la consulta de inventario móvil & 2 & Huamani Estefanero, Joel & Done \\
 \hline
-US32 & Descargo contable y físico automatizado mediante regla estricta FIFO por lote & AT-333 & UI Compose & Diseñar la pantalla de despacho de almacén mostrando lotes de adquisición ordenados cronológicamente & 3 & Huamani Estefanero, Joel & Done \\
+US32 & Descargo contable y físico automatizado mediante regla estricta FIFO por lote & AT-289 & UI Compose & Maquetar el diálogo modal de imputación y descargo de repuestos con control de cantidad y validación de stock & 5 & Huamani Estefanero, Joel & Done \\
 \cline{3-8}
-& & AT-334 & Algoritmo & Implementar la lógica de consumo FIFO rebajando unidades de los lotes más antiguos hasta completar & 4 & Huamani Estefanero, Joel & Done \\
+& & AT-290 & Algoritmo & Implementar la lógica de consumo estricto de lotes FIFO con validación de saldo no negativo & 5 & Huamani Estefanero, Joel & Done \\
 \cline{3-8}
-& & AT-335 & Dominio & Validar invariantes de saldo no negativo e impedir descargo ante stock insuficiente en almacén & 3 & Huamani Estefanero, Joel & Done \\
-\cline{3-8}
-& & AT-336 & Room Local & Persistir la transacción de descargo en la base de datos local actualizando las existencias físicas & 3 & Huamani Estefanero, Joel & Done \\
-\cline{3-8}
-& & AT-337 & Retrofit & Sincronizar el movimiento de kárdex con el servicio central de inventario en el backend & 2 & Huamani Estefanero, Joel & Done \\
+& & AT-291 & Persistencia & Integrar la valorización del costo real de salida y persistencia del descargo en la orden de trabajo & 5 & Huamani Estefanero, Joel & Done \\
 \hline
-US33 & Reincorporación lógica de materiales a inventario por remoción en tarea técnica & AT-338 & UI Compose & Diseñar la vista de devolución de repuestos no utilizados con motivo de reintegro a bodega & 2 & Huamani Estefanero, Joel & Done \\
+US33 & Reincorporación lógica de materiales a inventario por remoción en tarea técnica & AT-292 & UI Compose & Maquetar la acción y confirmación de remoción de repuestos en el detalle de la tarea mecánica & 3 & Huamani Estefanero, Joel & Done \\
 \cline{3-8}
-& & AT-339 & Algoritmo & Restituir las existencias al lote cronológico original revirtiendo el costo imputado a la faena & 3 & Huamani Estefanero, Joel & Done \\
+& & AT-293 & Algoritmo & Implementar la restitución lógica de existencias al lote cronológico original del almacén & 3 & Huamani Estefanero, Joel & Done \\
 \cline{3-8}
-& & AT-340 & Room Local & Actualizar el saldo local de existencias y anular la imputación en el registro de la orden & 2 & Huamani Estefanero, Joel & Done \\
-\cline{3-8}
-& & AT-341 & Retrofit & Notificar al backend la devolución del insumo para actualizar el balance del kárdex valorizado & 2 & Huamani Estefanero, Joel & Done \\
+& & AT-294 & Dominio & Integrar el recálculo automático y rebaja del costo imputado en la orden de trabajo móvil & 3 & Huamani Estefanero, Joel & Done \\
 \hline
 \end{longtable}
 \endgroup
