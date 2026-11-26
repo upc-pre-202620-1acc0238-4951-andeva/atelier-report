@@ -55,5 +55,8 @@
 |  3.0.0  | 10/11/2026 | Huamani Estefanero, Joel         | Consolidación del **_Sprint 2_**.                                                                                                                               |
 |  3.2.0  | 12/11/2026 | Huamani Estefanero, Joel         | Consolidación del **_Validation Interview_**.                                                                                                                   |
 |  3.2.1  | 12/11/2026 | Huamani Estefanero, Joel         | Inserción de analíticos de colaboración AV2, conclusiones y Student Outcomes.                                                                                   |
+|  3.3.0  | 24/11/2026 | Huamani Estefanero, Joel         | Consolidación del Sprint Planning y estructura base del Sprint Backlog para el **_Sprint 3_**.                                                                  |
+|  3.3.1  | 24/11/2026 | Granda Ibarra, Luis Daniel       | Inserción del Documento de Arquitectura y Aprendizaje móvil (Clean Architecture, persistencia Room, sincronización y pruebas) y especificación de tareas asignadas del **_Sprint 3_**. |
+|  3.3.2  | 25/11/2026 | Granda Ibarra, Luis Daniel       | Inserción de evidencias de desarrollo, pruebas automatizadas y trazabilidad de historias finalizadas (US18, US28, US29, US30 y US40) para la aplicación multiplataforma en Flutter del **_Sprint 3_**. |
 
 \newpage
