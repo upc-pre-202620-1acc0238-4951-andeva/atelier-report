@@ -58,6 +58,14 @@ En el siguiente cuadro se describe las acciones realizadas y enunciados de concl
 & 
 % --- Conclusiones del Criterio 1 (AV2) ---
 \textbf{AV2}: En el hito AV2, el equipo demostró un dominio riguroso al asimilar tecnologías móviles en Kotlin con Jetpack Compose y arquitecturas móviles cliente, consolidando esquemas offline-first con SQLite que garantizan continuidad operativa en entornos sin red. Se validaron las fortalezas de desacoplamiento y resiliencia de datos locales frente a las debilidades asociadas a la gestión de memoria en dispositivos móviles y la sincronización concurrente con la API central. La integración multidisciplinaria enlazó el desarrollo de software con la mecatrónica de diagnóstico OBD-II, la ergonomía de bahías mecánicas y las reglas contables de inventario FIFO, aplicando técnicas de investigación empírica y pruebas funcionales para validar la estabilidad de las soluciones desplegadas. \newline
+\\ \cline{2-3}
+
+% --- Alumno 1 (TB2) ---
+& 
+\textbf{TB2}: Desarrollo integral de la aplicación móvil multiplataforma Atelier Workshop en Flutter y Dart bajo Clean Architecture, inyección de dependencias con GetIt y persistencia relacional local con Drift sobre SQLite 3. Se implementó el motor de sincronización offline-first con WorkManager y ConnectivityPlus, el almacenamiento seguro de credenciales con FlutterSecureStorage, la navegación modularizada y la localización completa al español. En el ámbito funcional, se construyeron los módulos de diagnóstico vehicular mediante Universal BLE para escáneres OBD-II y alertas predictivas con inteligencia artificial, la gestión de caja y emisión de comprobantes con aritmética financiera exacta mediante Decimal, la exportación documental en PDF de salud vehicular y flujo de caja, la gestión de proveedores, lotes de inventario, tablero de bahías y el control de asistencia geodésica con Geolocator. Se evaluaron como fortalezas la portabilidad multiplataforma desde una base única de código, la precisión contable en operaciones financieras y la continuidad operativa en fosas sin conectividad, frente a debilidades operativas como la complejidad en la resolución de colas de sincronización ante reconexiones intermitentes y las variaciones de enlace Bluetooth en hardware heterogéneo. Este trabajo articuló la ingeniería de software multiplataforma con la mecatrónica de diagnóstico automotriz, la contabilidad tributaria de caja y la logística de taller, aplicando pruebas unitarias e integración automatizada con Mocktail y FakeAsync para verificar la resiliencia del motor de sincronización. \newline
+& 
+% --- Conclusiones del Criterio 1 (TB2) ---
+\textbf{TB2}: En el hito TB2, el equipo consolidó el desarrollo del ecosistema móvil multiplataforma en Flutter y Dart bajo Clean Architecture, integrando persistencia local reactiva en Drift sobre SQLite 3, enlaces Bluetooth Low Energy para telemetría OBD-II y módulos integrales de caja, inventario y bahías de servicio. Se contrastaron las fortalezas de portabilidad y resiliencia fuera de línea frente a las debilidades derivadas de la sincronización concurrente y la heterogeneidad de dispositivos inalámbricos. La solución articuló dominios de ingeniería móvil, diagnóstico automotriz, contabilidad financiera y operación en taller, respaldada por pruebas unitarias, pruebas de integración automatizadas y trazabilidad completa de historias de usuario. \newline
 \\ \cline{2-2}
 
 % --- Alumno 2 ---
@@ -90,6 +98,10 @@ En el siguiente cuadro se describe las acciones realizadas y enunciados de concl
 
 &
 \textbf{AV2}: Actualización y aplicación práctica de conocimientos sobre Kotlin, Jetpack Compose y Clean Architecture para fortalecer el módulo de asistencia de Atelier Mobile. Se implementaron mejoras en la validación de geolocalización GPS para la historia de usuario US06, aplicando el cálculo de distancia mediante la fórmula de Haversine y controles de precisión, detección de ubicaciones simuladas y validación de geocercas. Asimismo, se mejoró el flujo de marcación de salida de US08 mediante confirmaciones y visualización del tiempo trabajado, jornada regular y sobretiempo calculados por el backend. Para US09, se incorporó un selector interactivo de días que permite consultar horarios, turnos y días de descanso. Adicionalmente, se revisó la integración de US10 y se actualizaron las pruebas unitarias para contemplar distintos escenarios de validación de asistencia. Este trabajo permitió consolidar conocimientos sobre geolocalización, desarrollo Android, integración con servicios backend y aseguramiento de calidad del software. \newline
+& \\
+
+&
+\textbf{TB2}: Aquí detallas tu aporte... \newline
 & \\ \cline{2-2}
 
 % --- Alumno 4 ---
@@ -104,6 +116,10 @@ En el siguiente cuadro se describe las acciones realizadas y enunciados de concl
 
 &
 \textbf{AV2}: Investigación, asimilación y aplicación práctica de técnicas de diseño y homologación de contratos de red entre la plataforma backend en Spring Boot y la aplicación móvil cliente en Android con Kotlin. Se implementó la capa de consumo de servicios web mediante Retrofit 2 y OkHttp, estructurando modelos de transferencia de datos inmutables alineados con la especificación RFC 7807 Problem Details para la gestión uniforme de errores HTTP en las historias de usuario de cálculo automático de presupuestos en cascada, imputación de repuestos y generación de proformas comerciales en PDF. Se evaluaron como fortalezas la erradicación de fallas de deserialización en tiempo de ejecución, la solidez tipada y la consistencia transaccional de los montos económicos, frente a debilidades operativas asociadas a la sobrecarga de mantenimiento de mapeadores intercapas y la latencia adicional en la validación de esquemas JSON extensos. El trabajo integró conocimientos multidisciplinarios vinculando la arquitectura de integración cliente-servidor con la contabilidad tributaria de órdenes de trabajo y la gestión administrativa de talleres mecánicos. Se emplearon métodos de investigación técnica sistemática mediante pruebas automatizadas de integración de contratos y validación de esquemas para certificar la consistencia de datos entre el servidor y las terminales móviles. \newline
+& \\
+
+&
+\textbf{TB2}: Aquí detallas tu aporte... \newline
 & \\ \cline{2-2}
 
 % --- Alumno 5 ---
@@ -118,6 +134,10 @@ En el siguiente cuadro se describe las acciones realizadas y enunciados de concl
 
 &
 \textbf{AV2}: Aprendizaje y aplicación práctica de Jetpack Compose con Material Design 3 y de Navigation Compose con rutas tipadas para construir la interfaz de Atelier Workshop Mobile sobre la lógica de dominio ya existente en la aplicación Android. Se trasladó el sistema de diseño de la galería de pantallas a código mediante tokens de color en modo oscuro y claro, tipografía, formas, componentes reutilizables y animaciones de entrada que respetan la opción del sistema para reducir el movimiento. Con esa base se implementaron los flujos de inicio de sesión, registro por invitación, verificación de correo con código OTP y elección de sede para cuentas sin perfil laboral, apoyados en ViewModels con estado inmutable expuesto mediante StateFlow, inyección con Dagger Hilt y sesión persistida en DataStore. Se interpretaron los códigos de error del backend, como la cuenta sin verificar o la ausencia de perfil laboral, para decidir el siguiente destino del usuario en lugar de mostrar mensajes genéricos. Posteriormente se implementó la navegación principal con una barra de pestañas cuya composición se decide por los permisos de la sesión y no por el nombre del rol, de modo que cada taller pueda personalizar sus roles sin modificar la aplicación. En ella se integraron las pantallas de asistencia, tareas, órdenes, recepción e inventario y se añadieron el perfil con cierre de sesión y el contador de operaciones pendientes de sincronizar. Se evaluaron como fortalezas la consistencia visual, la accesibilidad táctil y el desacoplamiento de cada feature respecto de la navegación, y como debilidades la dependencia de pantallas de otros módulos que aún no tienen su diseño final y la imposibilidad de compilar y probar en un emulador durante parte del desarrollo. El comportamiento de los ViewModels se verificó con pruebas unitarias y las decisiones quedaron documentadas en la hoja de ruta del repositorio. Asimismo, se realizó una entrevista de validación con un integrante del Segmento 2, personal operativo del taller, para contrastar con su operación real los flujos de la aplicación móvil y recoger observaciones que orienten los siguientes ajustes de la interfaz. \newline
+& \\
+
+&
+\textbf{TB2}: Aquí detallas tu aporte... \newline
 & \\ \hline
 
 % =========================================================================
@@ -147,6 +167,14 @@ En el siguiente cuadro se describe las acciones realizadas y enunciados de concl
 & 
 % --- Conclusiones del Criterio 2 (AV2) ---
 \textbf{AV2}: Durante el hito AV2, la superación de desafíos en el desarrollo móvil nativo, la persistencia local desconectada y la sincronización telemática vehicular reforzó en el equipo el reconocimiento del aprendizaje permanente como pilar del desempeño profesional. Los integrantes actualizaron sus planes de carrera documentando áreas de especialización en ingeniería móvil reactiva, computación en la nube y diseño de interfaces accesibles. Se consolidaron compromisos formales para alcanzar certificaciones de nivel profesional y desarrollar iniciativas tecnológicas escalables en un horizonte de dos a tres años post-graduación, garantizando una adaptación continua a las demandas del sector tecnológico. \newline
+\\ \cline{2-3}
+
+% --- Alumno 1 (TB2) ---
+& 
+\textbf{TB2}: La construcción de extremo a extremo de la aplicación móvil multiplataforma en Flutter con sincronización en segundo plano, aritmética financiera exacta y enlace telemático Bluetooth confirmó que el desempeño profesional en ingeniería de software exige aprendizaje autónomo y actualización continua frente a ecosistemas móviles y distribuidos convergentes. Se identificaron y documentaron como áreas estratégicas de crecimiento profesional post-graduación la arquitectura de sistemas móviles multiplataforma resilientes, la computación en la nube orientada a eventos y el diseño de plataformas IoT de misión crítica. En consonancia, se definió un plan riguroso de crecimiento que contempla la obtención de dos certificaciones internacionales de nivel profesional en Cloud Computing y Arquitectura Backend durante los dos primeros años posteriores al egreso universitario, complementado con especialización continua en arquitecturas reactivas con Flutter y motores de persistencia local, proyectando asumir el liderazgo técnico como Chief Technology Officer en el desarrollo y lanzamiento comercial de productos tecnológicos corporativos en un horizonte de tres años. \newline
+& 
+% --- Conclusiones del Criterio 2 (TB2) ---
+\textbf{TB2}: En el hito TB2, la culminación del desarrollo multiplataforma en Flutter y su integración con hardware telemétrico y servicios en la nube reafirmaron el compromiso del equipo con el aprendizaje permanente. Los integrantes documentaron áreas de especialización post-graduación enfocadas en ingeniería móvil multiplataforma, arquitectura cloud, ciberseguridad e integración de sistemas distribuidos, formalizando planes rigurosos de certificación internacional y liderazgo tecnológico en un horizonte de dos a tres años tras el egreso para responder con solvencia a las demandas cambiantes de la industria del software. \newline
 \\ \cline{2-2}
 
 % --- Alumno 2 ---
@@ -179,6 +207,10 @@ En el siguiente cuadro se describe las acciones realizadas y enunciados de concl
 
 &
 \textbf{AV2}: Reconocimiento de la necesidad de mantener una actualización técnica constante frente a los desafíos del desarrollo móvil nativo. La implementación de validaciones GPS, geocercas y mejoras en los flujos de asistencia evidenció la importancia de profundizar continuamente en Kotlin, Jetpack Compose, servicios de ubicación de Android y pruebas automatizadas. Asimismo, se identificó la necesidad de fortalecer conocimientos sobre integración de APIs y arquitectura de aplicaciones móviles para desarrollar soluciones confiables y escalables. Como parte del crecimiento profesional, se plantea continuar con el aprendizaje autónomo mediante documentación oficial, proyectos prácticos y capacitación en desarrollo Android nativo y arquitectura de software, con el objetivo de consolidar competencias que permitan adaptarse a la evolución tecnológica de la industria. \newline
+& \\
+
+&
+\textbf{TB2}: Aquí detallas tu aporte... \newline
 & \\ \cline{2-2}
 
 % --- Alumno 4 ---
@@ -193,6 +225,10 @@ En el siguiente cuadro se describe las acciones realizadas y enunciados de concl
 
 &
 \textbf{AV2}: La homologación de contratos entre clientes móviles y servicios distribuidos en la nube durante el hito de desarrollo evidenció la importancia crítica del aprendizaje permanente frente a los estándares de interoperabilidad y seguridad en la industria del software. Como áreas clave de crecimiento profesional post-graduación, se identificaron y documentaron la arquitectura de microservicios elásticos en la nube y la ingeniería de soluciones móviles reactivas de alto rendimiento. Para consolidar este perfil, se estructuró un plan de desarrollo profesional riguroso a corto y mediano plazo. Durante los primeros dos años tras culminar la carrera universitaria, el plan establece la preparación y obtención de las certificaciones internacionales Google Associate Android Developer y AWS Certified Solutions Architect Associate, asegurando el dominio de sistemas distribuidos y desarrollo cliente moderno. A mediano plazo, en un horizonte de tres años, se proyecta liderar el diseño arquitectónico y desarrollo técnico de una plataforma SaaS B2B enfocada en operaciones industriales y logística como Líder de Ingeniería de Software o Arquitecto de Soluciones, manteniendo un proceso ininterrumpido de capacitación tecnológica y estudio de patrones avanzados de integración. \newline
+& \\
+
+&
+\textbf{TB2}: Aquí detallas tu aporte... \newline
 & \\ \cline{2-2}
 
 % --- Alumno 5 ---
@@ -207,6 +243,10 @@ En el siguiente cuadro se describe las acciones realizadas y enunciados de concl
 
 &
 \textbf{AV2}: El desarrollo de la capa de presentación móvil mostró que las herramientas y buenas prácticas de Android cambian con rapidez y que dominarlas exige estudio continuo. Para implementar el diseño fue necesario aprender por cuenta propia la navegación con rutas tipadas, el manejo de insets en pantallas de borde a borde, las animaciones que respetan la accesibilidad del sistema y el diseño de la sesión según permisos, temas que no formaban parte de los conocimientos previos del curso. También se reconoció que las decisiones de interfaz deben contrastarse con quienes usan la herramienta, pues la entrevista de validación realizada con el Segmento 2 evidenció que la mirada de un técnico en el taller aporta criterios que no surgen del escritorio. Con base en esta experiencia se reafirmó la meta de especialización en backend y microservicios, y se identificó como complemento necesario mantener actualizados los conocimientos de desarrollo móvil nativo para comprender de extremo a extremo los sistemas que se diseñan. El plan consiste en continuar el camino hacia dos certificaciones profesionales en backend y microservicios durante los dos años posteriores al egreso, practicar con proyectos propios y contribuciones a repositorios abiertos, y reservar tiempo periódico para revisar las novedades de Kotlin, Compose y las guías de Material Design. \newline
+& \\
+
+&
+\textbf{TB2}: Aquí detallas tu aporte... \newline
 & \\ \hline
 
 \end{longtable}

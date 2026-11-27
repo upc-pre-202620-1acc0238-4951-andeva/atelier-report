@@ -8,4 +8,6 @@ TB1: [upc-pre-202620-1acc0238-4951-andeva-expo-tb1](https://upcedupe-my.sharepoi
 
 AV2: No aplica.
 
+TB2: No aplica.
+
 \newpage
