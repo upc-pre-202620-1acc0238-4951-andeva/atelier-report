@@ -4567,7 +4567,7 @@ Atributos y validaciones & Objetos de valor inmutables. \textbf{WorkOrderNumber}
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Clase o Estructura:} Enumeraciones de Dominio de Workshop Operations} \\*
 \hline
-Valores constantes & Tipos enumerados que gobiernan estados de orden (**WorkOrderStatus**), labores (**WorkOrderTaskStatus**), causas de suspensión (**HoldReason**), estaciones (**BayType**, **BayStatus**), severidad y aprobación (**ProposalSeverity**, **ProposalStatus**) y tipos periciales (**EvidenceType**). \\*
+Valores constantes & Tipos enumerados que gobiernan estados de orden (\textbf{WorkOrderStatus}), labores (\textbf{WorkOrderTaskStatus}), causas de suspensión (\textbf{HoldReason}), estaciones (\textbf{BayType}, \textbf{BayStatus}), severidad y aprobación (\textbf{ProposalSeverity}, \textbf{ProposalStatus}) y tipos periciales (\textbf{EvidenceType}). \\*
 \hline
 \textbf{Firma o Tipo} & \texttt{Enumeraciones de dominio} \\*
 \hline
@@ -7629,7 +7629,7 @@ Supplier\allowbreak Repository\allowbreak Impl & Adaptador secundario de salida 
 \hline
 \textbf{Categoría} & Adaptador de Persistencia \\*
 \hline
-\textbf{Relaciones} & Persiste proveedores comerciales y despacha eventos **SupplierRegisteredEvent** a Outbox. \\*
+\textbf{Relaciones} & Persiste proveedores comerciales y despacha eventos \textbf{SupplierRegisteredEvent} a Outbox. \\*
 \hline
 \textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak adapters} \\
 \hline
@@ -7637,7 +7637,7 @@ PurchaseOrder\allowbreak Repository\allowbreak Impl & Adaptador secundario de sa
 \hline
 \textbf{Categoría} & Adaptador de Persistencia \\*
 \hline
-\textbf{Relaciones} & Persiste órdenes en cascada y emite eventos **PurchaseOrderReceivedEvent** a Outbox. \\*
+\textbf{Relaciones} & Persiste órdenes en cascada y emite eventos \textbf{PurchaseOrderReceivedEvent} a Outbox. \\*
 \hline
 \textbf{Paquete} & \texttt{...\allowbreak persistence.\allowbreak jpa.\allowbreak adapters} \\
 \hline
@@ -7863,7 +7863,7 @@ A fin de sistematizar las responsabilidades y contratos de persistencia, en la @
 \hline
 \textbf{Repositorios Inyectados} & \texttt{InventoryItemPersistenceRepository}, \texttt{InventoryBatchPersistenceRepository} \\*
 \hline
-\textbf{Operaciones Clave} & Mapea el agregado **InventoryItem** a su entidad relacional mediante ensamblador. Persiste en PostgreSQL 16 mediante *saveAndFlush()*. Extrae eventos acumulados mediante *pullDomainEvents()* y los canaliza al publicador transaccional hacia outbox\_messages. Ejecuta *findById()* con hidratación cronológica de lotes, *findByTenantIdAndSku()* para resolución por código natural de parte, *findLowStockItems()* para detección preventiva de repuestos en umbral crítico y *existsByTenantIdAndSku()* para prevención de duplicados. \\
+\textbf{Operaciones Clave} & Mapea el agregado \textbf{InventoryItem} a su entidad relacional mediante ensamblador. Persiste en PostgreSQL 16 mediante *saveAndFlush()*. Extrae eventos acumulados mediante *pullDomainEvents()* y los canaliza al publicador transaccional hacia outbox\_messages. Ejecuta *findById()* con hidratación cronológica de lotes, *findByTenantIdAndSku()* para resolución por código natural de parte, *findLowStockItems()* para detección preventiva de repuestos en umbral crítico y *existsByTenantIdAndSku()* para prevención de duplicados. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} SupplierRepositoryImpl} \\*
 \hline
@@ -7871,7 +7871,7 @@ A fin de sistematizar las responsabilidades y contratos de persistencia, en la @
 \hline
 \textbf{Repositorio Inyectado} & \texttt{SupplierPersistenceRepository} \\*
 \hline
-\textbf{Operaciones Clave} & Persiste y actualiza fichas de distribuidores comerciales. Despacha el evento **SupplierRegisteredEvent** en altas nuevas hacia outbox\_messages. Ejecuta *findById()* con validación de inquilino, *findByTenantIdAndTaxId()* para resolución unívoca por RUC de 11 dígitos, *existsByTenantIdAndTaxId()* para verificación de unicidad fiscal previa al registro y *searchByBusinessName()* para autocompletado en emisión de órdenes. \\
+\textbf{Operaciones Clave} & Persiste y actualiza fichas de distribuidores comerciales. Despacha el evento \textbf{SupplierRegisteredEvent} en altas nuevas hacia outbox\_messages. Ejecuta *findById()* con validación de inquilino, *findByTenantIdAndTaxId()* para resolución unívoca por RUC de 11 dígitos, *existsByTenantIdAndTaxId()* para verificación de unicidad fiscal previa al registro y *searchByBusinessName()* para autocompletado en emisión de órdenes. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} PurchaseOrderRepositoryImpl} \\*
 \hline
@@ -7879,7 +7879,7 @@ A fin de sistematizar las responsabilidades y contratos de persistencia, en la @
 \hline
 \textbf{Repositorios Inyectados} & \texttt{PurchaseOrderPersistenceRepository}, \texttt{PurchaseOrderItemPersistenceRepository} \\*
 \hline
-\textbf{Operaciones Clave} & Persiste en cascada la cabecera de la orden y las líneas de detalle. Al transicionar a RECEIVED emite **PurchaseOrderReceivedEvent** en outbox\_messages para originar lotes FIFO dependientes. Ejecuta *findById()* con carga de detalles y URL de comprobante digital, *findByTenantIdAndOrderNumber()* para consulta de órdenes por código correlativo y *findNextOrderSequence()* con consulta agregada para correlación atómica de pedidos. \\
+\textbf{Operaciones Clave} & Persiste en cascada la cabecera de la orden y las líneas de detalle. Al transicionar a RECEIVED emite \textbf{PurchaseOrderReceivedEvent} en outbox\_messages para originar lotes FIFO dependientes. Ejecuta *findById()* con carga de detalles y URL de comprobante digital, *findByTenantIdAndOrderNumber()* para consulta de órdenes por código correlativo y *findNextOrderSequence()* con consulta agregada para correlación atómica de pedidos. \\
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
@@ -11881,7 +11881,7 @@ A fin de sintetizar las responsabilidades y contratos de persistencia, en la @tb
 \hline
 \textbf{Repositorio Inyectado} & \texttt{WorkShiftPersistenceRepository} \\*
 \hline
-\textbf{Operaciones Clave} & Transforma el agregado **WorkShift** a entidad relacional mediante **WorkShiftPersistenceAssembler**. Persiste en base de datos relacional mediante *save()*. Extrae eventos de dominio con *pullDomainEvents()* y los canaliza al publicador transaccional. Ejecuta *findById()* con verificación de inquilino, *findByTenantIdAndName()* para validación de nombres únicos de jornada y *existsByTenantIdAndName()* para prevenir duplicados. \\
+\textbf{Operaciones Clave} & Transforma el agregado \textbf{WorkShift} a entidad relacional mediante \textbf{WorkShiftPersistenceAssembler}. Persiste en base de datos relacional mediante *save()*. Extrae eventos de dominio con *pullDomainEvents()* y los canaliza al publicador transaccional. Ejecuta *findById()* con verificación de inquilino, *findByTenantIdAndName()* para validación de nombres únicos de jornada y *existsByTenantIdAndName()* para prevenir duplicados. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} AttendanceRecordRepositoryImpl} \\*
 \hline
@@ -11889,7 +11889,7 @@ A fin de sintetizar las responsabilidades y contratos de persistencia, en la @tb
 \hline
 \textbf{Repositorio Inyectado} & \texttt{AttendanceRecordPersistenceRepository} \\*
 \hline
-\textbf{Operaciones Clave} & Mapea **AttendanceRecord** hacia **AttendanceRecordPersistenceEntity** asegurando fidelidad de coordenadas satelitales y distancias de geocerca. Al registrar ingresos o salidas extrae eventos **AttendanceMarkedEvent** hacia outbox\_messages. Ejecuta *findActiveClockIn()* mediante JPQL para validar marcaciones abiertas sin salida, *findAllByBranchAndDay()* para reportes diarios de patio y *findAllByMembershipAndPeriod()* para liquidaciones salariales. \\
+\textbf{Operaciones Clave} & Mapea \textbf{AttendanceRecord} hacia \textbf{AttendanceRecordPersistenceEntity} asegurando fidelidad de coordenadas satelitales y distancias de geocerca. Al registrar ingresos o salidas extrae eventos \textbf{AttendanceMarkedEvent} hacia outbox\_messages. Ejecuta *findActiveClockIn()* mediante JPQL para validar marcaciones abiertas sin salida, *findAllByBranchAndDay()* para reportes diarios de patio y *findAllByMembershipAndPeriod()* para liquidaciones salariales. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} PayrollPaymentRepositoryImpl} \\*
 \hline
@@ -11897,7 +11897,7 @@ A fin de sintetizar las responsabilidades y contratos de persistencia, en la @tb
 \hline
 \textbf{Repositorio Inyectado} & \texttt{PayrollPaymentPersistenceRepository} \\*
 \hline
-\textbf{Operaciones Clave} & Persiste en cascada la boleta de pago y sus partidas dependientes de bonos y deducciones en **PayrollPaymentPersistenceEntity**, **PayrollBonusItemPersistenceEntity** y **PayrollDeductionItemPersistenceEntity**. Extrae eventos **PayrollCalculatedEvent**, **PayrollApprovedEvent** y **PayrollPaidEvent** despachándolos al bus transaccional. Ejecuta *findById()* con carga de partidas, *findByMembershipIdAndPeriod()* para validación de nómina única mensual y *findAllByTenantIdAndPeriod()* para consolidación de planillas. \\
+\textbf{Operaciones Clave} & Persiste en cascada la boleta de pago y sus partidas dependientes de bonos y deducciones en \textbf{PayrollPaymentPersistenceEntity}, \textbf{PayrollBonusItemPersistenceEntity} y \textbf{PayrollDeductionItemPersistenceEntity}. Extrae eventos \textbf{PayrollCalculatedEvent}, \textbf{PayrollApprovedEvent} y \textbf{PayrollPaidEvent} despachándolos al bus transaccional. Ejecuta *findById()* con carga de partidas, *findByMembershipIdAndPeriod()* para validación de nómina única mensual y *findAllByTenantIdAndPeriod()* para consolidación de planillas. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} EmployeeProfileRepositoryImpl} \\*
 \hline
@@ -11905,7 +11905,7 @@ A fin de sintetizar las responsabilidades y contratos de persistencia, en la @tb
 \hline
 \textbf{Repositorio Inyectado} & \texttt{EmployeeProfilePersistenceRepository} \\*
 \hline
-\textbf{Operaciones Clave} & Persiste y actualiza expedientes laborales de personal técnico y administrativo en **EmployeeProfilePersistenceEntity**. Gestiona la asignación de turnos y condiciones contractuales de salario. Ejecuta *findByMembershipId()* para obtención directa de ficha laboral, *findAllByBranchId()* para nóminas de sede física y *findAllByTenantIdAndEmploymentStatus()* para personal activo en el taller. \\
+\textbf{Operaciones Clave} & Persiste y actualiza expedientes laborales de personal técnico y administrativo en \textbf{EmployeeProfilePersistenceEntity}. Gestiona la asignación de turnos y condiciones contractuales de salario. Ejecuta *findByMembershipId()* para obtención directa de ficha laboral, *findAllByBranchId()* para nóminas de sede física y *findAllByTenantIdAndEmploymentStatus()* para personal activo en el taller. \\
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
