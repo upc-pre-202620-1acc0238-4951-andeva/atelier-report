@@ -652,7 +652,7 @@ andeva-upc/\allowbreak atelier-platform & main & \texttt{cfdf145} & Merge tag '0
 \hline
 andeva-upc/\allowbreak atelier-platform & main & \texttt{3bfa961} & Merge branch 'release/\allowbreak 0.3.0' & - & 03/\allowbreak 10/\allowbreak 2026 \\
 \hline
-andeva-upc/\allowbreak atelier-platform & main & \texttt{d120cfc} & Merge branch 'feature/\allowbreak external-billing' into develop \# Please enter a commit message to explain why this merge is necessary, \# especially if it merges an updated upstream into a topic branch. \# \# Lines starting with '\#' will be ignored, and an empty message aborts \# the commit. & - & 03/\allowbreak 10/\allowbreak 2026 \\
+andeva-upc/\allowbreak atelier-platform & main & \texttt{d120cfc} & Merge branch 'feature/\allowbreak external-billing' into develop & - & 03/\allowbreak 10/\allowbreak 2026 \\
 \hline
 andeva-upc/\allowbreak atelier-platform & main & \texttt{8c39fe3} & feat(i18n): localize validation and exceptions. & Implement dynamic internationalization across Bean Validation annotations and REST exception handlers using Spring MessageSource and Accept-Language header resolution, supporting English and Spanish locales. & 03/\allowbreak 10/\allowbreak 2026 \\
 \hline

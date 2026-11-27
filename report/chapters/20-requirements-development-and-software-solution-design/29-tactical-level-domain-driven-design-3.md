@@ -3075,7 +3075,7 @@ Asimismo, el adaptador **SeriesConfigurationRepositoryImpl** implementa el puert
 \hline
 \textbf{Repositorio Inyectado} & \texttt{ElectronicVoucherPersistenceRepository} \\*
 \hline
-\textbf{Operaciones Clave} & Mapea el agregado puro **ElectronicVoucher** hacia **ElectronicVoucherPersistenceEntity** mediante **ElectronicVoucherPersistenceAssembler** bajo el subpaquete persistence.jpa.assemblers. Persiste en PostgreSQL 16 coordinando la cascada de líneas de detalle y cobros mediante *saveAndFlush()*. Extrae eventos de integración acumulados con *pullDomainEvents()* y los inserta de manera atómica en la tabla outbox\_messages. Ejecuta *findById()* con hidratación de colecciones dependientes, *findByTenantIdAndSerieAndNumber()* para recuperación canónica de comprobantes fiscales, *findAllByWorkOrderId()* para auditoría de facturación asociada a órdenes de trabajo y *findAllByTenantAndDateRange()* con segmentación optimizada para reportes contables. \\
+\textbf{Operaciones Clave} & Mapea el agregado puro \textbf{ElectronicVoucher} hacia \textbf{ElectronicVoucherPersistenceEntity} mediante \textbf{ElectronicVoucherPersistenceAssembler} bajo el subpaquete persistence.jpa.assemblers. Persiste en PostgreSQL 16 coordinando la cascada de líneas de detalle y cobros mediante *saveAndFlush()*. Extrae eventos de integración acumulados con *pullDomainEvents()* y los inserta de manera atómica en la tabla outbox\_messages. Ejecuta *findById()* con hidratación de colecciones dependientes, *findByTenantIdAndSerieAndNumber()* para recuperación canónica de comprobantes fiscales, *findAllByWorkOrderId()* para auditoría de facturación asociada a órdenes de trabajo y *findAllByTenantAndDateRange()* con segmentación optimizada para reportes contables. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} VoucherPaymentRepositoryImpl} \\*
 \hline
@@ -3083,7 +3083,7 @@ Asimismo, el adaptador **SeriesConfigurationRepositoryImpl** implementa el puert
 \hline
 \textbf{Repositorio Inyectado} & \texttt{VoucherPaymentPersistenceRepository} \\*
 \hline
-\textbf{Operaciones Clave} & Persiste transacciones individuales de pago y amortizaciones financieras vinculadas a comprobantes. Registra la referencia bancaria, método de pago y marca temporal de recaudación. Despacha eventos **VoucherPaymentRegisteredEvent** hacia outbox\_messages para notificar la liberación del vehículo en taller. Ejecuta *findById()* para auditoría transaccional, *findAllByVoucherId()* para consultar el historial completo de amortizaciones y *findAllByBranchAndDate()* para consolidar el arqueo de caja diario de la sucursal física. \\
+\textbf{Operaciones Clave} & Persiste transacciones individuales de pago y amortizaciones financieras vinculadas a comprobantes. Registra la referencia bancaria, método de pago y marca temporal de recaudación. Despacha eventos \textbf{VoucherPaymentRegisteredEvent} hacia outbox\_messages para notificar la liberación del vehículo en taller. Ejecuta *findById()* para auditoría transaccional, *findAllByVoucherId()* para consultar el historial completo de amortizaciones y *findAllByBranchAndDate()* para consolidar el arqueo de caja diario de la sucursal física. \\
 \hline
 \multicolumn{2}{|>{\centering\arraybackslash}p{15.4cm}|}{\textbf{Adaptador:} SeriesConfigurationRepositoryImpl} \\*
 \hline
