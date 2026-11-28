@@ -153,3 +153,55 @@ _Nota._ Grafo de commits y ramas integradas sobre el historial del repositorio e
 _Nota._ Registro cronológico de commits que certifica la autoría y coherencia con el registro de versiones del informe para el hito AV2.
 
 \newpage
+
+**Reporte de colaboración del TB2**
+
+Para el hito TB2, el equipo consolidó el ciclo documental bajo la metodología Docs as Code, integrando al informe técnico los resultados del Sprint 3 centrados en la aplicación móvil multiplataforma Atelier Workshop en Flutter y Dart. Los avances se estructuraron de forma modular en archivos Markdown dentro del repositorio oficial atelier-report en GitHub, manteniendo trazabilidad estricta entre las historias de usuario, el tablero de subtareas y las evidencias de implementación.
+
+El flujo de trabajo mantuvo la disciplina del modelo de ramificación GitFlow mediante ramas de características sobre develop y ramas de estabilización release para las versiones 3.3.0, 3.4.0, 3.5.0 y 3.5.1. Asimismo, la compilación contenerizada con Docker, Pandoc 3.8.3 y LuaLaTeX garantizó la uniformidad tipográfica de tablas de sprint backlog, diagramas y anexos de cierre del ciclo académico.
+
+**Distribución de Responsabilidades**
+
+La redacción, estructuración y validación de los contenidos incorporados en el hito TB2 contó con la participación coordinada de los cinco integrantes del equipo de trabajo, manteniendo correspondencia directa con el historial de control de versiones y el Registro de Versiones del Informe:
+
+- **Huamani Estefanero, Joel (shouydev):** Registró 16 commits en la ventana de consolidación de este hito. Lideró la integración técnica del Sprint 3 en las versiones 3.3.0, 3.5.0 y 3.5.1, redactando la planificación del sprint, la tabla completa del sprint backlog con subtareas de Jira y las evidencias de implementación multiplataforma en Flutter con Clean Architecture, Drift, WorkManager y Universal BLE para diagnóstico OBD-II. Asimismo, actualizó las conclusiones, los anexos y la sustentación de Student Outcomes, realizó la limpieza tipográfica de tablas en LaTeX y coordinó los lanzamientos de estabilización hacia la rama principal.
+
+- **Granda Ibarra, Luis Daniel (danieltyuyu):** Registró 2 commits en el repositorio y gestionó la integración de la rama de documentación móvil hacia develop. Documentó la arquitectura y aprendizajes de desarrollo móvil junto con la especificación de tareas asignadas del Sprint 3 en las versiones 3.3.1 y 3.3.2, e incorporó las evidencias de desarrollo, pruebas automatizadas y trazabilidad de las historias US18, US28, US29, US30 y US40 para la aplicación multiplataforma en Flutter, actualizando el registro de versiones.
+
+\newpage
+
+- **Teran Zavala, Mauricio Alejandro (mau-tz):** Registró 2 commits. Implementó en la aplicación móvil multiplataforma en Flutter los módulos de control de inventario FIFO con alertas reactivas de stock mínimo, tarjeta de rentabilidad en línea, configuración de series fiscales ante SUNAT y exportación en PDF de informes periciales de salud vehicular y flota, actualizando su sustentación individual en Student Outcomes para el hito TB2.
+
+- **Rocha Cotrina, Alvaro (alvarorc24):** Registró 1 commit. Desarrolló en Flutter y Dart los módulos de seguridad móvil con cierre de sesión y limpieza de caché temporal, recuperación de acceso con enlaces profundos, aislamiento de lecturas telemétricas por técnico en fosa y recaudación multimedio en caja con pase de salida vehicular, actualizando su sustentación de competencias en Student Outcomes para TB2.
+
+- **Sanchez Santin, Adiel Abdiaz (xs4el):** Construyó en Flutter y Dart bajo Clean Architecture los módulos de liquidación económica automática en cascada, facturación electrónica UBL 2.1 ante SUNAT con generación de código QR, emisión de notas de crédito, consulta de estado y exportación de reportes de flujo de caja en PDF, consolidando su sustentación técnica en Student Outcomes para el hito TB2.
+
+\newpage
+
+**Evidencias Gráficas de Colaboración en GitHub para el TB2**
+
+Las siguientes figuras certifican la trazabilidad, la frecuencia de commits y la colaboración del equipo en el repositorio de documentación durante el ciclo de desarrollo correspondiente al hito TB2.
+
+**_Métricas de Contribuidores y Frecuencia de Commits en GitHub para el TB2_**
+
+![](report/assets/collaboration-insights/tb2-github-contributors.png){width=95%}
+
+_Nota._ Gráfico de contribuciones individuales del repositorio atelier-report en GitHub durante el hito TB2.
+
+\newpage
+
+**_Red de Ramas e Integraciones en GitHub para el TB2_**
+
+![](report/assets/collaboration-insights/tb2-github-network-frequency.png){width=100%}
+
+_Nota._ Grafo de commits y ramas integradas sobre el historial del repositorio en GitHub durante el hito TB2.
+
+\newpage
+
+**_Registro Cronológico de Commits en GitHub para el TB2_**
+
+![](report/assets/collaboration-insights/tb2-github-commits-log.png){width=100%}
+
+_Nota._ Registro cronológico de commits que certifica la autoría y coherencia con el registro de versiones del informe para el hito TB2.
+
+\newpage

@@ -101,7 +101,7 @@ En el siguiente cuadro se describe las acciones realizadas y enunciados de concl
 & \\
 
 &
-\textbf{TB2}: Aquí detallas tu aporte... \newline
+\textbf{TB2}: Asimilación y aplicación práctica del entorno multiplataforma Flutter y Dart con persistencia local Drift sobre SQLite 3 para los módulos de seguridad móvil, sincronización en fosa y recaudación en caja de Atelier Workshop Mobile. Se implementaron el cierre de sesión seguro con limpieza de caché temporal y conteo de operaciones pendientes en el dispositivo, el flujo de recuperación de acceso con enlaces profundos mediante token de verificación y el aislamiento de lecturas telemétricas por técnico en fosa con volcado previo a la sincronización. Asimismo, se desarrollaron los pasos de recaudación multimedio, transición a orden pagada, emisión del pase de salida vehicular y entrega en patio. Se evaluaron como fortalezas el aislamiento transaccional de sesiones en terminales compartidas y la consistencia en la liquidación de cobros desde movilidad, frente a debilidades como la complejidad de mantener la paridad de navegación mediante enlaces profundos en sistemas móviles heterogéneos y el riesgo de colisiones al purgar datos locales con tareas diferidas activas. Este desarrollo integró la ingeniería móvil reactiva con la seguridad de credenciales, la mecatrónica de diagnóstico en fosa y la gestión operativa de cobranzas y entrega vehicular, aplicando pruebas unitarias de ViewModels y pruebas automatizadas de extremo a extremo. \newline
 & \\ \cline{2-2}
 
 % --- Alumno 4 ---
@@ -119,7 +119,7 @@ En el siguiente cuadro se describe las acciones realizadas y enunciados de concl
 & \\
 
 &
-\textbf{TB2}: Aquí detallas tu aporte... \newline
+\textbf{TB2}: Investigación, asimilación y aplicación práctica de Flutter y Dart bajo Clean Architecture para la construcción de los módulos de liquidación financiera, facturación electrónica tributaria y reportes contables en Atelier Workshop Mobile. Se desarrollaron la liquidación económica automática en cascada de órdenes de trabajo, los casos de uso de emisión, nota de crédito, anulación, consulta de estado y generación de código QR para comprobantes electrónicos UBL 2.1 ante SUNAT mediante Proveedor de Servicios Electrónicos, así como la exportación y compartición de reportes de flujo de caja en formato PDF filtrados por sucursal. Se evaluaron como fortalezas la exactitud matemática en el desglose tributario de impuestos, la trazabilidad documental en caja y el desacoplamiento de los casos de uso frente a la capa visual, frente a debilidades operativas como la latencia en la respuesta síncrona de validación fiscal externa y la gestión de permisos de almacenamiento de archivos PDF entre distintas versiones de sistemas operativos móviles. Este trabajo articuló la ingeniería de software multiplataforma con la normativa fiscal de facturación electrónica peruana y la auditoría contable de talleres automotrices, sustentando la confiabilidad del sistema mediante pruebas unitarias de ViewModels, pruebas de pantalla y flujos automatizados de extremo a extremo. \newline
 & \\ \cline{2-2}
 
 % --- Alumno 5 ---
@@ -137,7 +137,7 @@ En el siguiente cuadro se describe las acciones realizadas y enunciados de concl
 & \\
 
 &
-\textbf{TB2}: Aquí detallas tu aporte... \newline
+\textbf{TB2}: Asimilación y aplicación práctica del ecosistema Flutter y Dart bajo Clean Architecture para la implementación de los módulos de control de inventario FIFO, configuración de series fiscales y emisión de informes técnicos en Atelier Workshop Mobile. Se construyeron la bandeja reactiva de alertas por stock mínimo con recepción fotográfica de compras mediante cámara, la tarjeta de rentabilidad con cálculo en línea del margen bruto frente al costo de lotes FIFO, la configuración de series tributarias de boleta y factura con validación de duplicados por sede y la descarga consolidada en PDF de informes periciales de salud vehicular y flota. Se analizaron como fortalezas la visibilidad inmediata de la rentabilidad operativa por repuesto y la reactividad ante cambios en la caché local de existencias, frente a debilidades operativas como la sincronización de alertas de inventario generadas en segundo plano y el manejo de memoria al adjuntar imágenes de comprobantes de compra. La labor integró la ingeniería móvil multiplataforma con la contabilidad de costos FIFO, la administración tributaria de series SUNAT y el análisis pericial de salud vehicular, validando la precisión aritmética y los flujos de usuario mediante pruebas automatizadas de ViewModels y pruebas funcionales de pantalla. \newline
 & \\ \hline
 
 % =========================================================================
@@ -210,7 +210,7 @@ En el siguiente cuadro se describe las acciones realizadas y enunciados de concl
 & \\
 
 &
-\textbf{TB2}: Aquí detallas tu aporte... \newline
+\textbf{TB2}: La implementación de mecanismos de revocación segura de credenciales, aislamiento de lecturas telemétricas en Drift y orquestación de cobros multimedio sobre Flutter evidenció que la ingeniería de software actual exige una actualización continua en seguridad móvil, sincronización sin conexión e interoperabilidad multiplataforma. Como áreas prioritarias de crecimiento profesional post-graduación, se identificaron y documentaron la Arquitectura de Software resiliente y el diseño de sistemas de Internet de las Cosas con procesamiento de datos sensoriales en tiempo real. Para responder a estos retos, se estructuró un plan riguroso que proyecta la obtención de dos certificaciones internacionales de nivel profesional en Arquitectura de Software e Internet de las Cosas durante los dos primeros años posteriores a la culminación de la carrera. Esta formación permitirá liderar el desarrollo y la validación operativa de plataformas tecnológicas B2B orientadas a la modernización del sector automotriz como Líder Técnico o Arquitecto de Software en un horizonte de tres años. \newline
 & \\ \cline{2-2}
 
 % --- Alumno 4 ---
@@ -228,7 +228,7 @@ En el siguiente cuadro se describe las acciones realizadas y enunciados de concl
 & \\
 
 &
-\textbf{TB2}: Aquí detallas tu aporte... \newline
+\textbf{TB2}: El desarrollo de flujos críticos de facturación electrónica UBL 2.1, liquidación en cascada y generación documental PDF en un cliente multiplataforma consolidó la convicción de que la ingeniería de software demanda un aprendizaje permanente frente a la evolución de marcos móviles, estándares tributarios digitales y servicios distribuidos en la nube. Se documentaron como áreas de crecimiento profesional post-graduación la ingeniería de aplicaciones móviles reactivas de alto rendimiento y la arquitectura de microservicios y plataformas SaaS en la nube. Con base en estas prioridades, se definió un plan de desarrollo profesional riguroso que contempla la obtención de las certificaciones internacionales Google Associate Android Developer y AWS Certified Solutions Architect Associate en los dos primeros años posteriores al egreso universitario. Dicha ruta consolidará las capacidades técnicas necesarias para asumir el liderazgo arquitectónico de plataformas SaaS B2B orientadas a la automatización industrial y logística como Líder de Ingeniería de Software o Arquitecto de Soluciones en un horizonte de tres años. \newline
 & \\ \cline{2-2}
 
 % --- Alumno 5 ---
@@ -246,7 +246,7 @@ En el siguiente cuadro se describe las acciones realizadas y enunciados de concl
 & \\
 
 &
-\textbf{TB2}: Aquí detallas tu aporte... \newline
+\textbf{TB2}: La construcción de módulos de cálculo de rentabilidad FIFO, gestión documental PDF y parametrización fiscal en Flutter reafirmó que la ingeniería de software exige una actualización constante para articular interfaces cliente eficientes con reglas de negocio complejas y servicios distribuidos. Se identificaron y documentaron como áreas estratégicas de crecimiento profesional post-graduación la arquitectura backend de microservicios escalables, la optimización de bases de datos y la inteligencia artificial aplicada a la automatización de informes empresariales. En coherencia con estos objetivos, se formuló un plan riguroso de aprendizaje continuo orientado a obtener al menos dos certificaciones internacionales de nivel profesional en Backend y Microservicios durante los dos primeros años posteriores a la graduación, respaldado por el desarrollo de proyectos prácticos y contribuciones a repositorios de código abierto. A la par, el plan proyecta fundar una iniciativa tecnológica con inteligencia artificial para automatizar reportes ejecutivos en empresas medianas en un plazo de dos a tres años. \newline
 & \\ \hline
 
 \end{longtable}
