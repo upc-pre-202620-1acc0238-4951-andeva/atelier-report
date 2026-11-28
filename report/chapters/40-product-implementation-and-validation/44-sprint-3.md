@@ -117,7 +117,7 @@ Cada historia de usuario se descompone en tareas de diseño de interfaz en Flutt
 
 *Nota.* Captura de pantalla del tablero ágil del Sprint 3 en Jira Software mostrando las veintiuna historias de usuario distribuidas entre las columnas To Do y Done.
 
-La @tbl:sprint-backlog-3 presenta la maqueta base del Sprint Backlog del Sprint 3 con las veintiuna historias de usuario y sus responsables asignados, lista para registrar el desglose de subtareas, estimaciones horarias y estados conforme avance el tablero en Jira Software.
+La @tbl:sprint-backlog-3 presenta el Sprint Backlog consolidado del Sprint 3 con las veintiuna historias de usuario, el desglose de sus sesenta y tres subtareas técnicas sincronizadas con Jira Software, las estimaciones horarias y el estado completado de cada ítem.
 
 \begingroup
 \scriptsize
@@ -145,52 +145,136 @@ La @tbl:sprint-backlog-3 presenta la maqueta base del Sprint Backlog del Sprint 
 \endfoot
 \hline
 \endlastfoot
-US04 & Cierre de sesión seguro y revocación de credenciales en el dispositivo móvil &  &  &  &  & Rocha Cotrina, Alvaro &  \\
+US04 & Cierre de sesión seguro y revocación de credenciales en el dispositivo móvil & AT-336 & Pruebas & Agregar pruebas unitarias y de flujo para cierre de sesión y limpieza temporal & 1 & Rocha Cotrina, Alvaro & Done \\
+\cline{3-8}
+& & AT-337 & Dominio & Implementar limpieza de caché temporal y conteo de operaciones pendientes del dispositivo para cierre seguro & 1 & Rocha Cotrina, Alvaro & Done \\
+\cline{3-8}
+& & AT-338 & Auth / UI & Integrar la revocación de credenciales en el repositorio de autenticación y banner de pendientes al iniciar sesión & 1 & Rocha Cotrina, Alvaro & Done \\
 \hline
-US05 & Restablecimiento de credenciales de acceso mediante token de verificación &  &  &  &  & Rocha Cotrina, Alvaro &  \\
+US05 & Restablecimiento de credenciales de acceso mediante token de verificación & AT-339 & UI Flutter & Maquetar pantallas de solicitud y restablecimiento de contraseña con sus ViewModels y estados UI & 2 & Rocha Cotrina, Alvaro & Done \\
+\cline{3-8}
+& & AT-340 & Pruebas & Agregar pruebas de recuperación y restablecimiento de contraseña mediante enlace con token & 2 & Rocha Cotrina, Alvaro & Done \\
+\cline{3-8}
+& & AT-341 & Navegación & Implementar bandeja de enlaces profundos y rutas de recuperación en el grafo de autenticación & 2 & Rocha Cotrina, Alvaro & Done \\
 \hline
-US16 & Enlace inalámbrico y sincronización de escáner OBD-II en bahía &  &  &  &  & Huamani Estefanero, Joel &  \\
+US16 & Enlace inalámbrico y sincronización de escáner OBD-II en bahía & AT-324 & BLE / Parser & Implementar el enlace ELM327 por Bluetooth Low Energy y parser de respuestas OBD-II en Flutter & 3 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+& & AT-325 & UI Flutter & Maquetar la pestaña de dispositivos en el centro de diagnóstico con pruebas de protocolo y enlace & 3 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+& & AT-326 & Casos de Uso & Implementar los casos de uso de registro y actualización de estado de escáneres OBD-II contra la API IoT & 3 & Huamani Estefanero, Joel & Done \\
 \hline
-US17 & Extracción y decodificación de códigos de falla computarizados &  &  &  &  & Huamani Estefanero, Joel &  \\
+US17 & Extracción y decodificación de códigos de falla computarizados & AT-327 & UI Flutter & Maquetar pantalla de fallas vehiculares y ViewModel de diagnóstico para listar y consultar códigos por vehículo & 2 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+& & AT-328 & Pruebas & Agregar pruebas unitarias y de widgets para el parser de códigos de falla y las pantallas correspondientes & 2 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+& & AT-329 & Dominio & Implementar la decodificación de códigos de falla, mapeo local y encolado en el manejador de sincronización & 2 & Huamani Estefanero, Joel & Done \\
 \hline
-US18 & Monitoreo dinámico de parámetros telemétricos en tiempo real &  &  &  &  & Granda Ibarra, Luis Daniel &  \\
+US18 & Monitoreo dinámico de parámetros telemétricos en tiempo real & AT-351 & UI Flutter & Maquetar pantalla de telemetría en vivo con congelamiento de valores, alertas y acceso desde el centro de diagnóstico & 3 & Granda Ibarra, Luis Daniel & Done \\
+\cline{3-8}
+& & AT-352 & API / Dominio & Implementar endpoint, esquema de transferencia, repositorio y caso de uso para lectura telemétrica en vivo & 3 & Granda Ibarra, Luis Daniel & Done \\
+\cline{3-8}
+& & AT-353 & Pruebas & Agregar pruebas de ViewModel de telemetría en vivo, contenido visual y flujo de extremo a extremo & 3 & Granda Ibarra, Luis Daniel & Done \\
 \hline
-US19 & Almacenamiento local resiliente y sincronización diferida en fosa &  &  &  &  & Rocha Cotrina, Alvaro &  \\
+US19 & Almacenamiento local resiliente y sincronización diferida en fosa & AT-342 & Pruebas & Agregar pruebas de persistencia local resiliente y sincronización diferida en fosa & 3 & Rocha Cotrina, Alvaro & Done \\
+\cline{3-8}
+& & AT-343 & Sync Hook & Implementar gancho previo a la sincronización en el procesador para volcar lecturas pendientes & 3 & Rocha Cotrina, Alvaro & Done \\
+\cline{3-8}
+& & AT-344 & Drift Local & Actualizar esquema Drift en SQLite para aislar lecturas telemétricas en fosa por técnico & 3 & Rocha Cotrina, Alvaro & Done \\
 \hline
-US20 & Borrado y verificación de restablecimiento de fallas en la computadora &  &  &  &  & Huamani Estefanero, Joel &  \\
+US20 & Borrado y verificación de restablecimiento de fallas en la computadora & AT-330 & ViewModel & Integrar los controles de borrado de fallas y actualización de estado en el ViewModel y hojas modales de diagnóstico & 2 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+& & AT-331 & BLE / OBD & Implementar la limpieza de códigos de falla en la computadora vehicular mediante comando OBD-II y verificación posterior & 2 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+& & AT-332 & Pruebas & Validar el flujo de restablecimiento y verificación de fallas mediante pruebas automatizadas de pantallas & 2 & Huamani Estefanero, Joel & Done \\
 \hline
-US21 & Generación de informe pericial predictivo con inteligencia artificial y exportación en PDF &  &  &  &  & Huamani Estefanero, Joel &  \\
+US21 & Generación de informe pericial predictivo con inteligencia artificial y exportación en PDF & AT-333 & UI Flutter & Maquetar pantalla de informe de salud IA y pestaña de alertas para generar y visualizar el diagnóstico predictivo & 5 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+& & AT-334 & Pruebas & Agregar pruebas de casos de uso, repositorio y pantallas de diagnóstico predictivo & 5 & Huamani Estefanero, Joel & Done \\
+\cline{3-8}
+& & AT-335 & Dominio & Implementar las alertas predictivas con DAO local en Drift, consulta por taller y conversión a cita & 5 & Huamani Estefanero, Joel & Done \\
 \hline
-US28 & Registro fotográfico pericial de desmontaje y montaje de piezas en fosa &  &  &  &  & Granda Ibarra, Luis Daniel &  \\
+US28 & Registro fotográfico pericial de desmontaje y montaje de piezas en foso & AT-354 & Pruebas & Agregar textos de localización y pruebas de extremo a extremo para el registro fotográfico en foso & 2 & Granda Ibarra, Luis Daniel & Done \\
+\cline{3-8}
+& & AT-355 & Persistencia & Integrar la sección de evidencias sincronizadas y en cola dentro del detalle de tarea & 2 & Granda Ibarra, Luis Daniel & Done \\
+\cline{3-8}
+& & AT-356 & Cámara / UI & Maquetar la hoja de captura de evidencias con cámara y galería en el módulo de tareas & 2 & Granda Ibarra, Luis Daniel & Done \\
 \hline
-US29 & Solicitud y validación administrativa de suspensión por pieza defectuosa indispensable &  &  &  &  & Granda Ibarra, Luis Daniel &  \\
+US29 & Solicitud y validación administrativa de suspensión por pieza defectuosa indispensable & AT-357 & Dominio & Implementar modelo de suspensión pendiente y búsqueda de suspensiones activas en órdenes de trabajo y panel & 2 & Granda Ibarra, Luis Daniel & Done \\
+\cline{3-8}
+& & AT-358 & Pruebas & Agregar pruebas de revisión administrativa de suspensiones en detalle de orden y flujo completo & 2 & Granda Ibarra, Luis Daniel & Done \\
+\cline{3-8}
+& & AT-359 & Push / UI & Maquetar hojas de solicitud, revisión y reanudación de suspensiones con navegación desde notificaciones push & 2 & Granda Ibarra, Luis Daniel & Done \\
 \hline
-US30 & Cierre técnico de tarea con cómputo de horas hombre efectivas &  &  &  &  & Granda Ibarra, Luis Daniel &  \\
+US30 & Cierre técnico de tarea con cómputo de horas hombre efectivas & AT-360 & Dominio & Integrar el cómputo de horas hombre efectivas y actualización de estado en tareas técnicas & 2 & Granda Ibarra, Luis Daniel & Done \\
+\cline{3-8}
+& & AT-361 & UI Flutter & Implementar el botón de finalizar tarea en el dock de acción y hoja inferior de cierre técnico & 2 & Granda Ibarra, Luis Daniel & Done \\
+\cline{3-8}
+& & AT-362 & Pruebas & Agregar textos internacionalizados y pruebas de extremo a extremo para el cierre técnico de tarea & 2 & Granda Ibarra, Luis Daniel & Done \\
 \hline
-US34 & Disparo y desactivación de alertas automáticas de reposición por stock mínimo &  &  &  &  & Teran Zavala, Mauricio Alejandro &  \\
+US34 & Disparo y desactivación de alertas automáticas de reposición por stock mínimo & AT-375 & Pruebas & Agregar pruebas de la bandeja de alertas de stock y recepción de compra & 2 & Teran Zavala, Mauricio Alejandro & Done \\
+\cline{3-8}
+& & AT-376 & Alertas UI & Maquetar pantalla de alertas de stock con ViewModel observando caché y apertura desde notificación de stock mínimo & 2 & Teran Zavala, Mauricio Alejandro & Done \\
+\cline{3-8}
+& & AT-377 & Cámara / API & Implementar recepción de compra con comprobante, fecha y foto de cámara en el detalle de orden emitida & 2 & Teran Zavala, Mauricio Alejandro & Done \\
 \hline
-US35 & Imputación automática de precios de venta de catálogo y conciliación de margen FIFO &  &  &  &  & Teran Zavala, Mauricio Alejandro &  \\
+US35 & Imputación automática de precios de venta de catálogo y conciliación de margen FIFO & AT-378 & Pruebas & Validar el cálculo de rentabilidad y margen FIFO en la orden de trabajo & 3 & Teran Zavala, Mauricio Alejandro & Done \\
+\cline{3-8}
+& & AT-379 & ViewModel & Implementar ViewModel de rentabilidad con cálculo en línea de ingreso por repuestos, costo FIFO y ganancia bruta & 3 & Teran Zavala, Mauricio Alejandro & Done \\
+\cline{3-8}
+& & AT-380 & UI Flutter & Maquetar tarjeta de rentabilidad en el detalle de la orden de trabajo con desglose por repuesto & 3 & Teran Zavala, Mauricio Alejandro & Done \\
 \hline
-US36 & Liquidación económica automática en cascada de la orden de trabajo &  &  &  &  & Sanchez Santin, Adiel Abdiaz &  \\
+US36 & Liquidación económica automática en cascada de la orden de trabajo & AT-366 & UI Flutter & Integrar el botón flotante de cobro y diálogo de liquidación en el detalle de orden de trabajo & 3 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+& & AT-367 & Dominio & Implementar sección de resumen de cotización con el desglose automático de liquidación económica en cascada & 3 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+& & AT-368 & Pruebas & Agregar pruebas de pantallas de órdenes y flujo de extremo a extremo para liquidación en cascada & 3 & Sanchez Santin, Adiel Abdiaz & Done \\
 \hline
-US37 & Emisión de comprobantes tributarios electrónicos UBL 2.1 ante SUNAT vía PSE &  &  &  &  & Sanchez Santin, Adiel Abdiaz &  \\
+US37 & Emisión de comprobantes tributarios electrónicos UBL 2.1 ante SUNAT vía PSE & AT-369 & Pruebas & Agregar pruebas unitarias y flujo de extremo a extremo de facturación electrónica SUNAT & 5 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+& & AT-370 & Casos de Uso & Implementar casos de uso de emisión, nota de crédito, anulación, refresco de estado y descarga PDF de comprobantes & 5 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+& & AT-371 & SUNAT / UI & Maquetar gestión de comprobantes SUNAT, hoja de emisión UBL 2.1 y soporte de código QR en caja & 5 & Sanchez Santin, Adiel Abdiaz & Done \\
 \hline
-US38 & Recaudación y amortización de pagos multi-medio en mostrador y patio &  &  &  &  & Rocha Cotrina, Alvaro &  \\
+US38 & Recaudación y amortización de pagos multi-medio en mostrador y patio & AT-345 & ViewModel & Implementar la lógica de amortización y registro de pagos multimedio en el ViewModel de cobro & 3 & Rocha Cotrina, Alvaro & Done \\
+\cline{3-8}
+& & AT-346 & Checkout UI & Maquetar hojas modales y pantalla de cobro de orden de trabajo para el paso de recaudación multimedio & 3 & Rocha Cotrina, Alvaro & Done \\
+\cline{3-8}
+& & AT-347 & Pruebas & Agregar pruebas de ViewModel y flujo de extremo a extremo para recaudación multimedio & 3 & Rocha Cotrina, Alvaro & Done \\
 \hline
-US39 & Transición a orden pagada, emisión de pase de salida vehicular y entrega en patio &  &  &  &  & Rocha Cotrina, Alvaro &  \\
+US39 & Transición a orden pagada, emisión de pase de salida vehicular y entrega en patio & AT-348 & Checkout UI & Maquetar los pasos de pase de salida vehicular y confirmación de entrega en la pantalla de cobro & 2 & Rocha Cotrina, Alvaro & Done \\
+\cline{3-8}
+& & AT-349 & ViewModel & Implementar la transición a orden pagada, emisión de pase de salida y entrega en el ViewModel de cobro & 2 & Rocha Cotrina, Alvaro & Done \\
+\cline{3-8}
+& & AT-350 & Pruebas & Agregar pruebas de cierre de orden, pase de salida y entrega en patio & 2 & Rocha Cotrina, Alvaro & Done \\
 \hline
-US40 & Supervisión y reasignación de bahías de servicio en tiempo real &  &  &  &  & Granda Ibarra, Luis Daniel &  \\
+US40 & Supervisión y reasignación de bahías de servicio en tiempo real & AT-363 & ViewModel & Integrar la asignación de bahías en el ViewModel de detalle de orden y accesos desde el panel de piso & 3 & Granda Ibarra, Luis Daniel & Done \\
+\cline{3-8}
+& & AT-364 & Bahías UI & Maquetar tablero de ocupación de bahías y registrar rutas de navegación correspondientes & 3 & Granda Ibarra, Luis Daniel & Done \\
+\cline{3-8}
+& & AT-365 & Pruebas & Agregar pruebas de ViewModel del tablero de bahías, contenido visual y flujo de supervisión & 3 & Granda Ibarra, Luis Daniel & Done \\
 \hline
-US41 & Exportación de reporte de flujo de caja en PDF para auditoría contable externa &  &  &  &  & Sanchez Santin, Adiel Abdiaz &  \\
+US41 & Exportación de reporte de flujo de caja en PDF para auditoría contable externa & AT-372 & Pruebas & Agregar pruebas de pantalla y ViewModel de reportes junto con el flujo de reporte de flujo de caja & 3 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+& & AT-373 & PDF / API & Implementar descarga de PDF de flujo de caja en el descargador remoto y ViewModel de reportes & 3 & Sanchez Santin, Adiel Abdiaz & Done \\
+\cline{3-8}
+& & AT-374 & Reportes UI & Maquetar pantalla de reportes con filtro por sede y acciones de abrir y compartir PDF & 3 & Sanchez Santin, Adiel Abdiaz & Done \\
 \hline
-US42 & Configuración de información fiscal y series SUNAT con PSE administrado por la plataforma &  &  &  &  & Teran Zavala, Mauricio Alejandro &  \\
+US42 & Configuración de información fiscal y series SUNAT con PSE administrado por la plataforma & AT-381 & Pruebas & Agregar pruebas del ViewModel de series fiscales y configuración de series por sede & 3 & Teran Zavala, Mauricio Alejandro & Done \\
+\cline{3-8}
+& & AT-382 & Series UI & Maquetar pantalla de series fiscales y registrar ruta de configuración fiscal en el grafo de caja & 3 & Teran Zavala, Mauricio Alejandro & Done \\
+\cline{3-8}
+& & AT-383 & ViewModel & Implementar ViewModel de series fiscales y gestión de series de factura y boleta con validación de duplicados & 3 & Teran Zavala, Mauricio Alejandro & Done \\
 \hline
-US43 & Descarga y remisión de informe pericial de salud vehicular en PDF para clientes y flotas &  &  &  &  & Teran Zavala, Mauricio Alejandro &  \\
+US43 & Descarga y remisión de informe pericial de salud vehicular en PDF para clientes y flotas & AT-384 & Reportes UI & Agregar sección Salud de flota en la pantalla de reportes con búsqueda de cliente y descarga de PDF consolidado & 3 & Teran Zavala, Mauricio Alejandro & Done \\
+\cline{3-8}
+& & AT-385 & PDF / API & Implementar descarga y compartido de PDF de salud vehicular en la pantalla de informe IA y su ViewModel & 3 & Teran Zavala, Mauricio Alejandro & Done \\
+\cline{3-8}
+& & AT-386 & Permisos & Actualizar validación de permisos de acceso y documentación de paridad funcional & 3 & Teran Zavala, Mauricio Alejandro & Done \\
 \hline
 \end{longtable}
 \endgroup
 
-*Nota.* Estructura base del Sprint Backlog del Sprint 3 con las veintiuna historias de usuario y sus responsables asignados.
+*Nota.* Matriz consolidada del Sprint Backlog del Sprint 3 adaptada de Jira Software para el proyecto Atelier.
 
 \newpage
 
